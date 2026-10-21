@@ -35940,6 +35940,478 @@
           }
         }
       }
+    },
+    "/channel/ad-promotions/promotions": {
+      "get": {
+        "tags": [
+          "ad-promotion-controller"
+        ],
+        "operationId": "get_channel_ad_promotions_promotions",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "promotionType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "platformId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "shopCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "syncStatus",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdPromotionPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "ad-promotion-controller"
+        ],
+        "operationId": "post_channel_ad_promotions_promotions",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SavePromotionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdPromotionDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/ad-promotions/promotions/{id}": {
+      "get": {
+        "tags": [
+          "ad-promotion-controller"
+        ],
+        "operationId": "get_channel_ad_promotions_promotions_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdPromotionDetail"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "ad-promotion-controller"
+        ],
+        "operationId": "post_channel_ad_promotions_promotions_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SavePromotionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdPromotionDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/ad-promotions/promotions/{id}/status": {
+      "post": {
+        "tags": [
+          "ad-promotion-controller"
+        ],
+        "operationId": "post_channel_ad_promotions_promotions_id_status",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangePromotionStatusRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdPromotionDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/ad-promotions/promotions/{id}/check": {
+      "post": {
+        "tags": [
+          "ad-promotion-controller"
+        ],
+        "operationId": "post_channel_ad_promotions_promotions_id_check",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdPromotionDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/ad-promotions/guardrails": {
+      "get": {
+        "tags": [
+          "ad-promotion-controller"
+        ],
+        "operationId": "get_channel_ad_promotions_guardrails",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdPromotionGuardrailPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "ad-promotion-controller"
+        ],
+        "operationId": "post_channel_ad_promotions_guardrails",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveGuardrailRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdPromotionGuardrailRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/ad-promotions/options": {
+      "get": {
+        "tags": [
+          "ad-promotion-controller"
+        ],
+        "operationId": "get_channel_ad_promotions_options",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdPromotionOptions"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/ad-promotions/capabilities": {
+      "get": {
+        "tags": [
+          "ad-promotion-controller"
+        ],
+        "operationId": "get_channel_ad_promotions_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdPromotionCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -87472,6 +87944,776 @@
         }
       },
       "AdGroupReportCapabilityDimension": {
+        "type": "object",
+        "properties": {
+          "dimension": {
+            "type": "string",
+            "description": "维度键"
+          },
+          "description": {
+            "type": "string",
+            "description": "维度说明"
+          },
+          "available": {
+            "type": "boolean",
+            "description": "本模块是否已交付"
+          },
+          "source": {
+            "type": "string",
+            "description": "数据来源（表 / 上游模块）"
+          },
+          "ownerModule": {
+            "type": "string",
+            "description": "未交付段的责任模块"
+          },
+          "impact": {
+            "type": "string",
+            "description": "不交付的影响"
+          }
+        },
+        "description": "逐维度能力声明；未交付段 available=false"
+      },
+      "SavePromotionProduct": {
+        "required": [
+          "listingId"
+        ],
+        "type": "object",
+        "properties": {
+          "listingId": {
+            "type": "string",
+            "description": "listing id",
+            "format": "uuid"
+          },
+          "basePrice": {
+            "type": "string",
+            "description": "🔴 基准价（促销前原价；null = 不可比，不是 0）"
+          },
+          "currency": {
+            "maxLength": 3,
+            "minLength": 0,
+            "type": "string",
+            "description": "币种（与促销一致；留空取促销的币种）"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          }
+        },
+        "description": "适用商品"
+      },
+      "SavePromotionRequest": {
+        "required": [
+          "platformId",
+          "promotionCode",
+          "promotionName",
+          "promotionType",
+          "shopCode"
+        ],
+        "type": "object",
+        "properties": {
+          "promotionCode": {
+            "minLength": 1,
+            "type": "string",
+            "description": "促销编码（租户内唯一）"
+          },
+          "promotionName": {
+            "minLength": 1,
+            "type": "string",
+            "description": "促销名称"
+          },
+          "promotionType": {
+            "minLength": 1,
+            "type": "string",
+            "description": "促销类型：PERCENT_OFF / FIXED_AMOUNT_OFF / BOGO / BUNDLE / FREE_SHIPPING"
+          },
+          "platformId": {
+            "type": "string",
+            "description": "平台 id",
+            "format": "uuid"
+          },
+          "shopCode": {
+            "minLength": 1,
+            "type": "string",
+            "description": "参与店铺编码"
+          },
+          "discountRate": {
+            "type": "string",
+            "description": "折扣率（0 < r <= 1；PERCENT_OFF 必填）"
+          },
+          "discountAmount": {
+            "type": "string",
+            "description": "固定减免额（FIXED_AMOUNT_OFF 必填）"
+          },
+          "budgetCap": {
+            "type": "string",
+            "description": "预算上限（null = 不限）"
+          },
+          "currency": {
+            "maxLength": 3,
+            "minLength": 0,
+            "type": "string",
+            "description": "币种（3 位字母）"
+          },
+          "startAt": {
+            "type": "string",
+            "description": "开始时间",
+            "format": "date-time"
+          },
+          "endAt": {
+            "type": "string",
+            "description": "结束时间（必须晚于开始）",
+            "format": "date-time"
+          },
+          "products": {
+            "type": "array",
+            "description": "适用商品",
+            "items": {
+              "$ref": "#/components/schemas/SavePromotionProduct"
+            }
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          }
+        }
+      },
+      "AdPromotionCheckRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "记录 id",
+            "format": "uuid"
+          },
+          "listingId": {
+            "type": "string",
+            "description": "listing id（促销级检查为空）",
+            "format": "uuid"
+          },
+          "ruleCode": {
+            "type": "string",
+            "description": "规则：DISCOUNT_DEPTH / PRICE_FLOOR / PROMOTION_STACKING / BUDGET_CAP"
+          },
+          "severity": {
+            "type": "string",
+            "description": "结论：BLOCKED 拦截 / WARNING 预警"
+          },
+          "message": {
+            "type": "string",
+            "description": "结论说明"
+          },
+          "observedValue": {
+            "type": "string",
+            "description": "观测值（null = 该规则这次没有可比数值）"
+          },
+          "thresholdValue": {
+            "type": "string",
+            "description": "阈值（null = 该规则没设阈值）"
+          },
+          "checkedAt": {
+            "type": "string",
+            "description": "检查时刻",
+            "format": "date-time"
+          }
+        },
+        "description": "🔴 拦截 / 预警记录（最近一次检查）"
+      },
+      "AdPromotionDetail": {
+        "type": "object",
+        "properties": {
+          "promotion": {
+            "$ref": "#/components/schemas/AdPromotionRow"
+          },
+          "products": {
+            "type": "array",
+            "description": "🔴 适用商品（含折后价与叠加）",
+            "items": {
+              "$ref": "#/components/schemas/AdPromotionProductRow"
+            }
+          },
+          "checks": {
+            "type": "array",
+            "description": "🔴 拦截 / 预警记录（最近一次检查）",
+            "items": {
+              "$ref": "#/components/schemas/AdPromotionCheckRow"
+            }
+          },
+          "guardrail": {
+            "$ref": "#/components/schemas/AdPromotionGuardrailRow"
+          },
+          "blockedCount": {
+            "type": "integer",
+            "description": "拦截条数",
+            "format": "int32"
+          },
+          "warningCount": {
+            "type": "integer",
+            "description": "预警条数",
+            "format": "int32"
+          },
+          "marginNote": {
+            "type": "string",
+            "description": "🔴 毛利维度说明（当前拿不到成本）"
+          },
+          "syncNote": {
+            "type": "string",
+            "description": "🔴 平台同步说明"
+          },
+          "note": {
+            "type": "string",
+            "description": "说明"
+          }
+        }
+      },
+      "AdPromotionGuardrailRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "规则 id",
+            "format": "uuid"
+          },
+          "guardrailCode": {
+            "type": "string",
+            "description": "规则编码（租户内唯一）"
+          },
+          "guardrailName": {
+            "type": "string",
+            "description": "规则名称"
+          },
+          "maxDiscountRate": {
+            "type": "string",
+            "description": "折扣幅度上限（null = 不设阈值）"
+          },
+          "minNetPrice": {
+            "type": "string",
+            "description": "折后价下限（null = 不设阈值）"
+          },
+          "blockOnStacking": {
+            "type": "boolean",
+            "description": "促销叠加是否拦截（false = 只预警）"
+          },
+          "status": {
+            "type": "string",
+            "description": "状态：ACTIVE / PAUSED"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          },
+          "version": {
+            "type": "integer",
+            "description": "乐观锁版本",
+            "format": "int64"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "创建时刻",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "更新时刻",
+            "format": "date-time"
+          }
+        },
+        "description": "当前生效的护栏规则（没有则为空）"
+      },
+      "AdPromotionProductRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "关联 id",
+            "format": "uuid"
+          },
+          "listingId": {
+            "type": "string",
+            "description": "listing id",
+            "format": "uuid"
+          },
+          "externalItemId": {
+            "type": "string",
+            "description": "平台商品 id"
+          },
+          "title": {
+            "type": "string",
+            "description": "商品标题"
+          },
+          "listingStatus": {
+            "type": "string",
+            "description": "商品状态"
+          },
+          "basePrice": {
+            "type": "string",
+            "description": "🔴 基准价（促销定义登记的原价；null = 没登记）"
+          },
+          "currency": {
+            "type": "string",
+            "description": "币种"
+          },
+          "netPrice": {
+            "type": "string",
+            "description": "🔴 本促销下的折后价（null = 不可比）"
+          },
+          "discountDepth": {
+            "type": "string",
+            "description": "🔴 生效折扣幅度：百分比促销 = 折扣率；固定额促销 = 减免额 / 基准价（null = 不可比）"
+          },
+          "stackedPromotionCount": {
+            "type": "integer",
+            "description": "🔴 覆盖同一商品的其它生效促销数",
+            "format": "int32"
+          },
+          "stackedNetPrice": {
+            "type": "string",
+            "description": "🔴 叠加后的折后价（null = 不可比）"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "创建时刻",
+            "format": "date-time"
+          }
+        },
+        "description": "🔴 适用商品（含折后价与叠加）"
+      },
+      "AdPromotionRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "促销 id",
+            "format": "uuid"
+          },
+          "promotionCode": {
+            "type": "string",
+            "description": "促销编码（租户内唯一）"
+          },
+          "promotionName": {
+            "type": "string",
+            "description": "促销名称"
+          },
+          "promotionType": {
+            "type": "string",
+            "description": "促销类型"
+          },
+          "platformId": {
+            "type": "string",
+            "description": "平台 id",
+            "format": "uuid"
+          },
+          "platformCode": {
+            "type": "string",
+            "description": "平台编码"
+          },
+          "shopCode": {
+            "type": "string",
+            "description": "参与店铺编码"
+          },
+          "discountRate": {
+            "type": "string",
+            "description": "🔴 折扣率（0 < r <= 1；百分比促销才有）"
+          },
+          "discountAmount": {
+            "type": "string",
+            "description": "🔴 固定减免额（固定额促销才有）"
+          },
+          "budgetCap": {
+            "type": "string",
+            "description": "🔴 预算上限（null = 不限，不是 0）"
+          },
+          "currency": {
+            "type": "string",
+            "description": "币种"
+          },
+          "startAt": {
+            "type": "string",
+            "description": "开始时间",
+            "format": "date-time"
+          },
+          "endAt": {
+            "type": "string",
+            "description": "结束时间",
+            "format": "date-time"
+          },
+          "withinScheduleWindow": {
+            "type": "boolean",
+            "description": "🔴 当前是否落在促销时间窗内"
+          },
+          "status": {
+            "type": "string",
+            "description": "本地状态"
+          },
+          "platformSyncStatus": {
+            "type": "string",
+            "description": "🔴 平台同步状态：LOCAL_ONLY / PENDING_WRITEBACK / SYNCED / FAILED"
+          },
+          "pendingPlatformWriteback": {
+            "type": "boolean",
+            "description": "🔴 本地已改、还没回写平台"
+          },
+          "localChangedAt": {
+            "type": "string",
+            "description": "🔴 本地最后一次变更时刻",
+            "format": "date-time"
+          },
+          "lastCheckedAt": {
+            "type": "string",
+            "description": "🔴 最近一次拦截 / 预警检查的时刻（没检查过为空）",
+            "format": "date-time"
+          },
+          "platformPromotionId": {
+            "type": "string",
+            "description": "平台侧促销 id（未回写为空串）"
+          },
+          "productCount": {
+            "type": "integer",
+            "description": "适用商品条数",
+            "format": "int32"
+          },
+          "blockedCount": {
+            "type": "integer",
+            "description": "最近一次检查的拦截条数",
+            "format": "int32"
+          },
+          "warningCount": {
+            "type": "integer",
+            "description": "最近一次检查的预警条数",
+            "format": "int32"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          },
+          "version": {
+            "type": "integer",
+            "description": "乐观锁版本",
+            "format": "int64"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "创建时刻",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "更新时刻",
+            "format": "date-time"
+          }
+        },
+        "description": "促销"
+      },
+      "ChangePromotionStatusRequest": {
+        "required": [
+          "status"
+        ],
+        "type": "object",
+        "properties": {
+          "status": {
+            "minLength": 1,
+            "type": "string",
+            "description": "目标状态：SCHEDULED / ACTIVE / PAUSED / ENDED / CANCELLED"
+          },
+          "reason": {
+            "type": "string",
+            "description": "理由（会写进留痕）"
+          }
+        }
+      },
+      "SaveGuardrailRequest": {
+        "required": [
+          "guardrailCode",
+          "guardrailName"
+        ],
+        "type": "object",
+        "properties": {
+          "guardrailCode": {
+            "minLength": 1,
+            "type": "string",
+            "description": "规则编码（租户内唯一）"
+          },
+          "guardrailName": {
+            "minLength": 1,
+            "type": "string",
+            "description": "规则名称"
+          },
+          "maxDiscountRate": {
+            "type": "string",
+            "description": "折扣幅度上限（折扣率 > 上限 ⇒ 拦截）"
+          },
+          "minNetPrice": {
+            "type": "string",
+            "description": "折后价下限（折后价 < 下限 ⇒ 拦截）"
+          },
+          "blockOnStacking": {
+            "type": "boolean",
+            "description": "促销叠加是否拦截（false = 只预警）"
+          },
+          "status": {
+            "type": "string",
+            "description": "状态：ACTIVE / PAUSED"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          }
+        }
+      },
+      "AdPromotionPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "当前页数据",
+            "items": {
+              "$ref": "#/components/schemas/AdPromotionRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "description": "符合筛选条件的总条数",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "description": "页码，从 0 起",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "description": "每页条数",
+            "format": "int32"
+          }
+        }
+      },
+      "AdPromotionOption": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "取值"
+          },
+          "label": {
+            "type": "string",
+            "description": "中文说明"
+          }
+        },
+        "description": "严重级别选项"
+      },
+      "AdPromotionOptions": {
+        "type": "object",
+        "properties": {
+          "promotionTypes": {
+            "type": "array",
+            "description": "促销类型选项",
+            "items": {
+              "$ref": "#/components/schemas/AdPromotionOption"
+            }
+          },
+          "statuses": {
+            "type": "array",
+            "description": "本地状态选项",
+            "items": {
+              "$ref": "#/components/schemas/AdPromotionOption"
+            }
+          },
+          "syncStatuses": {
+            "type": "array",
+            "description": "平台同步状态选项",
+            "items": {
+              "$ref": "#/components/schemas/AdPromotionOption"
+            }
+          },
+          "ruleCodes": {
+            "type": "array",
+            "description": "拦截/预警规则选项",
+            "items": {
+              "$ref": "#/components/schemas/AdPromotionOption"
+            }
+          },
+          "severities": {
+            "type": "array",
+            "description": "严重级别选项",
+            "items": {
+              "$ref": "#/components/schemas/AdPromotionOption"
+            }
+          },
+          "platforms": {
+            "type": "array",
+            "description": "平台下拉项（带 id）",
+            "items": {
+              "$ref": "#/components/schemas/AdPromotionPlatformOption"
+            }
+          },
+          "platformCodes": {
+            "type": "array",
+            "description": "平台编码（租户内可用的）",
+            "items": {
+              "type": "string",
+              "description": "平台编码（租户内可用的）"
+            }
+          },
+          "shopCodes": {
+            "type": "array",
+            "description": "店铺编码（租户内可用的）",
+            "items": {
+              "type": "string",
+              "description": "店铺编码（租户内可用的）"
+            }
+          },
+          "currencies": {
+            "type": "array",
+            "description": "币种（促销里出现过的）",
+            "items": {
+              "type": "string",
+              "description": "币种（促销里出现过的）"
+            }
+          },
+          "netPriceNote": {
+            "type": "string",
+            "description": "🔴 折后价口径说明"
+          },
+          "marginNote": {
+            "type": "string",
+            "description": "🔴 毛利维度说明"
+          }
+        }
+      },
+      "AdPromotionPlatformOption": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "平台 id",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string",
+            "description": "平台编码"
+          },
+          "name": {
+            "type": "string",
+            "description": "平台名称"
+          }
+        },
+        "description": "平台下拉项（带 id）"
+      },
+      "AdPromotionGuardrailPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "当前页数据",
+            "items": {
+              "$ref": "#/components/schemas/AdPromotionGuardrailRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "description": "符合筛选条件的总条数",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "description": "页码，从 0 起",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "description": "每页条数",
+            "format": "int32"
+          }
+        }
+      },
+      "AdPromotionCapabilities": {
+        "type": "object",
+        "properties": {
+          "dimensions": {
+            "type": "array",
+            "description": "逐维度能力声明；未交付段 available=false",
+            "items": {
+              "$ref": "#/components/schemas/AdPromotionCapabilityDimension"
+            }
+          },
+          "promotionTypes": {
+            "type": "array",
+            "description": "促销类型取值",
+            "items": {
+              "type": "string",
+              "description": "促销类型取值"
+            }
+          },
+          "statuses": {
+            "type": "array",
+            "description": "本地状态取值",
+            "items": {
+              "type": "string",
+              "description": "本地状态取值"
+            }
+          },
+          "syncStatuses": {
+            "type": "array",
+            "description": "平台同步状态取值",
+            "items": {
+              "type": "string",
+              "description": "平台同步状态取值"
+            }
+          },
+          "ruleCodes": {
+            "type": "array",
+            "description": "拦截/预警规则取值",
+            "items": {
+              "type": "string",
+              "description": "拦截/预警规则取值"
+            }
+          },
+          "severities": {
+            "type": "array",
+            "description": "结论严重级别取值",
+            "items": {
+              "type": "string",
+              "description": "结论严重级别取值"
+            }
+          },
+          "netPriceNote": {
+            "type": "string",
+            "description": "🔴 折后价口径说明"
+          },
+          "marginNote": {
+            "type": "string",
+            "description": "🔴 毛利维度当前不可用的说明"
+          },
+          "effectNote": {
+            "type": "string",
+            "description": "🔴 平台效果维度当前不可用的说明"
+          },
+          "financeNote": {
+            "type": "string",
+            "description": "🔴 促销费用维度当前不可用的说明"
+          },
+          "syncNote": {
+            "type": "string",
+            "description": "🔴 平台同步状态的口径说明"
+          },
+          "stackingNote": {
+            "type": "string",
+            "description": "🔴 促销叠加的口径说明"
+          },
+          "upstreamNote": {
+            "type": "string",
+            "description": "上游与边界说明"
+          },
+          "boundaryNote": {
+            "type": "string",
+            "description": "下游与边界说明"
+          }
+        }
+      },
+      "AdPromotionCapabilityDimension": {
         "type": "object",
         "properties": {
           "dimension": {
