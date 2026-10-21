@@ -4154,6 +4154,58 @@ const services: readonly {
     // 放行它会让界面以为「一条不存在的列表接口」可用。
   },
   {
+    // 16.4.2.1 品牌授权（channel 服务，卷 16 的 L3 锚点 16.4.2）。
+    //
+    // 蓝图：「管理品牌授权：授权方、授权范围（店铺/国家/类目/期限）、授权文件、被授权主体，
+    // 校验刊登时的品牌使用是否在授权范围内。输入：授权录入；文件上传；有效期。
+    // 输出：授权档案 + 校验结果。关系：上游 = 6.1.2.3 供应商资质；下游 = 3.3.2 品牌状态、4.2.3.2 预检。
+    // **授权过期是「平时没事、上新时出事」的典型**，需到期提醒与刊登阻断。」
+    //
+    // 本条目是**新增一条 services[] 元素**，不是往既有 channel 分支的 alternation 里并 ——
+    // 既有 channel 元素里有十几条超长正则，并进去会让本车道与并行车道的插入点被隔开，git 判冲突。
+    // 插入锚点固定在 **15.2.2.1 索评那条之前**（crm 服务的元素），
+    // 与同批其它车道的锚点互不重叠，既有条目一字未动。
+    //
+    // 🔴 根路径用 `brand-authorizations`（**独立前缀**），与 `compliance-precheck`（16.2.2.1 合规预检）、
+    //     `listing-compliance-precheck`（4.2.3.2 合规预检）都不重叠。
+    //     动手前已用脚本逐条核对**既有全部 100 条 services[] 元素的正则**，
+    //     对本模块的 12 条路径（裸路径 + 11 条子形状）**命中数为 0**。
+    //
+    // 放行的形状逐条列出：
+    //   capabilities               能力声明（未交付的下游逐条报出来）
+    //   authorizations             授权档案列表（真分页 + 真筛选）+ POST 录入
+    //   authorizations/{uuid}      单条授权（档案 + 范围 + 文件）+ PUT 修改
+    //   authorizations/{uuid}/enabled   PUT 停用 / 启用（**撤销走这里**）
+    //   expiry-reminders           到期提醒清单（临期 / 已过期，真筛选 + 真分页）
+    //   checks                     POST 跑一次范围校验 + GET 校验历史
+    //   publish-gate               POST 刊登闸门（**服务端算出来的阻断结论**）
+    //   candidates/brands          03 品牌候选（catalog，只读）
+    //   candidates/suppliers       6.1.2.3 供应商资质候选（trade 服务，只读）
+    //   candidates/qualifications  某品牌下已登记的供应商资质候选
+    //   shops                      可选店铺（连同它覆盖的国家）
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 它会让界面以为「已经可用」）：
+    //   * 裸路径 `brand-authorizations` —— 后端没有「一条汇总列表接口」，
+    //     列表在 `authorizations` 上。放行裸路径等于放行一个不存在的映射。
+    //   * `authorizations/{uuid}/delete` —— 合规台账**不做物理删除**，撤销走 `enabled`；
+    //     历史判定凭据是「当时为什么拦」的证据，更不能删。
+    //   * `authorizations/{uuid}/documents` —— 授权文件是授权档案的**子集合**，
+    //     在 `GET / PUT /authorizations/{uuid}` 里整体读写，没有单独的文档端点。
+    //   * `expiry-reminders/scan` —— 到期提醒是**现算**的（按 DB 时钟），没有「扫一遍」这个动作。
+    //   * `checks/{uuid}` —— 校验历史只有列表，没有单条详情端点。
+    //   * `publish-gate/{uuid}` —— 闸门是一个动作，不是一段资源的子路径。
+    //   * 非 UUID 段 —— `authorizations/not-a-uuid` 必须 404，不能被宽松分支吃掉。
+    //
+    // 字面量子路径（capabilities / expiry-reminders / checks / publish-gate / candidates / shops）
+    // 与 {uuid} 段**不在同一层**，不会互相吃掉：`authorizations` 是字面量，
+    // 它的下一层才是 {uuid}（`authorizations/not-a-uuid` 落到 404）。
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^brand-authorizations\/(?:capabilities|authorizations(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/enabled)?)?|expiry-reminders|checks|publish-gate|candidates\/(?:brands|suppliers|qualifications)|shops)$/,
+  },
+  {
     // 15.2.2.1 Request a Review（索评）（crm 服务，卷 15 的 L3 锚点 15.2.2）。
     //
     // 蓝图：「按规则向已签收订单的买家发起索评（平台允许范围内），控制频次避免打扰，
