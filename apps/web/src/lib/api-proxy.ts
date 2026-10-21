@@ -5231,6 +5231,58 @@ const services: readonly {
       /^inventory\/consignment-stock\/(?:capabilities|forecast-preview|shops\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}|orders(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:lines|ship|confirm-receipt|close|cancel|receipts|settlement-receipts|ledger|reconciliation|settlement-basis|audit))?)?)$/,
   },
   {
+    // 14.1.1.2 活动详情（channel 服务）。纯**新增一条独立的 `services[]` 元素**，
+    // 既有的 `ad-campaigns`（14.1.1.1）、`ad-keywords`（14.1.3.1）、`ad-rules`（14.2.2.2）、
+    // `ad-type-diffs`（14.1.2.2）等**一字未动、也不重排** ——
+    // 本文件是多车道共用的累积型白名单，每条服务规则是一段超长单行正则，往同一条 alternation 里
+    // 并分支会让多车道同时并入时 git 必然判冲突（结构性，retry 不会自愈）。
+    //
+    // ---- 插入锚点固定在 `compliance-precheck`（16.2.2.1）那条**之前** ----
+    //   同批其它车道的插入点分别是「`sku-cost-compositions` 那条之前」「`location-allocations` 那条之前」
+    //   与「`ad-campaigns` 那条不动」，彼此相距数百行 ⇒ git 能干净求并。
+    //
+    // ---- 首 token「ad-campaign-details」的零命中核对结论 ----
+    //   本文件既有 100+ 条 services[] 正则里**没有任何一条**含 `ad-campaign-details` 这个串
+    //   （既有的是 `ad-campaigns` / `ad-keywords` / `ad-rules` / `ad-type-diffs` 一类），
+    //   所以首 token 既是独立字面量，也不会被既有分支的前缀吃掉。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   ad-campaign-details/capabilities                   能力声明（未交付段 available=false + ownerModule）
+    //   ad-campaign-details/campaigns/{uuid}               单活动全景（GET：基本设置 + 预算与消耗曲线 + 每日明细 + 结构条数）
+    //   ad-campaign-details/campaigns/{uuid}/groups        广告组列表（GET，真分页 + 真筛选）
+    //   ad-campaign-details/campaigns/{uuid}/products      投放商品列表（GET，真分页 + 真筛选）
+    //   ad-campaign-details/campaigns/{uuid}/creatives     创意列表（GET，真分页 + 按类型筛选）
+    //   ad-campaign-details/campaigns/{uuid}/keywords      关键词列表（GET，读上游 14.1.3.1）
+    //   ad-campaign-details/campaigns/{uuid}/change-history 平台侧修改历史（GET，**恒为 available=false** + 本地操作审计）
+    //   ad-campaign-details/campaigns/{uuid}/structure      登记结构（POST，结构数据的真实写入口）
+    //   ad-campaign-details/campaigns/{uuid}/bids          改竞价（POST，逐条结果 + 护栏 + 审计）
+    //   ad-campaign-details/campaigns/{uuid}/copy          复制结构（POST，结构副本真落库 + 平台侧待回写）
+    //
+    // 判别顺序：字面量子路径（capabilities）排在 {uuid} 段之前 —— alternation 是首个命中即返回，
+    // 顺序反了会被通配支吃掉半截。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸路径 `ad-campaign-details` —— 本模块没有裸路径资源。
+    //   * `ad-campaign-details/campaigns` —— 活动列表归 14.1.1.1 的 `ad-campaigns` 元素，本模块不重开一条。
+    //   * `ad-campaign-details/campaigns/{uuid}/budget` —— 预算曲线随全景一起返回，不单独开一条。
+    //   * `ad-campaign-details/campaigns/{uuid}/platform-history` —— 平台侧改历史**没有同步源**，
+    //     放行它会让界面以为「平台侧改历史」已交付。
+    //   * `ad-campaign-details/campaigns/{uuid}/writeback` —— 平台回写队列未交付（平台适配层）。
+    //   * `ad-campaign-details/campaigns/{uuid}/groups/{uuid}` —— 广告组的单条详情与增删改归 14.1.2.1（未交付）。
+    //   * `ad-campaign-details/campaigns/{uuid}/copy/preview` —— 变更预览属 14.1.1.3（未交付）。
+    //
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //（不是 `[0-9a-f-]+`：后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行）。
+    // ⚠️ `campaigns` 后面**必须**跟 id 段（uuid 段不可省）：本模块没有「活动列表」这个资源，
+    //    那是 14.1.1.1 的 `ad-campaigns` 元素的活。
+    // 末尾**刻意不带 `?`**：带了就等于放行裸路径 `ad-campaign-details`。
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^ad\-campaign\-details(?:\/capabilities|\/campaigns\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:groups|products|creatives|keywords|change-history|structure|bids|copy))?)$/,
+  },
+  {
     // 16.2.2.1 合规预检（channel 服务，卷 16「合规与风控」的 L3 锚点 16.2.2）。
     //
     // 蓝图：「发布前的合规体检：内容违规、认证缺失、尺寸规格不符、材质与描述不符、危险品与运输限制、
