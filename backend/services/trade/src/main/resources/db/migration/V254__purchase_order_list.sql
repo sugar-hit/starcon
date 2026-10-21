@@ -121,6 +121,13 @@ CREATE TABLE purchase_order (
 
   -- ---- 币种与金额：**一张单一个币种**，行金额与它对齐 ----
   currency char(3) NOT NULL CHECK(currency ~ '^[A-Z]{3}$'),
+
+  -- ---- 本位币与汇率快照（**建单那一刻**从 catalog 冻结）----
+  -- ⚠️ 取不到汇率就是**没有**（NULL），**绝不**按 1:1 或固定汇率填一个数进去 ——
+  --    一个假汇率会让「跨币种合计」变成一个看起来能对账、其实对不上的数。
+  functional_currency char(3)
+      CHECK(functional_currency IS NULL OR functional_currency ~ '^[A-Z]{3}$'),
+  fx_snapshot_at timestamptz,
   -- ⚠️ **金额与行数由 DB 从行表重算**（触发器 refresh_purchase_order_totals），
   --    调用方传不进来 ⇒ 「头金额与行金额对不上」不是代码路径，是不可能发生的事。
   total_amount numeric(19,6) NOT NULL DEFAULT 0 CHECK(total_amount >= 0),
@@ -262,30 +269,53 @@ CREATE SEQUENCE purchase_order_no_seq START 1;
 -- 五、触发器
 -- ===========================================================================
 -- 5.1 行金额由 DB 算：line_amount = quantity × unit_price（调用方传不进来）。
+--     同时：**已关闭的采购单不许再改行**（与头表冻结同一口径）。
 CREATE FUNCTION guard_purchase_order_line_amount() RETURNS trigger LANGUAGE plpgsql AS $$
+DECLARE
+  head_status varchar(20);
 BEGIN
+  SELECT o.status INTO head_status
+    FROM purchase_order o
+   WHERE o.id = NEW.order_id AND o.tenant_id = NEW.tenant_id;
+
+  IF head_status = 'CLOSED' THEN
+    RAISE EXCEPTION '采购单已关闭，不允许再改它的行（数量 / 单价 / SKU 都不可改）'
+      USING ERRCODE='23514';
+  END IF;
+
   NEW.line_amount := round(NEW.quantity * NEW.unit_price, 6);
   RETURN NEW;
 END $$;
 
 CREATE TRIGGER purchase_order_line_amount
-  BEFORE INSERT OR UPDATE OF quantity, unit_price ON purchase_order_line
+  BEFORE INSERT OR UPDATE ON purchase_order_line
   FOR EACH ROW EXECUTE FUNCTION guard_purchase_order_line_amount();
 
 -- 5.2 头的金额与行数由 DB 从行表重算。
 --     ⇒ 「列表上的总金额」与「详情里各行金额之和」永远是同一个数。
+--
+-- ⚠️ **不能用 COALESCE(NEW.x, OLD.x)**：DELETE 触发器里 NEW 是**未赋值记录**，
+--    引用它的字段会直接抛 `record "new" is not assigned yet` ⇒ 这里按 TG_OP 分流。
 CREATE FUNCTION refresh_purchase_order_totals() RETURNS trigger LANGUAGE plpgsql AS $$
 DECLARE
-  target uuid := COALESCE(NEW.order_id, OLD.order_id);
+  target uuid;
+  owner_tenant uuid;
 BEGIN
+  IF TG_OP = 'DELETE' THEN
+    target := OLD.order_id;
+    owner_tenant := OLD.tenant_id;
+  ELSE
+    target := NEW.order_id;
+    owner_tenant := NEW.tenant_id;
+  END IF;
+
   UPDATE purchase_order o
      SET line_count = (SELECT count(*) FROM purchase_order_line l
                         WHERE l.tenant_id = o.tenant_id AND l.order_id = o.id),
          total_amount = COALESCE((SELECT sum(l.line_amount) FROM purchase_order_line l
                                    WHERE l.tenant_id = o.tenant_id AND l.order_id = o.id), 0),
          updated_at = now()
-   WHERE o.tenant_id = (SELECT tenant_id FROM purchase_order_line
-                          WHERE id = COALESCE(NEW.id, OLD.id))
+   WHERE o.tenant_id = owner_tenant
      AND o.id = target;
   RETURN NULL;
 END $$;
