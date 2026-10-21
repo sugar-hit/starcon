@@ -38144,6 +38144,3096 @@
           }
         }
       }
+    },
+    "/trade/demand-merges": {
+      "get": {
+        "tags": [
+          "purchase-demand-merge-controller"
+        ],
+        "operationId": "get_trade_demand_merges",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "NEWEST"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseDemandMergeBatchPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "purchase-demand-merge-controller"
+        ],
+        "operationId": "post_trade_demand_merges",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PurchaseDemandMergeCreateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseDemandMergeDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/demand-merges/{id}/supplier": {
+      "post": {
+        "tags": [
+          "purchase-demand-merge-controller"
+        ],
+        "operationId": "post_trade_demand_merges_id_supplier",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PurchaseDemandBatchSupplierInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseDemandMergeDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/demand-merges/{id}/quantity": {
+      "post": {
+        "tags": [
+          "purchase-demand-merge-controller"
+        ],
+        "operationId": "post_trade_demand_merges_id_quantity",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PurchaseDemandBatchQuantityInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseDemandMergeDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/demand-merges/{id}/finalize": {
+      "post": {
+        "tags": [
+          "purchase-demand-merge-controller"
+        ],
+        "operationId": "post_trade_demand_merges_id_finalize",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseDemandMergeBatchRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/demand-merges/print": {
+      "post": {
+        "tags": [
+          "purchase-demand-merge-controller"
+        ],
+        "operationId": "post_trade_demand_merges_print",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PurchaseDemandPrintInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseDemandPrintResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/demand-merges/{id}": {
+      "get": {
+        "tags": [
+          "purchase-demand-merge-controller"
+        ],
+        "operationId": "get_trade_demand_merges_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseDemandMergeDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/demand-merges/{id}/unmerged": {
+      "get": {
+        "tags": [
+          "purchase-demand-merge-controller"
+        ],
+        "operationId": "get_trade_demand_merges_id_unmerged",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "reasonCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseDemandMergeUnmergedPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/demand-merges/{id}/lines": {
+      "get": {
+        "tags": [
+          "purchase-demand-merge-controller"
+        ],
+        "operationId": "get_trade_demand_merges_id_lines",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "draftId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "supplierId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseDemandMergeLinePage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/demand-merges/{id}/drafts": {
+      "get": {
+        "tags": [
+          "purchase-demand-merge-controller"
+        ],
+        "operationId": "get_trade_demand_merges_id_drafts",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "supplierId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseDemandMergeDraftPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/demand-merges/{id}/drafts/{draftId}": {
+      "get": {
+        "tags": [
+          "purchase-demand-merge-controller"
+        ],
+        "operationId": "get_trade_demand_merges_id_drafts_draftId",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "draftId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseDemandMergeDraftDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/demand-merges/options": {
+      "get": {
+        "tags": [
+          "purchase-demand-merge-controller"
+        ],
+        "operationId": "get_trade_demand_merges_options",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseDemandMergeOptions"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/demand-merges/capabilities": {
+      "get": {
+        "tags": [
+          "purchase-demand-merge-controller"
+        ],
+        "operationId": "get_trade_demand_merges_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseDemandMergeCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/purchase-orders/from-conversions": {
+      "post": {
+        "tags": [
+          "purchase-order-list-controller"
+        ],
+        "operationId": "post_trade_purchase_orders_from_conversions",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PurchaseOrderListConversionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseOrderListConversionResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/purchase-orders/batch/urge": {
+      "post": {
+        "tags": [
+          "purchase-order-list-controller"
+        ],
+        "operationId": "post_trade_purchase_orders_batch_urge",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PurchaseOrderListUrgeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseOrderListBatchResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/purchase-orders/batch/close": {
+      "post": {
+        "tags": [
+          "purchase-order-list-controller"
+        ],
+        "operationId": "post_trade_purchase_orders_batch_close",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PurchaseOrderListCloseRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseOrderListBatchResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/purchase-orders": {
+      "get": {
+        "tags": [
+          "purchase-order-list-controller"
+        ],
+        "operationId": "get_trade_purchase_orders",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "supplierRefId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "targetWarehouseId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "currency",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "skuId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "createdFrom",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "createdTo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "promisedFrom",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "promisedTo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "overdueOnly",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseOrderListPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/purchase-orders/filters": {
+      "get": {
+        "tags": [
+          "purchase-order-list-controller"
+        ],
+        "operationId": "get_trade_purchase_orders_filters",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseOrderListFilterOptions"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/purchase-orders/export": {
+      "get": {
+        "tags": [
+          "purchase-order-list-controller"
+        ],
+        "operationId": "get_trade_purchase_orders_export",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "supplierRefId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "targetWarehouseId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "currency",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "skuId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "createdFrom",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "createdTo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "promisedFrom",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "promisedTo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "overdueOnly",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/purchase-orders/capabilities": {
+      "get": {
+        "tags": [
+          "purchase-order-list-controller"
+        ],
+        "operationId": "get_trade_purchase_orders_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseOrderListCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/defective-dispositions/{id}": {
+      "get": {
+        "tags": [
+          "defective-goods-controller"
+        ],
+        "operationId": "get_trade_defective_dispositions_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefectiveOrderDetail"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "defective-goods-controller"
+        ],
+        "operationId": "put_trade_defective_dispositions_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DefectiveOrderInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefectiveOrderRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/defective-dispositions": {
+      "get": {
+        "tags": [
+          "defective-goods-controller"
+        ],
+        "operationId": "get_trade_defective_dispositions",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "dispositionType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "inspectionNo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "skuCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "supplierId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "created"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefectiveOrderPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "defective-goods-controller"
+        ],
+        "operationId": "post_trade_defective_dispositions",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DefectiveOrderInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefectiveOrderRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/defective-dispositions/{id}/dispatch-inventory": {
+      "post": {
+        "tags": [
+          "defective-goods-controller"
+        ],
+        "operationId": "post_trade_defective_dispositions_id_dispatch_inventory",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefectiveOrderRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/defective-dispositions/{id}/decide": {
+      "post": {
+        "tags": [
+          "defective-goods-controller"
+        ],
+        "operationId": "post_trade_defective_dispositions_id_decide",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefectiveOrderRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/defective-dispositions/{id}/complete": {
+      "post": {
+        "tags": [
+          "defective-goods-controller"
+        ],
+        "operationId": "post_trade_defective_dispositions_id_complete",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefectiveOrderRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/defective-dispositions/{id}/claims/{claimId}/withdraw": {
+      "post": {
+        "tags": [
+          "defective-goods-controller"
+        ],
+        "operationId": "post_trade_defective_dispositions_id_claims_claimId_withdraw",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "claimId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DefectiveClaimReasonInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefectiveClaimRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/defective-dispositions/{id}/claims/{claimId}/submit": {
+      "post": {
+        "tags": [
+          "defective-goods-controller"
+        ],
+        "operationId": "post_trade_defective_dispositions_id_claims_claimId_submit",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "claimId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefectiveClaimRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/defective-dispositions/{id}/claims/{claimId}/reject": {
+      "post": {
+        "tags": [
+          "defective-goods-controller"
+        ],
+        "operationId": "post_trade_defective_dispositions_id_claims_claimId_reject",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "claimId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DefectiveClaimReasonInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefectiveClaimRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/defective-dispositions/{id}/claims/{claimId}/agree": {
+      "post": {
+        "tags": [
+          "defective-goods-controller"
+        ],
+        "operationId": "post_trade_defective_dispositions_id_claims_claimId_agree",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "claimId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DefectiveClaimAgreeInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefectiveClaimRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/defective-dispositions/{id}/cancel": {
+      "post": {
+        "tags": [
+          "defective-goods-controller"
+        ],
+        "operationId": "post_trade_defective_dispositions_id_cancel",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DefectiveCancelInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefectiveOrderRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/defective-dispositions/{id}/export": {
+      "get": {
+        "tags": [
+          "defective-goods-controller"
+        ],
+        "operationId": "get_trade_defective_dispositions_id_export",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/csv": {
+                "schema": {
+                  "type": "string",
+                  "format": "byte"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/defective-dispositions/summary": {
+      "get": {
+        "tags": [
+          "defective-goods-controller"
+        ],
+        "operationId": "get_trade_defective_dispositions_summary",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "currencyCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefectiveSummary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/defective-dispositions/options": {
+      "get": {
+        "tags": [
+          "defective-goods-controller"
+        ],
+        "operationId": "get_trade_defective_dispositions_options",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefectiveOptions"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/defective-dispositions/capabilities": {
+      "get": {
+        "tags": [
+          "defective-goods-controller"
+        ],
+        "operationId": "get_trade_defective_dispositions_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefectiveGoodsCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/development-projects/{id}": {
+      "get": {
+        "tags": [
+          "development-project-controller"
+        ],
+        "operationId": "get_trade_development_projects_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DevelopmentProjectDetail"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "development-project-controller"
+        ],
+        "operationId": "put_trade_development_projects_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DevelopmentProjectUpdateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DevelopmentProjectDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/development-projects/{id}/milestones/{milestoneId}": {
+      "put": {
+        "tags": [
+          "development-project-controller"
+        ],
+        "operationId": "put_trade_development_projects_id_milestones_milestoneId",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "milestoneId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DevelopmentMilestoneInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DevelopmentMilestoneRow"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "development-project-controller"
+        ],
+        "operationId": "delete_trade_development_projects_id_milestones_milestoneId",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "milestoneId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DevelopmentMilestoneRow"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/development-projects": {
+      "get": {
+        "tags": [
+          "development-project-controller"
+        ],
+        "operationId": "get_trade_development_projects",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "category",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "ownerId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DevelopmentProjectPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "development-project-controller"
+        ],
+        "operationId": "post_trade_development_projects",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DevelopmentProjectCreateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DevelopmentProjectDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/development-projects/{id}/transitions": {
+      "post": {
+        "tags": [
+          "development-project-controller"
+        ],
+        "operationId": "post_trade_development_projects_id_transitions",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DevelopmentTransitionInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DevelopmentProjectDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/development-projects/{id}/spec-candidates": {
+      "get": {
+        "tags": [
+          "development-project-controller"
+        ],
+        "operationId": "get_trade_development_projects_id_spec_candidates",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DevelopmentSpecCandidateRow"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "development-project-controller"
+        ],
+        "operationId": "post_trade_development_projects_id_spec_candidates",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DevelopmentSpecCandidateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DevelopmentSpecCandidateRow"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/development-projects/{id}/milestones": {
+      "get": {
+        "tags": [
+          "development-project-controller"
+        ],
+        "operationId": "get_trade_development_projects_id_milestones",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DevelopmentMilestoneRow"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "development-project-controller"
+        ],
+        "operationId": "post_trade_development_projects_id_milestones",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DevelopmentMilestoneInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DevelopmentMilestoneRow"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/development-projects/{id}/markets": {
+      "get": {
+        "tags": [
+          "development-project-controller"
+        ],
+        "operationId": "get_trade_development_projects_id_markets",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DevelopmentMarketRow"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "development-project-controller"
+        ],
+        "operationId": "post_trade_development_projects_id_markets",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DevelopmentMarketInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DevelopmentMarketRow"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/development-projects/{id}/market-observations": {
+      "get": {
+        "tags": [
+          "development-project-controller"
+        ],
+        "operationId": "get_trade_development_projects_id_market_observations",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DevelopmentMarketObservationRow"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "development-project-controller"
+        ],
+        "operationId": "post_trade_development_projects_id_market_observations",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DevelopmentMarketObservationInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DevelopmentMarketObservationRow"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/development-projects/{id}/handoffs": {
+      "get": {
+        "tags": [
+          "development-project-controller"
+        ],
+        "operationId": "get_trade_development_projects_id_handoffs",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DevelopmentHandoffRow"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "development-project-controller"
+        ],
+        "operationId": "post_trade_development_projects_id_handoffs",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DevelopmentHandoffInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DevelopmentHandoffRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/development-projects/{id}/cost-estimate": {
+      "get": {
+        "tags": [
+          "development-project-controller"
+        ],
+        "operationId": "get_trade_development_projects_id_cost_estimate",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "referenceSkuId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DevelopmentCostEstimateView"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "development-project-controller"
+        ],
+        "operationId": "post_trade_development_projects_id_cost_estimate",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "referenceSkuId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "referenceSkuCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DevelopmentProjectDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/development-projects/{id}/sku-candidate": {
+      "get": {
+        "tags": [
+          "development-project-controller"
+        ],
+        "operationId": "get_trade_development_projects_id_sku_candidate",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DevelopmentSkuCandidate"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/development-projects/summary": {
+      "get": {
+        "tags": [
+          "development-project-controller"
+        ],
+        "operationId": "get_trade_development_projects_summary",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DevelopmentProjectSummary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/development-projects/options": {
+      "get": {
+        "tags": [
+          "development-project-controller"
+        ],
+        "operationId": "get_trade_development_projects_options",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DevelopmentProjectOptions"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/development-projects/capabilities": {
+      "get": {
+        "tags": [
+          "development-project-controller"
+        ],
+        "operationId": "get_trade_development_projects_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DevelopmentProjectCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/development-projects/{id}/spec-candidates/{candidateId}": {
+      "delete": {
+        "tags": [
+          "development-project-controller"
+        ],
+        "operationId": "delete_trade_development_projects_id_spec_candidates_candidateId",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "candidateId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DevelopmentSpecCandidateRow"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/development-projects/{id}/markets/{marketId}": {
+      "delete": {
+        "tags": [
+          "development-project-controller"
+        ],
+        "operationId": "delete_trade_development_projects_id_markets_marketId",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "marketId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DevelopmentMarketRow"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -93973,6 +97063,3423 @@
           "evidence": {
             "type": "string",
             "nullable": true
+          }
+        }
+      },
+      "PurchaseDemandMergeCreateInput": {
+        "required": [
+          "currencyCode",
+          "legalEntityId",
+          "sourceRequestIds",
+          "targetWarehouseId"
+        ],
+        "type": "object",
+        "properties": {
+          "sourceRequestIds": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "sourceLineIds": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "type": "string",
+              "format": "uuid",
+              "nullable": true
+            }
+          },
+          "targetSupplierId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "targetWarehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "legalEntityId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "currencyCode": {
+            "maxLength": 3,
+            "minLength": 3,
+            "type": "string"
+          },
+          "note": {
+            "maxLength": 1000,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "PurchaseDemandBatchAdjustmentRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "batchId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "scope": {
+            "type": "string"
+          },
+          "lineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "draftId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "field": {
+            "type": "string"
+          },
+          "beforeValue": {
+            "type": "string",
+            "nullable": true
+          },
+          "afterValue": {
+            "type": "string",
+            "nullable": true
+          },
+          "reason": {
+            "type": "string"
+          },
+          "affectedLineCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "adjustedBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "adjustedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "PurchaseDemandMergeBatchRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "batchNo": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "targetWarehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "targetWarehouseCode": {
+            "type": "string"
+          },
+          "targetWarehouseName": {
+            "type": "string"
+          },
+          "legalEntityId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "legalEntityCode": {
+            "type": "string"
+          },
+          "legalEntityName": {
+            "type": "string"
+          },
+          "currencyCode": {
+            "type": "string"
+          },
+          "draftCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "lineCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "unmergedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalQuantity": {
+            "type": "number"
+          },
+          "estimatedAmount": {
+            "type": "number",
+            "nullable": true
+          },
+          "sourceRequestIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "note": {
+            "type": "string"
+          },
+          "createdBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "finalizedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "finalizedBy": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          }
+        }
+      },
+      "PurchaseDemandMergeDetail": {
+        "type": "object",
+        "properties": {
+          "batch": {
+            "$ref": "#/components/schemas/PurchaseDemandMergeBatchRow"
+          },
+          "drafts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseDemandMergeDraftRow"
+            }
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseDemandMergeLineRow"
+            }
+          },
+          "sources": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseDemandMergeLineSourceRow"
+            }
+          },
+          "unmerged": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseDemandMergeUnmergedRow"
+            }
+          },
+          "adjustments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseDemandBatchAdjustmentRow"
+            }
+          }
+        }
+      },
+      "PurchaseDemandMergeDraftRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "batchId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "draftNo": {
+            "type": "string"
+          },
+          "supplierId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "supplierCode": {
+            "type": "string"
+          },
+          "supplierName": {
+            "type": "string"
+          },
+          "targetWarehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "targetWarehouseCode": {
+            "type": "string"
+          },
+          "targetWarehouseName": {
+            "type": "string"
+          },
+          "legalEntityId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "legalEntityCode": {
+            "type": "string"
+          },
+          "legalEntityName": {
+            "type": "string"
+          },
+          "currencyCode": {
+            "type": "string"
+          },
+          "lineCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalQuantity": {
+            "type": "number"
+          },
+          "estimatedAmount": {
+            "type": "number",
+            "nullable": true
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "createdBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "PurchaseDemandMergeLineRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "draftId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "supplierId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "supplierCode": {
+            "type": "string"
+          },
+          "supplierName": {
+            "type": "string"
+          },
+          "mergedQuantity": {
+            "type": "number"
+          },
+          "sourceQuantity": {
+            "type": "number"
+          },
+          "unitPrice": {
+            "type": "number",
+            "nullable": true
+          },
+          "lineAmount": {
+            "type": "number",
+            "nullable": true
+          },
+          "arrivalDate": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "sourceRequestCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "sortRank": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "note": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "PurchaseDemandMergeLineSourceRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "draftLineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sourceRequestId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sourceRequestLineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sourceSkuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sourceSkuCode": {
+            "type": "string"
+          },
+          "sourceQuantity": {
+            "type": "number"
+          },
+          "mergedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "PurchaseDemandMergeUnmergedRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "batchId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sourceRequestId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sourceRequestLineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sourceSkuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sourceSkuCode": {
+            "type": "string"
+          },
+          "sourceSkuName": {
+            "type": "string"
+          },
+          "sourceQuantity": {
+            "type": "number",
+            "nullable": true
+          },
+          "sourceSupplierId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "sourceSupplierName": {
+            "type": "string"
+          },
+          "reasonCode": {
+            "type": "string"
+          },
+          "reasonCodeLabel": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "PurchaseDemandBatchSupplierInput": {
+        "required": [
+          "lineIds",
+          "reason",
+          "supplierId"
+        ],
+        "type": "object",
+        "properties": {
+          "lineIds": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "supplierId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reason": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "PurchaseDemandBatchQuantityInput": {
+        "required": [
+          "lineIds",
+          "mode",
+          "reason",
+          "value"
+        ],
+        "type": "object",
+        "properties": {
+          "lineIds": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "mode": {
+            "minLength": 1,
+            "pattern": "SET|MULTIPLY",
+            "type": "string"
+          },
+          "value": {
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "type": "number"
+          },
+          "reason": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "PurchaseDemandPrintInput": {
+        "required": [
+          "draftIds"
+        ],
+        "type": "object",
+        "properties": {
+          "draftIds": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        }
+      },
+      "PurchaseDemandPrintLine": {
+        "type": "object",
+        "properties": {
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "supplierName": {
+            "type": "string"
+          },
+          "mergedQuantity": {
+            "type": "number"
+          },
+          "unitPrice": {
+            "type": "number",
+            "nullable": true
+          },
+          "lineAmount": {
+            "type": "number",
+            "nullable": true
+          },
+          "arrivalDate": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchaseDemandPrintResult": {
+        "type": "object",
+        "properties": {
+          "printedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "draftCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "lineCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalQuantity": {
+            "type": "number"
+          },
+          "totalAmount": {
+            "type": "number",
+            "nullable": true
+          },
+          "sheets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseDemandPrintSheet"
+            }
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchaseDemandPrintSheet": {
+        "type": "object",
+        "properties": {
+          "draftId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "draftNo": {
+            "type": "string"
+          },
+          "supplierCode": {
+            "type": "string"
+          },
+          "supplierName": {
+            "type": "string"
+          },
+          "targetWarehouseCode": {
+            "type": "string"
+          },
+          "targetWarehouseName": {
+            "type": "string"
+          },
+          "legalEntityCode": {
+            "type": "string"
+          },
+          "legalEntityName": {
+            "type": "string"
+          },
+          "currencyCode": {
+            "type": "string"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseDemandPrintLine"
+            }
+          },
+          "lineCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalQuantity": {
+            "type": "number"
+          },
+          "totalAmount": {
+            "type": "number",
+            "nullable": true
+          },
+          "note": {
+            "type": "string"
+          },
+          "textContent": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchaseDemandMergeBatchPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseDemandMergeBatchRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "PurchaseDemandMergeUnmergedPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseDemandMergeUnmergedRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "PurchaseDemandMergeLinePage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseDemandMergeLineRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "PurchaseDemandMergeDraftPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseDemandMergeDraftRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "PurchaseDemandMergeDraftDetail": {
+        "type": "object",
+        "properties": {
+          "draft": {
+            "$ref": "#/components/schemas/PurchaseDemandMergeDraftRow"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseDemandMergeLineRow"
+            }
+          },
+          "sources": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseDemandMergeLineSourceRow"
+            }
+          }
+        }
+      },
+      "PurchaseDemandMergeLegalEntityOption": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchaseDemandMergeOptions": {
+        "type": "object",
+        "properties": {
+          "suppliers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseDemandMergeSupplierOption"
+            }
+          },
+          "warehouses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseDemandMergeWarehouseOption"
+            }
+          },
+          "legalEntities": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseDemandMergeLegalEntityOption"
+            }
+          },
+          "supplierNote": {
+            "type": "string"
+          },
+          "warehouseNote": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchaseDemandMergeSupplierOption": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "selected": {
+            "type": "boolean"
+          }
+        }
+      },
+      "PurchaseDemandMergeWarehouseOption": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "countryCode": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchaseDemandMergeCapabilities": {
+        "type": "object",
+        "properties": {
+          "requestAvailable": {
+            "type": "boolean"
+          },
+          "requestOwnerModule": {
+            "type": "string"
+          },
+          "requestNote": {
+            "type": "string"
+          },
+          "supplierReferenceAvailable": {
+            "type": "boolean"
+          },
+          "supplierReferenceOwnerModule": {
+            "type": "string"
+          },
+          "supplierReferenceNote": {
+            "type": "string"
+          },
+          "warehouseReferenceAvailable": {
+            "type": "boolean"
+          },
+          "warehouseReferenceOwnerModule": {
+            "type": "string"
+          },
+          "warehouseReferenceNote": {
+            "type": "string"
+          },
+          "purchaseOrderDelivered": {
+            "type": "boolean"
+          },
+          "purchaseOrderOwnerModule": {
+            "type": "string"
+          },
+          "purchaseOrderNote": {
+            "type": "string"
+          },
+          "mergeRule": {
+            "type": "string"
+          },
+          "stateMachine": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchaseOrderListConversionRequest": {
+        "type": "object",
+        "properties": {
+          "conversionIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        }
+      },
+      "PurchaseOrderListConversionResult": {
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "orderNo": {
+            "type": "string",
+            "nullable": true
+          },
+          "lineCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalAmount": {
+            "type": "number",
+            "nullable": true
+          },
+          "currency": {
+            "type": "string",
+            "nullable": true
+          },
+          "functionalCurrency": {
+            "type": "string",
+            "nullable": true
+          },
+          "fxSnapshotStatus": {
+            "type": "string"
+          },
+          "rejected": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseOrderListRejectedConversion"
+            }
+          }
+        }
+      },
+      "PurchaseOrderListRejectedConversion": {
+        "type": "object",
+        "properties": {
+          "conversionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reasonCode": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchaseOrderListUrgeRequest": {
+        "type": "object",
+        "properties": {
+          "orderIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchaseOrderListBatchFailure": {
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderNo": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchaseOrderListBatchResult": {
+        "type": "object",
+        "properties": {
+          "requested": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "succeeded": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "failures": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseOrderListBatchFailure"
+            }
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchaseOrderListCloseRequest": {
+        "type": "object",
+        "properties": {
+          "orderIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchaseOrderListCurrencyAmount": {
+        "type": "object",
+        "properties": {
+          "currency": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "orderCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "PurchaseOrderListFunctionalTotal": {
+        "type": "object",
+        "properties": {
+          "functionalCurrency": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "includedOrderCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "excludedOrderCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "excludedCurrencies": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "note": {
+            "type": "string"
+          }
+        },
+        "nullable": true
+      },
+      "PurchaseOrderListPage": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseOrderListRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/PurchaseOrderListSummary"
+          },
+          "dataScope": {
+            "type": "string"
+          },
+          "dataScopeNote": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchaseOrderListRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderNo": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "supplierRefId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "supplierCode": {
+            "type": "string"
+          },
+          "supplierName": {
+            "type": "string"
+          },
+          "lineCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "skuCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalAmount": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "promisedArrivalDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "receivableQuantity": {
+            "type": "number",
+            "nullable": true
+          },
+          "receivedQuantity": {
+            "type": "number",
+            "nullable": true
+          },
+          "receivedRatio": {
+            "type": "number",
+            "nullable": true
+          },
+          "receivedQuantitySource": {
+            "type": "string"
+          },
+          "arrivalStatus": {
+            "type": "string",
+            "nullable": true
+          },
+          "warehouseReceiptCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "overdue": {
+            "type": "boolean"
+          },
+          "overdueDays": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "targetWarehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "targetWarehouseCode": {
+            "type": "string"
+          },
+          "targetWarehouseName": {
+            "type": "string"
+          },
+          "ownerUserId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "ownerDepartmentId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "urgeCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "lastUrgedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "PurchaseOrderListStatusCount": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "PurchaseOrderListSummary": {
+        "type": "object",
+        "properties": {
+          "totalCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "overdueCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "countsByStatus": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseOrderListStatusCount"
+            }
+          },
+          "amountsByCurrency": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseOrderListCurrencyAmount"
+            }
+          },
+          "functionalTotal": {
+            "$ref": "#/components/schemas/PurchaseOrderListFunctionalTotal"
+          },
+          "totalAmountNote": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchaseOrderListFilterOptions": {
+        "type": "object",
+        "properties": {
+          "statuses": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "currencies": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "suppliers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseOrderListSupplierOption"
+            }
+          },
+          "warehouses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseOrderListWarehouseOption"
+            }
+          },
+          "sorts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseOrderListSortOption"
+            }
+          }
+        }
+      },
+      "PurchaseOrderListSortOption": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchaseOrderListSupplierOption": {
+        "type": "object",
+        "properties": {
+          "supplierRefId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "supplierCode": {
+            "type": "string"
+          },
+          "supplierName": {
+            "type": "string"
+          },
+          "orderCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "PurchaseOrderListWarehouseOption": {
+        "type": "object",
+        "properties": {
+          "warehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "warehouseCode": {
+            "type": "string"
+          },
+          "warehouseName": {
+            "type": "string"
+          },
+          "orderCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "PurchaseOrderListBulkOperation": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "precondition": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchaseOrderListCapabilities": {
+        "type": "object",
+        "properties": {
+          "availableDimensions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "unavailableDimensions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseOrderListDimension"
+            }
+          },
+          "bulkOperations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseOrderListBulkOperation"
+            }
+          },
+          "availableSorts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseOrderListSortOption"
+            }
+          },
+          "filterableNote": {
+            "type": "string"
+          },
+          "exportNote": {
+            "type": "string"
+          },
+          "receivedQuantityNote": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchaseOrderListDimension": {
+        "type": "object",
+        "properties": {
+          "field": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "DefectiveLineInput": {
+        "required": [
+          "dispositionType",
+          "quantity"
+        ],
+        "type": "object",
+        "properties": {
+          "dispositionType": {
+            "type": "string",
+            "enum": [
+              "RETURN_EXCHANGE",
+              "REPAIR",
+              "CONCESSION",
+              "SCRAP",
+              "PROMOTION"
+            ]
+          },
+          "quantity": {
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "type": "number"
+          },
+          "releasedQuantity": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "nullable": true
+          },
+          "concessionReason": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "permissionCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "expectedReturnDate": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "repairVendor": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "promotionPlan": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "note": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "DefectiveOrderInput": {
+        "required": [
+          "inspectionOrderId",
+          "lines",
+          "reason"
+        ],
+        "type": "object",
+        "properties": {
+          "inspectionOrderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reason": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "type": "string"
+          },
+          "currencyCode": {
+            "maxLength": 8,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "claimAmount": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "nullable": true
+          },
+          "note": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DefectiveLineInput"
+            }
+          }
+        }
+      },
+      "DefectiveOrderRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "dispositionNo": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "inspectionOrderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "inspectionNo": {
+            "type": "string"
+          },
+          "inspectionResult": {
+            "type": "string"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string",
+            "nullable": true
+          },
+          "supplierId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "supplierName": {
+            "type": "string",
+            "nullable": true
+          },
+          "receiptCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "batchNo": {
+            "type": "string",
+            "nullable": true
+          },
+          "inspectionLotSize": {
+            "type": "number"
+          },
+          "inspectionDefectiveQuantity": {
+            "type": "number"
+          },
+          "inspectionQualifiedQuantity": {
+            "type": "number"
+          },
+          "inspectionConcessionQuantity": {
+            "type": "number"
+          },
+          "sellableCeiling": {
+            "type": "number"
+          },
+          "grossDeductedQuantity": {
+            "type": "number"
+          },
+          "disposedQuantity": {
+            "type": "number"
+          },
+          "releasedQuantity": {
+            "type": "number"
+          },
+          "remainingQuantity": {
+            "type": "number"
+          },
+          "dispositionSummary": {
+            "type": "string"
+          },
+          "dispositionSummaryLabel": {
+            "type": "string"
+          },
+          "inventoryStatus": {
+            "type": "string"
+          },
+          "inventoryStatusLabel": {
+            "type": "string"
+          },
+          "claimStatus": {
+            "type": "string"
+          },
+          "claimStatusLabel": {
+            "type": "string"
+          },
+          "currencyCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "claimAmount": {
+            "type": "number",
+            "nullable": true
+          },
+          "lineCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "instructionCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "claimCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "decidedBy": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "decidedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "completedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "DefectiveClaimReasonInput": {
+        "required": [
+          "reason"
+        ],
+        "type": "object",
+        "properties": {
+          "reason": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "DefectiveClaimRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "claimNo": {
+            "type": "string"
+          },
+          "claimType": {
+            "type": "string"
+          },
+          "claimTypeLabel": {
+            "type": "string"
+          },
+          "supplierId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "supplierName": {
+            "type": "string",
+            "nullable": true
+          },
+          "currencyCode": {
+            "type": "string"
+          },
+          "claimedAmount": {
+            "type": "number"
+          },
+          "agreedAmount": {
+            "type": "number",
+            "nullable": true
+          },
+          "effectiveAmount": {
+            "type": "number"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "financeStatus": {
+            "type": "string"
+          },
+          "financeStatusLabel": {
+            "type": "string"
+          },
+          "financeReference": {
+            "type": "string",
+            "nullable": true
+          },
+          "submittedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "acknowledgedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "settledAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "decidedReason": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "DefectiveClaimAgreeInput": {
+        "required": [
+          "agreedAmount"
+        ],
+        "type": "object",
+        "properties": {
+          "agreedAmount": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number"
+          },
+          "note": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "DefectiveCancelInput": {
+        "required": [
+          "cancelReason"
+        ],
+        "type": "object",
+        "properties": {
+          "cancelReason": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "DefectiveOrderPage": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DefectiveOrderRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "DefectiveEventRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "eventType": {
+            "type": "string"
+          },
+          "eventTypeLabel": {
+            "type": "string"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "actorId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "note": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "DefectiveInstructionRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "lineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "action": {
+            "type": "string"
+          },
+          "actionLabel": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "externalReference": {
+            "type": "string",
+            "nullable": true
+          },
+          "attemptCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "dispatchedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "DefectiveLineRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "dispositionType": {
+            "type": "string"
+          },
+          "dispositionTypeLabel": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "releasedQuantity": {
+            "type": "number"
+          },
+          "concessionReason": {
+            "type": "string",
+            "nullable": true
+          },
+          "permissionCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "expectedReturnDate": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "repairVendor": {
+            "type": "string",
+            "nullable": true
+          },
+          "promotionPlan": {
+            "type": "string",
+            "nullable": true
+          },
+          "note": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "DefectiveOrderDetail": {
+        "type": "object",
+        "properties": {
+          "order": {
+            "$ref": "#/components/schemas/DefectiveOrderRow"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DefectiveLineRow"
+            }
+          },
+          "instructions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DefectiveInstructionRow"
+            }
+          },
+          "claims": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DefectiveClaimRow"
+            }
+          },
+          "events": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DefectiveEventRow"
+            }
+          },
+          "quantityNote": {
+            "type": "string"
+          },
+          "concessionNote": {
+            "type": "string"
+          },
+          "inventoryNote": {
+            "type": "string"
+          },
+          "claimNote": {
+            "type": "string"
+          },
+          "actions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "DefectiveSummary": {
+        "type": "object",
+        "properties": {
+          "orderCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "draftCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "decidedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "executingCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "completedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "cancelledCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "concessionOrderCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "scrapOrderCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "repairOrderCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "returnExchangeOrderCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "promotionOrderCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "disposedQuantity": {
+            "type": "number"
+          },
+          "releasedQuantity": {
+            "type": "number"
+          },
+          "pendingClaimAmount": {
+            "type": "number"
+          },
+          "settledClaimAmount": {
+            "type": "number"
+          },
+          "currencyCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "instructionDispatchedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "instructionUnavailableCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "instructionFailedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "DefectiveInspectionOption": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "inspectionNo": {
+            "type": "string"
+          },
+          "result": {
+            "type": "string"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string",
+            "nullable": true
+          },
+          "supplierId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "supplierName": {
+            "type": "string",
+            "nullable": true
+          },
+          "lotSize": {
+            "type": "number"
+          },
+          "defectiveQuantity": {
+            "type": "number"
+          },
+          "qualifiedQuantity": {
+            "type": "number"
+          },
+          "concessionQuantity": {
+            "type": "number"
+          },
+          "sellableCeiling": {
+            "type": "number"
+          },
+          "grossDeductedQuantity": {
+            "type": "number"
+          },
+          "disposedQuantity": {
+            "type": "number"
+          },
+          "remainingQuantity": {
+            "type": "number"
+          },
+          "completedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "DefectiveOptions": {
+        "type": "object",
+        "properties": {
+          "inspections": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DefectiveInspectionOption"
+            }
+          },
+          "dispositionTypes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "dispositionTypeLabels": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "statuses": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "statusLabels": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "inventoryStatuses": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "inventoryStatusLabels": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "claimStatuses": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "claimStatusLabels": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "DefectiveCapabilityItem": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "ownerModule": {
+            "type": "string",
+            "nullable": true
+          },
+          "impact": {
+            "type": "string",
+            "nullable": true
+          },
+          "reason": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "DefectiveGoodsCapabilities": {
+        "type": "object",
+        "properties": {
+          "upstream": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DefectiveCapabilityItem"
+            }
+          },
+          "downstream": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DefectiveCapabilityItem"
+            }
+          },
+          "actions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DefectiveCapabilityItem"
+            }
+          },
+          "dispositionTypes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "dispositionTypeLabels": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "quantityNote": {
+            "type": "string"
+          },
+          "concessionNote": {
+            "type": "string"
+          },
+          "inventoryNote": {
+            "type": "string"
+          },
+          "claimNote": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "DevelopmentProjectUpdateInput": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "category": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "ownerId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "ownerName": {
+            "maxLength": 100,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "targetPrice": {
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "type": "number",
+            "nullable": true
+          },
+          "currency": {
+            "maxLength": 3,
+            "minLength": 3,
+            "type": "string",
+            "nullable": true
+          },
+          "targetCost": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "nullable": true
+          },
+          "costBasis": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "costEstimatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "referenceSkuId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "referenceSkuCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "decisionNote": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "launchTargetAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "DevelopmentHandoffRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "projectId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "handoffType": {
+            "type": "string"
+          },
+          "handoffTypeLabel": {
+            "type": "string"
+          },
+          "targetModule": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "payload": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "DevelopmentMarketObservationRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "projectId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "marketCode": {
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "metricCode": {
+            "type": "string"
+          },
+          "metricValue": {
+            "type": "number",
+            "nullable": true
+          },
+          "valueUnit": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "collectedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "DevelopmentMarketRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "projectId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "marketCode": {
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "targetPrice": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "priority": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "sortRank": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "DevelopmentMilestoneRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "projectId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "milestoneType": {
+            "type": "string"
+          },
+          "milestoneTypeLabel": {
+            "type": "string"
+          },
+          "plannedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "actualAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "status": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "DevelopmentProjectDetail": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "$ref": "#/components/schemas/DevelopmentProjectRow"
+          },
+          "milestones": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DevelopmentMilestoneRow"
+            }
+          },
+          "markets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DevelopmentMarketRow"
+            }
+          },
+          "specCandidates": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DevelopmentSpecCandidateRow"
+            }
+          },
+          "marketObservations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DevelopmentMarketObservationRow"
+            }
+          },
+          "transitions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DevelopmentTransitionRow"
+            }
+          },
+          "handoffs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DevelopmentHandoffRow"
+            }
+          },
+          "allowedTargets": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "DevelopmentProjectRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "projectNo": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "ownerId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "ownerName": {
+            "type": "string"
+          },
+          "targetPrice": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "targetCost": {
+            "type": "number",
+            "nullable": true
+          },
+          "costCurrency": {
+            "type": "string",
+            "nullable": true
+          },
+          "costAvailable": {
+            "type": "boolean"
+          },
+          "costSource": {
+            "type": "string"
+          },
+          "costSourceLabel": {
+            "type": "string"
+          },
+          "targetMarginRate": {
+            "type": "number",
+            "nullable": true
+          },
+          "marginBasis": {
+            "type": "string",
+            "nullable": true
+          },
+          "marketCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "milestoneCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "launchTargetAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "samplingPlannedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "massProductionPlannedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "DevelopmentSpecCandidateRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "projectId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "specName": {
+            "type": "string"
+          },
+          "specValue": {
+            "type": "string"
+          },
+          "sortRank": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "DevelopmentTransitionRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "projectId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "fromStatus": {
+            "type": "string"
+          },
+          "fromStatusLabel": {
+            "type": "string"
+          },
+          "toStatus": {
+            "type": "string"
+          },
+          "toStatusLabel": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "exemptionCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "exemptionNote": {
+            "type": "string",
+            "nullable": true
+          },
+          "actorId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "appliedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "DevelopmentMilestoneInput": {
+        "required": [
+          "milestoneType",
+          "plannedAt"
+        ],
+        "type": "object",
+        "properties": {
+          "milestoneType": {
+            "type": "string",
+            "enum": [
+              "SAMPLING",
+              "PILOT",
+              "MASS_PRODUCTION",
+              "LAUNCH"
+            ]
+          },
+          "plannedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "actualAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "PLANNED",
+              "REACHED",
+              "MISSED"
+            ]
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "DevelopmentProjectCreateInput": {
+        "required": [
+          "category",
+          "currency",
+          "name",
+          "ownerId",
+          "projectNo",
+          "targetPrice"
+        ],
+        "type": "object",
+        "properties": {
+          "projectNo": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "category": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "ownerId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "ownerName": {
+            "maxLength": 100,
+            "minLength": 0,
+            "type": "string"
+          },
+          "targetPrice": {
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "type": "number"
+          },
+          "currency": {
+            "maxLength": 3,
+            "minLength": 3,
+            "type": "string"
+          },
+          "targetCost": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "nullable": true
+          },
+          "costBasis": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "costEstimatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "referenceSkuId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "referenceSkuCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "decisionNote": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "launchTargetAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "DevelopmentTransitionInput": {
+        "required": [
+          "reason",
+          "toStatus"
+        ],
+        "type": "object",
+        "properties": {
+          "toStatus": {
+            "type": "string",
+            "enum": [
+              "EVALUATION",
+              "APPROVED",
+              "IN_DEVELOPMENT",
+              "SAMPLING",
+              "PILOT",
+              "MASS_PRODUCTION",
+              "TERMINATED"
+            ]
+          },
+          "reason": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          },
+          "exemptionCode": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "exemptionNote": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "DevelopmentSpecCandidateInput": {
+        "required": [
+          "specName",
+          "specValue"
+        ],
+        "type": "object",
+        "properties": {
+          "specName": {
+            "maxLength": 120,
+            "minLength": 0,
+            "type": "string"
+          },
+          "specValue": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "sortRank": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          }
+        }
+      },
+      "DevelopmentMarketInput": {
+        "required": [
+          "currency",
+          "marketCode",
+          "platformCode",
+          "targetPrice"
+        ],
+        "type": "object",
+        "properties": {
+          "marketCode": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string"
+          },
+          "platformCode": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string"
+          },
+          "targetPrice": {
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "type": "number"
+          },
+          "currency": {
+            "maxLength": 3,
+            "minLength": 3,
+            "type": "string"
+          },
+          "priority": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "sortRank": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          }
+        }
+      },
+      "DevelopmentMarketObservationInput": {
+        "required": [
+          "collectedAt",
+          "marketCode",
+          "metricCode",
+          "source"
+        ],
+        "type": "object",
+        "properties": {
+          "marketCode": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string"
+          },
+          "platformCode": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "metricCode": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string"
+          },
+          "metricValue": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "nullable": true
+          },
+          "valueUnit": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "source": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "collectedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "DevelopmentHandoffInput": {
+        "required": [
+          "handoffType"
+        ],
+        "type": "object",
+        "properties": {
+          "handoffType": {
+            "type": "string",
+            "enum": [
+              "SAMPLING_ORDER",
+              "PILOT_ORDER",
+              "SKU_ONBOARDING"
+            ]
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "DevelopmentProjectPage": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DevelopmentProjectRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "DevelopmentSkuCandidate": {
+        "type": "object",
+        "properties": {
+          "projectId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "projectNo": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string"
+          },
+          "targetMarkets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DevelopmentMarketRow"
+            }
+          },
+          "targetPriceMin": {
+            "type": "number",
+            "nullable": true
+          },
+          "targetPriceMax": {
+            "type": "number",
+            "nullable": true
+          },
+          "currency": {
+            "type": "string",
+            "nullable": true
+          },
+          "specCandidates": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DevelopmentSpecCandidateRow"
+            }
+          },
+          "launchTargetAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "samplingPlannedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "massProductionPlannedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "handoffType": {
+            "type": "string"
+          },
+          "targetModule": {
+            "type": "string"
+          },
+          "handoffReady": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "DevelopmentCostEstimateView": {
+        "type": "object",
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "unitCost": {
+            "type": "number",
+            "nullable": true
+          },
+          "costCurrency": {
+            "type": "string",
+            "nullable": true
+          },
+          "source": {
+            "type": "string"
+          },
+          "sourceLabel": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string",
+            "nullable": true
+          },
+          "unavailableReason": {
+            "type": "string",
+            "nullable": true
+          },
+          "basis": {
+            "type": "string",
+            "nullable": true
+          },
+          "estimatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "DevelopmentProjectSummary": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "statuses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DevelopmentStatusCount"
+            }
+          },
+          "recent": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DevelopmentProjectRow"
+            }
+          }
+        }
+      },
+      "DevelopmentStatusCount": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "CostSourceOption": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          }
+        }
+      },
+      "DevelopmentProjectOptions": {
+        "type": "object",
+        "properties": {
+          "statuses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DevelopmentStatusOption"
+            }
+          },
+          "milestoneTypes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MilestoneOption"
+            }
+          },
+          "costSources": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CostSourceOption"
+            }
+          },
+          "handoffTypes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HandoffOption"
+            }
+          }
+        }
+      },
+      "DevelopmentStatusOption": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "terminal": {
+            "type": "boolean"
+          },
+          "allowedTargets": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "HandoffOption": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "targetModule": {
+            "type": "string"
+          }
+        }
+      },
+      "MilestoneOption": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          }
+        }
+      },
+      "DevelopmentProjectCapabilities": {
+        "type": "object",
+        "properties": {
+          "costEstimateAvailable": {
+            "type": "boolean"
+          },
+          "costEstimateSource": {
+            "type": "string"
+          },
+          "costEstimateNote": {
+            "type": "string"
+          },
+          "marketDataAvailable": {
+            "type": "boolean"
+          },
+          "marketDataOwnerModule": {
+            "type": "string"
+          },
+          "marketDataNote": {
+            "type": "string"
+          },
+          "samplingModuleDelivered": {
+            "type": "boolean"
+          },
+          "samplingModuleNote": {
+            "type": "string"
+          },
+          "pilotModuleDelivered": {
+            "type": "boolean"
+          },
+          "pilotModuleNote": {
+            "type": "string"
+          },
+          "skuOnboardingDelivered": {
+            "type": "boolean"
+          },
+          "skuOnboardingNote": {
+            "type": "string"
+          },
+          "stateMachineNote": {
+            "type": "string"
+          },
+          "marginFormula": {
+            "type": "string"
+          },
+          "marginRoundingNote": {
+            "type": "string"
+          },
+          "boundaryNote": {
+            "type": "string"
           }
         }
       }
