@@ -1,10 +1,10 @@
-# starcon 集成分支并入 main · cron 任务书（每日 00:00）
+# starcon 集成分支并入 main · cron 任务书（每半小时）
 
 > **本文件是 cron 任务的 prompt 来源。协议只存这一份，且在版本控制里。**
 > 改策略改文件，不要改 cron prompt 字段。
 >
 > 本任务与「并行车道开发流水线」（`PIPELINE_CRON_PROMPT.md`）是**两个独立任务**：
-> 流水线负责在 `integration/module-dev` 上开发，本任务负责把集成分支**合入 `main`**。
+> 流水线负责在 `integration/module-dev` 上开发，本任务负责把集成分支**通过 Pull Request 合入 `main`**。
 > 两者不共享车道、不共享派发逻辑，但**共享同一个仓库** —— 并发时必须互不干扰。
 
 你每次运行是**全新的独立会话**，不继承任何上下文。
@@ -16,35 +16,53 @@
 
 项目：`/Users/tommy/Project/starcon`（Java Spring Boot 微服务 + Next.js 双栈，遵守根 `AGENTS.md`）。
 
-**你的职责：把 `integration/module-dev` 合入 `main`，处理冲突与合并过程中出现的问题，
-然后推送 `main`，并如实汇报。**
+**你的职责：把 `integration/module-dev` 合入 `main` —— 具体做法是开一个 Pull Request，
+逐个审查并解决冲突，跑完验证，等 CI 绿了再把 PR 合进 `main`，然后如实汇报。**
 
 源分支：`integration/module-dev`（远端 `upstream/integration/module-dev`）
 目标分支：`main`（远端 `upstream/main`）
+PR 分支：`chore/sync-module-dev`（固定名，复用同一个分支，不每轮新建）
+
+**节奏：每半小时触发一次。** 这意味着**大多数轮次什么都不会发生** ——
+没有新交付就安静收工，这是正常且正确的状态，不是失败。
 
 ---
 
 ## 1. ⛔ 硬性前提（先读这段）
 
-### 1.1 `main` 的推送授权
+### 1.1 `main` 只经 Pull Request 更新
 
-`main` 在本仓库**没有分支保护**（已核实：GitHub API 返回 `Branch not protected`），
-所以技术上可以直推。**但你必须遵守根 `AGENTS.md` 的「不要直接 push `main`」禁令 ——
-除非本任务的既定职责就是它。**
+根 `AGENTS.md` 的禁令是「**不要直接 push `main`**」。本任务**始终遵守**它：
 
-本任务的职责**就是**把集成分支并入 `main` 并推送。**这条禁令在本任务内被显式豁免**，
-豁免范围仅限「本任务推送 `main`」这一件事。除此之外的一切 `main` 推送仍然禁止。
+- ❌ 不许 `git push upstream HEAD:main`
+- ❌ 不许 `gh pr merge` 之外的任何直推 main 的手段
+- ✅ `main` 的每一次变化，都必须来自**一个被合上的 PR**
+
+`main` 在本仓库没有分支保护，**这不构成绕过流程的理由** ——
+没有保护恰恰意味着**流程要靠你自己守**。
+
+本任务对「合并 PR」的授权范围：仅限**它自己开的那一个同步 PR**。
+除此之外的 PR 一律不碰。
 
 ### 1.2 合并 ≠ 合并冲突解决
 
-`main` 是发布分支，合入必须**保证可构建、测试绿**。合并冲突解决只是其中一环。
-**不许「合上了就算完」** —— 冲突解完还要跑验证（见第 5 步）。
+`main` 是发布分支，合入必须**保证可构建、测试绿**。冲突解决只是其中一环。
+**不许「合上了就算完」** —— 冲突解完还要跑验证（见第 5 节），还要等 CI 绿（第 7 节）。
 
 ### 1.3 不许把「明天再说」当交付
 
-冲突解不了、验证不过、或者闸命中 —— **本轮不推送 `main`**，
+冲突解不了、验证不过、或者出现了**比 `main` 基线更多的 CI 失败** —— **本轮不合 PR**，
 但**必须把卡点写清楚**（哪个文件、什么原因、解除条件是什么）。
 **沉默地跳过一轮 = 谎报成功。**
+
+### 1.4 每轮都要「先问有没有东西可做」
+
+半小时一次意味着**大部分轮次无事可做**。本轮的判断顺序必须是：
+
+1. `main` 相对集成分支**有没有新内容**？没有 → 看看有没有开着的同步 PR（可能在等 CI）→ 收工。
+2. 有新内容 → 才进合并流程。
+
+**不许每轮都重跑一遍全量验证来「确认没事」** —— 那是发热高峰，且没有信息增量。
 
 ---
 
@@ -60,17 +78,31 @@ cd /Users/tommy/Project/starcon && node tools/module-progress/lane.mjs gate stat
 
 输出含 `gate / ageSeconds / ttlSeconds / stale`，**四个都要看**。
 
-| `gate` | `stale` | 含义 | 动作 |
-| --- | --- | --- | --- |
-| `free` | false | 闸空闲 | 可以 `acquire` |
-| `held` | false | **有活着的 tick 持着闸** | **不要抢**。只做只读检查 + 汇报，结束本轮 |
-| `held` | true | 持闸者崩了（超 TTL 70 分钟） | 可以 `acquire` 接管 |
+| `gate` | `stale` | 含义                         | 动作                                      |
+| ------ | ------- | ---------------------------- | ----------------------------------------- |
+| `free` | false   | 闸空闲                       | 可以 `acquire`                            |
+| `held` | false   | **有活着的 tick 持着闸**     | **不要抢**。只做只读检查 + 汇报，结束本轮 |
+| `held` | true    | 持闸者崩了（超 TTL 70 分钟） | 可以 `acquire` 接管                       |
 
 ⚠️ **`stale=false` 不等于持闸者在偷懒** —— 它可能正在跑 L2（实测单轮 40–60 分钟）。
 **撞闸（`acquire` 退出码 3）时，正确动作是「本轮零改动 + 只读 + 简短汇报」**，
 不是清闸、不是 `force`。崩掉的闸会被 TTL 自动接管（最多挡一轮）。
 
-### 2.2 取闸与放闸
+### 2.2 闸的持有范围
+
+**持闸 = 保护「本地会改状态的动作」**：
+
+```
+取闸 → fetch → 合并 → 解冲突 → 验证 → 推分支 → 建/更新 PR → 放闸
+```
+
+**CI 在远端跑，不持闸。** 等 CI 的那段时间必须放闸，
+否则一轮就把闸占住 30–60 分钟，流水线整轮空转。
+
+**合并 PR 前要再取一次闸**（短持有）—— 避免两轮同时合同一个 PR。
+流水线此刻正持闸 ⇒ 退出码 3 ⇒ **本轮不合，下一轮再合**，不许 `force`。
+
+### 2.3 取闸与放闸
 
 ```bash
 node tools/module-progress/lane.mjs gate acquire   # 退出码 3 = 撞闸
@@ -78,22 +110,32 @@ node tools/module-progress/lane.mjs gate acquire   # 退出码 3 = 撞闸
 node tools/module-progress/lane.mjs gate release     # 收尾必须放，无论成败
 ```
 
-**持闸要贯穿整个合并过程**（fetch → 合并 → 解冲突 → 验证 → push）。
 **本轮若因任何原因提前结束（闸 STOP、撞闸、异常），也必须 `gate release`** ——
 你已经拿到闸，不释放就等于把下一轮挡住。
 
-### 2.3 静默窗口
+### 2.4 静默窗口
 
 开发流水线的静默窗口是 **20:30 → 次日 08:00**（见 `.dev-agent/PIPELINE.local.md`）。
-本任务每日 **00:00** 触发，**落在静默窗口内**。
+本任务**全天 24 小时每半小时触发**，必然有一半落在静默窗口内。
 
 **静默窗口管的是「派发新车道」和「跑 L2 发热高峰」，管不住「合入 main」** ——
-后者是发布动作，必须在固定时刻发生。但因此**你要格外节制资源**：
+后者是发布动作。但因此**你要格外节制资源**：
 
 - 合并本身很轻（git 操作），**可以**在静默窗口内做。
-- **L2 全量验证是发热高峰**（后端全量 + 前端全量 + Next build，40–60 分钟）。
-  静默窗口内跑 L2 会让用户半夜被风扇吵醒 —— **本任务默认不在静默窗口内跑全量 L2**，
-  改用第 5 步的「定向验证」。见第 5 节的判定表。
+- **本地全量 L2 是发热高峰**（后端全量 + 前端全量 + Next build，40–60 分钟）。
+  本任务**默认不跑本地全量 L2**，改用第 5 节的「定向验证」。
+  **CI 是真正的全量闸**（远端 runner，不占本机资源）—— 见第 7 节。
+
+⚠️ **但 `main` 的 CI 现在就是红的**（2026-10-14 之后每次都红）：
+
+| 失败作业                           | 原因                                                        | 性质                   |
+| ---------------------------------- | ----------------------------------------------------------- | ---------------------- |
+| `Lint`                             | `pnpm format:check` —— 仓库级 Prettier 格式债（数百个文件） | 存量债，与本次合入无关 |
+| `Java 21 & PostgreSQL Integration` | identity 服务 1 例失败（`ApprovalRecordIntegrationTest`）   | 存量缺陷               |
+| `Catalog Browser & Contract Tests` | 端到端用例失败                                              | 存量缺陷               |
+
+**所以「CI 全绿」不是可用的闸** —— 拿它当闸，这个任务永远合不进去，等于没有闸。
+本任务用**基线相对判据**：PR 的失败不得**比 `main` 基线更多**。见 7.3。
 
 ---
 
@@ -102,24 +144,50 @@ node tools/module-progress/lane.mjs gate release     # 收尾必须放，无论�
 ```bash
 cd /Users/tommy/Project/starcon
 git fetch upstream --prune
-echo "=== 两分支关系（左=main 独有，右=module-dev 独有）==="
+echo "=== 两分支关系（左=main 独有，右=集成分支独有）==="
 git rev-list --left-right --count upstream/main...upstream/integration/module-dev
-echo "=== main 是否为 module-dev 的祖先（是则可快进，无冲突）==="
-git merge-base --is-ancestor upstream/main upstream/integration/module-dev \
-  && echo "可快进" || echo "已分叉 → 会产生真合并"
+echo "=== 真实增量（看树差异，不看提交数）==="
+git diff --stat upstream/main upstream/integration/module-dev | tail -3
+git diff --quiet upstream/main upstream/integration/module-dev \
+  && echo "无新内容" || echo "有新增内容"
 echo "=== 合并预演（无副作用，不碰工作区）==="
 git merge-tree --write-tree --name-only upstream/main upstream/integration/module-dev
 ```
 
 `merge-tree` 会**提前告诉你哪些文件会真冲突**。它是只读的，**不要跳过**。
 
-### 3.1 三种合并形态，处理方式不同
+⚠️ **「提交数」不是增量，`main` 是 squash 合入的**：
 
-| 形态 | 判据 | 处理 |
-| --- | --- | --- |
-| **A. 可快进** | `merge-base --is-ancestor` 成功 | `git merge --ff-only`，无冲突，跳到第 5 步验证 |
+`main` 的每次更新都是 **squash 合并**，所以 `main` 的提交**不是**集成分支的祖先
+（`merge-base --is-ancestor upstream/main upstream/integration/module-dev` 恒为假），
+`git rev-list --count upstream/main...upstream/integration/module-dev` 会报出**上百个提交**，
+而**实际内容差异可能只有几十个文件**（实测：提交数口径报 142，内容口径是 83 个文件）。
+
+⇒ **判断有没有新内容，只能看树差异**（`git diff --quiet upstream/main upstream/integration/module-dev`）。
+用提交数判断的后果是：**每一轮都以为有大增量**，于是每轮都开一个内容其实没变的 PR。
+
+同理，第 3.2 节的「可快进」判据在 squash 合入后**基本不成立** ——
+正常形态是「真合并」，且冲突解法见第 4 节。
+
+### 3.1 同步 PR 的现状（决定本轮走哪条路）
+
+```bash
+gh pr list --base main --head chore/sync-module-dev --state open
+```
+
+| 现状                            | 本轮动作                                                                              |
+| ------------------------------- | ------------------------------------------------------------------------------------- |
+| 没有开着的 PR **且** 没有新内容 | **本轮无动作**，简短汇报后结束                                                        |
+| 没有开着的 PR **且** 有新内容   | 走第 4–7 节：建分支 → 合并 → 解冲突 → 验证 → 推送 → 建 PR                             |
+| 有开着的 PR                     | 看它的 CI 状态（第 7 节）：绿了就合；红了就报告；跑着就等；**有更新的内容就刷新分支** |
+
+### 3.2 三种合并形态，处理方式不同
+
+| 形态                  | 判据                      | 处理                                                       |
+| --------------------- | ------------------------- | ---------------------------------------------------------- |
+| **A. 可快进**         | 树差异为空且祖先关系成立  | 极少出现（`main` 是 squash 合入的，祖先关系通常不成立）    |
 | **B. 真合并但无冲突** | `merge-tree` 不报冲突文件 | 正常 `git merge --no-ff`，可能有 `contract-union` 自动求并 |
-| **C. 真合并且有冲突** | `merge-tree` 报出冲突文件 | 走第 4 步逐个解冲突 |
+| **C. 真合并且有冲突** | `merge-tree` 报出冲突文件 | 走第 4 节逐个解冲突                                        |
 
 ---
 
@@ -127,42 +195,75 @@ git merge-tree --write-tree --name-only upstream/main upstream/integration/modul
 
 ### 4.1 冲突面分类 —— 三类文件，三种解法
 
-| 文件 | 合并驱动 | 解法 |
-| --- | --- | --- |
+| 文件                                                                                                                                          | 合并驱动            | 解法                                                           |
+| --------------------------------------------------------------------------------------------------------------------------------------------- | ------------------- | -------------------------------------------------------------- |
 | `packages/api-contracts/src/**/*.ts`<br>`packages/api-contracts/src/*.openapi.json`<br>`docs/product/capability-blueprint/module-progress.md` | ✅ `contract-union` | **自动按键求并**。git 会自己跑 `merge-union.mjs`，通常不留冲突 |
-| `apps/web/src/lib/api-proxy.ts` | ❌ **无驱动覆盖** | ⚠️ **必然真冲突，必须手工求并**（见 4.2） |
-| 其余源码 | ❌ 无驱动覆盖 | 按语义合并，逐个判断 |
+| `apps/web/src/lib/api-proxy.ts`                                                                                                               | ❌ **无驱动覆盖**   | ⚠️ **必然真冲突**，按 4.3 的判据解                             |
+| 其余源码                                                                                                                                      | ❌ 无驱动覆盖       | 按 4.2 的判据解                                                |
 
-### 4.2 ⚠️ `api-proxy.ts`：白名单正则两层 alternation，必须**都**求并
+### 4.2 ⛔ 第一步永远是「判定 main 侧是不是集成分支的祖先快照」
+
+**这不是可选的诊断步骤，是解冲突的入口。**
+
+因为 `main` 是 **squash 合入**的，`main` 的文件版本来自集成分支的**某个较早提交**。
+所以大多数冲突**不是双向分叉，而是线性演进**：
+
+- main 侧 = 集成分支历史上的某个旧版本 ⇒ **取集成分支侧**（新侧是演进的终点，取一边不丢内容）。
+- main 侧 = 集成分支**从未有过**的内容（真分叉）⇒ **必须并入**，取一边会丢东西。
+
+⚠️ **在 squash 合入的仓库里，「无脑求并」是错的** —— 求并会把 main 侧的旧内容重新塞回去，
+制造出「本该被替换掉的旧代码又活了」的状态。
+
+**用工具判，不要靠眼睛：**
+
+```bash
+cd /Users/tommy/Project/starcon
+node tools/module-progress/merge-resolve.mjs --base upstream/main --head upstream/integration/module-dev
+```
+
+输出逐个文件给出：
+
+| 输出                                  | 含义                             | 动作                                        |
+| ------------------------------------- | -------------------------------- | ------------------------------------------- |
+| `[取集成分支侧]` + 祖先快照成立       | 线性演进                         | `git checkout --theirs <file>` 后 `git add` |
+| `[取集成分支侧]` + 累积型三件套全成立 | 取新侧**在结果上等同于完整求并** | 同上                                        |
+| `[并入（人工）]`                      | main 有集成分支从未有过的内容    | **人工求并**，不许取一边                    |
+
+工具的退出码：0 = 全部可机械执行；1 = 存在必须人工并入的文件。
+
+### 4.3 `api-proxy.ts`：白名单累积型文件
 
 `apps/web/src/lib/api-proxy.ts` 是**累积型白名单**（按路径登记的 `pattern` 列表），
-**没有合并驱动**。2026-10-19 实证：两侧各加一个同位置分支 ⇒ **真冲突**（`CONFLICT (content)`）。
-
-**它的正则有两层 alternation**（内层是某服务组，外层是仓库级段）。
-**两层都必须求并** —— 只并内层会**静默丢掉外层新增分支**（已在 8.2.1.2 / 10.4.1.1 上各咬一次）。
+**没有合并驱动**。
 
 **症状极隐蔽**：白名单只在浏览器端生效，**typecheck / lint / vitest / Playwright 全绿**，
-但页面 404。所以：
+但页面 404。所以解法必须有证据，不能靠眼看。
 
-- 解法是**求并**，**不是二选一**（不要取 ours 也不要取 theirs）。
-- 冲突块形如：
-  ```
-  <<<<<<< HEAD
-      pattern: /^(login|logout|session|memberships|switch|module-dev-route)$/,
-  =======
-      pattern: /^(login|logout|session|memberships|switch|main-side-route)$/,
-  >>>>>>> a77dcb6a
-  ```
-  正确结果（**两侧分支都在**）：
-  ```
-      pattern: /^(login|logout|session|memberships|switch|module-dev-route|main-side-route)$/,
-  ```
-- **验证方式不能是眼看，也不能是 grep + 自写正则**（该方法已连续骗过 6 版）。
-  必须**跑真 proxy 断言 HTTP 状态码**（白名单拦截 = 404，放行 = 转发），
-  并**同时断言反向用例**（未知路径仍 404）—— 否则「全部拒绝」的正义正则也能让放行用例全绿。
-  对应测试文件：`apps/web/src/app/api/[...path]/route.test.ts`。
+**两层 alternation 的求并要求依然成立**（内层是某服务组，外层是仓库级段）——
+两侧各往同一处加分支时，只并内层会**静默丢掉外层新增分支**
+（已在 8.2.1.2 / 10.4.1.1 上各咬一次）。
 
-### 4.3 `contract-union` 自动求并的正确用法
+**但「求并」有两种形态，要分清：**
+
+| 形态                                    | 特征                         | 解法                                               |
+| --------------------------------------- | ---------------------------- | -------------------------------------------------- |
+| **真分叉**（main 有集成分支没有的分支） | 两侧各加了**不同**的分支     | **必须人工求并**，两个分支都要在                   |
+| **线性演进**（main 是旧快照）           | 集成分支只是在旧版本上继续加 | **取集成分支侧** —— 但要先证明它确实是严格保序超集 |
+
+**「取集成分支侧」的三个证明**（工具已自动跑完并打印结论）：
+
+1. **集合包含**：旧侧的每一条 pattern 都在新侧。
+2. **有序子序列**：旧侧的顺序在新侧保持 —— `resolve()` 是 first-match-wins，顺序错了会让旧分支吃掉新分支的路径。
+3. **零删除**：新旧之间没有删除行。
+
+三条同时成立 ⇒ 取新侧在结果上等同于完整求并，没有任何东西被丢掉。
+
+**验证方式不能是眼看，也不能是 grep + 自写正则**（该方法已连续骗过 6 版）。
+必须**跑真 proxy 断言 HTTP 状态码**（白名单拦截 = 404，放行 = 转发），
+并**同时断言反向用例**（未知路径仍 404）—— 否则「全部拒绝」的正则也能让放行用例全绿。
+对应测试文件：`apps/web/src/app/api/[...path]/route.test.ts`。
+
+### 4.4 `contract-union` 自动求并的正确用法
 
 驱动已注册在 `.git/config`（`merge.contract-union.driver`，**仓库本地配置，worktree 共享**）。
 它按「键」做**三方**求并（类型名 / OpenAPI 路径 / 模块 ID），base 才是裁判。
@@ -173,35 +274,41 @@ git merge-tree --write-tree --name-only upstream/main upstream/integration/modul
 - 台账求并后**必须**核对行数：`grep -cE '^\| [0-9]+\.[0-9]+\.[0-9]+\.[0-9]+ '` 须恒为 **465**，
   且 `grep -oE '...' | sort | uniq -d` 须**为空**。
 
-### 4.4 解冲突的通用纪律
+### 4.5 解冲突的通用纪律
 
+- **先跑 4.2 的判定工具**，不要凭印象决定取哪一边。
+- **取一边是允许的，但必须带证据**：祖先快照成立（线性演进），
+  且累积型文件的三件套全成立。
+  **没有证据的「取一边」= 静默删掉另一边已交付的成果。**
+- **真分叉（main 有集成分支没有的内容）必须并入**，这类文件工具会标成「并入（人工）」。
 - **先看 base**：用 `git diff <base> -- <file>` 判断「这一行是谁改的」。
   集成头侧新增 ≠ 车道删除 —— 逐行比对时也要问这个问题。
-- **不许用「取一边」糊掉冲突**。白名单、契约、台账这三类都是**累积型**，
-  取一边 = 静默删掉另一边已交付的成果。
+- **git 没报冲突 ≠ 不用审查**。已知累积型文件（白名单 / 契约 / 台账）
+  即使自动合并成功，也要核对一遍是不是真求并了（`contract-union` 的输出见 4.4）。
 - 解完必须 `git add` 冲突文件，确认 `git diff --name-only --diff-filter=U` **为空**。
 - 冲突解到一半**不许提交**。半解状态推上去会毁掉 `main`。
 
 ---
 
-## 5. 验证（决定能不能推 `main` 的闸）
+## 5. 验证（决定能不能推 PR 分支的闸）
 
 ### 5.1 判定表：跑哪一级
 
-| 合并形态 | 验证级别 | 内容 |
-| --- | --- | --- |
-| A 可快进 | **定向** | 静态预检 + `sync.mjs --check` + 关键服务测试 |
-| B 真合并无冲突 | **定向** | 同上 + 合并驱动输出核对 |
-| C 有冲突 | **定向 + 冲突面专项** | 同上 + 冲突文件的针对性测试 |
+| 合并形态       | 验证级别              | 内容                                         |
+| -------------- | --------------------- | -------------------------------------------- |
+| A 可快进       | **定向**              | 静态预检 + `sync.mjs --check` + 关键服务测试 |
+| B 真合并无冲突 | **定向**              | 同上 + 合并驱动输出核对                      |
+| C 有冲突       | **定向 + 冲突面专项** | 同上 + 冲突文件的针对性测试                  |
 
-**默认不跑全量 L2**（静默窗口 + 发热高峰，见 2.3）。理由：
-`main` 的内容来自 `integration/module-dev`，而**流水线在推 `module-dev` 之前已经跑过全量 L2**。
+**默认不跑本地全量 L2**（发热高峰，见 2.4）。理由：
+`main` 的内容来自 `integration/module-dev`，而**流水线在推 `module-dev` 之前已经跑过全量 L2**；
 本任务的增量只有「合并动作本身」与「冲突解法」—— **验证要打在增量上，不是重跑全量**。
+**真正的全量闸是 CI**（第 7 节），它在远端 runner 上跑，不占本机资源。
 
-**例外 —— 这几种情况必须跑全量 L2**（此时机器负载通常也不高）：
+**例外 —— 这几种情况必须本地跑全量 L2**：
 
 - 冲突解法动到了**后端业务代码 / 迁移脚本**（不只是前端白名单和契约）。
-- `sync.mjs --check` 红了。
+- `sync.mjs --check` 红了**且是合并引入的**（按 5.4 判别；源分支本来就红的不算）。
 - 定向测试红了（先按 5.3 归因，不是直接归因回归）。
 
 ### 5.2 定向验证清单
@@ -240,65 +347,219 @@ cd backend && ./mvnw -pl services/<被改的服务> -am test -Dtest='<那个测�
 
 ### 5.4 验证不过怎么办
 
-**不推 `main`。** 保持 `main` 不变，把卡点写进汇报：
-哪个测试、哪条断言、为什么、怎么复现。
-**不许**为了让 `main` 能推而去改测试、放宽断言、或跳过用例。
+**不推 PR 分支。** 把卡点写进汇报：哪个测试、哪条断言、为什么、怎么复现。
+**不许**为了让 PR 能推而去改测试、放宽断言、或跳过用例。
+
+**`sync.mjs --check` 红了要分清两种情况**：
+
+| 情况                 | 判据                                                                  | 处理                                                                                                                                                                |
+| -------------------- | --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **合并引入的**       | 在**源分支**（`upstream/integration/module-dev`）上跑同一个检查是绿的 | 真缺陷 → 阻塞，报告                                                                                                                                                 |
+| **源分支本来就红的** | 源分支上也是红的                                                      | **不是本次合入的责任**。台账是 `sync.mjs` 的生成物，跑一次 `node tools/module-progress/sync.mjs` 重新生成即可（实测它只改汇总表与行内空白，不动交付状态），然后继续 |
+
+源分支基线的查法（只读，不碰工作区）：
+
+```bash
+git worktree add --detach .worktrees/sync-baseline upstream/integration/module-dev
+cd .worktrees/sync-baseline && node tools/module-progress/sync.mjs --check; cd ../..
+git worktree remove --force .worktrees/sync-baseline
+```
 
 ---
 
-## 6. 实际执行（形态 B / C）
+## 6. 落提交（内容必须易读、专业）
+
+> 这一节是本任务的**硬性交付标准**，不是风格建议。
+
+### 6.1 摘要工具：功能增量从台账出，不要从提交信息出
+
+```bash
+cd /Users/tommy/Project/starcon
+node tools/module-progress/merge-summary.mjs --base upstream/main --head upstream/integration/module-dev
+```
+
+它输出**本次新交付 / 新推进的功能**（按业务系统分组，带功能名与模块 ID），
+以及一条候选标题。**这是 PR 标题与正文的事实来源。**
+
+⚠️ 它会**读不到就抛错**（台账已超过 1MB，Node 默认缓冲会踩 ENOBUFS；
+ref 不存在也会抛错）。**读不到就报错是对的**，不许把读失败当成「没有新交付」。
+
+### 6.2 标题
+
+格式：`<type>: <一句话功能概述>`
+
+- `type` 用 Conventional Commits 的（`feat` / `fix` / `chore` / `docs` / `refactor`）。
+- 概述**只讲功能**，长度控制在 30 字以内。
+- 候选标题由摘要工具给出，可微调，但**不许偏离「只讲功能」这条**。
+
+例子：
+
+- `feat: 订单变更取消与退货授权单交付`
+- `feat: 一键刊登、合规预检等 6 项能力交付`
+- `fix: 缺货预警与到岸成本口径修正`
+
+### 6.3 正文
+
+格式：
+
+```
+## 本次合入的功能
+- 订单变更取消（9.2.1.1）
+- 退货授权单（11.2.1.1）
+
+## 说明
+本次同步集成分支的最新交付，模块范围与验收记录见功能进度台账。
+```
+
+**正文里禁止出现的东西**（这正是「暴露工程细节」的表现）：
+
+- ❌ 提交数 / 文件数 / 增删行数（`279 提交 / 827 文件` 这类）
+- ❌ 冲突文件路径、冲突解决机制（求并策略、正则 alternation、合并驱动名）
+- ❌ 内部工具与脚本名（`sync.mjs`、`merge-union`、`lane.mjs`、worktree 路径）
+- ❌ 迁移版本号、数据库表名、端点路径（除非它本身就是这项功能的一部分）
+- ❌ **工程决策与取舍理由**（「因为…所以…」「为了让…我们采用…」）
+- ❌ 分支名、commit hash、任务内部代号
+
+**正文里该出现的东西**：功能名、模块 ID、面向使用者的能力描述、验证状态。
+
+### 6.4 提交信息
+
+PR 分支上的那个提交，**用与 PR 标题一致的可读标题**：
+
+```bash
+git commit -m "feat: 订单变更取消与退货授权单交付"
+```
+
+**不许**用 `merge(module-dev): 并入集成分支 <日期>` 这类工程流水账标题。
+
+---
+
+## 7. PR 与合并执行
 
 **在专用 worktree 里做，不要动主工作区** —— 主工作区是流水线的地盘，
 在它上面 checkout `main` 会打断流水线。
+
+### 7.1 建分支、合并、解冲突、验证、推送
 
 ```bash
 cd /Users/tommy/Project/starcon
 git fetch upstream --prune
 
 # ① 建专用 worktree（从 main 出发）
-git worktree add --detach .worktrees/main-merge upstream/main
-cd .worktrees/main-merge
+#    ⚠️ 路径必须**带唯一后缀**。固定路径（如 `.worktrees/main-merge`）是共享地，
+#    任何别的执行者（人工演练、另一台机器、另一个任务）用同一个路径建/删 worktree，
+#    都会把你**进行中**的合并状态一起删掉 —— 2026-10-21 08:30 那轮就是这么被打断的。
+WT=".worktrees/main-merge-$(date +%H%M%S)"
+git worktree add --detach "$WT" upstream/main
+cd "$WT"
 
-# ② 合并
+# ② 切出同步分支（已存在就重置到 main）
+git checkout -B chore/sync-module-dev
+
+# ③ 合并集成分支
 git merge --no-ff --no-commit upstream/integration/module-dev
-#    形态 A（可快进）改用：git merge --ff-only upstream/integration/module-dev
 
-# ③ 看冲突
+# ④ 看冲突
 git diff --name-only --diff-filter=U
 
-# ④ 解冲突（按第 4 节），解完 git add
+# ⑤ 解冲突（按第 4 节）
+#    先跑判定工具，它逐个文件给出「取集成分支侧」还是「并入（人工）」：
+cd /Users/tommy/Project/starcon
+node tools/module-progress/merge-resolve.mjs --base upstream/main --head upstream/integration/module-dev
+cd .worktrees/main-merge
+#    判「取集成分支侧」的文件：
+#      git checkout --theirs <file> && git add <file>
+#    判「并入（人工）」的文件：自己求并，**不许取一边**
+#    解完确认：git diff --name-only --diff-filter=U 为空
 
-# ⑤ 验证（按第 5 节）
+# ⑥ 验证（按第 5 节）
 
-# ⑥ 提交
-git commit -m "merge(module-dev): 并入集成分支 <日期>"
+# ⑦ 提交（可读标题，按第 6 节）
+git add -A && git commit -m "feat: <功能概述>"
 
-# ⑦ 推 main
-git push upstream HEAD:main
+# ⑧ 推 PR 分支
+git push --force-with-lease upstream chore/sync-module-dev
 ```
 
-### 6.1 合并驱动在 worktree 里可用吗
-
-**可用。** `merge.contract-union.driver` 注册在**仓库本地** `.git/config`，
-所有 worktree 共享同一份 `config`。2026-10-19 实证：在临时 worktree 里合并，
-台账自动求并成功（`Auto-merging ... module-progress.md`，无冲突文件残留）。
-
-⚠️ 但 `git worktree add` 出来的 worktree **不会**自动带 `.gitignore` 里的 `.worktrees/` 规则 ——
-`.worktrees/` 已在**仓库根**的 `.gitignore` 里，所以 worktree 内部不受影响（worktree 不含 `.gitignore` 之外的路径）。
-**但 worktree 目录本身在主仓库的 `.gitignore` 里，不会被主仓库的 `git status` 看到。** ✅
-
-### 6.2 收尾
+### 7.2 建 PR
 
 ```bash
 cd /Users/tommy/Project/starcon
-git worktree remove --force .worktrees/main-merge
+gh pr create \
+  --base main \
+  --head chore/sync-module-dev \
+  --title "feat: <功能概述>" \
+  --body "<按 6.3 的格式>"
+```
+
+**已经开着的 PR 不要重开** —— 直接更新分支即可（PR 内容自动跟随）。
+
+### 7.3 等 CI，并用基线相对判据决定能不能合
+
+CI 定义在 `.github/workflows/ci.yml`（`pull_request` 触发，会跑 lint / typecheck / test / build /
+security / 后端 verify / 端到端）。
+
+```bash
+cd /Users/tommy/Project/starcon
+gh pr checks <PR号> --watch --interval 30   # 有界等待，超时上限约 15 分钟
+```
+
+**等完之后，用闸工具判一次**（它会把 PR 的失败与 `main` 最近一次 run 的失败逐条比对）：
+
+```bash
+node tools/module-progress/ci-gate.mjs --pr <PR号>
+```
+
+判据（保守）：
+
+| 闸工具输出             | 含义                                                       | 动作                               |
+| ---------------------- | ---------------------------------------------------------- | ---------------------------------- |
+| `结论：可以合并`       | PR 的失败是 `main` 基线的子集，且没有新的失败用例          | 进 7.4 合并                        |
+| `结论：阻塞`           | 出现了基线里没有的失败作业，或同名作业里出现了新的失败用例 | **不合**，报告新增失败             |
+| 退出码 2（取不到状态） | run 还没开始 / 日志取不到                                  | **不合**，报告状态取不到，下轮再试 |
+| 明细不可比的作业       | 该作业的失败明细取不出来，只比对了作业粒度                 | 按持平放行，但**必须在汇报里点名** |
+
+⚠️ **不许把「CI 全绿」当成合并前提** —— `main` 基线就是红的（见 2.4）。
+也**不许因为「反正 main 也是红的」就无条件合并** —— 判据是**基线相对**，
+不是「红的就可以过」。
+
+- **CI 仍在跑** → **本轮不合**，报告「CI 仍在运行」，下一轮继续跟进。
+  （CI 是远端 runner，不要为了等它在本机空转。）
+
+### 7.4 合并 PR
+
+**前置条件**：7.3 的闸工具输出 `结论：可以合并`。不是这个结论就不许走到这一步。
+
+**合并前重新取闸**（短持有），避免两轮同时合同一个 PR：
+
+```bash
+cd /Users/tommy/Project/starcon
+node tools/module-progress/lane.mjs gate acquire   # 退出码 3 = 撞闸 ⇒ 本轮不合，下轮再合
+gh pr merge <PR号> --squash --subject "feat: <功能概述>" --body "<按 6.3 的格式>" --delete-branch
 node tools/module-progress/lane.mjs gate release
 ```
 
-**两个都必须做。** 漏掉 worktree 清理 → 明天 `git worktree add` 会报「已存在」。
-漏掉 `gate release` → 明天撞闸，任务空转一轮。
+**用 squash**：合进 `main` 的是**一条**可读提交，读者在 `git log` 里一眼看到
+「这次交付了哪些功能」，而不是几百条工程流水账。
 
-### 6.3 推 `main` 之前最后确认
+⚠️ `gh pr merge` 若报 `Pull request is not mergeable` / `not mergeable: the merge commit cannot be cleanly created`，
+**不要加 `--admin` 强合**。把真实原因写进汇报。
+
+### 7.5 收尾
+
+```bash
+cd /Users/tommy/Project/starcon
+git worktree remove --force "$WT"     # 只删**你自己**这一轮建的那个
+node tools/module-progress/lane.mjs gate release
+```
+
+**两个都必须做。** 漏掉 worktree 清理 → 自己的 worktree 会一直留着占磁盘。
+漏掉 `gate release` → 下轮撞闸，任务空转一轮。
+
+⚠️ **只删自己建的那一个。** 不要用 `git worktree remove --force .worktrees/main-merge`
+这种固定路径去删 —— 那可能删掉**别人正在用**的 worktree（实测踩过）。
+
+### 7.6 推之前最后确认
 
 ```bash
 git log --oneline -3          # 确认提交内容对
@@ -310,40 +571,51 @@ git diff upstream/main...HEAD --stat | tail -3   # 确认合并进来的东西�
 
 ---
 
-## 7. 汇报（12 行以内）
+## 8. 汇报（12 行以内）
 
+- **本轮动作**：无动作（无新内容）/ 新建 PR / 更新 PR / 合并 PR
 - **合并形态**：可快进 / 真合并无冲突 / 真合并有冲突
 - **冲突处理**：解了几个文件、分别是什么类（白名单 / 契约 / 台账 / 业务代码）、
   `api-proxy.ts` 是否两层都求并
-- **验证结果**：跑了哪一级、定向验证逐项的真实输出、是否跑了全量 L2（以及为什么）
-- **push 结果**：commit hash + 推的分支；**没推要明确写「验证未绿，本轮不推 `main`」**
+- **合入的功能**：功能名 + 模块 ID（业务视角，**不要写提交数/文件数**）
+- **验证结果**：跑了哪一级、定向验证逐项的真实输出、是否跑了本地全量 L2（以及为什么）
+- **CI 结果**：闸工具的结论（可以合并 / 阻塞）+ 与 `main` 基线相比新增了什么
+- **合并结果**：PR 号 + 是否已合进 `main`；**没合要明确写「验证未绿 / 出现新增失败，本轮不合」**
 - **闸**：acquire/release 是否成功
 - **台账**：行数是否恒为 465
 - **风险提示**（可选）
 
-**不许谎报**：没推就说没推，验证没跑就说没跑，冲突没解完就说没解完。
+**不许谎报**：没合就说没合，验证没跑就说没跑，冲突没解完就说没解完。
 
 ---
 
-## 8. 最高优先级禁令
+## 9. 最高优先级禁令
 
-- **验证没绿绝对不推 `main`**
-- **不许把 `main` 的冲突「取一边」糊掉** —— 白名单/契约/台账取一边 = 静默删交付成果
+- **不许直推 `main`**（只经 PR）
+- **不许在没有证据的情况下「取一边」** —— 必须先跑 4.2 的判定工具
+- **不许在 squash 合入的仓库里无脑求并** —— 那会把旧内容塞回去；判据是祖先快照 + 三件套
+- **不许在出现「比 `main` 基线更多的失败」时合并**（用 7.3 的闸工具判，不许凭感觉）
+- **不许把「CI 全绿」当成合并前提**（`main` 基线就是红的），也**不许因为「反正也是红的」就无条件合并**
+- **不许无证据地「取一边」** —— 白名单/契约/台账取一边 = 静默删交付成果（要取就带证据，见 4.2）
 - **不许在主工作区 checkout `main`** —— 会打断流水线
+- **不许用固定路径删 worktree**（只删自己本轮建的那个，路径带唯一后缀）
 - **不许 force push `main`**
+- **不许用 `gh pr merge --admin` 强合**
 - **不许在 `main` 上改业务代码**（本任务只做「合入」，不开发）
 - **不许动 `integration/module-dev`**（那是流水线的集成分支，本任务只读）
-- **不许为了让 `main` 能推而改测试、放宽断言、跳过用例**
+- **不许为了让 PR 能推而改测试、放宽断言、跳过用例**
+- **不许在 PR 标题/正文/提交信息里写工程流水账**（提交数、文件数、冲突机制、内部脚本名、工程决策理由）
 - **不许在 commit / 汇报里贴 secret**
-- **不许谎报「已推送」**
+- **不许谎报「已合并」**
 - **必须 `gate release`**（无论成败）
 - **必须清理 `.worktrees/main-merge`**（无论成败）
 - **不许在冲突解到一半时提交**
+- **不许把「读不到台账」当成「没有新交付」**
 
 ---
 
-## 9. 参考：本地运行参数
+## 10. 参考：本地运行参数
 
-本任务**没有需要本地覆盖的运行参数**（固定每日 00:00，固定两个分支名）。
-若将来要加（例如「推 main 前必须等 CI 绿」），**放本地 gitignored 文件，不要写进本文件** ——
+本任务**没有需要本地覆盖的运行参数**（固定每半小时、固定分支名）。
+若将来要加（例如「合并前必须等某个外部信号」），**放本地 gitignored 文件，不要写进本文件** ——
 写进版本化文档会让每次调参都产生一个噪音 commit。

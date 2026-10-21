@@ -4,7 +4,9 @@ import static com.starcon.trade.FulfillmentRequestModels.*;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.Clock;
 import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -36,6 +38,18 @@ import org.springframework.web.server.ResponseStatusException;
  *       会静默偏 -28800s，把 deadline 提前 8 小时导致刚建单就超时。</li>
  *   <li><b>不用 JPA 懒加载</b>：全部 jOOQ 显式 SQL。</li>
  * </ol>
+ *
+ * <p><b>⭐ 同一行的时间戳只能来自同一个时钟源（V211 修复的缺陷）</b>：
+ * 本模块<b>落库的每一个时间戳都取 DB 时钟</b>（{@code clock_timestamp()}），JVM 墙钟一个都不落库。
+ * 旧实现里服务层用 JVM 墙钟写「请求侧」时刻（{@code requested_at} / {@code deadline_at} /
+ * {@code last_step_at} / step 的 {@code started_at} / 事件的 {@code occurred_at}），
+ * 而窄函数用 DB 时钟写「转移侧」时刻（{@code finished_at} / {@code acknowledged_at} /
+ * {@code completed_at} / {@code blocked_at} …）—— 同一行的两个字段因此<b>分属两个时钟域</b>，
+ * 表级约束 {@code CHECK (finished_at >= started_at)}、{@code CHECK (acknowledged_at >= requested_at)} 等
+ * 会被两个时钟之间的几十微秒击穿，一次<b>完全合法</b>的履约步完成 / 预占回执会被 DB 随机拒掉，
+ * 流程卡在 RUNNING / RESERVING。
+ * 现在这一对（以及每一对）时间戳<b>都由 DB 时钟取</b>，{@code elapsed_seconds} 也由 DB 从这两个值算出来
+ * ⇒ 三个字段在构造上就自洽。详见 {@code V211__trade_fulfillment_step_clock.sql}。
  */
 @Service
 public class FulfillmentRequestService {
@@ -56,21 +70,48 @@ public class FulfillmentRequestService {
   private static final int SETTLE_SCALE = 2;
 
   private static final BigDecimal ZERO_QTY = new BigDecimal("0.000000");
-  private static final BigDecimal ZERO_SECONDS = new BigDecimal("0.000");
 
-  /** 头行列清单：列表、详情、版本回读共用同一份，避免两处写错。 */
+  /**
+   * 头行列清单：列表、详情、版本回读共用同一份，避免两处写错。
+   *
+   * <p>⭐ 末列 {@code overdue} 是<b>算出来的</b>，而且在 SQL 里算：deadline_at 是 DB 时钟
+   * 写下的时刻，「到没到点」就必须拿<b>同一个</b>时钟去比（V211）。
+   */
   private static final String REQUEST_COLUMNS =
       "id, request_code, order_ref, order_line_ref, split_unit_ref, consolidation_ref,"
           + " allocation_decision_ref, routing_decision_ref, sku_ref, platform_code,"
           + " warehouse_ref, legal_entity_code, destination_country_code, destination_region_code,"
           + " requested_qty, estimated_handling_amount, currency_code, status, current_step,"
           + " process_version, attempt, requested_at, deadline_at, last_step_at, blocked_at,"
-          + " blocked_reason_code, blocked_reason, completed_at, cancelled_at, cancel_reason, notes";
+          + " blocked_reason_code, blocked_reason, completed_at, cancelled_at, cancel_reason, notes,"
+          + " (deadline_at < clock_timestamp()) as overdue";
 
   private final DSLContext sql;
+  private final Clock clock;
 
-  public FulfillmentRequestService(DSLContext sql) {
+  /**
+   * 时钟从容器里取：trade 服务里<b>已经有且只有一个</b> {@link Clock} Bean
+   * （{@code ShipmentWritebackClockConfiguration} 声明的 {@code shipmentWritebackClock}），
+   * 本模块复用它，<b>不</b>再声明第二个 —— 两个同类型 Bean 会让按类型注入变成歧义，
+   * 整个 trade 服务会起不来。
+   *
+   * <p><b>本模块落库的每一个时间戳都取 DB 时钟</b>（{@code clock_timestamp()}），
+   * JVM 墙钟一个都不落库（V211 修复的跨时钟域缺陷）。这个注入的时钟因此只剩两处用途：
+   * <ol>
+   *   <li>扫描超时这类**纯应用侧**的报告时刻（{@code scannedAt}）；</li>
+   *   <li>让测试能把 JVM 时钟<b>钉到 DB 时钟之后</b>：跨时钟域的回归测试靠它
+   *       确定性地制造「JVM 比 DB 快」的现场，并断言落库时刻<b>不受</b> JVM 影响 ——
+   *       真实机器上 JVM 与 DB 只差几十微秒，没有这根把手就钉不住。</li>
+   * </ol>
+   */
+  public FulfillmentRequestService(DSLContext sql, Clock clock) {
     this.sql = sql;
+    this.clock = clock;
+  }
+
+  /** 当前时刻：走注入的 {@link Clock} 而不是 {@code OffsetDateTime.now()}，测试可钉死。 */
+  private OffsetDateTime now() {
+    return OffsetDateTime.ofInstant(clock.instant(), ZoneId.systemDefault());
   }
 
   // ================================================================ 能力声明
@@ -221,10 +262,12 @@ public class FulfillmentRequestService {
     if (Boolean.TRUE.equals(query.blockedOnly())) {
       where.add("status = 'BLOCKED'");
     }
-    // overdue 是**实时**判定（拿服务器时钟比 deadline），不落库 ——
+    // overdue 是**实时**判定（拿 DB 时钟比 deadline），不落库 ——
     // 落一个 overdue 布尔列就得每秒刷一次，而它只对「此刻」有意义。
+    // ⭐ 用 clock_timestamp() 而不是 now()：now() 是**事务开始时刻**，
+    //   长事务里它会停在事务开头，扫出来的「已超时」清单会过期（V152 文件头同一条纪律）。
     if (Boolean.TRUE.equals(query.overdueOnly())) {
-      where.add("deadline_at < now() and status not in ('COMPLETED','CANCELLED')");
+      where.add("deadline_at < clock_timestamp() and status not in ('COMPLETED','CANCELLED')");
     }
     if (notBlank(query.keyword())) {
       where.add(
@@ -244,7 +287,7 @@ public class FulfillmentRequestService {
                 "select " + REQUEST_COLUMNS + " from fulfillment_request" + sqlWhere
                     + " order by requested_at desc, id limit ? offset ?",
                 append(binds, size, (long) pageNo * size))
-            .map(FulfillmentRequestService::requestRow);
+            .map(this::requestRow);
     return new FulfillmentRequestPage(items, total, pageNo, size);
   }
 
@@ -261,7 +304,7 @@ public class FulfillmentRequestService {
                     + " order by blocked_at desc nulls last, id limit ? offset ?",
                 size,
                 (long) pageNo * size)
-            .map(FulfillmentRequestService::requestRow);
+            .map(this::requestRow);
     return new FulfillmentRequestResumablePage(items, total, pageNo, size);
   }
 
@@ -351,44 +394,55 @@ public class FulfillmentRequestService {
         FulfillmentStepKind.TRACK);
 
     UUID id = UUID.randomUUID();
-    OffsetDateTime now = OffsetDateTime.now();
+    // ⭐ requested_at / deadline_at / last_step_at 三个时刻**由 DB 时钟取**（同一个
+    //   clock_timestamp() 值 ts），不再从 JVM 绑定。
+    //   为什么必须这样：requested_at 会被 DB 侧的 completed_at / cancelled_at / blocked_at
+    //   与表级约束 CHECK (completed_at >= requested_at) 比较 —— 那三个是窄函数用
+    //   clock_timestamp() 写的，requested_at 若来自 JVM，两者是**两个时钟域**，
+    //   JVM 快几十微秒就违约，一次合法的完成/取消/挂起会被 DB 拒掉
+    //   （V211 修复的缺陷，详见类注释与 V211 文件头）。
+    //   deadline_at 必须是 requested_at + 阈值（现有断言就钉着这条），所以两者取**同一个** ts。
     // ⚠ ?::timestamptz 必须写在 values 的**对应位置**上，cast 不出现在绑定序列末位。
-        sql.execute(
-            "insert into fulfillment_request ("
+    var inserted =
+        sql.fetchOne(
+            "with t as (select clock_timestamp() as ts)"
+                + " insert into fulfillment_request ("
                 + "id, tenant_id, request_code, order_ref, order_line_ref, split_unit_ref, consolidation_ref, allocation_decision_ref, routing_decision_ref, sku_ref, platform_code, warehouse_ref, legal_entity_code, destination_country_code, destination_region_code, requested_qty, estimated_handling_amount, currency_code, status, current_step, process_version, attempt, reserve_timeout_seconds, outbound_timeout_seconds, work_timeout_seconds, track_timeout_seconds, idempotency_key, requested_at, deadline_at, last_step_at, notes, created_by_membership_id"
-                + ") values ("
-                + "?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,0,1,?,?,?,?,?,?::timestamptz,?::timestamptz,?::timestamptz,?,?"
-                + ")",
-        id,
-        tenantId(),
-        requestCode(input),
-        nz(input.orderRef()),
-        nz(input.orderLineRef()),
-        nz(input.splitUnitRef()),
-        nz(input.consolidationRef()),
-        nz(input.allocationDecisionRef()),
-        nz(input.routingDecisionRef()),
-        sku,
-        nz(input.platformCode()),
-        warehouse,
-        entity,
-        country,
-        notBlank(input.destinationRegionCode()) ? input.destinationRegionCode().trim() : "*",
-        qty,
-        amount,
-        currency,
-        FulfillmentRequestStatus.DRAFT.name(),
-        FulfillmentStepKind.RESERVE.name(),
-        reserveTimeout,
-        outboundTimeout,
-        workTimeout,
-        trackTimeout,
-        idempotency,
-        now,
-        now.plusSeconds(reserveTimeout),
-        now,
-        nz(input.notes()),
-        actor);
+                + ") select "
+                + "?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,0,1,?,?,?,?,?,"
+                + "ts,ts + make_interval(secs => ?::double precision),ts,?,?"
+                + " from t returning requested_at, deadline_at",
+            id,
+            tenantId(),
+            requestCode(input),
+            nz(input.orderRef()),
+            nz(input.orderLineRef()),
+            nz(input.splitUnitRef()),
+            nz(input.consolidationRef()),
+            nz(input.allocationDecisionRef()),
+            nz(input.routingDecisionRef()),
+            sku,
+            nz(input.platformCode()),
+            warehouse,
+            entity,
+            country,
+            notBlank(input.destinationRegionCode()) ? input.destinationRegionCode().trim() : "*",
+            qty,
+            amount,
+            currency,
+            FulfillmentRequestStatus.DRAFT.name(),
+            FulfillmentStepKind.RESERVE.name(),
+            reserveTimeout,
+            outboundTimeout,
+            workTimeout,
+            trackTimeout,
+            idempotency,
+            reserveTimeout,
+            nz(input.notes()),
+            actor);
+    // 回执里的时刻是**库里写下的**那一份，不是服务层自己算的那一份（两者可能差几十微秒）。
+    OffsetDateTime requestedAt = inserted.get("requested_at", OffsetDateTime.class);
+    OffsetDateTime deadlineAt = inserted.get("deadline_at", OffsetDateTime.class);
     event(id, FulfillmentEventKind.CREATED, "", FulfillmentRequestStatus.DRAFT.name(),
         "建单，履约单元从 " + nz(input.splitUnitRef(), "—") + " / "
             + nz(input.allocationDecisionRef(), "—") + " 来，发货仓 " + warehouse,
@@ -400,8 +454,8 @@ public class FulfillmentRequestService {
         FulfillmentStepKind.RESERVE,
         0L,
         1,
-        now,
-        now.plusSeconds(reserveTimeout));
+        requestedAt,
+        deadlineAt);
   }
 
   // ================================================================ 推进 / 挂起 / 重试 / 取消
@@ -597,15 +651,17 @@ public class FulfillmentRequestService {
     var head = requireHead(id);
     requireStep(head, FulfillmentStepKind.RESERVE, FulfillmentRequestStatus.RESERVING);
     UUID reservationId = UUID.randomUUID();
-    OffsetDateTime now = OffsetDateTime.now();
     String key = notBlank(input == null ? null : input.idempotencyKey())
         ? input.idempotencyKey().trim()
         : "reservation:" + id + ":" + head.attempt();
+    // ⭐ requested_at 由 DB 时钟取：它会被回执侧的 acknowledged_at / released_at
+    //   与表级约束 CHECK (acknowledged_at >= requested_at) 比较，
+    //   而那两个是窄函数用 clock_timestamp() 写的 ⇒ 必须同属一个时钟域（V211）。
     sql.execute(
         "insert into fulfillment_request_reservation (id, tenant_id, request_id, warehouse_ref,"
             + " sku_ref, requested_qty, status, idempotency_key, attempt,"
             + " requested_at, created_by_membership_id)"
-            + " values (?,?,?,?,?,?,'REQUESTED',?,?,?::timestamptz,?)",
+            + " values (?,?,?,?,?,?,'REQUESTED',?,?,clock_timestamp(),?)",
         reservationId,
         tenantId(),
         id,
@@ -614,9 +670,8 @@ public class FulfillmentRequestService {
         head.requestedQty(),
         key,
         head.attempt(),
-        now,
         actor);
-    markStepRunning(id, FulfillmentStepKind.RESERVE, head.attempt(), now, actor);
+    markStepRunning(id, FulfillmentStepKind.RESERVE, head.attempt(), actor);
     event(id, FulfillmentEventKind.RESERVATION_REQUESTED, head.status().name(),
         head.status().name(), "向 7.2 登记预占指令：" + head.requestedQty() + " 件，发货仓 "
             + head.warehouseRef() + "（尚未锁定，等 warehouse 回执）", actor, head.processVersion());
@@ -691,15 +746,17 @@ public class FulfillmentRequestService {
     var head = requireHead(id);
     requireStep(head, FulfillmentStepKind.OUTBOUND, FulfillmentRequestStatus.OUTBOUND_PENDING);
     UUID outboundId = UUID.randomUUID();
-    OffsetDateTime now = OffsetDateTime.now();
     String key = notBlank(input == null ? null : input.idempotencyKey())
         ? input.idempotencyKey().trim()
         : "outbound:" + id + ":" + head.attempt();
+    // ⭐ requested_at 由 DB 时钟取：它会被回执侧的 acknowledged_at 与表级约束
+    //   CHECK (acknowledged_at >= requested_at) 比较，而 acknowledged_at 是窄函数
+    //   用 clock_timestamp() 写的 ⇒ 必须同属一个时钟域（V211）。
     sql.execute(
         "insert into fulfillment_request_outbound_order (id, tenant_id, request_id,"
             + " warehouse_ref, outbound_qty, status, package_ref, idempotency_key, attempt,"
             + " requested_at, created_by_membership_id)"
-            + " values (?,?,?,?,?,'REQUESTED',?,?,?,?::timestamptz,?)",
+            + " values (?,?,?,?,?,'REQUESTED',?,?,?,clock_timestamp(),?)",
         outboundId,
         tenantId(),
         id,
@@ -708,9 +765,8 @@ public class FulfillmentRequestService {
         nz(input == null ? null : input.packageRef()),
         key,
         head.attempt(),
-        now,
         actor);
-    markStepRunning(id, FulfillmentStepKind.OUTBOUND, head.attempt(), now, actor);
+    markStepRunning(id, FulfillmentStepKind.OUTBOUND, head.attempt(), actor);
     event(id, FulfillmentEventKind.OUTBOUND_REQUESTED, head.status().name(), head.status().name(),
         "向 8.3.1 登记出库单指令：" + head.requestedQty() + " 件，发货仓 " + head.warehouseRef()
             + "（尚未确认，等下游回执）", actor, head.processVersion());
@@ -797,7 +853,7 @@ public class FulfillmentRequestService {
       throw bad("一条编排作业都还没完成，不能跟踪完成："
           + "「派了活」不等于「干完了活」");
     }
-    markStepRunning(id, FulfillmentStepKind.TRACK, head.attempt(), OffsetDateTime.now(), actor);
+    markStepRunning(id, FulfillmentStepKind.TRACK, head.attempt(), actor);
     completeStep(id, FulfillmentStepKind.TRACK, head.attempt(), null, null, done.intValue(), actor);
     sql.execute(
         "select advance_fulfillment_request_status(?,?,?,?,?,?)",
@@ -826,7 +882,6 @@ public class FulfillmentRequestService {
     if (input == null || input.tasks() == null || input.tasks().isEmpty()) {
       throw bad("至少要编排一条作业：说在干活却没有任何活可干");
     }
-    OffsetDateTime now = OffsetDateTime.now();
     for (FulfillmentRequestWorkTask task : input.tasks()) {
       BigDecimal qty = qty(task.qty(), "qty");
       if (qty.compareTo(head.requestedQty()) > 0) {
@@ -861,7 +916,7 @@ public class FulfillmentRequestService {
           head.attempt(),
           actor);
     }
-    markStepRunning(id, FulfillmentStepKind.WORK, head.attempt(), now, actor);
+    markStepRunning(id, FulfillmentStepKind.WORK, head.attempt(), actor);
     event(id, FulfillmentEventKind.WORK_ASSIGNED, head.status().name(), head.status().name(),
         "编排 " + input.tasks().size() + " 条作业", actor, head.processVersion());
     return workOrders(id);
@@ -954,7 +1009,9 @@ public class FulfillmentRequestService {
     }
     var due =
         sql.fetch(
-            "select id, request_code, current_step, process_version, deadline_at"
+            "select id, request_code, current_step, process_version, deadline_at,"
+                + " round(extract(epoch from (clock_timestamp() - deadline_at))::numeric, 3)"
+                + " as overdue_seconds"
                 + " from fulfillment_request"
                 + " where status not in ('COMPLETED','CANCELLED','BLOCKED')"
                 + " and deadline_at < clock_timestamp()" + filter
@@ -975,11 +1032,9 @@ public class FulfillmentRequestService {
               version);
       try {
         var result = block(id, blockInput, actor);
-        BigDecimal overdue =
-            BigDecimal.valueOf(
-                    java.time.Duration.between(row.get("deadline_at", OffsetDateTime.class),
-                            OffsetDateTime.now()).toSeconds())
-                .setScale(SECONDS_SCALE, RoundingMode.HALF_UP);
+        // ⭐ 「超了多久」也由 DB 时钟算：deadline_at 是 DB 时钟写的，
+        //   拿 JVM 墙钟去减它又是跨时钟域（V211）。
+        BigDecimal overdue = row.get("overdue_seconds", BigDecimal.class);
         blocked.add(
             new FulfillmentRequestScanResult.FulfillmentRequestBlocked(
                 id, row.get("request_code", String.class), step, reason, overdue,
@@ -992,7 +1047,7 @@ public class FulfillmentRequestService {
                 id, e.getMessage() == null ? e.getClass().getSimpleName() : e.getMessage()));
       }
     }
-    return new FulfillmentRequestScanResult(due.size(), blocked, skipped, OffsetDateTime.now());
+    return new FulfillmentRequestScanResult(due.size(), blocked, skipped, now());
   }
 
   /** 超时记录列表（9.3.3.2 的数据来源）。 */
@@ -1213,10 +1268,12 @@ public class FulfillmentRequestService {
 
   private void event(UUID requestId, FulfillmentEventKind kind, String from, String to,
       String detail, UUID actor, long version) {
+    // ⭐ occurred_at 由 DB 时钟取：事件流与流程步骤行是同一条时间线上的两笔账，
+    //   混用两个时钟域会让「事件在步骤之前 / 之后」的先后关系说反（V211）。
     sql.execute(
         "insert into fulfillment_request_event (id, tenant_id, request_id, event_kind, from_status,"
             + " to_status, process_version, detail, actor_id, occurred_at)"
-            + " values (?,?,?,?,?,?,?,?,?,?::timestamptz)",
+            + " values (?,?,?,?,?,?,?,?,?,clock_timestamp())",
         UUID.randomUUID(),
         tenantId(),
         requestId,
@@ -1225,13 +1282,18 @@ public class FulfillmentRequestService {
         nz(to),
         version,
         nz(detail),
-        actor,
-        OffsetDateTime.now());
+        actor);
   }
 
-  /** 本步开始执行：写一条 RUNNING 的 step 行（append-only，所以「开始」也要落一行）。 */
-  private void markStepRunning(UUID requestId, FulfillmentStepKind kind, int attempt,
-      OffsetDateTime now, UUID actor) {
+  /**
+   * 本步开始执行：写一条 RUNNING 的 step 行（append-only，所以「开始」也要落一行）。
+   *
+   * <p>⭐ {@code started_at} 由 <b>DB 时钟</b>（{@code clock_timestamp()}）生成，<b>不</b>取 JVM 墙钟。
+   * 这一行与后面 {@code finished_at} 必须落在<b>同一个时钟源</b>上，否则
+   * {@code CHECK (finished_at >= started_at)} 会被两个时钟之间的几十微秒随机击穿
+   * （V211 修复的缺陷，见类注释）。
+   */
+  private void markStepRunning(UUID requestId, FulfillmentStepKind kind, int attempt, UUID actor) {
     var exists =
         sql.fetchOne(
             "select id from fulfillment_request_step where request_id = ? and step_kind = ?"
@@ -1245,33 +1307,41 @@ public class FulfillmentRequestService {
     sql.execute(
         "insert into fulfillment_request_step (id, tenant_id, request_id, step_kind, attempt,"
             + " status, work_order_count, started_at, operated_by_membership_id)"
-            + " values (?,?,?,?,?,'RUNNING',0,?::timestamptz,?)",
+            + " values (?,?,?,?,?,'RUNNING',0,clock_timestamp(),?)",
         UUID.randomUUID(),
         tenantId(),
         requestId,
         kind.name(),
         attempt,
-        now,
         actor);
   }
 
-  /** 本步完成：写一条 COMPLETED 的 step 行并带上凭据。 */
+  /**
+   * 本步完成：写一条 COMPLETED 的 step 行并带上凭据。
+   *
+   * <p>⭐ {@code finished_at} 与 {@code elapsed_seconds} <b>都由 DB 算</b>：窄函数
+   * {@code complete_fulfillment_step} 用与 {@code started_at} 同一个 DB 时钟取完成时刻，
+   * 再由这两个值算出耗时 ⇒ 三个字段在构造上就自洽，不存在「JVM 算的耗时」与
+   * 「DB 写的时间戳」对不上的可能（旧实现正是这么把耗时算成负数的）。
+   */
   private void completeStep(UUID requestId, FulfillmentStepKind kind, int attempt,
       UUID reservationId, UUID outboundOrderId, Integer workOrderCount, UUID actor) {
     var existing =
         sql.fetchOne(
-            "select id, status, started_at from fulfillment_request_step"
+            "select id, status from fulfillment_request_step"
                 + " where request_id = ? and step_kind = ? and attempt = ?",
             requestId,
             kind.name(),
             attempt);
-    OffsetDateTime finished = OffsetDateTime.now();
     if (existing == null) {
+      // 没有 RUNNING 行就直接落一条 COMPLETED（补登记路径）：
+      // started_at / finished_at 取**同一个** clock_timestamp() 值，耗时恒为 0，与两者自洽。
       sql.execute(
-          "insert into fulfillment_request_step (id, tenant_id, request_id, step_kind, attempt,"
+          "with t as (select clock_timestamp() as ts)"
+              + " insert into fulfillment_request_step (id, tenant_id, request_id, step_kind, attempt,"
               + " status, reservation_id, outbound_order_id, work_order_count, started_at,"
               + " finished_at, elapsed_seconds, operated_by_membership_id)"
-              + " values (?,?,?,?,?,'COMPLETED',?,?,?,?::timestamptz,?::timestamptz,?::timestamptz,?)",
+              + " select ?,?,?,?,?,'COMPLETED',?,?,?,ts,ts,0.000,? from t",
           UUID.randomUUID(),
           tenantId(),
           requestId,
@@ -1280,28 +1350,22 @@ public class FulfillmentRequestService {
           reservationId,
           outboundOrderId,
           workOrderCount == null ? 0 : workOrderCount,
-          finished,
-          finished,
-          ZERO_SECONDS,
           actor);
       return;
     }
     if (!"RUNNING".equals(existing.get("status", String.class))) {
       return;
     }
-    var started = existing.get("started_at", OffsetDateTime.class);
-    BigDecimal elapsed =
-        BigDecimal.valueOf(java.time.Duration.between(started, finished).toMillis())
-            .divide(BigDecimal.valueOf(1000), SECONDS_SCALE, RoundingMode.HALF_UP);
     // ⚠ 走窄函数而不是直接 UPDATE：_step 表的 UPDATE 权已被 REVOKE，
     //   「同一次尝试 RUNNING → COMPLETED」是唯一允许的改写，由 DB 侧守卫终态。
+    //   窄函数自己取 DB 时钟写 finished_at 并算出 elapsed_seconds —— 服务层不再传时刻进去，
+    //   免得又出现「客户端算的耗时」与「库里写的时间戳」分属两个时钟域。
     sql.execute(
-        "select complete_fulfillment_step(?,?,?,?,?)",
+        "select complete_fulfillment_step(?,?,?,?)",
         existing.get("id", UUID.class),
         reservationId,
         outboundOrderId,
-        workOrderCount == null ? 0 : workOrderCount,
-        elapsed);
+        workOrderCount == null ? 0 : workOrderCount);
   }
 
   private static FulfillmentEventKind eventKindFor(FulfillmentRequestStatus target) {
@@ -1328,15 +1392,16 @@ public class FulfillmentRequestService {
 
   // ================================================================ 行映射
 
-  private static FulfillmentRequestRow requestRow(Record r) {
+  private FulfillmentRequestRow requestRow(Record r) {
     FulfillmentRequestStatus status = FulfillmentRequestStatus.valueOf(r.get("status", String.class));
     FulfillmentStepKind step = FulfillmentStepKind.valueOf(r.get("current_step", String.class));
     String blockedCode = r.get("blocked_reason_code", String.class);
     FulfillmentBlockReason blockReason =
         blockedCode == null || blockedCode.isBlank() ? null : FulfillmentBlockReason.valueOf(blockedCode);
     var deadline = r.get("deadline_at", OffsetDateTime.class);
-    boolean overdue =
-        deadline != null && deadline.isBefore(OffsetDateTime.now()) && !status.terminal();
+    // ⭐ 「到没到点」由 SQL 用 DB 时钟算（REQUEST_COLUMNS 里的 overdue 列）：
+    //   deadline_at 是 DB 时钟写的，拿 JVM 墙钟去比它又是跨时钟域（V211）。
+    boolean overdue = Boolean.TRUE.equals(r.get("overdue", Boolean.class)) && !status.terminal();
     BigDecimal amount = r.get("estimated_handling_amount", BigDecimal.class);
     return new FulfillmentRequestRow(
         r.get("id", UUID.class),

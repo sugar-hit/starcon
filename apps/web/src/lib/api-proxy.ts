@@ -105,6 +105,90 @@ const services: readonly {
       /^(permissions|owner-transfer|legal-entities(?:\/[0-9a-f-]+)?|legal-entities\/(?:[0-9a-f-]+\/accounting-books|references)|(?:roles|members|departments|children)(?:\/[0-9a-f-]+)?|tenants(?:\/current)?|audit(?:\/(?:export|[0-9a-f-]+))?|operation-log(?:\/(?:export|trace\/[0-9a-zA-Z-]+|[0-9a-f-]+))?||approval-records(?:\/(?:statistics|capabilities|export|by-actor\/[0-9a-f-]+|[0-9a-f-]+))?|hierarchy-authorizations(?:\/check|\/[0-9a-f-]+(?:\/revoke)?)?|accounting-books(?:\/[0-9a-f-]+)?|business-parameters(?:\/(?:effective|history|overrides(?:\/[0-9a-f-]+)?|freezes(?:\/[^/]+\/[^/]+)?))?|numbering(?:\/(?:entities|preview|sequences|issued|rules(?:\/conflicts|\/[0-9a-f-]+(?:\/next)?)?))?|approval-flows(?:\/(?:document-types|registrations|active|positions(?:\/[0-9a-f-]+)?|[0-9a-f-]+(?:\/validation)?))?|approval-rules(?:\/(?:effective-policy|evaluate|[0-9a-f-]+(?:\/validation)?))?|my-approvals(?:\/(?:capabilities|batch|[0-9a-f-]+(?:\/(?:decide|transfer))?))?|approval-instances|onboardings(?:\/[0-9a-f-]+\/complete)?|department-leaders|departments\/[0-9a-f-]+\/(?:leader(?:\/(?:proxies|grants)(?:\/[0-9a-f-]+)?)?|approval-chain)|offboarding(?:\/[0-9a-f-]+(?:\/revert|\/responsibility-items(?:\/[0-9a-f-]+(?:\/transfer)?)?|\/reclaim-items(?:\/[0-9a-f-]+(?:\/reclaim)?)?)?)?|legal-entities\/(?:[0-9a-f-]+\/(?:accounting-books|ledger-books|default-book)|references)|accounting-books(?:\/[0-9a-f-]+(?:\/fact-assignments(?:\/[0-9a-f-]+)?)?)?)$/,
   },
   {
+    // 5.5.2.1 异常告警（**本条目是新增一条 services[] 元素**，不是往既有 catalog 分支的
+    // alternation 里并**）。同批多车道共享这一个文件，而每个服务在 services[] 里
+    // 是**一段超长单行正则**：只要两条车道都往同一服务的 alternation 里并分支，git 必然判冲突
+    // （结构性的，retry 永远不会自愈）。所以本车道走「新加一条元素」这条路。
+    //
+    // 插入锚点固定在 `catalog/` SKU 列表那条元素**之前** —— 那样本车道与其他三条车道的
+    // 插入点被隔开，git 能干净求并。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   price-anomaly-alerts                          —— 🔴 **刻意不放行裸路径**：后端没有
+    //     「GET /catalog/price-anomaly-alerts」这个端点（集合读是 /events 与 /observations），
+    //     放行后端不存在的路径比 404 更糟 —— 界面会以为功能已交付。
+    //   price-anomaly-alerts/capabilities             能力声明（四个输入的真值 + 四类异常口径）
+    //   price-anomaly-alerts/observations             价格观测台账（GET）+ 登记观测（POST）
+    //   price-anomaly-alerts/events                   异常清单（GET）
+    //   price-anomaly-alerts/events/{id}              异常详情（GET）
+    //   price-anomaly-alerts/events/{id}/acknowledge  确认异常（POST）
+    //   price-anomaly-alerts/events/{id}/resolve      消解异常（POST）
+    //   price-anomaly-alerts/rules                   判定规则（GET）+ 保存规则（POST）
+    //   price-anomaly-alerts/notifications           预警通知（集合读）
+    //   price-anomaly-alerts/detect                  运行检测（POST）
+    //
+    // 🔴 `capabilities` / `observations` / `events` / `rules` / `notifications` / `detect`
+    //   的首字母都不落在 [0-9a-f] 里，所以字面量子路径不会被 uuid 分支提前吃掉；
+    //   uuid 分支只出现在 `events/` 下面，且**只接 acknowledge / resolve 两个动作**
+    //   —— 不接的动作（不存在的后端端点）一律 404。
+    //
+    // 🔴 token 与既有条目**不撞**：既有 catalog 元素的首 token 是 products / attributes /
+    //   brands / parties / categories / category-mappings / records / media / skus /
+    //   unit-groups / unit-conversion / spec-axis / variant-combination / … 以及
+    //   `sku-cost-compositions`（5.2.1.1 成本构成）；channel 元素的首 token 是 listings /
+    //   listing-details / listing-performance / listing-changes / listing-bulk-migrations 等。
+    //   本条目的首 token `price-anomaly-alerts` 与它们**首 token 全不相同**；
+    //   且既有正则都是**锚定**的（`/^token(...)?$/`），所以两者互不遮蔽。
+    //
+    // 🔴 刻意**不放行**：5.5.1.1 价格历史（**未交付**）—— 它与本模块同属 L3「5.5 价格监控」，
+    //   但端点命名空间不同，放行后端不存在的路径比 404 更糟。
+    prefix: 'catalog/',
+    env: 'CATALOG_URL',
+    fallback: 'http://127.0.0.1:8082',
+    pattern:
+      /^price-anomaly-alerts(?:\/capabilities|\/observations|\/events(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:acknowledge|resolve))?)?|\/rules|\/notifications|\/detect)$/,
+  },
+  {
+    // 5.5.1.1 价格历史（**本条目是新增一条 services[] 元素**，不是往既有 catalog 分支的
+    // alternation 里并**）。同批多车道共享这一个文件，而每个服务在 services[] 里
+    // 是**一段超长单行正则**：只要两条车道都往同一服务的 alternation 里并分支，git 必然判冲突
+    // （结构性的，retry 永远不会自愈）。所以本车道走「新加一条元素」这条路。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   price-history                          —— 🔴 **刻意不放行裸路径**：后端没有
+    //     「GET /catalog/price-history」这个端点（集合读是 /changes 与 /timeline），
+    //     放行后端不存在的路径比 404 更糟 —— 界面会以为功能已交付。
+    //   price-history/capabilities             能力声明（价格 / 销量 / 利润三个维度的真值与缺口）
+    //   price-history/changes                  价格变更时间轴（GET）+ 登记价格变更（POST）
+    //   price-history/changes/{id}              单条变更详情（GET）
+    //   price-history/timeline                 一个 listing（SKU × 店铺）的时间轴（GET）
+    //   price-history/comparison               「降价到底有没有用」的价格 + 利润 + 销量对比（GET）
+    //   price-history/sales                    一段区间的销量事实（GET；上游未接线 ⇒ 503）
+    //   price-history/reasons                  变更原因字典（GET）+ 保存原因（POST）
+    //
+    // 🔴 `capabilities` / `changes` / `timeline` / `comparison` / `sales` / `reasons`
+    //   的首字母都不落在 [0-9a-f] 里，所以字面量子路径不会被 uuid 分支提前吃掉；
+    //   uuid 分支只出现在 `changes/` 下面，且**只接一段 uuid** ——
+    //   不接的动作（不存在的后端端点）一律 404。
+    //
+    // 🔴 token 与既有条目**不撞**：既有 catalog 元素的首 token 是 products / attributes /
+    //   brands / parties / categories / category-mappings / records / media / skus /
+    //   unit-groups / unit-conversion / spec-axis / variant-combination / …
+    //   `sku-cost-compositions`（5.2.1.1）与 `price-anomaly-alerts`（5.5.2.1）等。
+    //   本条目的首 token `price-history` 与它们**首 token 全不相同**；
+    //   且既有正则都是**锚定**的（`/^token(...)?$/`），所以两者互不遮蔽。
+    //
+    // 🔴 刻意**不放行**：price-history/changes/{id}/**改写**类动作 ——
+    //   变更事实是**不可变事实**（只授 SELECT / INSERT，没有 UPDATE / DELETE 端点），
+    //   改价要改就**再登记一条**，不在原地改写已经发生过的历史。
+    //   放行一个不存在的写动作只会让界面以为已交付。
+    prefix: 'catalog/',
+    env: 'CATALOG_URL',
+    fallback: 'http://127.0.0.1:8082',
+    pattern:
+      /^price-history(?:\/capabilities|\/changes(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|\/timeline|\/comparison|\/sales|\/reasons)$/,
+  },
+  {
     prefix: 'catalog/',
     env: 'CATALOG_URL',
     fallback: 'http://127.0.0.1:8082',
@@ -345,6 +429,31 @@ const services: readonly {
     fallback: 'http://127.0.0.1:8082',
     pattern:
       /^sku-cost-compositions(?:\/capabilities|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:adjustments(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/void)?|revisions))?)?$/,
+  },
+  {
+    // 5.2.1.2 到岸成本：「货到目标仓可售」的总成本（单据级口径）。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   landed-costs                          到岸成本台账（集合读；筛选/分页在服务端）
+    //   landed-costs/capabilities             能力声明（六个分量的来源 + 成本口径）
+    //   landed-costs/comparisons              不同目的地的成本对比（按 skuId 查）
+    //   landed-costs/parameters               租户参数（清关费 / 尾程预备）：读 + 保存（PUT）
+    //   landed-costs/{id}                     到岸成本单明细（GET）
+    //   landed-costs/{id}/components          逐项分量（GET，分页）
+    //   landed-costs/{id}/recompute           按来源发运单重算（POST）
+    //   landed-costs                          计算一张到岸成本单（POST）
+    //
+    // 🔴 `capabilities` / `comparisons` / `parameters` 三个字面量子路径必须排在
+    // uuid 分支**之前**判别，否则它们会被当成「id=capabilities 的那张单」拼出去
+    // （这是本仓反复踩过的坑）。
+    //
+    // 与既有分支不重叠：既有 `catalog/` 长正则里没有 `landed-costs`，
+    // 所以本元素既不会被它遮蔽，也不会遮蔽它。
+    prefix: 'catalog/',
+    env: 'CATALOG_URL',
+    fallback: 'http://127.0.0.1:8082',
+    pattern:
+      /^landed-costs(?:\/(?:capabilities|comparisons|parameters)|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:components|recompute))?)?$/,
   },
   {
     // 02 渠道与店铺：平台目录、授权连接、店铺与站点。
@@ -3279,6 +3388,49 @@ const services: readonly {
       /^order\-pending\-review\/(?:capabilities|summary|queue(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/evaluate)?)?|batches(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?)$/,
   },
   {
+    // 6.1.2.1 档口与货源池（trade 服务）。本条目是**新增一条 services[] 元素**，不是往既有
+    // trade 分支的 alternation 里并分支 —— 那一支是一段超长单行正则，
+    // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在 9.2.1.1 `order-pending-review` 那条**之后**、9.2.2.2 `orders/risk-validation`
+    // 那条**之前**：与并行车道的插入点被既有条目隔开，git 能干净求并。
+    // resolve() 是「按顺序逐条匹配、首个命中即返回」，同前缀的第二条不会误吃前一条的路径。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   capabilities                          能力声明（快照语义 + 各平台是否已接线 + 未交付的下游）
+    //   options                               词表（平台 / 采集方式 / 状态 / 排序键）
+    //   overview                              概览（不受筛选与分页影响）
+    //   suppliers                             供应商候选（catalog 授权只读，跨服务只经 API）
+    //   stalls                                档口列表（GET，真分页 + 真筛选）
+    //   stalls                                POST 登记档口
+    //   stalls/{uuid}                         档口详情（GET）/ 修改（PUT）
+    //   stalls/{uuid}/sync                    触发一次主动抓取（POST；失败带原因，不返回编造的货源）
+    //   stalls/{uuid}/collections             插件推送一次采集结果（POST）
+    //   items                                 货源条目列表（GET，真分页 + 真筛选 + 真排序）
+    //   items/{uuid}                          货源条目详情（GET，含全部快照版本 = 价格历史）
+    //   items/{uuid}/favorite                 收藏 / 取消收藏（POST / DELETE）
+    //   items/{uuid}/sku-links                建立货源与内部 SKU 的关联（POST）
+    //   items/{uuid}/sku-links/{linkId}       解除货源与内部 SKU 的关联（DELETE）
+    //   sku/{uuid}/sources                    某内部 SKU 的货源关联视图 + 比价（GET）
+    //   collector-endpoint/{platform}         采集接入登记（GET 读 / PUT 写；只存凭证引用）
+    // 判别顺序：字面量子路径（capabilities / options / overview / suppliers / stalls / items）
+    // 排在 {uuid} 分支之前，否则会被 uuid 分支吃掉半截。
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），不是 `[0-9a-f-]+` ——
+    //    后者会把 `suppliers` / `collector-endpoint` 这类非 UUID 形状也当成 id 放行。
+    // ⚠️ platform 段用 `[A-Z0-9_]+`：它是平台词表（ALIBABA_1688 / YIWU_GOU），不是任意文本。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸路径 `sources` —— 后端没有「一条不存在的汇总列表接口」
+    //   * `sources/items/{uuid}/snapshots` —— 快照版本随详情一起返回，没有独立端点
+    //   * `sources/items/{uuid}/update` —— 货源快照是外部观测，改它等于篡改事实
+    //   * `sources/stalls/{uuid}/items` —— 货源条目随档口详情一起返回
+    //   * `sources/sku/{uuid}/compare` —— 比价就在 `sku/{uuid}/sources` 里
+    prefix: 'trade/',
+    env: 'TRADE_URL',
+    fallback: 'http://127.0.0.1:8085',
+    pattern:
+      /^sources(?:\/(?:capabilities|options|overview|suppliers)|\/stalls(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:sync|collections))?)?|\/items(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:favorite|sku-links(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?))?)?|\/sku\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/sources|\/collector-endpoint\/[A-Z0-9_]+)$/,
+  },
+  {
     // 9.2.2.2 风控校验（trade 服务）。本条目是**新增一条 services[] 元素**，不是往既有
     // trade 分支的 alternation 里并分支 —— 那一支是一段超长单行正则，
     // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
@@ -3359,6 +3511,36 @@ const services: readonly {
       /^fulfillment\/monitor\/(?:capabilities|scan|thresholds|todos(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/action)?|events|cases(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:verify|disposition|close|todos|disposition\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/status|release\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/ack))?)?)$/,
   },
   {
+    // 6.2.1.1 缺货与断货风险（trade 服务）。本条目是**新增一条 services[] 元素**，
+    // 不是往既有 trade 分支的 alternation 里并分支 —— 那一支是一段超长单行正则，
+    // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在既有那条 trade/ 分支（9.3.3.2 履约流程监控）**之后**、
+    // 9.3.3.1 履约请求那条**之前** —— 与另外三条并行车道的插入点被既有条目隔开，
+    // git 能干净求并。
+    // resolve() 是「按顺序逐条匹配、首个命中即返回」，同前缀的第二条不会误吃前一条的路径。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   capabilities                        能力与上下游可用性（含「日均销量由本服务登记」
+    //                                        「店铺名称属 channel 不复制」这类必须显式报出的事实）
+    //   velocities                          销售速度登记列表（GET）/ 登记（POST）
+    //   snapshots                           快照列表（GET）/ 计算一次风险清单（POST）
+    //   items                               断货风险清单（GET）
+    //   items/{uuid}                        风险行详情（GET）：涉及店铺 + 逐项计算过程
+    //
+    // 判别顺序：**字面量子路径必须排在 {uuid} 分支之前**，否则它们的 id 段会被 uuid 分支吃掉半截。
+    // ⚠ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），不是 `[0-9a-f-]+`。
+    // ⚠ 外层 `^` / `$` 包住完整分组，不写成 `^a|b|c$`。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸路径 stockout-risk —— 后端没有对应映射，放行只会拿到 404。
+    //   * `stockout-risk/items/{uuid}/...` 的任何子段 —— 后端只有单条详情，没有子资源。
+    prefix: 'trade/',
+    env: 'TRADE_URL',
+    fallback: 'http://127.0.0.1:8085',
+    pattern:
+      /^stockout\-risk\/(?:capabilities|velocities|snapshots|items(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?)$/,
+  },
+  {
     // 9.3.3.1 履约请求（trade 服务）。本条目是**新增一条 services[] 元素**，
     // 不是往既有 trade 分支的 alternation 里并分支 —— 那一支是一段超长单行正则，
     // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
@@ -3407,6 +3589,48 @@ const services: readonly {
     fallback: 'http://127.0.0.1:8085',
     pattern:
       /^fulfillment\/requests(?:\/(?:capabilities|resumable|scan-timeouts|timeouts|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:advance|block|retry|cancel|complete|reservation(?:\/ack)?|outbound-order(?:\/ack)?|work-orders(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/status)?))?))?$/,
+  },
+  {
+    // 6.3.2.2 到货与逾期（trade 服务）。本条目是**新增一条 services[] 元素**，不是往既有
+    // trade 分支的 alternation 里并分支 —— 那一支是一段超长单行正则，
+    // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在既有 `fulfillment/requests`（9.3.3.1 履约请求）那条**之后**、
+    // `fulfillment/consolidation`（9.3.1.2 合单）那条**之前**：
+    // 各车道的插入点被既有条目隔开，git 能干净求并。
+    // resolve() 是「按顺序逐条匹配、首个命中即返回」，同前缀的后一条不会误吃前一条的路径。
+    //
+    // ⚠️ 首段 `purchase-arrivals` 是**独立字面量**：与既有 trade 分支的 `order-review`、
+    //    `platform-orders`、`fulfillment/...`、`processing/...`、`aftersales/...`、
+    //    `refunds/...`、`supplier-claims/...` 互不吃，所以本条放在哪个位置都不会误伤它们。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   capabilities                              能力声明（状态机口径 / 逾期两个口径 / 未交付上游）
+    //   overdue-board                              逾期预警看板（逾期未到 + 在途滞留两类）
+    //   （裸路径）                                 到货跟踪列表（GET 真分页 + 多维筛选）
+    //   {uuid}                                    跟踪详情（头 + 流水 + 应付确认 + 建议 + 留痕）
+    //   {uuid}/ship                               标记已发货（在途）
+    //   {uuid}/arrivals                           登记到货（部分 / 全部由后端按缺口判定）
+    //   {uuid}/cancel                             取消跟踪单
+    //   {uuid}/sync-in-transit                    同步 10.4.1.2 在途状态快照
+    //   {uuid}/dispositions/{uuid}/resolve        处置建议采纳 / 忽略
+    //   {uuid}/payable-confirmations/{uuid}/confirm 财务确认应付部分确认
+    //   {uuid}/payable-confirmations/{uuid}/reject  财务驳回应付部分确认
+    // 判别顺序：字面量子路径（capabilities / overdue-board）排在 {uuid} 分支**之前**。
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），
+    //    不是 `[0-9a-f-]+` —— 后者把 `c`、`e`、`f` 这类单字符也当成合法 id 放行。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `purchase-arrivals/{uuid}/received-qty` —— **没有**这个写形状：
+    //     已收数量由 DB 从到货流水重算（V235 守卫①），后端刻意不提供直接改数量的入口。
+    //   * `purchase-arrivals/{uuid}/payable-confirmations` —— 没有「直接置为已确认」的旁路；
+    //     应付部分确认只能经 confirm / reject 两个动作。
+    //   * `purchase-arrivals/{uuid}/dispositions` —— 处置建议是派生结果，不提供手写建议的入口。
+    //   * `purchase-arrivals/{uuid}/overdue` —— 逾期判定由承诺到货日推出，不提供手工标逾期的入口。
+    prefix: 'trade/',
+    env: 'TRADE_URL',
+    fallback: 'http://127.0.0.1:8085',
+    pattern:
+      /^purchase\-arrivals(?:\/(?:capabilities|overdue\-board)|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:ship|arrivals|cancel|sync\-in\-transit|dispositions\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/resolve|payable\-confirmations\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/(?:confirm|reject)))?)?$/,
   },
   {
     // 9.3.1.2 合单（trade 服务）。本条目是**新增一条 services[] 元素**，不是往既有
@@ -3479,6 +3703,115 @@ const services: readonly {
       /^order\-address\-payment\-check\/(?:capabilities|overview|policy|embargo\-rules|country\-rules|payment\-rules|checks(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|orders\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/latest)$/,
   },
   {
+    // 6.2.1.2 补货建议（trade 服务，卷 06 采购与供应的 L3 锚点 6.2.1）。
+    //
+    // 蓝图：「计算建议补货量：目标库存覆盖天数 × 日均销量 −（可用 + 在途），并结合 MOQ、
+    // 箱规、采购起订额做取整修正，给出建议供应商与到货时间。」输出「补货建议
+    // （建议量、取整说明、预计到货日、预计费用）；支持接受/调整/忽略」。
+    //
+    // 本条目是**新增一条 services[] 元素**，不是往既有 trade 分支的 alternation 里并分支 ——
+    // 那一支是一段超长单行正则，多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    //
+    // 插入锚点固定在既有 `order-address-payment-check`（9.2.2.1）那条**之后**、
+    // `fulfillment/split`（9.3.1.1 拆单）那条**之前** —— 与同批另外三条车道的插入点
+    // 两两不重叠，git 能干净求并。既有条目一字未动。
+    // resolve() 是「按顺序逐条匹配、首个命中即返回」，同前缀的第二条不会误吃前一条的路径。
+    //
+    // 🔴 为什么用 `replenishment-suggestions` 这个独立前缀：
+    //   * 既有 trade 分支是**一条**覆盖全服务的长 alternation，里面没有 `replenishment-suggestions`；
+    //     已用脚本逐条核对本文件里**全部既有正则**：`replenishment-suggestions/**` **零命中**
+    //     （既有分支不会先把它吃掉）。
+    //   * 6.2.1.1 断货风险的既有 trade 路由（`stockout-risk/**`）**不是本模块的**，
+    //     本条目不放行它，也不改它。
+    //   * 6.2.1.3 采购计划与 6.2.2.1 采购申请**都不是本模块的**，不代它们开形状。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   replenishment-suggestions/capabilities            能力与上下游可用性（含「头程时效未交付」）
+    //   replenishment-suggestions/coverage-policies       覆盖天数目标配置（GET 真分页 / POST 登记）
+    //   replenishment-suggestions/order-policies          采购起订额 / 生产周期配置（GET 真分页 / POST 登记）
+    //   replenishment-suggestions/batches                 计算批次（GET 真分页 / POST 发起计算）
+    //   replenishment-suggestions/suggestions             建议清单（GET，真分页 + 真筛选）
+    //   replenishment-suggestions/suggestions/{uuid}      建议详情（GET：结论 + 计算过程 + 处置留痕）
+    //   replenishment-suggestions/suggestions/{uuid}/decision  处置（POST：接受 / 调整 / 忽略）
+    //
+    // ⚠️ 判别顺序：**字面量子路径（capabilities / coverage-policies / order-policies / batches /
+    //    suggestions）排在 {uuid} 段之前** —— alternation 是首个命中即返回，
+    //    顺序反了会被 uuid 支吃掉半截。
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），不是 `[0-9a-f-]+` ——
+    //    后者会把 `decision` 这种非 UUID 形状也当成 id 放行。
+    // ⚠️ 外层分组**不带 `?`**：本模块没有裸集合读，放行裸路径 `replenishment-suggestions`
+    //    就是凭空多出一条 GET（后端没有这个映射）。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸路径 `replenishment-suggestions` —— 后端没有对应映射。
+    //   * `replenishment-suggestions/suggestions/{uuid}/recompute` —— 重算是一次**新的批次**，
+    //     不是对一条已落库建议的改写（计算结论不可改写是 DB 层的不变量）。
+    //   * `replenishment-suggestions/plans/**` —— 6.2.1.3 采购计划**未交付**，本模块不代它开形状。
+    //   * `replenishment-suggestions/purchase-requests/**` —— 6.2.2.1 采购申请**未交付**，
+    //     本模块只产出建议与处置留痕，不代它建申请单。
+    prefix: 'trade/',
+    env: 'TRADE_URL',
+    fallback: 'http://127.0.0.1:8085',
+    pattern:
+      /^replenishment\-suggestions\/(?:capabilities|coverage\-policies|order\-policies|batches|suggestions(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/decision)?)?)$/,
+  },
+  {
+    // 6.2.1.3 采购计划（trade 服务，卷 06 采购与供应的 L3 锚点 6.2.1）。
+    //
+    // 蓝图：「按周期（月/季）、按店铺大促节奏、按仓库制定采购计划，把补货建议汇总成计划行，
+    // 支持调整、锁定、导出给采购员。」输出「采购计划（计划行：SKU、数量、目标仓、期望到货日、
+    // 优先级）」。
+    //
+    // 本条目是**新增一条 services[] 元素**，不是往既有 trade 分支的 alternation 里并分支 ——
+    // 那一支是一段超长单行正则，多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    // 既有条目**一字未动**（含 6.2.1.2 为 6.2.2.1 预留的那段 `purchase-requests` 说明）。
+    //
+    // 插入锚点固定在既有 `replenishment-suggestions`（6.2.1.2，本模块的直接上游）元素**之后** ——
+    // 与同批另外三条车道的插入点互不重叠，git 能干净求并。
+    // resolve() 是「按顺序逐条匹配、首个命中即返回」，同前缀的后一条不会误吃前一条的路径。
+    //
+    // 🔴 为什么用 `purchase-plans` 这个独立前缀：
+    //   * 既有 trade 分支是**一条**覆盖全服务的长 alternation，里面没有 `purchase-plans`；
+    //     已用脚本逐条核对本文件里**全部既有正则**：`purchase-plans/**` **零命中**
+    //     （既有分支不会先把它吃掉）。
+    //   * 6.2.1.2 的 `replenishment-suggestions/**` 与 6.2.2.1 采购申请**都不是本模块的**，
+    //     本条目既不改它也不代它开形状。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   purchase-plans                          计划清单（GET，真分页 + 真筛选 + 真排序）/ 建计划（POST）
+    //   purchase-plans/capabilities             能力与上下游可用性（含「锁库端口是否接线」）
+    //   purchase-plans/options                  建计划参照项（目标仓 / 法人 / 大促）
+    //   purchase-plans/summary                  汇总视图（**日常一段、大促一段**，两段不相加）
+    //   purchase-plans/campaigns                大促日历列表（GET 真分页）/ 登记档期（POST）
+    //   purchase-plans/campaigns/{uuid}         更新档期（PUT）/ 删除档期（DELETE）
+    //   purchase-plans/lock-policies            锁库策略列表（GET 真分页）/ 登记策略（POST）
+    //   purchase-plans/{uuid}                   计划详情（GET：头 + 计划行）
+    //   purchase-plans/{uuid}/confirm           确认计划（POST：草稿 → 已确认）
+    //   purchase-plans/{uuid}/aggregate         从补货建议汇总成计划行（POST）
+    //   purchase-plans/{uuid}/lines             计划行清单（GET，真分页 + 真筛选）
+    //   purchase-plans/{uuid}/lines/{uuid}      计划行详情（GET：行 + 调整留痕 + 锁定留痕）
+    //   purchase-plans/{uuid}/lines/{uuid}/adjust  调整计划行（POST，数量 / 到货日 / 优先级 / 目标仓）
+    //   purchase-plans/{uuid}/lines/{uuid}/lock    锁定计划行（POST，走 warehouse 的库存预占）
+    //   purchase-plans/{uuid}/export            导出 CSV 给采购员（GET，text/csv 原样透传）
+    //
+    // ⚠️ 判别顺序：**字面量子路径（capabilities / options / summary / campaigns / lock-policies）
+    //    排在 {uuid} 段之前** —— alternation 是首个命中即返回，顺序反了会被 uuid 支吃掉半截。
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），不是 `[0-9a-f-]+` ——
+    //    后者会把 `adjust` / `lock` 这种非 UUID 形状也当成 id 放行。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `purchase-plans/{uuid}/delete` —— 采购计划是业务凭据（行调整 / 锁定留痕都指向它），
+    //     本模块不提供删除计划；删的是**大促档期**（`campaigns/{uuid}`），且被计划引用时删不掉。
+    //   * `purchase-plans/purchase-requests/**` —— 6.2.2.1 采购申请**未交付**，
+    //     本模块只产出计划行，不代它建申请单、不代它走审批。
+    //   * `purchase-plans/lock-policies/{uuid}` —— 锁库策略走版本化 upsert，没有按 id 单独读/改。
+    prefix: 'trade/',
+    env: 'TRADE_URL',
+    fallback: 'http://127.0.0.1:8085',
+    pattern:
+      /^purchase\-plans(?:\/(?:capabilities|options|summary|campaigns(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|lock\-policies|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:aggregate|confirm|export|lines(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:adjust|lock))?)?))?))?$/,
+  },
+  {
     // 9.3.1.1 拆单（trade 服务）。本条目是**新增一条 services[] 元素**，不是往既有
     // trade 分支的 alternation 里并分支 —— 那一支是一段超长单行正则，
     // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
@@ -3514,6 +3847,67 @@ const services: readonly {
       /^fulfillment\/split\/(?:capabilities|rule|warehouses|stock-snapshots|preview|reservation-commands|writeback-tasks|splits(?:\/[0-9a-f-]+(?:\/(?:status|units\/[0-9a-f-]+\/(?:reservation|writeback)))?)?)$/,
     // 裸路径 fulfillment/split **刻意不放行**：后端没有对应映射，
     // 放行它会让界面以为「一条不存在的拆单列表接口」可用。
+  },
+  {
+    // 6.1.2.3 供应商资质：资质档案（营业执照 / 质检报告 / 认证证书 / 授权书）+ 有效期
+    // + 审核状态机 + 即将过期提醒 + **阻断判定**（04 刊登与发货链路消费的那一份）。
+    //
+    // 本条目是**新增一条 services[] 元素**，不是往既有 catalog / trade 长正则里并 ——
+    // 那一支是单行超长正则，多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在「9.3.1.1 拆单」元素之后、「9.6.1.3 代发履约跟踪」元素之前，
+    // 与另外三条车道的插入点互不重叠。既有条目**一字未动**。
+    //
+    // 🔴 为什么用 `supplier-qualifications` 这个独立前缀：
+    //   * 既有分支是覆盖全服务的**一条超长 alternation**，里面没有 `supplier-qualifications`；
+    //     已用脚本逐条核对本文件里**全部既有正则**：`supplier-qualifications/**` **零命中**
+    //     （既有分支不会先把它吃掉）。
+    //   * 6.1.2.2 同款货源推荐与本模块共用 L3 锚点，但**不共用端点**：
+    //     本车道只交付 6.1.2.3，不代未交付的兄弟模块开形状。
+    //   * catalog 侧那条长正则里已有 `supply/vendors/.../qualifications` 形状
+    //     （那是 6.1.1.x 供应商档案模块的端点，**一个字都不动**）：
+    //     本模块的端点走 **trade 服务 + `supplier-qualifications` 根路径**，两者不冲突。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   supplier-qualifications/capabilities                     能力声明（词表 / 上下游 gap / 阻断口径）
+    //   supplier-qualifications/options                          词表选项（类型 / 审核状态 / 到期状态 / 排序）
+    //   supplier-qualifications/overview                         概览（即将过期与已过期分成两个数）
+    //   supplier-qualifications/policy        GET / PUT           提醒窗口（天）+ 必备资质类型
+    //   supplier-qualifications/qualifications GET / POST        资质列表（真分页 + 筛选）/ 登记资质
+    //   supplier-qualifications/qualifications/{uuid} GET / PUT  资质详情（+ 文件 + 审核留痕）/ 修改
+    //   supplier-qualifications/qualifications/{uuid}/review     审核流转（状态机；POST）
+    //   supplier-qualifications/qualifications/{uuid}/documents  上传资质文件（POST）
+    //   supplier-qualifications/reminders     GET                过期提醒清单（真分页；即将过期 / 已过期分列）
+    //   supplier-qualifications/reminders/scan POST              生成 / 刷新提醒（幂等）
+    //   supplier-qualifications/reminders/{uuid} PUT             处理提醒（确认 / 关闭）
+    //   supplier-qualifications/suppliers    GET                供应商候选（catalog 只读）
+    //   supplier-qualifications/brands      GET                品牌候选（03 品牌只读）
+    //   supplier-qualifications/suppliers/{uuid}/blocking-decision       供应商维度阻断判定
+    //   supplier-qualifications/suppliers/{uuid}/brands/{uuid}/blocking-decision 品牌维度阻断判定
+    //   supplier-qualifications/skus/{uuid}/blocking-decision             商品维度阻断判定
+    //
+    // ⚠️ 判别顺序：**字面量子路径（capabilities / options / overview / policy /
+    //    qualifications / reminders / suppliers / brands）排在 {uuid} 段之前** ——
+    //    alternation 是首个命中即返回，顺序反了会被 uuid 支吃掉半截。
+    //    `reminders/scan` 排在 `reminders/{uuid}` 之前同理（虽然 scan 也不是 UUID 形状）。
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），不是 `[0-9a-f-]+` ——
+    //    后者会把 `scan`、`review` 这种非 UUID 形状也当成 id 放行。
+    // ⚠️ 外层分组**不带 `?`**：本模块没有裸集合读，放行裸路径 `supplier-qualifications`
+    //    就是凭空多出一条 GET。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸路径 `supplier-qualifications` —— 本模块没有裸路径资源。
+    //   * `supplier-qualifications/qualifications/{uuid}/documents/{docId}` / `DELETE` ——
+    //     资质文件**只追加**（续期是再上传一份，不是覆盖），没有删除形状。
+    //   * `supplier-qualifications/qualifications/{uuid}/delete` —— 资质档案不提供删除：
+    //     审核留痕与「当时交的是什么」是凭据，删行等于抹掉事实。
+    //   * `supplier-qualifications/reminders/{uuid}/delete` —— 提醒走状态流转，不走删除。
+    //   * 任何 `supplier-qualifications/**` 之外的 6.1.2.x 形状（6.1.2.2 同款货源推荐
+    //     **未交付**，本模块不代它开形状）。
+    prefix: 'trade/',
+    env: 'TRADE_URL',
+    fallback: 'http://127.0.0.1:8085',
+    pattern:
+      /^supplier\-qualifications(?:\/(?:capabilities|options|overview|policy|qualifications|reminders|suppliers|brands)|\/qualifications\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:review|documents))?|\/reminders\/scan|\/reminders\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}|\/suppliers\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/brands\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?\/blocking\-decision|\/skus\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/blocking\-decision)$/,
   },
   {
     prefix: 'trade/',
@@ -3664,6 +4058,132 @@ const services: readonly {
     // 放行它会让界面以为「一条不存在的列表接口」可用。
   },
   {
+    // 15.2.2.1 Request a Review（索评）（crm 服务，卷 15 的 L3 锚点 15.2.2）。
+    //
+    // 蓝图：「按规则向已签收订单的买家发起索评（平台允许范围内），控制频次避免打扰，
+    // 支持按店铺/时间/物流状态批量执行。输出：索评任务 + 发送记录 + 评价回收统计。
+    // 关系：上游 = 10.3.2.2 签收；下游 = 15.2.1.1 评价。**索评频次必须受限**。」
+    //
+    // 本条目是**新增一条 services[] 元素**，不是往既有 crm 分支的 alternation 里并 ——
+    // 既有 crm 那条是 15.4.2.1 客服知识库（`knowledge/...`），单行超长正则，
+    // 并进去会让本车道与并行车道的插入点被隔开，git 判冲突。
+    // 插入锚点固定在 **crm/ 知识库那条之后、warehouse/ 7.8.2.2 那条之前**，
+    // 与本批另外三条车道的锚点（catalog 两条、channel 一条）互不重叠。
+    //
+    // 🔴 为什么用 `review-requests` 这个独立前缀（已逐条核对既有全部 token）：
+    //   * 既有 crm 分支的 token 是 `knowledge`（15.4.2.1 知识库）；
+    //     `review-due` 是 knowledge **内部**的子形状（`knowledge/review-due`），不是独立 token。
+    //   * 既有别的服务的 token：`orders` · `order-review`（9.2.1.2 trade）·
+    //     `refunds` · `rma-authorizations` · `return-receipts` · `return-quality` …
+    //   * 既有正则都是**锚定**的（`^token(...)?$`），而本文件的 `resolve()` 先按
+    //     `path.startsWith(service.prefix)` 收窄服务、再判别正则 ⇒ 只有 prefix='crm/'
+    //     的元素才有机会吃到 `crm/review-requests/...`。
+    //     而本文件里 prefix='crm/' 的元素只有知识库那一条，它的正则 `^knowledge\/...$`
+    //     **不可能**匹配 `review-requests/...` ⇒ 两条互不吃掉，首 token 不同即可。
+    //   * 刻意**不**复用 `order-review`（trade 的订单审核）：那是另一个服务、
+    //     另一个模块（9.2.1.2），共用会让「索评」与「订单审核」在白名单上混成一个形状。
+    //
+    // 形状逐条列出：
+    //   review-requests                          索评任务集合读（GET，真分页 + 真筛选）/ 新建（POST）
+    //   review-requests/capabilities             能力声明（逐维 available + ownerModule + impact）
+    //   review-requests/frequency-policy         频次硬上限（GET 读 / PUT 配置）
+    //   review-requests/shops                    店铺目录（来自上游 channel 的真实清单）
+    //   review-requests/candidates               已签收候选单（上游 10.3.2.2 确认单清单）
+    //   review-requests/batch                    批量执行（POST，逐条给结论与原因）
+    //   review-requests/recovery-stats           评价回收统计（GET）
+    //   review-requests/{uuid}                   单条索评任务详情（GET）
+    //   review-requests/{uuid}/send-records      登记触达（POST）
+    //   review-requests/{uuid}/recoveries        登记评价回收（POST）
+    //
+    // 判别顺序：**字面量子路径（capabilities / frequency-policy / shops / candidates /
+    // batch / recovery-stats）排在 {uuid} 段之前** —— alternation 是首个命中即返回，
+    // 顺序反了会被通配支吃掉半截。
+    // id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`（不是
+    // `[0-9a-f-]+`）：后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `review-requests/{uuid}/replies` / `/tags` / `/appeals` ——
+    //     评价回复（15.2.1.2）、差评处理（15.2.1.3）都**未交付**，
+    //     本模块只落**评价回收桶**，不放行这些形状等于让界面以为能回复买家。
+    //   * `review-requests/{uuid}/delete` —— 索评请求是频次计数的凭据，不可删。
+    //   * `review-requests/{uuid}/cancel` —— 后端没有这个映射（状态机里 CANCELLED 暂无入口）。
+    //   * `review-requests/rules` —— 索评规则配置归 **15.2.2.2**（未交付），
+    //     本模块的规则是**一次请求自带的快照** + 一份租户级频次硬上限。
+    //   * `review-requests/{uuid}/send-records/{sendId}` ——
+    //     发送记录按请求读，不按单条记录寻址（后端没有这个映射）。
+    //   * 任何 DELETE / PUT 形状 —— 白名单是**按路径登记、不区分方法**的，
+    //     所以「不能删 / 不能乱改」的防线在服务端与 DB，不在这里。
+    prefix: 'crm/',
+    env: 'CRM_URL',
+    fallback: 'http://127.0.0.1:8086',
+    pattern:
+      /^review-requests(?:\/(?:capabilities|frequency-policy|shops|candidates|recovery-stats|batch)|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:send-records|recoveries))?)?$/,
+  },
+  {
+    // 15.2.2.2 索评规则（crm 服务，卷 15 的 L3 锚点 15.2.2 的第二个子模块）。
+    //
+    // 蓝图：「配置索评策略：按店铺、按物流方式（自发货/平台仓）设置不同延后时间，避开节假日，
+    // 支持 A/B 测试不同话术。输入：规则配置；话术模板。输出：生效策略 + 效果对比。
+    // 关系：上游 = 15.2.2.1；下游 = 15.1.1.2 发送。」
+    //
+    // 本条目是**新增一条 services[] 元素**，不是往既有 crm 分支的 alternation 里并 ——
+    // 既有两条 crm 分支分别是 `^knowledge\/...$`（15.4.2.1 客服知识库）与
+    // `^review-requests...$`（15.2.2.1 索评），首 token 都与 `review-rules` 不同，
+    // 两条互不吃掉。插入锚点固定在 **15.2.2.1 那条之后、warehouse 7.8.2.2 那条之前**，
+    // 与本批另外三条车道的锚点互不重叠。
+    //
+    // 🔴 为什么用 `review-rules` 这个独立前缀（已逐条核对既有全部 token）：
+    //   * 既有 crm 分支的 token 是 `knowledge` 与 `review-requests`；
+    //     `review-due` 是 knowledge **内部**的子形状（`knowledge/review-due`），不是独立 token。
+    //   * 既有别的服务的 token：`orders` · `order-review`（9.2.1.2 trade）·
+    //     `refunds` · `rma-authorizations` · `return-receipts` · `return-quality` …
+    //   * 既有正则都是**锚定**的（`^token(...)?$`），而本文件的 `resolve()` 先按
+    //     `path.startsWith(service.prefix)` 收窄服务、再判别正则 ⇒ 只有 prefix='crm/'
+    //     的元素才有机会吃到 `crm/review-rules/...`。
+    //     而 prefix='crm/' 的另两条元素正则是 `^knowledge\/...$` 与 `^review-requests...$`，
+    //     **不可能**匹配 `review-rules/...` ⇒ 首 token 不同即可。
+    //   * 刻意**不**复用 `review-requests/rules`（15.2.2.1 那条里写在拒绝清单上的形状）：
+    //     本模块是**独立命名空间**，不往兄弟模块的路径树上挂。
+    //
+    // 形状逐条列出：
+    //   review-rules                       索评规则集合（GET 真分页真筛选 / POST 新建）
+    //   review-rules/{uuid}                单条规则（GET 详情 / PUT 更新 / DELETE 删除）
+    //   review-rules/capabilities          能力声明（逐维 available + ownerModule + impact）
+    //   review-rules/shops                 店铺目录（来自上游 channel 的真实清单）
+    //   review-rules/effective             生效策略解析（GET）
+    //   review-rules/effect-comparison     效果对比（GET）
+    //   review-rules/candidates            可被应用策略的索评请求（上游 15.2.2.1，GET）
+    //   review-rules/templates             话术模板集合（GET / POST）
+    //   review-rules/templates/{uuid}      单个话术模板（GET / PUT / DELETE）
+    //   review-rules/holidays              节假日集合（GET / POST）
+    //   review-rules/holidays/{uuid}       单个节假日（GET / PUT / DELETE）
+    //   review-rules/assignments          生效策略落地记录（GET）/ 应用策略（POST）
+    //   review-rules/assignments/{uuid}   单条落地记录（GET）
+    //
+    // 判别顺序：**字面量子路径（capabilities / shops / effective / effect-comparison /
+    // candidates / templates / holidays / assignments）排在 {uuid} 段之前** ——
+    // alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    // id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`（不是
+    // `[0-9a-f-]+`）：后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `review-rules/capabilities/{uuid}` / `/shops/{uuid}` / `/effective/{uuid}` /
+    //     `/effect-comparison/{uuid}` / `/candidates/{uuid}` ——
+    //     这五个是聚合查询与目录，**不按 id 寻址**，所以那段后缀是**必需**的
+    //     （写成可选会让裸的 `capabilities/{uuid}` 一起通过）。
+    //   * `review-rules/{uuid}/variants` —— 后端没有「按规则 id 取变体」这个映射。
+    //   * `review-rules/effective/{uuid}` —— 生效策略**不按规则 id 寻址**。
+    //   * 任何 PUT / DELETE 形状之外的第三层子路径 —— 后端只有上面列出的那些。
+    //   * DELETE 本身是**放行**的：规则 / 模板 / 节假日都是**配置**（不是凭据），
+    //     删了就是删了；而「已被生效策略落地引用过的删不掉」这条防线在服务端与 DB，
+    //     不在白名单里（白名单是**按路径登记、不区分方法**的）。
+    prefix: 'crm/',
+    env: 'CRM_URL',
+    fallback: 'http://127.0.0.1:8086',
+    pattern:
+      /^review-rules(?:\/(?:capabilities|shops|effective|effect-comparison|candidates)|\/(?:templates|holidays|assignments)(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?$/,
+  },
+  {
     // 7.8.2.2 缺货与饥饿预警（warehouse 服务，7.8.2 的第二个 L3 锚点）。
     //
     // 蓝图：「识别因分摊/优先级导致的店铺"饥饿"（长期分不到货、影响绩效），以及真正的全网缺货，
@@ -3761,6 +4281,586 @@ const services: readonly {
     fallback: 'http://127.0.0.1:8083',
     pattern:
       /^compliance-precheck(?:\/capabilities|\/drafts(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/(?:check|precheck))?|\/reports(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?)$/,
+  },
+  {
+    // 10.4.2.2 备货预报（channel 服务，卷 10「物流与货运」的 L3 锚点 10.4.2）。
+    //
+    // 蓝图：「向海外仓/平台仓提交备货计划：SKU 与数量、目的仓、期望到货时间、平台货件编号，
+    // 接收仓端接收与拒收反馈。」加粗句：「**平台仓备货有严格规格**（箱型、贴标、托盘、混装限制），
+    // 规格不符会被拒收造成额外成本与延误。」
+    //
+    // 本条目是**新增一条 services[] 元素**，不是往既有 channel 分支的超长 alternation 里并 ——
+    // 那一支是单行超长正则，多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在 16.2.2.1 的 `compliance-precheck` 元素之后、10.7.1.3 的 `return-disposals`
+    // 元素之前 —— 与另外三条车道（catalog 调价单 / catalog 价格历史 / trade 采购计划）的
+    // 插入点互不重叠，git 能干净求并。
+    //
+    // 🔴 为什么用 `stock-forecasts` 这个独立前缀：
+    //   * 既有 10.4.2.1 海外仓连接走的是 `warehouse-providers`（服务商目录 / 连接 / 仓账户 /
+    //     库存同步 / 外部库存观测），本模块是**它的下游动作**（把货备到那个仓去），
+    //     两者语义不同、不共用端点、不共用表，必须分得开。
+    //   * 既有 `warehouse-providers` 元素的首 token 是 `warehouse-providers`，本元素的首 token
+    //     是 `stock-forecasts`，**首 token 不同就互不遮蔽**（既有正则都是锚定的 `/^token(...)?$/`）。
+    //   * 已用脚本逐条核对本文件里**全部**既有正则：`stock-forecasts/**` **零命中**
+    //     （既有分支不会先把它吃掉）。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   stock-forecasts                              集合读（GET，真分页 + 真筛选 + 真排序）/ 建预报单（POST）
+    //   stock-forecasts/capabilities                 能力声明（未接通维度 available=false + ownerModule + impact）
+    //   stock-forecasts/accounts                     目的仓下拉项（10.4.2.1 的仓账户，同库同服务）
+    //   stock-forecasts/specs                        备货规格集合读（GET）/ 新建规格版本（POST）
+    //   stock-forecasts/specs/{uuid}/retire          停用一版规格（POST）
+    //   stock-forecasts/{uuid}                       预报单详情（GET）
+    //   stock-forecasts/{uuid}/lines                 替换明细（PUT，**只在草稿态允许**）
+    //   stock-forecasts/{uuid}/spec-check            规格校验结果（GET，只读不改状态）
+    //   stock-forecasts/{uuid}/validate              过规格闸（POST；规格不过 ⇒ 422 + violations 数组）
+    //   stock-forecasts/{uuid}/submit                提交预报 → 生成平台货件创建任务（POST）
+    //   stock-forecasts/{uuid}/cancel                作废预报单（POST）
+    //   stock-forecasts/{uuid}/availability          备货可用性（GET，自营可售量 + 头程在途，只读 Port）
+    //   stock-forecasts/{uuid}/shipment-task         平台货件创建任务（GET）
+    //   stock-forecasts/{uuid}/shipment-task/dispatch 推进货件任务（POST；服务商侧失败 ⇒ 502 + 任务体）
+    //   stock-forecasts/{uuid}/shipment-task/retry   重试失败的货件任务（POST）
+    //   stock-forecasts/{uuid}/shipment-reports      平台货件报送行（GET 集合读 / POST 登记）
+    //   stock-forecasts/{uuid}/receipts              仓端接收/拒收回执（GET 集合读 / POST 登记）
+    //
+    // ⚠️ 判别顺序：**字面量子路径（capabilities / accounts / specs）排在 {uuid} 段之前** ——
+    //    alternation 是首个命中即返回，顺序反了会被 uuid 支吃掉半截。
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），不是 `[0-9a-f-]+` ——
+    //    后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸路径 `stock-forecasts/{uuid}/delete` —— 预报单靠状态机收口（作废），不靠物理删除；
+    //     仓端回执是 append-only 的凭据，更不能删。
+    //   * `stock-forecasts/{uuid}/shipment-task/{任意动作}` —— {uuid} 之下只认
+    //     dispatch 与 retry 两个动作；多放一层会让一个还不存在的动作看起来像已交付。
+    //   * `stock-forecasts/{uuid}/receipts/{任意}` —— 回执按预报单寻址，没有单条回执端点。
+    //   * `stock-forecasts/{uuid}/platform-shipment` —— 平台货件接口直连**未接通**
+    //     （本仓库没有真实平台账号与网络出口），放行它只会让界面以为已交付。
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^stock-forecasts(?:\/capabilities|\/accounts|\/specs(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/retire)?|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:lines|spec-check|validate|submit|cancel|availability|shipment-task(?:\/(?:dispatch|retry))?|shipment-reports|receipts))?)?$/,
+  },
+  {
+    // 10.7.1.3 弃置与销毁（channel 服务，卷 10「物流与货运」的 L3 锚点 10.7.1）。
+    //
+    // 蓝图：「管理弃置与销毁：无销售价值/品牌方要求/法规不允许再销售的退货，处理销毁、
+    // 留存销毁凭证/照片/重量记录，满足平台与品牌方的销毁证明要求；销毁数量可作为品牌方索赔依据。
+    // 输入：待销毁清单；销毁方式（压碎/焚烧/专业销毁）；凭证要求。
+    // 输出：销毁单 + 凭证 + 数量/重量记录；索赔依据（→ 6.1.2.3 / 11.2.3.3）。」
+    //
+    // 本条目是**新增一条 services[] 元素**，不是往既有 channel 分支的超长 alternation 里并 ——
+    // 那一支是单行超长正则，多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在 services[] 的**最末尾**（紧挨着 16.2.2.1 的 `compliance-precheck` 元素
+    // 之后、`];` 之前），与另外三条车道的插入点互不重叠。
+    //
+    // 🔴 为什么用 `return-disposals` 这个独立前缀：
+    //   * 既有 `return-dispositions` 是 **10.7.1.1 退货接收与处置决策**（决定去哪儿），
+    //     `return-shipbacks` 是 **10.7.1.2 退运回国**（真的把货凑成一批运回国），
+    //     本模块是 **10.7.1.3 弃置与销毁**（真的把货毁掉并**留证**）—— 三个模块
+    //     不共用表、不共用端点、不共用页面，语义上必须分得开。
+    //   * 既有两条正则都是**锚定**的（`/^return\-dispositions(...)$/`、`/^return\-shipbacks(...)$/`），
+    //     首 token 不同就**不会互相吃掉**：`return-disposals` 与 `return-dispositions` 差一个尾字母。
+    //   * `return-quality`（11.2.3.1 质检）与 `return-receipts`（11.2.2.1 退货入库）在 **trade** 服务，
+    //     命名空间本就不同；`refunds` / `supplier-claims` 更是无关。
+    //   * 已用脚本逐条核对本文件里**全部 73 条**既有正则：`return-disposals/**` **零命中**
+    //     （既有分支不会先把它吃掉）。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   return-disposals/capabilities              能力声明（凭证闸 / 枚举词表 / 未交付下游逐条写明 ownerModule）
+    //   return-disposals/overview                  全量概览（不受筛选与分页影响）
+    //   return-disposals/candidates                待销毁清单（只取 10.7.1.1 判为「弃置销毁」的处置单）
+    //   return-disposals/policies                  凭证要求集合读（GET，真分页 + 筛选）/ 登记（POST）
+    //   return-disposals/policies/{uuid}/revoke    撤销凭证要求（POST，必须写理由）
+    //   return-disposals/orders                    销毁单集合读（GET，真分页 + 筛选）/ 建销毁单（POST）
+    //   return-disposals/orders/{uuid}             销毁单详情（GET，含凭证 / 费用 / 索赔依据 / 留痕）
+    //   return-disposals/orders/{uuid}/schedule    排期（POST，**凭证要求在这一刻冻结**）
+    //   return-disposals/orders/{uuid}/evidence    登记一类凭证（POST）
+    //   return-disposals/orders/{uuid}/costs       记一笔销毁费用（POST）
+    //   return-disposals/orders/{uuid}/claim-basis 生成索赔依据（POST）
+    //   return-disposals/orders/{uuid}/dispose     执行销毁（POST，🔴 凭证不齐直接 422）
+    //   return-disposals/orders/{uuid}/cancel      取消销毁单（POST，必须写理由）
+    //   return-disposals/claim-bases/{uuid}/submit 提交下游索赔（POST，回填下游单号）
+    //   return-disposals/claim-bases/{uuid}/reject 下游驳回（POST，必须写理由）
+    //   return-disposals/events                    留痕集合读（GET，真分页 + 筛选）
+    //
+    // ⚠️ 判别顺序：**字面量子路径（capabilities / overview / candidates / policies / events）
+    //    排在 {uuid} 段之前** —— alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），不是 `[0-9a-f-]+` ——
+    //    后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行。
+    // ⚠️ 外层分组**不带 `?`**：本模块没有裸集合读，放行裸路径 `return-disposals` 就是凭空多出一条 GET。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸路径 `return-disposals` —— 本模块没有裸路径资源。
+    //   * `return-disposals/orders/{uuid}/costs/{uuid}` —— 费用没有独立删除端点。
+    //   * `return-disposals/orders/{uuid}/repatriation` —— 「退运回国」是 10.7.1.2 的主权。
+    //   * `return-disposals/policies/{uuid}` —— 凭证要求**按主体定位**（品牌 / 平台 / 租户默认），
+    //     没有「按 id 取单条」这个端点。
+    //   * `return-disposals/claim-bases/{uuid}` —— 索赔依据挂在销毁单下，按销毁单寻址。
+    //   * `return-disposals/claim-bases/{uuid}/delete` —— 依据不可删（删了就等于没索赔过）。
+    //   * `return-disposals/orders/{uuid}/delete` —— 销毁单不可删（不可删是状态机的一部分）。
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^return\-disposals(?:\/(?:capabilities|overview|candidates|events)|\/policies(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/revoke)?|\/orders(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:schedule|evidence|costs|claim-basis|dispose|cancel))?)?|\/claim-bases\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/(?:submit|reject))$/,
+  },
+  {
+    // 5.2.2.1 汇率查询：各币种对各本位币的汇率（方向 + 汇率 + 生效日 + 来源）、来源配置与外部拉取。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   exchange-rates                                 汇率台账（集合读）+ 手工录入（POST）
+    //   exchange-rates/capabilities                    能力声明（方向 / 唯一性 / 反向 / 下游状态）
+    //   exchange-rates/latest                          某币种对最新的一条汇率（asOf 查询）
+    //   exchange-rates/functional-currencies           各币种对各本位币的汇率（读 identity 的法人本位币）
+    //   exchange-rates/sources                         来源配置列表（GET）+ 新建来源（POST）
+    //   exchange-rates/sources/initialize              初始化内置来源（POST，幂等）
+    //   exchange-rates/sources/{code}                  修改来源配置（PUT；按**来源代码**寻址，不是 uuid）
+    //   exchange-rates/fetch                           外部拉取（POST）
+    //   exchange-rates/fetch-log                       拉取日志（只读）
+    //   exchange-rates/{id}                            汇率详情（GET）+ 更正（PUT）
+    //
+    // 🔴 `capabilities` / `latest` / `sources` / `fetch` 等字面量段排在 uuid 分支**之前**判别：
+    //     字面量先判，两类不会互相吃掉。
+    // 🔴 `sources/{code}` 的 code 是**来源代码**（如 BANK_OF_CHINA），不是 uuid ——
+    //     所以这一段用字符集而不是 {uuid} 段。
+    //
+    // 刻意**不**放行：5.2.2.2 汇率快照尚未交付（它上游是本模块）——
+    // 放行后端不存在的路径比 404 更糟，界面会以为功能已交付。
+    //
+    // 与既有分支不重叠：既有 `catalog/` 长正则里没有 `exchange-rates`，
+    // 所以本元素既不会被它遮蔽，也不会遮蔽它。
+    prefix: 'catalog/',
+    env: 'CATALOG_URL',
+    fallback: 'http://127.0.0.1:8082',
+    pattern:
+      /^exchange\-rates(?:\/(?:capabilities|latest|functional\-currencies|sources(?:\/initialize|\/[A-Za-z0-9_]{2,32})?|fetch|fetch\-log)|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?$/,
+  },
+  {
+    // 5.2.2.2 汇率快照（catalog 服务，卷 05「定价与价目」的 L3 锚点 5.2.2）。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   exchange-rate-snapshots                      快照台账（集合读）+ 冻结快照（POST）
+    //   exchange-rate-snapshots/capabilities         能力声明（冻结 / 方向 / 舍入规则）
+    //   exchange-rate-snapshots/replay               复算（POST，纯计算不写库）
+    //   exchange-rate-snapshots/rounding-rules       舍入规则配置（GET）+ 新建（POST）
+    //   exchange-rate-snapshots/rounding-rules/initialize  初始化内置舍入规则（POST，幂等）
+    //   exchange-rate-snapshots/rounding-rules/{code} 修改舍入规则（PUT；按**规则代码**寻址，不是 uuid）
+    //   exchange-rate-snapshots/{id}                 快照详情（GET）
+    //
+    // 🔴 `capabilities` / `replay` / `rounding-rules` 等字面量段排在 uuid 分支**之前**判别：
+    //     字面量先判，两类不会互相吃掉。
+    // 🔴 `rounding-rules/{code}` 的 code 是**规则代码**（如 JPY / DEFAULT），不是 uuid ——
+    //     所以这一段用字符集而不是 {uuid} 段。
+    //
+    // 刻意**不**放行：本模块**没有** UPDATE / DELETE 端点（快照是只追加的冻结事实），
+    // 也没有「导出」「批量冻结」这类不存在的形状 ——
+    // 放行后端不存在的路径比 404 更糟，界面会以为功能已交付。
+    //
+    // 与既有分支不重叠：既有 `catalog/` 长正则里没有 `exchange-rate-snapshots`，
+    // 而本条目的首 token `exchange-rate-snapshots` 与兄弟模块的 `exchange-rates` 也是两个 token，
+    // 两者不会互相吃掉。
+    prefix: 'catalog/',
+    env: 'CATALOG_URL',
+    fallback: 'http://127.0.0.1:8082',
+    pattern:
+      /^exchange\-rate\-snapshots(?:\/(?:capabilities|replay|rounding\-rules(?:\/initialize|\/[A-Za-z0-9_]{2,32})?)|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?$/,
+  },
+  {
+    // 5.2.1.3 成本分摊（catalog 服务，卷 05「定价与价目」的 L3 锚点 5.2.1）。
+    //
+    // 蓝图：「把混合成本的货件（一次采购多个 SKU 共用头程）按重量/体积/金额/数量规则分摊到各 SKU，
+    // 支持人工微调并留痕。……**分摊规则变更会导致历史利润变化**，因此调整必须留历史版本，不能就地覆盖。」
+    //
+    // 本条目是**新增一条 services[] 元素**，不是往既有 catalog 分支的超长 alternation 里并 ——
+    // 那一支是单行超长正则，多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在 services[] 的**最末尾**（紧挨着 10.7.1.3 的 `return-disposals` 元素之后、
+    // `];` 之前），与并行车道的插入点互不重叠。
+    //
+    // 🔴 为什么用 `cost-allocations` 这个独立前缀：
+    //   * 既有 catalog 分支的 alternation 里没有 `cost-allocations`（用脚本逐条核对了本文件里
+    //     **全部 77 条**既有正则：`cost-allocations/**` **零命中**，既有分支不会先把它吃掉）。
+    //   * channel 服务的 `CostAllocation*` DTO 家族（10.6.1.1 物流成本分析）是**服务端类型名**，
+    //     与这里的**浏览器侧路径**是两回事；本模块的端点挂在 catalog 的命名空间下，
+    //     前缀互不重叠（`catalog/` vs `channel/`）。
+    //   * 5.2.1.1 的 `sku-cost-compositions`（成本构成）与 5.2.1.2 的到岸成本各自独立，
+    //     本前缀与它们不共用首 token。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   cost-allocations                              分摊单台账（GET，筛选/分页在服务端）+ 新建分摊单（POST）
+    //   cost-allocations/capabilities                 能力声明（四条规则 / 两种来源 / 四个基数的口径）
+    //   cost-allocations/sources                      可分摊的货件候选（头程发运单，GET）
+    //   cost-allocations/{uuid}                       分摊单明细（GET）
+    //   cost-allocations/{uuid}/revisions             版本历史（GET）+ 应用重算追加新版本（POST）
+    //   cost-allocations/{uuid}/revisions/{no}        某一个版本的快照明细（GET）
+    //   cost-allocations/{uuid}/recalculate           试算重算（POST，**不落库**）
+    //   cost-allocations/{uuid}/diffs                 两版之间的差异对比（GET）
+    //
+    // ⚠️ 判别顺序：**字面量子路径（capabilities / sources）排在 {uuid} 段之前** ——
+    //    alternation 是首个命中即返回，而 `capabilities` 的首字母 `c` 落在 [0-9a-f] 里，
+    //    顺序反了会被 uuid 支吃掉半截（这是本仓反复踩过的坑）。
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），不是 `[0-9a-f-]+` ——
+    //    后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行。
+    // ⚠️ 版本号段用 `\d+`（不是 UUID）：它是 int。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `cost-allocations/{uuid}/lines` —— 明细行随明细与版本一起读，没有独立端点。
+    //   * `cost-allocations/{uuid}/delete` —— 历史不可变，分摊单不可删（删了就等于没版本历史）。
+    //   * `cost-allocations/batch` —— 没有批量分摊。
+    //   * 5.2.1.1 的 `sku-cost-compositions/{uuid}/allocations` —— 那条分支**刻意不放行**：
+    //     成本构成不提供「就地分摊」的入口（分摊是 5.2.1.3 自己的资源）。
+    prefix: 'catalog/',
+    env: 'CATALOG_URL',
+    fallback: 'http://127.0.0.1:8082',
+    pattern:
+      /^cost\-allocations(?:\/(?:capabilities|sources)|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:revisions(?:\/[0-9]+)?|recalculate|diffs))?)?$/,
+  },
+  {
+    // 5.2.3.2 物流与头程费用（catalog 服务，卷 05 定价与价目的 L3 锚点 5.2.3）。
+    //
+    // 蓝图：「维护物流渠道的计费规则（按重量 / 体积 / 件数、燃油附加、旺季附加、偏远附加）
+    // 与头程费用结构，用于测算运费占成本比。」输入「渠道计费规则 / 附加费参数 /
+    // 头程运输方式费用」，输出「费用规则集 + 测算输入」，
+    // 上游 = 10 物流与头程（**卷级引用**），下游 = 5.3.1.1 测算。
+    //
+    // 本条目是**新增一条 services[] 元素**，既有条目一字未动（插入锚点固定在
+    // 5.2.1.3 成本分摊之后、5.2.3.1 平台费用之前，与另外几条车道的插入点互不重叠）。
+    //
+    // 🔴 为什么用 `logistics-freight` 这个独立顶级前缀：
+    //   * 既有 catalog 分支是**一条**覆盖全服务的长 alternation，里面没有 `logistics-freight`；
+    //     已用脚本逐条核对本文件里**全部 110 条**既有正则：`logistics-freight/**` **零命中**
+    //     （既有分支不会先把它吃掉）。
+    //   * 5.2.3.1 平台费用与本模块共用页面路由 /pricing/fees，但**不共用端点**：
+    //     本车道只交付 5.2.3.2，不代兄弟模块开形状，也不挂在 `platform-fees/` 之下。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   logistics-freight/capabilities                     能力声明（逐维度写明取不到没有 / 归谁管）
+    //   logistics-freight/rules                            渠道计费规则集合读（GET）/ 新建（POST）
+    //   logistics-freight/rules/{uuid}                     规则详情（GET，含阶梯）
+    //   logistics-freight/rules/{uuid}/supersede           新增一个版本并取代旧版本（POST，不可变优先）
+    //   logistics-freight/rules/{uuid}/disable             停用一条规则版本（POST，必须写理由）
+    //   logistics-freight/surcharges                       附加费集合读（GET）/ 登记（POST）
+    //   logistics-freight/surcharges/{uuid}/disable        停用一条附加费（POST，必须写理由）
+    //   logistics-freight/head-freight/structures          头程费用结构集合读（GET）/ 新建（POST）
+    //   logistics-freight/head-freight/structures/{uuid}    头程费用结构明细（GET，含成本项）
+    //   logistics-freight/head-freight/structures/{uuid}/disable  停用一条头程结构（POST）
+    //   logistics-freight/head-freight/estimate           头程费测算（GET，逐项成本拆解）
+    //   logistics-freight/estimate                         渠道运费测算（GET，逐步拆解）
+    //   logistics-freight/actuals                          实际运费集合读（GET）/ 登记（POST）
+    //   logistics-freight/actuals/{uuid}/void              作废一条实际运费（POST，必须写理由）
+    //   logistics-freight/variance                         运费差异对照（GET，实际 vs 按规则测算）
+    //
+    // ⚠️ 判别顺序：**字面量子路径（capabilities / estimate / variance / actuals / rules /
+    //    surcharges）排在 {uuid} 段之前** —— alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），不是 `[0-9a-f-]+` ——
+    //    后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行。
+    // ⚠️ 外层分组**不带 `?`**：本模块没有裸集合读，放行裸路径 `logistics-freight` 就是凭空多出一条 GET。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸路径 `logistics-freight` —— 本模块没有裸路径资源。
+    //   * `logistics-freight/rules/{uuid}/delete` —— 规则不可删（要停用请走 /disable）。
+    //   * `logistics-freight/rules/{uuid}/tiers` —— 阶梯随规则整体写入，没有独立的替换端点
+    //     （不可变优先：改档位 = 新增一个版本）。
+    //   * `logistics-freight/actuals/{uuid}` —— 实际运费没有「按 id 取单条」这个端点，也不可就地改写
+    //     （只追加 + 作废留理由）。
+    //   * `logistics-freight/surcharges/{uuid}` —— 同上。
+    //   * `logistics-freight/head-freight/structures/{uuid}/update` —— 同上。
+    prefix: 'catalog/',
+    env: 'CATALOG_URL',
+    fallback: 'http://127.0.0.1:8082',
+    pattern:
+      /^logistics-freight(?:\/capabilities|\/estimate|\/variance|\/actuals(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/void)?|\/rules(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:supersede|disable))?)?|\/surcharges(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/disable)?|\/head-freight(?:\/estimate|\/structures(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/disable)?)?))$/,
+  },
+  {
+    // 5.2.3.1 平台费用（catalog 服务，卷 05 定价与价目的 L3 锚点 5.2.3）。
+    //
+    // 蓝图：「维护平台侧费用的计算规则：佣金比例或阶梯、订阅费分摊、Referral Fee、交易费、
+    // 罚款类型，用于利润测算的扣项。」输出「费用规则；测算时的费用项」，
+    // 并加粗「**规则参数用于事前测算，实际费用来自 12 的结算对账**——两者差额要在利润报表中
+    // 显性展示为『费用差异』，否则测算永远不准却不知道为什么」。
+    //
+    // 本条目是**新增一条 services[] 元素**，不是往既有 catalog 长正则里并 ——
+    // 那一支是单行超长正则，多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在 services[] 的**最末尾**（紧挨着 10.7.1.3 的 `return-disposals` 元素之后、
+    // `];` 之前），与另外三条车道的插入点互不重叠。既有条目一字未动。
+    //
+    // 🔴 为什么用 `platform-fees` 这个独立前缀：
+    //   * 既有 catalog 分支是**一条**覆盖全服务的长 alternation，里面没有 `platform-fees`；
+    //     已用脚本逐条核对本文件里**全部 77 条**既有正则：`platform-fees/**` **零命中**
+    //     （既有分支不会先把它吃掉）。
+    //   * 5.2.3.2 物流与头程费用与本模块共用页面路由 /pricing/fees，但**不共用端点**：
+    //     本车道只交付 5.2.3.1，不代未交付的兄弟模块开形状。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   platform-fees/capabilities        能力声明（逐维度写明取不到没有 / 归谁管）
+    //   platform-fees/directory           平台 / 站点目录（上游 2 平台目录，channel 授权只读）
+    //   platform-fees/rules               规则集合读（GET，真分页 + 筛选）/ 新建（POST）
+    //   platform-fees/rules/{uuid}        规则详情（GET）/ 修改（PUT，乐观锁）
+    //   platform-fees/rules/{uuid}/tiers  整体替换阶梯（PUT）
+    //   platform-fees/estimate            费用测算（GET，逐项费用 + 合计完整性）
+    //   platform-fees/actuals             实际费用集合读（GET）/ 登记（POST）
+    //   platform-fees/actuals/{uuid}/void 作废实际费用（POST，必须写理由）
+    //   platform-fees/variance            费用差异对照（GET，实际 vs 按规则测算）
+    //
+    // ⚠️ 判别顺序：**字面量子路径（capabilities / directory / estimate / variance /
+    //    actuals / rules）排在 {uuid} 段之前** —— alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），不是 `[0-9a-f-]+` ——
+    //    后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行。
+    // ⚠️ 外层分组**不带 `?`**：本模块没有裸集合读，放行裸路径 `platform-fees` 就是凭空多出一条 GET。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸路径 `platform-fees` —— 本模块没有裸路径资源。
+    //   * `platform-fees/rules/{uuid}/delete` —— 费率规则不可删（要停用请把 enabled 置 false 并设生效终点）。
+    //   * `platform-fees/actuals/{uuid}` —— 实际费用没有「按 id 取单条」这个端点，也不可就地改写
+    //     （只追加 + 作废留理由）。
+    //   * `platform-fees/actuals/{uuid}/update` —— 同上，改金额等于让历史事实可回溯修改。
+    //   * `platform-fees/logistics` —— 🔴 5.2.3.2 物流与头程费用**未交付**，本模块不代它开形状。
+    prefix: 'catalog/',
+    env: 'CATALOG_URL',
+    fallback: 'http://127.0.0.1:8082',
+    pattern:
+      /^platform-fees(?:\/capabilities|\/directory|\/estimate|\/variance|\/actuals(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/void)?|\/rules(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/tiers)?)?)$/,
+  },
+  {
+    // 5.3.2.2 价格规则（catalog 服务，卷 05 定价与价目的 L3 锚点 5.3.2）。
+    //
+    // 蓝图：「定义自动调价规则：触发条件（库存低于阈值/竞品降价/成本上涨/毛利低于下限/库龄超期）
+    // + 动作（降价/涨价/暂停促销/下架），支持优先级与生效时段。」输入「规则条件与动作；作用范围；
+    // 生效时段」，输出「规则记录 + 命中记录 + 建议调价列表」，并加粗
+    // 「**自动调价必须先"建议"再"执行"**，高风险规则（降价超过 X%）需人工确认，
+    // 避免错误规则批量改价造成损失」。
+    //
+    // 本条目是**新增一条 services[] 元素**，不是往既有 catalog 长正则里并 ——
+    // 那一支是单行超长正则，多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在「5.3.2.1 定价模板」元素**之前**，与另外几条车道的插入点互不重叠。
+    // 既有条目一字未动。
+    //
+    // 🔴 为什么用 `pricing-rules` 这个独立前缀：
+    //   * 既有 catalog 分支是**一条**覆盖全服务的长 alternation，里面没有 `pricing-rules`；
+    //     已用脚本逐条核对本文件里**全部既有正则**：`pricing-rules/**` **零命中**
+    //     （既有分支不会先把它吃掉）。
+    //   * 5.3.2.1 定价模板与本模块共用 L3 锚点 5.3.2，但**不共用端点**：
+    //     模板是「怎么算」，本模块是「什么时候改、改成多少」。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   pricing-rules/capabilities                 能力声明（触发条件 / 动作 / 作用范围 / 状态）
+    //   pricing-rules/directory                    作用范围目录（内部分类 + 品牌）
+    //   pricing-rules/rules                        规则集合读（GET，真分页 + 筛选）/ 新建（POST）
+    //   pricing-rules/rules/{uuid}                 规则详情（GET）/ 修改（PUT，乐观锁）/ 删除（DELETE）
+    //   pricing-rules/evaluate                     跑一次评估（POST）→ 命中记录 + 建议调价列表
+    //   pricing-rules/hits                         命中记录（GET，真分页 + 筛选）
+    //   pricing-rules/suggestions                  建议调价列表（GET，真分页 + 筛选）
+    //   pricing-rules/suggestions/{uuid}/decide    人工确认 / 驳回一条建议（POST）
+    //
+    // ⚠️ 判别顺序：**字面量子路径（capabilities / directory / rules / evaluate / hits /
+    //    suggestions）排在 {uuid} 段之前** —— alternation 是首个命中即返回，
+    //    顺序反了会被 uuid 支吃掉半截（`rules` / `suggestions` 的首字母都落在 [0-9a-f] 里）。
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），不是 `[0-9a-f-]+` ——
+    //    后者会把 `rules` 这种非 UUID 形状也当成 id 放行。
+    // ⚠️ 外层分组**不带 `?`**：本模块没有裸集合读，放行裸路径 `pricing-rules` 就是凭空多出一条 GET。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸路径 `pricing-rules` —— 本模块没有裸路径资源。
+    //   * `pricing-rules/rules/{uuid}/execute` —— 🔴 本模块只产出**建议调价**，
+    //     **不改价**：改价是 5.4.1.1 调价单的写入所有权（蓝图关系句：下游 = 5.4.1.1）。
+    //   * `pricing-rules/rules/{uuid}/prices` —— 本模块**不建价目表**（5.1.1.2 的写入所有权）。
+    //   * `pricing-rules/suggestions/{uuid}/apply` —— 建议调价没有「直接执行」的端点：
+    //     高风险建议必须先经 `decide` 人工确认。
+    prefix: 'catalog/',
+    env: 'CATALOG_URL',
+    fallback: 'http://127.0.0.1:8082',
+    pattern:
+      /^pricing\-rules(?:\/(?:capabilities|directory|evaluate|hits|rules|suggestions)|\/rules\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}|\/suggestions\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/decide)$/,
+  },
+  {
+    // 5.3.2.1 定价模板（catalog 服务，卷 05 定价与价目的 L3 锚点 5.3.2）。
+    //
+    // 蓝图：「沉淀定价策略模板：成本加成、固定毛利、竞品跟随（若允许）、按站点差异化、
+    // 按库存周转调整，新品与老品用不同模板。」输入「模板定义（基准 + 调整项）；适用对象
+    // （分类/品牌/店铺）」，输出「模板记录；一键应用到商品生成建议价」，
+    // 并加粗「**模板是"怎么算"，价目表是"算完是多少"**」。
+    //
+    // 本条目是**新增一条 services[] 元素**，不是往既有 catalog 长正则里并 ——
+    // 那一支是单行超长正则，多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在「5.2.3.1 平台费用」元素之后、「5.3.1.1 利润测算器」元素之前，
+    // 与另外三条车道的插入点互不重叠。既有条目一字未动。
+    //
+    // 🔴 为什么用 `pricing-templates` 这个独立前缀：
+    //   * 既有 catalog 分支是**一条**覆盖全服务的长 alternation，里面没有 `pricing-templates`；
+    //     已用脚本逐条核对本文件里**全部 84 条**既有正则：`pricing-templates/**` **零命中**
+    //     （既有分支不会先把它吃掉）。
+    //   * 5.3.2.2 价格规则与本模块共用 L3 锚点，但**不共用端点**：
+    //     本车道只交付 5.3.2.1，不代未交付的兄弟模块开形状。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   pricing-templates/capabilities          能力声明（基准 / 调整项 / 适用对象 / 商品阶段）
+    //   pricing-templates/directory             适用对象目录（内部分类 + 品牌）
+    //   pricing-templates/sites                 目标店铺（站点）列表，来自 2.1.1.1 平台目录
+    //   pricing-templates/templates             模板集合读（GET，真分页 + 筛选）/ 新建（POST）
+    //   pricing-templates/templates/{uuid}      模板详情（GET）/ 修改（PUT，乐观锁）/ 删除（DELETE）
+    //   pricing-templates/templates/{uuid}/apply 一键应用生成建议价（POST）
+    //   pricing-templates/applications         应用留痕（GET，真分页）
+    //
+    // ⚠️ 判别顺序：**字面量子路径（capabilities / directory / sites / applications / templates）
+    //    排在 {uuid} 段之前** —— alternation 是首个命中即返回，顺序反了会被 uuid 支吃掉半截。
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），不是 `[0-9a-f-]+` ——
+    //    后者会把 `templates` 这种非 UUID 形状也当成 id 放行。
+    // ⚠️ 外层分组**不带 `?`**：本模块没有裸集合读，放行裸路径 `pricing-templates` 就是凭空多出一条 GET。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸路径 `pricing-templates` —— 本模块没有裸路径资源。
+    //   * `pricing-templates/templates/{uuid}/prices` —— 本模块**不建价目表**（5.1.1.2 的写入所有权），
+    //     也不改生效价（5.4.1.1 调价单的写入所有权）：本模块只产出**建议价**。
+    //   * `pricing-templates/rules` —— 5.3.2.2 价格规则**未交付**，本模块不代它开形状。
+    prefix: 'catalog/',
+    env: 'CATALOG_URL',
+    fallback: 'http://127.0.0.1:8082',
+    pattern:
+      /^pricing\-templates(?:\/(?:capabilities|directory|sites|applications)|\/templates(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/apply)?)?)$/,
+  },
+  {
+    // 5.3.1.1 利润测算器：利润拆解（售价 → 每一项扣减 → 毛利）+ 测算方案。
+    // 形状逐个列出：
+    //   capabilities —— 能力声明（逐项标注上游真实交付状态与归谁管），字面量子路径；
+    //   sites —— 目标店铺（站点）列表，来自 2.1.1.1 平台目录，字面量子路径；
+    //   calculate —— 一次测算（POST），字面量子路径；
+    //   scenarios —— 方案集合（GET 列表 / POST 新建），字面量子路径；
+    //   scenarios/{uuid} —— 单个方案（GET 详情 / DELETE 删除）。
+    // `capabilities` 与 `calculate` 的首字母都落在 [0-9a-f] 里，但它们是**字面量**分支，
+    // 而 uuid 只出现在 `scenarios/` 之下 ⇒ 两者不会互相吃掉。
+    prefix: 'catalog/',
+    env: 'CATALOG_URL',
+    fallback: 'http://127.0.0.1:8082',
+    pattern:
+      /^profit-calculator(?:\/(?:capabilities|sites|calculate)|\/scenarios(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?)?$/,
+  },
+  {
+    // 5.3.1.2 批量测算：对一批 SKU 批量跑利润测算（利润表 + 亏损品/低毛利品标记 + 筛选 + 导出）。
+    // 形状逐个列出：
+    //   capabilities —— 能力声明（售价来源 / 上游真实交付状态 / 跳过规则），字面量子路径；
+    //   sites —— 目标店铺（站点）列表，来自 2.1.1.1 平台目录，字面量子路径；
+    //   runs —— 批次集合读（GET 列表）/ 新建批次（POST 发起批量测算），字面量子路径；
+    //   runs/{uuid} —— 单个批次（GET 详情）；
+    //   runs/{uuid}/results —— 结果表（GET，真分页 + 真筛选）；
+    //   runs/{uuid}/export —— 结果表 CSV 导出（GET，与列表共用同一套筛选）。
+    // ⚠️ 判别顺序：**字面量子路径（capabilities / sites / runs）排在 {uuid} 段之前** ——
+    //    alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    // ⚠️ `capabilities` 与 `sites` 的首字母落在 [0-9a-f] 里，但它们是**字面量**分支，
+    //    而 uuid 只出现在 `runs/` 之下 ⇒ 两者不会互相吃掉。
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），不是 `[0-9a-f-]+` ——
+    //    后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行。
+    // ⚠️ **刻意不放行裸路径** `batch-calculations`：本模块没有裸集合读，
+    //    放行它就是凭空多出一条 GET。
+    prefix: 'catalog/',
+    env: 'CATALOG_URL',
+    fallback: 'http://127.0.0.1:8082',
+    pattern:
+      /^batch-calculations(?:\/(?:capabilities|sites)|\/(?:runs(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:results|export))?)?))$/,
+  },
+  {
+    // 5.4.1.2 批量调价（catalog 服务，卷 05 定价与价目的 L3 锚点 5.4.1）。
+    //
+    // 蓝图：「**职责**：对选中的一批 listing 统一改价（固定金额/百分比/按模板），支持预览影响范围
+    // （涉及多少店铺、多少商品、预计利润变化）。**输入**：目标集合；调价参数；预览确认。
+    // **输出**：批量调价单 + 影响预览报告。**关系**：上游 = 5.3.1.2、4.1.1.1；下游 = 5.4.2.1。
+    // **必须先看预览再执行**，预览要包含"改完后预计亏损的商品数"这类反向指标。」
+    //
+    // 本条目是**新增一条 services[] 元素**，不是往既有 catalog 长正则里并 ——
+    // 那一支是单行超长正则，多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在「5.3.1.2 批量测算」元素之后、数组结尾的 `];` 之前（数组最末尾），
+    // 与同批另外三条车道的插入点互不重叠。既有条目一字未动。
+    //
+    // 🔴 为什么用 `batch-price-adjustments` 这个独立前缀：
+    //   * 既有 catalog 分支是**一条**覆盖全服务的长 alternation，里面没有 `batch-price-adjustments`；
+    //     已用脚本逐条核对本文件里**全部既有正则**：`batch-price-adjustments/**` **零命中**
+    //     （既有分支不会先把它吃掉）。
+    //   * 5.4.1.1 调价单与本模块共用 L3 锚点 5.4.1，但**不共用端点**：
+    //     本车道只交付 5.4.1.2，不代未交付的兄弟模块开形状。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   batch-price-adjustments              集合读（GET 调价单台账）/ 执行批量调价（POST，带预览令牌）
+    //   batch-price-adjustments/capabilities 能力声明（listing 的定义 / 当前价来源 / 预览闸 / 反向指标 / 舍入）
+    //   batch-price-adjustments/sites        目标店铺（站点）列表，来自 2.1.1.1 平台目录
+    //   batch-price-adjustments/preview      影响预览（POST，**无副作用**：后端在注定回滚的事务里跑它）
+    //   batch-price-adjustments/{uuid}       单张调价单（GET 详情）
+    //   batch-price-adjustments/{uuid}/items 明细（GET，真分页 + 真筛选）
+    //
+    // ⚠️ 判别顺序：**字面量子路径（capabilities / sites / preview）排在 {uuid} 段之前** ——
+    //    alternation 是首个命中即返回，顺序反了会被 uuid 支吃掉半截。
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），不是 `[0-9a-f-]+` ——
+    //    后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行。
+    // ⚠️ 外层分组**带 `?`**：本模块**有**裸集合路径（GET 列表 / POST 执行），所以裸路径要放行。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `batch-price-adjustments/{uuid}/items/export` —— 本模块**不导出 CSV**（蓝图的输出是
+    //     「调价单 + 影响预览报告」，不是导出件）；放行它只会让界面以为有下载按钮。
+    //   * `batch-price-adjustments/{uuid}/sync` —— 5.4.2.1 平台价格同步**未交付**，
+    //     本模块不代它开形状（那会把「已回写平台」这个动作凭空放出来）。
+    //   * `batch-price-adjustments/rules` —— 5.3.2.2 价格规则**未交付**，本模块不代它开形状。
+    prefix: 'catalog/',
+    env: 'CATALOG_URL',
+    fallback: 'http://127.0.0.1:8082',
+    pattern:
+      /^batch-price-adjustments(?:\/(?:capabilities|sites|preview)|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/items)?)?$/,
+  },
+  {
+    // 5.4.1.1 调价单（catalog 服务，卷 05 定价与价目的 L3 锚点 5.4.1）。
+    //
+    // 蓝图：「**职责**：发起价格变更：选择 SKU 与目标店铺、输入新旧价、说明原因、提交审批（若启用）；
+    // 记录变更前后值。**输入**：调价请求；`expected_version`；审批要求（17 组织的审批规则）。
+    // **输出**：调价单（草稿/待审/已批/已执行/已驳回）；生效后触发平台回写。
+    // **关系**：上游 = 5.3.1.1、5.3.2.2；下游 = 5.4.2.1、17 审批。**调价是受控动作**：
+    // 大额或大幅调价走审批，普通调整可配置免审。」
+    //
+    // 本条目是**新增一条 services[] 元素**，不是往既有 catalog 长正则里并 ——
+    // 那一支是单行超长正则，多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在「5.4.1.2 批量调价」元素之后、数组结尾的 `];` 之前（数组最末尾），
+    // 与同批另外三条车道的插入点互不重叠。既有条目一字未动。
+    //
+    // 🔴 为什么用 `price-adjustments` 这个独立前缀：
+    //   * 既有 catalog 分支是**一条**覆盖全服务的长 alternation，里面没有 `price-adjustments`；
+    //     已用脚本逐条核对本文件里**全部既有正则**：`price-adjustments/**` **零命中**
+    //     （既有分支不会先把它吃掉）。
+    //   * 5.4.1.1 调价单与 5.4.1.2 批量调价共用 L3 锚点 5.4.1，但**不共用端点**：
+    //     一张单与一批批量的生命周期、审批口径、版本闸都不一样。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   price-adjustments                        集合读（GET 台账）/ 建单（POST，草稿）
+    //   price-adjustments/capabilities           能力声明（listing 的定义 / 当前价来源 / 审批口径 / 状态机 / 版本闸 / 舍入）
+    //   price-adjustments/current-price          当前价解析（GET；取不到时后端返回 price=null 而不是 0）
+    //   price-adjustments/writebacks             待回写事实（GET，真分页 + 真筛选）—— 给下游 5.4.2.1
+    //   price-adjustments/writebacks/{uuid}/ack  待回写事实的回执（POST，由下游 5.4.2.1 调用）
+    //   price-adjustments/{uuid}                 单张调价单（GET 详情；读详情会顺带拉一次审批状态）
+    //   price-adjustments/{uuid}/submit          提交（草稿 → 待审 / 已批）
+    //   price-adjustments/{uuid}/execute         执行（已批 → 已执行，并产出待回写事实）
+    //   price-adjustments/{uuid}/reject          驳回（草稿 / 待审 → 已驳回）
+    //   price-adjustments/{uuid}/approval/refresh 刷新审批状态（拉取式同步 17 组织的审批结论）
+    //
+    // ⚠️ 判别顺序：**字面量子路径（capabilities / current-price / writebacks）排在 {uuid} 段之前** ——
+    //    alternation 是首个命中即返回，顺序反了会被 uuid 支吃掉半截。
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），不是 `[0-9a-f-]+` ——
+    //    后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行。
+    // ⚠️ `writebacks/{uuid}/ack` 的 uuid 段**必须**在 `ack` 之前，且 `ack` 是**唯一**允许的后缀 ——
+    //    `writebacks/{uuid}`（没有 ack）这个形状后端**不存在**，放行它会让界面以为能查单条回写。
+    // ⚠️ 外层分组**带 `?`**：本模块**有**裸集合路径（GET 列表 / POST 建单），所以裸路径要放行。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `price-adjustments/{uuid}/sync` —— 5.4.2.1 平台价格同步**未交付**，
+    //     本模块只产出「待回写」事实，不代它开形状（那会把「已回写平台」这个动作凭空放出来）。
+    //   * `price-adjustments/{uuid}/approve` —— 审批结论由 17 组织那边的人做出，
+    //     本模块**没有**「本地批准」端点：凭空放行它等于把审批流本地化，
+    //     而 identity 那边会什么都不知道（那边还有一条永远没人管的待办）。
+    //   * `price-adjustments/{uuid}/export` —— 本模块**不导出 CSV**（蓝图的输出是调价单，
+    //     不是导出件）；放行它只会让界面以为有下载按钮。
+    //   * `price-adjustments/rules` —— 5.3.2.2 价格规则的端点不是本模块的形状。
+    //   * `price-adjustments/approval-rules` —— 审批规则**归 17 组织**（identity 的
+    //     `/identity/approval-rules/**`），本模块只做**求值**，不代它开配置形状。
+    prefix: 'catalog/',
+    env: 'CATALOG_URL',
+    fallback: 'http://127.0.0.1:8082',
+    pattern:
+      /^price-adjustments(?:\/(?:capabilities|current-price|writebacks)(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/ack)?|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:submit|execute|reject|approval\/refresh))?)?$/,
   },
 ];
 
