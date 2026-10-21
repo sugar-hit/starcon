@@ -12,10 +12,10 @@
 | 指标 | 数量 |
 | --- | --- |
 | 模块总数 | 465 |
-| 已交付 | 266 |
+| 已交付 | 267 |
 | 进行中 | 0 |
-| **未开发** | **199** |
-| 完成率 | 57.2% |
+| **未开发** | **198** |
+| 完成率 | 57.4% |
 
 ## 分阶段进度（交付顺序看这里）
 
@@ -25,7 +25,7 @@
 | **D3** | 36 | 0 | 4 | 40 |
 | **D4** | 58 | 0 | 2 | 60 |
 | **D5** | 52 | 0 | 0 | 52 |
-| **D6** | 26 | 0 | 52 | 78 |
+| **D6** | 27 | 0 | 51 | 78 |
 | **D7** | 14 | 0 | 141 | 155 |
 
 ## 分系统进度
@@ -37,7 +37,7 @@
 | 03 | 商品主数据系统 | D1–D2 | 40 | 40 |
 | 04 | 刊登与内容系统 | D5 | 26 | 26 |
 | 05 | 定价与价目系统 | D6 | 15 | 19 |
-| 06 | 采购与供应系统 | D6 | 10 | 26 |
+| 06 | 采购与供应系统 | D6 | 11 | 26 |
 | 07 | 库存核算系统 | D3 | 28 | 31 |
 | 08 | 仓储作业系统 | D3 / D4 | 21 | 22 |
 | 09 | 订单履约系统 | D4 / D5 | 27 | 27 |
@@ -245,7 +245,7 @@
 | 6.4.1.2 | BOM 关联 | /purchase/processing | D6 | 已交付 | 迁移 trade `V98__processing_bom_binding.sql`（两张新表：processing_bom_snapshot 冻结快照头 + processing_bom_snapshot_line 展开树明细；tenant_id NOT NULL + ENABLE/FORCE RLS + GRANT trade_app/starcon_app，并按「授权在前、收回在后」REVOKE UPDATE/DELETE；一单一快照 UNIQUE(tenant_id,order_id)，TRUNCATED ⇒ reached_depth=max_depth，行数/采购行数自洽，4 个触发器：快照与明细不可改写、快照与明细写入时必须挂在草稿态加工单上）。**冻结语义是快照不是引用**：拍平 catalog 3.5.2.2 的整棵展开树（depth/path/子 BOM 判定/来源版本/单位用量/损耗率/需求量/可用/在途/缺口），读快照**不 join catalog、不 join 当前 BOM**，所以 BOM 中途改配影响不到已下达的加工单 —— 集成测试 `snapshotSurvivesBomChange` 改掉整棵 BOM 后逐行断言七列原封不动。**与 6.4.1.1 是互补不是重复**：6.4.1.1 冻结的是单层领料清单（processing_order_component，问「要领哪些料」），本模块冻结的是多层展开树（问「这批料当时按哪棵树、哪一版算的」）；不 ALTER 任何 V97 表、不加指向 processing_order 的 CHECK/触发器，跨车道 DDL 回归面 = 0（trade 全量 85 例含 6.4.1.1 的 27 例全绿）。**R1–R7 逐字沿用不另立一套**：展开由 catalog 3.5.2.2 真算，trade 只原样搬运；**R6 损耗率是百分数不是比率**（5 = 5%，scrap_rate NUMERIC(7,4) CHECK 0<=x<=100，服务层只做刻度对齐绝不做比率化）；R7 需求量 NUMERIC(19,6) 不取整；E1 逐层结转（深层按父行缺口驱动）因此必须同时冻结 available/in_transit/gap；E4 截断必须显形；R4 的 as_of 随快照冻结。对 catalog 的 V25/V26 表只存逻辑 ID，不建跨库 FK/视图/JOIN。端点 3 个：trade `POST/GET /trade/processing/orders/{orderId}/bom-binding`（冻结/读绑定，含漂移判定）+ `GET .../bom-binding/lines`（纯本地读展开树）；权限沿用 trade.processing.read/update，租户只来自已认证成员关系。页面 /purchase/processing 内嵌「BOM 冻结快照」面板（bom-binding-panel.tsx，与组件领用记录并排且明确区分；未冻结/空态/错误态/加载态齐全，截断显红，漂移告警措辞强调冻结仍然有效）。api-proxy 白名单**求并**追加 `bom-binding(?:\/lines)?` 一支（外层 2→2、module 层 4→4、orders 内层 3→4，逐分支核对无丢失），并写真 proxy 回归断言 9 例（含反向：refreeze/purge/delete/裸 bom-bindings 一律 404，且不误伤 6.4.1.1 与 9.3.2.2 既有分支）。测试 BomBindingIntegrationTest 21 例（trade，实跑 Testcontainers PostgreSQL 16，连接池压到 1，覆盖多租户三断言：两租户互不可见 / 伪造 X-Tenant-Id 无效且**断言行确实落在自称的租户名下** / 连接池归还后不串租户 20 轮）+ 前端 bom-binding-model.test.ts 11 例。契约由 codegen 重生成（catalog.ts +5 类型、trade.openapi.json +409 行，全部为新增）。 |
 | 6.4.2.1 | 质检单 | /purchase/quality | D6 | 未开发 | — |
 | 6.4.2.2 | 不良品处理 | /purchase/quality | D6 | 未开发 | — |
-| 6.5.1.1 | 采购对账 | /purchase/reconciliation | D6 | 未开发 | — |
+| 6.5.1.1 | 采购对账 | /purchase/reconciliation | D6 | 已交付 | 迁移 trade `V250__purchase_reconciliation.sql`（**五张新表、零 ALTER 零 DROP 既有表**，对 V188 `supplier_claim*`、V235 `purchase_arrival_tracking`/`purchase_arrival_receipt` 全部**只读**，跨车道 DDL 回归面 = 0）：`purchase_reconciliation`（对账单头）/ `purchase_reconciliation_line`（明细行）/ `purchase_reconciliation_discrepancy`（差异清单，可挂起）/ `purchase_reconciliation_confirmation`（供应商确认回执，追加式）/ `purchase_reconciliation_event`（留痕，追加式）。五表 tenant_id NOT NULL + ENABLE **与 FORCE** RLS isolation + GRANT trade_app/starcon_app；留痕表 UPDATE/DELETE 已收回，对账单头 / 明细行 / 差异条目**不提供 DELETE**（对账单是要与供应商对质的凭据）。 **对账基数只取自已交付事实**（本模块最关键的一条）：应收 = **6.3.2.2 到货流水**（`purchase_arrival_receipt` ⋈ `purchase_arrival_tracking`，同库只读；数量取本次到货量、单价与币种取到货跟踪单的采购单价快照），索赔 = **11.2.3.3 供应商索赔明细**（`supplier_claim_item`，同库只读，**不建影子表**；只计已提交 / 协商中 / 已达成 / 已结算四种状态），代扣代缴费用 = 采购登记。⚠️ 6.3.1.x 采购单未交付 ⇒ **不以采购单为基数**、也不为它建表；⚠️ **8.2.1.1 收货单已交付但 warehouse 侧不接受 PURCHASE 来源**（`requireSourceAvailable` 只放行 TRANSFER，因为 6.3.1 采购单未交付）⇒ 采购收货事实取自 6.3.2.2，warehouse 收货单号只作为**来源快照**带在明细行上 —— 这两条都在 capabilities 的 related 里如实报出。 **采购侧不确认应付**（蓝图加粗句「对账由采购发起、12 财务执行付款，两侧数据以对账单为交接点，避免采购擅自确认应付」）：本模块**没有**「应付已确认 / 已付款」的状态、字段与端点；汇总里唯一的应付数叫 `suggestedPayableAmount`（**建议**数）；`finance_handoff_status` 由**表级 CHECK 钉死**只能取 `PENDING_FINANCE_SERVICE` —— 也就是说**没有任何路径**能把交接状态写成「财务已确认」。⚠️ **12 财务服务在本仓不存在**（backend/services/ 下只有 identity / catalog / channel / warehouse / trade / crm）。 **未接线的事实要显式**（不是 0）：6.4.2.1 质检单与本模块**同批并行开发、此刻在集成头不存在**（既无 /purchase/quality 端点也无事实表）⇒ 走**只读端口 `QualityDeductionPort`**（本仓现成范式：`PurchasePlanLockPort` / `UnwiredPurchasePlanLockPort`），**当前只有未接线实现**（不写指向不存在端点的 HTTP 客户端 —— 那等于把一份不存在的契约固化进本仓）；未接线时明细行标 `quality_deduction_status='UNAVAILABLE'`、**`quality_deduction_quantity=NULL`（不是 0）**、并写明影响「本行应收数量尚未扣除质检不合格量」；DB 表级 CHECK 钉住「UNAVAILABLE ⇒ 扣量数量必须为 NULL」。capabilities 与详情 basis 的 unavailableSources 逐条报出 available=false + ownerModule + 影响说明。 **币种 + 汇率快照 + 单位换算必录**（卷 06 硬约束）：每行带 `currency` + `fx_rate` + `fx_rate_source` + `fx_rate_at` + `quantity`/`unit_code`/`unit_conversion`；**折算金额与基础数量由 DB 触发器算**（`statement_amount = amount × fx_rate`、`base_quantity = quantity × unit_conversion`），调用方传不进来；**跨币种绝按 1:1 折算** —— 服务层缺汇率 ⇒ 400，DB 触发器另行拒收「币种与对账单币种不同却没记汇率来源」的行。 **期间由服务端裁决，不悄悄改写**：`purchase_reconciliation_period_ok()` 是唯一口径（月度 = 某月 1 号到月末；季度 = 季首月 1 号到季末月末）；调用方给的起始日不对（或给了对不上的结束日）⇒ 400；同一口径由表级 CHECK 兜底。期间边界显式钉在 **UTC**（本仓尚无「租户时区」这个事实，留隐式本地时区会让同一张对账单在不同机器上算出不同期间）。 **差异逐条成行**：与供应商回执不一致的差异**逐条**落一行（差异类型 + 差在哪个字段 + 我方值 + 供应商值 + 差额 + 行号），不聚合成一个差额总数；供应商回执带**逐行**供应商值（数量 / 单价 / 金额）⇒ 差异是比出来的；「我方有对方没列 / 对方有我方没列」是**两个方向**的差异类型；差异可**挂起**（HELD）后再处理，解决必须写方式与说明、人与时刻（表级 CHECK），全部解决后自动推进到「已确认」。 端点 15 个挂 `/trade/purchase-reconciliations`：capabilities / options / 集合读(GET) + 发起对账(POST) / {id} / {id}/lines / {id}/deductions / {id}/send / {id}/confirmations / {id}/discrepancies(GET + POST) / {id}/discrepancies/{discrepancyId}/resolve / {id}/reopen / {id}/close / {id}/export(CSV 真导出)。 前端 `/purchase/reconciliation`（`purchase-reconciliation-{model,workspace}.tsx` + 路由页，**真实工作区**：顶部四卡 + **常驻「已知缺口」提示**（质检扣量未接入 / 12 财务未交付）+ 筛选（状态 / 供应商 / 期间类型 / 关键字）+ 明细行（数量 / 单位换算 / 单价 / 币种 / 汇率 / 原币与折算金额 / 质检扣量状态）+ 差异清单（逐条，可挂起可解决）+ 供应商回执录入（逐行填供应商值）+ 代扣代缴登记 + 发出 / 重开 / 关闭 + CSV 导出，**加载·空·错误三态齐全**，无占位数据；**刻意没有**「确认应付 / 付款」入口与「单价」输入框 —— 前者违反那条加粗句，后者把采购单价口径交给操作员自己编）。api-proxy **新增一条独立 services[] 元素**（不并进既有 trade 长正则，多车道并入 git 必冲突），插入锚点固定在既有 `prefix: 'trade/'`（9.2.1.2 审单规则）**之前**；根路径用独立字面量 `purchase-reconciliations`；**动手前逐条核对本文件里全部 100 条既有正则对 `purchase-reconciliations` 的命中数 = 0**（含 /capabilities /options /{uuid} /{uuid}/lines 等 7 个探针形状，Node 正则引擎逐条判定）。 **测试 17 例实跑 Testcontainers PostgreSQL 16**（PurchaseReconciliationIntegrationTest 13 + PurchaseReconciliationTenancyIntegrationTest 4，连接池压到 1，迁移实跑到 v250）：能力声明逐条报出未交付的质检扣量与 12 财务、**且动作表里没有可用的「确认应付 / 付款」**、发起对账按期间采集到货流水与索赔（数量 / 单价 / 金额逐个相等、汇总由 DB 触发器算）、**质检扣量未接线时是 NULL 而不是 0**、跨币种不给汇率快照被拒（400）、给了汇率快照才成立且折算由 DB 算（100 USD × 7.25 = 725 CNY）、期间由服务端裁决（月份非 1 号 ⇒ 400、给了对不上的结束日 ⇒ 400、季度 10-01~12-31 与 07-01~09-30）、供应商回执逐行比对产出**逐条**差异（数量差 −2 + 金额差 95/100）、差异可挂起、解决必须写方式与说明、**差异全部解决后自动推进到已确认**、没有明细的对账单不能发出、已发出的不能重复发、**在已交付事实里没有记录的供应商直接 400**（没有事实就没有对账基数）、代扣代缴登记且跨币种必须给汇率、CSV 真导出（含「上游未接线」与「采购侧不确认应付」字样）、金额 / 数量 / 汇率在库里是 **numeric** 不是浮点 · **多租户三断言实跑本模块五张表**：两租户互不可见（列表 / 按 id 直达 / 明细行 / 差异清单 / 写入口）、伪造 `X-Tenant-Id` 头无效（**在 RLS 上直接验证** —— 绑定 A 租户后**不带 tenant_id 谓词**也读不到 B 的行，证明是真隔离不是应用层过滤）、连接池压到 1 交替借还 5 轮不串租户 · 验证：L0 `./mvnw -q compile` EXIT=0；L1 `Tests run: 17, Failures: 0, Errors: 0` BUILD SUCCESS；前端 `pnpm vitest run apps/web/src/app/api` **126 文件 / 729 例全绿**（本车道改了共享白名单 api-proxy.ts，必须跑全量 allowlist 回归）、model 单测 20 例 + allowlist 5 例全绿、`pnpm typecheck` 3/3 successful、`pnpm lint` 3/3 successful。契约由 codegen 重生成（`python3 tools/codegen/catalog-contracts.py --spec-dir backend/target/openapi`；**按集合比对而非看 diff**：trade schemas 1228 → 1261（新增 33 个全部本模块）、**删除集为空**；paths 544 → 557（新增 13 条 = 15 个操作）；identity / catalog / channel / warehouse / crm 全部 **+0/-0**）。 **下游缺口（如实记录）**：12 财务（服务不存在）、6.4.2.1 质检单（同批并行开发）、6.3.1 采购单（未交付）、8.2.1.1 的 PURCHASE 来源（warehouse 侧未开放）—— 四项都在 capabilities 与详情 basis 里报 available=false + ownerModule + 影响说明，**绝不按 0 计入、绝不假装已完成**。 |
 | 6.5.2.1 | 采购分析 | /purchase/analytics | D6 | 未开发 | — |
 | 6.6.1.1 | 开发立项 | — | D6 | 未开发 | — |
 | 6.6.1.2 | 打样与样品管理 | — | D6 | 未开发 | — |
