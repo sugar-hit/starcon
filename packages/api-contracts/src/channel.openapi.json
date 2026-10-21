@@ -33522,6 +33522,445 @@
           }
         }
       }
+    },
+    "/channel/ad-reports/trend": {
+      "get": {
+        "tags": [
+          "ad-campaign-report-controller"
+        ],
+        "operationId": "get_channel_ad_reports_trend",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "granularity",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "DAY"
+            }
+          },
+          {
+            "name": "dimension",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "CAMPAIGN"
+            }
+          },
+          {
+            "name": "platformId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "shopCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "internalAdType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdCampaignReportTrend"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/ad-reports/rows": {
+      "get": {
+        "tags": [
+          "ad-campaign-report-controller"
+        ],
+        "operationId": "get_channel_ad_reports_rows",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "granularity",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "DAY"
+            }
+          },
+          {
+            "name": "dimension",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "CAMPAIGN"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "SPEND_DESC"
+            }
+          },
+          {
+            "name": "platformId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "shopCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "internalAdType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdCampaignReportPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/ad-reports/options": {
+      "get": {
+        "tags": [
+          "ad-campaign-report-controller"
+        ],
+        "operationId": "get_channel_ad_reports_options",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdCampaignReportOptions"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/ad-reports/exports": {
+      "get": {
+        "tags": [
+          "ad-campaign-report-controller"
+        ],
+        "operationId": "get_channel_ad_reports_exports",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdCampaignReportExportPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/ad-reports/export": {
+      "get": {
+        "tags": [
+          "ad-campaign-report-controller"
+        ],
+        "operationId": "get_channel_ad_reports_export",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "granularity",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "DAY"
+            }
+          },
+          {
+            "name": "dimension",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "CAMPAIGN"
+            }
+          },
+          {
+            "name": "platformId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "shopCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "internalAdType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/csv": {
+                "schema": {
+                  "$ref": "#/components/schemas/StreamingResponseBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/ad-reports/capabilities": {
+      "get": {
+        "tags": [
+          "ad-campaign-report-controller"
+        ],
+        "operationId": "get_channel_ad_reports_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdCampaignReportCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -80921,6 +81360,651 @@
         }
       },
       "AdBudgetCapabilityDimension": {
+        "type": "object",
+        "properties": {
+          "dimension": {
+            "type": "string",
+            "description": "维度键"
+          },
+          "description": {
+            "type": "string",
+            "description": "维度说明"
+          },
+          "available": {
+            "type": "boolean",
+            "description": "本模块是否已交付"
+          },
+          "source": {
+            "type": "string",
+            "description": "数据来源（表 / 上游模块）"
+          },
+          "ownerModule": {
+            "type": "string",
+            "description": "未交付段的责任模块"
+          },
+          "impact": {
+            "type": "string",
+            "description": "不交付的影响"
+          }
+        },
+        "description": "逐维度能力声明；未交付段 available=false"
+      },
+      "AdCampaignReportTrend": {
+        "type": "object",
+        "properties": {
+          "granularity": {
+            "type": "string",
+            "description": "时间粒度：DAY / WEEK / MONTH"
+          },
+          "series": {
+            "type": "array",
+            "description": "🔴 趋势线（按币种拆开）",
+            "items": {
+              "$ref": "#/components/schemas/AdCampaignReportTrendSeries"
+            }
+          },
+          "dataAsOf": {
+            "type": "string",
+            "description": "🔴 数据截至时刻",
+            "format": "date-time"
+          },
+          "metricDefinitions": {
+            "type": "array",
+            "description": "🔴 逐指标口径定义",
+            "items": {
+              "$ref": "#/components/schemas/AdReportMetricDefinition"
+            }
+          },
+          "emptyReason": {
+            "type": "string",
+            "description": "🔴 空态原因"
+          },
+          "emptyNote": {
+            "type": "string",
+            "description": "🔴 空态说明文案"
+          },
+          "metricDefinitionNote": {
+            "type": "string",
+            "description": "🔴 ACOS / ROAS / TACOS 口径说明"
+          }
+        }
+      },
+      "AdCampaignReportTrendPoint": {
+        "type": "object",
+        "properties": {
+          "periodStart": {
+            "type": "string",
+            "description": "该桶的起始日（DAY = 当天；WEEK = 该周周一；MONTH = 当月 1 日）",
+            "format": "date"
+          },
+          "impressions": {
+            "type": "string",
+            "description": "曝光合计"
+          },
+          "clicks": {
+            "type": "string",
+            "description": "点击合计"
+          },
+          "orders": {
+            "type": "string",
+            "description": "订单合计"
+          },
+          "spend": {
+            "type": "string",
+            "description": "花费合计"
+          },
+          "sales": {
+            "type": "string",
+            "description": "销售额合计"
+          },
+          "ctr": {
+            "type": "string",
+            "description": "🔴 CTR（分母为 0 时为 null=不可比）"
+          },
+          "cpc": {
+            "type": "string",
+            "description": "🔴 CPC（分母为 0 时为 null=不可比）"
+          },
+          "cvr": {
+            "type": "string",
+            "description": "🔴 转化率（分母为 0 时为 null=不可比）"
+          },
+          "acos": {
+            "type": "string",
+            "description": "🔴 ACOS（分母为 0 时为 null=不可比）"
+          },
+          "roas": {
+            "type": "string",
+            "description": "🔴 ROAS（分母为 0 时为 null=不可比）"
+          }
+        },
+        "description": "按时间升序的点"
+      },
+      "AdCampaignReportTrendSeries": {
+        "type": "object",
+        "properties": {
+          "currency": {
+            "type": "string",
+            "description": "币种"
+          },
+          "points": {
+            "type": "array",
+            "description": "按时间升序的点",
+            "items": {
+              "$ref": "#/components/schemas/AdCampaignReportTrendPoint"
+            }
+          }
+        },
+        "description": "🔴 趋势线（按币种拆开）"
+      },
+      "AdReportMetricDefinition": {
+        "type": "object",
+        "properties": {
+          "metric": {
+            "type": "string",
+            "description": "指标键"
+          },
+          "label": {
+            "type": "string",
+            "description": "指标显示名"
+          },
+          "available": {
+            "type": "boolean",
+            "description": "🔴 是否有分母可算（false = 当前不出数值，不是 0）"
+          },
+          "formula": {
+            "type": "string",
+            "description": "🔴 口径定义（写进表头的那句话）"
+          },
+          "source": {
+            "type": "string",
+            "description": "数据来源"
+          },
+          "ownerModule": {
+            "type": "string",
+            "description": "未交付段的责任模块"
+          },
+          "unavailableReason": {
+            "type": "string",
+            "description": "🔴 不可用的原因（available=false 时说明为什么没有数值）"
+          }
+        },
+        "description": "🔴 逐指标口径定义"
+      },
+      "AdCampaignReportPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "当前页数据",
+            "items": {
+              "$ref": "#/components/schemas/AdCampaignReportRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "description": "符合筛选条件的分组总条数（不受分页影响）",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "description": "页码，从 0 起",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "description": "每页条数",
+            "format": "int32"
+          },
+          "granularity": {
+            "type": "string",
+            "description": "时间粒度：DAY / WEEK / MONTH"
+          },
+          "dimension": {
+            "type": "string",
+            "description": "分组维度"
+          },
+          "summaries": {
+            "type": "array",
+            "description": "🔴 筛选后全集的汇总（按币种拆开，不受分页影响）",
+            "items": {
+              "$ref": "#/components/schemas/AdCampaignReportSummary"
+            }
+          },
+          "dataAsOf": {
+            "type": "string",
+            "description": "🔴 数据截至时刻（成功同步的水位；从未同步成功过则为 null）",
+            "format": "date-time"
+          },
+          "dataAsOfNote": {
+            "type": "string",
+            "description": "🔴 「数据截至 X 时间」的口径说明"
+          },
+          "metricDefinitions": {
+            "type": "array",
+            "description": "🔴 逐指标口径定义（表头渲染用）",
+            "items": {
+              "$ref": "#/components/schemas/AdReportMetricDefinition"
+            }
+          },
+          "emptyReason": {
+            "type": "string",
+            "description": "🔴 空态原因：NO_SYNCED_DATA / NO_METRICS_IN_RANGE / FILTERED_EMPTY / null"
+          },
+          "emptyNote": {
+            "type": "string",
+            "description": "🔴 空态说明文案（三种空的解释各不相同）"
+          },
+          "metricDefinitionNote": {
+            "type": "string",
+            "description": "🔴 ACOS / ROAS / TACOS 口径说明"
+          }
+        }
+      },
+      "AdCampaignReportRow": {
+        "type": "object",
+        "properties": {
+          "dimension": {
+            "type": "string",
+            "description": "分组维度：CAMPAIGN / PLATFORM / SHOP / AD_TYPE / CURRENCY"
+          },
+          "dimensionKey": {
+            "type": "string",
+            "description": "分组键"
+          },
+          "dimensionLabel": {
+            "type": "string",
+            "description": "分组显示名"
+          },
+          "currency": {
+            "type": "string",
+            "description": "🔴 币种（本仓无汇率源，不同币种不合并）"
+          },
+          "platformName": {
+            "type": "string",
+            "description": "平台名（CAMPAIGN / PLATFORM 分组时有值）"
+          },
+          "shopName": {
+            "type": "string",
+            "description": "店铺名（CAMPAIGN / SHOP 分组时有值）"
+          },
+          "externalCampaignId": {
+            "type": "string",
+            "description": "平台侧活动 id（仅 CAMPAIGN 分组）"
+          },
+          "impressions": {
+            "type": "string",
+            "description": "曝光合计"
+          },
+          "clicks": {
+            "type": "string",
+            "description": "点击合计"
+          },
+          "orders": {
+            "type": "string",
+            "description": "订单合计"
+          },
+          "spend": {
+            "type": "string",
+            "description": "花费合计"
+          },
+          "sales": {
+            "type": "string",
+            "description": "销售额合计"
+          },
+          "ctr": {
+            "type": "string",
+            "description": "🔴 CTR = Σ点击 / Σ曝光（分母为 0 时为 null=不可比）"
+          },
+          "cpc": {
+            "type": "string",
+            "description": "🔴 CPC = Σ花费 / Σ点击（分母为 0 时为 null=不可比）"
+          },
+          "cvr": {
+            "type": "string",
+            "description": "🔴 转化率 = Σ订单 / Σ点击（分母为 0 时为 null=不可比）"
+          },
+          "acos": {
+            "type": "string",
+            "description": "🔴 ACOS = Σ花费 / Σ销售额（分母为 0 时为 null=不可比）"
+          },
+          "roas": {
+            "type": "string",
+            "description": "🔴 ROAS = Σ销售额 / Σ花费（分母为 0 时为 null=不可比）"
+          },
+          "metricFrom": {
+            "type": "string",
+            "description": "该分组实际统计到的最早日期",
+            "format": "date"
+          },
+          "metricTo": {
+            "type": "string",
+            "description": "该分组实际统计到的最晚日期",
+            "format": "date"
+          }
+        },
+        "description": "当前页数据"
+      },
+      "AdCampaignReportSummary": {
+        "type": "object",
+        "properties": {
+          "currency": {
+            "type": "string",
+            "description": "币种"
+          },
+          "groupCount": {
+            "type": "integer",
+            "description": "该币种下的分组条数",
+            "format": "int64"
+          },
+          "totalImpressions": {
+            "type": "string",
+            "description": "曝光合计"
+          },
+          "totalClicks": {
+            "type": "string",
+            "description": "点击合计"
+          },
+          "totalOrders": {
+            "type": "string",
+            "description": "订单合计"
+          },
+          "totalSpend": {
+            "type": "string",
+            "description": "花费合计"
+          },
+          "totalSales": {
+            "type": "string",
+            "description": "销售额合计"
+          },
+          "ctr": {
+            "type": "string",
+            "description": "🔴 CTR = Σ点击 / Σ曝光（分母为 0 时为 null=不可比）"
+          },
+          "cpc": {
+            "type": "string",
+            "description": "🔴 CPC = Σ花费 / Σ点击（分母为 0 时为 null=不可比）"
+          },
+          "cvr": {
+            "type": "string",
+            "description": "🔴 转化率 = Σ订单 / Σ点击（分母为 0 时为 null=不可比）"
+          },
+          "acos": {
+            "type": "string",
+            "description": "🔴 ACOS = Σ花费 / Σ销售额（分母为 0 时为 null=不可比）"
+          },
+          "roas": {
+            "type": "string",
+            "description": "🔴 ROAS = Σ销售额 / Σ花费（分母为 0 时为 null=不可比）"
+          },
+          "metricFrom": {
+            "type": "string",
+            "description": "实际统计到的最早日期",
+            "format": "date"
+          },
+          "metricTo": {
+            "type": "string",
+            "description": "实际统计到的最晚日期",
+            "format": "date"
+          },
+          "metricDefinitionNote": {
+            "type": "string",
+            "description": "🔴 口径说明（ACOS / ROAS / TACOS 的分子分母）"
+          }
+        },
+        "description": "🔴 筛选后全集的汇总（按币种拆开，不受分页影响）"
+      },
+      "AdCampaignReportOption": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string",
+            "description": "取值"
+          },
+          "label": {
+            "type": "string",
+            "description": "显示名"
+          }
+        },
+        "description": "排序下拉项"
+      },
+      "AdCampaignReportOptions": {
+        "type": "object",
+        "properties": {
+          "granularities": {
+            "type": "array",
+            "description": "时间粒度下拉项",
+            "items": {
+              "$ref": "#/components/schemas/AdCampaignReportOption"
+            }
+          },
+          "dimensions": {
+            "type": "array",
+            "description": "分组维度下拉项",
+            "items": {
+              "$ref": "#/components/schemas/AdCampaignReportOption"
+            }
+          },
+          "platforms": {
+            "type": "array",
+            "description": "平台下拉项",
+            "items": {
+              "$ref": "#/components/schemas/AdCampaignReportOption"
+            }
+          },
+          "shops": {
+            "type": "array",
+            "description": "店铺下拉项",
+            "items": {
+              "$ref": "#/components/schemas/AdCampaignReportOption"
+            }
+          },
+          "internalAdTypes": {
+            "type": "array",
+            "description": "归一后类型下拉项",
+            "items": {
+              "$ref": "#/components/schemas/AdCampaignReportOption"
+            }
+          },
+          "statuses": {
+            "type": "array",
+            "description": "状态下拉项",
+            "items": {
+              "$ref": "#/components/schemas/AdCampaignReportOption"
+            }
+          },
+          "sorts": {
+            "type": "array",
+            "description": "排序下拉项",
+            "items": {
+              "$ref": "#/components/schemas/AdCampaignReportOption"
+            }
+          },
+          "metricDefinitions": {
+            "type": "array",
+            "description": "🔴 逐指标口径定义",
+            "items": {
+              "$ref": "#/components/schemas/AdReportMetricDefinition"
+            }
+          },
+          "metricDefinitionNote": {
+            "type": "string",
+            "description": "🔴 ACOS / ROAS / TACOS 口径说明"
+          },
+          "rangeLimitNote": {
+            "type": "string",
+            "description": "🔴 时间范围与粒度的上限说明"
+          }
+        }
+      },
+      "AdCampaignReportExportPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "当前页数据",
+            "items": {
+              "$ref": "#/components/schemas/AdCampaignReportExportRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "description": "总条数",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "description": "页码，从 0 起",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "description": "每页条数",
+            "format": "int32"
+          }
+        }
+      },
+      "AdCampaignReportExportRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "导出留痕 id",
+            "format": "uuid"
+          },
+          "requestedBy": {
+            "type": "string",
+            "description": "发起人（已认证成员）",
+            "format": "uuid"
+          },
+          "granularity": {
+            "type": "string",
+            "description": "时间粒度"
+          },
+          "dimension": {
+            "type": "string",
+            "description": "分组维度"
+          },
+          "platformId": {
+            "type": "string",
+            "description": "平台 id 筛选（null = 没筛）",
+            "format": "uuid"
+          },
+          "shopCode": {
+            "type": "string",
+            "description": "店铺筛选（null = 没筛）"
+          },
+          "internalAdType": {
+            "type": "string",
+            "description": "归一后类型筛选（null = 没筛）"
+          },
+          "status": {
+            "type": "string",
+            "description": "状态筛选（null = 没筛）"
+          },
+          "dateFrom": {
+            "type": "string",
+            "description": "统计起始日",
+            "format": "date"
+          },
+          "dateTo": {
+            "type": "string",
+            "description": "统计截止日",
+            "format": "date"
+          },
+          "rowCount": {
+            "type": "integer",
+            "description": "导出的分组行数",
+            "format": "int32"
+          },
+          "dataAsOf": {
+            "type": "string",
+            "description": "🔴 这次导出对着哪个水位算出来的（成功同步的水位）",
+            "format": "date-time"
+          },
+          "metricDefinitionNote": {
+            "type": "string",
+            "description": "🔴 导出当时的三个口径定义"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "发生时刻",
+            "format": "date-time"
+          }
+        },
+        "description": "当前页数据"
+      },
+      "StreamingResponseBody": {
+        "type": "object"
+      },
+      "AdCampaignReportCapabilities": {
+        "type": "object",
+        "properties": {
+          "dimensions": {
+            "type": "array",
+            "description": "逐维度能力声明；未交付段 available=false",
+            "items": {
+              "$ref": "#/components/schemas/AdReportCapabilityDimension"
+            }
+          },
+          "metricDefinitions": {
+            "type": "array",
+            "description": "🔴 逐指标口径定义（ACOS / ROAS / TACOS 的定义写在这里）",
+            "items": {
+              "$ref": "#/components/schemas/AdReportMetricDefinition"
+            }
+          },
+          "granularities": {
+            "type": "array",
+            "description": "时间粒度取值",
+            "items": {
+              "type": "string",
+              "description": "时间粒度取值"
+            }
+          },
+          "dimensions_": {
+            "type": "array",
+            "description": "分组维度取值",
+            "items": {
+              "type": "string",
+              "description": "分组维度取值"
+            }
+          },
+          "sortOptions": {
+            "type": "array",
+            "description": "排序方式取值",
+            "items": {
+              "type": "string",
+              "description": "排序方式取值"
+            }
+          },
+          "emptyReasons": {
+            "type": "array",
+            "description": "空态原因取值",
+            "items": {
+              "type": "string",
+              "description": "空态原因取值"
+            }
+          },
+          "metricDefinitionNote": {
+            "type": "string",
+            "description": "🔴 ACOS / ROAS / TACOS 口径说明（随报表一起返回）"
+          },
+          "dataAsOfNote": {
+            "type": "string",
+            "description": "🔴 「数据截至 X 时间」的含义"
+          },
+          "upstreamNote": {
+            "type": "string",
+            "description": "上游依赖说明"
+          },
+          "boundaryNote": {
+            "type": "string",
+            "description": "下游与边界说明"
+          }
+        }
+      },
+      "AdReportCapabilityDimension": {
         "type": "object",
         "properties": {
           "dimension": {
