@@ -31163,6 +31163,756 @@
           }
         }
       }
+    },
+    "/warehouse/inventory/adjustment-approvals/{orderId}/submit": {
+      "post": {
+        "tags": [
+          "inventory-adjustment-approval-controller"
+        ],
+        "operationId": "post_warehouse_inventory_adjustment_approvals_orderId_submit",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "orderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InventoryAdjustmentApprovalSubmitInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InventoryAdjustmentApprovalCaseDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/adjustment-approvals/{orderId}/reject": {
+      "post": {
+        "tags": [
+          "inventory-adjustment-approval-controller"
+        ],
+        "operationId": "post_warehouse_inventory_adjustment_approvals_orderId_reject",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "orderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InventoryAdjustmentApprovalNoteInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InventoryAdjustmentApprovalCaseDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/adjustment-approvals/{orderId}/approve": {
+      "post": {
+        "tags": [
+          "inventory-adjustment-approval-controller"
+        ],
+        "operationId": "post_warehouse_inventory_adjustment_approvals_orderId_approve",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "orderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InventoryAdjustmentApprovalNoteInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InventoryAdjustmentApprovalCaseDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/adjustment-approvals/rules": {
+      "get": {
+        "tags": [
+          "inventory-adjustment-approval-controller"
+        ],
+        "operationId": "get_warehouse_inventory_adjustment_approvals_rules",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/InventoryAdjustmentApprovalRule"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "inventory-adjustment-approval-controller"
+        ],
+        "operationId": "post_warehouse_inventory_adjustment_approvals_rules",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InventoryAdjustmentApprovalRuleInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InventoryAdjustmentApprovalRule"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/adjustment-approvals/rules/{ruleId}/update": {
+      "post": {
+        "tags": [
+          "inventory-adjustment-approval-controller"
+        ],
+        "operationId": "post_warehouse_inventory_adjustment_approvals_rules_ruleId_update",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "ruleId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InventoryAdjustmentApprovalRuleInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InventoryAdjustmentApprovalRule"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/adjustment-approvals/rules/{ruleId}/status": {
+      "post": {
+        "tags": [
+          "inventory-adjustment-approval-controller"
+        ],
+        "operationId": "post_warehouse_inventory_adjustment_approvals_rules_ruleId_status",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "ruleId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InventoryAdjustmentApprovalStatusInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InventoryAdjustmentApprovalRule"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/adjustment-approvals/evaluate": {
+      "post": {
+        "tags": [
+          "inventory-adjustment-approval-controller"
+        ],
+        "operationId": "post_warehouse_inventory_adjustment_approvals_evaluate",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InventoryAdjustmentApprovalEvaluateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InventoryAdjustmentApprovalEvaluation"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/adjustment-approvals/batch/reject": {
+      "post": {
+        "tags": [
+          "inventory-adjustment-approval-controller"
+        ],
+        "operationId": "post_warehouse_inventory_adjustment_approvals_batch_reject",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InventoryAdjustmentApprovalBatchInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InventoryAdjustmentApprovalBatchResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/adjustment-approvals/batch/approve": {
+      "post": {
+        "tags": [
+          "inventory-adjustment-approval-controller"
+        ],
+        "operationId": "post_warehouse_inventory_adjustment_approvals_batch_approve",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InventoryAdjustmentApprovalBatchInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InventoryAdjustmentApprovalBatchResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/adjustment-approvals/approvers": {
+      "get": {
+        "tags": [
+          "inventory-adjustment-approval-controller"
+        ],
+        "operationId": "get_warehouse_inventory_adjustment_approvals_approvers",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/InventoryAdjustmentApprovalApprover"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "inventory-adjustment-approval-controller"
+        ],
+        "operationId": "post_warehouse_inventory_adjustment_approvals_approvers",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InventoryAdjustmentApprovalApproverInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InventoryAdjustmentApprovalApprover"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/adjustment-approvals/approvers/{approverId}/status": {
+      "post": {
+        "tags": [
+          "inventory-adjustment-approval-controller"
+        ],
+        "operationId": "post_warehouse_inventory_adjustment_approvals_approvers_approverId_status",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "approverId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InventoryAdjustmentApprovalStatusInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InventoryAdjustmentApprovalApprover"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/adjustment-approvals/{orderId}": {
+      "get": {
+        "tags": [
+          "inventory-adjustment-approval-controller"
+        ],
+        "operationId": "get_warehouse_inventory_adjustment_approvals_orderId",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "orderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InventoryAdjustmentApprovalCaseDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/adjustment-approvals/valuations": {
+      "get": {
+        "tags": [
+          "inventory-adjustment-approval-controller"
+        ],
+        "operationId": "get_warehouse_inventory_adjustment_approvals_valuations",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InventoryAdjustmentApprovalValuationPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/adjustment-approvals/pending": {
+      "get": {
+        "tags": [
+          "inventory-adjustment-approval-controller"
+        ],
+        "operationId": "get_warehouse_inventory_adjustment_approvals_pending",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InventoryAdjustmentApprovalPendingPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/adjustment-approvals/capabilities": {
+      "get": {
+        "tags": [
+          "inventory-adjustment-approval-controller"
+        ],
+        "operationId": "get_warehouse_inventory_adjustment_approvals_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InventoryAdjustmentApprovalCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -72114,6 +72864,726 @@
           },
           "available": {
             "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "InventoryAdjustmentApprovalSubmitInput": {
+        "required": [
+          "amount",
+          "currency"
+        ],
+        "type": "object",
+        "properties": {
+          "amount": {
+            "type": "number"
+          },
+          "currency": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "InventoryAdjustmentApprovalCase": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderCode": {
+            "type": "string"
+          },
+          "caseNo": {
+            "type": "string"
+          },
+          "attemptNo": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "ruleId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "ruleName": {
+            "type": "string"
+          },
+          "ruleMatch": {
+            "type": "string"
+          },
+          "reasonCode": {
+            "type": "string"
+          },
+          "orderAmount": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "orderQty": {
+            "type": "number"
+          },
+          "requiredTier": {
+            "type": "string"
+          },
+          "requiredApprovals": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "approvedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "status": {
+            "type": "string"
+          },
+          "submittedBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "submittedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "rejectedBy": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "rejectedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "rejectReason": {
+            "type": "string"
+          }
+        }
+      },
+      "InventoryAdjustmentApprovalCaseDetail": {
+        "type": "object",
+        "properties": {
+          "approvalCase": {
+            "$ref": "#/components/schemas/InventoryAdjustmentApprovalCase"
+          },
+          "records": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InventoryAdjustmentApprovalRecord"
+            }
+          }
+        }
+      },
+      "InventoryAdjustmentApprovalRecord": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "caseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "action": {
+            "type": "string"
+          },
+          "actionLabel": {
+            "type": "string"
+          },
+          "actorUserId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "approvalTier": {
+            "type": "string"
+          },
+          "orderAmount": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "orderQty": {
+            "type": "number"
+          },
+          "detail": {
+            "type": "string"
+          }
+        }
+      },
+      "InventoryAdjustmentApprovalNoteInput": {
+        "type": "object",
+        "properties": {
+          "note": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "InventoryAdjustmentApprovalRuleInput": {
+        "required": [
+          "currency",
+          "requiredApprovals",
+          "requiredTier",
+          "ruleName",
+          "ruleNo"
+        ],
+        "type": "object",
+        "properties": {
+          "ruleNo": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "ruleName": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "reasonCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "currency": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "minAmount": {
+            "type": "number",
+            "nullable": true
+          },
+          "maxAmount": {
+            "type": "number",
+            "nullable": true
+          },
+          "minQty": {
+            "type": "number",
+            "nullable": true
+          },
+          "maxQty": {
+            "type": "number",
+            "nullable": true
+          },
+          "requiredTier": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "requiredApprovals": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "priority": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "InventoryAdjustmentApprovalRule": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "ruleNo": {
+            "type": "string"
+          },
+          "ruleName": {
+            "type": "string"
+          },
+          "reasonCode": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "minAmount": {
+            "type": "number"
+          },
+          "maxAmount": {
+            "type": "number",
+            "nullable": true
+          },
+          "minQty": {
+            "type": "number"
+          },
+          "maxQty": {
+            "type": "number",
+            "nullable": true
+          },
+          "requiredTier": {
+            "type": "string"
+          },
+          "requiredApprovals": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "priority": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "status": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "InventoryAdjustmentApprovalStatusInput": {
+        "required": [
+          "status"
+        ],
+        "type": "object",
+        "properties": {
+          "status": {
+            "minLength": 1,
+            "pattern": "ACTIVE|INACTIVE",
+            "type": "string"
+          }
+        }
+      },
+      "InventoryAdjustmentApprovalEvaluateInput": {
+        "required": [
+          "orderId"
+        ],
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "amount": {
+            "type": "number",
+            "nullable": true
+          },
+          "currency": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "InventoryAdjustmentApprovalEvaluation": {
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderCode": {
+            "type": "string"
+          },
+          "orderStatus": {
+            "type": "string"
+          },
+          "reasonCode": {
+            "type": "string"
+          },
+          "orderQty": {
+            "type": "number"
+          },
+          "netQty": {
+            "type": "number"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "ruleMatch": {
+            "type": "string"
+          },
+          "ruleId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "ruleName": {
+            "type": "string"
+          },
+          "requiredTier": {
+            "type": "string"
+          },
+          "requiredApprovals": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "approvedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "caseStatus": {
+            "type": "string",
+            "nullable": true
+          },
+          "approvable": {
+            "type": "boolean"
+          },
+          "approvableReason": {
+            "type": "string"
+          }
+        }
+      },
+      "InventoryAdjustmentApprovalBatchInput": {
+        "required": [
+          "orderIds"
+        ],
+        "type": "object",
+        "properties": {
+          "orderIds": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "InventoryAdjustmentApprovalBatchItem": {
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderCode": {
+            "type": "string"
+          },
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "InventoryAdjustmentApprovalBatchResult": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InventoryAdjustmentApprovalBatchItem"
+            }
+          },
+          "successCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "failureCount": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "InventoryAdjustmentApprovalApproverInput": {
+        "required": [
+          "approvalTier",
+          "currency",
+          "userId"
+        ],
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "userName": {
+            "type": "string",
+            "nullable": true
+          },
+          "approvalTier": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "currency": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "minAmount": {
+            "type": "number",
+            "nullable": true
+          },
+          "maxAmount": {
+            "type": "number",
+            "nullable": true
+          },
+          "maxQty": {
+            "type": "number",
+            "nullable": true
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "InventoryAdjustmentApprovalApprover": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "userId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "userName": {
+            "type": "string"
+          },
+          "approvalTier": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "minAmount": {
+            "type": "number"
+          },
+          "maxAmount": {
+            "type": "number",
+            "nullable": true
+          },
+          "maxQty": {
+            "type": "number",
+            "nullable": true
+          },
+          "status": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "InventoryAdjustmentApprovalValuation": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderCode": {
+            "type": "string"
+          },
+          "registeredAmount": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "effectiveAmount": {
+            "type": "number"
+          },
+          "status": {
+            "type": "string"
+          },
+          "registeredBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "registeredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "effectiveAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "InventoryAdjustmentApprovalValuationPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InventoryAdjustmentApprovalValuation"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "InventoryAdjustmentApprovalPendingItem": {
+        "type": "object",
+        "properties": {
+          "approvalCase": {
+            "$ref": "#/components/schemas/InventoryAdjustmentApprovalCase"
+          },
+          "orderCode": {
+            "type": "string"
+          },
+          "orderStatus": {
+            "type": "string"
+          },
+          "reasonCode": {
+            "type": "string"
+          },
+          "reasonLabel": {
+            "type": "string"
+          },
+          "lineCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "netQty": {
+            "type": "number"
+          },
+          "orderQty": {
+            "type": "number"
+          },
+          "submittedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "approvable": {
+            "type": "boolean"
+          },
+          "approvableReason": {
+            "type": "string"
+          }
+        }
+      },
+      "InventoryAdjustmentApprovalPendingPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InventoryAdjustmentApprovalPendingItem"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "InventoryAdjustmentApprovalCapabilities": {
+        "type": "object",
+        "properties": {
+          "capabilities": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InventoryAdjustmentApprovalCapability"
+            }
+          },
+          "policy": {
+            "$ref": "#/components/schemas/InventoryAdjustmentApprovalPolicy"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "InventoryAdjustmentApprovalCapability": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "href": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "InventoryAdjustmentApprovalPolicy": {
+        "type": "object",
+        "properties": {
+          "thresholdEnabled": {
+            "type": "boolean"
+          },
+          "activeRuleCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "liveCaseCount": {
+            "type": "integer",
+            "format": "int64"
           },
           "note": {
             "type": "string"
