@@ -269,6 +269,71 @@ const services: readonly {
       /^(permissions|owner-transfer|legal-entities(?:\/[0-9a-f-]+)?|legal-entities\/(?:[0-9a-f-]+\/accounting-books|references)|(?:roles|members|departments|children)(?:\/[0-9a-f-]+)?|tenants(?:\/current)?|audit(?:\/(?:export|[0-9a-f-]+))?|operation-log(?:\/(?:export|trace\/[0-9a-zA-Z-]+|[0-9a-f-]+))?||approval-records(?:\/(?:statistics|capabilities|export|by-actor\/[0-9a-f-]+|[0-9a-f-]+))?|hierarchy-authorizations(?:\/check|\/[0-9a-f-]+(?:\/revoke)?)?|accounting-books(?:\/[0-9a-f-]+)?|business-parameters(?:\/(?:effective|history|overrides(?:\/[0-9a-f-]+)?|freezes(?:\/[^/]+\/[^/]+)?))?|numbering(?:\/(?:entities|preview|sequences|issued|rules(?:\/conflicts|\/[0-9a-f-]+(?:\/next)?)?))?|approval-flows(?:\/(?:document-types|registrations|active|positions(?:\/[0-9a-f-]+)?|[0-9a-f-]+(?:\/validation)?))?|approval-rules(?:\/(?:effective-policy|evaluate|[0-9a-f-]+(?:\/validation)?))?|my-approvals(?:\/(?:capabilities|batch|[0-9a-f-]+(?:\/(?:decide|transfer))?))?|approval-instances|onboardings(?:\/[0-9a-f-]+\/complete)?|department-leaders|departments\/[0-9a-f-]+\/(?:leader(?:\/(?:proxies|grants)(?:\/[0-9a-f-]+)?)?|approval-chain)|offboarding(?:\/[0-9a-f-]+(?:\/revert|\/responsibility-items(?:\/[0-9a-f-]+(?:\/transfer)?)?|\/reclaim-items(?:\/[0-9a-f-]+(?:\/reclaim)?)?)?)?|legal-entities\/(?:[0-9a-f-]+\/(?:accounting-books|ledger-books|default-book)|references)|accounting-books(?:\/[0-9a-f-]+(?:\/fact-assignments(?:\/[0-9a-f-]+)?)?)?)$/,
   },
   {
+    // 15.1.1.1 消息收件箱（crm 服务，卷 15 的 L3 锚点 15.1.1）。
+    //
+    // 蓝图：「集中展示各店铺的平台站内信与买家消息：店铺、买家、主题、正文、附件、平台时间、
+    //   收发方向、已读状态、关联订单，支持按店铺/类型/优先级/未读筛选与批量处理。
+    //   输出：消息列表 + 详情视图 + 关联订单上下文。
+    //   **消息必须关联到买家与订单**，否则客服看到消息还要去猜是哪一单。」
+    //
+    // 本条目是**新增一条 services[] 元素**，不是往既有 crm 分支的 alternation 里并 ——
+    // 既有三条 crm 分支分别是 `^knowledge\/...$`（15.4.2.1 客服知识库）、
+    // `^review-requests...$`（15.2.2.1 索评）、`^review-rules...$`（15.2.2.2 索评规则），
+    // 首 token 都与 `message-inbox` 不同，三条互不吃掉。
+    //
+    // ---- 插入锚点 ----
+    //   固定在 **`identity/` 那条元素之后、`catalog/` 5.5.2.1 异常告警那条之前**。
+    //   同批另外三条车道的插入点彼此相距数百行（既有车道用过「数组最开头」「数组末尾」
+    //   「trade/ 之前」「crm 三条附近」等锚点），本处与它们都不重叠，
+    //   并入时 git 能干净求并 —— 既有条目**一字未动、也不重排**。
+    //
+    // ---- 首 token「message-inbox」的零命中核对结论 ----
+    //   本文件既有 100+ 条 services[] 正则里**没有任何一条**含 `message-inbox` 这个串
+    //   （既有含 `message` 的只有 `service-tickets/{uuid}/messages` 里的 `messages`，
+    //   它是 trade 服务的子路径，首 token 是 `service-tickets`，与本条目不同）。
+    //   且既有正则都是**锚定**的（`^token(...)?$`），而 `resolve()` 先按
+    //   `path.startsWith(service.prefix)` 收窄服务、再判别正则 ⇒ 只有 prefix='crm/' 的
+    //   元素才有机会吃到 `crm/message-inbox/...`，而本文件里 prefix='crm/' 的另外三条
+    //   正则**不可能**匹配 `message-inbox/...` ⇒ 首 token 不同即可，互不遮蔽。
+    //
+    // 形状逐条列出（**只放行本模块真实实现的路径**）：
+    //   message-inbox/messages            消息集合读（GET，真分页 + 真筛选）/ 登记（POST）
+    //   message-inbox/messages/{uuid}     单条消息详情（GET）
+    //   message-inbox/capabilities        能力声明（逐维 available + ownerModule + impact）
+    //   message-inbox/shops               店铺目录（来自上游 channel 的真实清单）
+    //   message-inbox/options             筛选词表（平台与店铺来自本租户真实数据）
+    //   message-inbox/platforms           逐平台的站内信接入状态（平台清单来自真实店铺目录）
+    //   message-inbox/batch               批量处理（POST，逐条给出结论与原因）
+    //   message-inbox/sync                平台消息同步（POST；当前逐平台未接入 ⇒ 后端 409）
+    //
+    // 判别顺序：**字面量子路径（capabilities / shops / options / platforms / batch / sync）
+    // 排在 {uuid} 段之前** —— alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    // id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    // （不是 `[0-9a-f-]+`）：后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸路径 `message-inbox` —— 后端**没有**这个映射（消息集合在 `messages` 上），
+    //     所以末尾**刻意不带 `?`**：带了就把裸路径一起放行，而那是一个不存在的端点。
+    //   * `message-inbox/messages/{uuid}/replies` —— 15.1.1.2 消息发送**未交付**，
+    //     放行它会让界面以为能回复买家。
+    //   * `message-inbox/messages/{uuid}/classify` —— 15.1.1.3 消息分类**未交付**，
+    //     本模块的优先级由**人工**设置。
+    //   * `message-inbox/messages/{uuid}/after-sales` 与 `/tickets` ——
+    //     11 售后与 15.4 工单**未交付**，本模块只落**处置意图**，不写下游单据。
+    //   * `message-inbox/messages/{uuid}/delete` —— 消息是纠纷举证材料，不提供删除。
+    //   * `message-inbox/messages/{uuid}/attachments/{attachmentId}` ——
+    //     附件按消息整体读，不按单条附件寻址（后端没有这个映射）。
+    //   * `message-inbox/capabilities/{uuid}` / `/shops/{uuid}` / `/options/{uuid}` /
+    //     `/platforms/{uuid}` —— 这四个是能力声明与目录，**不按 id 寻址**，
+    //     所以那段后缀是**必需**的（写成可选会让裸的 `capabilities/{uuid}` 一起通过）。
+    //   * 非 UUID 段 —— `message-inbox/messages/not-a-uuid` 必须 404。
+    prefix: 'crm/',
+    env: 'CRM_URL',
+    fallback: 'http://127.0.0.1:8086',
+    pattern:
+      /^message\-inbox(?:\/(?:capabilities|shops|options|platforms|batch|sync)|\/messages(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?)$/,
+  },
+  {
     // 5.5.2.1 异常告警（**本条目是新增一条 services[] 元素**，不是往既有 catalog 分支的
     // alternation 里并**）。同批多车道共享这一个文件，而每个服务在 services[] 里
     // 是**一段超长单行正则**：只要两条车道都往同一服务的 alternation 里并分支，git 必然判冲突
