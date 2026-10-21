@@ -1353,6 +1353,65 @@ const services: readonly {
     // 裸路径 logistics-channels **放行**：它就是本模块的集合读 + POST 登记入口。
   },
   {
+    // 14.5.2.1 带货归因（channel 服务，卷 14 广告与增长 / L3 14.5.2 达人效果下的第三格）。
+    //
+    // 本条目是**新增一条独立的 `services[]` 元素**，不是往既有 channel 分支的 alternation 里
+    // 并分支 —— 那一支是一段超长单行正则，多车道同时并进去 git 必然判冲突（结构性，
+    // retry 不会自愈）。
+    //
+    // ---- 插入锚点固定在 10.1.1.2 `logistics-channels` 那一条**之后** ----
+    //   与同批其它三条车道各自用过的锚点（`auth/` 前后 / `listing-claims` 之前 /
+    //   `purchase-followups` 之后 / `listing-performance` 之后 / `one-click-publish` 之后 /
+    //   数组开头 / 数组末尾）**全部不重叠**，本车道这一段是**物流区**，离它们都隔着
+    //   上千行 ⇒ git 能干净求并。
+    //
+    // ---- 首 token「attributions」的零命中核对结论 ----
+    //   本文件既有 140+ 条 services[] 正则里，**首 token** 是 `attributions` 的**一条也没有**：
+    //   既有含 `attributions` 这个串的两条是 `product-attribution/attributions`
+    //   与 `aftersales/reasons/attributions` —— 它们的 `attributions` 是**第二段**
+    //   （首 token 分别是 `product-attribution` 与 `aftersales`），且两条都挂在
+    //   `prefix: 'trade/'` 下，**根本不会被 `channel/` 这个前缀取到**。
+    //   本条目的首 token `attributions` 是**独立字面量**，不会被既有分支的前缀吃掉，
+    //   也不会吃掉它们（`^attributions` 与 `^product-attribution` / `^aftersales` 互不为前缀）。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   attributions/capabilities            能力声明（平台带货数据同步 / 佣金进利润表 13.4 /
+    //                                          订单级事实三个维度 available=false + ownerModule）
+    //   attributions/options                 下拉项（归因模型 / 分摊基准 / 退款口径 / 佣金口径 /
+    //                                          计提状态 / 平台 / 店铺 / 币种）
+    //   attributions/sync-status             逐平台的带货数据同步接入情况
+    //   attributions/sync                    触发一次同步（适配器未接入 ⇒ 明确 409，不写数据）
+    //   attributions/rules                   归因规则列表（GET，真分页 + 真筛选）
+    //   attributions/rules/current           当前生效的归因规则（GET）
+    //   attributions/rules                   配置归因规则（POST；保存新规则时旧的自动停用）
+    //   attributions/run                     归因批次（POST；没有生效规则 ⇒ 409）
+    //   attributions/records                 归因记录列表（GET，真分页 + 多维筛选 + 真排序）
+    //   attributions/records/{uuid}          归因详情（GET）
+    //   attributions/records/{uuid}/accrual  佣金计提状态变更（POST）
+    //   attributions/report                  达人效果报表（GET，真分页 + 真筛选）
+    //
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //（不是 `[0-9a-f-]+`：后者会把 `run` 这种非 UUID 形状也当成 id 放行）。
+    // ⚠️ 字面量子路径（capabilities / options / sync-status / sync / rules / rules/current /
+    //    run / report / records）排在 {uuid} 段之前判别 —— alternation 是首个命中即返回，
+    //    顺序反了会被通配支吃掉半截。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸路径 `attributions` —— 后端没有「一条不存在的汇总接口」。
+    //     末尾**刻意不带 `?`**：带了等于放行裸路径。
+    //   * `attributions/export`              —— 本模块不提供导出
+    //   * `attributions/records/{uuid}/delete` —— 归因是事实，不提供删除
+    //   * `attributions/profit`               —— 🔴 13.4 利润（reporting 服务）**未交付**，
+    //     放行它等于让界面以为「佣金成本已经进利润表了」
+    //   * `attributions/{uuid}`               —— 没有「按 id 取单条」这个形状（详情走 records/{uuid}）
+    //   * `attributions/records/not-a-uuid`   —— 非 UUID 段不应被 uuid 分支吃掉
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^attributions(?:\/(?:capabilities|options|sync-status|sync|rules(?:\/current)?|run|report|records(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/accrual)?)?))$/,
+  },
+  {
     // 10.3.1.1 轨迹查询（**本条目是新增一条 services[] 元素**，不是往既有 channel
     // 分支的 alternation 里并）。同批多车道共享这一个文件，而每个服务在 services[] 里
     // 是**一段超长单行正则**：只要两条车道都往同一服务的 alternation 里并分支，git 必然
