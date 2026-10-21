@@ -6569,6 +6569,59 @@ const services: readonly {
       /^platform-dispute-appeals(?:\/(?:capabilities|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:text|materials(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|submit|retry-submission|submission-attempts|platform-reply|withdraw))?))?$/,
   },
   {
+    // 14.1.2.1 广告组管理（channel 服务）。纯**新增一条独立的 `channel/` 元素**，
+    // 既有的 `ad-campaigns`（14.1.1.1）、`ad-campaign-details`（14.1.1.2）、
+    // `ad-type-diffs`（14.1.2.2）、`ad-reports`（14.3.1.1）等**一字未动、也不重排** ——
+    // 本文件是多车道共用的累积型白名单，每条服务规则是一段超长单行正则，
+    // 往既有那条 alternation 里并分支会让多车道同时并入时 git 必然判冲突。
+    //
+    // ---- 插入锚点固定在 `platform-disputes`（11.4.1.1）那条**之后**、`platform-disputes`
+    //      之后的第一条 trade 元素**之前**（即 `11.4.1.1 平台纠纷列表` 那条**之前**）----
+    //   同批其它车道（14.1.1.3 / 14.3.1.2 / 14.4.1.1）的插入点都在卷 14 的相邻元素附近
+    //   （`ad-campaigns` 之前 / `ad-reports` 附近 / 促销那一族），
+    //   与本锚点相距 600 行以上 ⇒ git 能干净求并。
+    //
+    // ---- 首 token「ad-groups」的零命中核对结论 ----
+    //   本文件既有 100+ 条 services[] 正则里**没有任何一条**含 `ad-groups` 这个串
+    //   （既有的是 `ad-campaigns` / `ad-campaign-details` / `ad-keywords` / `ad-rules` /
+    //   `ad-type-diffs` / `ad-reports` 一类），所以首 token 既是独立字面量，
+    //   也不会被既有分支的前缀吃掉。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   ad-groups                              广告组列表（GET，真分页 + 真筛选 + 真排序）
+    //   ad-groups/capabilities                 能力声明（未交付段 available=false + ownerModule）
+    //   ad-groups/options                      下拉项 + 护栏上限 + 组级报表路由标识
+    //   ad-groups/summary                      组级汇总（GET，只给条数，不做跨币种金额相加）
+    //   ad-groups/product-candidates           可选投放商品候选（GET，该活动所在店铺的 listing）
+    //   ad-groups/{uuid}                       广告组详情（GET，含投放商品 / SKU 映射现状 / 审计）
+    //   ad-groups/{uuid}/operations            组级操作审计（GET，真分页）
+    //   ad-groups/{uuid}/products              设投放商品（PUT，**替换**语义）
+    //
+    // 判别顺序：字面量子路径（capabilities / options / summary / product-candidates）排在
+    // {uuid} 段之前 —— alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `ad-groups/{uuid}/bids` —— 改竞价**复用**上游 14.1.1.2 的
+    //     `ad-campaign-details/campaigns/{uuid}/bids`（带单次上限与绝对上限、逐条留审计）。
+    //     本模块**不另起同义端点**：两个端点改同一笔钱，审计就会分叉。
+    //   * `ad-groups/{uuid}/metrics` —— 组级指标**没有事实来源**（没有组级指标表，
+    //     ad_campaign_daily_metric 是 campaign 维度），capabilities 里 available=false。
+    //   * `ad-groups/{uuid}/report` —— 组级报表归 14.3.1.2（同批并行开发）。
+    //   * `ad-groups/{uuid}/keywords` —— 关键词归 14.1.3.1（且只有活动维度）。
+    //   * `ad-groups/{uuid}/delete` —— 广告组是事实，不提供删除。
+    //   * `ad-groups/{uuid}/writeback` —— 平台回写队列未交付（平台适配层）。
+    //   * `ad-groups/groups` —— 不重开一条集合读。
+    //
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //（不是 `[0-9a-f-]+`：后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行）。
+    // 裸路径 `ad-groups` **刻意放行**：本模块真的有「广告组列表」这个集合读。
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^ad\-groups(?:\/(?:capabilities|options|summary|product\-candidates|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:operations|products))?))?$/,
+  },
+  {
     // 11.4.1.1 平台纠纷列表（trade 服务，卷 11「售后与退货」L3 11.4「平台纠纷与客诉」的第一格）。
     //
     // 蓝图：「管理平台纠纷/争议（Amazon A-to-Z、eBay 争议、速卖通纠纷）：类型、金额、平台时限、
