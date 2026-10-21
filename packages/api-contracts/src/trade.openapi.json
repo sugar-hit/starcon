@@ -45159,6 +45159,852 @@
           }
         }
       }
+    },
+    "/trade/platform-disputes/{id}/evidence-items/{itemId}": {
+      "put": {
+        "tags": [
+          "platform-dispute-controller"
+        ],
+        "operationId": "put_trade_platform_disputes_id_evidence_items_itemId",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "itemId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlatformEvidenceMark"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformDisputeDetail"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "platform-dispute-controller"
+        ],
+        "operationId": "delete_trade_platform_disputes_id_evidence_items_itemId",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "itemId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformDisputeDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/platform-disputes": {
+      "get": {
+        "tags": [
+          "platform-dispute-controller"
+        ],
+        "operationId": "get_trade_platform_disputes",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "disputeType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "platformCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "currency",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "ourPosition",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "liabilityStage",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "settlementStatus",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "overdueOnly",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "minAmount",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "maxAmount",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformDisputePage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "platform-dispute-controller"
+        ],
+        "operationId": "post_trade_platform_disputes",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlatformDisputeCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformDisputeDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/platform-disputes/{id}/withdraw": {
+      "post": {
+        "tags": [
+          "platform-dispute-controller"
+        ],
+        "operationId": "post_trade_platform_disputes_id_withdraw",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlatformDisputeWithdraw"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformDisputeDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/platform-disputes/{id}/submit-evidence": {
+      "post": {
+        "tags": [
+          "platform-dispute-controller"
+        ],
+        "operationId": "post_trade_platform_disputes_id_submit_evidence",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlatformDisputeSubmitEvidence"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformDisputeDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/platform-disputes/{id}/start-evidence": {
+      "post": {
+        "tags": [
+          "platform-dispute-controller"
+        ],
+        "operationId": "post_trade_platform_disputes_id_start_evidence",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "expectedVersion",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformDisputeDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/platform-disputes/{id}/settlements": {
+      "post": {
+        "tags": [
+          "platform-dispute-controller"
+        ],
+        "operationId": "post_trade_platform_disputes_id_settlements",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlatformDisputeSettlementCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformDisputeDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/platform-disputes/{id}/settlements/{settlementId}/reject": {
+      "post": {
+        "tags": [
+          "platform-dispute-controller"
+        ],
+        "operationId": "post_trade_platform_disputes_id_settlements_settlementId_reject",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "settlementId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlatformDisputeSettlementReject"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformDisputeDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/platform-disputes/{id}/settlements/{settlementId}/confirm": {
+      "post": {
+        "tags": [
+          "platform-dispute-controller"
+        ],
+        "operationId": "post_trade_platform_disputes_id_settlements_settlementId_confirm",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "settlementId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlatformDisputeSettlementConfirm"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformDisputeDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/platform-disputes/{id}/resolve": {
+      "post": {
+        "tags": [
+          "platform-dispute-controller"
+        ],
+        "operationId": "post_trade_platform_disputes_id_resolve",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlatformDisputeResolve"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformDisputeDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/platform-disputes/{id}/position": {
+      "post": {
+        "tags": [
+          "platform-dispute-controller"
+        ],
+        "operationId": "post_trade_platform_disputes_id_position",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlatformDisputePositionUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformDisputeDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/platform-disputes/{id}/evidence-items": {
+      "post": {
+        "tags": [
+          "platform-dispute-controller"
+        ],
+        "operationId": "post_trade_platform_disputes_id_evidence_items",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlatformEvidenceItemCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformDisputeDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/platform-disputes/{id}": {
+      "get": {
+        "tags": [
+          "platform-dispute-controller"
+        ],
+        "operationId": "get_trade_platform_disputes_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformDisputeDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/platform-disputes/capabilities": {
+      "get": {
+        "tags": [
+          "platform-dispute-controller"
+        ],
+        "operationId": "get_trade_platform_disputes_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformDisputeCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -109490,6 +110336,767 @@
           },
           "effective": {
             "type": "boolean"
+          }
+        }
+      },
+      "PlatformEvidenceMark": {
+        "type": "object",
+        "properties": {
+          "evidenceState": {
+            "type": "string"
+          },
+          "evidenceNote": {
+            "type": "string",
+            "nullable": true
+          },
+          "missingReason": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "PlatformDisputeAction": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "allowed": {
+            "type": "boolean"
+          },
+          "method": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "precondition": {
+            "type": "string"
+          },
+          "blockedReason": {
+            "type": "string"
+          }
+        }
+      },
+      "PlatformDisputeDetail": {
+        "type": "object",
+        "properties": {
+          "head": {
+            "$ref": "#/components/schemas/PlatformDisputeRow"
+          },
+          "evidenceItems": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlatformDisputeEvidenceRow"
+            }
+          },
+          "settlements": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlatformDisputeSettlementRow"
+            }
+          },
+          "events": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlatformDisputeEventRow"
+            }
+          },
+          "actions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlatformDisputeAction"
+            }
+          },
+          "evaluatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "PlatformDisputeEventRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "eventType": {
+            "type": "string"
+          },
+          "eventTypeLabel": {
+            "type": "string"
+          },
+          "fromStatus": {
+            "type": "string",
+            "nullable": true
+          },
+          "toStatus": {
+            "type": "string",
+            "nullable": true
+          },
+          "amount": {
+            "type": "number",
+            "nullable": true
+          },
+          "reasonNote": {
+            "type": "string"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "PlatformDisputeEvidenceRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "disputeId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "evidenceSeq": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "evidenceType": {
+            "type": "string"
+          },
+          "evidenceTypeLabel": {
+            "type": "string"
+          },
+          "evidenceLabel": {
+            "type": "string"
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "evidenceState": {
+            "type": "string"
+          },
+          "evidenceStateLabel": {
+            "type": "string"
+          },
+          "evidenceNote": {
+            "type": "string"
+          },
+          "missingReason": {
+            "type": "string"
+          },
+          "providedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "PlatformDisputeRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "disputeNo": {
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "platformName": {
+            "type": "string"
+          },
+          "platformDisputeNo": {
+            "type": "string"
+          },
+          "platformOrderNo": {
+            "type": "string"
+          },
+          "disputeType": {
+            "type": "string"
+          },
+          "disputeTypeLabel": {
+            "type": "string"
+          },
+          "disputeReason": {
+            "type": "string",
+            "nullable": true
+          },
+          "disputeCurrency": {
+            "type": "string"
+          },
+          "disputeAmount": {
+            "type": "number"
+          },
+          "evidenceDeadline": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "secondsRemaining": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "deadlineState": {
+            "type": "string"
+          },
+          "deadlineStateLabel": {
+            "type": "string"
+          },
+          "ourPosition": {
+            "type": "string"
+          },
+          "ourPositionLabel": {
+            "type": "string"
+          },
+          "positionNote": {
+            "type": "string"
+          },
+          "liabilityStage": {
+            "type": "string"
+          },
+          "liabilityStageLabel": {
+            "type": "string"
+          },
+          "liabilityNote": {
+            "type": "string"
+          },
+          "disputeStatus": {
+            "type": "string"
+          },
+          "disputeStatusLabel": {
+            "type": "string"
+          },
+          "evidenceSubmittedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "settlementState": {
+            "type": "string"
+          },
+          "settlementStateLabel": {
+            "type": "string"
+          },
+          "effectiveAmount": {
+            "type": "number"
+          },
+          "evidenceTotal": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "evidenceProvided": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "evidenceMissing": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "resolutionCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "resolutionCodeLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "resolvedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "PlatformDisputeSettlementRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "settlementCurrency": {
+            "type": "string"
+          },
+          "requestedAmount": {
+            "type": "number"
+          },
+          "effectiveAmount": {
+            "type": "number"
+          },
+          "settlementStatus": {
+            "type": "string"
+          },
+          "settlementStatusLabel": {
+            "type": "string"
+          },
+          "financeReference": {
+            "type": "string"
+          },
+          "confirmedBy": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "confirmedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "rejectReason": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "PlatformDisputeCreate": {
+        "type": "object",
+        "properties": {
+          "platformCode": {
+            "type": "string"
+          },
+          "platformName": {
+            "type": "string"
+          },
+          "platformDisputeNo": {
+            "type": "string"
+          },
+          "disputeType": {
+            "type": "string"
+          },
+          "disputeReason": {
+            "type": "string",
+            "nullable": true
+          },
+          "platformOrderNo": {
+            "type": "string",
+            "nullable": true
+          },
+          "disputeCurrency": {
+            "type": "string"
+          },
+          "disputeAmount": {
+            "type": "number"
+          },
+          "evidenceDeadline": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "ourPosition": {
+            "type": "string",
+            "nullable": true
+          },
+          "liabilityStage": {
+            "type": "string",
+            "nullable": true
+          },
+          "positionNote": {
+            "type": "string",
+            "nullable": true
+          },
+          "liabilityNote": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "PlatformDisputeWithdraw": {
+        "type": "object",
+        "properties": {
+          "withdrawReason": {
+            "type": "string",
+            "nullable": true
+          },
+          "expectedVersion": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "PlatformDisputeSubmitEvidence": {
+        "type": "object",
+        "properties": {
+          "submitNote": {
+            "type": "string",
+            "nullable": true
+          },
+          "expectedVersion": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "PlatformDisputeSettlementCreate": {
+        "type": "object",
+        "properties": {
+          "requestedAmount": {
+            "type": "number"
+          }
+        }
+      },
+      "PlatformDisputeSettlementReject": {
+        "type": "object",
+        "properties": {
+          "rejectReason": {
+            "type": "string"
+          }
+        }
+      },
+      "PlatformDisputeSettlementConfirm": {
+        "type": "object",
+        "properties": {
+          "financeReference": {
+            "type": "string"
+          }
+        }
+      },
+      "PlatformDisputeResolve": {
+        "type": "object",
+        "properties": {
+          "resolutionCode": {
+            "type": "string"
+          },
+          "resolutionNote": {
+            "type": "string",
+            "nullable": true
+          },
+          "expectedVersion": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "PlatformDisputePositionUpdate": {
+        "type": "object",
+        "properties": {
+          "ourPosition": {
+            "type": "string"
+          },
+          "liabilityStage": {
+            "type": "string"
+          },
+          "positionNote": {
+            "type": "string",
+            "nullable": true
+          },
+          "liabilityNote": {
+            "type": "string",
+            "nullable": true
+          },
+          "expectedVersion": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "PlatformEvidenceItemCreate": {
+        "type": "object",
+        "properties": {
+          "evidenceType": {
+            "type": "string"
+          },
+          "evidenceLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "required": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "evidenceNote": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "PlatformDisputeCurrencyTotal": {
+        "type": "object",
+        "properties": {
+          "currency": {
+            "type": "string"
+          },
+          "disputeCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalAmount": {
+            "type": "number"
+          },
+          "effectiveAmount": {
+            "type": "number"
+          }
+        }
+      },
+      "PlatformDisputePage": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlatformDisputeRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/PlatformDisputeSummary"
+          },
+          "currencyBreakdown": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlatformDisputeCurrencyTotal"
+            }
+          },
+          "evaluatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "paginationNote": {
+            "type": "string"
+          },
+          "deadlineNote": {
+            "type": "string"
+          },
+          "settlementNote": {
+            "type": "string"
+          },
+          "currencyNote": {
+            "type": "string"
+          },
+          "sortNote": {
+            "type": "string"
+          }
+        }
+      },
+      "PlatformDisputeSummary": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "open": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "evidencePreparing": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "evidenceSubmitted": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "resolvedWon": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "resolvedLost": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "withdrawn": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "overdue": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "awaitingFinanceConfirm": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "PlatformDisputeBoundary": {
+        "type": "object",
+        "properties": {
+          "boundary": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "PlatformDisputeCapabilities": {
+        "type": "object",
+        "properties": {
+          "dataSources": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "sections": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlatformDisputeSectionCapability"
+            }
+          },
+          "related": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlatformDisputeRelatedModule"
+            }
+          },
+          "actions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlatformDisputeCapabilityAction"
+            }
+          },
+          "boundaries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlatformDisputeBoundary"
+            }
+          },
+          "stateMachine": {
+            "type": "string"
+          },
+          "hardRuleDeadline": {
+            "type": "string"
+          },
+          "hardRuleFinanceConfirm": {
+            "type": "string"
+          },
+          "evidenceListRule": {
+            "type": "string"
+          },
+          "platformSyncGap": {
+            "type": "string"
+          }
+        }
+      },
+      "PlatformDisputeCapabilityAction": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "allowed": {
+            "type": "boolean"
+          },
+          "method": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "precondition": {
+            "type": "string"
+          },
+          "blockingReason": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "unavailableReason": {
+            "type": "string"
+          }
+        }
+      },
+      "PlatformDisputeRelatedModule": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "delivered": {
+            "type": "boolean"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "href": {
+            "type": "string"
+          }
+        }
+      },
+      "PlatformDisputeSectionCapability": {
+        "type": "object",
+        "properties": {
+          "section": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "landsIn": {
+            "type": "string"
           }
         }
       }
