@@ -201,6 +201,22 @@
 
 **按协议：L2 未全绿 ⇒ 本轮不 push。**（第一次 L2 的红是 5.5.1.1 那处墙钟断言，已修；第二次的红是**另一处**潜伏缺陷，见下。）
 
+### L2 第三次全量验证（10:46 → 11:23）：**全绿** ⇒ 本轮 push
+
+被验证的树 = 7 条模块车道 + 5.5.1.1 修复 + 9.1.1.3 修复（HEAD `8bb3fcdd`）。
+
+| 步骤 | 命令 | 结果 |
+| --- | --- | --- |
+| 后端 | `cd backend && ./mvnw verify` | ✅ **EXIT=0 · BUILD SUCCESS** —— 8 模块 reactor，397 个测试类；有测试的 6 个服务模块合计 **6841 例全绿**（identity 270 / catalog 1981 / channel 1182 / warehouse 1569 / **trade 1769** / crm 70） |
+| 类型 | `pnpm typecheck` | ✅ EXIT=0 |
+| Lint | `pnpm lint` | ✅ EXIT=0 |
+| 单测 | `pnpm test` | ✅ EXIT=0 —— **377 个文件 / 5758 例全绿** |
+| 构建 | `pnpm --filter @starcon/web build` | ✅ EXIT=0 |
+| 台账 | `node tools/module-progress/sync.mjs --check` | ✅ EXIT=0（台账与蓝图一致） |
+
+**关键确认**：上一轮红 6 例的 `OrderChangeCancelIntegrationTest` 在**同样的 L2 负载条件下**（同样 40+ PG 容器、同样时间窗）**41/41 全绿**
+（`Tests run: 41, Failures: 0, Errors: 0`）⇒ 修复在真实批次条件下被验证，不只是「单跑绿」。
+
 ### 红灯在哪个用例
 
 `com.starcon.trade.OrderChangeCancelIntegrationTest`（模块 **9.1.1.3 订单变更与取消**，V119 迁移，**不在本批 7 条车道的范围内**）。
