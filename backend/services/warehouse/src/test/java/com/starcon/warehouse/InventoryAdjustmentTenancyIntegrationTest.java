@@ -252,8 +252,8 @@ class InventoryAdjustmentTenancyIntegrationTest {
               "insert into inventory_adjustment_order_line(id,tenant_id,order_id,bucket_id,balance_id,"
                   + "legal_entity_id,sku_id,warehouse_id,location_id,quality_status_id,"
                   + "sku_code,sku_name,warehouse_code,location_code,lot_code,quality_status_code,"
-                  + "qty_delta,reason_code,note,expected_version,created_at) "
-                  + "values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?::timestamptz)",
+                  + "qty_delta,reason_code,note,expected_version,line_no,created_at) "
+                  + "values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?::timestamptz)",
               UUID.randomUUID(),
               tenant,
               orderId,
@@ -274,6 +274,9 @@ class InventoryAdjustmentTenancyIntegrationTest {
               "DAMAGE",
               "",
               0L,
+              // 行号（V261）：单内从 1 递增，不给就是 23502 —— 漏写要响亮地炸，
+              // 不靠默认值悄悄落成 0 或 1。
+              1,
               now());
           return orderId;
         });

@@ -398,6 +398,28 @@ class InventoryAdjustmentIntegrationTest {
     return new BigDecimal(String.valueOf(value));
   }
 
+  /**
+   * 按行的**身份**（sku × 库位 × 批次）从明细里找出那一行。
+   *
+   * <p>🔴 不给「按位置取行」的写法留口子：行的先后是「加行顺序」（line_no，V261），
+   * 而主键是随机 UUID —— {@code get(0)} 断言的是运气，不是业务。
+   */
+  static Map<String, Object> lineOf(
+      List<Map<String, Object>> lines, String skuCode, String locationCode, String lotCode) {
+    var found =
+        lines.stream()
+            .filter(
+                l ->
+                    skuCode.equals(l.get("skuCode"))
+                        && locationCode.equals(l.get("locationCode"))
+                        && lotCode.equals(l.get("lotCode")))
+            .toList();
+    assertThat(found)
+        .as("按身份找行：sku=%s location=%s lot=%s", skuCode, locationCode, lotCode)
+        .hasSize(1);
+    return found.get(0);
+  }
+
   static Map<String, Object> body(String reasonCode, List<Map<String, Object>> lines) {    var m = new java.util.LinkedHashMap<String, Object>();
     m.put("reasonCode", reasonCode);
     m.put("note", "外箱破损，按现场照片调整");
@@ -471,15 +493,81 @@ class InventoryAdjustmentIntegrationTest {
     @SuppressWarnings("unchecked")
     var lines = (List<Map<String, Object>>) order.get("lines");
     assertThat(lines).hasSize(2);
-    // 六维定位落在行上：调的是哪一件必须能一眼看出来
-    assertThat(lines.get(0)).containsEntry("skuCode", "SKU-1").containsEntry("locationCode", "A-01");
-    assertThat(lines.get(0)).containsEntry("lotCode", "LOT-A");
-    assertThat(lines.get(1)).containsEntry("lotCode", "");
+    // 六维定位落在行上：调的是哪一件必须能一眼看出来。
+    //
+    // 🔴 按行的**身份**（sku × 库位 × 批次）找那一行，**不按 get(0) / get(1) 的位置**：
+    // 行的先后由「加行顺序」决定（line_no，V261），而主键是随机 UUID ——
+    // 断言位置等于断言运气（这条用例上一轮 L2 是绿的，这一轮红了 1 例：约 50% 概率的假红）。
+    // 这里断言的是「这两行都在、内容各自对」，不是「谁排在前面」。
+    var lotA = lineOf(lines, "SKU-1", "A-01", "LOT-A");
+    var noLot = lineOf(lines, "SKU-1", "A-02", "");
+    assertThat(numOf(lotA.get("qtyDelta"))).isEqualByComparingTo("-3");
+    assertThat(numOf(noLot.get("qtyDelta"))).isEqualByComparingTo("-2");
     // 草稿阶段余额一个数都没动
     assertThat(bucketOnHand(b1)).isEqualByComparingTo("100");
     assertThat(bucketOnHand(b2)).isEqualByComparingTo("60");
     // 同一批货在一个仓只有一个 balance 行（库位/批次在它之下拆开）
     assertThat(balanceOnHand(balanceOf(b1))).isEqualByComparingTo("160");
+  }
+
+  /**
+   * 🔴 确定性证明：行的顺序由**行号**决定（= 加行顺序），与随机 UUID 的大小无关。
+   *
+   * <p>旧写法按 {@code order by l.id} 排序，而 id 是随机 uuid(v4) ⇒ 同一张单的两行谁在前
+   * 每次都可能不一样（约 50% 概率假红；2026-10-21 集成头全量 verify 红的就是这条）。
+   *
+   * <p>这里把「必翻车的现场」**真实构造**出来，而不是碰运气等它炸：
+   * 把两行的 id 改成与加行顺序**相反**的两个定值 UUID ⇒ 任何还按 id 排序的读法
+   * 都会把 A-02 排在 A-01 前面。于是：
+   *
+   * <ul>
+   *   <li>旧写法（断言第 0 行是 A-01）在这个现场**必红**（用 {@code assertThatThrownBy} 钉死）；
+   *   <li>新写法（按 line_no）**必须绿**，且顺序 = 加行顺序。
+   * </ul>
+   */
+  @Test
+  void 行的顺序是确定的_按加行顺序而不是随机UUID() throws Exception {
+    var b1 = bucket(whOne, skuOne, locOne, lotOne, "100");
+    var b2 = bucket(whOne, skuOne, locTwo, null, "60");
+
+    var order =
+        createOrder(
+            body(
+                "DAMAGE",
+                List.of(
+                    line(b1, "-3", bucketVersion(b1), null),
+                    line(b2, "-2", bucketVersion(b2), null))),
+            "Bearer tenant-a");
+    var orderId = UUID.fromString((String) order.get("id"));
+
+    // DB 层的真相：行号按加行顺序分配（A-01 是第 1 行，A-02 是第 2 行）。
+    assertThat(lineNoByLocation(orderId))
+        .as("行号 = 加行顺序：同一张单内从 1 递增")
+        .containsExactly("A-01:1", "A-02:2");
+
+    // ---- 现场：把两行的 UUID 改成与加行顺序相反 --------------------------------
+    reverseLineIds(orderId);
+
+    // 旧写法（按 id 排序）在这个现场里**必红**：id 顺序把 A-02 排在前面。
+    var byId = locationsById(orderId);
+    assertThat(byId).as("现场确实造出来了：按 id 排序与加行顺序相反").containsExactly("A-02", "A-01");
+    assertThatThrownBy(() -> assertThat(byId.get(0)).isEqualTo("A-01"))
+        .as("旧写法（按随机 UUID 排序 ⇒ 断言第 0 行是 A-01）必红")
+        .isInstanceOf(AssertionError.class);
+
+    // 新写法：顺序由行号决定 ⇒ 与加行顺序一致，与 UUID 大小无关。
+    var lines = detailLines(orderId);
+    assertThat(lines).hasSize(2);
+    assertThat(lines.get(0))
+        .as("第 1 行仍然是加行时提交的第 1 件（A-01）")
+        .containsEntry("skuCode", "SKU-1")
+        .containsEntry("locationCode", "A-01")
+        .containsEntry("lotCode", "LOT-A");
+    assertThat(lines.get(1))
+        .as("第 2 行仍然是加行时提交的第 2 件（A-02）")
+        .containsEntry("skuCode", "SKU-1")
+        .containsEntry("locationCode", "A-02")
+        .containsEntry("lotCode", "");
   }
 
   @Test
@@ -1095,5 +1183,72 @@ class InventoryAdjustmentIntegrationTest {
             sql.fetchOne(
                     "select count(*) from inventory_adjustment_order where tenant_id = ?", a)
                 .get(0, Long.class));
+  }
+
+  // ------------------------------------------------ 行的顺序（line_no，V261）
+
+  /** 详情端点返回的明细行（服务层按 line_no 排序后的真实结果）。 */
+  @SuppressWarnings("unchecked")
+  List<Map<String, Object>> detailLines(UUID orderId) throws Exception {
+    var result =
+        http.perform(
+                get("/warehouse/inventory/adjustments/" + orderId)
+                    .header("Authorization", "Bearer tenant-a"))
+            .andExpect(status().isOk())
+            .andReturn();
+    Map<String, Object> body = JSON.readValue(result.getResponse().getContentAsString(), Map.class);
+    return (List<Map<String, Object>>) body.get("lines");
+  }
+
+  /** DB 层的真相：库位 ← 行号（行号 = 加行顺序）。 */
+  List<String> lineNoByLocation(UUID orderId) {
+    return access.run(
+        actorA,
+        "warehouse.inventory.read",
+        () ->
+            sql.fetch(
+                    "select line_no, location_code from inventory_adjustment_order_line"
+                        + " where tenant_id = ? and order_id = ? order by line_no",
+                    a,
+                    orderId)
+                .stream()
+                .map(r -> r.get("location_code", String.class) + ":" + r.get("line_no", Integer.class))
+                .toList());
+  }
+
+  /** 旧写法（{@code order by l.id}）会看到的顺序：按主键排。 */
+  List<String> locationsById(UUID orderId) {
+    return access.run(
+        actorA,
+        "warehouse.inventory.read",
+        () ->
+            sql.fetch(
+                    "select location_code from inventory_adjustment_order_line"
+                        + " where tenant_id = ? and order_id = ? order by id",
+                    a,
+                    orderId)
+                .stream()
+                .map(r -> r.get("location_code", String.class))
+                .toList());
+  }
+
+  /**
+   * 🔴 现场构造：把两行的主键改成与加行顺序**相反**的两个定值 UUID。
+   *
+   * <p>这样「按随机 UUID 排序」就一定把 A-02 排在前面 —— 旧写法必红，新写法必须绿。
+   * 这是**真的构造**出来的翻车现场，不是碰运气等它炸。
+   */
+  void reverseLineIds(UUID orderId) {
+    access.run(
+        actorA,
+        "warehouse.inventory.update",
+        () ->
+            sql.execute(
+                "update inventory_adjustment_order_line set id = case line_no"
+                    + " when 1 then 'ffffffff-ffff-4fff-bfff-ffffffffffff'::uuid"
+                    + " else '00000000-0000-4000-8000-000000000000'::uuid end"
+                    + " where tenant_id = ? and order_id = ?",
+                a,
+                orderId));
   }
 }
