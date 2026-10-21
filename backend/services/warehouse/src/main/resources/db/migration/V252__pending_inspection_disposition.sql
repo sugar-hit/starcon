@@ -534,10 +534,14 @@ BEGIN
     END IF;
 
     -- ---- P1：负向分录绝对值之和必须**恰好等于**任务量（待检货全部被处置）。
-    SELECT count(*), coalesce(sum(-e.on_hand_delta),0), coalesce(sum(e.on_hand_delta),0)
-      INTO v_cnt, v_out, v_in
+    SELECT count(*), coalesce(sum(-e.on_hand_delta),0)
+      INTO v_cnt, v_out
       FROM inventory_entry e
      WHERE e.tenant_id = NEW.tenant_id AND e.transaction_id = v_tx AND e.on_hand_delta < 0;
+    -- 转入量 = **正向**分录之和（负向子集的和是负数，用它比就是拿负数比正数）。
+    SELECT coalesce(sum(e.on_hand_delta),0) INTO v_in
+      FROM inventory_entry e
+     WHERE e.tenant_id = NEW.tenant_id AND e.transaction_id = v_tx AND e.on_hand_delta > 0;
     IF v_cnt = 0 THEN
       RAISE EXCEPTION '待检处理单 % 标记完成但账上没有任何出账分录：货已经处置了却没有留下账（P1）',
         NEW.task_code USING ERRCODE='23514';
