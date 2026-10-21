@@ -3991,6 +3991,49 @@ const services: readonly {
     // 后端没有对应映射，放行它会让界面以为「一条不存在的列表接口」可用。
   },
   {
+    // purchase-requests 是 6.2.2.1 采购申请的**独立前缀**（trade 服务，端口 8085）。
+    // 本条目是**新增一条 services[] 元素**，不是往上面那条 trade 长正则的 alternation 里并 ——
+    // 那样本车道与并行车道的插入点会被隔开，git 能干净求并。
+    //
+    // 形状逐条列出（后端命名空间 /trade/purchase-requests）：
+    //   purchase-requests                          集合读（真分页 + 真筛选 + 排序白名单）/ POST 建单
+    //   purchase-requests/capabilities             能力声明（含「采购单 6.3.1.2 未交付」的如实标注）
+    //   purchase-requests/options                  参照下拉（供应商 / 目标仓 / 法人）
+    //   purchase-requests/{uuid}                   详情（GET）/ 更新草稿（PUT）
+    //   purchase-requests/{uuid}/lines             申请行集合读（GET）/ 手工加行（POST）
+    //   purchase-requests/{uuid}/lines/{uuid}/adjust    调整数量 / 交期 / 单价（POST，理由必填）
+    //   purchase-requests/{uuid}/lines/{uuid}/supplier  选供应商（POST）
+    //   purchase-requests/{uuid}/submit            提交审批（POST）
+    //   purchase-requests/{uuid}/approval/refresh  拉取审批结论（POST）
+    //   purchase-requests/{uuid}/convert           转单事实（POST）
+    //
+    // ⚠️ 判别顺序：字面量子路径（capabilities / options）排在 {uuid} 段**之前** ——
+    //    alternation 是首个命中即返回，顺序反了会被 uuid 支吃掉半截。
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），不是 `[0-9a-f-]+` ——
+    //    后者会把 `approve`、`export` 这种非 UUID 形状也当成 id 放行。
+    // ⚠️ `lines/{uuid}`（**不带**动作后缀）**刻意不放行**：本模块没有「按 id 读单行」的端点，
+    //    单行信息随详情一起返回。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `purchase-requests/{uuid}/approve` / `/reject` / `/approval/decide` ——
+    //     **本模块没有本地批准端点**：审批结论由 17 组织（identity）裁定。
+    //     本地批准会把审批流本地化，identity 那边什么都不知道还留一条没人管的待办。
+    //   * `purchase-requests/{uuid}/export` —— 本模块不提供导出形状。
+    //   * `purchase-requests/{uuid}/delete` —— 申请单是业务凭据（调整留痕 / 转单事实都指向它），
+    //     后端也没有删除端点。
+    //   * `purchase-requests/purchase-orders` —— 6.3.1.2 采购单**未交付**，
+    //     本模块只产出转单事实，不开采购单的形状。
+    //
+    // 🔴 回归基线：本条目是**新增**元素，上一条 trade 长正则（fulfillment / processing /
+    //    sales-orders / b2b-orders / dealers / shipment-writeback 等）与本文件其余所有条目
+    //    **一字未动** —— 兄弟车道（warehouse / channel / catalog 组）已交付的形状没有被挤掉。
+    prefix: 'trade/',
+    env: 'TRADE_URL',
+    fallback: 'http://127.0.0.1:8085',
+    pattern:
+      /^purchase\-requests(?:\/(?:capabilities|options)|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/lines(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/(?:adjust|supplier))?|\/(?:submit|convert)|\/approval\/refresh)?)?$/,
+  },
+  {
     // listing-templates 是 4.2.2.1 刊登模板的**独立前缀**（channel 服务，端口 8083）。
     // 本条目是**新增一条 services[] 元素**，不是往既有 channel 长正则的 alternation 里并 ——
     // 那样本车道与并行车道的插入点会被隔开，git 能干净求并。
