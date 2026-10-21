@@ -241,7 +241,11 @@ class HandoverBatchIntegrationTest {
   void truncateAll() {
     try (var c = DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
         var s = c.createStatement()) {
-      s.execute("truncate handover_event, handover_manifest_item, handover_candidate, handover_batch");
+      // CASCADE：V217 的 logistics_pickup_signoff_case 以外键引用 handover_manifest_item /
+      // handover_batch，引用方不在同一条 truncate 语句里，PG 会直接拒
+      // （cannot truncate a table referenced in a foreign key constraint），级联一并清干净。
+      s.execute(
+          "truncate handover_event, handover_manifest_item, handover_candidate, handover_batch cascade");
     } catch (java.sql.SQLException e) {
       throw new RuntimeException(e);
     }

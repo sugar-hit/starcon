@@ -6,8 +6,8 @@
 > 落库的完整协议在 `tools/module-progress/PIPELINE.md`，**两者不一致时以 PIPELINE.md 为准**，
 > 并在汇报里点名不一致的地方。
 >
-> **当前运行参数（节奏、节流闸阈值、`--lanes`、配额、load 阈值）在
-> `.dev-agent/PIPELINE.local.md` —— 那是本地文件，不进版本库。**
+> **当前运行参数（节奏、节流闸阈值、`--lanes`、配额、load 阈值、静默窗口、token 期限、
+> 本机路径、git 远端名、自己的 cron_id）在 `.dev-agent/PIPELINE.local.md` —— 那是本地文件，不进版本库。**
 > 本次开工先读它拿当前档位，不要引用本文档里的数字或凭记忆。
 
 你每次运行是**全新的独立会话**，不继承任何上下文。
@@ -17,7 +17,35 @@
 
 ## 0. 项目与职责
 
-项目：`/Users/tommy/Project/starcon`（Java Spring Boot 微服务 + Next.js 双栈，遵守根 `AGENTS.md`）。
+项目：Java Spring Boot 微服务 + Next.js 双栈，遵守根 `AGENTS.md`。
+
+### 0.1 本地参数（先读：机器相关的一切都在这里）
+
+流水线跑在**独立 worktree**（集成头 `integration/module-dev`）里，主工作区留给人工。
+所有机器相关参数集中在**本地配置文件**（不进版本库）：
+
+```bash
+TOP=$(git rev-parse --show-toplevel)             # 本任务的工作目录（主工作区）
+CFG="$TOP/.dev-agent/PIPELINE.local.md"
+
+PROJECT_ROOT=$(grep -E '^PROJECT_ROOT='   "$CFG" | cut -d= -f2-)  # 集成头 worktree 绝对路径
+PUSH_REMOTE=$(grep -E '^PUSH_REMOTE='   "$CFG" | cut -d= -f2-)  # git 远端名
+LANES=$(grep -E '^LANES='            "$CFG" | cut -d= -f2-)  # 每批车道数
+THROTTLE_MIN=$(grep -E '^THROTTLE_MIN='  "$CFG" | cut -d= -f2-)  # 节流闸阈值（分钟）
+SILENT_WINDOW=$(grep -E '^SILENT_WINDOW=' "$CFG" | cut -d= -f2-)  # 1=夜间静默 0=全天运行
+TOKEN_HORIZON=$(grep -E '^TOKEN_HORIZON=' "$CFG" | cut -d= -f2-)  # 高强度模式截止时刻
+CRON_ID=$(grep -E '^CRON_ID='         "$CFG" | cut -d= -f2-)  # 本任务自己的 cron_id
+
+cd "$PROJECT_ROOT"      # 之后所有命令都在集成头 worktree 里跑
+```
+
+⚠️ **下面所有 `<PROJECT_ROOT>` 都指这个值，不要写死绝对路径。**
+⚠️ `.dev-agent/` 有两类东西，**别搞混**：
+
+| 位置                   | 内容                                                       | 谁写   |
+| ---------------------- | ---------------------------------------------------------- | ------ |
+| 主工作区 `.dev-agent/` | `PIPELINE.local.md`（**配置**，人改）                      | 人     |
+| 集成头 `.dev-agent/`   | `lanes.json` / `dispatch.gate` / `last-batch-at`（**状态**） | 脚本 |
 
 你是**调度者**，绝不自己写业务代码 —— 代码由你派发的 `worker` 子任务完成。
 
@@ -97,7 +125,7 @@ L0/L1 归因精确；L2 抓跨车道互相破坏。
 每次运行**第一步先跑台账**：
 
 ```bash
-cd /Users/tommy/Project/starcon && node tools/module-progress/sync.mjs
+cd "$PROJECT_ROOT" && node tools/module-progress/sync.mjs
 ```
 
 - **未开发 > 0** → 照常执行第 1–6 步
@@ -106,10 +134,10 @@ cd /Users/tommy/Project/starcon && node tools/module-progress/sync.mjs
   2. `sync.mjs`
   3. `lane.mjs gc`
   4. 出最终收尾报告（总数/已交付/完成率、分阶段进度表、分系统进度表、集成头 hash、push 的 commit 列表）
-  5. **关闭本定时任务**（`fcf14c15-6744-4ec2-b733-fc31d5babf44`）：
+  5. **关闭本定时任务**（cron_id 从本地参数文件读：`$CRON_ID`）：
      ```bash
      # mcp_invoke(tool_name="cron_update", arguments={
-     #   "cron_id":"fcf14c15-6744-4ec2-b733-fc31d5babf44",
+     #   "cron_id":"<CRON_ID>",
      #   "enabled":false,
      #   "schedule":"<照抄 .dev-agent/PIPELINE.local.md 里的当前 cron 表达式>"   # 必须显式带，否则会被静默重置
      # })
@@ -120,7 +148,7 @@ cd /Users/tommy/Project/starcon && node tools/module-progress/sync.mjs
      ```
   6. 报告里明确写「定时任务已关闭」。**关不掉就写明失败原因，不要假装关掉了。**
 
-另一个 B 组任务 `f029d0bf-f94a-4aa4-8633-6dd220fe2ce7`（`0 */2`）保持 `enabled: false`，不必再动。
+⚠️ **不要去动别的 cron 任务。** 本地参数文件里没有登记的 cron 一律不碰。
 
 ### 🛑 长期停滞保护
 
@@ -135,7 +163,7 @@ cd /Users/tommy/Project/starcon && node tools/module-progress/sync.mjs
 ### 3.1 四条只读命令（都要跑）
 
 ```bash
-cd /Users/tommy/Project/starcon
+cd "$PROJECT_ROOT"
 node tools/module-progress/lane.mjs status | head -30
 uptime
 sysctl -n hw.ncpu
@@ -230,20 +258,28 @@ TTL 定成 4200 秒（70 分钟）就是为了覆盖它。
 
 ## 4. 六个步骤
 
-### 🔕 第 0 步：静默窗口闸（最高优先级，先于下面所有步骤）
+### 🔕 第 0 步：静默窗口闸（**由 `SILENT_WINDOW` 开关控制**，先于下面所有步骤）
 
-**20:30 到次日 08:00 之间，一个新任务都不许发起。** 这条优先于节流闸、
-优先于容量闸、优先于「本轮该干活」的任何判断。
+| `SILENT_WINDOW` | 行为                                                                    |
+| --------------- | ----------------------------------------------------------------------- |
+| `1`             | **夜间静默**：20:30 → 次日 08:00 一个新任务都不许发起（历史档位）       |
+| `0`             | **全天运行**：不设时段闸，节奏只由 cron + 节流闸决定                      |
 
 ```bash
-cd /Users/tommy/Project/starcon
-H=$(date +%H); M=$(date +%M); MINUTES=$(( H * 60 + M ))
-if [ "$MINUTES" -ge 1230 ] || [ "$MINUTES" -lt 480 ]; then   # 1230=20:30, 480=08:00
-  echo "静默窗口命中：$(date '+%H:%M') —— 本 tick 不得发起任何任务"
+cd "$PROJECT_ROOT"
+SILENT_WINDOW=$(grep -E '^SILENT_WINDOW=' "$TOP/.dev-agent/PIPELINE.local.md" | cut -d= -f2-)
+if [ "$SILENT_WINDOW" = "1" ]; then
+  H=$(date +%H); M=$(date +%M); MINUTES=$(( H * 60 + M ))
+  if [ "$MINUTES" -ge 1230 ] || [ "$MINUTES" -lt 480 ]; then   # 1230=20:30, 480=08:00
+    echo "静默窗口命中：$(date '+%H:%M') —— 本 tick 不得发起任何任务"
+  fi
 fi
 ```
 
-命中后**只做只读检查**（`sync.mjs`、`lane.mjs status`、台账 grep），然后结束。
+⚠️ **`SILENT_WINDOW=0` 不等于没有保护**：温度闸、容量闸、节流闸**全部照旧生效**，
+关掉的只是「按钟点不干活」这一条。机器的物理约束没有变。
+
+命中静默窗口后**只做只读检查**（`sync.mjs`、`lane.mjs status`、台账 grep），然后结束。
 
 | 允许 | 禁止 |
 | --- | --- |
@@ -254,17 +290,49 @@ fi
 | | ❌ 写 `last-batch-at` / `last-l2-at` |
 
 - **已在跑的车道（`state=running`）一律不杀** —— 用户明确「未结束的能忍受」。
-  让它们跑完，08:00 之后再回收 `ready`。
-- **不要为了「赶在 20:30 前做完」而加速**；20:30 命中就停，不硬撑。
+  让它们跑完，窗口开启后再回收 `ready`。
+- **不要为了「赶在窗口前做完」而加速**；命中就停，不硬撑。
 - **cron 是第一道闸，本闸是最后一道闸。** 即便 cron 被误改成 `*/30` 或 24 小时，
-  本闸仍会兜住 —— 上一轮「烧额度」就差点把 cron 改成 `*/30`。
+  `SILENT_WINDOW=1` 时本闸仍会兜住 —— 上一轮「烧额度」就差点把 cron 改成 `*/30`。
+
+### ⏳ 第 0.5 步：强度档位（`TOKEN_HORIZON`）
+
+```bash
+cd "$PROJECT_ROOT"
+TOKEN_HORIZON=$(grep -E '^TOKEN_HORIZON=' "$TOP/.dev-agent/PIPELINE.local.md" | cut -d= -f2-)
+LANES_CFG=$(grep -E '^LANES=' "$TOP/.dev-agent/PIPELINE.local.md" | cut -d= -f2-)
+THROTTLE_MIN=$(grep -E '^THROTTLE_MIN=' "$TOP/.dev-agent/PIPELINE.local.md" | cut -d= -f2-)
+
+NOW_EPOCH=$(date +%s)
+HZ_EPOCH=$(date -j -f '%Y-%m-%dT%H:%M:%S%z' "$TOKEN_HORIZON" +%s 2>/dev/null || echo 0)
+if [ "$HZ_EPOCH" -gt 0 ] && [ "$NOW_EPOCH" -ge "$HZ_EPOCH" ]; then
+  MODE=reduced
+  LANES=$(( LANES_CFG / 2 )); [ "$LANES" -lt 1 ] && LANES=1
+  THROTTLE_MIN=$(( THROTTLE_MIN * 2 ))
+else
+  MODE=full
+  LANES=$LANES_CFG
+fi
+echo "MODE=$MODE LANES=$LANES THROTTLE_MIN=$THROTTLE_MIN"
+```
+
+| 模式      | `LANES`                        | 节流闸阈值        |
+| --------- | ------------------------------ | ----------------- |
+| `full`    | 按本地配置的 `LANES`            | `THROTTLE_MIN`    |
+| `reduced` | `LANES / 2`（向下取整，最少 1） | `THROTTLE_MIN × 2` |
+
+⚠️ **后面第 1.5 步的节流闸、第 4 步的 `plan --lanes` 一律用这里算出的
+`$THROTTLE_MIN` 与 `$LANES`**，不要再从别处读数。
+⚠️ **降档是自动的，不要问、也不要自作主张改回高强度。** 期限是用户定的边界。
+⚠️ 期限**不改变**停机条件：停机只看「全部 465 个模块已交付」。
+⚠️ 汇报里必须写明当前是哪种模式。
 
 ---
 
 ### 第 1 步：同步台账
 
 ```bash
-cd /Users/tommy/Project/starcon && node tools/module-progress/sync.mjs
+cd "$PROJECT_ROOT" && node tools/module-progress/sync.mjs
 ```
 
 **以它的输出为准汇报数字，不要自己数。**
@@ -274,11 +342,11 @@ cd /Users/tommy/Project/starcon && node tools/module-progress/sync.mjs
 **cron 触发比实际节奏频繁，这道闸负责拦掉空转。阈值从 `.dev-agent/PIPELINE.local.md` 读。**
 
 ```bash
-cd /Users/tommy/Project/starcon
+cd "$PROJECT_ROOT"
 LAST=$(cat .dev-agent/last-batch-at 2>/dev/null || echo 0)
 NOW=$(date +%s)
 ELAPSED=$(( (NOW - LAST) / 60 ))
-echo "距上批 $ELAPSED 分钟"
+echo "距上批 $ELAPSED 分钟（阈值 $THROTTLE_MIN 分钟）"
 ```
 
 - **未达阈值** → 本轮**直接结束**。不取闸、不 plan、不派发、不跑 L2。
@@ -341,7 +409,6 @@ grep -oE '^\| [0-9]+\.[0-9]+\.[0-9]+\.[0-9]+ ' docs/product/capability-blueprint
 ### 第 4 步：排车道并派发
 
 ```bash
-eval "$(grep -E '^LANES=' .dev-agent/PIPELINE.local.md)"
 node tools/module-progress/lane.mjs plan --lanes "$LANES"
 ```
 
@@ -359,6 +426,11 @@ node tools/module-progress/lane.mjs plan --lanes "$LANES"
 
 派发时每条车道一个 `task`（`agent_name: worker`，`run_in_background: true`），
 任务书用 `PIPELINE.md` 的「子任务模板」章节。
+
+⚠️ **发出去之前逐字检查任务书里没有残留 `<...>` 占位符**（`<WORKTREE>` / `<BRANCH>` /
+`<INTEGRATION_ROOT>` / `<模块ID>` / `<MIGRATION_VERSION>` / `<BLUEPRINT>` …）。
+worker 的 shell 里**没有** `$PROJECT_ROOT`，占位符没替换会让它把心跳写进
+**自己 worktree 的** `.dev-agent/lanes.json`，调度者永远看不到落地标记，车道会被误判崩掉重派。
 
 ### 第 5 步：批量验证 + 写详细说明 + push
 
@@ -394,7 +466,12 @@ node tools/module-progress/sync.mjs --check
 5. 修复后**重跑 L2**，绿了再 push
 6. 连续 3 轮 L2 红且无法定位 → 本轮零派发并在汇报里点名
 
-#### 5.3 写详细功能说明（用户明确要求）
+#### 5.3 ⛔ 收尾三件套：写说明 → commit → push（**每次开发完成都必须做，顺序不可颠倒**）
+
+> **用户明确要求：每次开发完成都要 comment + commit + push。**
+> 三件套缺任何一件，本轮**不算完成**，汇报里必须点名缺哪一件。
+
+**① 写说明（comment）**
 
 **L2 绿之后**，写详细说明到 `docs/sessions/YYYY-MM/YYYY-MM-DD-batch-<n>-<topic>.md`，
 **每个模块一节**，包含：
@@ -414,12 +491,44 @@ node tools/module-progress/sync.mjs --check
 **关键设计决策**：为什么这么做、否决了什么方案
 ```
 
+⚠️ **批次号接着已有往后排**（这条分支上可能有别的 agent 同时在写，不能重号）：
+
+```bash
+cd "$PROJECT_ROOT"
+ls docs/sessions/$(date +%Y-%m)/ | grep -oE 'batch-[0-9]+' | sort -t- -k2 -n | tail -1
+```
+
 同时让集成头的 merge commit 正文列本批模块清单（Conventional Commits）。
+
+**② commit**（**最容易被漏掉的一步，历史上就漏过**）
+
+```bash
+cd "$PROJECT_ROOT"
+node tools/module-progress/sync.mjs
+git add docs/sessions/$(date +%Y-%m)/ docs/product/capability-blueprint/module-progress.md
+git -c user.name="Mavis" -c user.email="mavis@starcon.local" commit \
+  -m "docs(batch-<n>): <模块ID 清单> —— <一句话交付说明>"
+```
+
+⚠️ **说明文件没有 commit 进版本库，就等于没写** —— push 不会带上未提交的文件，
+远端会缺这一批的说明。⚠️ 说明文件与台账**必须同一个 commit**，不要拆开。
+
+**③ push**
+
+**L2 绿、且说明已 commit 之后**才 push：
+
+```bash
+cd "$PROJECT_ROOT"
+git push "$PUSH_REMOTE" integration/module-dev
+```
+
+⚠️ **L2 没绿不 push**，但**说明照写、commit 照做**（记清楚红在哪、二分到哪条车道），
+成果与诊断信息留在集成头本地，修复后随下一批一起 push。
 
 #### 5.4 push（用户明确要求「每次开发完就 push」）
 
 ```bash
-git push upstream integration/module-dev
+git push "$PUSH_REMOTE" integration/module-dev
 ```
 
 - **只在 L2 绿之后 push。不要 push 红的。**
@@ -435,6 +544,7 @@ git push upstream integration/module-dev
 - **静态预检**：互相破坏形状扫描有没有命中
 - **L2 结果**：绿 / 红。红了写明二分到哪条车道、几次、修复派发情况
 - **说明文件**：会话日志路径 + 覆盖模块清单
+- **收尾三件套**：说明 / commit / push 三件各自的结果（**缺哪一件就点名哪一件**）
 - **push 结果**：commit hash + 模块清单；没 push 要明确写「L2 未绿，本轮不 push」
 - **温度观测**：therm 有无降频项；`postgres:16-alpine` 容器数（**只数带 `org.testcontainers.sessionId` 标签的**；无标签的是历史遗留孤儿容器，要单独点名清理）
 - **吞吐预期**：**每次重跑都从 `.dev-agent/PIPELINE.local.md` 的当前 `LANES` + 实际节流间隔重新算**
@@ -447,6 +557,9 @@ git push upstream integration/module-dev
 ## 5. 最高优先级禁令
 
 - **L2 没绿绝对不 push**
+- **不要漏掉说明文件的 commit** —— 写了说明不 commit 等于没写，push 不会带上未提交的文件
+- **不要把说明文件与台账拆成两个 commit** —— 合成一个 `docs(batch-<n>):` 提交
+- **不要跳过三件套里的任何一件**（写说明 → commit → push），顺序不可颠倒
 - **L2 不得与在途车道的 L1 并发跑** —— 多套 Testcontainers PG 互相抢资源，
   2026-10-19 20:00 那轮实测：L2 与 4 条车道的 L1 并发时 PG 峰值 16，
   后端 1364 例里 3 failures + 24 errors **全是假红**（`seed()` 503 / 连接拒绝），

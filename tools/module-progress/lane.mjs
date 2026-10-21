@@ -703,7 +703,43 @@ if (cmd === 'plan') {
     planned.push(state.lanes[id]);
   }
 
-  if (!dryRun) writeState(state);
+  if (!dryRun) {
+    // ⚠️ **写盘前必须重新读一次状态。**
+    //
+    // plan 的语义是「读整份状态 → 改 → 写整份状态」，而 readState() 与 writeState()
+    // 之间隔着**整个 plan 的执行时间** —— 每条车道要 `git worktree add` +
+    // `pnpm install --prefer-offline`（实测 4~5 秒/条，4 条车道就是 100 秒量级）。
+    // 期间 worker 的 `land` / `heartbeat` 写的是**同一份** lanes.json，
+    // 而这里若把窗口开始时的陈旧快照整份写回去，那些新写入就被**静默吞掉**。
+    //
+    // 2026-10-20 13:00 tick 实测：10.6.1.1 的 `land` 标记被还原成 `running`
+    // （`land` 自己返回 ok、退出码 0，没有任何报错），
+    // 成果（已提交、工作区干净）被 merge-ready 漏并，只能靠 worker 手工补一次 land。
+    //
+    // 修法：写盘前重新读一次最新状态，只叠加「本轮 plan 自己真正改动过的车道」，
+    // 语义从「整份覆盖」变成「增量叠加」。另两条车道（1.1.1.1 已 ready / 1.1.2.2 刚续过心跳）
+    // 在窗口期内的写入就不再被吞。
+    //
+    // 详见 docs/backlog/2026-10-20-lane-plan-stale-state-clobbers-land.md
+    // 与回归测试 tools/module-progress/lane-plan-state.itest.mjs。
+    const fresh = readState();
+    fresh.lanes ??= {};
+    // 新建的车道：整条写入（此前不存在，没人碰过）
+    for (const l of planned) fresh.lanes[l.id] = l;
+    // 认领的孤儿车道：只在「到现在仍然没人接手」时才覆盖。
+    //   - 已经不是 running（worker 已 land / 已被并入）→ 不碰；
+    //   - 还是 running 但心跳比我们取样时更新（worker 刚续过心跳）→ 不碰。
+    // 这两种情况下再覆盖回去，就是把 worker 刚写的标记又吞一次。
+    for (const l of orphaned) {
+      const cur = fresh.lanes[l.id];
+      if (!cur || cur.state !== 'running') continue;
+      const curBeat = Date.parse(cur.heartbeatAt ?? cur.createdAt ?? '');
+      const ourBeat = Date.parse(l.heartbeatAt ?? '');
+      if (Number.isFinite(curBeat) && curBeat > ourBeat) continue;
+      fresh.lanes[l.id] = l;
+    }
+    writeState(fresh);
+  }
   console.log(
     JSON.stringify(
       {
@@ -799,7 +835,11 @@ if (cmd === 'land') {
     process.exit(1);
   }
   const sha = git(['rev-parse', 'HEAD'], lane.worktree);
-  if (sha === lane.baseSha || !sha) {
+  // ⚠️ baseSha 存的是**短** sha（7 位），而 rev-parse 给的是 40 位全量 ——
+  // 直接比**永远不相等**，于是「没有任何新提交就标 ready」这条闸是**死的**。
+  // （2026-10-20 取证：这条比较从未成立过。）
+  // 改成比短 sha，闸门才真的挡得住「一条 commit 都没有」的空落地。
+  if (!sha || sha.slice(0, 7) === lane.baseSha) {
     console.error(`✗ ${id} 没有任何新提交（HEAD 仍是基线 ${lane.baseSha}）`);
     process.exit(1);
   }

@@ -331,6 +331,23 @@ export const TASK_PAGES: TaskPage[] = [
     workflow: ['登记规则与信号', '触发评估', '人工复核'],
   },
   {
+    href: '/orders/address-payment-check',
+    implemented: true,
+    domain: 'orders',
+    label: '地址与支付校验',
+    description:
+      '校验买家地址可投递性（国家/邮编/街道格式）、禁运国家清单、支付状态一致性，输出校验结果与风险等级。',
+    fields: [
+      '订单号',
+      '校验结果',
+      '风险等级',
+      '命中项',
+      '禁运清单',
+      '支付一致性',
+    ],
+    workflow: ['登记禁运清单与国别规则', '跑一次校验', '读结论交异常拦截'],
+  },
+  {
     href: '/orders/fulfillment',
     implemented: true,
     domain: 'orders',
@@ -642,12 +659,12 @@ export const TASK_PAGES: TaskPage[] = [
   },
   {
     href: '/logistics/tracking',
-    implemented: false,
+    implemented: true,
     domain: 'logistics',
-    label: '物流异常',
-    description: '追踪揽收延迟、清关、停滞和签收异常。',
-    fields: ['运单号', '异常类型', '最后轨迹', '滞留时长', '负责人', '处理进度'],
-    workflow: ['监测异常', '联系承运商', '追踪处理'],
+    label: '轨迹查询',
+    description: '查询并展示包裹物流轨迹：节点时间线、预计时效对比、异常节点标记，支持按承运商批量拉取。',
+    fields: ['运单号', '承运商', '目的国', '最新节点', '时效状态', '异常标记'],
+    workflow: ['同步运单集合', '批量拉取轨迹', '查时间线与时效对比'],
   },
   {
     href: '/logistics/channels',
