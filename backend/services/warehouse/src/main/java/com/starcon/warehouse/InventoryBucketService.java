@@ -75,21 +75,22 @@ public class InventoryBucketService {
   /**
    * 本模块提供的行内操作入口。
    *
-   * <p>蓝图要求明细行带「发起调整 / 发起调拨 / 查看流水」三个入口。调整与调拨落在尚未交付的 模块（7.4.1.1 / 7.5.1.1），所以这里的做法是：
+   * <p>蓝图要求明细行带「发起调整 / 发起调拨 / 查看流水」三个入口。调拨落在尚未交付的 7.5.1.1，所以这里的做法是：
    *
    * <ul>
    *   <li>href 照给 —— 它是带 bucket 定位参数的**路由契约**，不是死链；
    *   <li>{@code available=false} + note 说明为什么现在点不了（目标模块未交付）。
    * </ul>
    *
-   * <p>「查看流水」（7.1.2.1）已交付，因此 available=true：那三个入口里只有它现在点得动， 再标成"未交付"就是在页面上说一个假状态。
+   * <p>「查看流水」（7.1.2.1）与「发起调整」（7.4.1.1）已交付，因此 available=true：那三个入口里
+   * 现在有两个点得动，再标成"未交付"就是在页面上说一个假状态。
    *
    * <p>这么做的理由与 7.1.1.1 拒绝建占位页一致：给一个必然 404 的按钮，比不给更糟 —— 用户会以为系统坏了。但完全不给入口又违背蓝图对「行内操作入口」的要求，
    * 所以契约给全、可用性如实标注。目标模块交付时只要改这里的 available。
    */
   public List<BucketAction> actions() {
     return List.of(
-        action("ADJUST", "发起调整", "/inventory/adjustments", "7.4.1.1", false, ""),
+        action("ADJUST", "发起调整", "/inventory/adjustments", "7.4.1.1", true, ""),
         action("TRANSFER", "发起调拨", "/inventory/transfer", "7.5.1.1", false, ""),
         action("LEDGER", "查看流水", "/inventory/ledger", "7.1.2.1", true, ""));
   }

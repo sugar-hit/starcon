@@ -555,6 +555,19 @@ const services: readonly {
     // lines|report|audit|adjustments / adjustments/{id}(+submit|approve|reject|cancel|post)。
     // 同样**没有** DELETE：差异处理全程只追加审计，归因/调整单/审计行都不可删，
     // 放行一个删除形状会让「能不能把一条差异的痕迹抹掉」看起来是能。
+    // adjustments 是 7.4.1.1 **通用调整单**（与上面 stocktake-variances 下的 adjustments
+    // 是两套单据：那一套要求先有盘点表，这一套是通用调整）：
+    //   capabilities / {id} / {id}/lines / {id}/lines/{lineId}/remove
+    //   / {id}/attachments / {id}/attachments/{attachmentId}/remove
+    //   / {id}/submit|approve|reject|cancel|post
+    // **没有** DELETE 形状：删行与摘凭证都是显式动作后缀（POST .../remove），
+    // 而且数据库只允许**草稿**单删行/摘凭证 —— 路径上放行 DELETE 会让
+    // 「能不能把一条已提交的调整痕迹抹掉」看起来是能。
+    // adjustment-sources 是 6.4.2.2 不良品处置单的跨服务只读投影：
+    //   defective-dispositions / defective-dispositions/{orderId}/instructions。
+    //   事实归 trade 所有，本服务只经授权 HTTP 读它 —— 不跨库读表、不建跨库 FK。
+    // capabilities 是字面量，排在 {id} 之前判别（'p' 落在 [0-9a-f-] 之外，
+    // 判别顺序错了会凭空放行一个「id=capabilities」的包裹）。
     // facilities 是 8.1.1.1 仓库列表 + 8.1.1.2 仓库详情（同一个页面，详情挂在列表之下）。
     // facilities/options 与 facilities/capabilities 是两个**单段字面量**子路径
     // （筛选下拉项与作业维度接入情况），排在任何 {uuid} 之前判别。
@@ -836,7 +849,7 @@ const services: readonly {
       //   后端并不存在的「id=capabilities 的包裹」。
       //   刻意**不含任何写操作**：本模块是 8.3.3.2 包裹凭据的只读视图，
       //   包裹与明细项是事实（V121 的守卫直接拒已结束的打包单再改），没有 POST/PUT/DELETE 端点。
-      /^(inventory\/(?:overview|buckets|bucket-actions|capabilities|policies(?:\/[0-9a-f-]+)?|sellable-policies(?:\/(?:effective|pools(?:\/[^/]+)?(?:\/calculation)?|calculation)|\/[0-9a-f-]+(?:\/(?:versions|retire))?)?|sellable(?:\/(?:capabilities|skus))?|safety-stock(?:\/capabilities|\/policies(?:\/effective|\/[0-9a-f-]+(?:\/(?:versions|retire))?)?|\/sales|\/evaluate|\/alerts(?:\/[0-9a-f-]+(?:\/(?:acknowledge|resolve))?)?|\/suggestions(?:\/[0-9a-f-]+\/(?:acknowledge|dismiss))?|\/evaluations)?|stocktakes(?:\/capabilities|\/[0-9a-f-]+(?:\/lines(?:\/[0-9a-f-]+\/count)?|\/tasks(?:\/[0-9a-f-]+\/assign)?)?)?|expiry(?:\/(?:alerts|policies|allocation|policy(?:\/[0-9a-f-]+)?|warehouses|lots(?:\/[0-9a-f-]+)?))?|lots(?:\/[0-9a-f-]+(?:\/(?:distribution|movements))?)?|ledger(?:\/ref-types|\/[0-9a-f-]+)?|reconciliation(?:\/[0-9a-f-]+(?:\/findings)?)?|distribution(?:\/spus)?|platform-observations|serial-vocabularies|serials(?:\/(?:import|movements|validate-movement|stats)|\/[0-9a-f-]+(?:\/movements)?)?|transfers(?:\/[0-9a-f-]+(?:\/(?:movements|confirm|ship|receive|close))?)?|in-transit(?:\/(?:alerts|netting)|\/[0-9a-f-]+(?:\/(?:arrive|discrepancy))?)?|stocktake-variances(?:\/capabilities|\/sheets\/[0-9a-f-]+\/(?:lines(?:\/[0-9a-f-]+\/attribute)?|report|audit|adjustments)|\/adjustments(?:\/[0-9a-f-]+(?:\/(?:submit|approve|reject|cancel|post))?)?)?|cross-entity-transfers(?:\/[0-9a-f-]+(?:\/(?:movements|settlement|source-confirm|target-confirm|ship|receive|close|cancel))?)?|health(?:\/(?:trend|gate|issues|assess))?|ownership(?:\/(?:capabilities|resolved|report|drift|reference-options|reassign|owners(?:\/[0-9a-f-]+(?:\/status)?)?|rules(?:\/[0-9a-f-]+(?:\/(?:versions|retire))?)?))?|allocation-policies(?:\/(?:capabilities|effective|calculation|runs(?:\/[0-9a-f-]+)?|[0-9a-f-]+(?:\/(?:versions|retire))?)?)?|allocation-results(?:\/(?:capabilities|results|runs|reconciliation|writebacks))?|allocation-sales|consignments(?:\/capabilities|\/[0-9a-f-]+(?:\/(?:lines|stock-view|settlement-window|settlements|returns|audit|activate|suspend|close))?|\/lines\/[0-9a-f-]+\/sales|\/settlements(?:\/[0-9a-f-]+(?:\/confirm)?)?|\/returns(?:\/[0-9a-f-]+(?:\/(?:execute|cancel))?)?)?|outbound-orders(?:\/(?:capabilities|detail-capabilities|pick-requests|print|cancel)|\/[0-9a-f-]+(?:\/transition)?)?|printing(?:\/capabilities|\/templates(?:\/[0-9a-f-]+)?|\/devices|\/reprint-rules|\/targets(?:\/[0-9a-f-]+(?:\/history)?)?|\/jobs(?:\/[0-9a-f-]+(?:\/(?:execute|cancel)|\/items\/[0-9a-f-]+\/content)?)?|\/logs)?|serial-movements|serial-operations|reservations(?:\/options|\/capabilities|\/release-candidates|\/expiry-runs(?:\/[0-9a-f-]+)?|\/release-records|\/release-options|\/release-capabilities|\/expire-overdue|\/[0-9a-f-]+(?:\/allocations(?:\/[0-9a-f-]+\/(?:commit|consume))?|\/timeline|\/allocation-options|\/capabilities|\/release|\/expiry)?)?|aging(?:\/(?:buckets|slow-moving|policies|policy(?:\/[0-9a-f-]+)?))?|serials(?:\/(?:import|movements|validate-movement|stats)|\/[0-9a-f-]+(?:\/movements)?)?|allocation-priority(?:\/(?:capabilities|calculation|runs|resolutions|floors(?:\/[0-9a-f-]+(?:\/(?:versions|retire))?)?))?)|facilities(?:\/(?:options|capabilities))?|warehouses|legal-entities|skus|quality-statuses|locations|labor(?:\/capabilities|\/report|\/ranking|\/trend|\/work-tasks(?:\/[0-9a-f-]+(?:\/(?:assign|start|complete|exception))?)?)?|goods-receipts(?:\/capabilities|\/[0-9a-f-]+(?:\/(?:movements|receive|close))?)?|goods-receipt-discrepancies(?:\/capabilities|\/[0-9a-f-]+(?:\/(?:evidence|decide|claim(?:\/(?:submit|withdraw))?|close))?)?|processing-orders(?:\/capabilities|\/boundary|\/issues|\/executions)?|first-mile-shipments(?:\/capabilities|\/source-candidates|\/[0-9a-f-]+(?:\/(?:transit-legs|confirm|dispatch|cancel))?)?|transit-trackings(?:\/capabilities|\/alerts(?:\/evaluate-all|\/[0-9a-f-]+\/(?:acknowledge|close))?|\/thresholds(?:\/[0-9a-f-]+)?|\/[0-9a-f-]+(?:\/(?:events|receipt|close)|\/alerts\/evaluate)?)?|facilities(?:\/(?:options|capabilities)|\/[0-9a-f-]+(?:\/(?:locations|entrypoints))?)?|lots|customs-declarations(?:\/capabilities|\/[0-9a-f-]+(?:\/(?:documents|results|events|submit-for-review|review|reject-review|withdraw-review|submit|amend|cancel)|\/documents\/[0-9a-f-]+\/finalize)?)?|duty-taxes(?:\/capabilities|\/variance-analysis|\/rates(?:\/[0-9a-f-]+)?|\/[0-9a-f-]+(?:\/(?:lines|payments|variances|recalculate|lock|void))?)?|trade-documents(?:\/capabilities|\/rules(?:\/[0-9a-f-]+)?|\/templates(?:\/[0-9a-f-]+)?|\/certifications(?:\/[0-9a-f-]+)?|\/preference-rules(?:\/[0-9a-f-]+)?|\/preference-confirmations|\/reminders(?:\/[0-9a-f-]+\/resolve)?|\/[0-9a-f-]+(?:\/(?:documents|checks|reminders|events|submit-for-review|review|reject-review|withdraw-review|check|submit|acknowledge|send-back|cancel)|\/documents\/[0-9a-f-]+(?:\/finalize|\/preference-claim|\/preference-confirm))?)?|inventory\/(?:overview|buckets|bucket-actions|capabilities|policies(?:\/[0-9a-f-]+)?|sellable-policies(?:\/(?:effective|pools(?:\/[^/]+)?(?:\/calculation)?|calculation)|\/[0-9a-f-]+(?:\/(?:versions|retire))?)?|stocktakes(?:\/capabilities|\/[0-9a-f-]+(?:\/lines(?:\/[0-9a-f-]+\/count)?|\/tasks(?:\/[0-9a-f-]+\/assign)?)?)?|expiry(?:\/(?:alerts|policies|allocation|policy(?:\/[0-9a-f-]+)?|warehouses|lots(?:\/[0-9a-f-]+)?))?|lots(?:\/[0-9a-f-]+(?:\/(?:distribution|movements))?)?|ledger(?:\/ref-types|\/[0-9a-f-]+)?|reconciliation(?:\/[0-9a-f-]+(?:\/findings)?)?|distribution(?:\/spus)?|platform-observations|serial-vocabularies|serials(?:\/(?:import|movements|validate-movement|stats)|\/[0-9a-f-]+(?:\/movements)?)?|transfers(?:\/[0-9a-f-]+(?:\/(?:movements|confirm|ship|receive|close))?)?|in-transit(?:\/(?:alerts|netting)|\/[0-9a-f-]+(?:\/(?:arrive|discrepancy))?)?|stocktake-variances(?:\/capabilities|\/sheets\/[0-9a-f-]+\/(?:lines(?:\/[0-9a-f-]+\/attribute)?|report|audit|adjustments)|\/adjustments(?:\/[0-9a-f-]+(?:\/(?:submit|approve|reject|cancel|post))?)?)?|cross-entity-transfers(?:\/[0-9a-f-]+(?:\/(?:movements|settlement|source-confirm|target-confirm|ship|receive|close|cancel))?)?|health(?:\/(?:trend|gate|issues|assess))?|ownership(?:\/(?:capabilities|resolved|report|drift|reference-options|reassign|owners(?:\/[0-9a-f-]+(?:\/status)?)?|rules(?:\/[0-9a-f-]+(?:\/(?:versions|retire))?)?))?|allocation-policies(?:\/(?:capabilities|effective|calculation|runs(?:\/[0-9a-f-]+)?|[0-9a-f-]+(?:\/(?:versions|retire))?)?)?|allocation-results(?:\/(?:capabilities|results|runs|reconciliation|writebacks))?|allocation-sales|consignments(?:\/capabilities|\/[0-9a-f-]+(?:\/(?:lines|stock-view|settlement-window|settlements|returns|audit|activate|suspend|close))?|\/lines\/[0-9a-f-]+\/sales|\/settlements(?:\/[0-9a-f-]+(?:\/confirm)?)?|\/returns(?:\/[0-9a-f-]+(?:\/(?:execute|cancel))?)?)?|vmi(?:\/capabilities|\/agreements(?:\/[0-9a-f-]+(?:\/(?:activate|suspend|close|water-levels|settlement-window|audit|sales|lines(?:\/[0-9a-f-]+\/sales)?|replenishment-signals|snapshots|settlements(?:\/[0-9a-f-]+)?))?)?|\/replenishment-signals(?:\/[0-9a-f-]+(?:\/(?:acknowledge|dispatch|fulfil|cancel))?)?|\/settlements(?:\/[0-9a-f-]+(?:\/confirm)?)?)|outbound-orders(?:\/(?:capabilities|detail-capabilities|pick-requests|print|cancel)|\/[0-9a-f-]+(?:\/transition)?)?|printing(?:\/capabilities|\/templates(?:\/[0-9a-f-]+)?|\/devices|\/reprint-rules|\/targets(?:\/[0-9a-f-]+(?:\/history)?)?|\/jobs(?:\/[0-9a-f-]+(?:\/(?:execute|cancel)|\/items\/[0-9a-f-]+\/content)?)?|\/logs)?|serial-movements|serial-operations|aging(?:\/(?:buckets|slow-moving|policies|policy(?:\/[0-9a-f-]+)?))?|serials(?:\/(?:import|movements|validate-movement|stats)|\/[0-9a-f-]+(?:\/movements)?)?|allocation-priority(?:\/(?:capabilities|calculation|runs|resolutions|floors(?:\/[0-9a-f-]+(?:\/(?:versions|retire))?)?))?)|facilities(?:\/(?:options|capabilities)|\/[0-9a-f-]+(?:\/(?:locations|entrypoints|config(?:\/(?:options|impacts|changes)|\/(?:shifts)(?:\/[0-9a-f-]+)?)?))?)?|location-trees(?:\/capabilities|\/[0-9a-f-]+(?:\/locations(?:\/[0-9a-f-]+)?)?)|location-utilization(?:\/capabilities|\/[0-9a-f-]+(?:\/locations\/[0-9a-f-]+)?)|location-allocations(?:\/(?:capabilities|recommend|list|by-receipt\/[0-9a-f-]+|[0-9a-f-]+(?:\/release)?))?|assembly-orders(?:\/capabilities|\/[0-9a-f-]+(?:\/(?:issue|cancel))?)?|disassembly-orders(?:\/capabilities|\/[0-9a-f-]+(?:\/(?:execute|cancel))?)?|putaway-tasks(?:\/capabilities|\/[0-9a-f-]+(?:\/(?:assign|start|scan|complete|cancel))?)?|pick-tasks(?:\/capabilities|\/[0-9a-f-]+(?:\/(?:assign|picks|exceptions(?:\/[0-9a-f-]+\/resolve)?|complete|reopen|cancel))?)?|pick-waves(?:\/capabilities|\/rules(?:\/[0-9a-f-]+\/retire)?|\/candidates|\/[0-9a-f-]+(?:\/(?:release|complete|cancel)|\/tasks\/[0-9a-f-]+\/detach)?)?|recount-scans(?:\/capabilities|\/rules(?:\/[0-9a-f-]+(?:\/retire)?)?|\/[0-9a-f-]+(?:\/(?:open-box|scans|settle|complete|escalate|cancel)|\/exceptions\/[0-9a-f-]+\/resolve)?)?|packing-orders(?:\/capabilities|\/materials(?:\/[0-9a-f-]+(?:\/retire)?)?|\/[0-9a-f-]+(?:\/completion|\/parcels(?:\/[0-9a-f-]+\/(?:items|measure|label))?|\/complete|\/fail|\/cancel)?)?|shipment-handovers(?:\/capabilities|\/[0-9a-f-]+(?:\/completion|\/waybills|\/confirm|\/cancel)?)?|parcels(?:\/capabilities|\/[0-9a-f-]+)|outbound-timeliness(?:\/(?:capabilities|report)|\/order-times|\/thresholds))$/,
+      /^(inventory\/(?:overview|buckets|bucket-actions|capabilities|policies(?:\/[0-9a-f-]+)?|sellable-policies(?:\/(?:effective|pools(?:\/[^/]+)?(?:\/calculation)?|calculation)|\/[0-9a-f-]+(?:\/(?:versions|retire))?)?|sellable(?:\/(?:capabilities|skus))?|safety-stock(?:\/capabilities|\/policies(?:\/effective|\/[0-9a-f-]+(?:\/(?:versions|retire))?)?|\/sales|\/evaluate|\/alerts(?:\/[0-9a-f-]+(?:\/(?:acknowledge|resolve))?)?|\/suggestions(?:\/[0-9a-f-]+\/(?:acknowledge|dismiss))?|\/evaluations)?|stocktakes(?:\/capabilities|\/[0-9a-f-]+(?:\/lines(?:\/[0-9a-f-]+\/count)?|\/tasks(?:\/[0-9a-f-]+\/assign)?)?)?|expiry(?:\/(?:alerts|policies|allocation|policy(?:\/[0-9a-f-]+)?|warehouses|lots(?:\/[0-9a-f-]+)?))?|lots(?:\/[0-9a-f-]+(?:\/(?:distribution|movements))?)?|ledger(?:\/ref-types|\/[0-9a-f-]+)?|reconciliation(?:\/[0-9a-f-]+(?:\/findings)?)?|distribution(?:\/spus)?|platform-observations|serial-vocabularies|serials(?:\/(?:import|movements|validate-movement|stats)|\/[0-9a-f-]+(?:\/movements)?)?|transfers(?:\/[0-9a-f-]+(?:\/(?:movements|confirm|ship|receive|close))?)?|in-transit(?:\/(?:alerts|netting)|\/[0-9a-f-]+(?:\/(?:arrive|discrepancy))?)?|stocktake-variances(?:\/capabilities|\/sheets\/[0-9a-f-]+\/(?:lines(?:\/[0-9a-f-]+\/attribute)?|report|audit|adjustments)|\/adjustments(?:\/[0-9a-f-]+(?:\/(?:submit|approve|reject|cancel|post))?)?)?|adjustments(?:\/capabilities|\/[0-9a-f-]+(?:\/lines(?:\/[0-9a-f-]+\/remove)?|\/attachments(?:\/[0-9a-f-]+\/remove)?|\/(?:submit|approve|reject|cancel|post))?)?|adjustment-sources\/defective-dispositions(?:\/[0-9a-f-]+\/instructions)?|cross-entity-transfers(?:\/[0-9a-f-]+(?:\/(?:movements|settlement|source-confirm|target-confirm|ship|receive|close|cancel))?)?|health(?:\/(?:trend|gate|issues|assess))?|ownership(?:\/(?:capabilities|resolved|report|drift|reference-options|reassign|owners(?:\/[0-9a-f-]+(?:\/status)?)?|rules(?:\/[0-9a-f-]+(?:\/(?:versions|retire))?)?))?|allocation-policies(?:\/(?:capabilities|effective|calculation|runs(?:\/[0-9a-f-]+)?|[0-9a-f-]+(?:\/(?:versions|retire))?)?)?|allocation-results(?:\/(?:capabilities|results|runs|reconciliation|writebacks))?|allocation-sales|consignments(?:\/capabilities|\/[0-9a-f-]+(?:\/(?:lines|stock-view|settlement-window|settlements|returns|audit|activate|suspend|close))?|\/lines\/[0-9a-f-]+\/sales|\/settlements(?:\/[0-9a-f-]+(?:\/confirm)?)?|\/returns(?:\/[0-9a-f-]+(?:\/(?:execute|cancel))?)?)?|outbound-orders(?:\/(?:capabilities|detail-capabilities|pick-requests|print|cancel)|\/[0-9a-f-]+(?:\/transition)?)?|printing(?:\/capabilities|\/templates(?:\/[0-9a-f-]+)?|\/devices|\/reprint-rules|\/targets(?:\/[0-9a-f-]+(?:\/history)?)?|\/jobs(?:\/[0-9a-f-]+(?:\/(?:execute|cancel)|\/items\/[0-9a-f-]+\/content)?)?|\/logs)?|serial-movements|serial-operations|reservations(?:\/options|\/capabilities|\/release-candidates|\/expiry-runs(?:\/[0-9a-f-]+)?|\/release-records|\/release-options|\/release-capabilities|\/expire-overdue|\/[0-9a-f-]+(?:\/allocations(?:\/[0-9a-f-]+\/(?:commit|consume))?|\/timeline|\/allocation-options|\/capabilities|\/release|\/expiry)?)?|aging(?:\/(?:buckets|slow-moving|policies|policy(?:\/[0-9a-f-]+)?))?|serials(?:\/(?:import|movements|validate-movement|stats)|\/[0-9a-f-]+(?:\/movements)?)?|allocation-priority(?:\/(?:capabilities|calculation|runs|resolutions|floors(?:\/[0-9a-f-]+(?:\/(?:versions|retire))?)?))?)|facilities(?:\/(?:options|capabilities))?|warehouses|legal-entities|skus|quality-statuses|locations|labor(?:\/capabilities|\/report|\/ranking|\/trend|\/work-tasks(?:\/[0-9a-f-]+(?:\/(?:assign|start|complete|exception))?)?)?|goods-receipts(?:\/capabilities|\/[0-9a-f-]+(?:\/(?:movements|receive|close))?)?|goods-receipt-discrepancies(?:\/capabilities|\/[0-9a-f-]+(?:\/(?:evidence|decide|claim(?:\/(?:submit|withdraw))?|close))?)?|processing-orders(?:\/capabilities|\/boundary|\/issues|\/executions)?|first-mile-shipments(?:\/capabilities|\/source-candidates|\/[0-9a-f-]+(?:\/(?:transit-legs|confirm|dispatch|cancel))?)?|transit-trackings(?:\/capabilities|\/alerts(?:\/evaluate-all|\/[0-9a-f-]+\/(?:acknowledge|close))?|\/thresholds(?:\/[0-9a-f-]+)?|\/[0-9a-f-]+(?:\/(?:events|receipt|close)|\/alerts\/evaluate)?)?|facilities(?:\/(?:options|capabilities)|\/[0-9a-f-]+(?:\/(?:locations|entrypoints))?)?|lots|customs-declarations(?:\/capabilities|\/[0-9a-f-]+(?:\/(?:documents|results|events|submit-for-review|review|reject-review|withdraw-review|submit|amend|cancel)|\/documents\/[0-9a-f-]+\/finalize)?)?|duty-taxes(?:\/capabilities|\/variance-analysis|\/rates(?:\/[0-9a-f-]+)?|\/[0-9a-f-]+(?:\/(?:lines|payments|variances|recalculate|lock|void))?)?|trade-documents(?:\/capabilities|\/rules(?:\/[0-9a-f-]+)?|\/templates(?:\/[0-9a-f-]+)?|\/certifications(?:\/[0-9a-f-]+)?|\/preference-rules(?:\/[0-9a-f-]+)?|\/preference-confirmations|\/reminders(?:\/[0-9a-f-]+\/resolve)?|\/[0-9a-f-]+(?:\/(?:documents|checks|reminders|events|submit-for-review|review|reject-review|withdraw-review|check|submit|acknowledge|send-back|cancel)|\/documents\/[0-9a-f-]+(?:\/finalize|\/preference-claim|\/preference-confirm))?)?|inventory\/(?:overview|buckets|bucket-actions|capabilities|policies(?:\/[0-9a-f-]+)?|sellable-policies(?:\/(?:effective|pools(?:\/[^/]+)?(?:\/calculation)?|calculation)|\/[0-9a-f-]+(?:\/(?:versions|retire))?)?|stocktakes(?:\/capabilities|\/[0-9a-f-]+(?:\/lines(?:\/[0-9a-f-]+\/count)?|\/tasks(?:\/[0-9a-f-]+\/assign)?)?)?|expiry(?:\/(?:alerts|policies|allocation|policy(?:\/[0-9a-f-]+)?|warehouses|lots(?:\/[0-9a-f-]+)?))?|lots(?:\/[0-9a-f-]+(?:\/(?:distribution|movements))?)?|ledger(?:\/ref-types|\/[0-9a-f-]+)?|reconciliation(?:\/[0-9a-f-]+(?:\/findings)?)?|distribution(?:\/spus)?|platform-observations|serial-vocabularies|serials(?:\/(?:import|movements|validate-movement|stats)|\/[0-9a-f-]+(?:\/movements)?)?|transfers(?:\/[0-9a-f-]+(?:\/(?:movements|confirm|ship|receive|close))?)?|in-transit(?:\/(?:alerts|netting)|\/[0-9a-f-]+(?:\/(?:arrive|discrepancy))?)?|stocktake-variances(?:\/capabilities|\/sheets\/[0-9a-f-]+\/(?:lines(?:\/[0-9a-f-]+\/attribute)?|report|audit|adjustments)|\/adjustments(?:\/[0-9a-f-]+(?:\/(?:submit|approve|reject|cancel|post))?)?)?|cross-entity-transfers(?:\/[0-9a-f-]+(?:\/(?:movements|settlement|source-confirm|target-confirm|ship|receive|close|cancel))?)?|health(?:\/(?:trend|gate|issues|assess))?|ownership(?:\/(?:capabilities|resolved|report|drift|reference-options|reassign|owners(?:\/[0-9a-f-]+(?:\/status)?)?|rules(?:\/[0-9a-f-]+(?:\/(?:versions|retire))?)?))?|allocation-policies(?:\/(?:capabilities|effective|calculation|runs(?:\/[0-9a-f-]+)?|[0-9a-f-]+(?:\/(?:versions|retire))?)?)?|allocation-results(?:\/(?:capabilities|results|runs|reconciliation|writebacks))?|allocation-sales|consignments(?:\/capabilities|\/[0-9a-f-]+(?:\/(?:lines|stock-view|settlement-window|settlements|returns|audit|activate|suspend|close))?|\/lines\/[0-9a-f-]+\/sales|\/settlements(?:\/[0-9a-f-]+(?:\/confirm)?)?|\/returns(?:\/[0-9a-f-]+(?:\/(?:execute|cancel))?)?)?|vmi(?:\/capabilities|\/agreements(?:\/[0-9a-f-]+(?:\/(?:activate|suspend|close|water-levels|settlement-window|audit|sales|lines(?:\/[0-9a-f-]+\/sales)?|replenishment-signals|snapshots|settlements(?:\/[0-9a-f-]+)?))?)?|\/replenishment-signals(?:\/[0-9a-f-]+(?:\/(?:acknowledge|dispatch|fulfil|cancel))?)?|\/settlements(?:\/[0-9a-f-]+(?:\/confirm)?)?)|outbound-orders(?:\/(?:capabilities|detail-capabilities|pick-requests|print|cancel)|\/[0-9a-f-]+(?:\/transition)?)?|printing(?:\/capabilities|\/templates(?:\/[0-9a-f-]+)?|\/devices|\/reprint-rules|\/targets(?:\/[0-9a-f-]+(?:\/history)?)?|\/jobs(?:\/[0-9a-f-]+(?:\/(?:execute|cancel)|\/items\/[0-9a-f-]+\/content)?)?|\/logs)?|serial-movements|serial-operations|aging(?:\/(?:buckets|slow-moving|policies|policy(?:\/[0-9a-f-]+)?))?|serials(?:\/(?:import|movements|validate-movement|stats)|\/[0-9a-f-]+(?:\/movements)?)?|allocation-priority(?:\/(?:capabilities|calculation|runs|resolutions|floors(?:\/[0-9a-f-]+(?:\/(?:versions|retire))?)?))?)|facilities(?:\/(?:options|capabilities)|\/[0-9a-f-]+(?:\/(?:locations|entrypoints|config(?:\/(?:options|impacts|changes)|\/(?:shifts)(?:\/[0-9a-f-]+)?)?))?)?|location-trees(?:\/capabilities|\/[0-9a-f-]+(?:\/locations(?:\/[0-9a-f-]+)?)?)|location-utilization(?:\/capabilities|\/[0-9a-f-]+(?:\/locations\/[0-9a-f-]+)?)|location-allocations(?:\/(?:capabilities|recommend|list|by-receipt\/[0-9a-f-]+|[0-9a-f-]+(?:\/release)?))?|assembly-orders(?:\/capabilities|\/[0-9a-f-]+(?:\/(?:issue|cancel))?)?|disassembly-orders(?:\/capabilities|\/[0-9a-f-]+(?:\/(?:execute|cancel))?)?|putaway-tasks(?:\/capabilities|\/[0-9a-f-]+(?:\/(?:assign|start|scan|complete|cancel))?)?|pick-tasks(?:\/capabilities|\/[0-9a-f-]+(?:\/(?:assign|picks|exceptions(?:\/[0-9a-f-]+\/resolve)?|complete|reopen|cancel))?)?|pick-waves(?:\/capabilities|\/rules(?:\/[0-9a-f-]+\/retire)?|\/candidates|\/[0-9a-f-]+(?:\/(?:release|complete|cancel)|\/tasks\/[0-9a-f-]+\/detach)?)?|recount-scans(?:\/capabilities|\/rules(?:\/[0-9a-f-]+(?:\/retire)?)?|\/[0-9a-f-]+(?:\/(?:open-box|scans|settle|complete|escalate|cancel)|\/exceptions\/[0-9a-f-]+\/resolve)?)?|packing-orders(?:\/capabilities|\/materials(?:\/[0-9a-f-]+(?:\/retire)?)?|\/[0-9a-f-]+(?:\/completion|\/parcels(?:\/[0-9a-f-]+\/(?:items|measure|label))?|\/complete|\/fail|\/cancel)?)?|shipment-handovers(?:\/capabilities|\/[0-9a-f-]+(?:\/completion|\/waybills|\/confirm|\/cancel)?)?|parcels(?:\/capabilities|\/[0-9a-f-]+)|outbound-timeliness(?:\/(?:capabilities|report)|\/order-times|\/thresholds))$/,
   },
   {
     // trade（09 订单履约）：第一条 9.x 模块车道 9.3.2.2（FBA 与自发货选择）落地，
@@ -3836,6 +3849,47 @@ const services: readonly {
       /^purchase\-order\-editor(?:\/(?:capabilities|options|quote\-preview|from\-drafts)|\/orders(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/submit)?)?)$/,
   },
   {
+    // 6.3.2.1 跟单与交期（trade 服务，卷 06 采购与供应 / L3 6.3.2 采购跟踪的第一格）。
+    //
+    // 本条目是**新增一条 services[] 元素**，不是往既有 trade 分支的 alternation 里并分支 ——
+    // 那一支是一段超长单行正则，多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在 `purchase-orders`（6.3.1.1 采购单列表）那条**之后**：
+    // 与本模块同属 L3 6.3 的就近邻居放在一起，且与另外三条车道的插入点被既有条目隔开，
+    // git 能干净求并。resolve() 是「按顺序逐条匹配、首个命中即返回」，
+    // 同前缀的后一条不会误吃前一条的路径。
+    //
+    // ⚠️ 首段 `purchase-followups` 是**独立字面量**：与既有 trade 分支的 `purchase-orders`
+    //    （6.3.1.1）、`purchase-arrivals`（6.3.2.2）、`purchase-requests`（6.2.2.1）、
+    //    `purchase-plans`（6.2.1.3）、`purchase-reconciliations`（6.5.1.1）、
+    //    `purchase-analytics`（6.5.2.1）首 token 全不相同，
+    //    且既有正则都是**锚定**的（`^token(...)?$`），所以谁也遮蔽不了谁。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   （裸路径）      跟单记录列表（GET，真分页 + 多维筛选）/ 登记跟单（POST）
+    //   capabilities    能力声明（哪些下游接上了、哪些没有）
+    //   changes         交期变更历史（GET，真分页）/ 登记交期变更（POST，触发回写）
+    //   timeline        跟单时间线（跟单记录 + 交期变更合并）
+    //   stats           延迟统计（平均延迟天数 / 准时率 / 已逾期）
+    //   delivery        逐单交付实况（真分页）
+    //
+    // ⚠️ **本条目没有 uuid 分支**：跟单与交期都是**集合级**的凭据流，
+    //   后端没有「按 id 取单条跟单记录 / 单条交期变更」这个映射 ——
+    //   放行一个后端不存在的形状比 404 更糟：界面会以为「详情页已经能用」。
+    //   正因为没有 uuid 分支，`capabilities` / `changes` / `timeline` / `stats` / `delivery`
+    //   这五个首字母落在 [0-9a-f] 里的（c / t / s / d）**不构成任何歧义** ——
+    //   它们是字面量分支，`purchase-followups/` 之后的**任何**其它内容一律 404。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `purchase-followups/{uuid}`            —— 没有单条详情端点
+    //   * `purchase-followups/{uuid}/writeback`  —— 回写留痕随交期变更一起返回
+    //   * `purchase-followups/{uuid}/delete`     —— 跟单与交期变更都是举证凭据，没有删除形状
+    //   * `purchase-followups/export`            —— 本模块不提供导出
+    prefix: 'trade/',
+    env: 'TRADE_URL',
+    fallback: 'http://127.0.0.1:8085',
+    pattern: /^purchase\-followups(?:\/(?:capabilities|changes|timeline|stats|delivery))?$/,
+  },
+  {
     // 9.3.1.2 合单（trade 服务）。本条目是**新增一条 services[] 元素**，不是往既有
     // trade 分支的 alternation 里并分支 —— 那一支是一段超长单行正则，
     // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
@@ -4139,6 +4193,78 @@ const services: readonly {
     fallback: 'http://127.0.0.1:8085',
     pattern:
       /^development\-samples(?:\/(?:capabilities|options|summary|samples|media\-candidates|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:transitions|samples(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:transitions|confirmations|shipments|media))?)?|cost(?:\/lines(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?)?))?))?$/,
+  },
+  {
+    // 6.6.2.1 试产单（trade 服务，卷 06 采购与供应的 L3 锚点 6.6.2）。
+    //
+    // 蓝图：「管理试产：小批量试产（数量、BOM 版本、组件需求、产线/加工厂、质检标准、
+    // 试产成本与良率），试产结果记录并对比量产目标，输出转量产建议。」
+    // 输出「试产单 + 组件领用需求（→ 7 库存）；良率与成本结果；转量产建议」。
+    //
+    // 本条目是**新增一条 services[] 元素**，不是往既有 trade 分支的 alternation 里并分支 ——
+    // 那一支是一段超长单行正则，多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在既有 `development-samples`（6.6.1.2，同为 6.6 分区）元素**之后**、
+    // `9.3.1.1 拆单`元素**之前**；与本批另外三条车道（6.3.2.1 / 6.3.1.3 / 11.4.1.1）
+    // 的插入点被既有条目隔开，git 能干净求并。resolve() 是「按顺序逐条匹配、首个命中即返回」，
+    // 同前缀的第二条不会误吃前一条的路径。
+    //
+    // 🔴 为什么用 `trial-productions` 这个独立前缀：
+    //   * 已逐条核对本文件里**全部 109 条既有正则**（含 trade 的超长 alternation 分支）：
+    //     本模块的 18 个形状对它们的命中数 = **0**；
+    //   * 逐条核对过邻近首 token：`purchase-orders` / `purchase-order-editor` /
+    //     `purchase-plans` / `purchase-requests` / `replenishment-suggestions` /
+    //     `development-projects` / `development-samples` / `quality-inspections` /
+    //     `defective-dispositions` —— **零命中**（既有的 `order-review/.../trial`
+    //     首 token 是 `order-review`，与本模块互不相干）；
+    //   * `development-samples`（6.6.1.2）的正则**不会**吃掉 `trial-productions/**`
+    //     —— 两者是互不相同的前缀字面量。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   trial-productions/capabilities            能力声明（库存扣减 / 转量产建档 / 汇率三条缺口）
+    //   trial-productions/options                 下拉（状态与合法去向 / 需求状态 / 判定结果 / 成本类型 / 建议结论）
+    //   trial-productions/summary                 按状态分组的概览 + 按币种分组的成本与成本对比
+    //   trial-productions/bom-version-candidates catalog 的 BOM 版本候选（跨服务只读）
+    //   trial-productions                         试产单清单（GET）/ 新建试产单（POST）
+    //   trial-productions/{uuid}                  试产单详情（GET）/ 改试产单（PUT）
+    //   trial-productions/{uuid}/transitions      推进试产单状态（POST，状态机只认存在的边）
+    //   trial-productions/{uuid}/component-requirements       组件领用需求（GET）
+    //   trial-productions/{uuid}/component-requirements/{uuid}/submit   提交领用需求（POST）
+    //   trial-productions/{uuid}/component-requirements/{uuid}/release  记录加工单承接（POST）
+    //   trial-productions/{uuid}/inspection-items               质检标准项（GET / POST）
+    //   trial-productions/{uuid}/inspection-items/{uuid}        记录质检判定（PUT）
+    //   trial-productions/{uuid}/result                          试产结果（GET / POST，良率由后端推导）
+    //   trial-productions/{uuid}/cost                           试产成本（GET）
+    //   trial-productions/{uuid}/cost/lines                     追加成本明细行（POST）
+    //   trial-productions/{uuid}/cost/lines/{uuid}              删成本明细行（DELETE）
+    //   trial-productions/{uuid}/cost-comparison                试产成本 vs 量产目标成本（GET）
+    //   trial-productions/{uuid}/mass-production-recommendation 转量产建议（GET / POST）
+    //
+    // ⚠️ 判别顺序：**字面量子路径（capabilities / options / summary / bom-version-candidates）
+    //    排在 {uuid} 段之前** —— alternation 是首个命中即返回，顺序反了会被 uuid 支吃掉半截。
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`（不是
+    //    `[0-9a-f-]+`）：后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `trial-productions/{uuid}/delete` —— 试产单挂着组件需求、质检项、结果、成本与
+    //     全部留痕，后端**不提供删除**（删掉它就抹掉了「这个试产经历过什么」的证据）。
+    //   * `trial-productions/{uuid}/inventory-deductions` / `/stock` —— 蓝图加粗句
+    //     「**试产消耗真实组件库存，需走 8 加工单而非直接改库存**」：本模块**只产出组件领用需求**，
+    //     **不建库存扣减表**。放行这两个路径会让界面以为本模块在扣库存。
+    //   * `trial-productions/{uuid}/component-requirements/{uuid}/deduct` —— 同上：
+    //     **领用由 warehouse 侧 8.4.1 组装单承接**，本模块不提供「扣减」动作。
+    //   * `trial-productions/{uuid}/assembly-orders` —— 组装单是 **warehouse 独立库**里
+    //     8.4.1 的事实，本模块只存它的**逻辑引用 + 展示快照**，**不建组装单**。
+    //   * `trial-productions/{uuid}/mass-production-orders` —— 6.6.2.2 转量产与建档**未开发**；
+    //     本模块只产**建议事实**，放行它会让界面以为量产单已经存在。
+    //   * `trial-productions/{uuid}/skus` —— SKU 建档归 3.1.2.1 与 6.6.2.2，
+    //     本模块**不建 SKU**。
+    //   * 任何 DELETE 裸集合形状 —— 白名单是**按路径登记、不区分方法**的，
+    //     所以「不能删」的防线在服务端与 DB，不在这里。
+    prefix: 'trade/',
+    env: 'TRADE_URL',
+    fallback: 'http://127.0.0.1:8085',
+    pattern:
+      /^trial\-productions(?:\/(?:capabilities|options|summary|bom\-version\-candidates|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:transitions|component\-requirements(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:submit|release))?)?|inspection\-items(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|result|cost(?:\/lines(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?)?|cost\-comparison|mass\-production\-recommendation))?))?$/,
   },
   {
     // 9.3.1.1 拆单（trade 服务）。本条目是**新增一条 services[] 元素**，不是往既有
@@ -5394,6 +5520,76 @@ const services: readonly {
       /^defective\-dispositions(?:\/(?:capabilities|options|summary)|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:decide|dispatch\-inventory|complete|cancel|export)|\/claims\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/(?:submit|agree|reject|withdraw))?)?$/,
   },
   {
+    // 6.3.1.3 采购单审批（trade 服务，卷 06「采购与供应」的 L3 锚点 6.3.1「采购单」下的第三格）。
+    //
+    // 蓝图：「按金额阈值与采购员分级审批，支持批量审批、驳回并附意见，审批通过后锁定单据生成应付。」
+    // 输出「审批结果 + 审批链路记录；通过后触发 12 生成应付、8 允许收货」。
+    //
+    // 本条目是**新增一条 services[] 元素**，不是往既有 trade 巨型正则里并 ——
+    // 那一支是单行超长 alternation，多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在「6.4.2.2 不良品处理」元素**之后**、「5.3.2.2 价格规则」元素**之前**，
+    // 与本批另外三条车道的插入点（6.3.2.1 / 6.6.2.1 / 11.4.1.1）互不重叠；既有条目一字未动。
+    //
+    // 🔴 为什么用 `purchase-order-approvals` 这个独立前缀：
+    //   * 用脚本逐条核对了本文件里**全部 117 条**既有正则（一条不漏、逐条 new RegExp 试跑）：
+    //     本模块的 **15 个形状**对它们**零命中**（既有条目不会先把它吃掉）。
+    //   * 首 token 与本仓已占用的邻近首 token 全部不同：
+    //     `purchase-orders`（6.3.1.1）、`purchase-order-editor`（6.3.1.2）、
+    //     `purchase-plans`（6.2.1.3）、`purchase-requests`（6.2.2.1）、
+    //     `purchase-arrivals`（6.3.2.2）、`purchase-analytics`（6.5.2.1）、
+    //     `purchase-reconciliations`（6.5.1.1）、`replenishment-suggestions`（6.2.1.2）、
+    //     `development-projects` / `development-samples`（6.6.1.x）。
+    //   * ⚠️ `purchase-orders` 与 `purchase-order-approvals` **只差两个连字符** ——
+    //     既有那条是**锚定**的（`^purchase\-orders(?:...)$`），吃不到本模块的路径；
+    //     本条也是锚定的，两者互不吃。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   purchase-order-approvals/capabilities            能力声明（GET）
+    //   purchase-order-approvals/rules                   规则列表（GET）+ 新建规则（POST）
+    //   purchase-order-approvals/rules/{uuid}            改规则（PUT）
+    //   purchase-order-approvals/rules/{uuid}/status     启用 / 停用规则（POST）
+    //   purchase-order-approvals/members                采购员分级 + 审批人（GET）
+    //   purchase-order-approvals/members/buyers         登记 / 改采购员分级（POST）
+    //   purchase-order-approvals/members/approvers      登记 / 改审批人（POST）
+    //   purchase-order-approvals/orders                 审批台账（GET，真分页 + 筛选）
+    //   purchase-order-approvals/orders/batch           批量审批 / 批量驳回（POST）
+    //   purchase-order-approvals/orders/{uuid}          审批详情（GET）
+    //   purchase-order-approvals/orders/{uuid}/approve  审批通过（POST）
+    //   purchase-order-approvals/orders/{uuid}/reject   驳回并附意见（POST）
+    //   purchase-order-approvals/payables               应付登记台账（GET）
+    //   purchase-order-approvals/payables/{uuid}/confirm 财务确认（POST）
+    //   purchase-order-approvals/payables/{uuid}/reject  财务驳回（POST）
+    //
+    // ⚠️ 判别顺序：**字面量子路径（capabilities / rules / members / orders / payables）排在
+    // {uuid} 段之前**，且 `orders/batch` 排在 `orders/{uuid}` 之前 ——
+    // 否则「batch」会被 uuid 支吃掉半截。
+    //
+    // 🔴 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 ——
+    //    界面会以为功能已交付）：
+    //   * purchase-order-approvals —— 裸路径：本模块没有裸集合读，放行它会凭空多出一条 GET。
+    //   * purchase-order-approvals/orders/{uuid}/lines —— 行随 6.3.1.2 的编辑表单一起返回，
+    //     没有独立的行子资源端点。
+    //   * purchase-order-approvals/orders/{uuid}/chain、/payable、/receipt-release ——
+    //     审批链路、应付登记、收货放行**随详情一起返回**，没有独立的子资源端点。
+    //   * purchase-order-approvals/orders/{uuid}/revoke-receipt ——
+    //     🔴 **不存在**「撤销收货放行」的端点：审批通过后的采购单只能走
+    //     APPROVED → CLOSED（V254 的状态机钉死），要改数量与单价得走变更单或红冲重下。
+    //     放行它会让界面显示「已撤销」而其实没有。
+    //   * purchase-order-approvals/payables/{uuid}、/rules/{uuid}、/members/{uuid} ——
+    //     这三张表**没有**按 id 寻址的读端点（台账一次给全，详情按采购单取）。
+    //   * purchase-order-approvals/rules/{uuid}/delete —— 规则**不提供删除**：
+    //     已命中的规则是历史审批单的依据，删掉会让「按哪条规则批的」答不出来（用停用）。
+    //   * purchase-order-approvals/orders/{uuid}/tax —— **12 财务未交付**（本仓没有 finance
+    //     服务）：不代它开税额形状。
+    //   * purchase-order-approvals/change-orders —— 变更单 / 红冲重下**不在本模块内**：
+    //     本模块只锁不改，不代写变更单（否则同一张单会有两份金额真相）。
+    prefix: 'trade/',
+    env: 'TRADE_URL',
+    fallback: 'http://127.0.0.1:8085',
+    pattern:
+      /^purchase\-order\-approvals(?:\/(?:capabilities|rules(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/status)?)?|members(?:\/(?:buyers|approvers))?|orders(?:\/(?:batch|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:approve|reject))?)?)?|payables(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/(?:confirm|reject))?))$/,
+  },
+  {
     // 5.3.2.2 价格规则（catalog 服务，卷 05 定价与价目的 L3 锚点 5.3.2）。
     //
     // 蓝图：「定义自动调价规则：触发条件（库存低于阈值/竞品降价/成本上涨/毛利低于下限/库龄超期）
@@ -5734,6 +5930,78 @@ const services: readonly {
     fallback: 'http://127.0.0.1:8084',
     pattern:
       /^pending-inspections(?:\/(?:capabilities|stock|options|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:request-inspection|record-result|dispose|cancel))?))?$/,
+  },
+  {
+    // 11.4.1.1 平台纠纷列表（trade 服务，卷 11「售后与退货」L3 11.4「平台纠纷与客诉」的第一格）。
+    //
+    // 蓝图：「管理平台纠纷/争议（Amazon A-to-Z、eBay 争议、速卖通纠纷）：类型、金额、平台时限、
+    // 举证要求、我方立场、结果记录。」输出：「纠纷单 + 时效倒计时 + 举证清单。」
+    // 加粗句：「**平台纠纷有严格举证时限**，超期自动判败，是硬性时效要求。」
+    //
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 trade 那条巨型 alternation 里并分支 ——
+    //   那一支是单行超长正则，多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在 services[] 的**最末尾**（紧挨着 `];`），
+    // 与同批其它车道（6.3.2.1 / 6.6.2.1 / 6.3.1.3）的插入点互不重叠。
+    //
+    // ---- 首 token「platform-disputes」的零命中核对结论（逐条核过本文件**全部**既有正则）----
+    //   本文件既有 116 条 services[] 正则，**逐条**用本模块的九个真实调用形状
+    //   （platform-disputes / .../capabilities / .../{uuid} / .../evidence-items /
+    //     .../evidence-items/{uuid} / .../start-evidence / .../position / .../submit-evidence /
+    //     .../resolve / .../withdraw / .../settlements / .../settlements/{uuid}/confirm /
+    //     .../settlements/{uuid}/reject）跑过一遍：**命中 0 条**。
+    //   逐条核对的既有首 token（全部零命中）：
+    //     purchase-orders / purchase-order-editor / purchase-followups / purchase-plans /
+    //     purchase-requests / purchase-arrivals / purchase-reconciliation / purchase-analytics /
+    //     replenishment-suggestions / development-projects / development-samples /
+    //     quality-inspections / defective-dispositions / return-dispositions / return-shipbacks /
+    //     quality-analysis / quality-supplier-refs / knowledge / review-requests / review-rules /
+    //     supplier-claims / product-attribution / return-quality / return-receipts /
+    //     rma-authorizations / rma-instructions / refunds / refund-applications /
+    //     platform-order-sync / pending-inspections / putaway-tasks / goods-receipts …
+    //   另外本文件**全部**正则的字面量里也不存在 "platform-dispute" 这个串
+    //   （grep 全文件零命中）—— 所以首 token 既是独立字面量，也不会被既有分支的前缀吃掉。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   platform-disputes                                集合读（GET，真分页 / 真筛选）+ 建单（POST）
+    //   platform-disputes/capabilities                   能力声明（含上下游未交付的逐条说明）
+    //   platform-disputes/{uuid}                         单据详情（GET：头 + 举证清单 + 结算分录 + 留痕）
+    //   platform-disputes/{uuid}/evidence-items          加举证材料项（POST）
+    //   platform-disputes/{uuid}/evidence-items/{uuid}   更新举证材料状态（PUT）/ 移除（DELETE）
+    //   platform-disputes/{uuid}/start-evidence          进入举证准备（POST）
+    //   platform-disputes/{uuid}/position                更新我方立场与责任判定（POST）
+    //   platform-disputes/{uuid}/submit-evidence         提交举证（POST）
+    //   platform-disputes/{uuid}/resolve                 记录平台裁决结果（POST）
+    //   platform-disputes/{uuid}/withdraw                我方撤诉（POST）
+    //   platform-disputes/{uuid}/settlements             登记结算影响（POST）
+    //   platform-disputes/{uuid}/settlements/{uuid}/confirm  财务确认结算生效（POST）
+    //   platform-disputes/{uuid}/settlements/{uuid}/reject   财务驳回结算影响（POST）
+    //
+    // 判别顺序：**字面量子路径（capabilities）排在 {uuid} 段之前** ——
+    // alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    // id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`（不是
+    // `[0-9a-f-]+`）：后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行。
+    // 两个动作段（{uuid}/xxx）挂在单段 {uuid} 组的可选后缀里，否则会被单段分支吃掉半截、
+    // 把动作名留在匹配之外。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   platform-disputes/{uuid}/auto-lose    —— **超期自动判败是系统做的**（后端 DB 守卫①），
+    //     刻意不提供手动入口：一个能提前把自己判负的按钮只会让人用它来提前结案。
+    //   platform-disputes/{uuid}/evidence      —— 举证**清单**在详情里，没有单独的读端点。
+    //   platform-disputes/{uuid}/upload        —— 本模块只落**清单事实**（该交什么 / 齐不齐 / 缺什么），
+    //     不上传材料；材料与申诉属 11.4.1.2（未开发）。
+    //   platform-disputes/{uuid}/appeal        —— 申诉提交属 11.4.1.2（未开发），本模块不越界。
+    //   platform-disputes/{uuid}/sync          —— channel 服务**没有纠纷专用同步端点**
+    //     （已交付的是平台目录 / 连接 / 店铺 / 同步任务 / 同步运行 / 回写 / webhook / 增量补拉），
+    //     放行一个不存在的同步入口等于让界面以为平台会自动拉纠纷。
+    //   platform-disputes/summary              —— 汇总在列表响应里，没有单独的汇总端点。
+    //   platform-disputes/{uuid}/delete        —— 终态不可逆：纠纷凭据不能删（后端 405 + DB 守卫）。
+    //   任何 DELETE / PUT 形状 —— 白名单是**按路径登记、不区分方法**的，
+    //     所以「不能删」的防线在服务端与 DB，不在这里。
+    prefix: 'trade/',
+    env: 'TRADE_URL',
+    fallback: 'http://127.0.0.1:8085',
+    pattern:
+      /^platform-disputes(?:\/(?:capabilities|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:evidence-items(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|start-evidence|position|submit-evidence|resolve|withdraw|settlements(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/(?:confirm|reject))?))?))?$/,
   },
 ];
 

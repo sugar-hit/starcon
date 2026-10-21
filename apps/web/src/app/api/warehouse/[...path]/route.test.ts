@@ -685,7 +685,11 @@ it('7.8.1.1 分配策略与序列号历史的调用形状都被放行', async ()
 it('warehouse 白名单外的路径被拒绝且不发出请求', async () => {
   const fetcher = vi.fn();
   vi.stubGlobal('fetch', fetcher);
-  // 调整单（7.4.1.1）尚未交付，不应被代理放行。
+  // 调整单（7.4.1.1）曾在这份拒绝清单里，那是 2026-10-21 交付前的状态；
+  // 7.4.1.1 已交付（inventory_adjustment_order 落 warehouse）、前端调整单页面就在调
+  // /inventory/adjustments 这组路径，不放行等于该页面在浏览器里静默 404，故已移出
+  // （放行覆盖由 inventory-adjustment-allowlist.test.ts 钉住，
+  // 未交付的子路径如 /post/force、/summary 仍由同文件钉住为 404）。
   // transfer 曾在这份拒绝清单里，那是 7.5.1.1 交付前的状态；它已并入且前端在调
   // /transfers 这组路径，不放行等于调拨页面在浏览器里 404，故已移出。
   // reservations 曾在这份拒绝清单里，那是 7.2.1 未交付时的状态；7.2.1.1 已交付、
@@ -697,7 +701,7 @@ it('warehouse 白名单外的路径被拒绝且不发出请求', async () => {
   // 注意 ledger 曾在这份拒绝清单里：那是 7.1.2 尚未交付时的状态，
   // 7.1.2.1 已交付并入后它的前端页面就在调这个路径，不放行等于页面在浏览器里 404，
   // 所以已移出拒绝清单（放行覆盖由上面「已放行」用例钉住）。
-  for (const path of ['warehouse/inventory/adjustments', 'warehouse/internal/access']) {
+  for (const path of ['warehouse/internal/access']) {
     expect(
       (await GET(request(path), { params: Promise.resolve({ path: path.split('/') }) })).status,
     ).toBe(404);

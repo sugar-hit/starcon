@@ -12,12 +12,14 @@ import com.sun.net.httpserver.HttpServer;
 import java.math.BigDecimal;
 import java.net.InetSocketAddress;
 import java.sql.DriverManager;
+import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.jooq.DSLContext;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,6 +51,10 @@ import org.testcontainers.containers.PostgreSQLContainer;
  *   <li><b>DB 级闸门</b>：两段不得同时在途、异常证据不可改写、事件流 append-only；
  *   <li><b>多租户三断言</b>：两租户互不可见 / 伪造 tenant header 无效 / 连接池归还后不串租户。
  * </ol>
+ *
+ * <p><b>🔴 时刻基准同源</b>：承诺时限这类「写进去的值」与「拿来断言的值」必须取自**同一次**时钟读取。
+ * 取两次（中间隔一次 DB 往返）一旦跨过整秒边界就必然假红 —— 写进去的是 {@code T}、断言用的是
+ * {@code T+1s}。见 {@code 承诺时限只取一次时钟_跨整秒边界现场下依然成立}。
  */
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -158,6 +164,12 @@ class DropshipTrackingIntegrationTest {
     actorB = actors.get("Bearer tenant-b");
   }
 
+  /** 回归用例会把时钟钉死；用完必须还原，免得钉死的时钟漏到别的用例里。 */
+  @AfterEach
+  void restoreClockSource() {
+    clockSource = WALL_CLOCK;
+  }
+
   <T> T asA(java.util.function.Supplier<T> work) {
     return access.run(actorA, "trade.fulfillment.update", work);
   }
@@ -170,18 +182,30 @@ class DropshipTrackingIntegrationTest {
     return tenant.equals(a) ? asA(work) : asB(work);
   }
 
+  /**
+   * 🔴 测试时钟源：默认读 JVM 墙钟；回归用例可以把它钉死成「可复现的脚本时钟」。
+   *
+   * <p>之所以把时钟抽出来：承诺时限这类断言若「写入取一次时钟、断言再取一次时钟」，两次读取之间隔着一次
+   * DB 往返；{@code at()} 每次都重读墙钟并截断到整秒 ⇒ 只要这两次跨过一个整秒边界，写进库的是
+   * {@code T}、断言用的是 {@code T+1s} ⇒ 必假红。时钟可钉死，才能**确定性地**复现这个现场，
+   * 而不是靠运气等它炸（见 {@code 承诺时限只取一次时钟_跨整秒边界现场下依然成立}）。
+   */
+  static final java.util.function.Supplier<OffsetDateTime> WALL_CLOCK =
+      () -> OffsetDateTime.now(ZoneOffset.ofHours(8));
+
+  static java.util.function.Supplier<OffsetDateTime> clockSource = WALL_CLOCK;
+
+  /** 当前测试时钟（默认 JVM 墙钟）。 */
+  static OffsetDateTime now() {
+    return clockSource.get();
+  }
+
   static OffsetDateTime at(int daysFromNow) {
-    return OffsetDateTime.now(ZoneOffset.ofHours(8))
-        .plusDays(daysFromNow)
-        .withNano(0)
-        .truncatedTo(ChronoUnit.SECONDS);
+    return now().plusDays(daysFromNow).withNano(0).truncatedTo(ChronoUnit.SECONDS);
   }
 
   static OffsetDateTime hoursAgo(int hours) {
-    return OffsetDateTime.now(ZoneOffset.ofHours(8))
-        .minusHours(hours)
-        .withNano(0)
-        .truncatedTo(ChronoUnit.SECONDS);
+    return now().minusHours(hours).withNano(0).truncatedTo(ChronoUnit.SECONDS);
   }
 
   static java.sql.SQLException rootSqlException(Throwable error) {
@@ -339,6 +363,26 @@ class DropshipTrackingIntegrationTest {
     return as(tenant, () -> service.trackingDetail(id).tracking());
   }
 
+  /**
+   * 建跟踪并回读：承诺时限**只取一次时钟**，写入值与断言值共用同一个读数。
+   *
+   * <p>🔴 纪律：承诺时限的「写入值」与「断言值」必须来自**同一次**时钟读取。两次取时钟（写一次、断言
+   * 一次）之间隔着一次 DB 往返，只要这两次跨过整秒边界就必然假红 —— 写进库的是 {@code T}、断言用的是
+   * {@code T+1s}。
+   *
+   * <p>本方法与回归用例 {@code 承诺时限只取一次时钟_跨整秒边界现场下依然成立} 共用：谁把「取两次时钟」
+   * 的写法搬回来，回归用例在钉死的时钟下立刻红。
+   */
+  DropshipTrackingRow 建跟踪并回读承诺时限(UUID tenant, Fixture f) {
+    OffsetDateTime promised = at(2); // ← 只取一次时钟
+    UUID id = newTracking(tenant, f, promised);
+    var row = trackingRow(tenant, id);
+    assertThat(row.supplierPromisedShipAt().toInstant())
+        .as("承诺发货时限是延迟判定的唯一基准，必须真的写进去")
+        .isEqualTo(promised.toInstant());
+    return row;
+  }
+
   List<DropshipTrackingExceptionRow> exceptions(UUID tenant, UUID trackingId) {
     return as(tenant, () -> service.trackingDetail(trackingId).exceptions());
   }
@@ -416,16 +460,69 @@ class DropshipTrackingIntegrationTest {
   @Test
   void 建跟踪时两段各自独立_互不预填() {
     var f = seedTenant(a);
-    UUID id = newTracking(a, f, at(2));
-    var row = trackingRow(a, id);
+    // 🔴 承诺时限只取一次时钟：写入值与断言值共用同一个读数（取两次 ⇒ 跨整秒边界就假红）
+    var row = 建跟踪并回读承诺时限(a, f);
     assertThat(row.activeLeg()).isEqualTo("SUPPLIER");
     assertThat(row.supplierLegStatus()).isEqualTo("NOT_SHIPMENT");
     assertThat(row.ownLegStatus()).isEqualTo("NOT_HANDED_OVER");
     assertThat(row.supplierTrackingNo()).isEmpty();
     assertThat(row.ownTrackingNo()).isEmpty();
-    assertThat(row.supplierPromisedShipAt().toInstant())
-        .as("承诺发货时限是延迟判定的唯一基准，必须真的写进去")
-        .isEqualTo(at(2).toInstant());
+  }
+
+  /**
+   * 🔴 确定性证明：承诺时限的**写入值与断言值必须取自同一次时钟读取**。
+   *
+   * <p>旧写法把 {@code at(2)} 调了两次：一次写进库、一次当断言基准，两次之间隔着一次 DB 往返。
+   * {@code at()} 每次都重读 JVM 墙钟并截断到整秒 ⇒ 只要这两次跨过一个整秒边界，写进去的是
+   * {@code T}、断言用的是 {@code T+1s} ⇒ 必红。2026-10-21 的 L2 批次闸就是这么红的（trade 2132 例里
+   * 红 1 例），隔离复跑却 29/29 全绿 —— 典型的偶发假红。
+   *
+   * <p>这里把时钟**钉死**成「每次读取整整晚 1 秒、且永远停在整秒边界前 1ns」：于是**任意两次相邻读取**
+   * 截断到秒之后必然差**整 1 秒**（就是 {@code 25.999 → 26.001} 那种必翻车的现场），而且与「两次调用
+   * 之间隔了多久」无关 ⇒ 确定性，不靠运气。
+   *
+   * <p>在这个现场里：旧写法**必须红**（{@code assertThatThrownBy} 钉死，不许有人把它搬回来），
+   * 新写法**必须绿**（写回库里的正好是那唯一一个被取到的时刻）。
+   */
+  @Test
+  void 承诺时限只取一次时钟_跨整秒边界现场下依然成立() {
+    var f = seedTenant(a);
+    var f2 = seedTenant2(a);
+
+    // ---- 把时钟钉死：每次读取整整晚 1 秒，且永远停在整秒边界前 1ns ----
+    AtomicInteger reads = new AtomicInteger();
+    OffsetDateTime pinned = OffsetDateTime.now(ZoneOffset.ofHours(8)).withNano(999_999_999);
+    clockSource = () -> pinned.plusSeconds(reads.getAndIncrement());
+    try {
+      // ---- 现场自证：相邻两次读取截断到秒后恰好差整 1 秒（这正是旧写法翻车的原因） ----
+      OffsetDateTime first = pinned;
+      OffsetDateTime second = pinned.plusSeconds(1);
+      assertThat(Duration.between(
+              first.withNano(0).truncatedTo(ChronoUnit.SECONDS),
+              second.withNano(0).truncatedTo(ChronoUnit.SECONDS)))
+          .as("钉死的现场：相邻两次时钟读取截断到秒后恰好差整 1 秒")
+          .isEqualTo(Duration.ofSeconds(1));
+
+      // ---- 新写法：只取一次时钟 ⇒ 写入值与断言值同源，在这个现场下依然绿 ----
+      var row = 建跟踪并回读承诺时限(a, f);
+      assertThat(row.supplierPromisedShipAt().toInstant())
+          .as("写回库里的承诺时限必须正好是钉死时钟的第一次读取（跨整秒边界的头一次）")
+          .isEqualTo(pinned.plusDays(2).withNano(0).toInstant());
+
+      // ---- 旧写法：写入取一次时钟、断言再取一次 ⇒ 在这个现场下必红 ----
+      assertThatThrownBy(
+              () -> {
+                UUID oldId = newTracking(a, f2, at(2));
+                var oldRow = trackingRow(a, oldId);
+                assertThat(oldRow.supplierPromisedShipAt().toInstant())
+                    .as("旧写法：写入值与断言值各取一次时钟")
+                    .isEqualTo(at(2).toInstant());
+              })
+          .as("旧写法在「两次取时钟必跨整秒边界」的现场下必须红")
+          .isInstanceOf(AssertionError.class);
+    } finally {
+      clockSource = WALL_CLOCK;
+    }
   }
 
   @Test

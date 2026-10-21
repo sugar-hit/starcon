@@ -10,11 +10,14 @@ import com.sun.net.httpserver.HttpServer;
 import java.math.BigDecimal;
 import java.net.InetSocketAddress;
 import java.sql.DriverManager;
+import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.jooq.DSLContext;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +46,10 @@ import org.testcontainers.containers.PostgreSQLContainer;
  *   <li><b>可售标记如实</b>：没有供应商库存观测是 <b>null</b> 而不是 0； 差价为负被拦住；可售与可刊登是两列；
  *   <li><b>多租户三断言</b>：两租户互不可见 / 伪造 tenant header 无效 / 连接池归还后不串租户。
  * </ol>
+ *
+ * <p><b>🔴 时刻基准同源</b>：有效期这类「写进去的值」与「拿来断言的值」必须取自**同一次**时钟读取。
+ * 取两次（中间隔一次 DB 往返）一旦跨过整秒边界就必然假红 —— 写进去的是 {@code T}、断言用的是
+ * {@code T+1s}。见 {@code 有效时间只取一次时钟_跨整秒边界现场下依然成立}。
  */
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -142,6 +149,12 @@ class DropshipConfigIntegrationTest {
     pg.stop();
   }
 
+  /** 回归用例会把时钟钉死；用完必须还原，免得钉死的时钟漏到别的用例里。 */
+  @AfterEach
+  void restoreClockSource() {
+    clockSource = WALL_CLOCK;
+  }
+
   AccessService.Access actorA;
   AccessService.Access actorB;
 
@@ -157,11 +170,26 @@ class DropshipConfigIntegrationTest {
     return tenant.equals(a) ? asA(work) : asB(work);
   }
 
+  /**
+   * 🔴 测试时钟源：默认读 JVM 墙钟；回归用例可以把它钉死成「可复现的脚本时钟」。
+   *
+   * <p>之所以把时钟抽出来：有效期这类「写进去的值」与「拿来断言的值」若各取一次时钟，两次读取之间隔着一次
+   * DB 往返；{@code at()} 每次都重读墙钟并截断到整秒 ⇒ 只要这两次跨过一个整秒边界，写进库的是 {@code T}、
+   * 断言用的是 {@code T+1s} ⇒ 必假红。时钟可钉死，才能**确定性地**复现这个现场，而不是靠运气等它炸
+   * （见 {@code 有效时间只取一次时钟_跨整秒边界现场下依然成立}）。
+   */
+  static final java.util.function.Supplier<OffsetDateTime> WALL_CLOCK =
+      () -> OffsetDateTime.now(ZoneOffset.ofHours(8));
+
+  static java.util.function.Supplier<OffsetDateTime> clockSource = WALL_CLOCK;
+
+  /** 当前测试时钟（默认 JVM 墙钟）。 */
+  static OffsetDateTime now() {
+    return clockSource.get();
+  }
+
   static OffsetDateTime at(int daysFromNow) {
-    return OffsetDateTime.now(ZoneOffset.ofHours(8))
-        .plusDays(daysFromNow)
-        .withNano(0)
-        .truncatedTo(java.time.temporal.ChronoUnit.SECONDS);
+    return now().plusDays(daysFromNow).withNano(0).truncatedTo(ChronoUnit.SECONDS);
   }
 
   /** 沿 cause 链找最里面那条 SQLException —— DB 拒绝的**原文**在那里。 */
@@ -912,14 +940,26 @@ class DropshipConfigIntegrationTest {
         .isEqualTo(sent.toInstant());
   }
 
-  @Test
-  void 有效时间写入后读回一致() {
+  /**
+   * 保存代发配置并回读有效期：写入值与断言值**共用同一组读数**。
+   *
+   * <p>🔴 纪律：有效期的「写入值」与「断言值」必须来自**同一次**时钟读取。两次取时钟（写一次、断言一次）
+   * 之间隔着一次 DB 往返，只要这两次跨过整秒边界就必然假红 —— 写进库的是 {@code T}、断言用的是 {@code T+1s}。
+   *
+   * <p>本方法与回归用例 {@code 有效时间只取一次时钟_跨整秒边界现场下依然成立} 共用：谁把「取两次时钟」的
+   * 写法搬回来，回归用例在钉死的时钟下立刻红。
+   *
+   * @return 写回库里的两个有效期时刻（供回归用例核对「写进去的正是那唯一一个被取到的时刻」）
+   */
+  Map<String, OffsetDateTime> 保存配置并回读有效期(
+      UUID tenant, String code, OffsetDateTime effectiveFrom, OffsetDateTime effectiveTo) {
     var saved =
-        asA(
+        as(
+            tenant,
             () ->
                 service.saveConfig(
                     new DropshipConfigInput(
-                        "DSH-TIME",
+                        code,
                         "有效期",
                         "SKU",
                         "",
@@ -941,20 +981,130 @@ class DropshipConfigIntegrationTest {
                         new BigDecimal("2.000000"),
                         "PAUSE_WHEN_NEGATIVE_MARGIN",
                         5,
-                        at(-3),
-                        at(30),
+                        effectiveFrom,
+                        effectiveTo,
                         ""),
-                    idFor(a, 99)));
+                    idFor(tenant, 99)));
     var row =
-        asA(
+        as(
+            tenant,
             () ->
                 sql.fetchOne(
                     "select effective_from,effective_to from fulfillment_dropship_config where id = ?",
                     saved.id()));
     assertThat(row.get("effective_from", OffsetDateTime.class).toInstant())
-        .isEqualTo(at(-3).toInstant());
+        .as("有效期起点必须原样写进去")
+        .isEqualTo(effectiveFrom.toInstant());
     assertThat(row.get("effective_to", OffsetDateTime.class).toInstant())
-        .isEqualTo(at(30).toInstant());
+        .as("有效期终点必须原样写进去")
+        .isEqualTo(effectiveTo.toInstant());
+    return Map.of(
+        "effective_from", row.get("effective_from", OffsetDateTime.class),
+        "effective_to", row.get("effective_to", OffsetDateTime.class));
+  }
+
+  @Test
+  void 有效时间写入后读回一致() {
+    // 🔴 有效期只取一次时钟：写入值与断言值共用同一个读数（取两次 ⇒ 跨整秒边界就假红）
+    OffsetDateTime effectiveFrom = at(-3);
+    OffsetDateTime effectiveTo = at(30);
+    保存配置并回读有效期(a, "DSH-TIME", effectiveFrom, effectiveTo);
+  }
+
+  /**
+   * 🔴 确定性证明：有效期的**写入值与断言值必须取自同一次时钟读取**。
+   *
+   * <p>旧写法把 {@code at(-3)} / {@code at(30)} 各调了两次：一次写进库、一次当断言基准，两次之间隔着一次 DB
+   * 往返。{@code at()} 每次都重读 JVM 墙钟并截断到整秒 ⇒ 只要这两次跨过一个整秒边界，写进去的是 {@code T}、
+   * 断言用的是 {@code T+1s} ⇒ 必红。这与 9.6.1.3 那处同形状（同一次假红，根因同一根）。
+   *
+   * <p>这里把时钟**钉死**成「每次读取整整晚 1 秒、且永远停在整秒边界前 1ns」：于是**任意两次相邻读取**截断到
+   * 秒之后必然差**整 1 秒**（就是 {@code 25.999 → 26.001} 那种必翻车的现场），而且与「两次调用之间隔了多久」
+   * 无关 ⇒ 确定性，不靠运气。
+   *
+   * <p>在这个现场里：旧写法**必须红**（{@code assertThatThrownBy} 钉死，不许有人把它搬回来），新写法**必须绿**
+   * （写回库里的正好是那唯一一个被取到的时刻）。
+   */
+  @Test
+  void 有效时间只取一次时钟_跨整秒边界现场下依然成立() {
+    // ---- 把时钟钉死：每次读取整整晚 1 秒，且永远停在整秒边界前 1ns ----
+    AtomicInteger reads = new AtomicInteger();
+    OffsetDateTime pinned = OffsetDateTime.now(ZoneOffset.ofHours(8)).withNano(999_999_999);
+    clockSource = () -> pinned.plusSeconds(reads.getAndIncrement());
+    try {
+      // ---- 现场自证：相邻两次读取截断到秒后恰好差整 1 秒（这正是旧写法翻车的原因） ----
+      OffsetDateTime first = pinned;
+      OffsetDateTime second = pinned.plusSeconds(1);
+      assertThat(Duration.between(
+              first.withNano(0).truncatedTo(ChronoUnit.SECONDS),
+              second.withNano(0).truncatedTo(ChronoUnit.SECONDS)))
+          .as("钉死的现场：相邻两次时钟读取截断到秒后恰好差整 1 秒")
+          .isEqualTo(Duration.ofSeconds(1));
+
+      // ---- 新写法：只取一次时钟 ⇒ 写入值与断言值同源，在这个现场下依然绿 ----
+      OffsetDateTime effectiveFrom = at(-3); // ← 唯一一次读取
+      OffsetDateTime effectiveTo = at(30); // ← 唯一一次读取
+      var written = 保存配置并回读有效期(a, "DSH-CLOCK", effectiveFrom, effectiveTo);
+      assertThat(written.get("effective_from").toInstant())
+          .as("写回库里的有效期起点必须正好是钉死时钟的第一次读取（跨整秒边界的头一次）")
+          .isEqualTo(pinned.minusDays(3).withNano(0).toInstant());
+      assertThat(written.get("effective_to").toInstant())
+          .as("写回库里的有效期终点必须正好是钉死时钟的第二次读取")
+          .isEqualTo(pinned.plusSeconds(1).plusDays(30).withNano(0).toInstant());
+
+      // ---- 旧写法：写入取一次时钟、断言再取一次 ⇒ 在这个现场下必红 ----
+      assertThatThrownBy(
+              () -> {
+                var oldSaved =
+                    asA(
+                        () ->
+                            service.saveConfig(
+                                new DropshipConfigInput(
+                                    "DSH-CLOCK-OLD",
+                                    "有效期",
+                                    "SKU",
+                                    "",
+                                    "SKU-OK",
+                                    "SUPPLIER_DIRECT",
+                                    "SUP-ACME",
+                                    "PURE_AGENCY",
+                                    null,
+                                    null,
+                                    null,
+                                    "",
+                                    "ON_RECEIPT",
+                                    "MARGIN_SHARE",
+                                    new BigDecimal("0.600000"),
+                                    "USD",
+                                    new BigDecimal("40.0000"),
+                                    new BigDecimal("100.0000"),
+                                    "SUPPLIER_STOCK",
+                                    new BigDecimal("2.000000"),
+                                    "PAUSE_WHEN_NEGATIVE_MARGIN",
+                                    5,
+                                    at(-3),
+                                    at(30),
+                                    ""),
+                                idFor(a, 99)));
+                var oldRow =
+                    asA(
+                        () ->
+                            sql.fetchOne(
+                                "select effective_from,effective_to from fulfillment_dropship_config"
+                                    + " where id = ?",
+                                oldSaved.id()));
+                assertThat(oldRow.get("effective_from", OffsetDateTime.class).toInstant())
+                    .as("旧写法：写入值与断言值各取一次时钟")
+                    .isEqualTo(at(-3).toInstant());
+                assertThat(oldRow.get("effective_to", OffsetDateTime.class).toInstant())
+                    .as("旧写法：写入值与断言值各取一次时钟")
+                    .isEqualTo(at(30).toInstant());
+              })
+          .as("旧写法在「两次取时钟必跨整秒边界」的现场下必须红")
+          .isInstanceOf(AssertionError.class);
+    } finally {
+      clockSource = WALL_CLOCK;
+    }
   }
 
   // ==========================================================================
