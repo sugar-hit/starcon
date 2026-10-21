@@ -5435,6 +5435,63 @@ const services: readonly {
       /^compliance-precheck(?:\/capabilities|\/drafts(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/(?:check|precheck))?|\/reports(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?)$/,
   },
   {
+    // 14.3.2.2 效率诊断（channel 服务，卷 14「广告与增长」的 L3 锚点 14.3.2）。
+    //
+    // 蓝图：「诊断投放效率问题：高花费零转化、ACOS 长期超标、预算受限、竞价过低曝光不足、创意衰退，
+    // 给出可执行建议与一键调整。输入：14.3 报表指标；诊断规则。输出：诊断清单 + 建议动作。
+    // 关系：上游 = 14.3.1；下游 = 14.2.1.1、14.1.3.1。**诊断要给动作而不是只报警**，
+    // 否则用户看完还是要自己想怎么办。」
+    //
+    // 本条目是**新增一条 services[] 元素**，不是往既有 channel 分支的超长 alternation 里并 ——
+    // 那一支是单行超长正则，多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在 10.4.2.2 的 `stock-forecasts` 元素**之前**（`prefix: 'channel/'`，
+    // pattern 首 token 为 `^stock-forecasts`，全文件唯一）——
+    // 与同批 14.1.1.2 活动详情（`ad-campaign-details`，落在 `compliance-precheck` 之前）相隔 60+ 行，
+    // 与另外三条车道（catalog 调价单 / catalog 价格历史 / trade 采购计划）也互不重叠，git 能干净求并。
+    //
+    // ---- 首 token「ad-diagnostics」的零命中核对结论 ----
+    //   本文件既有 100+ 条 services[] 正则里**没有任何一条**含 `ad-diagnostics` 这个串
+    //   （既有的是 `ad-campaigns` / `ad-keywords` / `ad-rules` / `ad-type-diffs` / `ad-campaign-details`
+    //   一类的其它命名），所以首 token 既是独立字面量，也不会被既有分支的前缀吃掉。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   ad-diagnostics/capabilities                能力声明（未交付段 available=false + ownerModule + impact）
+    //   ad-diagnostics/rules                       规则集合读（GET）/ 登记规则（POST）
+    //   ad-diagnostics/rules/defaults              初始化默认诊断规则（POST，幂等：已存在的不覆盖）
+    //   ad-diagnostics/rules/{uuid}                规则详情（GET）
+    //   ad-diagnostics/rules/{uuid}/status         启用 / 停用一条规则（POST）
+    //   ad-diagnostics/runs                        运行历史（GET）/ 跑一次诊断（POST）
+    //   ad-diagnostics/runs/{uuid}                 运行详情（GET：逐条规则的评估结论 + 结论 + 建议动作）
+    //   ad-diagnostics/diagnoses                   诊断清单（GET，真分页 + 真筛选）
+    //   ad-diagnostics/diagnoses/{uuid}            诊断详情（GET：结论 + 观察量快照 + 建议动作）
+    //   ad-diagnostics/actions                     建议动作集合读（GET，真分页 + 真筛选）
+    //   ad-diagnostics/actions/{uuid}              建议动作详情（GET）
+    //   ad-diagnostics/actions/{uuid}/apply        🔴 一键调整（POST，走 14.1.1.1 已交付的写路径与护栏）
+    //
+    // ⚠️ 判别顺序：**字面量子路径（capabilities / rules / rules/defaults / runs / diagnoses / actions）
+    //    排在 {uuid} 段之前** —— alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //（不是 `[0-9a-f-]+`：后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行）。
+    // 末尾**刻意不带 `?`**：带了就等于放行裸路径 `ad-diagnostics`。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸路径 `ad-diagnostics` —— 本模块没有裸集合读，一切入口都带子路径。
+    //   * `ad-diagnostics/rules/{uuid}/delete` —— 规则是配置事实，撤下走 status=DISABLED，不物理删除。
+    //   * `ad-diagnostics/diagnoses/{uuid}/delete` —— 诊断结论是那一次判定的凭据，不可删。
+    //   * `ad-diagnostics/diagnoses/{uuid}/apply` —— 调整挂在**建议动作**上，不挂在结论上。
+    //   * `ad-diagnostics/actions/{uuid}/dispatch` / `/sync` —— 平台侧真实下发**未交付**
+    //     （平台回写队列未接通），放行它只会让界面以为「已回写平台」。
+    //   * `ad-diagnostics/actions/{uuid}/bid` —— 竞价调整归 14.2.1.1 竞价管理（**未交付**），
+    //     本模块**不跳过它直接写平台**。
+    //   * `ad-diagnostics/creative-decay` —— 创意衰退的数据源未就绪（14.1.1.2 未交付），
+    //     没有这个资源；它只是诊断清单里一条被显式标为「数据源未就绪」的规则。
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^ad\-diagnostics(?:\/(?:capabilities|rules(?:\/defaults|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/status)?)?|runs(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|diagnoses(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|actions(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/apply)?)?))$/,
+  },
+  {
     // 10.4.2.2 备货预报（channel 服务，卷 10「物流与货运」的 L3 锚点 10.4.2）。
     //
     // 蓝图：「向海外仓/平台仓提交备货计划：SKU 与数量、目的仓、期望到货时间、平台货件编号，

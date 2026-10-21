@@ -33961,6 +33961,696 @@
           }
         }
       }
+    },
+    "/channel/ad-diagnostics/runs": {
+      "get": {
+        "tags": [
+          "ad-efficiency-diagnosis-controller"
+        ],
+        "operationId": "get_channel_ad_diagnostics_runs",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdDiagnosisRunPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "ad-efficiency-diagnosis-controller"
+        ],
+        "operationId": "post_channel_ad_diagnostics_runs",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RunDiagnosisRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdDiagnosisRunDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/ad-diagnostics/rules": {
+      "get": {
+        "tags": [
+          "ad-efficiency-diagnosis-controller"
+        ],
+        "operationId": "get_channel_ad_diagnostics_rules",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "ruleType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "enabled",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdDiagnosisRulePage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "ad-efficiency-diagnosis-controller"
+        ],
+        "operationId": "post_channel_ad_diagnostics_rules",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveRuleRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdDiagnosisRuleRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/ad-diagnostics/rules/{id}/status": {
+      "post": {
+        "tags": [
+          "ad-efficiency-diagnosis-controller"
+        ],
+        "operationId": "post_channel_ad_diagnostics_rules_id_status",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdDiagnosisRuleRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/ad-diagnostics/rules/defaults": {
+      "post": {
+        "tags": [
+          "ad-efficiency-diagnosis-controller"
+        ],
+        "operationId": "post_channel_ad_diagnostics_rules_defaults",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdDiagnosisRuleDefaultsResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/ad-diagnostics/actions/{id}/apply": {
+      "post": {
+        "tags": [
+          "ad-efficiency-diagnosis-controller"
+        ],
+        "operationId": "post_channel_ad_diagnostics_actions_id_apply",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApplyActionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdDiagnosisApplyResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/ad-diagnostics/runs/{id}": {
+      "get": {
+        "tags": [
+          "ad-efficiency-diagnosis-controller"
+        ],
+        "operationId": "get_channel_ad_diagnostics_runs_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdDiagnosisRunDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/ad-diagnostics/rules/{id}": {
+      "get": {
+        "tags": [
+          "ad-efficiency-diagnosis-controller"
+        ],
+        "operationId": "get_channel_ad_diagnostics_rules_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdDiagnosisRuleRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/ad-diagnostics/diagnoses": {
+      "get": {
+        "tags": [
+          "ad-efficiency-diagnosis-controller"
+        ],
+        "operationId": "get_channel_ad_diagnostics_diagnoses",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "ruleType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "severity",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "campaignId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "runId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdDiagnosisPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/ad-diagnostics/diagnoses/{id}": {
+      "get": {
+        "tags": [
+          "ad-efficiency-diagnosis-controller"
+        ],
+        "operationId": "get_channel_ad_diagnostics_diagnoses_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdDiagnosisDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/ad-diagnostics/capabilities": {
+      "get": {
+        "tags": [
+          "ad-efficiency-diagnosis-controller"
+        ],
+        "operationId": "get_channel_ad_diagnostics_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdDiagnosisCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/ad-diagnostics/actions": {
+      "get": {
+        "tags": [
+          "ad-efficiency-diagnosis-controller"
+        ],
+        "operationId": "get_channel_ad_diagnostics_actions",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "outcome",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "actionMode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "available",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "diagnosisId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "runId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdDiagnosisActionPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/ad-diagnostics/actions/{id}": {
+      "get": {
+        "tags": [
+          "ad-efficiency-diagnosis-controller"
+        ],
+        "operationId": "get_channel_ad_diagnostics_actions_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdDiagnosisActionRow"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -82033,6 +82723,926 @@
           }
         },
         "description": "逐维度能力声明；未交付段 available=false"
+      },
+      "RunDiagnosisRequest": {
+        "type": "object",
+        "properties": {
+          "lookbackDays": {
+            "maximum": 365,
+            "minimum": 1,
+            "type": "integer",
+            "description": "观察窗口（天，缺省用规则自己的窗口）",
+            "format": "int32"
+          },
+          "dryRun": {
+            "type": "boolean",
+            "description": "🔴 试运行（默认 true）：只诊断不产生任何实际调整"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          }
+        }
+      },
+      "AdDiagnosisActionRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "建议动作 id",
+            "format": "uuid"
+          },
+          "diagnosisId": {
+            "type": "string",
+            "description": "诊断结论 id",
+            "format": "uuid"
+          },
+          "ruleId": {
+            "type": "string",
+            "description": "规则 id",
+            "format": "uuid"
+          },
+          "campaignId": {
+            "type": "string",
+            "description": "活动 id",
+            "format": "uuid"
+          },
+          "campaignName": {
+            "type": "string",
+            "description": "活动名"
+          },
+          "actionType": {
+            "type": "string",
+            "description": "动作类型"
+          },
+          "actionMode": {
+            "type": "string",
+            "description": "🔴 动作模式：WRITE / NAVIGATE / UNAVAILABLE"
+          },
+          "available": {
+            "type": "boolean",
+            "description": "🔴 本动作现在能不能做"
+          },
+          "ownerModule": {
+            "type": "string",
+            "description": "🔴 未交付段的责任模块"
+          },
+          "impact": {
+            "type": "string",
+            "description": "🔴 不交付的影响"
+          },
+          "targetModule": {
+            "type": "string",
+            "description": "🔴 NAVIGATE 段：去哪个模块处理"
+          },
+          "targetPath": {
+            "type": "string",
+            "description": "🔴 NAVIGATE 段：去哪个页面"
+          },
+          "actionPercent": {
+            "type": "string",
+            "description": "建议幅度（比例）"
+          },
+          "actionAmount": {
+            "type": "string",
+            "description": "建议幅度（绝对额）"
+          },
+          "beforeValue": {
+            "type": "string",
+            "description": "调整前的日预算"
+          },
+          "afterValue": {
+            "type": "string",
+            "description": "🔴 「本来会变成多少」（试运行里也是这个值）"
+          },
+          "outcome": {
+            "type": "string",
+            "description": "🔴 执行结论：NOT_APPLIED / DRY_RUN / APPLIED / REJECTED / SKIPPED / UNAVAILABLE"
+          },
+          "message": {
+            "type": "string",
+            "description": "结果说明（被拒时给出原因）"
+          },
+          "guardrailNote": {
+            "type": "string",
+            "description": "🔴 护栏结论（被哪一道闸拦下）"
+          },
+          "dryRun": {
+            "type": "boolean",
+            "description": "🔴 本次执行口径：true = 试运行（只算不调）"
+          },
+          "requestedBy": {
+            "type": "string",
+            "description": "发起人（已认证成员）",
+            "format": "uuid"
+          },
+          "appliedAt": {
+            "type": "string",
+            "description": "执行时刻",
+            "format": "date-time"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "创建时刻",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "更新时刻",
+            "format": "date-time"
+          }
+        },
+        "description": "本次产出的建议动作"
+      },
+      "AdDiagnosisRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "诊断结论 id",
+            "format": "uuid"
+          },
+          "runId": {
+            "type": "string",
+            "description": "运行 id",
+            "format": "uuid"
+          },
+          "ruleId": {
+            "type": "string",
+            "description": "规则 id",
+            "format": "uuid"
+          },
+          "ruleCode": {
+            "type": "string",
+            "description": "规则编码"
+          },
+          "ruleType": {
+            "type": "string",
+            "description": "🔴 规则类型（五种问题之一）"
+          },
+          "severity": {
+            "type": "string",
+            "description": "严重度"
+          },
+          "campaignId": {
+            "type": "string",
+            "description": "活动 id",
+            "format": "uuid"
+          },
+          "campaignName": {
+            "type": "string",
+            "description": "活动名"
+          },
+          "platformCode": {
+            "type": "string",
+            "description": "平台编码"
+          },
+          "shopCode": {
+            "type": "string",
+            "description": "店铺编码"
+          },
+          "status": {
+            "type": "string",
+            "description": "状态：OPEN / ACTIONED / DISMISSED / STALE"
+          },
+          "windowFrom": {
+            "type": "string",
+            "description": "统计区间开始",
+            "format": "date"
+          },
+          "windowTo": {
+            "type": "string",
+            "description": "统计区间结束",
+            "format": "date"
+          },
+          "metricDays": {
+            "type": "integer",
+            "description": "🔴 实际有数据的天数",
+            "format": "int32"
+          },
+          "impressions": {
+            "type": "string",
+            "description": "曝光合计"
+          },
+          "clicks": {
+            "type": "string",
+            "description": "点击合计"
+          },
+          "orders": {
+            "type": "string",
+            "description": "订单合计"
+          },
+          "spend": {
+            "type": "string",
+            "description": "消耗合计"
+          },
+          "sales": {
+            "type": "string",
+            "description": "销售额合计"
+          },
+          "acos": {
+            "type": "string",
+            "description": "🔴 ACOS = 消耗 / 销售额；null = 不可比（分母为 0），与 0 含义相反"
+          },
+          "roas": {
+            "type": "string",
+            "description": "🔴 ROAS = 销售额 / 消耗；null = 不可比"
+          },
+          "ctr": {
+            "type": "string",
+            "description": "🔴 CTR = 点击 / 曝光；null = 不可比"
+          },
+          "dailyBudget": {
+            "type": "string",
+            "description": "当时的日预算"
+          },
+          "budgetUtilization": {
+            "type": "string",
+            "description": "🔴 预算利用率 = 日均花费 / 日预算；null = 没有预算（不可比）"
+          },
+          "deliveryRatio": {
+            "type": "string",
+            "description": "🔴 曝光相对倍数 = 日均曝光 / 同平台在投活动中位数；null = 没有可比口径"
+          },
+          "overTargetDays": {
+            "type": "integer",
+            "description": "🔴 窗口内超标天数",
+            "format": "int32"
+          },
+          "title": {
+            "type": "string",
+            "description": "🔴 结论标题"
+          },
+          "evidence": {
+            "type": "string",
+            "description": "🔴 判定依据（写清为什么判定为这个问题）"
+          },
+          "recommendation": {
+            "type": "string",
+            "description": "🔴 可执行建议（诊断要给动作而不是只报警）"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "创建时刻",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "更新时刻",
+            "format": "date-time"
+          }
+        },
+        "description": "本次产出的诊断结论"
+      },
+      "AdDiagnosisRunDetail": {
+        "type": "object",
+        "properties": {
+          "run": {
+            "$ref": "#/components/schemas/AdDiagnosisRunRow"
+          },
+          "ruleResults": {
+            "type": "array",
+            "description": "🔴 逐条规则的评估结论（跳过的也在）",
+            "items": {
+              "$ref": "#/components/schemas/AdDiagnosisRunRuleRow"
+            }
+          },
+          "diagnoses": {
+            "type": "array",
+            "description": "本次产出的诊断结论",
+            "items": {
+              "$ref": "#/components/schemas/AdDiagnosisRow"
+            }
+          },
+          "actions": {
+            "type": "array",
+            "description": "本次产出的建议动作",
+            "items": {
+              "$ref": "#/components/schemas/AdDiagnosisActionRow"
+            }
+          },
+          "note": {
+            "type": "string",
+            "description": "说明"
+          }
+        }
+      },
+      "AdDiagnosisRunRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "运行 id",
+            "format": "uuid"
+          },
+          "lookbackDays": {
+            "type": "integer",
+            "description": "观察窗口（天）",
+            "format": "int32"
+          },
+          "windowFrom": {
+            "type": "string",
+            "description": "统计区间开始",
+            "format": "date"
+          },
+          "windowTo": {
+            "type": "string",
+            "description": "统计区间结束",
+            "format": "date"
+          },
+          "ruleCount": {
+            "type": "integer",
+            "description": "评估的规则数",
+            "format": "int32"
+          },
+          "enabledRuleCount": {
+            "type": "integer",
+            "description": "其中启用的条数",
+            "format": "int32"
+          },
+          "skippedRuleCount": {
+            "type": "integer",
+            "description": "其中被跳过的条数（数据源未就绪）",
+            "format": "int32"
+          },
+          "scannedCampaignCount": {
+            "type": "integer",
+            "description": "扫描到的活动数",
+            "format": "int32"
+          },
+          "diagnosisCount": {
+            "type": "integer",
+            "description": "产出的诊断结论数",
+            "format": "int32"
+          },
+          "dataAsOf": {
+            "type": "string",
+            "description": "🔴 数据截至时刻（本次诊断用的数据截至什么时候）",
+            "format": "date-time"
+          },
+          "status": {
+            "type": "string",
+            "description": "状态：SUCCESS / FAILED"
+          },
+          "message": {
+            "type": "string",
+            "description": "说明（FAILED 时必有内容）"
+          },
+          "startedAt": {
+            "type": "string",
+            "description": "开始时刻",
+            "format": "date-time"
+          },
+          "finishedAt": {
+            "type": "string",
+            "description": "结束时刻",
+            "format": "date-time"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "创建时刻",
+            "format": "date-time"
+          }
+        },
+        "description": "运行"
+      },
+      "AdDiagnosisRunRuleRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "评估记录 id",
+            "format": "uuid"
+          },
+          "runId": {
+            "type": "string",
+            "description": "运行 id",
+            "format": "uuid"
+          },
+          "ruleId": {
+            "type": "string",
+            "description": "规则 id",
+            "format": "uuid"
+          },
+          "ruleCode": {
+            "type": "string",
+            "description": "规则编码"
+          },
+          "ruleType": {
+            "type": "string",
+            "description": "规则类型"
+          },
+          "severity": {
+            "type": "string",
+            "description": "严重度"
+          },
+          "evaluated": {
+            "type": "boolean",
+            "description": "🔴 是否真的评估了"
+          },
+          "skipReason": {
+            "type": "string",
+            "description": "🔴 跳过原因（evaluated=false 时必填）"
+          },
+          "noMatchReason": {
+            "type": "string",
+            "description": "评估过但没命中的原因说明"
+          },
+          "matchedCampaignCount": {
+            "type": "integer",
+            "description": "命中的活动数",
+            "format": "int32"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "创建时刻",
+            "format": "date-time"
+          }
+        },
+        "description": "🔴 逐条规则的评估结论（跳过的也在）"
+      },
+      "AdDiagnosisRuleRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "规则 id",
+            "format": "uuid"
+          },
+          "ruleCode": {
+            "type": "string",
+            "description": "规则编码（租户内唯一）"
+          },
+          "ruleName": {
+            "type": "string",
+            "description": "规则名称"
+          },
+          "ruleType": {
+            "type": "string",
+            "description": "🔴 判定口径：五种问题之一"
+          },
+          "severity": {
+            "type": "string",
+            "description": "严重度"
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "是否启用"
+          },
+          "lookbackDays": {
+            "type": "integer",
+            "description": "观察窗口（天）",
+            "format": "int32"
+          },
+          "minMetricDays": {
+            "type": "integer",
+            "description": "🔴 最少需要几天的数据才下结论（数据不足 ⇒ 不下结论）",
+            "format": "int32"
+          },
+          "thresholdAmount": {
+            "type": "string",
+            "description": "🔴 金额阈值（高花费的门槛）"
+          },
+          "thresholdRatio": {
+            "type": "string",
+            "description": "🔴 比率阈值（ACOS 目标线）"
+          },
+          "minOverTargetDays": {
+            "type": "integer",
+            "description": "🔴 「超标天数」下限（ACOS 长期超标的判据）",
+            "format": "int32"
+          },
+          "budgetUtilizationRatio": {
+            "type": "string",
+            "description": "🔴 预算利用率下限（预算受限的判据）"
+          },
+          "deliveryRatio": {
+            "type": "string",
+            "description": "🔴 曝光相对下限（曝光不足的判据）"
+          },
+          "actionType": {
+            "type": "string",
+            "description": "🔴 建议动作（主）"
+          },
+          "actionPercent": {
+            "type": "string",
+            "description": "建议幅度（比例）"
+          },
+          "actionAmount": {
+            "type": "string",
+            "description": "建议幅度（绝对额）"
+          },
+          "secondaryActionType": {
+            "type": "string",
+            "description": "🔴 次要建议动作（可空）"
+          },
+          "secondaryActionPercent": {
+            "type": "string",
+            "description": "次要动作幅度（比例）"
+          },
+          "secondaryActionAmount": {
+            "type": "string",
+            "description": "次要动作幅度（绝对额）"
+          },
+          "dataSourceReady": {
+            "type": "boolean",
+            "description": "🔴 数据源是否就绪：false ⇒ 该规则不产出任何结论"
+          },
+          "dryRun": {
+            "type": "boolean",
+            "description": "🔴 试运行开关（默认 true）：与本次请求的 dry_run 取更严的那个"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          },
+          "version": {
+            "type": "integer",
+            "description": "乐观锁版本",
+            "format": "int64"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "创建时刻",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "更新时刻",
+            "format": "date-time"
+          }
+        }
+      },
+      "AdDiagnosisRuleDefaultsResult": {
+        "type": "object",
+        "properties": {
+          "created": {
+            "type": "integer",
+            "description": "本次新建的规则条数",
+            "format": "int32"
+          },
+          "existing": {
+            "type": "integer",
+            "description": "本租户已存在、未被覆盖的规则条数",
+            "format": "int32"
+          },
+          "rules": {
+            "type": "array",
+            "description": "本租户当前的规则清单",
+            "items": {
+              "$ref": "#/components/schemas/AdDiagnosisRuleRow"
+            }
+          },
+          "note": {
+            "type": "string",
+            "description": "说明"
+          }
+        }
+      },
+      "ApplyActionRequest": {
+        "type": "object",
+        "properties": {
+          "dryRun": {
+            "type": "boolean",
+            "description": "🔴 试运行（默认 true）：只算「本来会变成多少」，不真的调"
+          },
+          "reason": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "description": "操作理由（写进审计）"
+          }
+        }
+      },
+      "AdDiagnosisApplyResult": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "$ref": "#/components/schemas/AdDiagnosisActionRow"
+          },
+          "outcome": {
+            "type": "string",
+            "description": "🔴 本次执行结论：APPLIED / REJECTED / SKIPPED / DRY_RUN"
+          },
+          "message": {
+            "type": "string",
+            "description": "🔴 结果说明（被拒时给出原因）"
+          },
+          "guardrailNote": {
+            "type": "string",
+            "description": "🔴 护栏结论"
+          },
+          "note": {
+            "type": "string",
+            "description": "说明"
+          }
+        }
+      },
+      "AdDiagnosisRunPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "当前页数据",
+            "items": {
+              "$ref": "#/components/schemas/AdDiagnosisRunRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "description": "符合筛选条件的总条数（不受分页影响）",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "description": "页码，从 0 起",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "description": "每页条数",
+            "format": "int32"
+          }
+        }
+      },
+      "AdDiagnosisRulePage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "当前页数据",
+            "items": {
+              "$ref": "#/components/schemas/AdDiagnosisRuleRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "description": "符合筛选条件的总条数（不受分页影响）",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "description": "页码，从 0 起",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "description": "每页条数",
+            "format": "int32"
+          },
+          "enabledCount": {
+            "type": "integer",
+            "description": "其中启用的条数",
+            "format": "int64"
+          },
+          "notReadyCount": {
+            "type": "integer",
+            "description": "其中数据源未就绪的条数",
+            "format": "int64"
+          }
+        }
+      },
+      "AdDiagnosisPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "当前页数据",
+            "items": {
+              "$ref": "#/components/schemas/AdDiagnosisRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "description": "符合筛选条件的总条数（不受分页影响）",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "description": "页码，从 0 起",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "description": "每页条数",
+            "format": "int32"
+          },
+          "openCount": {
+            "type": "integer",
+            "description": "其中待处理的条数",
+            "format": "int64"
+          },
+          "criticalCount": {
+            "type": "integer",
+            "description": "其中 CRITICAL 的条数",
+            "format": "int64"
+          },
+          "emptyReason": {
+            "type": "string",
+            "description": "🔴 空态原因：NO_RULES / NO_DATA / NO_FINDINGS / FILTERED_EMPTY / null"
+          },
+          "emptyNote": {
+            "type": "string",
+            "description": "🔴 空态说明文案（几种空的解释各不相同）"
+          },
+          "metricDefinitionNote": {
+            "type": "string",
+            "description": "🔴 指标口径说明"
+          }
+        }
+      },
+      "AdDiagnosisDetail": {
+        "type": "object",
+        "properties": {
+          "diagnosis": {
+            "$ref": "#/components/schemas/AdDiagnosisRow"
+          },
+          "actions": {
+            "type": "array",
+            "description": "🔴 建议动作（可执行的那几个 + 明确不可用的那几个）",
+            "items": {
+              "$ref": "#/components/schemas/AdDiagnosisActionRow"
+            }
+          },
+          "note": {
+            "type": "string",
+            "description": "说明"
+          }
+        }
+      },
+      "AdDiagnosisCapabilities": {
+        "type": "object",
+        "properties": {
+          "dimensions": {
+            "type": "array",
+            "description": "逐维度能力声明；未交付段 available=false",
+            "items": {
+              "$ref": "#/components/schemas/AdDiagnosisCapabilityDimension"
+            }
+          },
+          "ruleTypes": {
+            "type": "array",
+            "description": "诊断规则类型取值",
+            "items": {
+              "type": "string",
+              "description": "诊断规则类型取值"
+            }
+          },
+          "severities": {
+            "type": "array",
+            "description": "严重度取值",
+            "items": {
+              "type": "string",
+              "description": "严重度取值"
+            }
+          },
+          "actionTypes": {
+            "type": "array",
+            "description": "建议动作类型取值",
+            "items": {
+              "type": "string",
+              "description": "建议动作类型取值"
+            }
+          },
+          "actionModes": {
+            "type": "array",
+            "description": "动作模式：WRITE 本模块可写 / NAVIGATE 去已交付模块 / UNAVAILABLE 依赖未交付模块",
+            "items": {
+              "type": "string",
+              "description": "动作模式：WRITE 本模块可写 / NAVIGATE 去已交付模块 / UNAVAILABLE 依赖未交付模块"
+            }
+          },
+          "outcomes": {
+            "type": "array",
+            "description": "执行结论：NOT_APPLIED / DRY_RUN / APPLIED / REJECTED / SKIPPED / UNAVAILABLE",
+            "items": {
+              "type": "string",
+              "description": "执行结论：NOT_APPLIED / DRY_RUN / APPLIED / REJECTED / SKIPPED / UNAVAILABLE"
+            }
+          },
+          "diagnosisStatuses": {
+            "type": "array",
+            "description": "诊断结论状态：OPEN / ACTIONED / DISMISSED / STALE",
+            "items": {
+              "type": "string",
+              "description": "诊断结论状态：OPEN / ACTIONED / DISMISSED / STALE"
+            }
+          },
+          "emptyReasons": {
+            "type": "array",
+            "description": "空态原因取值",
+            "items": {
+              "type": "string",
+              "description": "空态原因取值"
+            }
+          },
+          "metricDefinitionNote": {
+            "type": "string",
+            "description": "🔴 指标口径说明（ACOS / ROAS / 预算利用率 / 曝光相对倍数）"
+          },
+          "ruleDefinitionNote": {
+            "type": "string",
+            "description": "🔴 五种问题的判定口径说明"
+          },
+          "actionNote": {
+            "type": "string",
+            "description": "🔴 「诊断要给动作」的执行边界说明"
+          },
+          "guardrailNote": {
+            "type": "string",
+            "description": "🔴 上限 / 试运行 / 幂等 / 审计的说明"
+          },
+          "upstreamNote": {
+            "type": "string",
+            "description": "上游与数据截至时间的说明"
+          },
+          "boundaryNote": {
+            "type": "string",
+            "description": "下游与边界说明"
+          }
+        }
+      },
+      "AdDiagnosisCapabilityDimension": {
+        "type": "object",
+        "properties": {
+          "dimension": {
+            "type": "string",
+            "description": "维度键"
+          },
+          "description": {
+            "type": "string",
+            "description": "维度说明"
+          },
+          "available": {
+            "type": "boolean",
+            "description": "本模块是否已交付"
+          },
+          "source": {
+            "type": "string",
+            "description": "数据来源（表 / 上游模块）"
+          },
+          "ownerModule": {
+            "type": "string",
+            "description": "未交付段的责任模块"
+          },
+          "impact": {
+            "type": "string",
+            "description": "不交付的影响"
+          }
+        },
+        "description": "逐维度能力声明；未交付段 available=false"
+      },
+      "AdDiagnosisActionPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "当前页数据",
+            "items": {
+              "$ref": "#/components/schemas/AdDiagnosisActionRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "description": "符合筛选条件的总条数（不受分页影响）",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "description": "页码，从 0 起",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "description": "每页条数",
+            "format": "int32"
+          },
+          "availableCount": {
+            "type": "integer",
+            "description": "其中现在可执行的条数",
+            "format": "int64"
+          },
+          "appliedCount": {
+            "type": "integer",
+            "description": "其中已生效的条数",
+            "format": "int64"
+          },
+          "rejectedCount": {
+            "type": "integer",
+            "description": "其中被护栏拒绝的条数",
+            "format": "int64"
+          },
+          "dryRunCount": {
+            "type": "integer",
+            "description": "其中试运行的条数",
+            "format": "int64"
+          },
+          "unavailableCount": {
+            "type": "integer",
+            "description": "其中依赖未交付模块的条数",
+            "format": "int64"
+          }
+        }
       }
     }
   }
