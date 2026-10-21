@@ -2709,6 +2709,54 @@ const services: readonly {
       /^purchase\-reconciliations(?:\/capabilities|\/options|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/discrepancies\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/resolve|\/lines|\/deductions|\/send|\/confirmations|\/discrepancies|\/reopen|\/close|\/export)?)?$/,
   },
   {
+    // 6.1.2.2 同款货源推荐（trade 服务，卷 06 采购与供应的 L3 锚点 6.1.2）。
+    //
+    // 蓝图：「当某 SKU 缺货或质量不达标时，推荐可替代的同款/相似货源：同款不同供应商、
+    // 历史采购过该货的供应商、价格对比。输入：SKU 编码与图片；历史采购记录；货源库匹配结果。
+    // 输出：候选货源列表（供应商、价格、交期、历史质量评分）+ 一键生成采购申请。」
+    //
+    // 本条目是**新增一条 services[] 元素**，不是往既有 trade 分支的 alternation 里并分支 ——
+    // 那一支是一段超长单行正则，多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在 6.2.2.2 需求合并与批量（既有条目）**之前**：
+    // 各车道的插入点被既有条目隔开，git 能干净求并。
+    // resolve() 是「按顺序逐条匹配、首个命中即返回」，同前缀的后一条不会误吃前一条的路径。
+    //
+    // 已核对本文件里**全部既有正则**：`source-alternatives` **零命中**
+    // （既有分支不会先把它吃掉）。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   source-alternatives/capabilities            能力与上下游可用性（明说「图片相似度判定未交付」）
+    //   source-alternatives/options                 词表（推荐理由 / 判定类型 / 批次状态 / 判定类型）
+    //   source-alternatives/targets                 目标仓与法人下拉（warehouse 未接线时如实报「不可用」）
+    //   source-alternatives/overview                概览（不受筛选与分页影响）
+    //   source-alternatives/policy                  租户级规则与排序权重（GET 读 + PUT 改，权重和必须等于 1）
+    //   source-alternatives/runs                    推荐批次清单（GET，真分页 + 真筛选）/ 新建推荐（POST）
+    //   source-alternatives/runs/{uuid}             批次详情（批次头 + 候选 + 判定留痕 + 价格对比）
+    //   source-alternatives/skus/{uuid}/candidates  实时候选预览（**不落库**，与落库口径同一套计算）
+    //   source-alternatives/candidates/{uuid}/decision             人工判定（确认 / 否决，否决必填理由）
+    //   source-alternatives/candidates/{uuid}/purchase-request     一键生成采购申请（写 6.2.2.1 的申请单）
+    //
+    // ⚠️ 判别顺序：字面量子路径（capabilities / options / targets / overview / policy）排在
+    //    {uuid} 段**之前** —— alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 100 处的同一写法），
+    //    不是 `[0-9a-f-]+` —— 后者把 `c`、`e`、`f` 这类单字符也当成合法 id 放行。
+    //
+    // 🔴 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸路径 `source-alternatives` —— 后端没有「一条不存在的汇总列表接口」。
+    //   * `source-alternatives/runs/{uuid}/candidates` —— 候选随批次详情一起返回，
+    //     没有「按批次再列一次候选」的映射。
+    //   * `source-alternatives/candidates/{uuid}` —— 候选信息随批次详情返回，
+    //     没有「按候选 id 直达」的端点（那会让猜 id 的人直接读到证据快照）。
+    //   * `source-alternatives/skus/{uuid}` —— 只有候选预览这一个形状。
+    //   * `source-alternatives/purchases` / `/purchase-requests` —— 下游申请单由 6.2.2.1 的
+    //     命名空间管，本模块只写不读。
+    prefix: 'trade/',
+    env: 'TRADE_URL',
+    fallback: 'http://127.0.0.1:8085',
+    pattern:
+      /^source\-alternatives(?:\/(?:capabilities|options|targets|overview|policy)|\/runs(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|\/skus\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/candidates|\/candidates\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/(?:decision|purchase-request))$/,
+  },
+  {
     // 6.2.2.2 需求合并与批量（trade 服务，卷 06 采购与供应的 L3 锚点 6.2.2）。
     //
     // 蓝图：「把多个 SKU 的需求合并成一张采购单（同一供应商），支持批量生成、批量修改数量与

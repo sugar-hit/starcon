@@ -511,6 +511,126 @@ public class PurchaseRequestService {
 
     // 目标仓与法人的展示快照：跨服务只读，读不到就留空 + 如实记下原因，不编造。
     String note = input.note() == null ? "" : input.note().trim();
+    return persistRequest(
+        sourceType,
+        sourcePlanId,
+        sourceBatchId,
+        targetWarehouseId,
+        warehouseCode,
+        warehouseName,
+        legalEntityId,
+        entityCode,
+        entityName,
+        currency,
+        newLines,
+        note,
+        actorId,
+        bearer);
+  }
+
+  /**
+   * 从「建议」建申请单，但**申请行由调用方直接给**。
+   *
+   * <p>用途：6.1.2.2 同款货源推荐的候选不是补货建议（行来自货源快照，不是
+   * {@code replenishment_suggestion}），但同属「系统建议、运营确认」这一类 ——
+   * 所以用同一个 {@code source_type='SUGGESTION'}，并把来源批次（{@code sourceBatchId}）
+   * 与来源说明（{@code note}）一起带上，单据上答得出「这张申请是从哪来的」。
+   *
+   * <p>🔴 **写入口只有本模块**：purchase_request / purchase_request_line 的写入所有者是
+   * 6.2.2.1，别的模块要建单必须走这里 —— 一张事实表只有一个写入所有者。
+   */
+  @Transactional
+  public PurchaseRequestRow createFromSuggestion(
+      PurchaseRequestSuggestionInput input, UUID actorId, String bearer) {
+    UUID tenantId = currentTenant();
+    if (input.targetWarehouseId() == null || input.legalEntityId() == null) {
+      throw new ResponseStatusException(
+          HttpStatus.BAD_REQUEST, "从建议建申请单时必须给目标仓与法人（建议本身没有仓的概念）");
+    }
+    List<PurchaseRequestSuggestionLineInput> lines = input.lines();
+    if (lines == null || lines.isEmpty()) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "从建议建申请单时必须至少给一行");
+    }
+    int rank = 0;
+    List<NewLine> newLines = new ArrayList<>();
+    for (PurchaseRequestSuggestionLineInput line : lines) {
+      BigDecimal quantity = line.requestedQuantity();
+      if (quantity == null || quantity.signum() <= 0) {
+        throw new ResponseStatusException(
+            HttpStatus.BAD_REQUEST, "申请行 " + line.skuCode() + " 没有有效的申请数量");
+      }
+      newLines.add(
+          new NewLine(
+              line.skuId(),
+              line.skuCode(),
+              line.skuName(),
+              quantity,
+              line.unitPrice(),
+              line.requestedArrivalDate(),
+              line.priority() == null || line.priority().isBlank() ? "NORMAL" : line.priority().trim(),
+              null,
+              null,
+              null,
+              rank++,
+              line.note() == null ? "" : line.note()));
+    }
+    PurchaseRequestRow row =
+        persistRequest(
+            PurchaseRequestSourceType.SUGGESTION,
+            null,
+            input.sourceBatchId(),
+            input.targetWarehouseId(),
+            "",
+            "",
+            input.legalEntityId(),
+            "",
+            "",
+            input.currencyCode(),
+            newLines,
+            input.note() == null ? "" : input.note().trim(),
+            actorId,
+            bearer);
+    // 供应商写回行上（申请行允许先不定供应商：走审批时供应商往往还没定，这里是「建议里已经定了」）。
+    for (PurchaseRequestSuggestionLineInput line : lines) {
+      if (line.supplierId() == null) continue;
+      sql.execute(
+          "update purchase_request_line set supplier_id = ?::uuid, supplier_code = ?::varchar,"
+              + " supplier_name = ?::varchar, updated_at = ?::timestamptz"
+              + " where tenant_id = ?::uuid and request_id = ?::uuid and sku_id = ?::uuid",
+          line.supplierId(),
+          line.supplierCode() == null ? "" : line.supplierCode(),
+          line.supplierName() == null ? "" : line.supplierName(),
+          OffsetDateTime.now(ZoneOffset.UTC),
+          tenantId,
+          row.id(),
+          line.skuId());
+    }
+    return requestRow(row.id(), tenantId);
+  }
+
+  /**
+   * 落库一张申请单（头 + 行 + 金额重算）。
+   *
+   * <p>把「建单」这段从 {@link #create} 里抽出来，是为了让**来源不同的建议**共用同一条落库路径：
+   * 补货建议（6.2.1.2）、同款货源推荐（6.1.2.2）…… 落库口径必须只有一份，
+   * 否则两处各写一遍插入语句，早晚会长出两套不一致的单据规则。
+   */
+  private PurchaseRequestRow persistRequest(
+      PurchaseRequestSourceType sourceType,
+      UUID sourcePlanId,
+      UUID sourceBatchId,
+      UUID targetWarehouseId,
+      String warehouseCode,
+      String warehouseName,
+      UUID legalEntityId,
+      String entityCode,
+      String entityName,
+      String currency,
+      List<NewLine> newLines,
+      String note,
+      UUID actorId,
+      String bearer) {
+    UUID tenantId = currentTenant();
     if (targetWarehouseId != null && warehouseCode.isEmpty() && warehouseName.isEmpty()) {
       var resolved = resolveWarehouse(targetWarehouseId, bearer);
       if (resolved != null) {
