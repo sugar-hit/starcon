@@ -446,8 +446,12 @@ cd /Users/tommy/Project/starcon
 git fetch upstream --prune
 
 # ① 建专用 worktree（从 main 出发）
-git worktree add --detach .worktrees/main-merge upstream/main
-cd .worktrees/main-merge
+#    ⚠️ 路径必须**带唯一后缀**。固定路径（如 `.worktrees/main-merge`）是共享地，
+#    任何别的执行者（人工演练、另一台机器、另一个任务）用同一个路径建/删 worktree，
+#    都会把你**进行中**的合并状态一起删掉 —— 2026-10-21 08:30 那轮就是这么被打断的。
+WT=".worktrees/main-merge-$(date +%H%M%S)"
+git worktree add --detach "$WT" upstream/main
+cd "$WT"
 
 # ② 切出同步分支（已存在就重置到 main）
 git checkout -B chore/sync-module-dev
@@ -545,12 +549,15 @@ node tools/module-progress/lane.mjs gate release
 
 ```bash
 cd /Users/tommy/Project/starcon
-git worktree remove --force .worktrees/main-merge
+git worktree remove --force "$WT"     # 只删**你自己**这一轮建的那个
 node tools/module-progress/lane.mjs gate release
 ```
 
-**两个都必须做。** 漏掉 worktree 清理 → 下轮 `git worktree add` 会报「已存在」。
+**两个都必须做。** 漏掉 worktree 清理 → 自己的 worktree 会一直留着占磁盘。
 漏掉 `gate release` → 下轮撞闸，任务空转一轮。
+
+⚠️ **只删自己建的那一个。** 不要用 `git worktree remove --force .worktrees/main-merge`
+这种固定路径去删 —— 那可能删掉**别人正在用**的 worktree（实测踩过）。
 
 ### 7.6 推之前最后确认
 
@@ -591,6 +598,7 @@ git diff upstream/main...HEAD --stat | tail -3   # 确认合并进来的东西�
 - **不许把「CI 全绿」当成合并前提**（`main` 基线就是红的），也**不许因为「反正也是红的」就无条件合并**
 - **不许无证据地「取一边」** —— 白名单/契约/台账取一边 = 静默删交付成果（要取就带证据，见 4.2）
 - **不许在主工作区 checkout `main`** —— 会打断流水线
+- **不许用固定路径删 worktree**（只删自己本轮建的那个，路径带唯一后缀）
 - **不许 force push `main`**
 - **不许用 `gh pr merge --admin` 强合**
 - **不许在 `main` 上改业务代码**（本任务只做「合入」，不开发）
