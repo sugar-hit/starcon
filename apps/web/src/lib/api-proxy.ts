@@ -4343,6 +4343,60 @@ const services: readonly {
     pattern: /^purchase\-followups(?:\/(?:capabilities|changes|timeline|stats|delivery))?$/,
   },
   {
+    // 14.5.1.1 达人库（channel 服务，卷 14 广告与增长 / L3 14.5.1 达人管理下的第一格）。
+    //
+    // 本条目是**新增一条独立的 services[] 元素**，不是往既有 channel 分支的 alternation 里
+    // 并分支 —— 那一支是一段超长单行正则，多车道同时并进去 git 必然判冲突（结构性，
+    // retry 不会自愈）。
+    // 插入锚点固定在既有 `purchase-followups`（6.3.2.1 跟单与交期）那条**之后**：
+    // 同批其它三条车道的插入点各在别的行上，四条插入点被既有条目隔开，git 能干净求并。
+    //
+    // ⚠️ 首 token「influencers」的零命中核对结论：
+    //   本文件既有 100+ 条 services[] 正则里**没有任何一条**含 `influencers` 这个串
+    //   （既有的是 `ad-campaigns` / `ad-keywords` / `ad-reports` / `ad-promotions` /
+    //   `listing-*` / `aftersales` 一类），所以首 token 既是独立字面量，
+    //   也不会被既有分支的前缀吃掉。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   influencers/capabilities                能力声明（未交付段 available=false）
+    //   influencers/options                     下拉项（粉丝层级 / 拉黑原因 / 合作状态 / 平台 / 店铺 / 币种 / 类目）
+    //   influencers/sync-status                 逐平台的达人数据同步接入情况
+    //   influencers/sync                        触发一次同步（适配器未接入 ⇒ 明确 409，不写数据）
+    //   influencers/profiles                    达人库（真分页 + 多维筛选 + 真排序）
+    //   influencers/profiles/{uuid}             达人详情（档案 + 标签 + 合作历史 + 黑名单）
+    //   influencers/profiles/{uuid}/tags        批量打标
+    //   influencers/profiles/{uuid}/tags/{uuid} 移除一个标签
+    //   influencers/profiles/{uuid}/rating      重算评级
+    //   influencers/tag-groups                  标签分组（GET 列表 / POST 新建）
+    //   influencers/tag-groups/{uuid}           标签分组（POST 改 / DELETE 删）
+    //   influencers/tags                        标签（GET 列表 / POST 新建）
+    //   influencers/tags/{uuid}                 标签（POST 改 / DELETE 删）
+    //   influencers/rating-tiers                评级档位（GET 列表 / POST 新建）
+    //   influencers/rating-tiers/{uuid}         评级档位（POST 改 / DELETE 删）
+    //   influencers/rating-rules                评分口径（GET 读 / POST 配）
+    //   influencers/blacklist                   黑名单（GET 列表 / POST 拉黑）
+    //   influencers/blacklist/{uuid}/release    解除黑名单（留痕：时刻 + 理由）
+    //   influencers/cooperations                合作历史（GET 列表 / POST 登记）
+    //   influencers/cooperations/{uuid}         合作记录（POST 改）
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `influencers`                          —— 裸路径：后端没有「一条不存在的汇总接口」。
+    //                                                末尾**刻意不带 `?`**：带了等于放行裸路径。
+    //   * `influencers/profiles/{uuid}/export`   —— 本模块不提供导出。
+    //   * `influencers/attributions`             —— 带货归因（14.5.2.1）**未交付**，
+    //                                                放行它会让界面以为归因口径已经可用。
+    //   * `influencers/outreach`                 —— 建联与样品（14.5.1.2）**未交付**。
+    //   * `influencers/profiles/not-a-uuid`      —— 非 UUID 段不应被 uuid 分支吃掉。
+    //
+    // id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    // （不是 `[0-9a-f-]+`）：后者会把 `tags` 这种非 UUID 形状也当成 id 放行。
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^influencers(?:\/(?:capabilities|options|sync-status|sync|profiles|tags|tag-groups|rating-tiers|rating-rules|blacklist|cooperations)|\/profiles\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/tags(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|\/rating)?|\/tags\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}|\/tag-groups\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}|\/rating-tiers\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}|\/blacklist\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/release|\/cooperations\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})$/,
+  },
+  {
     // 9.3.1.2 合单（trade 服务）。本条目是**新增一条 services[] 元素**，不是往既有
     // trade 分支的 alternation 里并分支 —— 那一支是一段超长单行正则，
     // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。

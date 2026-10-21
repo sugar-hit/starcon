@@ -36412,6 +36412,1618 @@
           }
         }
       }
+    },
+    "/channel/influencers/tags": {
+      "get": {
+        "tags": [
+          "influencer-controller"
+        ],
+        "operationId": "get_channel_influencers_tags",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "groupCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InfluencerTagPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "influencer-controller"
+        ],
+        "operationId": "post_channel_influencers_tags",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveInfluencerTagRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InfluencerTagRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/influencers/tags/{id}": {
+      "post": {
+        "tags": [
+          "influencer-controller"
+        ],
+        "operationId": "post_channel_influencers_tags_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveInfluencerTagRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InfluencerTagRow"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "influencer-controller"
+        ],
+        "operationId": "delete_channel_influencers_tags_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/influencers/tag-groups": {
+      "get": {
+        "tags": [
+          "influencer-controller"
+        ],
+        "operationId": "get_channel_influencers_tag_groups",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InfluencerTagGroupPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "influencer-controller"
+        ],
+        "operationId": "post_channel_influencers_tag_groups",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveInfluencerTagGroupRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InfluencerTagGroupRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/influencers/tag-groups/{id}": {
+      "post": {
+        "tags": [
+          "influencer-controller"
+        ],
+        "operationId": "post_channel_influencers_tag_groups_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveInfluencerTagGroupRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InfluencerTagGroupRow"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "influencer-controller"
+        ],
+        "operationId": "delete_channel_influencers_tag_groups_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/influencers/sync": {
+      "post": {
+        "tags": [
+          "influencer-controller"
+        ],
+        "operationId": "post_channel_influencers_sync",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SyncInfluencersRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InfluencerSyncResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/influencers/rating-tiers": {
+      "get": {
+        "tags": [
+          "influencer-controller"
+        ],
+        "operationId": "get_channel_influencers_rating_tiers",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InfluencerRatingTierPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "influencer-controller"
+        ],
+        "operationId": "post_channel_influencers_rating_tiers",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveInfluencerRatingTierRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InfluencerRatingTierRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/influencers/rating-tiers/{id}": {
+      "post": {
+        "tags": [
+          "influencer-controller"
+        ],
+        "operationId": "post_channel_influencers_rating_tiers_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveInfluencerRatingTierRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InfluencerRatingTierRow"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "influencer-controller"
+        ],
+        "operationId": "delete_channel_influencers_rating_tiers_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/influencers/rating-rules": {
+      "get": {
+        "tags": [
+          "influencer-controller"
+        ],
+        "operationId": "get_channel_influencers_rating_rules",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InfluencerRatingRuleRow"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "influencer-controller"
+        ],
+        "operationId": "post_channel_influencers_rating_rules",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveInfluencerRatingRuleRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InfluencerRatingRuleRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/influencers/profiles": {
+      "get": {
+        "tags": [
+          "influencer-controller"
+        ],
+        "operationId": "get_channel_influencers_profiles",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "category",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "followerTier",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "tagId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "tagCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "tagGroupId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "tagGroupCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "ratingTierCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "minGmv",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "maxGmv",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "minEngagementRate",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "maxEngagementRate",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "platformId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "shopCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "includeBlacklisted",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "GMV_DESC"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InfluencerPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "influencer-controller"
+        ],
+        "operationId": "post_channel_influencers_profiles",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveInfluencerRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InfluencerDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/influencers/profiles/{id}": {
+      "get": {
+        "tags": [
+          "influencer-controller"
+        ],
+        "operationId": "get_channel_influencers_profiles_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InfluencerDetail"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "influencer-controller"
+        ],
+        "operationId": "post_channel_influencers_profiles_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveInfluencerRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InfluencerDetail"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "influencer-controller"
+        ],
+        "operationId": "delete_channel_influencers_profiles_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/influencers/profiles/{id}/tags": {
+      "post": {
+        "tags": [
+          "influencer-controller"
+        ],
+        "operationId": "post_channel_influencers_profiles_id_tags",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TagInfluencersRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InfluencerDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/influencers/profiles/{id}/rating": {
+      "post": {
+        "tags": [
+          "influencer-controller"
+        ],
+        "operationId": "post_channel_influencers_profiles_id_rating",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InfluencerDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/influencers/cooperations": {
+      "get": {
+        "tags": [
+          "influencer-controller"
+        ],
+        "operationId": "get_channel_influencers_cooperations",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "influencerId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "campaignId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "shopCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InfluencerCooperationPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "influencer-controller"
+        ],
+        "operationId": "post_channel_influencers_cooperations",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveCooperationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InfluencerCooperationRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/influencers/cooperations/{id}": {
+      "post": {
+        "tags": [
+          "influencer-controller"
+        ],
+        "operationId": "post_channel_influencers_cooperations_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveCooperationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InfluencerCooperationRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/influencers/blacklist": {
+      "get": {
+        "tags": [
+          "influencer-controller"
+        ],
+        "operationId": "get_channel_influencers_blacklist",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "reasonCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "influencerId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InfluencerBlacklistPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "influencer-controller"
+        ],
+        "operationId": "post_channel_influencers_blacklist",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BlacklistInfluencerRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InfluencerBlacklistRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/influencers/blacklist/{id}/release": {
+      "post": {
+        "tags": [
+          "influencer-controller"
+        ],
+        "operationId": "post_channel_influencers_blacklist_id_release",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReleaseBlacklistRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InfluencerBlacklistRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/influencers/sync-status": {
+      "get": {
+        "tags": [
+          "influencer-controller"
+        ],
+        "operationId": "get_channel_influencers_sync_status",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InfluencerSyncStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/influencers/options": {
+      "get": {
+        "tags": [
+          "influencer-controller"
+        ],
+        "operationId": "get_channel_influencers_options",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InfluencerOptions"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/influencers/capabilities": {
+      "get": {
+        "tags": [
+          "influencer-controller"
+        ],
+        "operationId": "get_channel_influencers_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InfluencerCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/influencers/profiles/{id}/tags/{tagId}": {
+      "delete": {
+        "tags": [
+          "influencer-controller"
+        ],
+        "operationId": "delete_channel_influencers_profiles_id_tags_tagId",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "tagId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InfluencerDetail"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -88742,6 +90354,1397 @@
           }
         },
         "description": "逐维度能力声明；未交付段 available=false"
+      },
+      "SaveInfluencerTagRequest": {
+        "required": [
+          "groupId",
+          "tagCode",
+          "tagName"
+        ],
+        "type": "object",
+        "properties": {
+          "groupId": {
+            "type": "string",
+            "description": "分组 id",
+            "format": "uuid"
+          },
+          "tagCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string",
+            "description": "标签编码（租户内唯一）"
+          },
+          "tagName": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string",
+            "description": "标签名称"
+          },
+          "description": {
+            "type": "string",
+            "description": "标签说明"
+          },
+          "status": {
+            "type": "string",
+            "description": "状态：ACTIVE / PAUSED"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          }
+        }
+      },
+      "InfluencerTagRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "标签 id",
+            "format": "uuid"
+          },
+          "groupId": {
+            "type": "string",
+            "description": "分组 id",
+            "format": "uuid"
+          },
+          "groupCode": {
+            "type": "string",
+            "description": "分组编码"
+          },
+          "groupName": {
+            "type": "string",
+            "description": "分组名称"
+          },
+          "tagCode": {
+            "type": "string",
+            "description": "标签编码（租户内唯一）"
+          },
+          "tagName": {
+            "type": "string",
+            "description": "标签名称"
+          },
+          "description": {
+            "type": "string",
+            "description": "标签说明"
+          },
+          "status": {
+            "type": "string",
+            "description": "状态：ACTIVE / PAUSED"
+          },
+          "influencerCount": {
+            "type": "integer",
+            "description": "打了这个标签的达人数",
+            "format": "int32"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          },
+          "version": {
+            "type": "integer",
+            "description": "乐观锁版本",
+            "format": "int64"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "创建时刻",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "更新时刻",
+            "format": "date-time"
+          }
+        }
+      },
+      "SaveInfluencerTagGroupRequest": {
+        "required": [
+          "groupCode",
+          "groupName"
+        ],
+        "type": "object",
+        "properties": {
+          "groupCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string",
+            "description": "分组编码（租户内唯一）"
+          },
+          "groupName": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string",
+            "description": "分组名称"
+          },
+          "description": {
+            "type": "string",
+            "description": "分组说明"
+          },
+          "status": {
+            "type": "string",
+            "description": "状态：ACTIVE / PAUSED"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          }
+        }
+      },
+      "InfluencerTagGroupRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "分组 id",
+            "format": "uuid"
+          },
+          "groupCode": {
+            "type": "string",
+            "description": "分组编码（租户内唯一）"
+          },
+          "groupName": {
+            "type": "string",
+            "description": "分组名称"
+          },
+          "description": {
+            "type": "string",
+            "description": "分组说明"
+          },
+          "status": {
+            "type": "string",
+            "description": "状态：ACTIVE / PAUSED"
+          },
+          "tagCount": {
+            "type": "integer",
+            "description": "该分组下的标签数",
+            "format": "int32"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          },
+          "version": {
+            "type": "integer",
+            "description": "乐观锁版本",
+            "format": "int64"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "创建时刻",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "更新时刻",
+            "format": "date-time"
+          }
+        }
+      },
+      "SyncInfluencersRequest": {
+        "required": [
+          "platformCode",
+          "shopCode"
+        ],
+        "type": "object",
+        "properties": {
+          "platformCode": {
+            "minLength": 1,
+            "type": "string",
+            "description": "平台编码"
+          },
+          "shopCode": {
+            "minLength": 1,
+            "type": "string",
+            "description": "店铺编码"
+          }
+        }
+      },
+      "InfluencerSyncResult": {
+        "type": "object",
+        "properties": {
+          "synced": {
+            "type": "boolean",
+            "description": "是否真的同步了"
+          },
+          "message": {
+            "type": "string",
+            "description": "结论说明"
+          },
+          "syncedCount": {
+            "type": "integer",
+            "description": "写入的达人数",
+            "format": "int32"
+          },
+          "failedCount": {
+            "type": "integer",
+            "description": "失败条数",
+            "format": "int32"
+          }
+        }
+      },
+      "SaveInfluencerRatingTierRequest": {
+        "required": [
+          "maxScore",
+          "minScore",
+          "tierCode",
+          "tierName"
+        ],
+        "type": "object",
+        "properties": {
+          "tierCode": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string",
+            "description": "档位编码（租户内唯一）"
+          },
+          "tierName": {
+            "maxLength": 100,
+            "minLength": 0,
+            "type": "string",
+            "description": "档位名称"
+          },
+          "minScore": {
+            "type": "string",
+            "description": "分数下限（含）"
+          },
+          "maxScore": {
+            "type": "string",
+            "description": "分数上限（含）"
+          },
+          "sortOrder": {
+            "type": "integer",
+            "description": "排序位（越大越靠前）",
+            "format": "int32"
+          },
+          "status": {
+            "type": "string",
+            "description": "状态：ACTIVE / PAUSED"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          }
+        }
+      },
+      "InfluencerRatingTierRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "档位 id",
+            "format": "uuid"
+          },
+          "tierCode": {
+            "type": "string",
+            "description": "档位编码（租户内唯一）"
+          },
+          "tierName": {
+            "type": "string",
+            "description": "档位名称"
+          },
+          "minScore": {
+            "type": "string",
+            "description": "分数下限（含）"
+          },
+          "maxScore": {
+            "type": "string",
+            "description": "分数上限（含）"
+          },
+          "sortOrder": {
+            "type": "integer",
+            "description": "排序位（越大越靠前）",
+            "format": "int32"
+          },
+          "status": {
+            "type": "string",
+            "description": "状态：ACTIVE / PAUSED"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          },
+          "version": {
+            "type": "integer",
+            "description": "乐观锁版本",
+            "format": "int64"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "创建时刻",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "更新时刻",
+            "format": "date-time"
+          }
+        }
+      },
+      "SaveInfluencerRatingRuleRequest": {
+        "required": [
+          "engagementCap",
+          "gmvCap",
+          "refundCap",
+          "weightEngagement",
+          "weightGmv",
+          "weightRefund"
+        ],
+        "type": "object",
+        "properties": {
+          "ruleCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string",
+            "description": "口径编码（租户内唯一）"
+          },
+          "weightGmv": {
+            "type": "string",
+            "description": "GMV 权重"
+          },
+          "weightEngagement": {
+            "type": "string",
+            "description": "互动率权重"
+          },
+          "weightRefund": {
+            "type": "string",
+            "description": "退款率权重"
+          },
+          "gmvCap": {
+            "type": "string",
+            "description": "GMV 归一化上限"
+          },
+          "engagementCap": {
+            "type": "string",
+            "description": "互动率归一化上限"
+          },
+          "refundCap": {
+            "type": "string",
+            "description": "退款率归一化上限"
+          },
+          "status": {
+            "type": "string",
+            "description": "状态：ACTIVE / PAUSED"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          }
+        }
+      },
+      "InfluencerRatingRuleRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "口径 id",
+            "format": "uuid"
+          },
+          "ruleCode": {
+            "type": "string",
+            "description": "口径编码"
+          },
+          "weightGmv": {
+            "type": "string",
+            "description": "GMV 权重"
+          },
+          "weightEngagement": {
+            "type": "string",
+            "description": "互动率权重"
+          },
+          "weightRefund": {
+            "type": "string",
+            "description": "退款率权重"
+          },
+          "gmvCap": {
+            "type": "string",
+            "description": "GMV 归一化上限"
+          },
+          "engagementCap": {
+            "type": "string",
+            "description": "互动率归一化上限"
+          },
+          "refundCap": {
+            "type": "string",
+            "description": "退款率归一化上限"
+          },
+          "status": {
+            "type": "string",
+            "description": "状态：ACTIVE / PAUSED"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          },
+          "version": {
+            "type": "integer",
+            "description": "乐观锁版本",
+            "format": "int64"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "创建时刻",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "更新时刻",
+            "format": "date-time"
+          }
+        }
+      },
+      "SaveInfluencerRequest": {
+        "required": [
+          "category",
+          "displayName",
+          "platformId",
+          "shopCode"
+        ],
+        "type": "object",
+        "properties": {
+          "platformId": {
+            "type": "string",
+            "description": "平台 id",
+            "format": "uuid"
+          },
+          "shopCode": {
+            "minLength": 1,
+            "type": "string",
+            "description": "店铺编码"
+          },
+          "externalInfluencerId": {
+            "maxLength": 128,
+            "minLength": 0,
+            "type": "string",
+            "description": "平台侧达人 id（留空 = 还没登记）"
+          },
+          "displayName": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string",
+            "description": "达人名称"
+          },
+          "handle": {
+            "maxLength": 128,
+            "minLength": 0,
+            "type": "string",
+            "description": "账号名"
+          },
+          "category": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string",
+            "description": "类目"
+          },
+          "followerCount": {
+            "type": "integer",
+            "description": "粉丝数（粉丝层级由它推导）",
+            "format": "int64"
+          },
+          "engagementRate": {
+            "type": "string",
+            "description": "互动率（0 ~ 1；留空 = 还没录）"
+          },
+          "gmv": {
+            "type": "string",
+            "description": "带货 GMV（留空 = 还没录，不可比）"
+          },
+          "gmvCurrency": {
+            "maxLength": 3,
+            "minLength": 0,
+            "type": "string",
+            "description": "GMV 币种（3 位字母）"
+          },
+          "refundRate": {
+            "type": "string",
+            "description": "退款率（0 ~ 1；留空 = 还没录）"
+          },
+          "status": {
+            "type": "string",
+            "description": "状态：ACTIVE / INACTIVE"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          }
+        }
+      },
+      "InfluencerBlacklistRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "黑名单记录 id",
+            "format": "uuid"
+          },
+          "influencerId": {
+            "type": "string",
+            "description": "达人 id",
+            "format": "uuid"
+          },
+          "influencerName": {
+            "type": "string",
+            "description": "达人名称"
+          },
+          "category": {
+            "type": "string",
+            "description": "类目"
+          },
+          "followerTier": {
+            "type": "string",
+            "description": "粉丝层级"
+          },
+          "reasonCode": {
+            "type": "string",
+            "description": "拉黑原因码"
+          },
+          "reason": {
+            "type": "string",
+            "description": "拉黑理由"
+          },
+          "effectiveAt": {
+            "type": "string",
+            "description": "生效时刻",
+            "format": "date-time"
+          },
+          "releasedAt": {
+            "type": "string",
+            "description": "解除时刻（未解除为空）",
+            "format": "date-time"
+          },
+          "releasedReason": {
+            "type": "string",
+            "description": "解除理由"
+          },
+          "status": {
+            "type": "string",
+            "description": "状态：ACTIVE 生效中 / RELEASED 已解除"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "创建时刻",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "更新时刻",
+            "format": "date-time"
+          }
+        },
+        "description": "黑名单记录（生效中的或最近一条已解除的；没有则为空）"
+      },
+      "InfluencerCooperationRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "合作记录 id",
+            "format": "uuid"
+          },
+          "influencerId": {
+            "type": "string",
+            "description": "达人 id",
+            "format": "uuid"
+          },
+          "influencerName": {
+            "type": "string",
+            "description": "达人名称"
+          },
+          "campaignId": {
+            "type": "string",
+            "description": "活动 id",
+            "format": "uuid"
+          },
+          "campaignName": {
+            "type": "string",
+            "description": "活动名称"
+          },
+          "externalCampaignId": {
+            "type": "string",
+            "description": "平台侧活动 id"
+          },
+          "shopCode": {
+            "type": "string",
+            "description": "店铺编码"
+          },
+          "status": {
+            "type": "string",
+            "description": "合作状态：PLANNED / ACTIVE / COMPLETED / CANCELLED"
+          },
+          "startedAt": {
+            "type": "string",
+            "description": "开始时刻",
+            "format": "date-time"
+          },
+          "endedAt": {
+            "type": "string",
+            "description": "结束时刻",
+            "format": "date-time"
+          },
+          "gmv": {
+            "type": "string",
+            "description": "合作 GMV（null = 还没录）"
+          },
+          "orderCount": {
+            "type": "string",
+            "description": "合作订单量（null = 还没录）"
+          },
+          "commission": {
+            "type": "string",
+            "description": "佣金（null = 还没录）"
+          },
+          "refundRate": {
+            "type": "string",
+            "description": "退款率（null = 还没录）"
+          },
+          "currency": {
+            "type": "string",
+            "description": "币种"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "创建时刻",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "更新时刻",
+            "format": "date-time"
+          }
+        },
+        "description": "合作历史（按开始时刻倒序）"
+      },
+      "InfluencerDetail": {
+        "type": "object",
+        "properties": {
+          "influencer": {
+            "$ref": "#/components/schemas/InfluencerRow"
+          },
+          "tags": {
+            "type": "array",
+            "description": "标签（按标签编码升序）",
+            "items": {
+              "$ref": "#/components/schemas/InfluencerTagRow"
+            }
+          },
+          "cooperations": {
+            "type": "array",
+            "description": "合作历史（按开始时刻倒序）",
+            "items": {
+              "$ref": "#/components/schemas/InfluencerCooperationRow"
+            }
+          },
+          "blacklist": {
+            "$ref": "#/components/schemas/InfluencerBlacklistRow"
+          },
+          "effectNote": {
+            "type": "string",
+            "description": "🔴 效果数据口径说明"
+          },
+          "ratingNote": {
+            "type": "string",
+            "description": "🔴 评分口径说明"
+          },
+          "syncNote": {
+            "type": "string",
+            "description": "🔴 平台同步说明"
+          },
+          "note": {
+            "type": "string",
+            "description": "说明"
+          }
+        }
+      },
+      "InfluencerRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "达人 id",
+            "format": "uuid"
+          },
+          "platformId": {
+            "type": "string",
+            "description": "平台 id",
+            "format": "uuid"
+          },
+          "platformCode": {
+            "type": "string",
+            "description": "平台编码"
+          },
+          "shopCode": {
+            "type": "string",
+            "description": "店铺编码"
+          },
+          "externalInfluencerId": {
+            "type": "string",
+            "description": "平台侧达人 id（空串 = 还没登记）"
+          },
+          "displayName": {
+            "type": "string",
+            "description": "达人名称"
+          },
+          "handle": {
+            "type": "string",
+            "description": "账号名"
+          },
+          "category": {
+            "type": "string",
+            "description": "类目"
+          },
+          "followerCount": {
+            "type": "integer",
+            "description": "粉丝数",
+            "format": "int64"
+          },
+          "followerTier": {
+            "type": "string",
+            "description": "🔴 粉丝层级（由触发器从粉丝数推导）"
+          },
+          "engagementRate": {
+            "type": "string",
+            "description": "互动率（null = 还没录，不可比）"
+          },
+          "gmv": {
+            "type": "string",
+            "description": "🔴 带货 GMV（null = 还没录，不可比）"
+          },
+          "gmvCurrency": {
+            "type": "string",
+            "description": "GMV 币种"
+          },
+          "refundRate": {
+            "type": "string",
+            "description": "🔴 退款率（null = 还没录，不可比）"
+          },
+          "ratingScore": {
+            "type": "string",
+            "description": "🔴 评分（null = 评分口径未配置）"
+          },
+          "ratingTierId": {
+            "type": "string",
+            "description": "评级档位 id",
+            "format": "uuid"
+          },
+          "ratingTierCode": {
+            "type": "string",
+            "description": "评级档位编码"
+          },
+          "ratingTierName": {
+            "type": "string",
+            "description": "评级档位名称"
+          },
+          "ratingSortOrder": {
+            "type": "integer",
+            "description": "评级档位排序位",
+            "format": "int32"
+          },
+          "cooperationCount": {
+            "type": "integer",
+            "description": "合作历史条数",
+            "format": "int32"
+          },
+          "gmvFromCooperations": {
+            "type": "string",
+            "description": "🔴 合作历史 GMV 合计（合作口径，非归因口径）"
+          },
+          "syncSource": {
+            "type": "string",
+            "description": "数据来源：MANUAL 手动录入 / PLATFORM_API 平台接口"
+          },
+          "platformSyncStatus": {
+            "type": "string",
+            "description": "平台同步状态：LOCAL_ONLY / PENDING_SYNC / SYNCED / FAILED"
+          },
+          "status": {
+            "type": "string",
+            "description": "本地状态：ACTIVE / INACTIVE"
+          },
+          "blacklisted": {
+            "type": "boolean",
+            "description": "🔴 是否在黑名单里（生效中）"
+          },
+          "blacklistId": {
+            "type": "string",
+            "description": "黑名单记录 id",
+            "format": "uuid"
+          },
+          "blacklistReasonCode": {
+            "type": "string",
+            "description": "黑名单原因码"
+          },
+          "blacklistEffectiveAt": {
+            "type": "string",
+            "description": "黑名单生效时刻",
+            "format": "date-time"
+          },
+          "tagCodes": {
+            "type": "string",
+            "description": "标签编码（逗号分隔，按标签编码升序）"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          },
+          "version": {
+            "type": "integer",
+            "description": "乐观锁版本",
+            "format": "int64"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "创建时刻",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "更新时刻",
+            "format": "date-time"
+          }
+        },
+        "description": "达人档案"
+      },
+      "TagInfluencersRequest": {
+        "type": "object",
+        "properties": {
+          "tagIds": {
+            "type": "array",
+            "description": "标签 id 列表",
+            "items": {
+              "type": "string",
+              "description": "标签 id 列表",
+              "format": "uuid"
+            }
+          },
+          "tagCodes": {
+            "type": "array",
+            "description": "标签编码列表（与 tagIds 合并后一起打）",
+            "items": {
+              "type": "string",
+              "description": "标签编码列表（与 tagIds 合并后一起打）"
+            }
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          }
+        }
+      },
+      "SaveCooperationRequest": {
+        "required": [
+          "campaignId",
+          "influencerId"
+        ],
+        "type": "object",
+        "properties": {
+          "influencerId": {
+            "type": "string",
+            "description": "达人 id",
+            "format": "uuid"
+          },
+          "campaignId": {
+            "type": "string",
+            "description": "活动 id",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "description": "状态：PLANNED / ACTIVE / COMPLETED / CANCELLED"
+          },
+          "startedAt": {
+            "type": "string",
+            "description": "开始时刻",
+            "format": "date-time"
+          },
+          "endedAt": {
+            "type": "string",
+            "description": "结束时刻",
+            "format": "date-time"
+          },
+          "gmv": {
+            "type": "string",
+            "description": "合作 GMV（留空 = 还没录）"
+          },
+          "orderCount": {
+            "type": "string",
+            "description": "合作订单量（留空 = 还没录）"
+          },
+          "commission": {
+            "type": "string",
+            "description": "佣金（留空 = 还没录）"
+          },
+          "refundRate": {
+            "type": "string",
+            "description": "退款率（0 ~ 1；留空 = 还没录）"
+          },
+          "currency": {
+            "maxLength": 3,
+            "minLength": 0,
+            "type": "string",
+            "description": "币种（3 位字母）"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          }
+        }
+      },
+      "BlacklistInfluencerRequest": {
+        "required": [
+          "influencerId",
+          "reasonCode"
+        ],
+        "type": "object",
+        "properties": {
+          "influencerId": {
+            "type": "string",
+            "description": "达人 id",
+            "format": "uuid"
+          },
+          "reasonCode": {
+            "minLength": 1,
+            "type": "string",
+            "description": "拉黑原因码"
+          },
+          "reason": {
+            "type": "string",
+            "description": "拉黑理由（人话）"
+          },
+          "effectiveAt": {
+            "type": "string",
+            "description": "生效时刻（留空 = 现在生效）",
+            "format": "date-time"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          }
+        }
+      },
+      "ReleaseBlacklistRequest": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "description": "解除理由（会写进留痕）"
+          }
+        }
+      },
+      "InfluencerTagPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "当前页数据",
+            "items": {
+              "$ref": "#/components/schemas/InfluencerTagRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "description": "符合筛选条件的总条数",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "description": "页码，从 0 起",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "description": "每页条数",
+            "format": "int32"
+          }
+        }
+      },
+      "InfluencerTagGroupPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "当前页数据",
+            "items": {
+              "$ref": "#/components/schemas/InfluencerTagGroupRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "description": "符合筛选条件的总条数",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "description": "页码，从 0 起",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "description": "每页条数",
+            "format": "int32"
+          }
+        }
+      },
+      "InfluencerPlatformSyncAvailability": {
+        "type": "object",
+        "properties": {
+          "platformCode": {
+            "type": "string",
+            "description": "平台编码"
+          },
+          "platformName": {
+            "type": "string",
+            "description": "平台名称"
+          },
+          "available": {
+            "type": "boolean",
+            "description": "是否已接入达人数据适配器"
+          },
+          "status": {
+            "type": "string",
+            "description": "同步状态：NOT_INTEGRATED 未接入 / AVAILABLE 已接入"
+          },
+          "reason": {
+            "type": "string",
+            "description": "未接入的原因（人能读，不是异常类名）"
+          },
+          "registeredCount": {
+            "type": "integer",
+            "description": "该平台在库里已登记的达人数",
+            "format": "int32"
+          }
+        },
+        "description": "逐平台接入情况"
+      },
+      "InfluencerSyncStatus": {
+        "type": "object",
+        "properties": {
+          "platforms": {
+            "type": "array",
+            "description": "逐平台接入情况",
+            "items": {
+              "$ref": "#/components/schemas/InfluencerPlatformSyncAvailability"
+            }
+          },
+          "syncNote": {
+            "type": "string",
+            "description": "🔴 同步口径说明"
+          }
+        }
+      },
+      "InfluencerRatingTierPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "当前页数据",
+            "items": {
+              "$ref": "#/components/schemas/InfluencerRatingTierRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "description": "符合筛选条件的总条数",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "description": "页码，从 0 起",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "description": "每页条数",
+            "format": "int32"
+          }
+        }
+      },
+      "InfluencerPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "当前页数据",
+            "items": {
+              "$ref": "#/components/schemas/InfluencerRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "description": "符合筛选条件的总条数",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "description": "页码，从 0 起",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "description": "每页条数",
+            "format": "int32"
+          }
+        }
+      },
+      "InfluencerOption": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "取值"
+          },
+          "label": {
+            "type": "string",
+            "description": "中文说明"
+          }
+        },
+        "description": "合作状态选项"
+      },
+      "InfluencerOptions": {
+        "type": "object",
+        "properties": {
+          "followerTiers": {
+            "type": "array",
+            "description": "粉丝层级选项",
+            "items": {
+              "$ref": "#/components/schemas/InfluencerOption"
+            }
+          },
+          "blacklistReasons": {
+            "type": "array",
+            "description": "拉黑原因选项",
+            "items": {
+              "$ref": "#/components/schemas/InfluencerOption"
+            }
+          },
+          "cooperationStatuses": {
+            "type": "array",
+            "description": "合作状态选项",
+            "items": {
+              "$ref": "#/components/schemas/InfluencerOption"
+            }
+          },
+          "platforms": {
+            "type": "array",
+            "description": "平台下拉项（带 id）",
+            "items": {
+              "$ref": "#/components/schemas/InfluencerPlatformOption"
+            }
+          },
+          "platformCodes": {
+            "type": "array",
+            "description": "平台编码（租户内可用的）",
+            "items": {
+              "type": "string",
+              "description": "平台编码（租户内可用的）"
+            }
+          },
+          "shopCodes": {
+            "type": "array",
+            "description": "店铺编码（租户内可用的）",
+            "items": {
+              "type": "string",
+              "description": "店铺编码（租户内可用的）"
+            }
+          },
+          "currencies": {
+            "type": "array",
+            "description": "币种（达人库里出现过的）",
+            "items": {
+              "type": "string",
+              "description": "币种（达人库里出现过的）"
+            }
+          },
+          "categories": {
+            "type": "array",
+            "description": "类目（达人库里出现过的）",
+            "items": {
+              "type": "string",
+              "description": "类目（达人库里出现过的）"
+            }
+          },
+          "effectNote": {
+            "type": "string",
+            "description": "🔴 效果数据口径说明"
+          },
+          "ratingNote": {
+            "type": "string",
+            "description": "🔴 评分口径说明"
+          }
+        }
+      },
+      "InfluencerPlatformOption": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "平台 id",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string",
+            "description": "平台编码"
+          },
+          "name": {
+            "type": "string",
+            "description": "平台名称"
+          }
+        },
+        "description": "平台下拉项（带 id）"
+      },
+      "InfluencerCooperationPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "当前页数据",
+            "items": {
+              "$ref": "#/components/schemas/InfluencerCooperationRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "description": "符合筛选条件的总条数",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "description": "页码，从 0 起",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "description": "每页条数",
+            "format": "int32"
+          }
+        }
+      },
+      "InfluencerCapabilities": {
+        "type": "object",
+        "properties": {
+          "dimensions": {
+            "type": "array",
+            "description": "逐维度能力声明；未交付段 available=false",
+            "items": {
+              "$ref": "#/components/schemas/InfluencerCapabilityDimension"
+            }
+          },
+          "followerTiers": {
+            "type": "array",
+            "description": "粉丝层级取值",
+            "items": {
+              "type": "string",
+              "description": "粉丝层级取值"
+            }
+          },
+          "blacklistReasonCodes": {
+            "type": "array",
+            "description": "拉黑原因取值",
+            "items": {
+              "type": "string",
+              "description": "拉黑原因取值"
+            }
+          },
+          "cooperationStatuses": {
+            "type": "array",
+            "description": "合作状态取值",
+            "items": {
+              "type": "string",
+              "description": "合作状态取值"
+            }
+          },
+          "syncSources": {
+            "type": "array",
+            "description": "数据来源取值",
+            "items": {
+              "type": "string",
+              "description": "数据来源取值"
+            }
+          },
+          "effectNote": {
+            "type": "string",
+            "description": "🔴 效果数据口径说明"
+          },
+          "ratingNote": {
+            "type": "string",
+            "description": "🔴 评分口径说明"
+          },
+          "syncNote": {
+            "type": "string",
+            "description": "🔴 平台同步能力说明"
+          },
+          "upstreamNote": {
+            "type": "string",
+            "description": "上游与边界说明"
+          },
+          "boundaryNote": {
+            "type": "string",
+            "description": "下游与边界说明"
+          }
+        }
+      },
+      "InfluencerCapabilityDimension": {
+        "type": "object",
+        "properties": {
+          "dimension": {
+            "type": "string",
+            "description": "维度键"
+          },
+          "description": {
+            "type": "string",
+            "description": "维度说明"
+          },
+          "available": {
+            "type": "boolean",
+            "description": "本模块是否已交付"
+          },
+          "source": {
+            "type": "string",
+            "description": "数据来源（表 / 上游模块）"
+          },
+          "ownerModule": {
+            "type": "string",
+            "description": "未交付段的责任模块"
+          },
+          "impact": {
+            "type": "string",
+            "description": "不交付的影响"
+          }
+        },
+        "description": "逐维度能力声明；未交付段 available=false"
+      },
+      "InfluencerBlacklistPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "当前页数据",
+            "items": {
+              "$ref": "#/components/schemas/InfluencerBlacklistRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "description": "符合筛选条件的总条数",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "description": "页码，从 0 起",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "description": "每页条数",
+            "format": "int32"
+          }
+        }
       }
     }
   }
