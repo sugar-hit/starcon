@@ -12,17 +12,15 @@ import { COST_SECTIONS } from '../../../components/pricing/cost-composition-mode
  *
  * <ol>
  *   <li>路由目录存在，页面渲染的是**真实工作区**而不是占位页；
- *   <li>分区表里三个模块各占一条，兄弟模块的分区**显式标为未交付** ——
+ *   <li>分区表里三个模块各占一条，每条分区的**「未交付」标记与摘要口径一致** ——
  *       画一个空白框让人以为已交付，比明说「未交付」糟得多；
+ *       反过来，已交付的分区摘要里也不该再残留「未交付」字样；
  *   <li>兄弟模块要加分区时**不需要重写本页骨架** —— 所以本页不得引入
  *       「整页只有一个模块」的假设。
  * </ol>
  */
 
-const PAGE = readFileSync(
-  fileURLToPath(new URL('./page.tsx', import.meta.url)),
-  'utf8',
-);
+const PAGE = readFileSync(fileURLToPath(new URL('./page.tsx', import.meta.url)), 'utf8');
 
 describe('/pricing/cost 路由', () => {
   it('页面渲染的是真实工作区组件，不是占位页', () => {
@@ -45,23 +43,47 @@ describe('/pricing/cost 路由', () => {
 
 describe('分区块约定', () => {
   it('三个模块各占一条分区', () => {
-    expect(COST_SECTIONS.map((s) => s.moduleId)).toEqual([
-      '5.2.1.1',
-      '5.2.1.2',
-      '5.2.1.3',
-    ]);
+    expect(COST_SECTIONS.map((s) => s.moduleId)).toEqual(['5.2.1.1', '5.2.1.2', '5.2.1.3']);
   });
 
-  it('未交付的兄弟分区写明「未交付」并说明口径差异', () => {
-    const landed = COST_SECTIONS.find((s) => s.moduleId === '5.2.1.2');
-    expect(landed?.delivered).toBe(false);
-    expect(landed?.summary).toContain('未交付');
-    expect(landed?.summary).toContain('单据级');
+  it('未交付的分区写明「未交付」，已交付的分区不写「未交付」', () => {
+    // 🔴 这条断言**不钉死「哪个兄弟模块还没交付」**：
+    // 5.2.1.2 到岸成本已交付，5.2.1.3 成本分摊下轮就会落地，delivered 标志会来回翻。
+    // 硬编码 moduleId 的断言每翻一次就要改一次测试，而每改一次就会漏一处 ——
+    // 本车道当初就是漏改了兄弟模块 5.2.1.1 留下的这条用例，把集成头的前端测试打红了。
+    // 所以这里断言的是**对全体分区都成立的不变量**：
+    //   已交付 ⇒ 摘要不得再写「未交付」；未交付 ⇒ 摘要必须写明「未交付」。
+    for (const section of COST_SECTIONS) {
+      if (section.delivered) {
+        expect(section.summary, `${section.moduleId} 已交付，摘要不得再写「未交付」`).not.toContain(
+          '未交付',
+        );
+      } else {
+        expect(section.summary, `${section.moduleId} 未交付，摘要必须写明「未交付」`).toContain(
+          '未交付',
+        );
+      }
+    }
+  });
 
-    const allocation = COST_SECTIONS.find((s) => s.moduleId === '5.2.1.3');
-    expect(allocation?.delivered).toBe(false);
-    expect(allocation?.summary).toContain('未交付');
-    expect(allocation?.summary).toContain('规则表');
+  it('已交付的两个口径各自写明口径差异', () => {
+    // 🔴 口径关键词是**稳定文案**：5.2.1.3 落地后仍然只有 5.2.1.1 / 5.2.1.2 两条已交付分区，
+    // 这两条的口径措辞不会因为兄弟模块落地而变 —— 所以可以硬断言。
+    // 但**不断言未交付分区的任何具体关键词**：未交付分区的摘要会随那个模块落地被整段换掉。
+    const composition = COST_SECTIONS.find((s) => s.moduleId === '5.2.1.1');
+    expect(composition, '5.2.1.1 必须在分区表里').toBeTruthy();
+    expect(composition?.delivered).toBe(true);
+    // 5.2.1.1 的口径 = SKU 级单位成本。现文案写作「SKU 的单位成本构成」，
+    // 所以断言口径关键词本身，不锁死「SKU 的 / SKU 级」这类措辞差异。
+    expect(composition?.summary).toMatch(/SKU(\s*的|\s*级)?\s*单位成本/);
+
+    const landed = COST_SECTIONS.find((s) => s.moduleId === '5.2.1.2');
+    expect(landed, '5.2.1.2 必须在分区表里').toBeTruthy();
+    expect(landed?.delivered).toBe(true);
+    expect(landed?.summary).toContain('单据级');
+    // 到岸成本摘要必须同时点名 5.2.1.1 的口径（SKU 级）——
+    // 两个分区共用 /pricing/cost 路由，不点明「单据级 vs SKU 级」，运营会把两个数当成同一个数。
+    expect(landed?.summary).toContain('SKU 级');
   });
 
   it('分区 id 是兄弟模块后续扩展时要用的键（唯一且稳定）', () => {

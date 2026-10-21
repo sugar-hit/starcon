@@ -14,6 +14,7 @@ import java.net.InetSocketAddress;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -28,6 +29,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.testcontainers.containers.PostgreSQLContainer;
 
 /**
@@ -47,6 +50,9 @@ import org.testcontainers.containers.PostgreSQLContainer;
  *   <li><b>🔴 库存读不到就是读不到</b>：warehouse 挂掉时建作业直接失败，<b>不</b>把可售量折成 0。
  *   <li><b>🔴 模板来源存规则不存值</b>：源商品属性改了，重新发布求出来的是新值。
  *   <li><b>能力声明如实</b>：5.1.1.1 / 4.2.3.2 / 4.3.1.3 / 4.1.1.3 四段 available=false + ownerModule。
+ *   <li><b>🔴 时刻基准同源</b>：{@code dispatched_at} 记的是「写入它的那一次事务的 DB 时刻」
+ *       （PG 的 {@code now()} = 事务开始时刻），断言的参照也取自 DB —— <b>不跟 JVM 墙钟比</b>。
+ *       跨时钟域比较 + 只留 2 秒余量 = 全量跑时必假红（见 {@code dispatchedAtBaselineIsDbSourced}）。
  * </ol>
  */
 @SpringBootTest
@@ -173,6 +179,7 @@ class ListingPublishJobIntegrationTest {
   @Autowired ListingEditorService editor;
   @Autowired AccessService access;
   @Autowired MockMvc http;
+  @Autowired PlatformTransactionManager txManager;
 
   // ==================================================================
   // 辅助
@@ -218,6 +225,17 @@ class ListingPublishJobIntegrationTest {
   static long count(String sql) {
     String value = scalar(sql);
     return value == null ? 0L : Long.parseLong(value);
+  }
+
+  /**
+   * 从 DB 读一个 {@code timestamptz} 值（DB 侧原样读回，不做时区换算）。
+   *
+   * <p>🔴 时刻基准必须**同源**：参照时刻也取自 DB，才不会跟 JVM 墙钟跨时钟域比较。
+   * {@code clock_timestamp()} 是**语句时刻**（DB 时钟），{@code now()} 是**事务开始时刻**。
+   */
+  OffsetDateTime dbTimestamp(String sql) {
+    String raw = scalar(sql);
+    return raw == null ? null : OffsetDateTime.parse(raw.replace(' ', 'T'));
   }
 
   UUID seedShop(String code, UUID platformId, UUID marketplaceId) {
@@ -974,12 +992,33 @@ class ListingPublishJobIntegrationTest {
                         "time-1"),
                     bearer,
                     user));
-    OffsetDateTime before = OffsetDateTime.now().minusSeconds(2);
     as("channel.operation.update", () -> publishes.dispatch(job.jobId().toString()));
     var target = as("channel.operation.read", () -> publishes.targets(job.jobId().toString(), null)).get(0);
 
     assertThat(target.dispatchedAt()).isNotNull();
-    assertThat(target.dispatchedAt()).isAfter(before);
+
+    // 🔴 基准换源：**同源时钟**，不跟 JVM 墙钟比。
+    //    服务层写的是 dispatched_at = now()，而 PG 的 now() 是**事务开始时刻**、不是语句时刻；
+    //    同一条 UPDATE 里 dispatched_at 与 updated_at 是同一个 now() 的两次落笔
+    //    ⇒ updated_at 就是「写入 dispatched_at 的那一次事务的时刻」（同一次写入、同一个事务）。
+    //    上界再取 DB 自己的时钟（clock_timestamp = 语句时刻）。
+    //    🔴 为什么不再用「JVM 墙钟 - 2 秒」：那是**跨时钟域**比较（DB 的时刻 vs JVM 的墙钟）
+    //    且只留 2 秒余量 ⇒ 事务一开久、或 DB 与 JVM 时钟本身有偏斜，就必然假红。
+    //    全量跑时它已经打红过整整一轮（1133 例里红 1 例），隔离复跑却 18/18 全绿。
+    OffsetDateTime txInstant =
+        dbTimestamp(
+            "select updated_at from listing_publish_job_target where tenant_id='"
+                + tenant
+                + "' and id='"
+                + target.targetId()
+                + "'");
+    OffsetDateTime dbNow = dbTimestamp("select clock_timestamp()");
+    assertThat(target.dispatchedAt().toInstant())
+        .as("派发时刻 = 写入它的那次事务的 DB 时刻（同源时钟；事务开多久都不影响判定）")
+        .isEqualTo(txInstant.toInstant());
+    assertThat(target.dispatchedAt())
+        .as("派发时刻不在 DB 自己的当前时刻之后（DB 时钟，不是 JVM 墙钟）")
+        .isBeforeOrEqualTo(dbNow);
 
     String raw =
         scalar(
@@ -993,6 +1032,99 @@ class ListingPublishJobIntegrationTest {
     assertThat(stored.toInstant())
         .as("库里写回的时刻与服务端读到的一致")
         .isEqualTo(target.dispatchedAt().toInstant());
+  }
+
+  /**
+   * 🔴 确定性证明：新的时刻基准（DB 同源时钟）在两个**会翻车的现场**下依然成立。
+   *
+   * <p>缺陷本质是「跨时钟域比较 + 余量太小」，所以这里把两个现场都**造出来**：
+   *
+   * <ol>
+   *   <li><b>老事务现场</b>：派发发生在一次**已经开了 3 秒**的事务里（真实服务 + 外层事务）。
+   *       PG 的 now() 是事务开始时刻 ⇒ 写进去的 dispatched_at 就比「现在」老 3 秒 ⇒
+   *       旧的「JVM 墙钟 - 2 秒」余量必然不够。
+   *   <li><b>可控的跨时钟域倒挂</b>：显式构造一个「JVM 墙钟比 DB 时钟快 50 秒」的倒挂，
+   *       复现全量跑时打红的形状（DB 侧时刻比 JVM 侧早几十秒）。
+   * </ol>
+   *
+   * <p>两个现场里：旧写法<b>必须红</b>（用 {@code assertThatThrownBy} 钉死，不许有人把它搬回来），
+   * 新写法<b>必须绿</b>。
+   */
+  @Test
+  @DisplayName("4.3.1.1 时刻基准同源：老事务现场 + 跨时钟域倒挂，新基准都不翻车")
+  void dispatchedAtBaselineIsDbSourced() {
+    UUID amazonShop = seedShop("AMZ-" + shortId(), AMAZON, siteUs);
+    UUID submission = editorSubmission(amazonShop, siteUs, "基准标题");
+    var job =
+        as(
+            "channel.operation.create",
+            () ->
+                publishes.create(
+                    request(
+                        UUID.randomUUID(),
+                        "EDITOR_SUBMISSION",
+                        List.of(submission),
+                        List.of(target(amazonShop, siteUs, "en-US")),
+                        "clock-1"),
+                    bearer,
+                    user));
+
+    // ---- 现场一：派发发生在一次「已经开了很久」的事务里 ----------------------------
+    // 用**真实服务**造这个现场：外层先开一个事务并把它留活，再在里面派发
+    // （access.run 的 TransactionTemplate 是 REQUIRED ⇒ 会并进这个外层事务）。
+    new TransactionTemplate(txManager)
+        .execute(
+            status -> {
+              // 先在这个事务里跑一条语句 ⇒ BEGIN 真的发出去 ⇒ 事务开始时刻 = 此刻
+              as("channel.operation.read", () -> publishes.targets(job.jobId().toString(), null));
+              // 让这个事务真的变老 3 秒（DB 侧真实等待）
+              exec("select pg_sleep(3)");
+              as("channel.operation.update", () -> publishes.dispatch(job.jobId().toString()));
+              return null;
+            });
+
+    var target = as("channel.operation.read", () -> publishes.targets(job.jobId().toString(), null)).get(0);
+    OffsetDateTime dispatchedAt = target.dispatchedAt();
+    assertThat(dispatchedAt).isNotNull();
+
+    // 老事务现场的可验证证据：全部用 DB 自己的时钟 ⇒ 与 JVM 墙钟无关。
+    OffsetDateTime dbNow = dbTimestamp("select clock_timestamp()");
+    Duration age = Duration.between(dispatchedAt, dbNow);
+    assertThat(age.toMillis())
+        .as("现场确实是老事务：写进去的时刻比 DB 当前时刻老了整段事务年龄")
+        .isGreaterThanOrEqualTo(3000L);
+
+    // 旧写法在「JVM 墙钟与 DB 时钟一致」的常态下，在这个现场**必红**。
+    // 为了可复现（不依赖两台机器的时钟恰好对齐），这里用「DB 时钟 - 2 秒」代替
+    // 「JVM 墙钟 - 2 秒」—— 旧写法的失效点就是这个 2 秒余量本身。
+    assertThatThrownBy(() -> assertThat(dispatchedAt).isAfter(dbNow.minusSeconds(2)))
+        .as("老事务现场 + 2 秒余量 ⇒ 旧写法（JVM 墙钟基准）必红")
+        .isInstanceOf(AssertionError.class);
+
+    // ---- 现场二：可控的跨时钟域倒挂 ------------------------------------------------
+    // 显式构造「JVM 墙钟比 DB 时钟快 50 秒」的倒挂 = 全量跑时打红的形状。
+    OffsetDateTime invertedJvmClock = dbNow.plusSeconds(50);
+    assertThatThrownBy(() -> assertThat(dispatchedAt).isAfter(invertedJvmClock.minusSeconds(2)))
+        .as("跨时钟域倒挂下，旧写法（拿 JVM 墙钟比）必红")
+        .isInstanceOf(AssertionError.class);
+
+    // 两个现场里，新基准都必须绿：它只用 DB 自己的时钟，跟 JVM 墙钟毫无关系。
+    OffsetDateTime txInstant =
+        dbTimestamp(
+            "select updated_at from listing_publish_job_target where tenant_id='"
+                + tenant
+                + "' and id='"
+                + target.targetId()
+                + "'");
+    assertThat(dispatchedAt.toInstant())
+        .as("新基准：派发时刻 = 写入它的那次事务的 DB 时刻（老事务 / 倒挂都成立）")
+        .isEqualTo(txInstant.toInstant());
+    assertThat(dispatchedAt)
+        .as("新基准：派发时刻不早于写入它的那次事务的 DB 时刻（下界方向）")
+        .isAfterOrEqualTo(txInstant);
+    assertThat(dispatchedAt)
+        .as("新基准：派发时刻不晚于 DB 当前时刻（上界方向）")
+        .isBeforeOrEqualTo(dbNow);
   }
 
   // ==================================================================
