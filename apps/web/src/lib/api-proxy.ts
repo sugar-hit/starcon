@@ -3541,6 +3541,79 @@ const services: readonly {
       /^return-receipts(?:\/(?:capabilities|receivable|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:post|cancel|photos))?))?$/,
   },
   {
+    // 15.1.2.1 邮件收发（crm 服务，卷 15 的 L3 锚点 15.1.2 的买家邮件子域）。
+    //
+    // 蓝图：「管理买家邮件（Amazon Buyer-Seller Messaging、eBay 邮件等）：收发、附件、模板、
+    // 与站内信的双向同步或标记为同源。输入：邮件同步；发送请求。输出：邮件列表与详情 + 发送记录。
+    // 关系：上游 = 2 同步；下游 = 15.1.1.2 发送。
+    // **部分平台要求邮件与站内信在同一会话处理**，分开展示会导致重复回复买家。」
+    //
+    // 本条目是**新增一条独立的 services[] 元素**，不是往既有 crm 分支的 alternation 里并分支 ——
+    // 既有三条 crm 分支分别是 `^knowledge\/...$`（15.4.2.1 客服知识库）、
+    // `^review-requests...$`（15.2.2.1 索评）与 `^review-rules...$`（15.2.2.2 索评规则），
+    // 首 token 都与 `buyer-emails` 不同，三条互不吃掉；同批并行的 15.1.1.1 消息收件箱
+    // 也各自**新增独立元素**（首 token `message-inbox`），本车道不碰它那条。
+    //
+    // ---- 插入锚点选在 **11.2.2.1 `return-receipts` 之后 / 11.2.2.2 `receipt-allocations` 之前** ----
+    //   这一段是 **trade 服务的 11 卷退货收件**区，与本批另外三条车道的落点
+    //   （crm/ 知识库 · 索评 · 索评规则那条带，以及 channel 的广告 / 达人区）**相距 1700 行以上**，
+    //   并入时 git 能干净求并。既有条目一字未动。
+    //
+    // ---- 首 token「buyer-emails」的零命中核对结论 ----
+    //   本文件既有 **143 条** services[] 正则里**没有任何一条**含 `buyer-emails` 这个串
+    //   （全文出现次数 = 0）。带 `buyer` 字样的只有两条，且首 token 与本模块完全不同：
+    //     * `^order-review\/...`（9.2.1.2 trade 订单审核）—— 它内部的 `buyer-profiles` 是子形状；
+    //     * `^purchase-order-approvals(?:\/...|members(?:\/(?:buyers|approvers))`（trade 采购订单审批）
+    //       —— 它的 `buyers` 是 `members` 下的子形状。
+    //   两者都在 `prefix: 'trade/'` 下，首 token 与 `buyer-emails` 不同 ⇒ **互不吃掉**。
+    //   既有正则都是**锚定**的（`^token(...)?$`），而本文件的 `resolve()` 先按
+    //   `path.startsWith(service.prefix)` 收窄服务、再判别正则 ⇒ 只有 prefix='crm/' 的元素
+    //   才有机会吃到 `crm/buyer-emails/...`。
+    //
+    // 形状逐条列出：
+    //   buyer-emails                          邮件集合读（GET，真分页 + 真筛选）/ 新建（POST，登记收到的邮件）
+    //   buyer-emails/capabilities             能力声明（逐维 available + ownerModule + impact）
+    //   buyer-emails/shops                    店铺目录（来自上游 channel 的真实清单 + 每平台接入状态）
+    //   buyer-emails/sync                     平台买家邮件同步（POST）—— 🔴 适配器未接入，端点恒 409
+    //   buyer-emails/templates                邮件模板集合（GET 真分页真筛选 / POST 新建）
+    //   buyer-emails/templates/{uuid}         单条模板（GET 详情 / PUT 更新 / DELETE 删除）
+    //   buyer-emails/{uuid}                   单封邮件详情（GET）
+    //   buyer-emails/{uuid}/conversation      会话视图（GET，同会话的收 + 发两行）
+    //   buyer-emails/{uuid}/attachments       登记附件元数据（POST）
+    //   buyer-emails/{uuid}/send-records      发送记录（GET 列表 / POST 登记）
+    //
+    // 判别顺序：**字面量子路径（capabilities / shops / sync / templates）排在 {uuid} 段之前** ——
+    //   alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    //   `templates` 那一支**自带**可选的 {uuid} 段（`templates/{uuid}` 是真实形状），
+    //   它排在裸 {uuid} 支之前，两支首字符不同（`t` vs 十六进制串），互不吃掉。
+    // id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`（不是
+    // `[0-9a-f-]+`）：后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行。
+    //
+    // ⚠️ **裸路径 `buyer-emails` 是放行的**：本模块的集合读与新建都在裸路径上，
+    //   与同服务的 15.2.2.1 `review-requests` 同一形状。蓝图输出句点名「邮件列表与详情」，
+    //   列表必须有集合路径 —— 把它挡掉只会让页面 404（白名单漏登记的真实后果）。
+    //   与之相对，字面量段（capabilities / shops / sync / templates）**刻意不接** {uuid} 段，
+    //   它们是能力声明、目录、聚合与配置，**不按 id 寻址**。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `buyer-emails/{uuid}/delete` —— 邮件是会话与「有没有重复回复」的凭据，不可删；
+    //   * `buyer-emails/{uuid}/replies` —— 回复是**发送记录**（send-records），不是另一个资源；
+    //   * `buyer-emails/{uuid}/tags` / `/attachments/{uuid}` / `/send-records/{uuid}` ——
+    //     后端没有「按单条附件 / 单条发送记录寻址」的映射；
+    //   * `buyer-emails/{uuid}/inbox` —— 站内信原文属 **15.1.1.1，未交付**，
+    //     放行一个站内信入口等于让界面以为「邮件与站内信已经合并」；
+    //   * `buyer-emails/{uuid}/rules` —— 邮件规则属 **15.2.2.2，未交付**；
+    //   * `buyer-emails/templates/{uuid}/publish` —— 模板没有「发布」这个动作，只有启停；
+    //   * 任何 `capabilities/{uuid}` / `shops/{uuid}` / `sync/{uuid}` —— 字面量段不接 id 段；
+    //   * 非 UUID 段（如 `buyer-emails/not-a-uuid`）必须 404，不能被宽松分支吃掉。
+    //   * PUT / DELETE 之外的第三层子路径 —— 后端只有上面列出的那些。
+    prefix: 'crm/',
+    env: 'CRM_URL',
+    fallback: 'http://127.0.0.1:8086',
+    pattern:
+      /^buyer-emails(?:\/(?:capabilities|shops|sync)|\/templates(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:attachments|conversation|send-records))?)?$/,
+  },
+  {
     // 11.2.2.2 实收分配（trade 服务）。本条目是**新增一条 services[] 元素**，
     // 11.2.3.1 质检与判定（trade 服务）。本条目是**新增一条 services[] 元素**，
     // 不是往既有 trade 分支的超长单行 alternation 里并分支 —— 那一支多车道同时并进去
