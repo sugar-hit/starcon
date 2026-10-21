@@ -4748,6 +4748,54 @@ const services: readonly {
       /^cost\-allocations(?:\/(?:capabilities|sources)|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:revisions(?:\/[0-9]+)?|recalculate|diffs))?)?$/,
   },
   {
+    // 6.5.2.1 采购分析（trade 服务，卷 06 采购与供应的 L3 锚点 6.5.2）。
+    //
+    // 蓝图：「采购侧报表：采购金额趋势、供应商集中度与贡献、采购价格波动、到货准时率、
+    // 采购成本占销售额比、按类目/店铺维度的采购效率。输入：采购单与收货数据；
+    // 时间范围与维度筛选。输出：报表图表 + 可导出明细；下钻到具体采购单。」
+    //
+    // 本条目是**新增一条 services[] 元素**，既有条目一字未动（插入锚点固定在
+    // 5.2.3.2 物流与头程费用之前，与同批另外几条车道的插入点互不重叠）。
+    //
+    // 🔴 为什么用 `purchase-analytics` 这个独立顶级前缀：
+    //   * 既有 trade 分支是**一条**覆盖全服务的长 alternation，里面没有 `purchase-analytics`；
+    //     已用脚本逐条核对本文件里**全部 100 条**既有正则：`purchase-analytics/**` **零命中**
+    //     （既有分支不会先把它吃掉）。
+    //   * 前端路由是 /purchase/analytics，后端命名空间是 /trade/purchase-analytics ——
+    //     两者是两件事，不共用前缀（与 6.2.1.3 的 purchase-plans 同一纪律）。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   purchase-analytics/capabilities            能力声明（逐条点名未交付的归谁管）
+    //   purchase-analytics/options                 筛选下拉（全部来自已物化的真实事实）
+    //   purchase-analytics/facts                   下钻明细列表（真分页 + 真筛选 + 真排序）
+    //   purchase-analytics/facts/sync              把上游已交付事实物化进台账（POST）
+    //   purchase-analytics/facts/{uuid}            单条事实详情
+    //   purchase-analytics/sync-runs               同步批次留痕（真分页）
+    //   purchase-analytics/summary                 总览 KPI（金额按币种分列）
+    //   purchase-analytics/trend                   采购金额趋势（按币种分列）
+    //   purchase-analytics/supplier-concentration  供应商集中度与贡献（top-N 占比 + HHI）
+    //   purchase-analytics/price-variance          采购价格波动（环比）
+    //   purchase-analytics/on-time-rate            到货准时率（分母是承诺到货行）
+    //   purchase-analytics/cost-to-sales-ratio     采购成本占销售额比（分母不可用时显式标算不出）
+    //   purchase-analytics/efficiency              按类目/店铺维度的采购效率
+    //   purchase-analytics/export                  下钻明细 CSV 导出（流式，GET）
+    //
+    // ⚠️ 判别顺序：**字面量子路径（capabilities / options / facts / summary / trend …）排在
+    //    {uuid} 段之前** —— alternation 是首个命中即返回，而 `facts/sync` 这类字面量子路径
+    //    若排在 uuid 段之后会被 uuid 支吃掉半截（这是本仓反复踩过的坑）。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `purchase-analytics/facts/{uuid}/lines` —— 事实是**单级**的，没有子行。
+    //   * `purchase-analytics/facts/{uuid}/delete` —— 事实台账是凭据，删了等于把这个数从报表里抹掉。
+    //   * `purchase-analytics/export/{uuid}` —— 导出按当前筛选整体导出，没有单条导出。
+    //   * `purchase-analytics/reconciliation` —— 6.5.1.1 采购对账**未交付**，本模块不代它开形状。
+    prefix: 'trade/',
+    env: 'TRADE_URL',
+    fallback: 'http://127.0.0.1:8085',
+    pattern:
+      /^purchase\-analytics(?:\/(?:capabilities|options|facts|summary|trend|supplier\-concentration|price\-variance|on\-time\-rate|cost\-to\-sales\-ratio|efficiency|export|sync\-runs)|\/facts\/sync|\/facts\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?$/,
+  },
+  {
     // 5.2.3.2 物流与头程费用（catalog 服务，卷 05 定价与价目的 L3 锚点 5.2.3）。
     //
     // 蓝图：「维护物流渠道的计费规则（按重量 / 体积 / 件数、燃油附加、旺季附加、偏远附加）

@@ -37179,6 +37179,971 @@
           }
         }
       }
+    },
+    "/trade/purchase-analytics/facts/sync": {
+      "post": {
+        "tags": [
+          "purchase-analytics-controller"
+        ],
+        "operationId": "post_trade_purchase_analytics_facts_sync",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PurchaseAnalyticsSyncRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseAnalyticsSyncResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/purchase-analytics/trend": {
+      "get": {
+        "tags": [
+          "purchase-analytics-controller"
+        ],
+        "operationId": "get_trade_purchase_analytics_trend",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "granularity",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "MONTH"
+            }
+          },
+          {
+            "name": "currency",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "supplierRefId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseAnalyticsTrend"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/purchase-analytics/sync-runs": {
+      "get": {
+        "tags": [
+          "purchase-analytics-controller"
+        ],
+        "operationId": "get_trade_purchase_analytics_sync_runs",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseAnalyticsSyncRunPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/purchase-analytics/supplier-concentration": {
+      "get": {
+        "tags": [
+          "purchase-analytics-controller"
+        ],
+        "operationId": "get_trade_purchase_analytics_supplier_concentration",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "currency",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "supplierRefId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "topN",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 5
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseAnalyticsConcentration"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/purchase-analytics/summary": {
+      "get": {
+        "tags": [
+          "purchase-analytics-controller"
+        ],
+        "operationId": "get_trade_purchase_analytics_summary",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "currency",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "supplierRefId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseAnalyticsSummary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/purchase-analytics/price-variance": {
+      "get": {
+        "tags": [
+          "purchase-analytics-controller"
+        ],
+        "operationId": "get_trade_purchase_analytics_price_variance",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "currency",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "supplierRefId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "dimension",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "SUPPLIER"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseAnalyticsPriceVariance"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/purchase-analytics/options": {
+      "get": {
+        "tags": [
+          "purchase-analytics-controller"
+        ],
+        "operationId": "get_trade_purchase_analytics_options",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseAnalyticsOptions"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/purchase-analytics/on-time-rate": {
+      "get": {
+        "tags": [
+          "purchase-analytics-controller"
+        ],
+        "operationId": "get_trade_purchase_analytics_on_time_rate",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "currency",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "supplierRefId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseAnalyticsOnTimeRate"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/purchase-analytics/facts": {
+      "get": {
+        "tags": [
+          "purchase-analytics-controller"
+        ],
+        "operationId": "get_trade_purchase_analytics_facts",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "currency",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "supplierRefId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "categoryCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "shopCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "factKind",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sourceType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "onTimeStatus",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "occurred"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseAnalyticsFactPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/purchase-analytics/facts/{id}": {
+      "get": {
+        "tags": [
+          "purchase-analytics-controller"
+        ],
+        "operationId": "get_trade_purchase_analytics_facts_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseAnalyticsFactDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/purchase-analytics/export": {
+      "get": {
+        "tags": [
+          "purchase-analytics-controller"
+        ],
+        "operationId": "get_trade_purchase_analytics_export",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "currency",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "supplierRefId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "categoryCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "shopCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "factKind",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sourceType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "onTimeStatus",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "occurred"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/csv": {
+                "schema": {
+                  "$ref": "#/components/schemas/StreamingResponseBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/purchase-analytics/efficiency": {
+      "get": {
+        "tags": [
+          "purchase-analytics-controller"
+        ],
+        "operationId": "get_trade_purchase_analytics_efficiency",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "dimension",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "CATEGORY"
+            }
+          },
+          {
+            "name": "currency",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "supplierRefId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "categoryCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "shopCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseAnalyticsEfficiency"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/purchase-analytics/cost-to-sales-ratio": {
+      "get": {
+        "tags": [
+          "purchase-analytics-controller"
+        ],
+        "operationId": "get_trade_purchase_analytics_cost_to_sales_ratio",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "currency",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "supplierRefId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseAnalyticsCostToSales"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/purchase-analytics/capabilities": {
+      "get": {
+        "tags": [
+          "purchase-analytics-controller"
+        ],
+        "operationId": "get_trade_purchase_analytics_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseAnalyticsCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -91986,6 +92951,1026 @@
             "type": "string"
           },
           "href": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "PurchaseAnalyticsSyncRequest": {
+        "type": "object",
+        "properties": {
+          "sourceType": {
+            "type": "string",
+            "description": "ALL 或某个来源；空 = ALL",
+            "nullable": true
+          },
+          "from": {
+            "type": "string",
+            "description": "窗口起（含）。空 = 最近 90 天",
+            "format": "date",
+            "nullable": true
+          },
+          "to": {
+            "type": "string",
+            "description": "窗口止（含）。空 = 今天",
+            "format": "date",
+            "nullable": true
+          }
+        }
+      },
+      "PurchaseAnalyticsSyncResult": {
+        "type": "object",
+        "properties": {
+          "runNo": {
+            "type": "string"
+          },
+          "sourceType": {
+            "type": "string"
+          },
+          "windowStart": {
+            "type": "string",
+            "format": "date"
+          },
+          "windowEnd": {
+            "type": "string",
+            "format": "date"
+          },
+          "status": {
+            "type": "string"
+          },
+          "scannedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "createdCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "updatedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "skippedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "unresolvedSkuCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "unconvertedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "notes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchaseAnalyticsTrend": {
+        "type": "object",
+        "properties": {
+          "window": {
+            "$ref": "#/components/schemas/PurchaseAnalyticsWindow"
+          },
+          "currencies": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "points": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseAnalyticsTrendPoint"
+            }
+          },
+          "basis": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchaseAnalyticsTrendPoint": {
+        "type": "object",
+        "properties": {
+          "period": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "factCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "averageAmount": {
+            "type": "number"
+          }
+        }
+      },
+      "PurchaseAnalyticsWindow": {
+        "type": "object",
+        "properties": {
+          "from": {
+            "type": "string",
+            "format": "date"
+          },
+          "to": {
+            "type": "string",
+            "format": "date"
+          },
+          "granularity": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchaseAnalyticsSyncRunPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseAnalyticsSyncRunRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchaseAnalyticsSyncRunRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "runNo": {
+            "type": "string"
+          },
+          "sourceType": {
+            "type": "string"
+          },
+          "windowStart": {
+            "type": "string",
+            "format": "date"
+          },
+          "windowEnd": {
+            "type": "string",
+            "format": "date"
+          },
+          "status": {
+            "type": "string"
+          },
+          "scannedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "createdCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "updatedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "skippedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "unresolvedSkuCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "unconvertedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          },
+          "startedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "finishedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "PurchaseAnalyticsConcentration": {
+        "type": "object",
+        "properties": {
+          "window": {
+            "$ref": "#/components/schemas/PurchaseAnalyticsWindow"
+          },
+          "buckets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseAnalyticsConcentrationBucket"
+            }
+          },
+          "basis": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchaseAnalyticsConcentrationBucket": {
+        "type": "object",
+        "properties": {
+          "currency": {
+            "type": "string"
+          },
+          "suppliers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseAnalyticsSupplierRow"
+            }
+          },
+          "totalAmount": {
+            "type": "number"
+          },
+          "topShare": {
+            "type": "number"
+          },
+          "topN": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "hhi": {
+            "type": "number"
+          },
+          "hhiScale": {
+            "type": "string"
+          },
+          "supplierCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "unconvertedAmount": {
+            "type": "number"
+          }
+        }
+      },
+      "PurchaseAnalyticsSupplierRow": {
+        "type": "object",
+        "properties": {
+          "supplierRefId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "supplierCode": {
+            "type": "string"
+          },
+          "supplierName": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "share": {
+            "type": "number"
+          },
+          "cumulativeShare": {
+            "type": "number"
+          },
+          "factCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "onTimeRate": {
+            "type": "number",
+            "nullable": true
+          },
+          "currency": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchaseAnalyticsCurrencyAmount": {
+        "type": "object",
+        "properties": {
+          "currency": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "baseAmount": {
+            "type": "number"
+          },
+          "baseCurrency": {
+            "type": "string",
+            "nullable": true
+          },
+          "factCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "unconvertedCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "PurchaseAnalyticsSummary": {
+        "type": "object",
+        "properties": {
+          "window": {
+            "$ref": "#/components/schemas/PurchaseAnalyticsWindow"
+          },
+          "purchaseAmounts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseAnalyticsCurrencyAmount"
+            }
+          },
+          "purchaseAmountTotal": {
+            "type": "number",
+            "description": "只有单一币种时才有合计；多币种不合并",
+            "nullable": true
+          },
+          "purchaseCurrencyNote": {
+            "type": "string"
+          },
+          "costFactCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "receiptFactCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "planFactCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "supplierCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "claimOffsets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseAnalyticsCurrencyAmount"
+            }
+          },
+          "unconvertedAmount": {
+            "type": "number"
+          },
+          "unconvertedNote": {
+            "type": "string"
+          },
+          "basis": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchaseAnalyticsPriceVariance": {
+        "type": "object",
+        "properties": {
+          "window": {
+            "$ref": "#/components/schemas/PurchaseAnalyticsWindow"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "comparison": {
+            "type": "string"
+          },
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseAnalyticsPriceVarianceRow"
+            }
+          },
+          "currentPeriod": {
+            "type": "string",
+            "nullable": true
+          },
+          "previousPeriod": {
+            "type": "string",
+            "nullable": true
+          },
+          "currentAveragePrice": {
+            "type": "number",
+            "nullable": true
+          },
+          "previousAveragePrice": {
+            "type": "number",
+            "nullable": true
+          },
+          "overallChangeRate": {
+            "type": "number",
+            "nullable": true
+          },
+          "basis": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchaseAnalyticsPriceVarianceRow": {
+        "type": "object",
+        "properties": {
+          "dimension": {
+            "type": "string"
+          },
+          "dimensionLabel": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "currentQuantity": {
+            "type": "number",
+            "nullable": true
+          },
+          "currentAmount": {
+            "type": "number",
+            "nullable": true
+          },
+          "currentAveragePrice": {
+            "type": "number",
+            "nullable": true
+          },
+          "previousQuantity": {
+            "type": "number",
+            "nullable": true
+          },
+          "previousAmount": {
+            "type": "number",
+            "nullable": true
+          },
+          "previousAveragePrice": {
+            "type": "number",
+            "nullable": true
+          },
+          "changeRate": {
+            "type": "number",
+            "nullable": true
+          },
+          "factCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchaseAnalyticsOptionItem": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "factCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "PurchaseAnalyticsOptions": {
+        "type": "object",
+        "properties": {
+          "suppliers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseAnalyticsOptionItem"
+            }
+          },
+          "currencies": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseAnalyticsOptionItem"
+            }
+          },
+          "categories": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseAnalyticsOptionItem"
+            }
+          },
+          "shops": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseAnalyticsOptionItem"
+            }
+          },
+          "sourceTypes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseAnalyticsOptionItem"
+            }
+          },
+          "factKinds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "onTimeStatuses": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "lastSyncNote": {
+            "type": "string",
+            "nullable": true
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "PurchaseAnalyticsOnTimeRate": {
+        "type": "object",
+        "properties": {
+          "window": {
+            "$ref": "#/components/schemas/PurchaseAnalyticsWindow"
+          },
+          "denominatorCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "onTimeCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "lateCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "pendingCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "onTimeRate": {
+            "type": "number"
+          },
+          "denominatorRule": {
+            "type": "string"
+          },
+          "calendarRule": {
+            "type": "string"
+          },
+          "lateRows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseAnalyticsOnTimeRow"
+            }
+          },
+          "basis": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchaseAnalyticsOnTimeRow": {
+        "type": "object",
+        "properties": {
+          "factId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sourceDocNo": {
+            "type": "string"
+          },
+          "sourceRefNo": {
+            "type": "string"
+          },
+          "supplierName": {
+            "type": "string"
+          },
+          "promisedArrivalDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number",
+            "nullable": true
+          },
+          "delayDays": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "PurchaseAnalyticsFactPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseAnalyticsFactRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchaseAnalyticsFactRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "factKey": {
+            "type": "string"
+          },
+          "factKind": {
+            "type": "string"
+          },
+          "sourceType": {
+            "type": "string"
+          },
+          "sourceDocNo": {
+            "type": "string"
+          },
+          "sourceDocId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "sourceRefNo": {
+            "type": "string"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "occurredDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "supplierRefId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "supplierCode": {
+            "type": "string"
+          },
+          "supplierName": {
+            "type": "string"
+          },
+          "skuRefId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "categoryCode": {
+            "type": "string"
+          },
+          "categoryName": {
+            "type": "string"
+          },
+          "shopCode": {
+            "type": "string"
+          },
+          "warehouseCode": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "unitCode": {
+            "type": "string"
+          },
+          "unitFactor": {
+            "type": "number",
+            "nullable": true
+          },
+          "baseQuantity": {
+            "type": "number",
+            "nullable": true
+          },
+          "unitPrice": {
+            "type": "number",
+            "nullable": true
+          },
+          "amount": {
+            "type": "number",
+            "nullable": true
+          },
+          "currency": {
+            "type": "string",
+            "nullable": true
+          },
+          "baseCurrency": {
+            "type": "string",
+            "nullable": true
+          },
+          "fxRate": {
+            "type": "number",
+            "nullable": true
+          },
+          "baseAmount": {
+            "type": "number",
+            "description": "本位币金额；汇率未登记时为空（不是 0，也不按 1:1）",
+            "nullable": true
+          },
+          "fxStatus": {
+            "type": "string"
+          },
+          "fxRateId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "fxRateEffectiveDate": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "promisedArrivalDate": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "onTimeStatus": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchaseAnalyticsFactDetail": {
+        "type": "object",
+        "properties": {
+          "fact": {
+            "$ref": "#/components/schemas/PurchaseAnalyticsFactRow"
+          },
+          "sourceModule": {
+            "type": "string"
+          },
+          "sourceDescription": {
+            "type": "string"
+          },
+          "drillDownNote": {
+            "type": "string",
+            "nullable": true
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "StreamingResponseBody": {
+        "type": "object"
+      },
+      "PurchaseAnalyticsEfficiency": {
+        "type": "object",
+        "properties": {
+          "window": {
+            "$ref": "#/components/schemas/PurchaseAnalyticsWindow"
+          },
+          "dimension": {
+            "type": "string"
+          },
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseAnalyticsEfficiencyRow"
+            }
+          },
+          "dimensionNote": {
+            "type": "string"
+          },
+          "basis": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchaseAnalyticsEfficiencyRow": {
+        "type": "object",
+        "properties": {
+          "dimensionCode": {
+            "type": "string"
+          },
+          "dimensionLabel": {
+            "type": "string"
+          },
+          "plannedQuantity": {
+            "type": "number"
+          },
+          "receivedQuantity": {
+            "type": "number",
+            "nullable": true
+          },
+          "fulfillmentRate": {
+            "type": "number",
+            "nullable": true
+          },
+          "planLineCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "receiptFactCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "unitCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchaseAnalyticsCostToSales": {
+        "type": "object",
+        "properties": {
+          "window": {
+            "$ref": "#/components/schemas/PurchaseAnalyticsWindow"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "ownerModule": {
+            "type": "string",
+            "nullable": true
+          },
+          "impact": {
+            "type": "string",
+            "nullable": true
+          },
+          "ratio": {
+            "type": "number",
+            "nullable": true
+          },
+          "ratioCurrency": {
+            "type": "string",
+            "nullable": true
+          },
+          "purchaseAmounts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseAnalyticsCurrencyAmount"
+            }
+          },
+          "salesAmounts": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/PurchaseAnalyticsCurrencyAmount"
+            }
+          },
+          "salesNote": {
+            "type": "string",
+            "nullable": true
+          },
+          "basis": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchaseAnalyticsCapabilities": {
+        "type": "object",
+        "properties": {
+          "sections": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseAnalyticsCapabilitySection"
+            }
+          },
+          "moduleNote": {
+            "type": "string"
+          },
+          "basisNote": {
+            "type": "string"
+          },
+          "currencyNote": {
+            "type": "string"
+          },
+          "drillDownNote": {
+            "type": "string"
+          },
+          "exportNote": {
+            "type": "string"
+          },
+          "syncNote": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchaseAnalyticsCapabilitySection": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "ownerModule": {
+            "type": "string",
+            "description": "不可用时这个能力归属哪个模块号",
+            "nullable": true
+          },
+          "blockedReason": {
+            "type": "string",
+            "description": "不可用的原因（available=false 时非空）",
+            "nullable": true
+          },
+          "impact": {
+            "type": "string",
+            "description": "不可用对本模块的影响（available=false 时非空）",
+            "nullable": true
+          },
+          "detail": {
+            "type": "string"
+          },
+          "evidence": {
             "type": "string",
             "nullable": true
           }
