@@ -19,6 +19,7 @@ import com.starcon.catalog.PriceHistoryModels.PriceHistoryReasonInput;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
@@ -47,7 +48,8 @@ import org.springframework.web.server.ResponseStatusException;
  *   <li>{@link #批量调价执行后这次改价真的落进了时间轴()}：5.4.1.2 是**已交付**的上游，
  *       它改完价必须真的能在这本账上看见。</li>
  *   <li>{@link #重复投递同一个幂等键不会堆出第二条变更()}：重试 / 补偿不得堆行。</li>
- *   <li>{@link #时间轴按维度真筛选且真分页真排序()}：筛选、分页、排序都在 DB 层。</li>
+ *   <li>{@link #时间轴按维度真筛选且真分页真排序()}：筛选、分页、排序都在 DB 层；
+ *       时间范围那一段的**种子与窗口锚在同一个显式 UTC 日**上 ⇒ 与墙上时钟无关。</li>
  *   <li>{@link #销量维度未接线时显式不可用而不是零()}：**绝不用 0 冒充销量** ——
  *       那会让每次降价都显示成「降价后一件没卖出去」。</li>
  *   <li>{@link #变更事实不可变没有改写入口()}：GRANT 里没有 UPDATE / DELETE。</li>
@@ -138,6 +140,22 @@ class PriceHistoryIntegrationTest extends BatchCalcFixture {
                         "select count(*) from price_change_history where sku_id=?", skuId)
                     .get(0, Long.class))
         .longValue();
+  }
+
+  /**
+   * 按**时间窗口**查某个 SKU 的变更（窗口两端同一天 ⇒ 那一天整天）。
+   *
+   * <p>服务端把 {@code LocalDate} 窗口换算成 <b>UTC 零点</b>的半开区间
+   * （{@code [from 00:00Z, to+1 00:00Z)}）⇒ 调用方传的日期**就是**UTC 日历日。
+   */
+  private List<PriceHistoryChangeRow> changesInWindow(UUID skuId, LocalDate from, LocalDate to) {
+    return tx(
+            actor,
+            () ->
+                history.listChanges(
+                    new PriceHistoryChangeQuery(
+                        null, skuId, null, null, null, null, null, from, to, null, 0, 50)))
+        .items();
   }
 
   // ================================================================ 断言一
@@ -349,17 +367,43 @@ class PriceHistoryIntegrationTest extends BatchCalcFixture {
 
   // ================================================================ 断言七
 
-  /** 时间轴按 SKU / 店铺 / 时间范围 / 变更来源**真筛选**，分页与排序也是真的。 */
+  /**
+   * 时间轴按 SKU / 店铺 / 时间范围 / 变更来源**真筛选**，分页与排序也是真的。
+   *
+   * <p>🔴 <b>时间范围这一段：种子与窗口必须用同一套口径（UTC 日界）</b>。
+   * 服务层把 {@code LocalDate} 窗口换算成 <b>UTC 零点</b>的半开区间
+   * （{@code [from 00:00Z, to+1 00:00Z)}，见 {@code PriceHistoryService}），
+   * 而墙钟给的是**本地**日历日 —— 两者差一个时区偏移（本地 +08:00 ⇒ 差 8 小时）：
+   * 种子只要写成「墙钟相对值」（{@code now().minusDays(8)}）就会在某些时刻滑出窗口
+   * （本地 08:00 之后 now 的 UTC 值已跨日 ⇒ 窗口必然落空 ⇒ 假红）。
+   * ⇒ 这里把三个种子与查询窗口都锚在**同一个显式 UTC 日**上：
+   * 种子必然落在 {@code [day 00:00Z, day+1 00:00Z)} 内，<b>与运行时刻、运行机器时区都无关</b>。
+   */
   @Test
   void 时间轴按维度真筛选且真分页真排序() {
     UUID skuA = pricedSku(actor, "PRHA", unique("CAT"), "BrandA");
     UUID skuB = pricedSku(actor, "PRHB", unique("CAT"), "BrandB");
-    var base = OffsetDateTime.now().minusDays(10);
+    // 窗口目标日 = 一个**显式的 UTC 日历日**（种子与窗口共用它 ⇒ 断言与墙上时刻无关）。
+    var windowDay = LocalDate.now(ZoneOffset.UTC).minusDays(9);
+    var dayStart = windowDay.atStartOfDay().atOffset(ZoneOffset.UTC);
+    // 三个种子相对窗口的位置是**显式不变量**：A1 在窗口前一天（窗口外）、
+    // A2 在窗口日正午 UTC（窗口内）、A3 恰好在窗口的**排他上界**（= 次日零点，窗口外）。
+    var a1At = dayStart.minusDays(1);
+    var a2At = windowDay.atTime(12, 0).atOffset(ZoneOffset.UTC);
+    var a3At = dayStart.plusDays(1);
 
-    register(actor, skuA, "100", "90", "MANUAL_ADJUSTMENT", "A1", base);
-    register(actor, skuA, "90", "95", "PRICE_RULE", "A2", base.plusDays(2));
-    register(actor, skuA, "95", "80", "BATCH_ADJUSTMENT", "A3", base.plusDays(4));
-    register(actor, skuB, "50", "40", "MANUAL_ADJUSTMENT", "B1", base.plusDays(1));
+    register(actor, skuA, "100", "90", "MANUAL_ADJUSTMENT", "A1", a1At);
+    register(actor, skuA, "90", "95", "PRICE_RULE", "A2", a2At);
+    register(actor, skuA, "95", "80", "BATCH_ADJUSTMENT", "A3", a3At);
+    register(actor, skuB, "50", "40", "MANUAL_ADJUSTMENT", "B1", a1At.plusHours(12));
+
+    // 口径自证（可执行的不变量）：把服务层的换算规则原样写在这里 ——
+    // 窗口 = [from 00:00Z, to+1 00:00Z)。谁把种子改回「墙钟相对值」，下面这三条立刻红。
+    var windowFromBound = dayStart.toInstant();
+    var windowToBound = dayStart.plusDays(1).toInstant();
+    assertThat(a2At.toInstant()).isAfterOrEqualTo(windowFromBound).isBefore(windowToBound);
+    assertThat(a1At.toInstant()).isBefore(windowFromBound);
+    assertThat(a3At.toInstant()).isEqualTo(windowToBound);
 
     // 按 SKU 筛。
     var bySku =
@@ -394,28 +438,24 @@ class PriceHistoryIntegrationTest extends BatchCalcFixture {
             .items();
     assertThat(otherShop).isEmpty();
 
-    // 按时间范围筛（半开区间：from 含、to 含整天）。
-    var byWindow =
-        tx(
-                actor,
-                () ->
-                    history.listChanges(
-                        new PriceHistoryChangeQuery(
-                            null,
-                            skuA,
-                            null,
-                            null,
-                            null,
-                            null,
-                            null,
-                            LocalDate.now().minusDays(9),
-                            LocalDate.now().minusDays(9),
-                            null,
-                            0,
-                            50)))
-            .items();
+    // 按时间范围筛（半开区间：from 含、to 含整天 ⇒ [from 00:00Z, to+1 00:00Z)）。
+    var byWindow = changesInWindow(skuA, windowDay, windowDay);
     assertThat(byWindow).hasSize(1);
     assertThat(byWindow.get(0).reasonText()).isEqualTo("A2");
+    // 命中的那条的生效时刻就是种进去的那个时刻（断言**写回的值**，不是「没抛异常」）。
+    assertThat(byWindow.get(0).effectiveAt().toInstant()).isEqualTo(a2At.toInstant());
+
+    // 窗口挪一天就换一条 ⇒ 真按天筛，不是「反正只有一条」。
+    var byPreviousDay = changesInWindow(skuA, windowDay.minusDays(1), windowDay.minusDays(1));
+    assertThat(byPreviousDay).hasSize(1);
+    assertThat(byPreviousDay.get(0).reasonText()).isEqualTo("A1");
+    // A3 恰好落在窗口的**排他上界** ⇒ 它不在 [day, day] 里，而在 [day+1, day+1] 里。
+    var byNextDay = changesInWindow(skuA, windowDay.plusDays(1), windowDay.plusDays(1));
+    assertThat(byNextDay).hasSize(1);
+    assertThat(byNextDay.get(0).reasonText()).isEqualTo("A3");
+    // 空窗口 ⇒ 命中 0 条（窗口外一条都不许命中，也不许拿 0 冒充一条真实的变更）。
+    var byEmptyWindow = changesInWindow(skuA, windowDay.plusDays(5), windowDay.plusDays(5));
+    assertThat(byEmptyWindow).isEmpty();
 
     // 真分页。
     var page1 =
@@ -434,6 +474,9 @@ class PriceHistoryIntegrationTest extends BatchCalcFixture {
             .items();
     assertThat(page1).hasSize(2);
     assertThat(page2).hasSize(1);
+    // 默认排序是生效时刻倒序 ⇒ 第一页是 A3 / A2，第二页是 A1（不是随机切两页）。
+    assertThat(page1.stream().map(r -> r.reasonText()).toList()).containsExactly("A3", "A2");
+    assertThat(page2.stream().map(r -> r.reasonText()).toList()).containsExactly("A1");
     assertThat(page1.stream().map(r -> r.id()).toList())
         .doesNotContainAnyElementsOf(page2.stream().map(r -> r.id()).toList());
 

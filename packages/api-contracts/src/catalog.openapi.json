@@ -33437,6 +33437,557 @@
           }
         }
       }
+    },
+    "/catalog/price-sync/sync": {
+      "post": {
+        "tags": [
+          "platform-price-sync-controller"
+        ],
+        "operationId": "post_catalog_price_sync_sync",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlatformPriceSyncRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformPriceSyncRunView"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/price-sync/rules": {
+      "get": {
+        "tags": [
+          "platform-price-sync-controller"
+        ],
+        "operationId": "get_catalog_price_sync_rules",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "ruleType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "platformCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "siteCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "skuId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformPriceRulePage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "platform-price-sync-controller"
+        ],
+        "operationId": "post_catalog_price_sync_rules",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlatformPriceRuleInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformPriceRuleView"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/price-sync/records/{id}/receipt": {
+      "post": {
+        "tags": [
+          "platform-price-sync-controller"
+        ],
+        "operationId": "post_catalog_price_sync_records_id_receipt",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlatformPriceReceiptRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformPriceSyncRecordDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/price-sync/rules/{id}": {
+      "get": {
+        "tags": [
+          "platform-price-sync-controller"
+        ],
+        "operationId": "get_catalog_price_sync_rules_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformPriceRuleView"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "platform-price-sync-controller"
+        ],
+        "operationId": "patch_catalog_price_sync_rules_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlatformPriceRuleInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformPriceRuleView"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/price-sync/records": {
+      "get": {
+        "tags": [
+          "platform-price-sync-controller"
+        ],
+        "operationId": "get_catalog_price_sync_records",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "outcome",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "platformCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "siteCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "skuId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformPriceSyncRecordPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/price-sync/records/{id}": {
+      "get": {
+        "tags": [
+          "platform-price-sync-controller"
+        ],
+        "operationId": "get_catalog_price_sync_records_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformPriceSyncRecordDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/price-sync/diffs": {
+      "get": {
+        "tags": [
+          "platform-price-sync-controller"
+        ],
+        "operationId": "get_catalog_price_sync_diffs",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "outcome",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "platformCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "siteCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "skuId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "syncId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformPriceDiffPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/price-sync/capabilities": {
+      "get": {
+        "tags": [
+          "platform-price-sync-controller"
+        ],
+        "operationId": "get_catalog_price_sync_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformPriceSyncCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -67757,6 +68308,628 @@
           },
           "note": {
             "type": "string"
+          }
+        }
+      },
+      "PlatformPriceSyncRequest": {
+        "type": "object",
+        "properties": {
+          "platformCode": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "siteCode": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "limit": {
+            "maximum": 500,
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          }
+        }
+      },
+      "PlatformPriceSyncRecordView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "writebackId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderItemId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "siteCode": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "expectedPrice": {
+            "type": "number"
+          },
+          "predictedPrice": {
+            "type": "number",
+            "nullable": true
+          },
+          "actualPrice": {
+            "type": "number",
+            "nullable": true
+          },
+          "priceDelta": {
+            "type": "number",
+            "nullable": true
+          },
+          "deviationRatio": {
+            "type": "number",
+            "nullable": true
+          },
+          "outcome": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "ACCEPTED",
+              "ADJUSTED",
+              "REJECTED",
+              "FAILED"
+            ]
+          },
+          "ruleOutcome": {
+            "type": "string",
+            "enum": [
+              "NOT_EVALUATED",
+              "NO_RULE",
+              "ACCEPTED",
+              "ADJUSTED",
+              "REJECTED"
+            ]
+          },
+          "ruleId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "ruleReason": {
+            "type": "string"
+          },
+          "platformOperationId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "platformRequestId": {
+            "type": "string"
+          },
+          "idempotencyKey": {
+            "type": "string"
+          },
+          "lastError": {
+            "type": "string"
+          },
+          "dispatchedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "completedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "PlatformPriceSyncRunView": {
+        "type": "object",
+        "properties": {
+          "scanned": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "created": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "dispatched": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "rejected": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "skipped": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "failed": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlatformPriceSyncRecordView"
+            }
+          }
+        }
+      },
+      "PlatformPriceRuleInput": {
+        "required": [
+          "platformCode",
+          "ruleType"
+        ],
+        "type": "object",
+        "properties": {
+          "ruleType": {
+            "type": "string",
+            "enum": [
+              "MIN_PRICE",
+              "AUTO_COMPARE",
+              "MULTI_SITE_LINK"
+            ]
+          },
+          "platformCode": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string"
+          },
+          "siteCode": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "ACTIVE",
+              "DISABLED"
+            ]
+          },
+          "priority": {
+            "maximum": 100000,
+            "minimum": 0,
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "minPrice": {
+            "minimum": 0.0001,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "nullable": true
+          },
+          "currency": {
+            "pattern": "^[A-Z]{3}$",
+            "type": "string",
+            "nullable": true
+          },
+          "comparePlatformCode": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "compareSiteCode": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "maxGapRatio": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "nullable": true
+          },
+          "referenceSiteCode": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "minRatio": {
+            "minimum": 0.000001,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "nullable": true
+          },
+          "maxRatio": {
+            "minimum": 0.000001,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "nullable": true
+          },
+          "note": {
+            "maxLength": 400,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "PlatformPriceRuleView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "ruleType": {
+            "type": "string",
+            "enum": [
+              "MIN_PRICE",
+              "AUTO_COMPARE",
+              "MULTI_SITE_LINK"
+            ]
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "siteCode": {
+            "type": "string"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ACTIVE",
+              "DISABLED"
+            ]
+          },
+          "priority": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "minPrice": {
+            "type": "number",
+            "nullable": true
+          },
+          "currency": {
+            "type": "string",
+            "nullable": true
+          },
+          "comparePlatformCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "compareSiteCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "maxGapRatio": {
+            "type": "number",
+            "nullable": true
+          },
+          "referenceSiteCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "minRatio": {
+            "type": "number",
+            "nullable": true
+          },
+          "maxRatio": {
+            "type": "number",
+            "nullable": true
+          },
+          "note": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "PlatformPriceReceiptRequest": {
+        "required": [
+          "outcome"
+        ],
+        "type": "object",
+        "properties": {
+          "outcome": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "ACCEPTED",
+              "ADJUSTED",
+              "REJECTED",
+              "FAILED"
+            ]
+          },
+          "actualPrice": {
+            "minimum": 0.0001,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "nullable": true
+          },
+          "platformRequestId": {
+            "maxLength": 128,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "reason": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "PlatformPriceDiffView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "syncId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "writebackId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "siteCode": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "expectedPrice": {
+            "type": "number"
+          },
+          "actualPrice": {
+            "type": "number",
+            "nullable": true
+          },
+          "priceDelta": {
+            "type": "number",
+            "nullable": true
+          },
+          "deviationRatio": {
+            "type": "number",
+            "nullable": true
+          },
+          "outcome": {
+            "type": "string",
+            "enum": [
+              "MATCHED",
+              "ADJUSTED",
+              "REJECTED",
+              "FAILED"
+            ]
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "RULE_EVALUATION",
+              "PLATFORM_RECEIPT"
+            ]
+          },
+          "reasonCode": {
+            "type": "string"
+          },
+          "reasonMessage": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "PlatformPriceSyncRecordDetail": {
+        "type": "object",
+        "properties": {
+          "record": {
+            "$ref": "#/components/schemas/PlatformPriceSyncRecordView"
+          },
+          "diffs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlatformPriceDiffView"
+            }
+          }
+        }
+      },
+      "PlatformPriceRulePage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlatformPriceRuleView"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalElements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "PlatformPriceSyncRecordPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlatformPriceSyncRecordView"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalElements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "PlatformPriceDiffPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlatformPriceDiffView"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalElements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "PlatformPriceSyncCapabilities": {
+        "type": "object",
+        "properties": {
+          "module": {
+            "type": "string"
+          },
+          "ruleTypes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "ruleTypeSemantics": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "outcomes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "diffSources": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "upstreamOwner": {
+            "type": "string"
+          },
+          "upstreamResource": {
+            "type": "string"
+          },
+          "upstreamWriteOwner": {
+            "type": "string"
+          },
+          "queueService": {
+            "type": "string"
+          },
+          "queueResource": {
+            "type": "string"
+          },
+          "queueOperation": {
+            "type": "string"
+          },
+          "comparisonPriceSource": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         }
       }

@@ -28966,6 +28966,922 @@
           }
         }
       }
+    },
+    "/warehouse/inventory/consignment-stock/orders": {
+      "get": {
+        "tags": [
+          "consignment-stock-controller"
+        ],
+        "operationId": "get_warehouse_inventory_consignment_stock_orders",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "shopId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "settlementBasis",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformConsignmentOrderPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "consignment-stock-controller"
+        ],
+        "operationId": "post_warehouse_inventory_consignment_stock_orders",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlatformConsignmentOrderInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformConsignmentOrderDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/consignment-stock/orders/{orderId}/ship": {
+      "post": {
+        "tags": [
+          "consignment-stock-controller"
+        ],
+        "operationId": "post_warehouse_inventory_consignment_stock_orders_orderId_ship",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "orderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlatformConsignmentNoteInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformConsignmentOrder"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/consignment-stock/orders/{orderId}/settlement-receipts": {
+      "get": {
+        "tags": [
+          "consignment-stock-controller"
+        ],
+        "operationId": "get_warehouse_inventory_consignment_stock_orders_orderId_settlement_receipts",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "orderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformConsignmentSettlementReceiptPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "consignment-stock-controller"
+        ],
+        "operationId": "post_warehouse_inventory_consignment_stock_orders_orderId_settlement_receipts",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "orderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlatformConsignmentSettlementReceiptInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformConsignmentSettlementReceipt"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/consignment-stock/orders/{orderId}/receipts": {
+      "get": {
+        "tags": [
+          "consignment-stock-controller"
+        ],
+        "operationId": "get_warehouse_inventory_consignment_stock_orders_orderId_receipts",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "orderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "receiptType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformConsignmentReceiptPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "consignment-stock-controller"
+        ],
+        "operationId": "post_warehouse_inventory_consignment_stock_orders_orderId_receipts",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "orderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlatformConsignmentReceiptInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformConsignmentReceipt"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/consignment-stock/orders/{orderId}/lines": {
+      "post": {
+        "tags": [
+          "consignment-stock-controller"
+        ],
+        "operationId": "post_warehouse_inventory_consignment_stock_orders_orderId_lines",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "orderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlatformConsignmentAddLineInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformConsignmentOrderDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/consignment-stock/orders/{orderId}/confirm-receipt": {
+      "post": {
+        "tags": [
+          "consignment-stock-controller"
+        ],
+        "operationId": "post_warehouse_inventory_consignment_stock_orders_orderId_confirm_receipt",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "orderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlatformConsignmentNoteInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformConsignmentOrder"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/consignment-stock/orders/{orderId}/close": {
+      "post": {
+        "tags": [
+          "consignment-stock-controller"
+        ],
+        "operationId": "post_warehouse_inventory_consignment_stock_orders_orderId_close",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "orderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlatformConsignmentNoteInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformConsignmentOrder"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/consignment-stock/orders/{orderId}/cancel": {
+      "post": {
+        "tags": [
+          "consignment-stock-controller"
+        ],
+        "operationId": "post_warehouse_inventory_consignment_stock_orders_orderId_cancel",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "orderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlatformConsignmentNoteInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformConsignmentOrder"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/consignment-stock/shops/{shopId}": {
+      "get": {
+        "tags": [
+          "consignment-stock-controller"
+        ],
+        "operationId": "get_warehouse_inventory_consignment_stock_shops_shopId",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "shopId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformConsignmentShopMode"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/consignment-stock/orders/{orderId}": {
+      "get": {
+        "tags": [
+          "consignment-stock-controller"
+        ],
+        "operationId": "get_warehouse_inventory_consignment_stock_orders_orderId",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "orderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformConsignmentOrderDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/consignment-stock/orders/{orderId}/settlement-basis": {
+      "get": {
+        "tags": [
+          "consignment-stock-controller"
+        ],
+        "operationId": "get_warehouse_inventory_consignment_stock_orders_orderId_settlement_basis",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "orderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformConsignmentSettlementBasisView"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/consignment-stock/orders/{orderId}/reconciliation": {
+      "get": {
+        "tags": [
+          "consignment-stock-controller"
+        ],
+        "operationId": "get_warehouse_inventory_consignment_stock_orders_orderId_reconciliation",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "orderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformConsignmentReconciliation"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/consignment-stock/orders/{orderId}/ledger": {
+      "get": {
+        "tags": [
+          "consignment-stock-controller"
+        ],
+        "operationId": "get_warehouse_inventory_consignment_stock_orders_orderId_ledger",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "orderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformConsignmentLedger"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/consignment-stock/orders/{orderId}/audit": {
+      "get": {
+        "tags": [
+          "consignment-stock-controller"
+        ],
+        "operationId": "get_warehouse_inventory_consignment_stock_orders_orderId_audit",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "orderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PlatformConsignmentAuditEntry"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/consignment-stock/forecast-preview": {
+      "get": {
+        "tags": [
+          "consignment-stock-controller"
+        ],
+        "operationId": "get_warehouse_inventory_consignment_stock_forecast_preview",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "forecastId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformConsignmentForecastPreview"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/consignment-stock/capabilities": {
+      "get": {
+        "tags": [
+          "consignment-stock-controller"
+        ],
+        "operationId": "get_warehouse_inventory_consignment_stock_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformConsignmentCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -67251,6 +68167,1081 @@
           "reason": {
             "type": "string",
             "nullable": true
+          }
+        }
+      },
+      "PlatformConsignmentLineInput": {
+        "type": "object",
+        "properties": {
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "stockedQuantity": {
+            "type": "number"
+          },
+          "unit": {
+            "type": "string",
+            "nullable": true
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "PlatformConsignmentOrderInput": {
+        "type": "object",
+        "properties": {
+          "shopId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "platformWarehouseCode": {
+            "type": "string"
+          },
+          "platformWarehouseName": {
+            "type": "string"
+          },
+          "legalEntityId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "settlementBasis": {
+            "type": "string"
+          },
+          "forecastId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlatformConsignmentLineInput"
+            }
+          }
+        }
+      },
+      "PlatformConsignmentAuditEntry": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "eventType": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "actorUserId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "PlatformConsignmentLedger": {
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderCode": {
+            "type": "string"
+          },
+          "shopCode": {
+            "type": "string"
+          },
+          "shopName": {
+            "type": "string"
+          },
+          "operatingMode": {
+            "type": "string"
+          },
+          "operatingModeLabel": {
+            "type": "string"
+          },
+          "settlementBasis": {
+            "type": "string"
+          },
+          "settlementBasisLabel": {
+            "type": "string"
+          },
+          "totalStockedQuantity": {
+            "type": "number"
+          },
+          "totalPlatformReceivedQuantity": {
+            "type": "number"
+          },
+          "totalPlatformSoldQuantity": {
+            "type": "number"
+          },
+          "totalPlatformOnHandQuantity": {
+            "type": "number"
+          },
+          "totalInTransitQuantity": {
+            "type": "number"
+          },
+          "totalSettledQuantity": {
+            "type": "number"
+          },
+          "totalUnsettledQuantity": {
+            "type": "number"
+          },
+          "totalOwnInventoryOnHandQuantity": {
+            "type": "number"
+          },
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlatformConsignmentLedgerRow"
+            }
+          },
+          "measureNote": {
+            "type": "string"
+          },
+          "separationNote": {
+            "type": "string"
+          }
+        }
+      },
+      "PlatformConsignmentLedgerRow": {
+        "type": "object",
+        "properties": {
+          "orderLineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "stockedQuantity": {
+            "type": "number"
+          },
+          "platformReceivedQuantity": {
+            "type": "number"
+          },
+          "platformSoldQuantity": {
+            "type": "number"
+          },
+          "platformOnHandQuantity": {
+            "type": "number"
+          },
+          "inTransitQuantity": {
+            "type": "number"
+          },
+          "settledQuantity": {
+            "type": "number"
+          },
+          "unsettledQuantity": {
+            "type": "number"
+          },
+          "ownInventoryOnHandQuantity": {
+            "type": "number"
+          },
+          "ownInventoryReservedQuantity": {
+            "type": "number"
+          },
+          "countsAsOwnedAsset": {
+            "type": "boolean"
+          },
+          "settlementBasis": {
+            "type": "string"
+          },
+          "settlementBasisLabel": {
+            "type": "string"
+          },
+          "settlementState": {
+            "type": "string"
+          },
+          "settlementStateLabel": {
+            "type": "string"
+          }
+        }
+      },
+      "PlatformConsignmentOrder": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderCode": {
+            "type": "string"
+          },
+          "shopId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "shopCode": {
+            "type": "string"
+          },
+          "shopName": {
+            "type": "string"
+          },
+          "operatingMode": {
+            "type": "string"
+          },
+          "operatingModeLabel": {
+            "type": "string"
+          },
+          "platformWarehouseCode": {
+            "type": "string"
+          },
+          "platformWarehouseName": {
+            "type": "string"
+          },
+          "legalEntityId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "settlementBasis": {
+            "type": "string"
+          },
+          "settlementBasisLabel": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "forecastId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "forecastNo": {
+            "type": "string"
+          },
+          "lineCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalStockedQuantity": {
+            "type": "number"
+          },
+          "totalPlatformReceivedQuantity": {
+            "type": "number"
+          },
+          "totalPlatformSoldQuantity": {
+            "type": "number"
+          },
+          "totalPlatformOnHandQuantity": {
+            "type": "number"
+          },
+          "totalUnsettledQuantity": {
+            "type": "number"
+          },
+          "settlementState": {
+            "type": "string"
+          },
+          "settlementStateLabel": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "createdByUserId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "shippedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "platformReceivedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "closedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "PlatformConsignmentOrderDetail": {
+        "type": "object",
+        "properties": {
+          "order": {
+            "$ref": "#/components/schemas/PlatformConsignmentOrder"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlatformConsignmentOrderLine"
+            }
+          },
+          "ledger": {
+            "$ref": "#/components/schemas/PlatformConsignmentLedger"
+          },
+          "reconciliation": {
+            "$ref": "#/components/schemas/PlatformConsignmentReconciliation"
+          },
+          "auditTrail": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlatformConsignmentAuditEntry"
+            }
+          }
+        }
+      },
+      "PlatformConsignmentOrderLine": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "stockedQuantity": {
+            "type": "number"
+          },
+          "unit": {
+            "type": "string"
+          },
+          "countsAsOwnedAsset": {
+            "type": "boolean"
+          },
+          "platformReceivedQuantity": {
+            "type": "number"
+          },
+          "platformSoldQuantity": {
+            "type": "number"
+          },
+          "platformOnHandQuantity": {
+            "type": "number"
+          },
+          "inTransitQuantity": {
+            "type": "number"
+          },
+          "settledQuantity": {
+            "type": "number"
+          },
+          "unsettledQuantity": {
+            "type": "number"
+          },
+          "settlementState": {
+            "type": "string"
+          },
+          "settlementStateLabel": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "PlatformConsignmentReconciliation": {
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderCode": {
+            "type": "string"
+          },
+          "shopCode": {
+            "type": "string"
+          },
+          "operatingMode": {
+            "type": "string"
+          },
+          "operatingModeLabel": {
+            "type": "string"
+          },
+          "settlementBasis": {
+            "type": "string"
+          },
+          "settlementBasisLabel": {
+            "type": "string"
+          },
+          "totalStockedQuantity": {
+            "type": "number"
+          },
+          "totalPlatformReceivedQuantity": {
+            "type": "number"
+          },
+          "totalPlatformSoldQuantity": {
+            "type": "number"
+          },
+          "totalPlatformOnHandQuantity": {
+            "type": "number"
+          },
+          "totalInTransitQuantity": {
+            "type": "number"
+          },
+          "totalUnsettledQuantity": {
+            "type": "number"
+          },
+          "ownInventoryOnHandQuantity": {
+            "type": "number"
+          },
+          "ownInventoryReservedQuantity": {
+            "type": "number"
+          },
+          "segregationLeakQuantity": {
+            "type": "number"
+          },
+          "segregationStatus": {
+            "type": "string"
+          },
+          "segregationStatusLabel": {
+            "type": "string"
+          },
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlatformConsignmentReconciliationRow"
+            }
+          },
+          "differenceNote": {
+            "type": "string"
+          },
+          "segregationNote": {
+            "type": "string"
+          }
+        }
+      },
+      "PlatformConsignmentReconciliationRow": {
+        "type": "object",
+        "properties": {
+          "orderLineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "stockedQuantity": {
+            "type": "number"
+          },
+          "platformReceivedQuantity": {
+            "type": "number"
+          },
+          "platformSoldQuantity": {
+            "type": "number"
+          },
+          "platformOnHandQuantity": {
+            "type": "number"
+          },
+          "inTransitQuantity": {
+            "type": "number"
+          },
+          "settledQuantity": {
+            "type": "number"
+          },
+          "unsettledQuantity": {
+            "type": "number"
+          },
+          "ownInventoryOnHandQuantity": {
+            "type": "number"
+          },
+          "ownInventoryReservedQuantity": {
+            "type": "number"
+          },
+          "differenceQuantity": {
+            "type": "number"
+          },
+          "differenceBasis": {
+            "type": "string"
+          },
+          "differenceBasisLabel": {
+            "type": "string"
+          },
+          "differenceNote": {
+            "type": "string"
+          }
+        }
+      },
+      "PlatformConsignmentNoteInput": {
+        "type": "object",
+        "properties": {
+          "note": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "PlatformConsignmentSettlementReceiptInput": {
+        "type": "object",
+        "properties": {
+          "orderLineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "settlementBasis": {
+            "type": "string"
+          },
+          "periodStart": {
+            "type": "string",
+            "format": "date"
+          },
+          "periodEnd": {
+            "type": "string",
+            "format": "date"
+          },
+          "settledQuantity": {
+            "type": "number"
+          },
+          "settledAmount": {
+            "type": "number",
+            "nullable": true
+          },
+          "currency": {
+            "type": "string"
+          },
+          "platformRef": {
+            "type": "string"
+          },
+          "receivedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "sourceSystem": {
+            "type": "string",
+            "nullable": true
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "PlatformConsignmentSettlementReceipt": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderLineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "settlementBasis": {
+            "type": "string"
+          },
+          "settlementBasisLabel": {
+            "type": "string"
+          },
+          "periodStart": {
+            "type": "string",
+            "format": "date"
+          },
+          "periodEnd": {
+            "type": "string",
+            "format": "date"
+          },
+          "settledQuantity": {
+            "type": "number"
+          },
+          "settledAmount": {
+            "type": "number",
+            "nullable": true
+          },
+          "currency": {
+            "type": "string"
+          },
+          "platformRef": {
+            "type": "string"
+          },
+          "receivedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "sourceSystem": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "PlatformConsignmentReceiptInput": {
+        "type": "object",
+        "properties": {
+          "orderLineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "receiptType": {
+            "type": "string"
+          },
+          "platformReceiptRef": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "sourceSystem": {
+            "type": "string",
+            "nullable": true
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "PlatformConsignmentReceipt": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderLineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "receiptType": {
+            "type": "string"
+          },
+          "receiptTypeLabel": {
+            "type": "string"
+          },
+          "platformReceiptRef": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "sourceSystem": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "PlatformConsignmentAddLineInput": {
+        "type": "object",
+        "properties": {
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "stockedQuantity": {
+            "type": "number"
+          },
+          "unit": {
+            "type": "string",
+            "nullable": true
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "PlatformConsignmentShopMode": {
+        "type": "object",
+        "properties": {
+          "shopId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "shopCode": {
+            "type": "string"
+          },
+          "shopName": {
+            "type": "string"
+          },
+          "operatingMode": {
+            "type": "string",
+            "nullable": true
+          },
+          "operatingModeLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "known": {
+            "type": "boolean"
+          },
+          "supportsConsignmentStock": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "PlatformConsignmentOrderPage": {
+        "type": "object",
+        "properties": {
+          "orders": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlatformConsignmentOrder"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "PlatformConsignmentSettlementReceiptPage": {
+        "type": "object",
+        "properties": {
+          "receipts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlatformConsignmentSettlementReceipt"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "PlatformConsignmentSettledPeriod": {
+        "type": "object",
+        "properties": {
+          "periodStart": {
+            "type": "string",
+            "format": "date"
+          },
+          "periodEnd": {
+            "type": "string",
+            "format": "date"
+          },
+          "settledQuantity": {
+            "type": "number"
+          },
+          "basis": {
+            "type": "string"
+          }
+        }
+      },
+      "PlatformConsignmentSettlementBasisView": {
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderCode": {
+            "type": "string"
+          },
+          "basis": {
+            "type": "string"
+          },
+          "basisLabel": {
+            "type": "string"
+          },
+          "basisRule": {
+            "type": "string"
+          },
+          "platformSoldQuantity": {
+            "type": "number"
+          },
+          "settledQuantity": {
+            "type": "number"
+          },
+          "unsettledQuantity": {
+            "type": "number",
+            "nullable": true
+          },
+          "unsettledKnown": {
+            "type": "boolean"
+          },
+          "settlementState": {
+            "type": "string"
+          },
+          "settlementStateLabel": {
+            "type": "string"
+          },
+          "settledPeriods": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlatformConsignmentSettledPeriod"
+            }
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "PlatformConsignmentReceiptPage": {
+        "type": "object",
+        "properties": {
+          "receipts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlatformConsignmentReceipt"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "PlatformConsignmentForecastLine": {
+        "type": "object",
+        "properties": {
+          "skuCode": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "unit": {
+            "type": "string"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "skuName": {
+            "type": "string",
+            "nullable": true
+          },
+          "mapped": {
+            "type": "boolean"
+          }
+        }
+      },
+      "PlatformConsignmentForecastPreview": {
+        "type": "object",
+        "properties": {
+          "forecastId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "forecastNo": {
+            "type": "string"
+          },
+          "known": {
+            "type": "boolean"
+          },
+          "status": {
+            "type": "string"
+          },
+          "expectedArrivalAt": {
+            "type": "string"
+          },
+          "totalQuantity": {
+            "type": "number"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlatformConsignmentForecastLine"
+            }
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "PlatformConsignmentCapabilities": {
+        "type": "object",
+        "properties": {
+          "operatingModes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlatformConsignmentOption"
+            }
+          },
+          "settlementBases": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlatformConsignmentOption"
+            }
+          },
+          "receiptTypes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlatformConsignmentOption"
+            }
+          },
+          "differenceBases": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlatformConsignmentOption"
+            }
+          },
+          "orderStatuses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlatformConsignmentOption"
+            }
+          },
+          "supportedOperatingModes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "unavailable": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlatformConsignmentUnavailableCapability"
+            }
+          },
+          "measureNote": {
+            "type": "string"
+          },
+          "separationNote": {
+            "type": "string"
+          },
+          "settlementNote": {
+            "type": "string"
+          },
+          "operatingModeNote": {
+            "type": "string"
+          },
+          "forecastNote": {
+            "type": "string"
+          },
+          "segregationCheckNote": {
+            "type": "string"
+          }
+        }
+      },
+      "PlatformConsignmentOption": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        }
+      },
+      "PlatformConsignmentUnavailableCapability": {
+        "type": "object",
+        "properties": {
+          "capability": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "ownerService": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "handoff": {
+            "type": "string"
           }
         }
       }
