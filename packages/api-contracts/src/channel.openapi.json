@@ -40037,6 +40037,538 @@
           }
         }
       }
+    },
+    "/channel/ad-promotion-analysis/runs": {
+      "get": {
+        "tags": [
+          "ad-promotion-analysis-controller"
+        ],
+        "operationId": "get_channel_ad_promotion_analysis_runs",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AdPromotionAnalysisRunRow"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "ad-promotion-analysis-controller"
+        ],
+        "operationId": "post_channel_ad_promotion_analysis_runs",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RunAnalysisRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdPromotionAnalysisRunRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/ad-promotion-analysis/exports": {
+      "get": {
+        "tags": [
+          "ad-promotion-analysis-controller"
+        ],
+        "operationId": "get_channel_ad_promotion_analysis_exports",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdPromotionAnalysisExportPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "ad-promotion-analysis-controller"
+        ],
+        "operationId": "post_channel_ad_promotion_analysis_exports",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdPromotionAnalysisExportRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdPromotionAnalysisExportRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/ad-promotion-analysis/cost-snapshots": {
+      "get": {
+        "tags": [
+          "ad-promotion-analysis-controller"
+        ],
+        "operationId": "get_channel_ad_promotion_analysis_cost_snapshots",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "promotionId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "listingId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdPromotionAnalysisCostSnapshotPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "ad-promotion-analysis-controller"
+        ],
+        "operationId": "post_channel_ad_promotion_analysis_cost_snapshots",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveCostSnapshotRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdPromotionAnalysisCostSnapshotRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/ad-promotion-analysis/report": {
+      "get": {
+        "tags": [
+          "ad-promotion-analysis-controller"
+        ],
+        "operationId": "get_channel_ad_promotion_analysis_report",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "dimension",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "promotionId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "platformId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "shopCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "currency",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "incrementVerdict",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "marginAlertOnly",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "dateFrom",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "dateTo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdPromotionAnalysisPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/ad-promotion-analysis/options": {
+      "get": {
+        "tags": [
+          "ad-promotion-analysis-controller"
+        ],
+        "operationId": "get_channel_ad_promotion_analysis_options",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdPromotionAnalysisOptions"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/ad-promotion-analysis/exports/{exportId}/csv": {
+      "get": {
+        "tags": [
+          "ad-promotion-analysis-controller"
+        ],
+        "operationId": "get_channel_ad_promotion_analysis_exports_exportId_csv",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "exportId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/csv": {
+                "schema": {
+                  "$ref": "#/components/schemas/StreamingResponseBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/ad-promotion-analysis/capabilities": {
+      "get": {
+        "tags": [
+          "ad-promotion-analysis-controller"
+        ],
+        "operationId": "get_channel_ad_promotion_analysis_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdPromotionAnalysisCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -96764,6 +97296,836 @@
             "format": "int32"
           }
         }
+      },
+      "RunAnalysisRequest": {
+        "type": "object",
+        "properties": {
+          "promotionId": {
+            "type": "string",
+            "description": "促销 id；留空 = 跑全部处于活动期的促销",
+            "format": "uuid"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          }
+        }
+      },
+      "AdPromotionAnalysisRunRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "运行 id",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "description": "状态：SUCCESS / PARTIAL / FAILED"
+          },
+          "promotionId": {
+            "type": "string",
+            "description": "目标促销 id；null = 批量",
+            "format": "uuid"
+          },
+          "analyzedCount": {
+            "type": "integer",
+            "description": "算出来的促销数",
+            "format": "int32"
+          },
+          "skippedCount": {
+            "type": "integer",
+            "description": "跳过的促销数",
+            "format": "int32"
+          },
+          "skipped": {
+            "type": "string",
+            "description": "跳过明细（jsonb 数组：promotionId / promotionCode / reason）"
+          },
+          "dataAsOf": {
+            "type": "string",
+            "description": "数据截至",
+            "format": "date-time"
+          },
+          "metricDefinitionNote": {
+            "type": "string",
+            "description": "口径定义"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "运行时刻",
+            "format": "date-time"
+          }
+        }
+      },
+      "AdPromotionAnalysisExportRequest": {
+        "required": [
+          "dimension"
+        ],
+        "type": "object",
+        "properties": {
+          "dimension": {
+            "minLength": 1,
+            "type": "string",
+            "description": "维度：PROMOTION / PRODUCT"
+          },
+          "promotionId": {
+            "type": "string",
+            "description": "促销筛选",
+            "format": "uuid"
+          },
+          "platformId": {
+            "type": "string",
+            "description": "平台筛选",
+            "format": "uuid"
+          },
+          "shopCode": {
+            "type": "string",
+            "description": "店铺筛选"
+          },
+          "currency": {
+            "type": "string",
+            "description": "币种筛选"
+          },
+          "incrementVerdict": {
+            "type": "string",
+            "description": "判定筛选"
+          },
+          "dateFrom": {
+            "type": "string",
+            "description": "起始日",
+            "format": "date"
+          },
+          "dateTo": {
+            "type": "string",
+            "description": "截止日",
+            "format": "date"
+          }
+        }
+      },
+      "AdPromotionAnalysisExportRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "导出 id",
+            "format": "uuid"
+          },
+          "requestedBy": {
+            "type": "string",
+            "description": "导出人",
+            "format": "uuid"
+          },
+          "dimension": {
+            "type": "string",
+            "description": "维度：PROMOTION / PRODUCT"
+          },
+          "promotionId": {
+            "type": "string",
+            "description": "促销筛选",
+            "format": "uuid"
+          },
+          "platformId": {
+            "type": "string",
+            "description": "平台筛选",
+            "format": "uuid"
+          },
+          "shopCode": {
+            "type": "string",
+            "description": "店铺筛选"
+          },
+          "currency": {
+            "type": "string",
+            "description": "币种筛选"
+          },
+          "incrementVerdict": {
+            "type": "string",
+            "description": "判定筛选"
+          },
+          "dateFrom": {
+            "type": "string",
+            "description": "起始日",
+            "format": "date"
+          },
+          "dateTo": {
+            "type": "string",
+            "description": "截止日",
+            "format": "date"
+          },
+          "rowCount": {
+            "type": "integer",
+            "description": "导出行数",
+            "format": "int32"
+          },
+          "dataAsOf": {
+            "type": "string",
+            "description": "数据截至",
+            "format": "date-time"
+          },
+          "metricDefinitionNote": {
+            "type": "string",
+            "description": "口径定义"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "导出时刻",
+            "format": "date-time"
+          }
+        }
+      },
+      "SaveCostSnapshotRequest": {
+        "required": [
+          "listingId",
+          "promotionId",
+          "unitCost"
+        ],
+        "type": "object",
+        "properties": {
+          "promotionId": {
+            "type": "string",
+            "description": "促销 id",
+            "format": "uuid"
+          },
+          "listingId": {
+            "type": "string",
+            "description": "商品 id",
+            "format": "uuid"
+          },
+          "unitCost": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "description": "单位成本；catalog 侧 landed cost / sku cost 口径"
+          },
+          "basePrice": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "description": "促销前基准价；留空 = 没登记 ⇒ 补贴成本不可比"
+          },
+          "currency": {
+            "type": "string",
+            "description": "币种；留空 = 取促销的币种"
+          },
+          "sourceRef": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string",
+            "description": "来源说明（catalog 的哪个口径 / 哪条记录）"
+          },
+          "capturedAt": {
+            "type": "string",
+            "description": "🔴 快照时刻：成本是随时间变的，不记时刻就不知道这个数字说的是哪天",
+            "format": "date-time"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          }
+        }
+      },
+      "AdPromotionAnalysisCostSnapshotRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "快照 id",
+            "format": "uuid"
+          },
+          "promotionId": {
+            "type": "string",
+            "description": "促销 id",
+            "format": "uuid"
+          },
+          "promotionCode": {
+            "type": "string",
+            "description": "促销编码"
+          },
+          "promotionName": {
+            "type": "string",
+            "description": "促销名称"
+          },
+          "listingId": {
+            "type": "string",
+            "description": "商品 id",
+            "format": "uuid"
+          },
+          "listingTitle": {
+            "type": "string",
+            "description": "商品标题"
+          },
+          "externalItemId": {
+            "type": "string",
+            "description": "商品编码"
+          },
+          "currency": {
+            "type": "string",
+            "description": "币种"
+          },
+          "unitCost": {
+            "type": "number",
+            "description": "单位成本快照"
+          },
+          "basePrice": {
+            "type": "number",
+            "description": "促销前基准价快照；null = 没登记 ⇒ **百分比促销**的补贴不可比（固定额促销不需要它）"
+          },
+          "sourceRef": {
+            "type": "string",
+            "description": "来源说明"
+          },
+          "capturedAt": {
+            "type": "string",
+            "description": "快照时刻",
+            "format": "date-time"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          },
+          "version": {
+            "type": "integer",
+            "description": "版本",
+            "format": "int64"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "更新时间",
+            "format": "date-time"
+          }
+        }
+      },
+      "AdPromotionAnalysisPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "本页数据",
+            "items": {
+              "$ref": "#/components/schemas/AdPromotionAnalysisRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "description": "总条数",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "description": "页码（从 0 起）",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "description": "每页条数",
+            "format": "int32"
+          },
+          "metricDefinitionNote": {
+            "type": "string",
+            "description": "🔴 口径定义"
+          }
+        }
+      },
+      "AdPromotionAnalysisRow": {
+        "type": "object",
+        "properties": {
+          "promotionId": {
+            "type": "string",
+            "description": "促销 id",
+            "format": "uuid"
+          },
+          "promotionCode": {
+            "type": "string",
+            "description": "促销编码"
+          },
+          "promotionName": {
+            "type": "string",
+            "description": "促销名称"
+          },
+          "promotionType": {
+            "type": "string",
+            "description": "促销类型"
+          },
+          "platformCode": {
+            "type": "string",
+            "description": "平台编码"
+          },
+          "shopCode": {
+            "type": "string",
+            "description": "店铺编码"
+          },
+          "listingId": {
+            "type": "string",
+            "description": "商品 id；活动维度汇总时为空",
+            "format": "uuid"
+          },
+          "listingTitle": {
+            "type": "string",
+            "description": "商品标题；活动维度汇总时为空"
+          },
+          "externalItemId": {
+            "type": "string",
+            "description": "商品编码；活动维度汇总时为空"
+          },
+          "currency": {
+            "type": "string",
+            "description": "币种"
+          },
+          "periodFromAt": {
+            "type": "string",
+            "description": "促销期窗口起",
+            "format": "date-time"
+          },
+          "periodToAt": {
+            "type": "string",
+            "description": "促销期窗口止",
+            "format": "date-time"
+          },
+          "periodDays": {
+            "type": "integer",
+            "description": "促销期天数",
+            "format": "int32"
+          },
+          "periodCoveredDays": {
+            "type": "integer",
+            "description": "促销期内有平台快照的天数（覆盖度）",
+            "format": "int32"
+          },
+          "promoUnits": {
+            "type": "number",
+            "description": "促销期销量"
+          },
+          "promoSales": {
+            "type": "number",
+            "description": "促销期销售额"
+          },
+          "promoCost": {
+            "type": "number",
+            "description": "促销期成本；null = 不可比"
+          },
+          "promoGrossProfit": {
+            "type": "number",
+            "description": "🔴 促销期毛利额；null = 不可比（缺成本快照）"
+          },
+          "promoGrossMarginRate": {
+            "type": "number",
+            "description": "🔴 促销期毛利率；null = 不可比"
+          },
+          "baselineFromAt": {
+            "type": "string",
+            "description": "基期窗口起",
+            "format": "date-time"
+          },
+          "baselineToAt": {
+            "type": "string",
+            "description": "基期窗口止",
+            "format": "date-time"
+          },
+          "baselineDays": {
+            "type": "integer",
+            "description": "基期天数（与促销期等长）",
+            "format": "int32"
+          },
+          "baselineCoveredDays": {
+            "type": "integer",
+            "description": "基期内有平台快照的天数（覆盖度）",
+            "format": "int32"
+          },
+          "baselineUnits": {
+            "type": "number",
+            "description": "基期销量"
+          },
+          "baselineSales": {
+            "type": "number",
+            "description": "基期销售额"
+          },
+          "baselineCost": {
+            "type": "number",
+            "description": "基期成本；null = 不可比"
+          },
+          "baselineGrossProfit": {
+            "type": "number",
+            "description": "基期毛利额；null = 不可比"
+          },
+          "baselineGrossMarginRate": {
+            "type": "number",
+            "description": "基期毛利率；null = 不可比"
+          },
+          "incrementUnits": {
+            "type": "number",
+            "description": "增量销量（总量口径）"
+          },
+          "incrementSales": {
+            "type": "number",
+            "description": "增量销售额（总量口径）"
+          },
+          "incrementGrossProfit": {
+            "type": "number",
+            "description": "🔴 增量毛利（总量口径）；null = 不可比"
+          },
+          "subsidyUnit": {
+            "type": "number",
+            "description": "单件让利；null = 该促销类型无可折算价格系数或缺基准价"
+          },
+          "subsidyCost": {
+            "type": "number",
+            "description": "🔴 补贴成本 = 单件让利 × 实际销量；null = 不可比"
+          },
+          "roiNumerator": {
+            "type": "number",
+            "description": "🔴 ROI 分子（增量毛利）"
+          },
+          "roiDenominator": {
+            "type": "number",
+            "description": "🔴 ROI 分母（补贴成本）"
+          },
+          "roiValue": {
+            "type": "number",
+            "description": "🔴 ROI；null = 不可比（分母 ≤ 0）"
+          },
+          "incrementVerdict": {
+            "type": "string",
+            "description": "🔴 增量判定（判据是增量毛利）"
+          },
+          "marginAlert": {
+            "type": "boolean",
+            "description": "🔴 放量不赚告警：销售额涨了但毛利率跌了"
+          },
+          "productCount": {
+            "type": "integer",
+            "description": "参与汇总的商品数",
+            "format": "int32"
+          },
+          "grossProfitProductCount": {
+            "type": "integer",
+            "description": "其中毛利可比的商品数（其余缺成本快照）",
+            "format": "int32"
+          },
+          "comparableProductCount": {
+            "type": "integer",
+            "description": "其中毛利与补贴均可比的商品数",
+            "format": "int32"
+          },
+          "dataAsOf": {
+            "type": "string",
+            "description": "数据截至",
+            "format": "date-time"
+          },
+          "metricDefinitionNote": {
+            "type": "string",
+            "description": "🔴 口径定义（随行返回，跨部门沟通用同一份）"
+          }
+        },
+        "description": "本页数据"
+      },
+      "AdPromotionAnalysisOption": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "取值"
+          },
+          "label": {
+            "type": "string",
+            "description": "显示名"
+          }
+        },
+        "description": "排序下拉项"
+      },
+      "AdPromotionAnalysisOptions": {
+        "type": "object",
+        "properties": {
+          "incrementVerdicts": {
+            "type": "array",
+            "description": "增量判定下拉项",
+            "items": {
+              "$ref": "#/components/schemas/AdPromotionAnalysisOption"
+            }
+          },
+          "dimensions": {
+            "type": "array",
+            "description": "维度下拉项",
+            "items": {
+              "$ref": "#/components/schemas/AdPromotionAnalysisOption"
+            }
+          },
+          "sorts": {
+            "type": "array",
+            "description": "排序下拉项",
+            "items": {
+              "$ref": "#/components/schemas/AdPromotionAnalysisOption"
+            }
+          },
+          "promotions": {
+            "type": "array",
+            "description": "促销下拉项",
+            "items": {
+              "$ref": "#/components/schemas/AdPromotionAnalysisPromotionOption"
+            }
+          },
+          "platforms": {
+            "type": "array",
+            "description": "平台下拉项",
+            "items": {
+              "$ref": "#/components/schemas/AdPromotionAnalysisPlatformOption"
+            }
+          },
+          "shops": {
+            "type": "array",
+            "description": "店铺下拉项",
+            "items": {
+              "$ref": "#/components/schemas/AdPromotionAnalysisShopOption"
+            }
+          },
+          "currencies": {
+            "type": "array",
+            "description": "币种下拉项",
+            "items": {
+              "type": "string",
+              "description": "币种下拉项"
+            }
+          },
+          "salesNote": {
+            "type": "string",
+            "description": "🔴 销量与销售额口径说明"
+          },
+          "marginNote": {
+            "type": "string",
+            "description": "🔴 毛利口径说明"
+          },
+          "baselineNote": {
+            "type": "string",
+            "description": "🔴 基期对比口径说明"
+          }
+        }
+      },
+      "AdPromotionAnalysisPlatformOption": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "平台 id"
+          },
+          "code": {
+            "type": "string",
+            "description": "平台编码"
+          },
+          "name": {
+            "type": "string",
+            "description": "平台名称"
+          }
+        },
+        "description": "平台下拉项"
+      },
+      "AdPromotionAnalysisPromotionOption": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "促销 id"
+          },
+          "promotionCode": {
+            "type": "string",
+            "description": "促销编码"
+          },
+          "promotionName": {
+            "type": "string",
+            "description": "促销名称"
+          },
+          "promotionType": {
+            "type": "string",
+            "description": "促销类型"
+          },
+          "currency": {
+            "type": "string",
+            "description": "币种"
+          },
+          "startAt": {
+            "type": "string",
+            "description": "开始时刻",
+            "format": "date-time"
+          },
+          "endAt": {
+            "type": "string",
+            "description": "结束时刻",
+            "format": "date-time"
+          },
+          "status": {
+            "type": "string",
+            "description": "状态"
+          }
+        },
+        "description": "促销下拉项"
+      },
+      "AdPromotionAnalysisShopOption": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "店铺编码"
+          },
+          "name": {
+            "type": "string",
+            "description": "店铺名称"
+          }
+        },
+        "description": "店铺下拉项"
+      },
+      "AdPromotionAnalysisExportPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "本页数据",
+            "items": {
+              "$ref": "#/components/schemas/AdPromotionAnalysisExportRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "description": "总条数",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "description": "页码（从 0 起）",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "description": "每页条数",
+            "format": "int32"
+          }
+        }
+      },
+      "AdPromotionAnalysisCostSnapshotPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "本页数据",
+            "items": {
+              "$ref": "#/components/schemas/AdPromotionAnalysisCostSnapshotRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "description": "总条数",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "description": "页码（从 0 起）",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "description": "每页条数",
+            "format": "int32"
+          }
+        }
+      },
+      "AdPromotionAnalysisCapabilities": {
+        "type": "object",
+        "properties": {
+          "dimensions": {
+            "type": "array",
+            "description": "逐维度能力声明；未交付段 available=false",
+            "items": {
+              "$ref": "#/components/schemas/AdPromotionAnalysisCapabilityDimension"
+            }
+          },
+          "incrementVerdicts": {
+            "type": "array",
+            "description": "增量判定取值",
+            "items": {
+              "type": "string",
+              "description": "增量判定取值"
+            }
+          },
+          "reportDimensions": {
+            "type": "array",
+            "description": "报表维度取值",
+            "items": {
+              "type": "string",
+              "description": "报表维度取值"
+            }
+          },
+          "sorts": {
+            "type": "array",
+            "description": "报表排序取值",
+            "items": {
+              "type": "string",
+              "description": "报表排序取值"
+            }
+          },
+          "salesNote": {
+            "type": "string",
+            "description": "🔴 销量与销售额口径说明"
+          },
+          "marginNote": {
+            "type": "string",
+            "description": "🔴 毛利口径说明"
+          },
+          "baselineNote": {
+            "type": "string",
+            "description": "🔴 基期对比口径说明"
+          },
+          "incrementNote": {
+            "type": "string",
+            "description": "🔴 增量判定口径说明"
+          },
+          "subsidyNote": {
+            "type": "string",
+            "description": "🔴 补贴成本口径说明"
+          },
+          "roiNote": {
+            "type": "string",
+            "description": "🔴 ROI 口径说明"
+          },
+          "upstreamNote": {
+            "type": "string",
+            "description": "上游与边界说明"
+          },
+          "boundaryNote": {
+            "type": "string",
+            "description": "下游与边界说明"
+          }
+        }
+      },
+      "AdPromotionAnalysisCapabilityDimension": {
+        "type": "object",
+        "properties": {
+          "dimension": {
+            "type": "string",
+            "description": "维度键"
+          },
+          "description": {
+            "type": "string",
+            "description": "维度说明"
+          },
+          "available": {
+            "type": "boolean",
+            "description": "本模块是否已交付"
+          },
+          "source": {
+            "type": "string",
+            "description": "数据来源（表 / 上游模块）"
+          },
+          "ownerModule": {
+            "type": "string",
+            "description": "未交付段的责任模块"
+          },
+          "impact": {
+            "type": "string",
+            "description": "不交付的影响"
+          }
+        },
+        "description": "逐维度能力声明；未交付段 available=false"
       }
     }
   }

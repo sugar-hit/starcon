@@ -3919,6 +3919,49 @@ const services: readonly {
     pattern: /^aftersales\/(?:capabilities|filters|cases(?:\/bulk)?)$/,
   },
   {
+    // 14.4.2.1 促销效果分析（channel 服务）。本条目是**新增一条独立的 services[] 元素**，
+    // 不是往既有 channel 分支的 alternation 里并分支 —— 那一支是一段超长单行正则，
+    // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在既有 `pattern: /^aftersales\/(?:capabilities|filters|cases(?:\/bulk)?)$/,`
+    // **之后**：与并行车道的插入点被既有条目隔开，git 能干净求并。
+    // resolve() 是「按顺序逐条匹配、首个命中即返回」，同前缀的第二条不会误吃前一条的路径。
+    //
+    // ---- 首 token「ad-promotion-analysis」的零命中核对结论 ----
+    //   本文件既有 100+ 条 services[] 正则里**没有任何一条**含 `ad-promotion-analysis`
+    //   （既有的是 `ad-promotions/` / `ad-budgets/` / `ad-campaigns/`），所以首 token 既是
+    //   独立字面量，也不会被既有分支的前缀吃掉。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   ad-promotion-analysis/capabilities      能力声明（十个维度各自的依据与下游归属）
+    //   ad-promotion-analysis/options           词表（判定 / 维度 / 排序 / 促销 / 平台 / 店铺 / 币种）
+    //   ad-promotion-analysis/report            效果报表（GET，真聚合 + 真分页 + 真筛选 + 真排序）
+    //   ad-promotion-analysis/runs              发起一次分析（POST）+ 运行留痕（GET）
+    //   ad-promotion-analysis/exports           导出留痕登记（POST）+ 留痕列表（GET）
+    //   ad-promotion-analysis/exports/{uuid}/csv  按留痕 id 下载 CSV
+    //   ad-promotion-analysis/cost-snapshots    成本与售价快照（GET 列表 / POST 登记）
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   ad-promotion-analysis                   —— 裸路径：后端没有「一条不存在的汇总接口」，
+    //                                               一切入口都带子路径。
+    //   ad-promotion-analysis/effects           —— 效果数据来自 report 端点的真聚合，
+    //                                               没有独立的「效果表」读取接口。
+    //   ad-promotion-analysis/runs/{uuid}       —— 运行留痕是追加式证据，不提供单条详情。
+    //   ad-promotion-analysis/exports/{uuid}    —— 下载只走 `/{uuid}/csv`；
+    //                                               详情在列表里已经有。
+    //   ad-promotion-analysis/cost-snapshots/{uuid} —— 快照是登记 + 列表，不给单条更新端点。
+    //   ad-promotion-analysis/profit            —— 13.4 利润（reporting 服务）未交付，
+    //                                               本模块自算毛利，**不开第二条映射**。
+    //   ad-promotion-analysis/attribution       —— 平台促销归因接口未交付，
+    //                                               本模块的增量是「活动前 vs 活动期」的对比。
+    //
+    // id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`（不是 `[0-9a-f-]+`）：
+    // 后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行。
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern: /^ad-promotion-analysis\/(?:capabilities|options|report|runs|exports(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/csv)?|cost-snapshots)$/,
+  },
+  {
     // 11.1.1.3 售后受理（trade 服务）。本条目是**新增一条 services[] 元素**，
     // 不是往既有 trade 分支的 alternation 里并分支 —— 那一支是一段超长单行正则，
     // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
