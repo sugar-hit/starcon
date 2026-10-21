@@ -4526,6 +4526,65 @@ const services: readonly {
       /^return\-disposals(?:\/(?:capabilities|overview|candidates|events)|\/policies(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/revoke)?|\/orders(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:schedule|evidence|costs|claim-basis|dispose|cancel))?)?|\/claim-bases\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/(?:submit|reject))$/,
   },
   {
+    // 16.2.2.2 认证与资质：产品认证档案（CE / FCC / RoHS / PSE / FDA / CCC 等）、到期提醒、
+    // 覆盖情况统计（哪些 SKU 缺认证）。🔴 蓝图加粗句「认证缺失是 listing 被抑制与下架的
+    // 高频原因」「上架时不管、出事才补的典型滞后项」的落点。
+    //
+    // ⚠️ **本模块是独立一条 services[] 元素**，刻意**不**往既有 channel 长 alternation 里并分支：
+    //   那条正则由多车道共用，并进去必然 git 冲突，且取错一侧会静默删掉别人已交付的路由
+    //   （表现是页面 404，而 typecheck / lint / vitest / Playwright 全部全绿）。
+    //   插入锚点固定在「文件里最后一条 prefix: 'channel/' 元素之后」，与另外三条车道互不重叠。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   product-certifications/capabilities          能力声明（到期口径 / 覆盖口径 / 词表口径 / 边界）
+    //   product-certifications/overview              概览（档案数 / 即将过期 / 已过期 / 缺认证 SKU）
+    //   product-certifications/types                 生效认证类型词表（内置 ∪ 租户字典）
+    //   product-certifications/types/{code}          租户字典行：新增 / 改名 / 停用（PUT）、删除（DELETE）
+    //   product-certifications/policy                租户级「即将过期」窗口
+    //   product-certifications/certifications        认证档案台账（真分页 + 筛选）+ 登记（POST）
+    //   product-certifications/certifications/{id}   认证详情（含适用 SKU / 类目 / 扫描件）+ 修改（PUT）
+    //   product-certifications/certifications/{id}/revoke      撤销认证（必须写理由）
+    //   product-certifications/certifications/{id}/skus        挂 / 解挂适用 SKU
+    //   product-certifications/certifications/{id}/categories   挂 / 解挂对应类目要求
+    //   product-certifications/certifications/{id}/documents   扫描件上传（JSON base64 / multipart）
+    //   product-certifications/documents/{id}        扫描件元数据
+    //   product-certifications/documents/{id}/file    扫描件本体（二进制，**浏览器代理不透传**）
+    //   product-certifications/requirements           要求侧登记（真分页）+ 登记（POST）
+    //   product-certifications/requirements/{id}      撤销一条要求登记（DELETE）
+    //   product-certifications/coverage              覆盖情况统计（哪些 SKU 缺认证）
+    //   product-certifications/coverage/skus/{id}    单 SKU 覆盖明细
+    //   product-certifications/expiry-reminders      到期提醒（按剩余天数升序）
+    //   product-certifications/sku-candidates        catalog SKU 候选（只读）
+    //   product-certifications/category-candidates   catalog 内部类目候选（只读）
+    //
+    // 🔴 前缀**不与 16.2.2.1 的 `compliance-precheck` 撞车** —— 两者是同一 L3 下的两个模块，
+    //   各占一条独立元素，谁也不遮蔽谁（16.2.2.1 的元素在文件更前面，本元素在其之后）。
+    //
+    // ⚠️ `documents/{id}/file` 虽然放行，但**浏览器代理不原样透传二进制**（代理只透传
+    //    text/csv、text/vnd.zpl、text/html）：这条是给直连调用方（运维脚本 / 归档任务）用的，
+    //    页面上的扫描件清单显示元数据，不靠它下载。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸路径 `product-certifications` —— 本模块没有裸路径资源。
+    //   * `product-certifications/certifications/{id}/delete` —— 认证档案不可删（它是合规凭据，
+    //     能做的只有撤销）。
+    //   * `product-certifications/rules` / `library` —— 16.2.1.1 规则库未交付，本模块不代它开形状。
+    //   * `product-certifications/publish-gate` —— 16.2.1.2 拦截执行未交付，
+    //     本模块只出档案、提醒与覆盖统计，不执行拦截。
+    //   * `product-certifications/certifications/{id}/renew` —— 续期是「再上传一份扫描件 +
+    //     改有效期」，不是另一个动作。
+    //   * 字面量子路径不得带 id 段（`capabilities/{id}`）。
+    // ⚠️ 外层分组**不带 `?`**：本模块没有裸集合读，放行裸路径 `product-certifications`
+    //    就是凭空多出一条资源（界面上会以为有一个「认证与资质」的裸列表端点）。
+    //    判别顺序上，字面量子路径（capabilities / overview / types / policy / …）与
+    //    {uuid} 段互不吃：字面量先判，两类不会互相吃掉。
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^product\-certifications(?:\/(?:capabilities|overview|types|policy|certifications|requirements|coverage|expiry-reminders|sku-candidates|category-candidates)|\/types\/[A-Za-z0-9_-]{1,32}|\/certifications\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:revoke|skus(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|categories(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|documents))?|\/documents\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/file)?|\/requirements\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}|\/coverage\/skus\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})$/,
+  },
+  {
     // 5.2.2.1 汇率查询：各币种对各本位币的汇率（方向 + 汇率 + 生效日 + 来源）、来源配置与外部拉取。
     //
     // 形状逐个列出（**只放行本模块真实实现的路径**）：
