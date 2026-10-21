@@ -3348,6 +3348,56 @@ const services: readonly {
       /^quality-analysis\/(?:capabilities|overview|defect-distribution|lot-trend|supplier-comparison|photo-clusters|open-box-rate|quality-cost|improvements|defect-observations|cost-parameters|supplier-refs)$|^quality-analysis\/defect-observations\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/void$|^quality-analysis\/cost-parameters\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/supersede$|^quality-analysis\/supplier-refs\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/status$/,
   },
   {
+    // 11.4.2.1 工单管理（trade 服务）。本条目是**新增一条 services[] 元素**，
+    // 不是往既有 trade 分支的 alternation 里并分支 —— 那一支是一段超长单行正则，
+    // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在 11.5.2.1 质量分析那条**之后**、11.1.1.2 售后单详情那条**之前**：
+    // 与并行车道的插入点被既有条目隔开，git 能干净求并。
+    // resolve() 是「按顺序逐条匹配、首个命中即返回」，本条的首 token「service-tickets」
+    // 与既有所有 trade 条目的首 token 互不相交，谁先被匹配都互不吃。
+    //
+    // ---- 首 token「service-tickets」的零命中核对结论 ----
+    //   本文件既有全部 services[] 正则，**逐条**核过：字面量里**不存在** "service-tickets"
+    //   这个串（grep 全文件零命中），也没有任何既有正则的首 token 是 "service-tickets"
+    //   的前缀 ⇒ 本条既不会被既有分支吃掉，也不会吃掉既有分支的路径。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   service-tickets                        集合读（GET，真分页 / 真筛选）+ 建单（POST）
+    //   service-tickets/capabilities           能力声明（含上下游未交付的逐条说明）
+    //   service-tickets/sla-stats              SLA 达成统计（GET，按关闭时间窗）
+    //   service-tickets/{uuid}                 单据详情（GET：头 + 转派历史 + 事件流 + 评价 + SLA 快照 + 动作）
+    //   service-tickets/{uuid}/assign          人工派单（POST）
+    //   service-tickets/{uuid}/auto-assign     名册加权轮转派单（POST）
+    //   service-tickets/{uuid}/transfer        转派（POST）
+    //   service-tickets/{uuid}/claim           认领（POST）
+    //   service-tickets/{uuid}/release         释放责任人（POST）
+    //   service-tickets/{uuid}/first-reply     记录首次回复（POST）
+    //   service-tickets/{uuid}/status          状态流转（POST）
+    //   service-tickets/{uuid}/close           关闭（POST）
+    //   service-tickets/{uuid}/satisfaction    满意度评价（POST）
+    //   service-tickets/{uuid}/escalate        升级：转投诉 / 转纠纷（POST）
+    //
+    // 判别顺序：**字面量子路径（capabilities / sla-stats）排在 {uuid} 段之前** ——
+    // alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    // id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`（不是
+    // `[0-9a-f-]+`）：后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   service-tickets/{uuid}/delete          —— 工单是纠纷举证材料，删掉等于毁掉
+    //     「谁在什么时候把单给了谁」的凭据；要停止跟单就关闭它（写明原因）。
+    //   service-tickets/{uuid}/messages        —— 15 客户与客服的消息模块**未开发**，
+    //     放行一个消息入口等于让界面以为买家消息能自动变成工单。
+    //   service-tickets/{uuid}/assign-rules    —— 分配规则读的是 11.1.1.3 的责任人名册，
+    //     本模块不另建一份规则表。
+    //   任何 PUT / DELETE 形状 —— 白名单是**按路径登记、不区分方法**的，
+    //     所以「不能删」的防线在服务端与 DB，不在这里。
+    prefix: 'trade/',
+    env: 'TRADE_URL',
+    fallback: 'http://127.0.0.1:8085',
+    pattern:
+      /^service-tickets(?:\/(?:capabilities|sla-stats|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:assign|auto-assign|transfer|claim|release|first-reply|status|close|satisfaction|escalate))?))?$/,
+  },
+  {
     // 11.1.1.2 售后单详情（trade 服务）。本条目是**新增一条 services[] 元素**，
     // 不是往既有 trade 分支的 alternation 里并分支 —— 那一支是一段超长单行正则，
     // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。

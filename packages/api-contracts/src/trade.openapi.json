@@ -48072,6 +48072,820 @@
           }
         }
       }
+    },
+    "/trade/service-tickets": {
+      "get": {
+        "tags": [
+          "service-ticket-controller"
+        ],
+        "operationId": "get_trade_service_tickets",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "ticketType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "priority",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sourceChannel",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "assignedToRef",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "caseId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "slaState",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "overdueOnly",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "unassignedOnly",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceTicketPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "service-ticket-controller"
+        ],
+        "operationId": "post_trade_service_tickets",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ServiceTicketCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceTicketDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/service-tickets/{id}/transfer": {
+      "post": {
+        "tags": [
+          "service-ticket-controller"
+        ],
+        "operationId": "post_trade_service_tickets_id_transfer",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ServiceTicketTransfer"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceTicketDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/service-tickets/{id}/status": {
+      "post": {
+        "tags": [
+          "service-ticket-controller"
+        ],
+        "operationId": "post_trade_service_tickets_id_status",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ServiceTicketStatusChange"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceTicketDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/service-tickets/{id}/satisfaction": {
+      "post": {
+        "tags": [
+          "service-ticket-controller"
+        ],
+        "operationId": "post_trade_service_tickets_id_satisfaction",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ServiceTicketSatisfactionCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceTicketDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/service-tickets/{id}/release": {
+      "post": {
+        "tags": [
+          "service-ticket-controller"
+        ],
+        "operationId": "post_trade_service_tickets_id_release",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ServiceTicketRelease"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceTicketDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/service-tickets/{id}/first-reply": {
+      "post": {
+        "tags": [
+          "service-ticket-controller"
+        ],
+        "operationId": "post_trade_service_tickets_id_first_reply",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ServiceTicketFirstReply"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceTicketDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/service-tickets/{id}/escalate": {
+      "post": {
+        "tags": [
+          "service-ticket-controller"
+        ],
+        "operationId": "post_trade_service_tickets_id_escalate",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ServiceTicketEscalate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceTicketDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/service-tickets/{id}/close": {
+      "post": {
+        "tags": [
+          "service-ticket-controller"
+        ],
+        "operationId": "post_trade_service_tickets_id_close",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ServiceTicketClose"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceTicketDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/service-tickets/{id}/claim": {
+      "post": {
+        "tags": [
+          "service-ticket-controller"
+        ],
+        "operationId": "post_trade_service_tickets_id_claim",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ServiceTicketClaim"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceTicketDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/service-tickets/{id}/auto-assign": {
+      "post": {
+        "tags": [
+          "service-ticket-controller"
+        ],
+        "operationId": "post_trade_service_tickets_id_auto_assign",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ServiceTicketAutoAssign"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceTicketDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/service-tickets/{id}/assign": {
+      "post": {
+        "tags": [
+          "service-ticket-controller"
+        ],
+        "operationId": "post_trade_service_tickets_id_assign",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ServiceTicketAssign"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceTicketDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/service-tickets/{id}": {
+      "get": {
+        "tags": [
+          "service-ticket-controller"
+        ],
+        "operationId": "get_trade_service_tickets_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceTicketDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/service-tickets/sla-stats": {
+      "get": {
+        "tags": [
+          "service-ticket-controller"
+        ],
+        "operationId": "get_trade_service_tickets_sla_stats",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceTicketSlaStats"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/service-tickets/capabilities": {
+      "get": {
+        "tags": [
+          "service-ticket-controller"
+        ],
+        "operationId": "get_trade_service_tickets_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceTicketCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -116008,6 +116822,999 @@
         }
       },
       "PlatformAppealSectionCapability": {
+        "type": "object",
+        "properties": {
+          "section": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "ownerModule": {
+            "type": "string",
+            "nullable": true
+          },
+          "reason": {
+            "type": "string"
+          },
+          "landsIn": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ServiceTicketCreate": {
+        "type": "object",
+        "properties": {
+          "caseId": {
+            "type": "string"
+          },
+          "ticketType": {
+            "type": "string"
+          },
+          "sourceChannel": {
+            "type": "string"
+          },
+          "sourceRef": {
+            "type": "string",
+            "nullable": true
+          },
+          "subject": {
+            "type": "string",
+            "nullable": true
+          },
+          "priority": {
+            "type": "string",
+            "nullable": true
+          },
+          "reasonNote": {
+            "type": "string",
+            "nullable": true
+          },
+          "assignedToRef": {
+            "type": "string",
+            "nullable": true
+          },
+          "replyDueAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "resolveDueAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "knowledgeEntryId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          }
+        }
+      },
+      "ServiceTicketAction": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "allowed": {
+            "type": "boolean"
+          },
+          "method": {
+            "type": "string",
+            "nullable": true
+          },
+          "path": {
+            "type": "string",
+            "nullable": true
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "precondition": {
+            "type": "string",
+            "nullable": true
+          },
+          "blockedReason": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ServiceTicketAssignmentRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "ticketId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "assignAction": {
+            "type": "string"
+          },
+          "assignActionLabel": {
+            "type": "string"
+          },
+          "assignMode": {
+            "type": "string"
+          },
+          "assignModeLabel": {
+            "type": "string"
+          },
+          "fromOwnerRef": {
+            "type": "string"
+          },
+          "toOwnerRef": {
+            "type": "string"
+          },
+          "reasonNote": {
+            "type": "string"
+          },
+          "createdBy": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ServiceTicketDetail": {
+        "type": "object",
+        "properties": {
+          "head": {
+            "$ref": "#/components/schemas/ServiceTicketRow"
+          },
+          "assignments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ServiceTicketAssignmentRow"
+            }
+          },
+          "events": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ServiceTicketEventRow"
+            }
+          },
+          "satisfactions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ServiceTicketSatisfactionRow"
+            }
+          },
+          "slaSnapshots": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ServiceTicketSlaSnapshotRow"
+            }
+          },
+          "actions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ServiceTicketAction"
+            }
+          },
+          "evaluatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "ServiceTicketEventRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "ticketId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "eventType": {
+            "type": "string"
+          },
+          "eventTypeLabel": {
+            "type": "string"
+          },
+          "fromStatus": {
+            "type": "string"
+          },
+          "toStatus": {
+            "type": "string"
+          },
+          "actorId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "note": {
+            "type": "string"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ServiceTicketRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "ticketNo": {
+            "type": "string"
+          },
+          "ticketType": {
+            "type": "string"
+          },
+          "ticketTypeLabel": {
+            "type": "string"
+          },
+          "ticketStatus": {
+            "type": "string"
+          },
+          "ticketStatusLabel": {
+            "type": "string"
+          },
+          "priority": {
+            "type": "string"
+          },
+          "priorityLabel": {
+            "type": "string"
+          },
+          "sourceChannel": {
+            "type": "string"
+          },
+          "sourceChannelLabel": {
+            "type": "string"
+          },
+          "sourceRef": {
+            "type": "string"
+          },
+          "subject": {
+            "type": "string"
+          },
+          "reasonNote": {
+            "type": "string"
+          },
+          "assignedToRef": {
+            "type": "string"
+          },
+          "assignedToUserId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "assignedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "caseId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "caseNo": {
+            "type": "string"
+          },
+          "caseStatus": {
+            "type": "string"
+          },
+          "caseType": {
+            "type": "string",
+            "nullable": true
+          },
+          "platformScope": {
+            "type": "string",
+            "nullable": true
+          },
+          "caseReplyDueAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "caseResolveDueAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "knowledgeEntryId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "slaPolicyId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "slaReplyHours": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "slaResolveHours": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "slaBasis": {
+            "type": "string"
+          },
+          "slaBasisLabel": {
+            "type": "string"
+          },
+          "replyDueAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "resolveDueAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "firstReplyAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "replySlaState": {
+            "type": "string"
+          },
+          "replySlaStateLabel": {
+            "type": "string"
+          },
+          "resolveSlaState": {
+            "type": "string"
+          },
+          "resolveSlaStateLabel": {
+            "type": "string"
+          },
+          "secondsToReplyDue": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "waitingBuyerAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "closedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "closeReason": {
+            "type": "string"
+          },
+          "closeReasonLabel": {
+            "type": "string"
+          },
+          "closeNote": {
+            "type": "string"
+          },
+          "escalatedCaseId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "escalatedCaseNo": {
+            "type": "string",
+            "nullable": true
+          },
+          "escalatedDisputeId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "escalatedDisputeNo": {
+            "type": "string",
+            "nullable": true
+          },
+          "satisfactionRating": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "ServiceTicketSatisfactionRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "ticketId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "score": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "comment": {
+            "type": "string"
+          },
+          "ratedBy": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "ratedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ServiceTicketSlaSnapshotRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "ticketId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "slaPolicyId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "slaReplyHours": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "slaResolveHours": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "replyDueAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "resolveDueAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "firstReplyAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "closedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "replyMet": {
+            "type": "boolean"
+          },
+          "resolveMet": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "snapshottedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ServiceTicketTransfer": {
+        "type": "object",
+        "properties": {
+          "toOwnerRef": {
+            "type": "string"
+          },
+          "toOwnerUserId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "reasonNote": {
+            "type": "string"
+          },
+          "expectedVersion": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "ServiceTicketStatusChange": {
+        "type": "object",
+        "properties": {
+          "targetStatus": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          },
+          "expectedVersion": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "ServiceTicketSatisfactionCreate": {
+        "type": "object",
+        "properties": {
+          "score": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "comment": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ServiceTicketRelease": {
+        "type": "object",
+        "properties": {
+          "reasonNote": {
+            "type": "string"
+          },
+          "expectedVersion": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "ServiceTicketFirstReply": {
+        "type": "object",
+        "properties": {
+          "replyNote": {
+            "type": "string",
+            "nullable": true
+          },
+          "expectedVersion": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "ServiceTicketEscalate": {
+        "type": "object",
+        "properties": {
+          "targetType": {
+            "type": "string"
+          },
+          "reasonNote": {
+            "type": "string"
+          },
+          "targetCaseType": {
+            "type": "string",
+            "nullable": true
+          },
+          "targetReasonCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "targetAmount": {
+            "type": "number",
+            "nullable": true
+          },
+          "targetCurrency": {
+            "type": "string",
+            "nullable": true
+          },
+          "targetQuantity": {
+            "type": "number",
+            "nullable": true
+          },
+          "platformCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "platformName": {
+            "type": "string",
+            "nullable": true
+          },
+          "platformDisputeNo": {
+            "type": "string",
+            "nullable": true
+          },
+          "platformOrderNo": {
+            "type": "string",
+            "nullable": true
+          },
+          "disputeType": {
+            "type": "string",
+            "nullable": true
+          },
+          "disputeAmount": {
+            "type": "number",
+            "nullable": true
+          },
+          "disputeCurrency": {
+            "type": "string",
+            "nullable": true
+          },
+          "evidenceDeadline": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "expectedVersion": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "ServiceTicketClose": {
+        "type": "object",
+        "properties": {
+          "closeReason": {
+            "type": "string"
+          },
+          "closeNote": {
+            "type": "string",
+            "nullable": true
+          },
+          "expectedVersion": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "ServiceTicketClaim": {
+        "type": "object",
+        "properties": {
+          "ownerRef": {
+            "type": "string"
+          },
+          "ownerUserId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "reasonNote": {
+            "type": "string",
+            "nullable": true
+          },
+          "expectedVersion": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "ServiceTicketAutoAssign": {
+        "type": "object",
+        "properties": {
+          "reasonNote": {
+            "type": "string",
+            "nullable": true
+          },
+          "expectedVersion": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "ServiceTicketAssign": {
+        "type": "object",
+        "properties": {
+          "ownerRef": {
+            "type": "string"
+          },
+          "ownerUserId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "reasonNote": {
+            "type": "string",
+            "nullable": true
+          },
+          "expectedVersion": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "ServiceTicketPage": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ServiceTicketRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/ServiceTicketSummary"
+          },
+          "slaStats": {
+            "$ref": "#/components/schemas/ServiceTicketSlaStats"
+          },
+          "evaluatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "paginationNote": {
+            "type": "string"
+          },
+          "slaNote": {
+            "type": "string"
+          },
+          "sortNote": {
+            "type": "string"
+          }
+        }
+      },
+      "ServiceTicketSlaStats": {
+        "type": "object",
+        "properties": {
+          "closedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "replyMeasured": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "replyMet": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "replyBreached": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "resolveMeasured": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "resolveMet": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "resolveBreached": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "bothMet": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "replyAchievementRate": {
+            "type": "number",
+            "nullable": true
+          },
+          "resolveAchievementRate": {
+            "type": "number",
+            "nullable": true
+          }
+        }
+      },
+      "ServiceTicketSummary": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "open": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "inProgress": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "waitingBuyer": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "resolved": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "cancelled": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "unassigned": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "overdue": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "complaint": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "inquiry": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "ServiceTicketBoundary": {
+        "type": "object",
+        "properties": {
+          "boundary": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string",
+            "nullable": true
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "ServiceTicketCapabilities": {
+        "type": "object",
+        "properties": {
+          "dataSources": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "sections": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ServiceTicketSectionCapability"
+            }
+          },
+          "related": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ServiceTicketRelatedModule"
+            }
+          },
+          "actions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ServiceTicketCapabilityAction"
+            }
+          },
+          "boundaries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ServiceTicketBoundary"
+            }
+          },
+          "stateMachine": {
+            "type": "string"
+          },
+          "hardRuleOneTicketPerCase": {
+            "type": "string"
+          },
+          "hardRuleSlaSingleTruth": {
+            "type": "string"
+          },
+          "hardRuleAppendOnly": {
+            "type": "string"
+          },
+          "upstreamGap": {
+            "type": "string"
+          }
+        }
+      },
+      "ServiceTicketCapabilityAction": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "allowed": {
+            "type": "boolean"
+          },
+          "method": {
+            "type": "string",
+            "nullable": true
+          },
+          "path": {
+            "type": "string",
+            "nullable": true
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "precondition": {
+            "type": "string",
+            "nullable": true
+          },
+          "blockingReason": {
+            "type": "string",
+            "nullable": true
+          },
+          "ownerModule": {
+            "type": "string",
+            "nullable": true
+          },
+          "unavailableReason": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ServiceTicketRelatedModule": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "delivered": {
+            "type": "boolean"
+          },
+          "ownerModule": {
+            "type": "string",
+            "nullable": true
+          },
+          "reason": {
+            "type": "string"
+          },
+          "href": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ServiceTicketSectionCapability": {
         "type": "object",
         "properties": {
           "section": {
