@@ -40569,6 +40569,2035 @@
           }
         }
       }
+    },
+    "/channel/outreach/templates": {
+      "get": {
+        "tags": [
+          "influencer-outreach-controller"
+        ],
+        "operationId": "get_channel_outreach_templates",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "platformCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InfluencerOutreachTemplatePage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "influencer-outreach-controller"
+        ],
+        "operationId": "post_channel_outreach_templates",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveInfluencerOutreachTemplateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InfluencerOutreachTemplateRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/outreach/templates/{id}": {
+      "post": {
+        "tags": [
+          "influencer-outreach-controller"
+        ],
+        "operationId": "post_channel_outreach_templates_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveInfluencerOutreachTemplateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InfluencerOutreachTemplateRow"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "influencer-outreach-controller"
+        ],
+        "operationId": "delete_channel_outreach_templates_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/outreach/shipments/{id}/status": {
+      "post": {
+        "tags": [
+          "influencer-outreach-controller"
+        ],
+        "operationId": "post_channel_outreach_shipments_id_status",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TransitionInfluencerSampleShipmentRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InfluencerSampleShipmentRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/outreach/segments": {
+      "get": {
+        "tags": [
+          "influencer-outreach-controller"
+        ],
+        "operationId": "get_channel_outreach_segments",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InfluencerOutreachSegmentPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "influencer-outreach-controller"
+        ],
+        "operationId": "post_channel_outreach_segments",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveInfluencerOutreachSegmentRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InfluencerOutreachSegmentRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/outreach/segments/{id}": {
+      "post": {
+        "tags": [
+          "influencer-outreach-controller"
+        ],
+        "operationId": "post_channel_outreach_segments_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveInfluencerOutreachSegmentRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InfluencerOutreachSegmentRow"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "influencer-outreach-controller"
+        ],
+        "operationId": "delete_channel_outreach_segments_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/outreach/samples": {
+      "get": {
+        "tags": [
+          "influencer-outreach-controller"
+        ],
+        "operationId": "get_channel_outreach_samples",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "outreachId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "influencerId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "shopCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "skuCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "CREATED_DESC"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InfluencerSampleOrderPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "influencer-outreach-controller"
+        ],
+        "operationId": "post_channel_outreach_samples",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveInfluencerSampleOrderRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InfluencerSampleOrderRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/outreach/samples/{id}": {
+      "post": {
+        "tags": [
+          "influencer-outreach-controller"
+        ],
+        "operationId": "post_channel_outreach_samples_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveInfluencerSampleOrderRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InfluencerSampleOrderRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/outreach/samples/{id}/status": {
+      "post": {
+        "tags": [
+          "influencer-outreach-controller"
+        ],
+        "operationId": "post_channel_outreach_samples_id_status",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TransitionInfluencerSampleOrderRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InfluencerSampleOrderRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/outreach/samples/{id}/shipments": {
+      "post": {
+        "tags": [
+          "influencer-outreach-controller"
+        ],
+        "operationId": "post_channel_outreach_samples_id_shipments",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateInfluencerSampleShipmentRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InfluencerSampleShipmentRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/outreach/policies": {
+      "get": {
+        "tags": [
+          "influencer-outreach-controller"
+        ],
+        "operationId": "get_channel_outreach_policies",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "platformCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InfluencerOutreachPolicyPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "influencer-outreach-controller"
+        ],
+        "operationId": "post_channel_outreach_policies",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveInfluencerOutreachPolicyRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InfluencerOutreachPolicyRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/outreach/outreachs": {
+      "get": {
+        "tags": [
+          "influencer-outreach-controller"
+        ],
+        "operationId": "get_channel_outreach_outreachs",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "influencerId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "segmentId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "templateId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "platformCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "shopCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "CREATED_DESC"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InfluencerOutreachPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "influencer-outreach-controller"
+        ],
+        "operationId": "post_channel_outreach_outreachs",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveInfluencerOutreachRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InfluencerOutreachRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/outreach/outreachs/{id}": {
+      "get": {
+        "tags": [
+          "influencer-outreach-controller"
+        ],
+        "operationId": "get_channel_outreach_outreachs_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InfluencerOutreachDetail"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "influencer-outreach-controller"
+        ],
+        "operationId": "post_channel_outreach_outreachs_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveInfluencerOutreachRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InfluencerOutreachRow"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "influencer-outreach-controller"
+        ],
+        "operationId": "delete_channel_outreach_outreachs_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/outreach/outreachs/{id}/status": {
+      "post": {
+        "tags": [
+          "influencer-outreach-controller"
+        ],
+        "operationId": "post_channel_outreach_outreachs_id_status",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TransitionInfluencerOutreachRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InfluencerOutreachRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/outreach/outreachs/{id}/send": {
+      "post": {
+        "tags": [
+          "influencer-outreach-controller"
+        ],
+        "operationId": "post_channel_outreach_outreachs_id_send",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InfluencerOutreachSendResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/outreach/outreachs/{id}/receipt": {
+      "post": {
+        "tags": [
+          "influencer-outreach-controller"
+        ],
+        "operationId": "post_channel_outreach_outreachs_id_receipt",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterInfluencerOutreachReceiptRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InfluencerOutreachRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/outreach/outreachs/{id}/followups": {
+      "post": {
+        "tags": [
+          "influencer-outreach-controller"
+        ],
+        "operationId": "post_channel_outreach_outreachs_id_followups",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateInfluencerOutreachFollowupRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InfluencerOutreachFollowupRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/outreach/outreachs/batch": {
+      "post": {
+        "tags": [
+          "influencer-outreach-controller"
+        ],
+        "operationId": "post_channel_outreach_outreachs_batch",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BatchInfluencerOutreachRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InfluencerOutreachBatchResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/outreach/commission-rules": {
+      "get": {
+        "tags": [
+          "influencer-outreach-controller"
+        ],
+        "operationId": "get_channel_outreach_commission_rules",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "scopeType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InfluencerCommissionRulePage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "influencer-outreach-controller"
+        ],
+        "operationId": "post_channel_outreach_commission_rules",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveInfluencerCommissionRuleRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InfluencerCommissionRuleRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/outreach/commission-rules/{id}": {
+      "post": {
+        "tags": [
+          "influencer-outreach-controller"
+        ],
+        "operationId": "post_channel_outreach_commission_rules_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveInfluencerCommissionRuleRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InfluencerCommissionRuleRow"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "influencer-outreach-controller"
+        ],
+        "operationId": "delete_channel_outreach_commission_rules_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/outreach/commission-accruals": {
+      "get": {
+        "tags": [
+          "influencer-outreach-controller"
+        ],
+        "operationId": "get_channel_outreach_commission_accruals",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "outreachId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "influencerId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "ACCRUED_DESC"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InfluencerCommissionAccrualPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "influencer-outreach-controller"
+        ],
+        "operationId": "post_channel_outreach_commission_accruals",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateInfluencerCommissionAccrualRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InfluencerCommissionAccrualRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/outreach/templates/{id}/preview": {
+      "get": {
+        "tags": [
+          "influencer-outreach-controller"
+        ],
+        "operationId": "get_channel_outreach_templates_id_preview",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "influencerId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InfluencerOutreachTemplatePreview"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/outreach/summary": {
+      "get": {
+        "tags": [
+          "influencer-outreach-controller"
+        ],
+        "operationId": "get_channel_outreach_summary",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InfluencerOutreachSummary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/outreach/shipments": {
+      "get": {
+        "tags": [
+          "influencer-outreach-controller"
+        ],
+        "operationId": "get_channel_outreach_shipments",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "sampleOrderId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InfluencerSampleShipmentPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/outreach/segments/{id}/candidates": {
+      "get": {
+        "tags": [
+          "influencer-outreach-controller"
+        ],
+        "operationId": "get_channel_outreach_segments_id_candidates",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InfluencerOutreachCandidatePage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/outreach/outreach-availability": {
+      "get": {
+        "tags": [
+          "influencer-outreach-controller"
+        ],
+        "operationId": "get_channel_outreach_outreach_availability",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InfluencerOutreachAvailability"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/outreach/options": {
+      "get": {
+        "tags": [
+          "influencer-outreach-controller"
+        ],
+        "operationId": "get_channel_outreach_options",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InfluencerOutreachOptions"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/outreach/followups": {
+      "get": {
+        "tags": [
+          "influencer-outreach-controller"
+        ],
+        "operationId": "get_channel_outreach_followups",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "outreachId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InfluencerOutreachFollowupPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/outreach/capabilities": {
+      "get": {
+        "tags": [
+          "influencer-outreach-controller"
+        ],
+        "operationId": "get_channel_outreach_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InfluencerOutreachCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -98098,6 +100127,2229 @@
         }
       },
       "AdPromotionAnalysisCapabilityDimension": {
+        "type": "object",
+        "properties": {
+          "dimension": {
+            "type": "string",
+            "description": "维度键"
+          },
+          "description": {
+            "type": "string",
+            "description": "维度说明"
+          },
+          "available": {
+            "type": "boolean",
+            "description": "本模块是否已交付"
+          },
+          "source": {
+            "type": "string",
+            "description": "数据来源（表 / 上游模块）"
+          },
+          "ownerModule": {
+            "type": "string",
+            "description": "未交付段的责任模块"
+          },
+          "impact": {
+            "type": "string",
+            "description": "不交付的影响"
+          }
+        },
+        "description": "逐维度能力声明；未交付段 available=false"
+      },
+      "SaveInfluencerOutreachTemplateRequest": {
+        "required": [
+          "body",
+          "platformId",
+          "templateCode",
+          "templateName"
+        ],
+        "type": "object",
+        "properties": {
+          "templateCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string",
+            "description": "模板编码（租户内唯一）"
+          },
+          "templateName": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string",
+            "description": "模板名称"
+          },
+          "platformId": {
+            "type": "string",
+            "description": "平台 id",
+            "format": "uuid"
+          },
+          "subject": {
+            "maxLength": 300,
+            "minLength": 0,
+            "type": "string",
+            "description": "标题模板（可含 {{变量}}）"
+          },
+          "body": {
+            "minLength": 1,
+            "type": "string",
+            "description": "正文模板（可含 {{变量}}）"
+          },
+          "status": {
+            "type": "string",
+            "description": "状态：ACTIVE / PAUSED"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          }
+        }
+      },
+      "InfluencerOutreachTemplateRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "模板 id",
+            "format": "uuid"
+          },
+          "templateCode": {
+            "type": "string",
+            "description": "模板编码（租户内唯一）"
+          },
+          "templateName": {
+            "type": "string",
+            "description": "模板名称"
+          },
+          "platformId": {
+            "type": "string",
+            "description": "平台 id",
+            "format": "uuid"
+          },
+          "platformCode": {
+            "type": "string",
+            "description": "平台编码"
+          },
+          "platformName": {
+            "type": "string",
+            "description": "平台名称"
+          },
+          "subject": {
+            "type": "string",
+            "description": "标题模板"
+          },
+          "body": {
+            "type": "string",
+            "description": "正文模板"
+          },
+          "status": {
+            "type": "string",
+            "description": "状态：ACTIVE / PAUSED"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          },
+          "version": {
+            "type": "integer",
+            "description": "乐观锁版本",
+            "format": "int64"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "创建时刻",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "更新时刻",
+            "format": "date-time"
+          }
+        }
+      },
+      "TransitionInfluencerSampleShipmentRequest": {
+        "required": [
+          "status"
+        ],
+        "type": "object",
+        "properties": {
+          "status": {
+            "minLength": 1,
+            "type": "string",
+            "description": "目标状态"
+          },
+          "occurredAt": {
+            "type": "string",
+            "description": "发生时刻（留空 = 现在）",
+            "format": "date-time"
+          },
+          "signedBy": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string",
+            "description": "签收人"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          }
+        }
+      },
+      "InfluencerSampleShipmentRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "包裹 id",
+            "format": "uuid"
+          },
+          "sampleOrderId": {
+            "type": "string",
+            "description": "样品单 id",
+            "format": "uuid"
+          },
+          "carrierCode": {
+            "type": "string",
+            "description": "承运商编码"
+          },
+          "trackingNo": {
+            "type": "string",
+            "description": "物流单号"
+          },
+          "packageCount": {
+            "type": "string",
+            "description": "件数"
+          },
+          "status": {
+            "type": "string",
+            "description": "包裹状态"
+          },
+          "shippedAt": {
+            "type": "string",
+            "description": "发货时刻",
+            "format": "date-time"
+          },
+          "deliveredAt": {
+            "type": "string",
+            "description": "送达时刻",
+            "format": "date-time"
+          },
+          "signedAt": {
+            "type": "string",
+            "description": "签收时刻",
+            "format": "date-time"
+          },
+          "signedBy": {
+            "type": "string",
+            "description": "签收人"
+          },
+          "trackingAvailable": {
+            "type": "boolean",
+            "description": "🔴 物流轨迹是否可查（恒为 false）"
+          },
+          "trackingOwnerModule": {
+            "type": "string",
+            "description": "🔴 物流责任模块"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "创建时刻",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "更新时刻",
+            "format": "date-time"
+          }
+        }
+      },
+      "SaveInfluencerOutreachSegmentRequest": {
+        "required": [
+          "segmentCode",
+          "segmentName"
+        ],
+        "type": "object",
+        "properties": {
+          "segmentCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string",
+            "description": "筛选条件编码（租户内唯一）"
+          },
+          "segmentName": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string",
+            "description": "筛选条件名称"
+          },
+          "description": {
+            "type": "string",
+            "description": "说明"
+          },
+          "category": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string",
+            "description": "类目（留空 = 不限）"
+          },
+          "followerTier": {
+            "type": "string",
+            "description": "粉丝层级（留空 = 不限）"
+          },
+          "minFollowerCount": {
+            "type": "integer",
+            "description": "粉丝数下限（留空 = 不限）",
+            "format": "int64"
+          },
+          "minEngagementRate": {
+            "type": "string",
+            "description": "互动率下限（0 ~ 1；留空 = 不限）"
+          },
+          "minGmv": {
+            "type": "string",
+            "description": "GMV 下限（留空 = 不限）"
+          },
+          "ratingTierCode": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string",
+            "description": "评级档位编码（留空 = 不限）"
+          },
+          "tagCodes": {
+            "type": "string",
+            "description": "标签编码列表（逗号分隔；多个之间是 OR）"
+          },
+          "platformId": {
+            "type": "string",
+            "description": "平台 id（留空 = 不限）",
+            "format": "uuid"
+          },
+          "shopCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string",
+            "description": "店铺编码（留空 = 不限）"
+          },
+          "excludeBlacklisted": {
+            "type": "boolean",
+            "description": "是否排除黑名单里的达人（默认 true）"
+          },
+          "status": {
+            "type": "string",
+            "description": "状态：ACTIVE / PAUSED"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          }
+        }
+      },
+      "InfluencerOutreachSegmentRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "筛选条件 id",
+            "format": "uuid"
+          },
+          "segmentCode": {
+            "type": "string",
+            "description": "筛选条件编码（租户内唯一）"
+          },
+          "segmentName": {
+            "type": "string",
+            "description": "筛选条件名称"
+          },
+          "description": {
+            "type": "string",
+            "description": "说明"
+          },
+          "category": {
+            "type": "string",
+            "description": "类目（空串 = 不限）"
+          },
+          "followerTier": {
+            "type": "string",
+            "description": "粉丝层级（空串 = 不限）"
+          },
+          "minFollowerCount": {
+            "type": "integer",
+            "description": "粉丝数下限（null = 不限）",
+            "format": "int64"
+          },
+          "minEngagementRate": {
+            "type": "string",
+            "description": "互动率下限（null = 不限）"
+          },
+          "minGmv": {
+            "type": "string",
+            "description": "GMV 下限（null = 不限）"
+          },
+          "ratingTierCode": {
+            "type": "string",
+            "description": "评级档位编码（空串 = 不限）"
+          },
+          "tagCodes": {
+            "type": "string",
+            "description": "标签编码列表（逗号分隔；多个之间是 OR）"
+          },
+          "platformId": {
+            "type": "string",
+            "description": "平台 id（null = 不限）",
+            "format": "uuid"
+          },
+          "platformCode": {
+            "type": "string",
+            "description": "平台编码（null = 不限）"
+          },
+          "shopCode": {
+            "type": "string",
+            "description": "店铺编码（空串 = 不限）"
+          },
+          "excludeBlacklisted": {
+            "type": "boolean",
+            "description": "是否排除黑名单里的达人"
+          },
+          "status": {
+            "type": "string",
+            "description": "状态：ACTIVE / PAUSED"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          },
+          "version": {
+            "type": "integer",
+            "description": "乐观锁版本",
+            "format": "int64"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "创建时刻",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "更新时刻",
+            "format": "date-time"
+          }
+        }
+      },
+      "SaveInfluencerSampleOrderRequest": {
+        "required": [
+          "outreachId",
+          "skuCode"
+        ],
+        "type": "object",
+        "properties": {
+          "outreachId": {
+            "type": "string",
+            "description": "建联记录 id",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string",
+            "description": "样品 SKU 编码"
+          },
+          "skuName": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string",
+            "description": "样品名称快照"
+          },
+          "quantity": {
+            "type": "string",
+            "description": "样品数量（默认 1）"
+          },
+          "sampleValue": {
+            "type": "string",
+            "description": "样品成本（留空 = 还没录，不可比）"
+          },
+          "sampleCurrency": {
+            "maxLength": 3,
+            "minLength": 0,
+            "type": "string",
+            "description": "样品成本币种（3 位字母）"
+          },
+          "recipientName": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string",
+            "description": "收件人"
+          },
+          "recipientPhone": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string",
+            "description": "收件电话"
+          },
+          "recipientAddress": {
+            "type": "string",
+            "description": "收件地址"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          }
+        }
+      },
+      "InfluencerSampleOrderRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "样品单 id",
+            "format": "uuid"
+          },
+          "outreachId": {
+            "type": "string",
+            "description": "建联记录 id",
+            "format": "uuid"
+          },
+          "influencerId": {
+            "type": "string",
+            "description": "达人 id",
+            "format": "uuid"
+          },
+          "influencerName": {
+            "type": "string",
+            "description": "达人名称"
+          },
+          "shopCode": {
+            "type": "string",
+            "description": "店铺编码"
+          },
+          "skuCode": {
+            "type": "string",
+            "description": "样品 SKU 编码（catalog 逻辑引用 + 快照）"
+          },
+          "skuName": {
+            "type": "string",
+            "description": "样品名称快照"
+          },
+          "quantity": {
+            "type": "string",
+            "description": "样品数量"
+          },
+          "sampleValue": {
+            "type": "string",
+            "description": "🔴 样品成本（null = 还没录，不可比）"
+          },
+          "sampleCurrency": {
+            "type": "string",
+            "description": "样品成本币种"
+          },
+          "recipientName": {
+            "type": "string",
+            "description": "收件人"
+          },
+          "recipientPhone": {
+            "type": "string",
+            "description": "收件电话"
+          },
+          "recipientAddress": {
+            "type": "string",
+            "description": "收件地址"
+          },
+          "status": {
+            "type": "string",
+            "description": "样品单状态"
+          },
+          "statusDerived": {
+            "type": "boolean",
+            "description": "🔴 状态是否由包裹推导"
+          },
+          "outboundStatus": {
+            "type": "string",
+            "description": "🔴 本地出库状态：LOCAL_PENDING / LOCAL_OUTBOUNDED"
+          },
+          "outboundAt": {
+            "type": "string",
+            "description": "本地出库时刻",
+            "format": "date-time"
+          },
+          "warehouseOutboundRef": {
+            "type": "string",
+            "description": "🔴 8 仓库的出库单号（未交付 ⇒ 空串）"
+          },
+          "warehouseOwnerModule": {
+            "type": "string",
+            "description": "🔴 出库责任模块"
+          },
+          "trackingAvailable": {
+            "type": "boolean",
+            "description": "🔴 物流轨迹是否可查（恒为 false）"
+          },
+          "trackingOwnerModule": {
+            "type": "string",
+            "description": "🔴 物流责任模块"
+          },
+          "signedAt": {
+            "type": "string",
+            "description": "签收时刻",
+            "format": "date-time"
+          },
+          "signedBy": {
+            "type": "string",
+            "description": "签收人"
+          },
+          "shipmentCount": {
+            "type": "integer",
+            "description": "包裹数",
+            "format": "int32"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          },
+          "version": {
+            "type": "integer",
+            "description": "乐观锁版本",
+            "format": "int64"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "创建时刻",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "更新时刻",
+            "format": "date-time"
+          }
+        }
+      },
+      "TransitionInfluencerSampleOrderRequest": {
+        "required": [
+          "status"
+        ],
+        "type": "object",
+        "properties": {
+          "status": {
+            "minLength": 1,
+            "type": "string",
+            "description": "目标状态"
+          },
+          "outboundAt": {
+            "type": "string",
+            "description": "本地出库时刻（OUTBOUNDED 时必填）",
+            "format": "date-time"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          }
+        }
+      },
+      "CreateInfluencerSampleShipmentRequest": {
+        "type": "object",
+        "properties": {
+          "carrierCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string",
+            "description": "承运商编码"
+          },
+          "trackingNo": {
+            "maxLength": 128,
+            "minLength": 0,
+            "type": "string",
+            "description": "物流单号"
+          },
+          "packageCount": {
+            "type": "string",
+            "description": "件数（默认 1）"
+          },
+          "shippedAt": {
+            "type": "string",
+            "description": "发货时刻（留空 = 现在）",
+            "format": "date-time"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          }
+        }
+      },
+      "SaveInfluencerOutreachPolicyRequest": {
+        "required": [
+          "platformId"
+        ],
+        "type": "object",
+        "properties": {
+          "platformId": {
+            "type": "string",
+            "description": "平台 id",
+            "format": "uuid"
+          },
+          "dailySendLimit": {
+            "type": "integer",
+            "description": "每日发送上限（默认 20）",
+            "format": "int32"
+          },
+          "minIntervalSeconds": {
+            "type": "integer",
+            "description": "两条发送之间的最小间隔秒数（默认 60）",
+            "format": "int32"
+          },
+          "status": {
+            "type": "string",
+            "description": "状态：ACTIVE / PAUSED"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          }
+        }
+      },
+      "InfluencerOutreachPolicyRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "策略 id",
+            "format": "uuid"
+          },
+          "platformId": {
+            "type": "string",
+            "description": "平台 id",
+            "format": "uuid"
+          },
+          "platformCode": {
+            "type": "string",
+            "description": "平台编码"
+          },
+          "platformName": {
+            "type": "string",
+            "description": "平台名称"
+          },
+          "dailySendLimit": {
+            "type": "integer",
+            "description": "每日发送上限",
+            "format": "int32"
+          },
+          "minIntervalSeconds": {
+            "type": "integer",
+            "description": "两条发送之间的最小间隔（秒）",
+            "format": "int32"
+          },
+          "status": {
+            "type": "string",
+            "description": "状态：ACTIVE / PAUSED"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          },
+          "version": {
+            "type": "integer",
+            "description": "乐观锁版本",
+            "format": "int64"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "创建时刻",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "更新时刻",
+            "format": "date-time"
+          }
+        }
+      },
+      "SaveInfluencerOutreachRequest": {
+        "required": [
+          "idempotencyKey",
+          "influencerId",
+          "segmentId",
+          "templateId"
+        ],
+        "type": "object",
+        "properties": {
+          "influencerId": {
+            "type": "string",
+            "description": "达人 id",
+            "format": "uuid"
+          },
+          "segmentId": {
+            "type": "string",
+            "description": "筛选条件 id",
+            "format": "uuid"
+          },
+          "templateId": {
+            "type": "string",
+            "description": "模板 id",
+            "format": "uuid"
+          },
+          "idempotencyKey": {
+            "maxLength": 128,
+            "minLength": 0,
+            "type": "string",
+            "description": "幂等键（租户内唯一）"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          }
+        }
+      },
+      "InfluencerOutreachRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "建联记录 id",
+            "format": "uuid"
+          },
+          "influencerId": {
+            "type": "string",
+            "description": "达人 id",
+            "format": "uuid"
+          },
+          "influencerName": {
+            "type": "string",
+            "description": "达人名称"
+          },
+          "influencerCategory": {
+            "type": "string",
+            "description": "达人类目"
+          },
+          "segmentId": {
+            "type": "string",
+            "description": "筛选条件 id",
+            "format": "uuid"
+          },
+          "segmentCode": {
+            "type": "string",
+            "description": "筛选条件编码"
+          },
+          "segmentName": {
+            "type": "string",
+            "description": "筛选条件名称"
+          },
+          "templateId": {
+            "type": "string",
+            "description": "模板 id",
+            "format": "uuid"
+          },
+          "templateCode": {
+            "type": "string",
+            "description": "模板编码"
+          },
+          "templateName": {
+            "type": "string",
+            "description": "模板名称"
+          },
+          "platformId": {
+            "type": "string",
+            "description": "平台 id",
+            "format": "uuid"
+          },
+          "platformCode": {
+            "type": "string",
+            "description": "平台编码"
+          },
+          "shopCode": {
+            "type": "string",
+            "description": "店铺编码"
+          },
+          "contactChannel": {
+            "type": "string",
+            "description": "🔴 沟通渠道（恒为 OFFICIAL_API）"
+          },
+          "idempotencyKey": {
+            "type": "string",
+            "description": "幂等键"
+          },
+          "subject": {
+            "type": "string",
+            "description": "渲染后的标题（快照）"
+          },
+          "messageBody": {
+            "type": "string",
+            "description": "渲染后的正文（快照）"
+          },
+          "status": {
+            "type": "string",
+            "description": "建联状态"
+          },
+          "platformMessageId": {
+            "type": "string",
+            "description": "平台消息 id（手动登记）"
+          },
+          "platformReceipt": {
+            "type": "string",
+            "description": "平台回执（手动登记）"
+          },
+          "sentAt": {
+            "type": "string",
+            "description": "发送时刻",
+            "format": "date-time"
+          },
+          "repliedAt": {
+            "type": "string",
+            "description": "回复时刻",
+            "format": "date-time"
+          },
+          "closedAt": {
+            "type": "string",
+            "description": "关闭时刻",
+            "format": "date-time"
+          },
+          "followupCount": {
+            "type": "integer",
+            "description": "跟进条数",
+            "format": "int32"
+          },
+          "sampleOrderCount": {
+            "type": "integer",
+            "description": "样品单条数",
+            "format": "int32"
+          },
+          "accrualCount": {
+            "type": "integer",
+            "description": "已登记的佣金计提条数",
+            "format": "int32"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          },
+          "version": {
+            "type": "integer",
+            "description": "乐观锁版本",
+            "format": "int64"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "创建时刻",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "更新时刻",
+            "format": "date-time"
+          }
+        }
+      },
+      "TransitionInfluencerOutreachRequest": {
+        "required": [
+          "status"
+        ],
+        "type": "object",
+        "properties": {
+          "status": {
+            "minLength": 1,
+            "type": "string",
+            "description": "目标状态"
+          },
+          "occurredAt": {
+            "type": "string",
+            "description": "发生时刻（留空 = 现在）",
+            "format": "date-time"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          }
+        }
+      },
+      "InfluencerOutreachSendResult": {
+        "type": "object",
+        "properties": {
+          "sent": {
+            "type": "boolean",
+            "description": "是否真的发出去了"
+          },
+          "message": {
+            "type": "string",
+            "description": "结论说明"
+          },
+          "platformMessageId": {
+            "type": "string",
+            "description": "平台消息 id（未发出时为空串）"
+          }
+        }
+      },
+      "RegisterInfluencerOutreachReceiptRequest": {
+        "required": [
+          "platformMessageId"
+        ],
+        "type": "object",
+        "properties": {
+          "platformMessageId": {
+            "maxLength": 128,
+            "minLength": 0,
+            "type": "string",
+            "description": "平台消息 id"
+          },
+          "platformReceipt": {
+            "type": "string",
+            "description": "平台回执原文"
+          },
+          "sentAt": {
+            "type": "string",
+            "description": "发送时刻（留空 = 现在）",
+            "format": "date-time"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          }
+        }
+      },
+      "CreateInfluencerOutreachFollowupRequest": {
+        "required": [
+          "content",
+          "followupType"
+        ],
+        "type": "object",
+        "properties": {
+          "followupType": {
+            "minLength": 1,
+            "type": "string",
+            "description": "跟进方式"
+          },
+          "content": {
+            "minLength": 1,
+            "type": "string",
+            "description": "跟进内容"
+          },
+          "occurredAt": {
+            "type": "string",
+            "description": "发生时刻（留空 = 现在）",
+            "format": "date-time"
+          },
+          "nextFollowupAt": {
+            "type": "string",
+            "description": "下次跟进时刻",
+            "format": "date-time"
+          },
+          "ownerUserId": {
+            "type": "string",
+            "description": "负责人 id",
+            "format": "uuid"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          }
+        }
+      },
+      "InfluencerOutreachFollowupRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "跟进 id",
+            "format": "uuid"
+          },
+          "outreachId": {
+            "type": "string",
+            "description": "建联记录 id",
+            "format": "uuid"
+          },
+          "followupType": {
+            "type": "string",
+            "description": "跟进方式"
+          },
+          "content": {
+            "type": "string",
+            "description": "跟进内容"
+          },
+          "occurredAt": {
+            "type": "string",
+            "description": "发生时刻",
+            "format": "date-time"
+          },
+          "nextFollowupAt": {
+            "type": "string",
+            "description": "下次跟进时刻",
+            "format": "date-time"
+          },
+          "ownerUserId": {
+            "type": "string",
+            "description": "负责人 id",
+            "format": "uuid"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "创建时刻",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "更新时刻",
+            "format": "date-time"
+          }
+        }
+      },
+      "BatchInfluencerOutreachRequest": {
+        "required": [
+          "segmentId",
+          "templateId"
+        ],
+        "type": "object",
+        "properties": {
+          "segmentId": {
+            "type": "string",
+            "description": "筛选条件 id",
+            "format": "uuid"
+          },
+          "templateId": {
+            "type": "string",
+            "description": "模板 id",
+            "format": "uuid"
+          },
+          "batchKey": {
+            "maxLength": 96,
+            "minLength": 0,
+            "type": "string",
+            "description": "批次键（幂等键的组成部分；同一批次重复跑不会重复建）"
+          },
+          "limit": {
+            "type": "integer",
+            "description": "最多建多少条（默认 50，上限 200）",
+            "format": "int32"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          }
+        }
+      },
+      "InfluencerOutreachBatchItem": {
+        "type": "object",
+        "properties": {
+          "influencerId": {
+            "type": "string",
+            "description": "达人 id",
+            "format": "uuid"
+          },
+          "influencerName": {
+            "type": "string",
+            "description": "达人名称"
+          },
+          "outreachId": {
+            "type": "string",
+            "description": "建联记录 id（created=false 时为空）",
+            "format": "uuid"
+          },
+          "idempotencyKey": {
+            "type": "string",
+            "description": "幂等键"
+          },
+          "created": {
+            "type": "boolean",
+            "description": "是否已创建"
+          },
+          "result": {
+            "type": "string",
+            "description": "结果码：CREATED 已创建 / SKIPPED_OPEN 已有未走完的邀约 / SKIPPED_DUPLICATE 幂等键已存在 / SKIPPED_TEMPLATE 模板渲染失败"
+          },
+          "message": {
+            "type": "string",
+            "description": "人可读说明"
+          }
+        },
+        "description": "逐条结果"
+      },
+      "InfluencerOutreachBatchResult": {
+        "type": "object",
+        "properties": {
+          "matchedCount": {
+            "type": "integer",
+            "description": "筛中的达人数",
+            "format": "int32"
+          },
+          "createdCount": {
+            "type": "integer",
+            "description": "实际新建的条数",
+            "format": "int32"
+          },
+          "skippedCount": {
+            "type": "integer",
+            "description": "跳过的条数",
+            "format": "int32"
+          },
+          "items": {
+            "type": "array",
+            "description": "逐条结果",
+            "items": {
+              "$ref": "#/components/schemas/InfluencerOutreachBatchItem"
+            }
+          },
+          "note": {
+            "type": "string",
+            "description": "说明"
+          }
+        }
+      },
+      "SaveInfluencerCommissionRuleRequest": {
+        "required": [
+          "commissionType",
+          "ruleCode",
+          "ruleName"
+        ],
+        "type": "object",
+        "properties": {
+          "ruleCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string",
+            "description": "规则编码（租户内唯一）"
+          },
+          "ruleName": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string",
+            "description": "规则名称"
+          },
+          "scopeType": {
+            "type": "string",
+            "description": "适用范围：GLOBAL / SEGMENT / INFLUENCER"
+          },
+          "segmentId": {
+            "type": "string",
+            "description": "筛选条件 id（SEGMENT 时必填）",
+            "format": "uuid"
+          },
+          "influencerId": {
+            "type": "string",
+            "description": "达人 id（INFLUENCER 时必填）",
+            "format": "uuid"
+          },
+          "commissionType": {
+            "minLength": 1,
+            "type": "string",
+            "description": "佣金形态：RATE / FIXED"
+          },
+          "commissionRate": {
+            "type": "string",
+            "description": "佣金比例（RATE 形态必填，0 ~ 1）"
+          },
+          "fixedAmount": {
+            "type": "string",
+            "description": "固定金额（FIXED 形态必填）"
+          },
+          "currency": {
+            "maxLength": 3,
+            "minLength": 0,
+            "type": "string",
+            "description": "币种（3 位字母）"
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "description": "生效起（留空 = 现在）",
+            "format": "date-time"
+          },
+          "effectiveTo": {
+            "type": "string",
+            "description": "生效止（留空 = 长期有效）",
+            "format": "date-time"
+          },
+          "status": {
+            "type": "string",
+            "description": "状态：ACTIVE / PAUSED"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          }
+        }
+      },
+      "InfluencerCommissionRuleRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "规则 id",
+            "format": "uuid"
+          },
+          "ruleCode": {
+            "type": "string",
+            "description": "规则编码（租户内唯一）"
+          },
+          "ruleName": {
+            "type": "string",
+            "description": "规则名称"
+          },
+          "scopeType": {
+            "type": "string",
+            "description": "适用范围：GLOBAL / SEGMENT / INFLUENCER"
+          },
+          "segmentId": {
+            "type": "string",
+            "description": "筛选条件 id（SEGMENT 时有值）",
+            "format": "uuid"
+          },
+          "segmentName": {
+            "type": "string",
+            "description": "筛选条件名称（SEGMENT 时有值）"
+          },
+          "influencerId": {
+            "type": "string",
+            "description": "达人 id（INFLUENCER 时有值）",
+            "format": "uuid"
+          },
+          "influencerName": {
+            "type": "string",
+            "description": "达人名称（INFLUENCER 时有值）"
+          },
+          "commissionType": {
+            "type": "string",
+            "description": "佣金形态：RATE / FIXED"
+          },
+          "commissionRate": {
+            "type": "string",
+            "description": "佣金比例（null = 该形态不用它）"
+          },
+          "fixedAmount": {
+            "type": "string",
+            "description": "固定金额（null = 该形态不用它）"
+          },
+          "currency": {
+            "type": "string",
+            "description": "币种"
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "description": "生效起",
+            "format": "date-time"
+          },
+          "effectiveTo": {
+            "type": "string",
+            "description": "生效止（null = 长期有效）",
+            "format": "date-time"
+          },
+          "status": {
+            "type": "string",
+            "description": "状态：ACTIVE / PAUSED"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          },
+          "version": {
+            "type": "integer",
+            "description": "乐观锁版本",
+            "format": "int64"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "创建时刻",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "更新时刻",
+            "format": "date-time"
+          }
+        }
+      },
+      "CreateInfluencerCommissionAccrualRequest": {
+        "required": [
+          "outreachId"
+        ],
+        "type": "object",
+        "properties": {
+          "outreachId": {
+            "type": "string",
+            "description": "建联记录 id",
+            "format": "uuid"
+          },
+          "ruleId": {
+            "type": "string",
+            "description": "规则 id（留空 = 用服务层解析出的生效规则）",
+            "format": "uuid"
+          },
+          "baseAmount": {
+            "type": "string",
+            "description": "计提基数（人工登记的归因 GMV；留空 = 0）"
+          },
+          "baseCurrency": {
+            "maxLength": 3,
+            "minLength": 0,
+            "type": "string",
+            "description": "基数币种（3 位字母）"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          }
+        }
+      },
+      "InfluencerCommissionAccrualRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "计提 id",
+            "format": "uuid"
+          },
+          "outreachId": {
+            "type": "string",
+            "description": "建联记录 id",
+            "format": "uuid"
+          },
+          "influencerId": {
+            "type": "string",
+            "description": "达人 id",
+            "format": "uuid"
+          },
+          "influencerName": {
+            "type": "string",
+            "description": "达人名称"
+          },
+          "ruleId": {
+            "type": "string",
+            "description": "规则 id（规则后来删了会为空）",
+            "format": "uuid"
+          },
+          "ruleCode": {
+            "type": "string",
+            "description": "规则编码"
+          },
+          "commissionType": {
+            "type": "string",
+            "description": "佣金形态：RATE / FIXED"
+          },
+          "commissionRate": {
+            "type": "string",
+            "description": "佣金比例快照（null = 该形态不用它）"
+          },
+          "fixedAmount": {
+            "type": "string",
+            "description": "固定额快照（null = 该形态不用它）"
+          },
+          "baseAmount": {
+            "type": "string",
+            "description": "计提基数（人工登记的归因 GMV）"
+          },
+          "baseCurrency": {
+            "type": "string",
+            "description": "基数币种"
+          },
+          "accruedAmount": {
+            "type": "string",
+            "description": "计提金额"
+          },
+          "accruedCurrency": {
+            "type": "string",
+            "description": "计提金额币种"
+          },
+          "status": {
+            "type": "string",
+            "description": "计提状态"
+          },
+          "financePosted": {
+            "type": "boolean",
+            "description": "🔴 是否已入财务（恒为 false）"
+          },
+          "financeOwnerModule": {
+            "type": "string",
+            "description": "🔴 财务责任模块"
+          },
+          "accruedAt": {
+            "type": "string",
+            "description": "计提时刻",
+            "format": "date-time"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          },
+          "version": {
+            "type": "integer",
+            "description": "乐观锁版本",
+            "format": "int64"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "创建时刻",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "更新时刻",
+            "format": "date-time"
+          }
+        }
+      },
+      "InfluencerOutreachTemplatePage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "当前页数据",
+            "items": {
+              "$ref": "#/components/schemas/InfluencerOutreachTemplateRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "description": "符合筛选条件的总条数",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "description": "页码，从 0 起",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "description": "每页条数",
+            "format": "int32"
+          }
+        }
+      },
+      "InfluencerOutreachTemplatePreview": {
+        "type": "object",
+        "properties": {
+          "templateId": {
+            "type": "string",
+            "description": "模板 id",
+            "format": "uuid"
+          },
+          "subject": {
+            "type": "string",
+            "description": "渲染后的标题"
+          },
+          "messageBody": {
+            "type": "string",
+            "description": "渲染后的正文"
+          },
+          "values": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "description": "渲染用到的变量取值"
+            },
+            "description": "渲染用到的变量取值"
+          },
+          "note": {
+            "type": "string",
+            "description": "说明"
+          }
+        }
+      },
+      "InfluencerOutreachSummary": {
+        "type": "object",
+        "properties": {
+          "totalOutreachs": {
+            "type": "integer",
+            "description": "建联记录总数",
+            "format": "int64"
+          },
+          "draftCount": {
+            "type": "integer",
+            "description": "草稿数",
+            "format": "int64"
+          },
+          "sentCount": {
+            "type": "integer",
+            "description": "已发送数",
+            "format": "int64"
+          },
+          "repliedCount": {
+            "type": "integer",
+            "description": "已回复数",
+            "format": "int64"
+          },
+          "cooperatingCount": {
+            "type": "integer",
+            "description": "合作中数",
+            "format": "int64"
+          },
+          "completedCount": {
+            "type": "integer",
+            "description": "已完成数",
+            "format": "int64"
+          },
+          "closedCount": {
+            "type": "integer",
+            "description": "已拒绝 / 无回复数",
+            "format": "int64"
+          },
+          "sampleOrderCount": {
+            "type": "integer",
+            "description": "样品单数",
+            "format": "int64"
+          },
+          "signedSampleCount": {
+            "type": "integer",
+            "description": "已签收样品单数",
+            "format": "int64"
+          },
+          "pendingSignCount": {
+            "type": "integer",
+            "description": "待签收样品单数",
+            "format": "int64"
+          },
+          "accrualCount": {
+            "type": "integer",
+            "description": "佣金计提条数",
+            "format": "int64"
+          },
+          "accruedAmountTotal": {
+            "type": "string",
+            "description": "本地计提金额合计（null = 一条都没计提）"
+          },
+          "accruedCurrency": {
+            "type": "string",
+            "description": "🔴 计提金额币种（只有一个币种才汇总）"
+          },
+          "downstreamNote": {
+            "type": "string",
+            "description": "🔴 下游缺口说明"
+          },
+          "asOf": {
+            "type": "string",
+            "description": "数据截至时刻",
+            "format": "date-time"
+          }
+        }
+      },
+      "InfluencerSampleShipmentPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "当前页数据",
+            "items": {
+              "$ref": "#/components/schemas/InfluencerSampleShipmentRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "description": "符合筛选条件的总条数",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "description": "页码，从 0 起",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "description": "每页条数",
+            "format": "int32"
+          }
+        }
+      },
+      "InfluencerOutreachSegmentPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "当前页数据",
+            "items": {
+              "$ref": "#/components/schemas/InfluencerOutreachSegmentRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "description": "符合筛选条件的总条数",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "description": "页码，从 0 起",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "description": "每页条数",
+            "format": "int32"
+          }
+        }
+      },
+      "InfluencerOutreachCandidate": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "达人 id",
+            "format": "uuid"
+          },
+          "displayName": {
+            "type": "string",
+            "description": "达人名称"
+          },
+          "handle": {
+            "type": "string",
+            "description": "账号名"
+          },
+          "category": {
+            "type": "string",
+            "description": "类目"
+          },
+          "followerCount": {
+            "type": "integer",
+            "description": "粉丝数",
+            "format": "int64"
+          },
+          "followerTier": {
+            "type": "string",
+            "description": "粉丝层级"
+          },
+          "engagementRate": {
+            "type": "string",
+            "description": "🔴 互动率（null = 还没录，不可比）"
+          },
+          "gmv": {
+            "type": "string",
+            "description": "🔴 带货 GMV（null = 还没录，不可比）"
+          },
+          "gmvCurrency": {
+            "type": "string",
+            "description": "GMV 币种"
+          },
+          "platformCode": {
+            "type": "string",
+            "description": "平台编码"
+          },
+          "shopCode": {
+            "type": "string",
+            "description": "店铺编码"
+          },
+          "blacklisted": {
+            "type": "boolean",
+            "description": "🔴 是否在黑名单里（生效中）"
+          },
+          "hasOpenOutreach": {
+            "type": "boolean",
+            "description": "🔴 是否已有未走完的邀约"
+          }
+        },
+        "description": "当前页数据"
+      },
+      "InfluencerOutreachCandidatePage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "当前页数据",
+            "items": {
+              "$ref": "#/components/schemas/InfluencerOutreachCandidate"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "description": "符合筛选条件的总条数",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "description": "页码，从 0 起",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "description": "每页条数",
+            "format": "int32"
+          }
+        }
+      },
+      "InfluencerSampleOrderPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "当前页数据",
+            "items": {
+              "$ref": "#/components/schemas/InfluencerSampleOrderRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "description": "符合筛选条件的总条数",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "description": "页码，从 0 起",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "description": "每页条数",
+            "format": "int32"
+          }
+        }
+      },
+      "InfluencerOutreachPolicyPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "当前页数据",
+            "items": {
+              "$ref": "#/components/schemas/InfluencerOutreachPolicyRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "description": "符合筛选条件的总条数",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "description": "页码，从 0 起",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "description": "每页条数",
+            "format": "int32"
+          }
+        }
+      },
+      "InfluencerOutreachPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "当前页数据",
+            "items": {
+              "$ref": "#/components/schemas/InfluencerOutreachRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "description": "符合筛选条件的总条数",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "description": "页码，从 0 起",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "description": "每页条数",
+            "format": "int32"
+          }
+        }
+      },
+      "InfluencerOutreachDetail": {
+        "type": "object",
+        "properties": {
+          "outreach": {
+            "$ref": "#/components/schemas/InfluencerOutreachRow"
+          },
+          "followups": {
+            "type": "array",
+            "description": "跟进（按发生时刻倒序）",
+            "items": {
+              "$ref": "#/components/schemas/InfluencerOutreachFollowupRow"
+            }
+          },
+          "sampleOrders": {
+            "type": "array",
+            "description": "样品单",
+            "items": {
+              "$ref": "#/components/schemas/InfluencerSampleOrderRow"
+            }
+          },
+          "accruals": {
+            "type": "array",
+            "description": "佣金计提",
+            "items": {
+              "$ref": "#/components/schemas/InfluencerCommissionAccrualRow"
+            }
+          },
+          "officialApiNote": {
+            "type": "string",
+            "description": "🔴 官方接口红线说明"
+          },
+          "rateLimitNote": {
+            "type": "string",
+            "description": "🔴 频率上限说明"
+          },
+          "downstreamNote": {
+            "type": "string",
+            "description": "🔴 下游缺口说明"
+          },
+          "note": {
+            "type": "string",
+            "description": "说明"
+          }
+        }
+      },
+      "InfluencerOutreachAvailability": {
+        "type": "object",
+        "properties": {
+          "platforms": {
+            "type": "array",
+            "description": "逐平台接入情况",
+            "items": {
+              "$ref": "#/components/schemas/InfluencerOutreachPlatformAvailability"
+            }
+          },
+          "officialApiNote": {
+            "type": "string",
+            "description": "🔴 官方接口红线说明"
+          },
+          "rateLimitNote": {
+            "type": "string",
+            "description": "🔴 频率上限说明"
+          }
+        }
+      },
+      "InfluencerOutreachPlatformAvailability": {
+        "type": "object",
+        "properties": {
+          "platformCode": {
+            "type": "string",
+            "description": "平台编码"
+          },
+          "platformName": {
+            "type": "string",
+            "description": "平台名称"
+          },
+          "available": {
+            "type": "boolean",
+            "description": "是否已接入官方私信接口"
+          },
+          "status": {
+            "type": "string",
+            "description": "状态：NOT_INTEGRATED 未接入 / AVAILABLE 已接入"
+          },
+          "reason": {
+            "type": "string",
+            "description": "未接入的原因（人能读，不是异常类名）"
+          },
+          "sentToday": {
+            "type": "integer",
+            "description": "该平台今天已登记的发送条数",
+            "format": "int64"
+          },
+          "dailySendLimit": {
+            "type": "integer",
+            "description": "该平台的每日发送上限",
+            "format": "int32"
+          }
+        },
+        "description": "逐平台接入情况"
+      },
+      "InfluencerOutreachOption": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "取值"
+          },
+          "label": {
+            "type": "string",
+            "description": "中文说明"
+          }
+        },
+        "description": "计提状态选项"
+      },
+      "InfluencerOutreachOptions": {
+        "type": "object",
+        "properties": {
+          "outreachStatuses": {
+            "type": "array",
+            "description": "建联状态选项",
+            "items": {
+              "$ref": "#/components/schemas/InfluencerOutreachOption"
+            }
+          },
+          "sampleOrderStatuses": {
+            "type": "array",
+            "description": "样品单状态选项",
+            "items": {
+              "$ref": "#/components/schemas/InfluencerOutreachOption"
+            }
+          },
+          "shipmentStatuses": {
+            "type": "array",
+            "description": "包裹状态选项",
+            "items": {
+              "$ref": "#/components/schemas/InfluencerOutreachOption"
+            }
+          },
+          "followupTypes": {
+            "type": "array",
+            "description": "跟进方式选项",
+            "items": {
+              "$ref": "#/components/schemas/InfluencerOutreachOption"
+            }
+          },
+          "commissionTypes": {
+            "type": "array",
+            "description": "佣金形态选项",
+            "items": {
+              "$ref": "#/components/schemas/InfluencerOutreachOption"
+            }
+          },
+          "commissionScopes": {
+            "type": "array",
+            "description": "佣金适用范围选项",
+            "items": {
+              "$ref": "#/components/schemas/InfluencerOutreachOption"
+            }
+          },
+          "accrualStatuses": {
+            "type": "array",
+            "description": "计提状态选项",
+            "items": {
+              "$ref": "#/components/schemas/InfluencerOutreachOption"
+            }
+          },
+          "platforms": {
+            "type": "array",
+            "description": "平台下拉项（带 id）",
+            "items": {
+              "$ref": "#/components/schemas/InfluencerOutreachPlatformOption"
+            }
+          },
+          "platformCodes": {
+            "type": "array",
+            "description": "平台编码（租户内可用的）",
+            "items": {
+              "type": "string",
+              "description": "平台编码（租户内可用的）"
+            }
+          },
+          "shopCodes": {
+            "type": "array",
+            "description": "店铺编码（租户内可用的）",
+            "items": {
+              "type": "string",
+              "description": "店铺编码（租户内可用的）"
+            }
+          },
+          "templateVariables": {
+            "type": "array",
+            "description": "模板变量（闭合词表）",
+            "items": {
+              "$ref": "#/components/schemas/InfluencerOutreachTemplateVariable"
+            }
+          },
+          "officialApiNote": {
+            "type": "string",
+            "description": "🔴 官方接口红线说明"
+          },
+          "rateLimitNote": {
+            "type": "string",
+            "description": "🔴 频率上限说明"
+          },
+          "downstreamNote": {
+            "type": "string",
+            "description": "🔴 下游缺口说明"
+          }
+        }
+      },
+      "InfluencerOutreachPlatformOption": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "平台 id",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string",
+            "description": "平台编码"
+          },
+          "name": {
+            "type": "string",
+            "description": "平台名称"
+          }
+        },
+        "description": "平台下拉项（带 id）"
+      },
+      "InfluencerOutreachTemplateVariable": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "变量名（不含大括号）"
+          },
+          "label": {
+            "type": "string",
+            "description": "中文说明"
+          },
+          "required": {
+            "type": "boolean",
+            "description": "是不是必填"
+          }
+        },
+        "description": "模板变量（闭合词表）"
+      },
+      "InfluencerOutreachFollowupPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "当前页数据",
+            "items": {
+              "$ref": "#/components/schemas/InfluencerOutreachFollowupRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "description": "符合筛选条件的总条数",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "description": "页码，从 0 起",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "description": "每页条数",
+            "format": "int32"
+          }
+        }
+      },
+      "InfluencerCommissionRulePage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "当前页数据",
+            "items": {
+              "$ref": "#/components/schemas/InfluencerCommissionRuleRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "description": "符合筛选条件的总条数",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "description": "页码，从 0 起",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "description": "每页条数",
+            "format": "int32"
+          }
+        }
+      },
+      "InfluencerCommissionAccrualPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "当前页数据",
+            "items": {
+              "$ref": "#/components/schemas/InfluencerCommissionAccrualRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "description": "符合筛选条件的总条数",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "description": "页码，从 0 起",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "description": "每页条数",
+            "format": "int32"
+          }
+        }
+      },
+      "InfluencerOutreachCapabilities": {
+        "type": "object",
+        "properties": {
+          "dimensions": {
+            "type": "array",
+            "description": "逐维度能力声明；未交付段 available=false",
+            "items": {
+              "$ref": "#/components/schemas/InfluencerOutreachCapabilityDimension"
+            }
+          },
+          "outreachStatuses": {
+            "type": "array",
+            "description": "建联状态取值",
+            "items": {
+              "type": "string",
+              "description": "建联状态取值"
+            }
+          },
+          "sampleOrderStatuses": {
+            "type": "array",
+            "description": "样品单状态取值",
+            "items": {
+              "type": "string",
+              "description": "样品单状态取值"
+            }
+          },
+          "shipmentStatuses": {
+            "type": "array",
+            "description": "包裹状态取值",
+            "items": {
+              "type": "string",
+              "description": "包裹状态取值"
+            }
+          },
+          "followupTypes": {
+            "type": "array",
+            "description": "跟进方式取值",
+            "items": {
+              "type": "string",
+              "description": "跟进方式取值"
+            }
+          },
+          "commissionTypes": {
+            "type": "array",
+            "description": "佣金形态取值",
+            "items": {
+              "type": "string",
+              "description": "佣金形态取值"
+            }
+          },
+          "templateVariables": {
+            "type": "array",
+            "description": "模板变量（闭合词表）",
+            "items": {
+              "$ref": "#/components/schemas/InfluencerOutreachTemplateVariable"
+            }
+          },
+          "officialApiNote": {
+            "type": "string",
+            "description": "🔴 官方接口红线说明"
+          },
+          "rateLimitNote": {
+            "type": "string",
+            "description": "🔴 频率上限说明"
+          },
+          "downstreamNote": {
+            "type": "string",
+            "description": "🔴 下游缺口说明"
+          },
+          "upstreamNote": {
+            "type": "string",
+            "description": "上游与边界说明"
+          },
+          "boundaryNote": {
+            "type": "string",
+            "description": "下游与边界说明"
+          }
+        }
+      },
+      "InfluencerOutreachCapabilityDimension": {
         "type": "object",
         "properties": {
           "dimension": {

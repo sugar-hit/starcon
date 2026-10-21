@@ -269,6 +269,86 @@ const services: readonly {
       /^(permissions|owner-transfer|legal-entities(?:\/[0-9a-f-]+)?|legal-entities\/(?:[0-9a-f-]+\/accounting-books|references)|(?:roles|members|departments|children)(?:\/[0-9a-f-]+)?|tenants(?:\/current)?|audit(?:\/(?:export|[0-9a-f-]+))?|operation-log(?:\/(?:export|trace\/[0-9a-zA-Z-]+|[0-9a-f-]+))?||approval-records(?:\/(?:statistics|capabilities|export|by-actor\/[0-9a-f-]+|[0-9a-f-]+))?|hierarchy-authorizations(?:\/check|\/[0-9a-f-]+(?:\/revoke)?)?|accounting-books(?:\/[0-9a-f-]+)?|business-parameters(?:\/(?:effective|history|overrides(?:\/[0-9a-f-]+)?|freezes(?:\/[^/]+\/[^/]+)?))?|numbering(?:\/(?:entities|preview|sequences|issued|rules(?:\/conflicts|\/[0-9a-f-]+(?:\/next)?)?))?|approval-flows(?:\/(?:document-types|registrations|active|positions(?:\/[0-9a-f-]+)?|[0-9a-f-]+(?:\/validation)?))?|approval-rules(?:\/(?:effective-policy|evaluate|[0-9a-f-]+(?:\/validation)?))?|my-approvals(?:\/(?:capabilities|batch|[0-9a-f-]+(?:\/(?:decide|transfer))?))?|approval-instances|onboardings(?:\/[0-9a-f-]+\/complete)?|department-leaders|departments\/[0-9a-f-]+\/(?:leader(?:\/(?:proxies|grants)(?:\/[0-9a-f-]+)?)?|approval-chain)|offboarding(?:\/[0-9a-f-]+(?:\/revert|\/responsibility-items(?:\/[0-9a-f-]+(?:\/transfer)?)?|\/reclaim-items(?:\/[0-9a-f-]+(?:\/reclaim)?)?)?)?|legal-entities\/(?:[0-9a-f-]+\/(?:accounting-books|ledger-books|default-book)|references)|accounting-books(?:\/[0-9a-f-]+(?:\/fact-assignments(?:\/[0-9a-f-]+)?)?)?)$/,
   },
   {
+    // 14.5.1.2 建联与样品（channel 服务，卷 14 广告与增长 / L3 14.5.1 达人管理下的第二格）。
+    //
+    // 本条目是**新增一条独立的 services[] 元素**，不是往既有 channel 分支的 alternation 里
+    // 并分支 —— 那些分支是一段超长单行正则，多车道同时并进去 git 必然判冲突（结构性，
+    // retry 不会自愈）。
+    //
+    // ---- 插入锚点固定在 `prefix: 'identity/'` 那条元素**之后** ----
+    //   本仓历史上用过的锚点是「数组最开头」「`auth/` 前后」「`trade/` 之前」
+    //   「`catalog/` 之前」「`warehouse/` 前后」「数组末尾」与「`purchase-followups` 之后」
+    //   （14.5.1.1 达人库用的就是最后一个）。`identity/` 元素**之后**这个位置本仓
+    //   还没有车道用过，与同批其它车道常见的锚点相距 2000 行以上 ⇒ git 能干净求并。
+    //   锚点相邻的既有条目是 `identity/`（前缀 `identity/`）与 `price-anomaly-alerts`
+    //   （前缀 `catalog/`）—— 前缀都不同，不会与本条目抢同一条路径。
+    //
+    // ⚠️ 首 token「outreach」的零命中核对结论：
+    //   本文件既有 100+ 条 services[] 正则里**没有任何一条**含 `outreach` 这个串
+    //   （全文唯一的 `outreach` 出现在 14.5.1.1 那条条目的**注释**里 ——
+    //   `influencers/outreach —— 建联与样品（14.5.1.2）未交付`，那是注释不是正则）。
+    //   所以首 token 既是独立字面量，也不会被既有分支的前缀吃掉。
+    //   resolve() 是「按顺序逐条匹配、首个命中即返回」，而本条目**之前**的三条
+    //   `channel/` 元素（`ad-campaigns` / `ad-coupons` / `ad-flash-sales`）的正则
+    //   都是 `^ad\-…` 锚定的，**零命中** `outreach/…` ⇒ 本条目不会被它们遮蔽。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   outreach/capabilities                能力声明（未交付段 available=false + ownerModule）
+    //   outreach/options                     下拉项（状态 / 跟进方式 / 佣金形态 / 平台 / 店铺 / 模板变量）
+    //   outreach/summary                     概览统计
+    //   outreach/outreach-availability       逐平台的达人私信官方接口接入情况 + 今日发送数
+    //   outreach/segments                    筛选条件（GET 列表 / POST 新建）
+    //   outreach/segments/{uuid}             筛选条件（POST 改 / DELETE 删）
+    //   outreach/segments/{uuid}/candidates  按规则筛出的候选达人（真筛选）
+    //   outreach/templates                   邀约模板（GET 列表 / POST 新建）
+    //   outreach/templates/{uuid}            邀约模板（POST 改 / DELETE 删）
+    //   outreach/templates/{uuid}/preview    模板预览（真渲染）
+    //   outreach/policies                    风控策略（按平台：每日上限 + 最小间隔）
+    //   outreach/outreachs                   建联记录（GET 列表 / POST 新建）
+    //   outreach/outreachs/{uuid}            建联记录（GET 详情 / POST 改 / DELETE 删）
+    //   outreach/outreachs/batch             批量建联（**只生成草稿**，不是批量群发）
+    //   outreach/outreachs/{uuid}/receipt    手动登记「已发送 + 平台回执」
+    //   outreach/outreachs/{uuid}/send       走官方接口发送（适配器未接入 ⇒ 明确失败且不写数据）
+    //   outreach/outreachs/{uuid}/status     推进建联状态
+    //   outreach/outreachs/{uuid}/followups  登记合作跟进
+    //   outreach/followups                   跟进列表（GET）
+    //   outreach/samples                     样品单（GET 列表 / POST 新建）
+    //   outreach/samples/{uuid}              样品单（POST 改）
+    //   outreach/samples/{uuid}/status       手动推进样品单（只能到 OUTBOUNDED / CANCELLED）
+    //   outreach/samples/{uuid}/shipments    登记样品包裹（发货 / 物流单号）
+    //   outreach/shipments                   包裹列表（GET）
+    //   outreach/shipments/{uuid}/status     推进包裹状态（送达 / 签收 / 丢件 / 退回）
+    //   outreach/commission-rules            佣金规则（GET 列表 / POST 新建）
+    //   outreach/commission-rules/{uuid}     佣金规则（POST 改 / DELETE 删）
+    //   outreach/commission-accruals          佣金计提（GET 列表 / POST 登记）
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸路径 `outreach` —— 本模块没有裸集合读，一切入口都带子路径。
+    //     末尾**刻意不带 `?`**：带了等于放行裸路径。
+    //   * `outreach/outreachs/{uuid}/batch-send` —— **批量群发不存在**：蓝图红线是
+    //     「建联必须走官方接口，批量私信是平台风控重点」。批量能力只到
+    //     `POST /outreachs/batch`（批量生成**草稿**），每一条仍要逐条登记回执才发出。
+    //   * `outreach/outreachs/{uuid}/delete` —— 已发出的私信是举证凭据，删不掉（DELETE 打在
+    //     `{uuid}` 上本身就是删整条，不是动作）。
+    //   * `outreach/samples/{uuid}/shipments/{uuid}` —— 包裹是**样品单的子资源**，
+    //     读包裹走 `outreach/shipments`（带 `sampleOrderId` 筛选）。
+    //   * `outreach/attributions` —— 带货归因（14.5.2.1）**未交付**。
+    //   * `influencers/outreach` —— 14.5.1.1 达人库那条条目里**刻意不放行**的形状：
+    //     本模块的端点在前缀 `outreach/` 下，不在 `influencers/` 下。
+    //   * 非 UUID 段 —— `outreach/outreachs/not-a-uuid` 必须 404。
+    //
+    // id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    // （不是 `[0-9a-f-]+`）：后者会把 `batch` 这种非 UUID 形状也当成 id 放行。
+    // 字面量子路径（capabilities / options / summary / policies / followups /
+    // outreach-availability / commission-accruals 那一组）排在 {uuid} 段之前判别 ——
+    // alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^outreach(?:\/(?:capabilities|options|summary|outreach\-availability|followups)|\/segments(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/candidates)?)?|\/templates(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/preview)?)?|\/policies|\/outreachs(?:\/batch|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:receipt|send|status|followups))?)?|\/samples(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:status|shipments))?)?|\/shipments(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/status)?|\/commission\-rules(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|\/commission\-accruals)$/,
+  },
+  {
     // 5.5.2.1 异常告警（**本条目是新增一条 services[] 元素**，不是往既有 catalog 分支的
     // alternation 里并**）。同批多车道共享这一个文件，而每个服务在 services[] 里
     // 是**一段超长单行正则**：只要两条车道都往同一服务的 alternation 里并分支，git 必然判冲突
