@@ -4938,6 +4938,62 @@ const services: readonly {
     pattern:
       /^price-adjustments(?:\/(?:capabilities|current-price|writebacks)(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/ack)?|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:submit|execute|reject|approval\/refresh))?)?$/,
   },
+  {
+    // 5.4.2.1 平台价格同步（catalog 服务，卷 05 定价与价目的 L3 锚点 5.4.2）。
+    //
+    // 蓝图：「**职责**：把生效价格回写到平台，处理平台定价规则（平台可能有最低价 / 自动比价 /
+    // 多站点联动），记录回写结果与被平台调整后的实际价。**输出**：回写任务（经 02 队列）；
+    // 实际价与期望价的差异记录。**平台可能拒绝或调整价格**（如低于最低价触发），
+    // 差异必须显性反馈，不能假设回写即成功。」
+    //
+    // 本条目是**新增一条 services[] 元素**，不是往既有 catalog 长正则里并 ——
+    // 那一支是单行超长正则，多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在「5.4.1.1 调价单」元素之后、数组结尾的 `];` 之前（数组最末尾），
+    // 与同批另外三条车道的插入点互不重叠（它们分别用 warehouse / trade / channel 组）。
+    // 既有条目一字未动。
+    //
+    // 🔴 为什么用 `price-sync` 这个独立前缀：
+    //   * 既有 catalog 分支是**一条**覆盖全服务的长 alternation，里面没有 `price-sync`；
+    //     已用脚本逐条核对本文件里**全部既有正则**：`price-sync/**` **零命中**
+    //     （既有分支不会先把它吃掉）。
+    //   * 5.4.1.1 调价单与 5.4.2.1 平台价格同步**不共用端点**：一个回答「这次改价批不批」，
+    //     一个回答「这个价推上平台会怎样」；上游的 `price-adjustments/writebacks/{uuid}/ack`
+    //     仍是 5.4.1.1 的形状，本模块只是**调用**它，不另开形状。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   price-sync/capabilities                    能力声明（规则语义 / 结局 / 队列归属）
+    //   price-sync/rules                          平台定价规则集合读（GET）+ 建规则（POST）
+    //   price-sync/rules/{uuid}                   规则详情（GET）+ 改规则 / 停用（PATCH）
+    //   price-sync/records                        回写结果集合读（真分页 + 真筛选）
+    //   price-sync/records/{uuid}                 回写结果详情（含它的差异记录）
+    //   price-sync/records/{uuid}/receipt         平台回执（实际价 / 拒绝原因）
+    //   price-sync/diffs                          差异台账（实际价与期望价的差异逐条可查）
+    //   price-sync/sync                           执行一次同步（消费上游待回写事实）
+    //
+    // ⚠️ 判别顺序：**字面量子路径（capabilities / rules / records / diffs / sync）**
+    //    必须排在 uuid 段之前 —— alternation 是首个命中即返回，顺序反了会被 uuid 支吃掉半截。
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），不是 `[0-9a-f-]+` ——
+    //    后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行。
+    // ⚠️ `receipt` **只在 records 之下**放行：规则的回执不存在，放行它会让界面以为能提交规则回执。
+    // ⚠️ **裸路径 `price-sync` 不放行**：本模块没有这个集合资源，放行它等于凭空开一个形状。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `price-sync` —— 没有裸集合资源。
+    //   * `price-sync/records/{uuid}/approve` —— 平台的结论由**平台回执**给出，
+    //     本模块**没有**「本地批准回执」端点：凭空放行它等于把平台结论本地化。
+    //   * `price-sync/rules/{uuid}/receipt` —— 规则没有回执。
+    //   * `price-sync/export` —— 本模块**不导出 CSV**（蓝图的输出是回写任务与差异记录，
+    //     不是导出件）；放行它只会让界面以为有下载按钮。
+    //   * `price-sync/records/{uuid}/retry` —— 重试语义住在 channel 的 02 队列
+    //     （platform_operation 的 attempts / verification），本模块**不自造第二套队列**；
+    //     界面上「再执行一次同步」走的是 `price-sync/sync`，不是按记录重试。
+    //   * `price-sync/price-adjustments` —— 5.4.1.1 的命名空间，本模块只**调用**它的 ack 端点。
+    prefix: 'catalog/',
+    env: 'CATALOG_URL',
+    fallback: 'http://127.0.0.1:8082',
+    pattern:
+      /^price-sync\/(?:capabilities|diffs|sync|rules(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|records(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/receipt)?)?)$/,
+  },
 ];
 
 function resolve(path: string) {
