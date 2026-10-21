@@ -29882,6 +29882,552 @@
           }
         }
       }
+    },
+    "/warehouse/pending-inspections": {
+      "get": {
+        "tags": [
+          "pending-inspection-controller"
+        ],
+        "operationId": "get_warehouse_pending_inspections",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "warehouseId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "skuId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "receiptId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "CREATED_AT"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PendingInspectionTaskPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "pending-inspection-controller"
+        ],
+        "operationId": "post_warehouse_pending_inspections",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PendingInspectionTaskCreateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PendingInspectionTaskRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/pending-inspections/{id}/request-inspection": {
+      "post": {
+        "tags": [
+          "pending-inspection-controller"
+        ],
+        "operationId": "post_warehouse_pending_inspections_id_request_inspection",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PendingInspectionRequestInspectionInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PendingInspectionTaskRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/pending-inspections/{id}/record-result": {
+      "post": {
+        "tags": [
+          "pending-inspection-controller"
+        ],
+        "operationId": "post_warehouse_pending_inspections_id_record_result",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PendingInspectionRecordResultInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PendingInspectionTaskRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/pending-inspections/{id}/dispose": {
+      "post": {
+        "tags": [
+          "pending-inspection-controller"
+        ],
+        "operationId": "post_warehouse_pending_inspections_id_dispose",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PendingInspectionDisposeInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PendingInspectionTaskRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/pending-inspections/{id}/cancel": {
+      "post": {
+        "tags": [
+          "pending-inspection-controller"
+        ],
+        "operationId": "post_warehouse_pending_inspections_id_cancel",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PendingInspectionCancelInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PendingInspectionTaskRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/pending-inspections/{id}": {
+      "get": {
+        "tags": [
+          "pending-inspection-controller"
+        ],
+        "operationId": "get_warehouse_pending_inspections_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PendingInspectionTaskDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/pending-inspections/stock": {
+      "get": {
+        "tags": [
+          "pending-inspection-controller"
+        ],
+        "operationId": "get_warehouse_pending_inspections_stock",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "warehouseId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "locationId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "skuId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "ON_HAND"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PendingInspectionStockPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/pending-inspections/options": {
+      "get": {
+        "tags": [
+          "pending-inspection-controller"
+        ],
+        "operationId": "get_warehouse_pending_inspections_options",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "warehouseId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PendingInspectionOptions"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/pending-inspections/capabilities": {
+      "get": {
+        "tags": [
+          "pending-inspection-controller"
+        ],
+        "operationId": "get_warehouse_pending_inspections_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PendingInspectionCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -69241,6 +69787,906 @@
             "type": "string"
           },
           "handoff": {
+            "type": "string"
+          }
+        }
+      },
+      "PendingInspectionTaskCreateInput": {
+        "required": [
+          "quantity",
+          "receiptLineId",
+          "sourceBucketId"
+        ],
+        "type": "object",
+        "properties": {
+          "sourceBucketId": {
+            "type": "string",
+            "description": "待检库存行（stock_bucket.id）：这批待检货此刻所在的库位 × 批次",
+            "format": "uuid"
+          },
+          "receiptLineId": {
+            "type": "string",
+            "description": "上游 8.2.1.1 收货明细行（goods_receipt_line.id）：这批货是哪次实收的哪一行",
+            "format": "uuid"
+          },
+          "quantity": {
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "type": "number",
+            "description": "本次待检的批量（不得超过库存行在手量与收货明细行实收量）"
+          },
+          "notes": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "PendingInspectionTaskRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "taskCode": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "warehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "warehouseCode": {
+            "type": "string"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "receiptId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "receiptCode": {
+            "type": "string"
+          },
+          "receiptLineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "inspectionOrderCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "resultType": {
+            "type": "string",
+            "nullable": true
+          },
+          "resultTypeLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "qualifiedQuantity": {
+            "type": "number",
+            "nullable": true
+          },
+          "unqualifiedQuantity": {
+            "type": "number",
+            "nullable": true
+          },
+          "concessionQuantity": {
+            "type": "number",
+            "nullable": true
+          },
+          "sellableQuantity": {
+            "type": "number",
+            "nullable": true
+          },
+          "nonSellableQuantity": {
+            "type": "number",
+            "nullable": true
+          },
+          "dispositionSummary": {
+            "type": "string"
+          },
+          "dispositionSummaryLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "disposedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "PendingInspectionRequestInspectionInput": {
+        "required": [
+          "templateId"
+        ],
+        "type": "object",
+        "properties": {
+          "templateId": {
+            "type": "string",
+            "description": "6.4.2.1 质检模板（trade 服务，quality_inspection_template.id）",
+            "format": "uuid"
+          },
+          "notes": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "PendingInspectionRecordResultInput": {
+        "type": "object",
+        "properties": {
+          "notes": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "PendingInspectionDisposeInput": {
+        "required": [
+          "expectedVersion",
+          "lines"
+        ],
+        "type": "object",
+        "properties": {
+          "expectedVersion": {
+            "type": "integer",
+            "description": "乐观锁版本号（单头 version），与当前不一致一律 409",
+            "format": "int64"
+          },
+          "lines": {
+            "minItems": 1,
+            "type": "array",
+            "description": "处置明细。至少一行，各行数量之和必须等于任务批量",
+            "items": {
+              "$ref": "#/components/schemas/PendingInspectionDisposeLineInput"
+            }
+          },
+          "notes": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "PendingInspectionDisposeLineInput": {
+        "required": [
+          "dispositionType",
+          "quantity"
+        ],
+        "type": "object",
+        "properties": {
+          "dispositionType": {
+            "type": "string",
+            "description": "去向：SELLABLE 转可售 / DEFECTIVE 转残次 / SCRAP 报废（离仓） / RETURN 退货（离仓）"
+          },
+          "quantity": {
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "type": "number",
+            "description": "该去向的数量"
+          },
+          "targetQualityStatusId": {
+            "type": "string",
+            "description": "目标质量状态（inventory_quality_status.id）。SELLABLE / DEFECTIVE 行必填，且角色必须与去向一致；SCRAP / RETURN 行必须为空",
+            "format": "uuid",
+            "nullable": true
+          },
+          "targetLocationId": {
+            "type": "string",
+            "description": "目标库位（warehouse_location.id）。SELLABLE / DEFECTIVE 行必填，库位类型必须与质量角色匹配（可售→存储 / 残次→残次）；SCRAP / RETURN 行必须为空",
+            "format": "uuid",
+            "nullable": true
+          },
+          "note": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "description": "处置明细。至少一行，各行数量之和必须等于任务批量"
+      },
+      "PendingInspectionCancelInput": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "PendingInspectionTaskPage": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PendingInspectionTaskRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalQuantity": {
+            "type": "number"
+          },
+          "totalSellableQuantity": {
+            "type": "number"
+          },
+          "totalNonSellableQuantity": {
+            "type": "number"
+          },
+          "pendingCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "inspectionRequestedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "resultRecordedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "disposedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "cancelledCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "PendingInspectionDispositionRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "dispositionType": {
+            "type": "string"
+          },
+          "dispositionTypeLabel": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "targetQualityStatusId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "targetQualityStatusCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "targetQualityStatusName": {
+            "type": "string",
+            "nullable": true
+          },
+          "targetLocationId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "targetLocationCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "targetLocationName": {
+            "type": "string",
+            "nullable": true
+          },
+          "targetLocationType": {
+            "type": "string",
+            "nullable": true
+          },
+          "targetBalanceId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "targetBucketId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "PendingInspectionEntryRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "balanceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "qualityStatusId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "qualityStatusCode": {
+            "type": "string"
+          },
+          "qualityStatusName": {
+            "type": "string"
+          },
+          "qualityRole": {
+            "type": "string"
+          },
+          "onHandDelta": {
+            "type": "number"
+          },
+          "reservedDelta": {
+            "type": "number"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "PendingInspectionEventRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "eventType": {
+            "type": "string"
+          },
+          "eventTypeLabel": {
+            "type": "string"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "actorId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "PendingInspectionOrderSnapshot": {
+        "type": "object",
+        "properties": {
+          "inspectionOrderId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "inspectionOrderCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "inspectionTemplateCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "requestedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "requestedBy": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "PendingInspectionTaskDetail": {
+        "type": "object",
+        "properties": {
+          "task": {
+            "$ref": "#/components/schemas/PendingInspectionTaskRow"
+          },
+          "sourceBucketId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sourceLocationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sourceLocationCode": {
+            "type": "string"
+          },
+          "sourceLocationName": {
+            "type": "string"
+          },
+          "sourceLocationType": {
+            "type": "string"
+          },
+          "sourceBalanceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "pendingQualityStatusId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "pendingQualityStatusCode": {
+            "type": "string"
+          },
+          "pendingQualityStatusName": {
+            "type": "string"
+          },
+          "lotId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "lotCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "sourceOnHand": {
+            "type": "number"
+          },
+          "inspection": {
+            "$ref": "#/components/schemas/PendingInspectionOrderSnapshot"
+          },
+          "dispositions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PendingInspectionDispositionRow"
+            }
+          },
+          "events": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PendingInspectionEventRow"
+            }
+          },
+          "entries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PendingInspectionEntryRow"
+            }
+          },
+          "netOnHandDelta": {
+            "type": "number"
+          },
+          "sellableBefore": {
+            "type": "number"
+          },
+          "sellableAfter": {
+            "type": "number"
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "PendingInspectionStockPage": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PendingInspectionStockRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalOnHand": {
+            "type": "number"
+          },
+          "totalAvailable": {
+            "type": "number"
+          },
+          "bucketCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "locationCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "skuCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "PendingInspectionStockRow": {
+        "type": "object",
+        "properties": {
+          "bucketId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "balanceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "warehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "warehouseCode": {
+            "type": "string"
+          },
+          "warehouseName": {
+            "type": "string"
+          },
+          "locationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "locationCode": {
+            "type": "string"
+          },
+          "locationName": {
+            "type": "string"
+          },
+          "locationType": {
+            "type": "string"
+          },
+          "locationPickable": {
+            "type": "boolean"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "lotId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "lotCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "qualityStatusId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "qualityStatusCode": {
+            "type": "string"
+          },
+          "qualityStatusName": {
+            "type": "string"
+          },
+          "onHand": {
+            "type": "number"
+          },
+          "reserved": {
+            "type": "number"
+          },
+          "available": {
+            "type": "number"
+          },
+          "lastMovementAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "hasOpenTask": {
+            "type": "boolean"
+          }
+        }
+      },
+      "PendingInspectionLocationRef": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "warehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "warehouseCode": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "pickable": {
+            "type": "boolean"
+          },
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "PendingInspectionOptions": {
+        "type": "object",
+        "properties": {
+          "warehouses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PendingInspectionWarehouseRef"
+            }
+          },
+          "qualityStatuses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PendingInspectionQualityRef"
+            }
+          },
+          "locations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PendingInspectionLocationRef"
+            }
+          },
+          "inspectionTemplates": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PendingInspectionTemplateRef"
+            }
+          },
+          "inspectionTemplatesAvailable": {
+            "type": "boolean"
+          },
+          "inspectionTemplatesNote": {
+            "type": "string",
+            "nullable": true
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "PendingInspectionQualityRef": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          }
+        }
+      },
+      "PendingInspectionTemplateRef": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "inspectionType": {
+            "type": "string"
+          },
+          "inspectionTypeLabel": {
+            "type": "string"
+          }
+        }
+      },
+      "PendingInspectionWarehouseRef": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "countryCode": {
+            "type": "string"
+          },
+          "timezone": {
+            "type": "string"
+          }
+        }
+      },
+      "PendingInspectionCapabilities": {
+        "type": "object",
+        "properties": {
+          "refType": {
+            "type": "string"
+          },
+          "atomicQualityMoves": {
+            "type": "boolean"
+          },
+          "pendingIsNotSellable": {
+            "type": "boolean"
+          },
+          "disposeMustCoverWholeLot": {
+            "type": "boolean"
+          },
+          "upstreamBoundary": {
+            "type": "string"
+          },
+          "inspectionBoundary": {
+            "type": "string"
+          },
+          "dispositionBoundary": {
+            "type": "string"
+          },
+          "upstreamModules": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PendingInspectionUpstreamModule"
+            }
+          },
+          "downstreamModules": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PendingInspectionDownstreamModule"
+            }
+          },
+          "hardRules": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PendingInspectionHardRule"
+            }
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "PendingInspectionDownstreamModule": {
+        "type": "object",
+        "properties": {
+          "moduleId": {
+            "type": "string"
+          },
+          "moduleName": {
+            "type": "string"
+          },
+          "service": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "effect": {
+            "type": "string"
+          }
+        }
+      },
+      "PendingInspectionHardRule": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "rule": {
+            "type": "string"
+          },
+          "enforcedBy": {
+            "type": "string"
+          }
+        }
+      },
+      "PendingInspectionUpstreamModule": {
+        "type": "object",
+        "properties": {
+          "moduleId": {
+            "type": "string"
+          },
+          "moduleName": {
+            "type": "string"
+          },
+          "service": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "usage": {
             "type": "string"
           }
         }

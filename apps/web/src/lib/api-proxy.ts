@@ -4690,6 +4690,56 @@ const services: readonly {
       /^product\-certifications(?:\/(?:capabilities|overview|types|policy|certifications|requirements|coverage|expiry-reminders|sku-candidates|category-candidates)|\/types\/[A-Za-z0-9_-]{1,32}|\/certifications\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:revoke|skus(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|categories(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|documents))?|\/documents\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/file)?|\/requirements\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}|\/coverage\/skus\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})$/,
   },
   {
+    // 16.4.2.2 授权凭证：集中存储与核验授权凭证文件（真伪验证记录 / 文件版本 / 签署方信息 /
+    // 一键核验）。🔴 蓝图加粗句「凭证需保留原始文件与元数据，争议时是唯一证据」的落点。
+    //
+    // ⚠️ **本模块是独立一条 services[] 元素**，刻意**不**往既有 channel 长 alternation 里并分支：
+    //   那条正则由多车道共用，并进去必然 git 冲突，且取错一侧会静默删掉别人已交付的路由
+    //   （表现是页面 404，而 typecheck / lint / vitest / Playwright 全部全绿）。
+    //   插入锚点固定在「16.2.2.2 认证与资质那条元素之后」，既有条目一字未动。
+    //
+    // 🔴 根路径用 `brand-credentials`（**独立前缀**），与 16.4.2.1 的 `brand-authorizations`
+    //     不重叠（两字面量互不为前缀，不会互相吃掉）。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   brand-credentials/capabilities                 能力声明（真伪怎么判 / 结论口径 / 边界）
+    //   brand-credentials/overview                     概览（凭证数 / 有效 / 临期 / 过期 / 撤销 / 核验三态）
+    //   brand-credentials/credentials                  凭证档案列表（真分页 + 真筛选）+ 登记（POST）
+    //   brand-credentials/credentials/{uuid}           凭证详情 + 修改（PUT）
+    //   brand-credentials/credentials/verify-batch     批量核验（POST，一次最多 50 个）
+    //   brand-credentials/credentials/{uuid}/revoke    撤销凭证（POST，必须写理由）
+    //   brand-credentials/credentials/{uuid}/verify    🔴 一键核验（POST）
+    //   brand-credentials/credentials/{uuid}/signatories            签署方清单（GET）+ 登记（POST）
+    //   brand-credentials/credentials/{uuid}/signatories/{uuid}    移除签署方（DELETE）
+    //   brand-credentials/credentials/{uuid}/documents              文件版本清单（GET）+ 上传（POST）
+    //   brand-credentials/documents/{uuid}             凭证文件元数据
+    //   brand-credentials/documents/{uuid}/file        凭证文件本体（二进制，**浏览器代理不透传**）
+    //   brand-credentials/verifications                核验记录历史（真分页）
+    //   brand-credentials/authorizations               上游 16.4.2.1 的授权档案候选（同库只读）
+    //
+    // ⚠️ `documents/{uuid}/file` 虽然放行，但**浏览器代理不原样透传二进制**（代理只透传
+    //    text/csv、text/vnd.zpl、text/html）：这条是给直连调用方（归档任务 / 争议取证）用的，
+    //    页面上的文件清单显示元数据与 sha256 摘要，不靠它下载。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸路径 `brand-credentials` —— 本模块没有裸路径资源（列表在 credentials 上）。
+    //   * `brand-credentials/credentials/{uuid}/delete` —— 合规台账**不做物理删除**，
+    //     撤销走 `revoke`；凭证是「争议时是唯一证据」的那份东西。
+    //   * `brand-credentials/credentials/{uuid}/restore` —— 撤销是终态，不提供「恢复」。
+    //   * `brand-credentials/verifications/{uuid}` —— 核验记录只有列表，没有单条详情端点。
+    //   * `brand-credentials/documents/{uuid}/delete` —— 文件版本**只追加**，没有删除。
+    //   * 非 UUID 段 —— `credentials/not-a-uuid` 必须 404，不能被宽松分支吃掉。
+    // ⚠️ 外层分组**不带 `?`**：本模块没有裸集合读，放行裸路径 `brand-credentials`
+    //    就是凭空多出一条资源（界面上会以为有一个「授权凭证」的裸列表端点）。
+    //    判别顺序上，字面量子路径（capabilities / overview / verifications / authorizations）
+    //    与 {uuid} 段互不吃；`credentials/verify-batch` 是字面量，排在 {uuid} 段之前判别。
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^brand-credentials\/(?:capabilities|overview|verifications|authorizations|credentials(?:\/verify-batch|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:revoke|verify|signatories(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|documents))?)?|documents\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/file)?)$/,
+  },
+  {
     // 5.2.2.1 汇率查询：各币种对各本位币的汇率（方向 + 汇率 + 生效日 + 来源）、来源配置与外部拉取。
     //
     // 形状逐个列出（**只放行本模块真实实现的路径**）：
@@ -5305,6 +5355,52 @@ const services: readonly {
     fallback: 'http://127.0.0.1:8082',
     pattern:
       /^price-sync\/(?:capabilities|diffs|sync|rules(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|records(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/receipt)?)?)$/,
+  },
+  {
+    // 8.2.2.2 待检处理（warehouse 服务，卷 08「仓储作业」的 L3 锚点 8.2.2）。
+    //
+    // 蓝图：「管理待检区库存：发起质检任务（6 质检单）、质检通过后转入可售、
+    // 质检不通过转残次/报废/退货。」「输出：质量状态变更分录；可售量更新。」
+    //
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 warehouse 那条巨型 alternation 里并分支 ——
+    // 那一支是单行超长正则，多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在 services[] 的**最末尾**（紧挨着 `];`），
+    // 与同批其它车道（catalog / trade / channel 组）的插入点互不重叠。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   pending-inspections/capabilities            能力声明（硬规则 / 上下游接入情况）
+    //   pending-inspections/stock                    待检库存清单（GET，真分页 / 真筛选）
+    //   pending-inspections/options                  下拉（仓库 / 质量状态 / 库位 / 质检模板）
+    //   pending-inspections                          处理单集合（GET 真分页 / POST 建单）
+    //   pending-inspections/{uuid}                   单据详情（GET：单头 + 分录 + 事件 + 可售量前后对照）
+    //   pending-inspections/{uuid}/request-inspection 发起质检任务（POST，走 trade 的 6.4.2.1）
+    //   pending-inspections/{uuid}/record-result      录入质检结果（POST，三量从质检单回读）
+    //   pending-inspections/{uuid}/dispose            处置决定（POST，本模块唯一动库存的动作）
+    //   pending-inspections/{uuid}/cancel             取消（POST）
+    //
+    // 判别顺序：**字面量子路径（capabilities / stock / options）排在 {uuid} 段之前** ——
+    // alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    // id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`（不是
+    // `[0-9a-f-]+`）：后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行。
+    // 两个动作段（{uuid}/xxx）挂在单段 {uuid} 组的可选后缀里，否则会被单段分支吃掉半截、
+    // 把动作名留在匹配之外。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   pending-inspections/{uuid}/entries   —— 分录在详情里，没有单独的读端点。
+    //   pending-inspections/{uuid}/approve    —— 本模块没有审批动作（审批属 8.5.x 与 17 卷）。
+    //   pending-inspections/summary          —— 汇总在列表响应里，没有单独的汇总端点。
+    //   pending-inspections/{uuid}/delete     —— 终态不可逆：处置完的凭据不能删（后端 405 + DB 守卫）。
+    //   任何 DELETE / PUT 形状 —— 白名单是**按路径登记、不区分方法**的，
+    //     所以「不能删」的防线在服务端与 DB，不在这里。
+    //
+    // 与既有分支不重叠：既有 warehouse 那条巨型正则的 alternation 里
+    // 没有 `pending-inspections`（`putaway-tasks` / `goods-receipts` 与它不是一回事），
+    // 所以 `pending-inspections/...` 不会先被既有分支吃掉。
+    prefix: 'warehouse/',
+    env: 'WAREHOUSE_URL',
+    fallback: 'http://127.0.0.1:8084',
+    pattern:
+      /^pending-inspections(?:\/(?:capabilities|stock|options|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:request-inspection|record-result|dispose|cancel))?))?$/,
   },
 ];
 
