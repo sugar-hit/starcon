@@ -146,14 +146,28 @@ cd /Users/tommy/Project/starcon
 git fetch upstream --prune
 echo "=== 两分支关系（左=main 独有，右=集成分支独有）==="
 git rev-list --left-right --count upstream/main...upstream/integration/module-dev
-echo "=== main 是否为集成分支的祖先（是则可快进，无冲突）==="
-git merge-base --is-ancestor upstream/main upstream/integration/module-dev \
-  && echo "可快进" || echo "已分叉 → 会产生真合并"
+echo "=== 真实增量（看树差异，不看提交数）==="
+git diff --stat upstream/main upstream/integration/module-dev | tail -3
+git diff --quiet upstream/main upstream/integration/module-dev \
+  && echo "无新内容" || echo "有新增内容"
 echo "=== 合并预演（无副作用，不碰工作区）==="
 git merge-tree --write-tree --name-only upstream/main upstream/integration/module-dev
 ```
 
 `merge-tree` 会**提前告诉你哪些文件会真冲突**。它是只读的，**不要跳过**。
+
+⚠️ **「提交数」不是增量，`main` 是 squash 合入的**：
+
+`main` 的每次更新都是 **squash 合并**，所以 `main` 的提交**不是**集成分支的祖先
+（`merge-base --is-ancestor upstream/main upstream/integration/module-dev` 恒为假），
+`git rev-list --count upstream/main...upstream/integration/module-dev` 会报出**上百个提交**，
+而**实际内容差异可能只有几十个文件**（实测：提交数口径报 142，内容口径是 83 个文件）。
+
+⇒ **判断有没有新内容，只能看树差异**（`git diff --quiet upstream/main upstream/integration/module-dev`）。
+用提交数判断的后果是：**每一轮都以为有大增量**，于是每轮都开一个内容其实没变的 PR。
+
+同理，第 3.2 节的「可快进」判据在 squash 合入后**基本不成立** ——
+正常形态是「真合并」，且冲突解法见第 4 节。
 
 ### 3.1 同步 PR 的现状（决定本轮走哪条路）
 
@@ -169,11 +183,11 @@ gh pr list --base main --head chore/sync-module-dev --state open
 
 ### 3.2 三种合并形态，处理方式不同
 
-| 形态                  | 判据                            | 处理                                                       |
-| --------------------- | ------------------------------- | ---------------------------------------------------------- |
-| **A. 可快进**         | `merge-base --is-ancestor` 成功 | `git merge --ff-only`，无冲突，跳到第 5 节验证             |
-| **B. 真合并但无冲突** | `merge-tree` 不报冲突文件       | 正常 `git merge --no-ff`，可能有 `contract-union` 自动求并 |
-| **C. 真合并且有冲突** | `merge-tree` 报出冲突文件       | 走第 4 节逐个解冲突                                        |
+| 形态                  | 判据                      | 处理                                                       |
+| --------------------- | ------------------------- | ---------------------------------------------------------- |
+| **A. 可快进**         | 树差异为空且祖先关系成立  | 极少出现（`main` 是 squash 合入的，祖先关系通常不成立）    |
+| **B. 真合并但无冲突** | `merge-tree` 不报冲突文件 | 正常 `git merge --no-ff`，可能有 `contract-union` 自动求并 |
+| **C. 真合并且有冲突** | `merge-tree` 报出冲突文件 | 走第 4 节逐个解冲突                                        |
 
 ---
 
@@ -184,39 +198,72 @@ gh pr list --base main --head chore/sync-module-dev --state open
 | 文件                                                                                                                                          | 合并驱动            | 解法                                                           |
 | --------------------------------------------------------------------------------------------------------------------------------------------- | ------------------- | -------------------------------------------------------------- |
 | `packages/api-contracts/src/**/*.ts`<br>`packages/api-contracts/src/*.openapi.json`<br>`docs/product/capability-blueprint/module-progress.md` | ✅ `contract-union` | **自动按键求并**。git 会自己跑 `merge-union.mjs`，通常不留冲突 |
-| `apps/web/src/lib/api-proxy.ts`                                                                                                               | ❌ **无驱动覆盖**   | ⚠️ **必然真冲突，必须手工求并**（见 4.2）                      |
-| 其余源码                                                                                                                                      | ❌ 无驱动覆盖       | 按语义合并，逐个判断                                           |
+| `apps/web/src/lib/api-proxy.ts`                                                                                                               | ❌ **无驱动覆盖**   | ⚠️ **必然真冲突**，按 4.3 的判据解                             |
+| 其余源码                                                                                                                                      | ❌ 无驱动覆盖       | 按 4.2 的判据解                                                |
 
-### 4.2 ⚠️ `api-proxy.ts`：白名单正则两层 alternation，必须**都**求并
+### 4.2 ⛔ 第一步永远是「判定 main 侧是不是集成分支的祖先快照」
+
+**这不是可选的诊断步骤，是解冲突的入口。**
+
+因为 `main` 是 **squash 合入**的，`main` 的文件版本来自集成分支的**某个较早提交**。
+所以大多数冲突**不是双向分叉，而是线性演进**：
+
+- main 侧 = 集成分支历史上的某个旧版本 ⇒ **取集成分支侧**（新侧是演进的终点，取一边不丢内容）。
+- main 侧 = 集成分支**从未有过**的内容（真分叉）⇒ **必须并入**，取一边会丢东西。
+
+⚠️ **在 squash 合入的仓库里，「无脑求并」是错的** —— 求并会把 main 侧的旧内容重新塞回去，
+制造出「本该被替换掉的旧代码又活了」的状态。
+
+**用工具判，不要靠眼睛：**
+
+```bash
+cd /Users/tommy/Project/starcon
+node tools/module-progress/merge-resolve.mjs --base upstream/main --head upstream/integration/module-dev
+```
+
+输出逐个文件给出：
+
+| 输出                                  | 含义                             | 动作                                        |
+| ------------------------------------- | -------------------------------- | ------------------------------------------- |
+| `[取集成分支侧]` + 祖先快照成立       | 线性演进                         | `git checkout --theirs <file>` 后 `git add` |
+| `[取集成分支侧]` + 累积型三件套全成立 | 取新侧**在结果上等同于完整求并** | 同上                                        |
+| `[并入（人工）]`                      | main 有集成分支从未有过的内容    | **人工求并**，不许取一边                    |
+
+工具的退出码：0 = 全部可机械执行；1 = 存在必须人工并入的文件。
+
+### 4.3 `api-proxy.ts`：白名单累积型文件
 
 `apps/web/src/lib/api-proxy.ts` 是**累积型白名单**（按路径登记的 `pattern` 列表），
-**没有合并驱动**。2026-10-19 实证：两侧各加一个同位置分支 ⇒ **真冲突**（`CONFLICT (content)`）。
-
-**它的正则有两层 alternation**（内层是某服务组，外层是仓库级段）。
-**两层都必须求并** —— 只并内层会**静默丢掉外层新增分支**（已在 8.2.1.2 / 10.4.1.1 上各咬一次）。
+**没有合并驱动**。
 
 **症状极隐蔽**：白名单只在浏览器端生效，**typecheck / lint / vitest / Playwright 全绿**，
-但页面 404。所以：
+但页面 404。所以解法必须有证据，不能靠眼看。
 
-- 解法是**求并**，**不是二选一**（不要取 ours 也不要取 theirs）。
-- 冲突块形如：
-  ```
-  <<<<<<< HEAD
-      pattern: /^(login|logout|session|memberships|switch|module-dev-route)$/,
-  =======
-      pattern: /^(login|logout|session|memberships|switch|main-side-route)$/,
-  >>>>>>> a77dcb6a
-  ```
-  正确结果（**两侧分支都在**）：
-  ```
-      pattern: /^(login|logout|session|memberships|switch|module-dev-route|main-side-route)$/,
-  ```
-- **验证方式不能是眼看，也不能是 grep + 自写正则**（该方法已连续骗过 6 版）。
-  必须**跑真 proxy 断言 HTTP 状态码**（白名单拦截 = 404，放行 = 转发），
-  并**同时断言反向用例**（未知路径仍 404）—— 否则「全部拒绝」的正则也能让放行用例全绿。
-  对应测试文件：`apps/web/src/app/api/[...path]/route.test.ts`。
+**两层 alternation 的求并要求依然成立**（内层是某服务组，外层是仓库级段）——
+两侧各往同一处加分支时，只并内层会**静默丢掉外层新增分支**
+（已在 8.2.1.2 / 10.4.1.1 上各咬一次）。
 
-### 4.3 `contract-union` 自动求并的正确用法
+**但「求并」有两种形态，要分清：**
+
+| 形态                                    | 特征                         | 解法                                               |
+| --------------------------------------- | ---------------------------- | -------------------------------------------------- |
+| **真分叉**（main 有集成分支没有的分支） | 两侧各加了**不同**的分支     | **必须人工求并**，两个分支都要在                   |
+| **线性演进**（main 是旧快照）           | 集成分支只是在旧版本上继续加 | **取集成分支侧** —— 但要先证明它确实是严格保序超集 |
+
+**「取集成分支侧」的三个证明**（工具已自动跑完并打印结论）：
+
+1. **集合包含**：旧侧的每一条 pattern 都在新侧。
+2. **有序子序列**：旧侧的顺序在新侧保持 —— `resolve()` 是 first-match-wins，顺序错了会让旧分支吃掉新分支的路径。
+3. **零删除**：新旧之间没有删除行。
+
+三条同时成立 ⇒ 取新侧在结果上等同于完整求并，没有任何东西被丢掉。
+
+**验证方式不能是眼看，也不能是 grep + 自写正则**（该方法已连续骗过 6 版）。
+必须**跑真 proxy 断言 HTTP 状态码**（白名单拦截 = 404，放行 = 转发），
+并**同时断言反向用例**（未知路径仍 404）—— 否则「全部拒绝」的正则也能让放行用例全绿。
+对应测试文件：`apps/web/src/app/api/[...path]/route.test.ts`。
+
+### 4.4 `contract-union` 自动求并的正确用法
 
 驱动已注册在 `.git/config`（`merge.contract-union.driver`，**仓库本地配置，worktree 共享**）。
 它按「键」做**三方**求并（类型名 / OpenAPI 路径 / 模块 ID），base 才是裁判。
@@ -227,14 +274,17 @@ gh pr list --base main --head chore/sync-module-dev --state open
 - 台账求并后**必须**核对行数：`grep -cE '^\| [0-9]+\.[0-9]+\.[0-9]+\.[0-9]+ '` 须恒为 **465**，
   且 `grep -oE '...' | sort | uniq -d` 须**为空**。
 
-### 4.4 解冲突的通用纪律
+### 4.5 解冲突的通用纪律
 
+- **先跑 4.2 的判定工具**，不要凭印象决定取哪一边。
+- **取一边是允许的，但必须带证据**：祖先快照成立（线性演进），
+  且累积型文件的三件套全成立。
+  **没有证据的「取一边」= 静默删掉另一边已交付的成果。**
+- **真分叉（main 有集成分支没有的内容）必须并入**，这类文件工具会标成「并入（人工）」。
 - **先看 base**：用 `git diff <base> -- <file>` 判断「这一行是谁改的」。
   集成头侧新增 ≠ 车道删除 —— 逐行比对时也要问这个问题。
-- **不许用「取一边」糊掉冲突**。白名单、契约、台账这三类都是**累积型**，
-  取一边 = 静默删掉另一边已交付的成果。
 - **git 没报冲突 ≠ 不用审查**。已知累积型文件（白名单 / 契约 / 台账）
-  即使自动合并成功，也要按 4.2 / 4.3 的规则**核对一遍是不是真求并了**。
+  即使自动合并成功，也要核对一遍是不是真求并了（`contract-union` 的输出见 4.4）。
 - 解完必须 `git add` 冲突文件，确认 `git diff --name-only --diff-filter=U` **为空**。
 - 冲突解到一半**不许提交**。半解状态推上去会毁掉 `main`。
 
@@ -404,12 +454,19 @@ git checkout -B chore/sync-module-dev
 
 # ③ 合并集成分支
 git merge --no-ff --no-commit upstream/integration/module-dev
-#    形态 A（可快进）改用：git merge --ff-only upstream/integration/module-dev
 
 # ④ 看冲突
 git diff --name-only --diff-filter=U
 
-# ⑤ 解冲突（按第 4 节），解完 git add
+# ⑤ 解冲突（按第 4 节）
+#    先跑判定工具，它逐个文件给出「取集成分支侧」还是「并入（人工）」：
+cd /Users/tommy/Project/starcon
+node tools/module-progress/merge-resolve.mjs --base upstream/main --head upstream/integration/module-dev
+cd .worktrees/main-merge
+#    判「取集成分支侧」的文件：
+#      git checkout --theirs <file> && git add <file>
+#    判「并入（人工）」的文件：自己求并，**不许取一边**
+#    解完确认：git diff --name-only --diff-filter=U 为空
 
 # ⑥ 验证（按第 5 节）
 
@@ -528,9 +585,11 @@ git diff upstream/main...HEAD --stat | tail -3   # 确认合并进来的东西�
 ## 9. 最高优先级禁令
 
 - **不许直推 `main`**（只经 PR）
+- **不许在没有证据的情况下「取一边」** —— 必须先跑 4.2 的判定工具
+- **不许在 squash 合入的仓库里无脑求并** —— 那会把旧内容塞回去；判据是祖先快照 + 三件套
 - **不许在出现「比 `main` 基线更多的失败」时合并**（用 7.3 的闸工具判，不许凭感觉）
 - **不许把「CI 全绿」当成合并前提**（`main` 基线就是红的），也**不许因为「反正也是红的」就无条件合并**
-- **不许把冲突「取一边」糊掉** —— 白名单/契约/台账取一边 = 静默删交付成果
+- **不许无证据地「取一边」** —— 白名单/契约/台账取一边 = 静默删交付成果（要取就带证据，见 4.2）
 - **不许在主工作区 checkout `main`** —— 会打断流水线
 - **不许 force push `main`**
 - **不许用 `gh pr merge --admin` 强合**
