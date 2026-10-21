@@ -6,15 +6,19 @@
 >
 > 状态词表只有三个值，统计逻辑依赖它，不要新增：
 > `已交付`（迁移 + API + 页面 + 测试齐全，无 TODO 残留）· `进行中`（部分交付、未收口，证据列写清缺哪一块）· `未开发`（未开工）。
+
 ## 总览
+
 | 指标 | 数量 |
 | --- | --- |
 | 模块总数 | 465 |
-| 已交付 | 273 |
+| 已交付 | 274 |
 | 进行中 | 0 |
-| **未开发** | **192** |
-| 完成率 | 58.7% |
+| **未开发** | **191** |
+| 完成率 | 58.9% |
+
 ## 分阶段进度（交付顺序看这里）
+
 | 阶段 | 已交付 | 进行中 | 未开发 | 合计 |
 | --- | --- | --- | --- | --- |
 | **D1–D2** | 80 | 0 | 0 | 80 |
@@ -22,9 +26,12 @@
 | **D4** | 58 | 0 | 2 | 60 |
 | **D5** | 52 | 0 | 0 | 52 |
 | **D6** | 31 | 0 | 47 | 78 |
-| **D7** | 15 | 0 | 140 | 155 |
+| **D7** | 16 | 0 | 139 | 155 |
+
 ## 分系统进度
+
 | 卷 | 系统 | 阶段 | 已交付 | 模块数 |
+| --- | --- | --- | --- | --- |
 | 01 | 工作台与门户系统 | D7 | 0 | 23 |
 | 02 | 渠道与店铺系统 | D1–D2 / D5 | 25 | 25 |
 | 03 | 商品主数据系统 | D1–D2 | 40 | 40 |
@@ -40,25 +47,33 @@
 | 13 | 利润与经营分析系统 | D7 | 0 | 23 |
 | 14 | 广告与增长系统 | D7 | 1 | 22 |
 | 15 | 客户与客服系统 | D7 | 3 | 24 |
-| 16 | 合规与风控系统 | D7 | 2 | 23 |
+| 16 | 合规与风控系统 | D7 | 3 | 23 |
 | 17 | 组织权限与系统设置系统 | D1–D2 / D4 / D6 / D7 | 25 | 29 |
 | 18 | 集成开放与智能自动化系统 | D7 | 0 | 24 |
+
 ## 判定「已交付」的标准
+
 一个模块标 `已交付` 当且仅当下面四件都成立，缺一件就是 `未开发` 或 `进行中`：
+
 1. **迁移** — `backend/services/<svc>/src/main/resources/db/migration/V*.sql` 里有真实表结构，
    带 `tenant_id NOT NULL` + RLS 策略，不是注释里的设计。
 2. **API** — 服务里有对应端点，走 jOOQ 显式 SQL，不是返回硬编码常量的桩。
 3. **页面** — `apps/web/src/app/**/page.tsx` 是真实工作区，不是 `DomainPlaceholder`。
 4. **测试** — `cd backend && ./mvnw verify` 绿；涉及租户隔离的必须实跑
    「两租户互不可见 / 伪造 tenant header 无效 / 连接池归还后不串租户」三条断言。
+
 **判定为 `未开发` 的典型形态**（见到就说明没做完，不许算进已交付）：
+
 - `DomainPlaceholder` 占位页
 - 硬编码数组 / 常量当数据源
 - 服务里 `TODO` + `throw new UnsupportedOperationException()`
 - 迁移文件存在但没有 RLS 策略
 - 前端有页面但后端没有对应端点（或反之）
+
 ## 跨期说明
+
 「阶段」列按**依赖就绪顺序**逐模块标注，不是卷归属。跨期卷的拆分如下：
+
 - **01 工作台与门户 → 全部 D7**：它是纯投影聚合层（蓝图原文「不写业务数据，只读投影」），
   聚合 09 订单 / 07 库存 / 02 渠道 / 12 财务 / 15 客户 / 17 审批的投影。
   这些数据源没落地之前建「我的待办」只能造假数据，所以整卷排到最后收口。
@@ -72,7 +87,9 @@
 - **11 售后与退货**：D4 交付售后单、退货授权与实收、退款换货；平台纠纷 / 客诉工单 / 分析排 D7。
 - **17 组织权限**：D1–D2 交付租户、法人、部门、成员、角色、页面权限、数据范围、审计；
   17.4 审批流随单据排 D4，17.6.1.1 账簿与本位币随财务排 D6，17.7 套餐与平台参数排 D7。
+
 ## 模块明细
+
 | 模块 ID | 模块名 | L3 锚点路由 | 阶段 | 状态 | 证据 |
 | --- | --- | --- | --- | --- | --- |
 | 1.1.1.1 | 我的待办 | /dashboard/todo | D7 | 未开发 | — |
@@ -479,7 +496,7 @@
 | 16.3.2.3 | 销售税与 marketplace facilitator | — | D7 | 未开发 | — |
 | 16.4.1.1 | 侵权库 | — | D7 | 未开发 | — |
 | 16.4.1.2 | 检测与预警 | — | D7 | 未开发 | — |
-| 16.4.2.1 | 品牌授权 | — | D7 | 已交付 | 迁移 channel `V248__brand_authorization.sql`（**纯新建 4 张表、零 ALTER 任何既有表**：`brand_authz_authorization` 授权档案 / `brand_authz_scope` 授权范围（店铺·国家·类目）/ `brand_authz_document` 授权文件引用 / `brand_authz_check` 校验凭据；均 tenant_id NOT NULL + ENABLE **与 FORCE** ROW LEVEL SECURITY + POLICY isolation + GRANT channel_app / REVOKE starcon_app；表前缀 `brand_authz_*` 与同批 `listing_compliance_*`（4.2.3.2）、`compliance_check_*`（16.2.2.1）以及 **catalog 服务自己库里的 `brand_authorization`（3.2.1.2）** 三个命名空间彼此隔离）。**🔴 与 catalog 3.2.1.2「品牌授权」不是同一件事**：catalog 那套是品牌档案自带的授权凭证（证书号 / 授权方 / 有效期），回答「这个品牌有没有被授权过」；本模块是**合规口径的授权档案**（授权方 / 授权范围 / 授权文件 / 被授权主体）+ **刊登时的范围校验结论**，回答「这一段范围、这一段时间、谁可以用这个品牌」。catalog 侧的一切只经授权只读端口读，**不建它的影子表、不跨库 SQL**，catalog 的能力**不算作本模块的交付物**。**🔴 授权期限是区间**（effective_from / effective_to，CHECK 住真区间），到期判定一律用**同源 DB 时钟**（服务层 `select now()` 取一次，同一事务里 Java 比较与 SQL 比较共用这一个时刻；剩余天数由 DB 按 `effective_to - now()` 算），**禁用 LocalDate.now()** —— 应用机与数据库机差半天，「授权还剩 0 天」就变成了差半天。**🔴 没有原因的 false 是不允许出现的**：每一次「不覆盖」都落到一条原因上（原因码 + 人话 + 关联授权 id + 严重度），DB 层还有 CHECK `conclusion='IN_SCOPE' OR jsonb_array_length(reasons)>0` 兜底。**🔴「判不了」是第三种状态**：上下文缺店铺 / 国家 / 类目（或店铺没有可解析的国家）⇒ conclusion=UNKNOWN + severity=REVIEW + 逐条原因（SHOP_UNRESOLVED / COUNTRY_UNRESOLVED / CATEGORY_UNRESOLVED），**发布闸门不放行** —— 「无法证明在授权范围内」不等于「已在授权范围内」。**🔴 阻断在服务端强制**：① 服务层 `POST /channel/brand-authorizations/publish-gate` 真算一遍，回 `allowed=false` + 逐条原因，页面上的红字只是显示、不是防线；② DB 层判定凭据 **append-only**（触发器 `guard_brand_authz_check_immutable` 钉住 in_scope / blocking / severity / conclusion / rule_version / evaluated_at / matched_authorization_id 事后改写不了），③ 授权的 `rule_version` **只能前进**（触发器 `guard_brand_authz_authorization_version`）—— 卷首约束「规则变更不能追溯改变历史判定」落成物理事实。**🔴 授权文件只存引用与元数据**（文件名 / 内容类型 / 字节数 / 存储句柄 / 上传时刻 / 上传人），**文件本体不入库**；16.4.2.2 授权凭证（真伪验证记录 / 文件版本 / 签署方信息 / 一键核验）未交付。**跨服务只经授权 HTTP API 读**：`BrandAuthorizationSourcePort` —— 03 品牌（catalog `GET /catalog/brands`，只读）+ 06.1.2.3 供应商资质（**trade 服务** `GET /trade/supplier-qualifications/suppliers` / `/qualifications`，只读；⚠️ 任务书把它写成 catalog，实测在 **trade** 服务，本车道按实测路径走）；转发调用方自己的 bearer，租户仍由上游按已认证成员关系解析，两道 RLS；**读不到就显式说读不到**（available=false + 原因），绝不返回空集合冒充「上游一个数据都没有」。授权范围里的**店铺与国家两维**从 channel 本库的 `shop` / `shop_marketplace` / `marketplace` 真实还原。端点 `/channel/brand-authorizations/**`（capabilities / authorizations（GET 列表真分页+真筛选、POST 录入）/ authorizations/{uuid}（GET 详情、PUT 修改）/ authorizations/{uuid}/enabled（PUT 停用启用）/ expiry-reminders（临期·已过期，真筛选+真分页）/ checks（POST 跑校验、GET 校验历史真分页）/ publish-gate（🔴 刊登闸门）/ candidates/brands|suppliers|qualifications / shops）；**刻意没有 DELETE** —— 合规台账不做物理删除，撤销走 enabled，历史判定凭据更是「当时为什么拦」的证据。权限复用 identity 已有的 `channel.operation.*`，identity 服务零改动。测试 `BrandAuthorizationRulesTest` **18 例**（纯函数：五种结论 / 期限三态 / 三个范围维度 / UNKNOWN 三种成因 / 多国店铺必须全覆盖 / 到期五态）、`BrandAuthorizationIntegrationTest` **19 例**（**Testcontainers 真实 PostgreSQL 16** + 本地真 HTTP 上游：授权档案真落库、**timestamptz 往返逐字相等（用 epoch 比，不偏 28800 秒）**、入参校验是真的（期限倒挂 / 空授权方 / 非法国家码 / 不存在的店铺全被拒）、IN_SCOPE / OUT_OF_SCOPE / EXPIRED / NO_AUTHORIZATION / UNKNOWN 五种结论逐条断言、publish-gate 只在 IN_SCOPE 放行、到期提醒真筛选+真分页、**判定凭据被 DB 触发器真的拒改写**、规则版本回退被拒、**没有原因的不合格判定写不进库**、候选真读上游且上游 500 ⇒ 显式「读不到」、列表与历史真分页、HTTP 面 401/404）、`BrandAuthorizationTenancyIntegrationTest` **3 例**（**多租户三断言**：两租户互不可见（四张表直查全零行 + 四张表 FORCE RLS + 本租户自己的数据必须看得见行；**直查用 `channel_app` 连接** —— Testcontainers 默认超级用户绕过 RLS，用它查永远「读得到」，那是断言本身失效不是隔离被破）/ 伪造 `X-Tenant-Id` 头无效 / 连接池压到 1 条后 A→B→A 三轮不串租户）。页面 `/compliance/brand-authorization`（brand-authorization-workspace.tsx + 纯函数 brand-authorization-model.ts 与 **21 例单测**）：**到期提醒单列一节**（不混在档案里靠人眼扫）+ 授权档案列表（关键词 / 到期状态筛选 + 真分页）+ 授权详情（范围 / 文件 / 期限）+ 录入与修改弹窗（授权方 / 被授权主体 / 期限 / 店铺·国家·类目范围 / 文件引用）+ **刊登校验与闸门面板**（结论原样显示后端算的，逐条原因逐条列出，**前端不重算**）+ 校验历史 + 能力声明（未交付的下游逐条报出来）；**加载态 / 错误态 / 三种空态齐全且文案各不相同**（没有授权档案 / 没有临期或已过期 / 还没有校验记录）；**候选读不到时显示「读不到」而不是「暂无候选」**。api-proxy **纯增量**新增一条独立 `services[]` 元素（`prefix: 'channel/'` + 自己的 pattern `brand-authorizations`，**没有**往既有 channel 巨型正则里并 alternation），插入锚点固定在 **15.2.2.1 索评那条之前**（基线 4060 行），既有条目**一字未动**（git diff 只有 52 行插入、零删除）；动手前用脚本逐条核对**既有全部 100 条 services[] 元素的正则**，对本模块 12 条路径（裸路径 + 11 条子形状）**命中数为 0**（裸路径刻意不放行，后端没有「一条汇总列表接口」）；allowlist **双向**断言（放行契约里每个真实 path + POST/PUT 真的转发到 8083 + 拒绝 9 个不存在的形状 + **既有 channel 模块入口零误伤**）。契约 packages/api-contracts 由 `python3 tools/codegen/catalog-contracts.py --spec-dir backend/target/openapi` 重新生成（六个服务的 OpenApiContractTest 先刷新快照）：**+21 个 BrandAuthorization* DTO、+11 条路径**，channel 契约纯增量；catalog / trade 的漂移是别的车道的未再生物，**已还原**，不夹带。⚠️ DTO 改名记录：入参 record 原名 `BrandAuthorizationInput` 与 **catalog 3.2.1.2 的同名 record 撞名**，会被 codegen 的跨服务覆盖检测中止（桶文件按服务顺序绑定第一份 ⇒ catalog 那份会整份遮掉本模块的入参），已改名 `BrandAuthorizationRegistrationInput`，理由写在 record 的 javadoc 上。**未交付项逐条 available=false + ownerModule + 影响说明**：16.4.1.1 侵权库（不做侵权比对）、16.4.1.2 检测与预警（结论不推预警工单）、16.4.2.2 授权凭证（只存文件引用与元数据）、16.2.1.1 合规规则库（判定规则不版本化治理，规则版本号固定 1）、16.2.1.2 拦截执行（只给服务端阻断结论，拦截/豁免/审批不发生）；4.3.1.1 一键刊登未交付 ⇒ 本模块交付**服务端算出来的阻断结论**，不代它执行刊登动作。 |
+| 16.4.2.1 | 品牌授权 | — | D7 | 已交付 | 迁移 channel `V248__brand_authorization.sql`（**纯新建 4 张表、零 ALTER 任何既有表**：`brand_authz_authorization` 授权档案 / `brand_authz_scope` 授权范围（店铺·国家·类目）/ `brand_authz_document` 授权文件引用 / `brand_authz_check` 校验凭据；均 tenant_id NOT NULL + ENABLE **与 FORCE** ROW LEVEL SECURITY + POLICY isolation + GRANT channel_app / REVOKE starcon_app；表前缀 `brand_authz_*` 与同批 `listing_compliance_*`（4.2.3.2）、`compliance_check_*`（16.2.2.1）以及 **catalog 服务自己库里的 `brand_authorization`（3.2.1.2）** 三个命名空间彼此隔离）。**🔴 与 catalog 3.2.1.2「品牌授权」不是同一件事**：catalog 那套是品牌档案自带的授权凭证（证书号 / 授权方 / 有效期），回答「这个品牌有没有被授权过」；本模块是**合规口径的授权档案**（授权方 / 授权范围 / 授权文件 / 被授权主体）+ **刊登时的范围校验结论**，回答「这一段范围、这一段时间、谁可以用这个品牌」。catalog 侧的一切只经授权只读端口读，**不建它的影子表、不跨库 SQL**，catalog 的能力**不算作本模块的交付物**。**🔴 授权期限是区间**（effective_from / effective_to，CHECK 住真区间），到期判定一律用**同源 DB 时钟**（服务层 `select now()` 取一次，同一事务里 Java 比较与 SQL 比较共用这一个时刻；剩余天数由 DB 按 `effective_to - now()` 算），**禁用 LocalDate.now()** —— 应用机与数据库机差半天，「授权还剩 0 天」就变成了差半天。**🔴 没有原因的 false 是不允许出现的**：每一次「不覆盖」都落到一条原因上（原因码 + 人话 + 关联授权 id + 严重度），DB 层还有 CHECK `conclusion='IN_SCOPE' OR jsonb_array_length(reasons)>0` 兜底。**🔴「判不了」是第三种状态**：上下文缺店铺 / 国家 / 类目（或店铺没有可解析的国家）⇒ conclusion=UNKNOWN + severity=REVIEW + 逐条原因（SHOP_UNRESOLVED / COUNTRY_UNRESOLVED / CATEGORY_UNRESOLVED），**发布闸门不放行** —— 「无法证明在授权范围内」不等于「已在授权范围内」。**🔴 阻断在服务端强制**：① 服务层 `POST /channel/brand-authorizations/publish-gate` 真算一遍，回 `allowed=false` + 逐条原因，页面上的红字只是显示、不是防线；② DB 层判定凭据 **append-only**（触发器 `guard_brand_authz_check_immutable` 钉住 in_scope / blocking / severity / conclusion / rule_version / evaluated_at / matched_authorization_id 事后改写不了），③ 授权的 `rule_version` **只能前进**（触发器 `guard_brand_authz_authorization_version`）—— 卷首约束「规则变更不能追溯改变历史判定」落成物理事实。**🔴 授权文件只存引用与元数据**（文件名 / 内容类型 / 字节数 / 存储句柄 / 上传时刻 / 上传人），**文件本体不入库**；16.4.2.2 授权凭证（真伪验证记录 / 文件版本 / 签署方信息 / 一键核验）未交付。**跨服务只经授权 HTTP API 读**：`BrandAuthorizationSourcePort` —— 03 品牌（catalog `GET /catalog/brands`，只读）+ 06.1.2.3 供应商资质（**trade 服务** `GET /trade/supplier-qualifications/suppliers` / `/qualifications`，只读；⚠️ 任务书把它写成 catalog，实测在 **trade** 服务，本车道按实测路径走）；转发调用方自己的 bearer，租户仍由上游按已认证成员关系解析，两道 RLS；**读不到就显式说读不到**（available=false + 原因），绝不返回空集合冒充「上游一个数据都没有」。授权范围里的**店铺与国家两维**从 channel 本库的 `shop` / `shop_marketplace` / `marketplace` 真实还原。端点 `/channel/brand-authorizations/**`（capabilities / authorizations（GET 列表真分页+真筛选、POST 录入）/ authorizations/{uuid}（GET 详情、PUT 修改）/ authorizations/{uuid}/enabled（PUT 停用启用）/ expiry-reminders（临期·已过期，真筛选+真分页）/ checks（POST 跑校验、GET 校验历史真分页）/ publish-gate（🔴 刊登闸门）/ candidates/brands |
 | 16.4.2.2 | 授权凭证 | — | D7 | 未开发 | — |
 | 16.5.1.1 | 黑名单 | — | D7 | 未开发 | — |
 | 16.5.1.2 | 风险评分 | — | D7 | 未开发 | — |
@@ -540,13 +557,3 @@
 | 18.4.3.2 | 效果评估 | — | D7 | 未开发 | — |
 | 18.5.1.1 | 模板管理 | — | D7 | 未开发 | — |
 | 18.5.2.1 | 投递记录 | — | D7 | 未开发 | — |
-| 已交付 | 266 |
-| **未开发** | **199** |
-| 完成率 | 57.2% |
-| **D3** | 36 | 0 | 4 | 40 |
-| **D6** | 26 | 0 | 52 | 78 |
-| **D7** | 14 | 0 | 141 | 155 |
-| 05 | 定价与价目系统 | D6 | 15 | 19 |
-| 06 | 采购与供应系统 | D6 | 10 | 26 |
-| 07 | 库存核算系统 | D3 | 28 | 31 |
-| 16 | 合规与风控系统 | D7 | 1 | 23 |
