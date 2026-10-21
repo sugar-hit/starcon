@@ -271,6 +271,10 @@ CREATE TABLE purchase_demand_batch_adjustment (
   sku_code varchar(64) NOT NULL DEFAULT '',
   -- 被改的字段名（merged_quantity / supplier_id）。
   field text NOT NULL CHECK(btrim(field) <> ''),
+  -- **本次批量动作一共改了多少行**（同一批动作的每一行留痕都记同一个数）。
+  -- 这是「改了多少」的凭据：批量动作**整体生效或整体拒绝**，
+  -- 所以「N 行留痕」要么同时出现，要么一行都不出现 —— 不可能留下「改了一半」的中间态。
+  affected_line_count int NOT NULL DEFAULT 1 CHECK(affected_line_count >= 1),
   -- 改之前的值 / 改之后的值（原文）。
   before_value text,
   after_value text,

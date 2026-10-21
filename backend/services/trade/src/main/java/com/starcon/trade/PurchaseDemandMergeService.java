@@ -378,6 +378,7 @@ public class PurchaseDemandMergeService {
           actorId,
           now,
           now);
+      int rank = 0;
       for (Record line : group) {
         BigDecimal quantity = line.get("requested_quantity", BigDecimal.class);
         BigDecimal price = line.get("unit_price", BigDecimal.class);
@@ -444,7 +445,7 @@ public class PurchaseDemandMergeService {
                   + " supplier_id,merged_quantity,source_quantity,unit_price,line_amount,arrival_date,"
                   + " source_request_count,sort_rank,note,created_at,updated_at)"
                   + " values (?::uuid,?::uuid,?::uuid,?::uuid,?::varchar,?::varchar,?::uuid,?::numeric,"
-                  + " ?::numeric,?::numeric,?::numeric,?::date,1,?::varchar,?::varchar,?::timestamptz,"
+                  + " ?::numeric,?::numeric,?::numeric,?::date,1,?::int,?::varchar,?::timestamptz,"
                   + " ?::timestamptz)",
               lineId,
               tenantId,
@@ -460,7 +461,7 @@ public class PurchaseDemandMergeService {
                   ? null
                   : scaledPrice.multiply(scaledQuantity).setScale(AMOUNT_SCALE, RoundingMode.HALF_UP),
               arrival,
-              "",
+              rank,
               "",
               now,
               now);
@@ -473,6 +474,7 @@ public class PurchaseDemandMergeService {
               line.get("sku_code", String.class),
               scaledQuantity,
               now);
+          rank++;
         }
       }
     }
@@ -1084,8 +1086,12 @@ public class PurchaseDemandMergeService {
       UUID draftId = draft.get("id", UUID.class);
       var lines =
           sql.fetch(
-                  "select * from purchase_demand_merge_line where tenant_id = ?::uuid"
-                      + " and draft_id = ?::uuid order by sort_rank, id",
+                  // 🔴 必须连上草稿取供应商展示快照：行的供应商展示字段在**草稿**上（草稿只有一个供应商），
+                  // 行表里只有 supplier_id —— 用 select * 读行表再映射会取不到 supplier_code / supplier_name，
+                  // jOOQ 抛 IllegalArgumentException，被统一错误处理翻译成 400「字段格式不正确」（极难反推）。
+                  LINE_COLUMNS
+                      + " where l.tenant_id = ?::uuid and l.draft_id = ?::uuid"
+                      + " order by l.sort_rank, l.id",
                   tenantId,
                   draftId)
               .map(this::toLineRow);
