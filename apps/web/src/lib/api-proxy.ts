@@ -3686,6 +3686,50 @@ const services: readonly {
       /^purchase\-arrivals(?:\/(?:capabilities|overdue\-board)|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:ship|arrivals|cancel|sync\-in\-transit|dispositions\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/resolve|payable\-confirmations\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/(?:confirm|reject)))?)?$/,
   },
   {
+    // 6.3.1.1 采购单列表（trade 服务，卷 06 采购与供应 / L3 6.3.1 采购单的锚点模块）。
+    //
+    // 本条目是**新增一条 services[] 元素**，不是往既有 trade 分支的 alternation 里并分支 ——
+    // 那一支是一段超长单行正则，多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在 `purchase-arrivals`（6.3.2.2 到货与逾期）那条**之后**、
+    // `fulfillment/consolidation`（9.3.1.2 合单）那条**之前**：与本模块同属 L3 6.3 的
+    // 就近邻居放在一起，且与另外三条车道的插入点被既有条目隔开，git 能干净求并。
+    // resolve() 是「按顺序逐条匹配、首个命中即返回」，同前缀的后一条不会误吃前一条的路径。
+    //
+    // ⚠️ 首段 `purchase-orders` 是**独立字面量**：与既有 trade 分支的 `purchase-arrivals`
+    //    （6.3.2.2）、`purchase-requests`（6.2.2.1）、`purchase-plans`（6.2.1.3）、
+    //    `purchase-reconciliations`（6.5.1.1）、`purchase-analytics`（6.5.2.1）首 token
+    //    全不相同，且既有正则都是**锚定**的（`^token(...)?$`），所以谁也遮蔽不了谁。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   （裸路径）                采购单主列表（GET，真分页 + 多维筛选 + 与分页无关的汇总）
+    //   capabilities              能力声明（哪些维度真有依据 / 哪些批量操作能落地）
+    //   filters                   筛选项下拉用的租户级词表（状态 / 币种 / 供应商 / 目标仓 / 排序）
+    //   export                    导出当前筛选结果 CSV（GET，text/csv 原样透传）
+    //   from-conversions           由 6.2.2.1 的转单事实生成采购单（POST）
+    //   batch/urge                批量催单（POST，只留痕，不改承诺到货日）
+    //   batch/close               批量关闭（POST，理由必填，关闭后整单冻结）
+    //
+    // ⚠️ **本条目没有 uuid 分支**：本模块是**列表**模块，按 id 取单条的「6.3.1.2 采购单详情」
+    //   是同 L3 下的**兄弟模块且未交付** —— 后端此刻压根没有这个映射。
+    //   放行一个后端不存在的形状比 404 更糟：界面会以为「详情页已经能用」。
+    //   正因为没有 uuid 分支，`capabilities` / `filters` / `export` 三个首字母落在
+    //   [0-9a-f] 里（c / f / e）**不构成任何歧义** —— 它们是字面量分支，
+    //   `purchase-orders/` 之后的**任何**其它内容一律 404。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `purchase-orders/{uuid}`            —— 6.3.1.2 详情未交付
+    //   * `purchase-orders/{uuid}/lines`      —— 6.3.1.2 详情未交付
+    //   * `purchase-orders/{uuid}/urge`       —— 催单只有**批量**一个形状
+    //   * `purchase-orders/{uuid}/close`      —— 关闭只有**批量**一个形状
+    //   * `purchase-orders/{uuid}/export`     —— 导出是**集合**级（当前筛选整体导出）
+    //   * `purchase-orders/{uuid}/delete`     —— 采购单是对供应商的正式承诺，没有删除形状
+    prefix: 'trade/',
+    env: 'TRADE_URL',
+    fallback: 'http://127.0.0.1:8085',
+    pattern:
+      /^purchase\-orders(?:\/(?:capabilities|filters|export|from\-conversions|batch\/(?:urge|close)))?$/,
+  },
+  {
     // 9.3.1.2 合单（trade 服务）。本条目是**新增一条 services[] 元素**，不是往既有
     // trade 分支的 alternation 里并分支 —— 那一支是一段超长单行正则，
     // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
