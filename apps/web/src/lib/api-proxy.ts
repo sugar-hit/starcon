@@ -3783,6 +3783,59 @@ const services: readonly {
       /^purchase\-orders(?:\/(?:capabilities|filters|export|from\-conversions|batch\/(?:urge|close)))?$/,
   },
   {
+    // 6.3.1.2 采购单创建与编辑（trade 服务，卷 06 采购与供应 / L3 6.3.1 采购单的第二格）。
+    //
+    // 本条目是**新增一条 services[] 元素**，不是往既有 trade 分支的 alternation 里并分支 ——
+    // 那一支是一段超长单行正则，多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在「6.3.1.1 采购单列表」元素**之后**、既有 `fulfillment/consolidation`
+    // 元素**之前**：同属 L3 6.3.1 的两个兄弟模块放在一起，且与并行车道的插入点被既有条目隔开。
+    // resolve() 是「按顺序逐条匹配、首个命中即返回」，同前缀的后一条不会误吃前一条的路径。
+    //
+    // 🔴 为什么用 `purchase-order-editor` 这个**独立首段字面量**：
+    //   * 6.3.1.1 已经占了 `purchase-orders`（那是**列表**模块的形状：裸路径 / capabilities /
+    //     filters / export / from-conversions / batch/*）。本模块是它的**兄弟**（同一个 L3 下的
+    //     两个 L4），**刻意不共用那一个命名空间** —— 否则两个模块的形状会挤进同一支正则，
+    //     兄弟模块交付时就得去改对方已登记的分支（跨车道回归面）。
+    //   * 已逐条核对本文件里全部既有正则：`purchase-order-editor/**` 对它们**零命中**
+    //     （既有条目不会先把它吃掉）；两段前缀在第 14 个字符上就分开了
+    //     （`purchase-orders` 与 `purchase-order-editor`），且既有正则都是**锚定**的
+    //     （`^token(...)?$`），谁也遮蔽不了谁。
+    //   * 前端路由同样分开：列表在 `/purchase/orders`，建单 / 编辑在
+    //     `/purchase/orders/new` 与 `/purchase/orders/{id}/edit`。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   capabilities                     能力声明（哪些维度真有依据 / 哪些归别的模块）
+    //   options                          建单参照（供应商 / 目标仓 / 法人 / 币种，全是真实数据）
+    //   quote-preview                    带出报价与库存快照（POST，只读无副作用）
+    //   orders                           新建采购单草稿（POST）
+    //   orders/{uuid}                    读编辑表单（GET）/ 编辑保存（PUT，带 expected_version）
+    //   orders/{uuid}/submit             提交（POST，草稿 → 待审批，冻结单价/汇率/单位换算快照）
+    //   from-drafts                      由 6.2.2.2 的采购单草稿建单（POST）
+    //
+    // ⚠️ 判别顺序：**字面量子路径（capabilities / options / quote-preview / from-drafts）
+    //    排在 orders 段之前**。uuid 只出现在 `orders/` 之下 ⇒ 两者不会互相吃掉。
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），不是 `[0-9a-f-]+`：
+    //    后者会把 `orders/not-a-uuid` 这种形状也当成 id 放行。
+    // ⚠️ 外层分组**不带 `?`**：本模块没有裸集合读，放行裸路径 `purchase-order-editor`
+    //    就是凭空多出一条 GET（而界面上并没有一个「采购单编辑器列表」）。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸路径 `purchase-order-editor` —— 本模块没有裸集合读，放行它会凭空多出一条 GET。
+    //   * `purchase-order-editor/orders/{uuid}/delete` —— 采购单是对供应商的正式承诺，
+    //     没有删除形状（6.3.1.1 的保护原封不动）。
+    //   * `purchase-order-editor/orders/{uuid}/approve` / `/reject` —— **6.3.1.3 采购单审批
+    //     未交付**；本模块只把单推到待审批，不代它开审批形状。
+    //   * `purchase-order-editor/orders/{uuid}/lines` —— 行随编辑表单一起返回，
+    //     没有独立的行子资源端点。
+    //   * `purchase-order-editor/orders/{uuid}/tax` —— **12 财务未交付**（本仓没有 finance
+    //     服务），本模块不代它开税额形状。
+    prefix: 'trade/',
+    env: 'TRADE_URL',
+    fallback: 'http://127.0.0.1:8085',
+    pattern:
+      /^purchase\-order\-editor(?:\/(?:capabilities|options|quote\-preview|from\-drafts)|\/orders(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/submit)?)?)$/,
+  },
+  {
     // 9.3.1.2 合单（trade 服务）。本条目是**新增一条 services[] 元素**，不是往既有
     // trade 分支的 alternation 里并分支 —— 那一支是一段超长单行正则，
     // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
@@ -4021,6 +4074,71 @@ const services: readonly {
     fallback: 'http://127.0.0.1:8085',
     pattern:
       /^development\-projects(?:\/(?:capabilities|options|summary|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:transitions|milestones(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|markets(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|spec\-candidates(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|market\-observations|cost\-estimate|sku\-candidate|handoffs))?))?$/,
+  },
+  {
+    // 6.6.1.2 打样与样品管理（trade 服务，卷 06 采购与供应的 L3 锚点 6.6.1）。
+    //
+    // 蓝图：「管理打样与样品：样品申请、样品来源（供应商/自有产）、样品物流、确认结果（通过/修改/放弃）、
+    // 样品成本；与达人寄样（14.5.1.2）区分打样与营销样品。」输出「打样单 + 样品台账 + 确认记录；样品成本」。
+    //
+    // 本条目是**新增一条 services[] 元素**，不是往既有 trade 分支的 alternation 里并分支 ——
+    // 那一支是一段超长单行正则，多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在既有 `development-projects`（6.6.1.1，同为 6.6.1 分区）元素**之后**：
+    // 与「`prefix: 'trade/'` 之前」「services[] 最末尾」这两个常见锚点都隔开 ≥ 1500 行，
+    // git 能干净求并。resolve() 是「按顺序逐条匹配、首个命中即返回」，
+    // 同前缀的第二条不会误吃前一条的路径。
+    //
+    // 🔴 为什么用 `development-samples` 这个独立前缀：
+    //   * 既有 trade 分支的 alternation 里没有 `development-samples`；
+    //     已逐条核对本文件里**全部既有正则**：`development-samples/**` **零命中**。
+    //   * `development-projects`（6.6.1.1）的正则**不会**吃掉 `development-samples/**`
+    //     —— 两者是互不相同的前缀字面量。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   development-samples/capabilities            能力声明（12 费用 / 10 物流 / 6.6.2.1 缺口）
+    //   development-samples/options                 下拉（来源 / 用途 / 状态与合法去向 / 确认结果 / 成本类型 / 物流状态）
+    //   development-samples/summary                 按状态分组的概览
+    //   development-samples/samples                 样品台账（跨打样单，一件样品一行）
+    //   development-samples/media-candidates        catalog 媒体库候选（跨服务只读）
+    //   development-samples                         打样单清单（GET）/ 新建打样单（POST）
+    //   development-samples/{uuid}                  打样单详情（GET）/ 改打样单（PUT）
+    //   development-samples/{uuid}/transitions      推进打样单状态（POST，状态机只认存在的边）
+    //   development-samples/{uuid}/samples          登记样品（POST）/ 该单下的样品台账（GET）
+    //   development-samples/{uuid}/samples/{uuid}                  样品详情（GET）/ 改样品（PUT）
+    //   development-samples/{uuid}/samples/{uuid}/transitions      推进制作进度（POST）
+    //   development-samples/{uuid}/samples/{uuid}/confirmations    确认结果（POST）/ 确认记录（GET）
+    //   development-samples/{uuid}/samples/{uuid}/shipments       物流快照（POST / GET）
+    //   development-samples/{uuid}/samples/{uuid}/media           样品图片（POST / GET）
+    //   development-samples/{uuid}/cost                            样品成本（GET）
+    //   development-samples/{uuid}/cost/lines                      追加成本明细行（POST）
+    //   development-samples/{uuid}/cost/lines/{uuid}               删成本明细行（DELETE）
+    //
+    // ⚠️ 判别顺序：**字面量子路径（capabilities / options / summary / samples / media-candidates）
+    //    排在 {uuid} 段之前** —— alternation 是首个命中即返回，顺序反了会被 uuid 支吃掉半截。
+    //    注意 `samples` 这个字面量同时出现在顶层（跨单台账）与 uuid 之下（某单下的样品）：
+    //    顶层那个排在 uuid 段之前，uuid 之下那个挂在 uuid 分支内，两者不打架
+    //    （`samples` 不是 UUID 形状，uuid 支吃不下它）。
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`（不是
+    //    `[0-9a-f-]+`）：后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `development-samples/{uuid}/delete` —— 打样单挂着样品、成本行与全部留痕，
+    //     后端不提供删除。
+    //   * `development-samples/{uuid}/pilot-orders` —— 6.6.2.1 试产单**未交付**，
+    //     放行这个路径会让界面以为试产单已经存在。
+    //   * `development-samples/{uuid}/expenses` / `/expense-posts` —— 进费用归集属
+    //     **12 费用**（finance 服务**在本仓不存在**），本模块**不代它入账**。
+    //   * `development-samples/{uuid}/samples/{uuid}/tracking` —— 真实物流轨迹属
+    //     **10 物流**，本模块**只记物流快照**，不假装已接通物流平台。
+    //   * `development-samples/marketing-samples` —— 达人寄样（14.5.1.2）属 14 卷，
+    //     **不归本模块**：放行它会让界面以为营销样品也能在这里登记。
+    //   * 任何 DELETE 裸集合形状 —— 白名单是**按路径登记、不区分方法**的，
+    //     所以「不能删」的防线在服务端与 DB，不在这里。
+    prefix: 'trade/',
+    env: 'TRADE_URL',
+    fallback: 'http://127.0.0.1:8085',
+    pattern:
+      /^development\-samples(?:\/(?:capabilities|options|summary|samples|media\-candidates|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:transitions|samples(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:transitions|confirmations|shipments|media))?)?|cost(?:\/lines(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?)?))?))?$/,
   },
   {
     // 9.3.1.1 拆单（trade 服务）。本条目是**新增一条 services[] 元素**，不是往既有

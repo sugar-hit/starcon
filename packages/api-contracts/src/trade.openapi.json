@@ -41234,6 +41234,1546 @@
           }
         }
       }
+    },
+    "/trade/purchase-order-editor/orders/{id}": {
+      "get": {
+        "tags": [
+          "purchase-order-edit-controller"
+        ],
+        "operationId": "get_trade_purchase_order_editor_orders_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseOrderEditForm"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "purchase-order-edit-controller"
+        ],
+        "operationId": "put_trade_purchase_order_editor_orders_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PurchaseOrderEditUpdateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseOrderEditForm"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/purchase-order-editor/quote-preview": {
+      "post": {
+        "tags": [
+          "purchase-order-edit-controller"
+        ],
+        "operationId": "post_trade_purchase_order_editor_quote_preview",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PurchaseOrderEditQuotePreviewRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseOrderEditQuotePreview"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/purchase-order-editor/orders": {
+      "post": {
+        "tags": [
+          "purchase-order-edit-controller"
+        ],
+        "operationId": "post_trade_purchase_order_editor_orders",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PurchaseOrderEditCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseOrderEditForm"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/purchase-order-editor/orders/{id}/submit": {
+      "post": {
+        "tags": [
+          "purchase-order-edit-controller"
+        ],
+        "operationId": "post_trade_purchase_order_editor_orders_id_submit",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PurchaseOrderEditSubmitRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseOrderEditForm"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/purchase-order-editor/from-drafts": {
+      "post": {
+        "tags": [
+          "purchase-order-edit-controller"
+        ],
+        "operationId": "post_trade_purchase_order_editor_from_drafts",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PurchaseOrderEditFromDraftRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseOrderEditFromDraftResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/purchase-order-editor/options": {
+      "get": {
+        "tags": [
+          "purchase-order-edit-controller"
+        ],
+        "operationId": "get_trade_purchase_order_editor_options",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseOrderEditOptions"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/purchase-order-editor/capabilities": {
+      "get": {
+        "tags": [
+          "purchase-order-edit-controller"
+        ],
+        "operationId": "get_trade_purchase_order_editor_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseOrderEditCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/development-samples/{id}": {
+      "get": {
+        "tags": [
+          "development-sample-controller"
+        ],
+        "operationId": "get_trade_development_samples_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DevelopmentSampleOrderDetail"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "development-sample-controller"
+        ],
+        "operationId": "put_trade_development_samples_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DevelopmentSampleOrderUpdateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DevelopmentSampleOrderDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/development-samples/{id}/samples/{sampleId}": {
+      "get": {
+        "tags": [
+          "development-sample-controller"
+        ],
+        "operationId": "get_trade_development_samples_id_samples_sampleId",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "sampleId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DevelopmentSampleDetail"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "development-sample-controller"
+        ],
+        "operationId": "put_trade_development_samples_id_samples_sampleId",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "sampleId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DevelopmentSampleUpdateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DevelopmentSampleDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/development-samples": {
+      "get": {
+        "tags": [
+          "development-sample-controller"
+        ],
+        "operationId": "get_trade_development_samples",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sourceType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "developmentProjectId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DevelopmentSampleOrderPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "development-sample-controller"
+        ],
+        "operationId": "post_trade_development_samples",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DevelopmentSampleOrderCreateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DevelopmentSampleOrderDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/development-samples/{id}/transitions": {
+      "post": {
+        "tags": [
+          "development-sample-controller"
+        ],
+        "operationId": "post_trade_development_samples_id_transitions",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DevelopmentSampleOrderTransitionInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DevelopmentSampleOrderDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/development-samples/{id}/samples": {
+      "get": {
+        "tags": [
+          "development-sample-controller"
+        ],
+        "operationId": "get_trade_development_samples_id_samples",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DevelopmentSampleRow"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "development-sample-controller"
+        ],
+        "operationId": "post_trade_development_samples_id_samples",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DevelopmentSampleCreateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DevelopmentSampleDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/development-samples/{id}/samples/{sampleId}/transitions": {
+      "post": {
+        "tags": [
+          "development-sample-controller"
+        ],
+        "operationId": "post_trade_development_samples_id_samples_sampleId_transitions",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "sampleId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DevelopmentSampleTransitionInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DevelopmentSampleDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/development-samples/{id}/samples/{sampleId}/shipments": {
+      "get": {
+        "tags": [
+          "development-sample-controller"
+        ],
+        "operationId": "get_trade_development_samples_id_samples_sampleId_shipments",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "sampleId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DevelopmentSampleShipmentRow"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "development-sample-controller"
+        ],
+        "operationId": "post_trade_development_samples_id_samples_sampleId_shipments",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "sampleId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DevelopmentSampleShipmentInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DevelopmentSampleShipmentRow"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/development-samples/{id}/samples/{sampleId}/media": {
+      "get": {
+        "tags": [
+          "development-sample-controller"
+        ],
+        "operationId": "get_trade_development_samples_id_samples_sampleId_media",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "sampleId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DevelopmentSampleMediaRow"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "development-sample-controller"
+        ],
+        "operationId": "post_trade_development_samples_id_samples_sampleId_media",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "sampleId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DevelopmentSampleMediaInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DevelopmentSampleMediaRow"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/development-samples/{id}/samples/{sampleId}/confirmations": {
+      "get": {
+        "tags": [
+          "development-sample-controller"
+        ],
+        "operationId": "get_trade_development_samples_id_samples_sampleId_confirmations",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "sampleId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DevelopmentSampleConfirmationRow"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "development-sample-controller"
+        ],
+        "operationId": "post_trade_development_samples_id_samples_sampleId_confirmations",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "sampleId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DevelopmentSampleConfirmationInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DevelopmentSampleDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/development-samples/{id}/cost/lines": {
+      "post": {
+        "tags": [
+          "development-sample-controller"
+        ],
+        "operationId": "post_trade_development_samples_id_cost_lines",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DevelopmentSampleCostLineInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DevelopmentSampleCostView"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/development-samples/{id}/cost": {
+      "get": {
+        "tags": [
+          "development-sample-controller"
+        ],
+        "operationId": "get_trade_development_samples_id_cost",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DevelopmentSampleCostView"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/development-samples/summary": {
+      "get": {
+        "tags": [
+          "development-sample-controller"
+        ],
+        "operationId": "get_trade_development_samples_summary",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DevelopmentSampleSummary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/development-samples/samples": {
+      "get": {
+        "tags": [
+          "development-sample-controller"
+        ],
+        "operationId": "get_trade_development_samples_samples",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sourceType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "developmentProjectId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "orderId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DevelopmentSamplePage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/development-samples/options": {
+      "get": {
+        "tags": [
+          "development-sample-controller"
+        ],
+        "operationId": "get_trade_development_samples_options",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DevelopmentSampleOptions"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/development-samples/media-candidates": {
+      "get": {
+        "tags": [
+          "development-sample-controller"
+        ],
+        "operationId": "get_trade_development_samples_media_candidates",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DevelopmentSampleMediaCandidateRow"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/development-samples/capabilities": {
+      "get": {
+        "tags": [
+          "development-sample-controller"
+        ],
+        "operationId": "get_trade_development_samples_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DevelopmentSampleCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/development-samples/{id}/cost/lines/{lineId}": {
+      "delete": {
+        "tags": [
+          "development-sample-controller"
+        ],
+        "operationId": "delete_trade_development_samples_id_cost_lines_lineId",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "lineId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DevelopmentSampleCostView"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -100476,6 +102016,2385 @@
             "type": "string"
           },
           "marginRoundingNote": {
+            "type": "string"
+          },
+          "boundaryNote": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchaseOrderEditAddressInput": {
+        "type": "object",
+        "properties": {
+          "recipientName": {
+            "type": "string"
+          },
+          "recipientPhone": {
+            "type": "string"
+          },
+          "countryCode": {
+            "type": "string"
+          },
+          "province": {
+            "type": "string"
+          },
+          "city": {
+            "type": "string"
+          },
+          "district": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "postalCode": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        },
+        "nullable": true
+      },
+      "PurchaseOrderEditAttachmentInput": {
+        "type": "object",
+        "properties": {
+          "mediaId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "attachmentType": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchaseOrderEditLineInput": {
+        "type": "object",
+        "properties": {
+          "lineNo": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number",
+            "nullable": true
+          },
+          "unitCode": {
+            "type": "string"
+          },
+          "unitPrice": {
+            "type": "number",
+            "nullable": true
+          },
+          "priceSource": {
+            "type": "string"
+          },
+          "quoteId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchaseOrderEditOrderInput": {
+        "type": "object",
+        "properties": {
+          "supplierRefId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "supplierCode": {
+            "type": "string"
+          },
+          "supplierName": {
+            "type": "string"
+          },
+          "legalEntityId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "legalEntityCode": {
+            "type": "string"
+          },
+          "legalEntityName": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "targetWarehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "targetWarehouseCode": {
+            "type": "string"
+          },
+          "targetWarehouseName": {
+            "type": "string"
+          },
+          "promisedArrivalDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "note": {
+            "type": "string"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseOrderEditLineInput"
+            }
+          },
+          "shipAddress": {
+            "$ref": "#/components/schemas/PurchaseOrderEditAddressInput"
+          },
+          "attachments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseOrderEditAttachmentInput"
+            }
+          }
+        }
+      },
+      "PurchaseOrderEditUpdateRequest": {
+        "type": "object",
+        "properties": {
+          "expectedVersion": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "order": {
+            "$ref": "#/components/schemas/PurchaseOrderEditOrderInput"
+          }
+        }
+      },
+      "PurchaseOrderEditAddress": {
+        "type": "object",
+        "properties": {
+          "recipientName": {
+            "type": "string"
+          },
+          "recipientPhone": {
+            "type": "string"
+          },
+          "countryCode": {
+            "type": "string"
+          },
+          "province": {
+            "type": "string"
+          },
+          "city": {
+            "type": "string"
+          },
+          "district": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "postalCode": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        },
+        "nullable": true
+      },
+      "PurchaseOrderEditAmounts": {
+        "type": "object",
+        "properties": {
+          "totalAmount": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "lineCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalQuantity": {
+            "type": "number"
+          },
+          "taxRate": {
+            "type": "number",
+            "nullable": true
+          },
+          "taxAmount": {
+            "type": "number",
+            "nullable": true
+          },
+          "taxStatus": {
+            "type": "string"
+          },
+          "taxNote": {
+            "type": "string"
+          },
+          "functionalCurrency": {
+            "type": "string",
+            "nullable": true
+          },
+          "fxRateToFunctional": {
+            "type": "number",
+            "nullable": true
+          },
+          "fxRateEffectiveDate": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "fxStatus": {
+            "type": "string"
+          },
+          "functionalAmount": {
+            "type": "number",
+            "nullable": true
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchaseOrderEditAttachment": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "mediaId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "mediaName": {
+            "type": "string"
+          },
+          "mediaType": {
+            "type": "string"
+          },
+          "mimeType": {
+            "type": "string"
+          },
+          "byteSize": {
+            "type": "number",
+            "nullable": true
+          },
+          "storageKey": {
+            "type": "string"
+          },
+          "originalFilename": {
+            "type": "string"
+          },
+          "attachmentType": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchaseOrderEditForm": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderNo": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "sourceType": {
+            "type": "string"
+          },
+          "sourceDraftNo": {
+            "type": "string",
+            "nullable": true
+          },
+          "sourceRequestNo": {
+            "type": "string",
+            "nullable": true
+          },
+          "supplierRefId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "supplierCode": {
+            "type": "string"
+          },
+          "supplierName": {
+            "type": "string"
+          },
+          "legalEntityId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "legalEntityCode": {
+            "type": "string"
+          },
+          "legalEntityName": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "targetWarehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "targetWarehouseCode": {
+            "type": "string"
+          },
+          "targetWarehouseName": {
+            "type": "string"
+          },
+          "promisedArrivalDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "note": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "editable": {
+            "type": "boolean"
+          },
+          "editableReason": {
+            "type": "string"
+          },
+          "amounts": {
+            "$ref": "#/components/schemas/PurchaseOrderEditAmounts"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseOrderEditLine"
+            }
+          },
+          "shipAddress": {
+            "$ref": "#/components/schemas/PurchaseOrderEditAddress"
+          },
+          "attachments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseOrderEditAttachment"
+            }
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "PurchaseOrderEditLine": {
+        "type": "object",
+        "properties": {
+          "lineNo": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "unitCode": {
+            "type": "string"
+          },
+          "unitPrice": {
+            "type": "number"
+          },
+          "lineAmount": {
+            "type": "number"
+          },
+          "priceSource": {
+            "type": "string"
+          },
+          "quoteId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "snapshot": {
+            "$ref": "#/components/schemas/PurchaseOrderEditLineSnapshot"
+          }
+        }
+      },
+      "PurchaseOrderEditLineSnapshot": {
+        "type": "object",
+        "properties": {
+          "baseUnitCode": {
+            "type": "string"
+          },
+          "purchaseUnitCode": {
+            "type": "string"
+          },
+          "quantityPerBase": {
+            "type": "number",
+            "nullable": true
+          },
+          "baseQuantity": {
+            "type": "number",
+            "nullable": true
+          },
+          "conversionStatus": {
+            "type": "string"
+          },
+          "quoteId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "quoteSupplierName": {
+            "type": "string",
+            "nullable": true
+          },
+          "quoteCurrency": {
+            "type": "string",
+            "nullable": true
+          },
+          "quoteUnitPrice": {
+            "type": "number",
+            "nullable": true
+          },
+          "quoteMoqQuantity": {
+            "type": "number",
+            "nullable": true
+          },
+          "quoteLeadTimeDays": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "quoteValidFrom": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "quoteValidTo": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "stockAvailableQty": {
+            "type": "number",
+            "nullable": true
+          },
+          "stockSellableQty": {
+            "type": "number",
+            "nullable": true
+          },
+          "stockSnapshotAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "stockStatus": {
+            "type": "string"
+          },
+          "taxRate": {
+            "type": "number",
+            "nullable": true
+          },
+          "taxAmount": {
+            "type": "number",
+            "nullable": true
+          },
+          "taxStatus": {
+            "type": "string"
+          },
+          "snapshotAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "nullable": true
+      },
+      "PurchaseOrderEditQuotePreviewRequest": {
+        "type": "object",
+        "properties": {
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "supplierRefId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "quantity": {
+            "type": "number",
+            "nullable": true
+          },
+          "at": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          }
+        }
+      },
+      "PurchaseOrderEditQuoteCandidate": {
+        "type": "object",
+        "properties": {
+          "quoteId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "supplierId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "supplierName": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "purchaseUnitCode": {
+            "type": "string"
+          },
+          "moqQuantity": {
+            "type": "number"
+          },
+          "leadTimeDays": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "priority": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "unitPrice": {
+            "type": "number",
+            "nullable": true
+          },
+          "minQuantity": {
+            "type": "number",
+            "nullable": true
+          },
+          "selectionState": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "nullable": true
+      },
+      "PurchaseOrderEditQuotePreview": {
+        "type": "object",
+        "properties": {
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "baseUnit": {
+            "type": "string"
+          },
+          "purchaseUnitCode": {
+            "type": "string"
+          },
+          "quantityPerBase": {
+            "type": "number",
+            "nullable": true
+          },
+          "baseQuantity": {
+            "type": "number",
+            "nullable": true
+          },
+          "conversionStatus": {
+            "type": "string"
+          },
+          "candidates": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseOrderEditQuoteCandidate"
+            }
+          },
+          "selected": {
+            "$ref": "#/components/schemas/PurchaseOrderEditQuoteCandidate"
+          },
+          "ambiguous": {
+            "type": "boolean"
+          },
+          "ambiguityProblem": {
+            "type": "string",
+            "nullable": true
+          },
+          "stockAvailableQty": {
+            "type": "number",
+            "nullable": true
+          },
+          "stockSellableQty": {
+            "type": "number",
+            "nullable": true
+          },
+          "stockStatus": {
+            "type": "string"
+          },
+          "stockNote": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchaseOrderEditCreateRequest": {
+        "type": "object",
+        "properties": {
+          "order": {
+            "$ref": "#/components/schemas/PurchaseOrderEditOrderInput"
+          }
+        }
+      },
+      "PurchaseOrderEditSubmitRequest": {
+        "type": "object",
+        "properties": {
+          "expectedVersion": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchaseOrderEditFromDraftRequest": {
+        "type": "object",
+        "properties": {
+          "draftIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        }
+      },
+      "PurchaseOrderEditCreatedOrder": {
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderNo": {
+            "type": "string"
+          },
+          "sourceDraftId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sourceDraftNo": {
+            "type": "string"
+          },
+          "lineCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalAmount": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchaseOrderEditFromDraftResult": {
+        "type": "object",
+        "properties": {
+          "created": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseOrderEditCreatedOrder"
+            }
+          },
+          "rejected": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseOrderEditRejectedDraft"
+            }
+          }
+        }
+      },
+      "PurchaseOrderEditRejectedDraft": {
+        "type": "object",
+        "properties": {
+          "draftId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reasonCode": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchaseOrderEditCurrencyOption": {
+        "type": "object",
+        "properties": {
+          "currency": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "orderCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "PurchaseOrderEditLegalEntityOption": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "baseCurrency": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "PurchaseOrderEditOptions": {
+        "type": "object",
+        "properties": {
+          "suppliers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseOrderEditSupplierOption"
+            }
+          },
+          "warehouses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseOrderEditWarehouseOption"
+            }
+          },
+          "legalEntities": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseOrderEditLegalEntityOption"
+            }
+          },
+          "currencies": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseOrderEditCurrencyOption"
+            }
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchaseOrderEditSupplierOption": {
+        "type": "object",
+        "properties": {
+          "roleId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "partyCode": {
+            "type": "string"
+          },
+          "partyName": {
+            "type": "string"
+          },
+          "partyStatus": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchaseOrderEditWarehouseOption": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "countryCode": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchaseOrderEditCapabilities": {
+        "type": "object",
+        "properties": {
+          "capabilities": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseOrderEditCapability"
+            }
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchaseOrderEditCapability": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "DevelopmentSampleOrderUpdateInput": {
+        "required": [
+          "currency",
+          "requesterId",
+          "sourceType",
+          "usageType"
+        ],
+        "type": "object",
+        "properties": {
+          "sourceType": {
+            "type": "string",
+            "enum": [
+              "SUPPLIER",
+              "OWN_FACTORY",
+              "STALL"
+            ]
+          },
+          "usageType": {
+            "type": "string",
+            "enum": [
+              "DEVELOPMENT"
+            ]
+          },
+          "supplierRefId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "supplierCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "supplierName": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "stallId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "stallCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "stallName": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "currency": {
+            "maxLength": 3,
+            "minLength": 3,
+            "type": "string"
+          },
+          "requesterId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "requesterName": {
+            "maxLength": 100,
+            "minLength": 0,
+            "type": "string"
+          },
+          "expectedDeliveryAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "purposeNote": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "DevelopmentSampleCostLineRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "costId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "costType": {
+            "type": "string"
+          },
+          "costTypeLabel": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "incurredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "DevelopmentSampleCostView": {
+        "type": "object",
+        "properties": {
+          "costId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "totalAmount": {
+            "type": "number"
+          },
+          "expensePosted": {
+            "type": "boolean"
+          },
+          "expenseOwnerModule": {
+            "type": "string"
+          },
+          "expenseNote": {
+            "type": "string"
+          },
+          "postedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DevelopmentSampleCostLineRow"
+            }
+          }
+        }
+      },
+      "DevelopmentSampleOrderDetail": {
+        "type": "object",
+        "properties": {
+          "order": {
+            "$ref": "#/components/schemas/DevelopmentSampleOrderRow"
+          },
+          "samples": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DevelopmentSampleRow"
+            }
+          },
+          "transitions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DevelopmentSampleOrderTransitionRow"
+            }
+          },
+          "cost": {
+            "$ref": "#/components/schemas/DevelopmentSampleCostView"
+          },
+          "allowedTargets": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "DevelopmentSampleOrderRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderNo": {
+            "type": "string"
+          },
+          "developmentProjectId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "projectNo": {
+            "type": "string"
+          },
+          "projectName": {
+            "type": "string"
+          },
+          "sourceType": {
+            "type": "string"
+          },
+          "sourceTypeLabel": {
+            "type": "string"
+          },
+          "usageType": {
+            "type": "string"
+          },
+          "usageTypeLabel": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "supplierRefId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "supplierCode": {
+            "type": "string"
+          },
+          "supplierName": {
+            "type": "string"
+          },
+          "stallId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "stallCode": {
+            "type": "string"
+          },
+          "stallName": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "requesterId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "requesterName": {
+            "type": "string"
+          },
+          "requestedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expectedDeliveryAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "sampleCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "confirmedSampleCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "costTotal": {
+            "type": "number",
+            "nullable": true
+          },
+          "purposeNote": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "createdBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "DevelopmentSampleOrderTransitionRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "fromStatus": {
+            "type": "string"
+          },
+          "fromStatusLabel": {
+            "type": "string"
+          },
+          "toStatus": {
+            "type": "string"
+          },
+          "toStatusLabel": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "actorId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "actorName": {
+            "type": "string"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "appliedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "DevelopmentSampleRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sampleNo": {
+            "type": "string"
+          },
+          "developmentProjectId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "projectNo": {
+            "type": "string"
+          },
+          "projectName": {
+            "type": "string"
+          },
+          "sourceType": {
+            "type": "string"
+          },
+          "sourceTypeLabel": {
+            "type": "string"
+          },
+          "usageType": {
+            "type": "string"
+          },
+          "usageTypeLabel": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "specName": {
+            "type": "string"
+          },
+          "specValue": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "revisionRound": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "confirmationCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "shipmentCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "mediaCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "latestTrackingNo": {
+            "type": "string",
+            "nullable": true
+          },
+          "latestLogisticsStatus": {
+            "type": "string",
+            "nullable": true
+          },
+          "remark": {
+            "type": "string"
+          },
+          "createdBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "DevelopmentSampleUpdateInput": {
+        "required": [
+          "quantity"
+        ],
+        "type": "object",
+        "properties": {
+          "specName": {
+            "maxLength": 120,
+            "minLength": 0,
+            "type": "string"
+          },
+          "specValue": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "quantity": {
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "type": "number"
+          },
+          "remark": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "DevelopmentSampleConfirmationRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sampleId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "result": {
+            "type": "string"
+          },
+          "resultLabel": {
+            "type": "string"
+          },
+          "confirmSeq": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "issueNote": {
+            "type": "string"
+          },
+          "actorId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "actorName": {
+            "type": "string"
+          },
+          "confirmedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "appliedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "DevelopmentSampleDetail": {
+        "type": "object",
+        "properties": {
+          "sample": {
+            "$ref": "#/components/schemas/DevelopmentSampleRow"
+          },
+          "transitions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DevelopmentSampleTransitionRow"
+            }
+          },
+          "confirmations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DevelopmentSampleConfirmationRow"
+            }
+          },
+          "shipments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DevelopmentSampleShipmentRow"
+            }
+          },
+          "media": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DevelopmentSampleMediaRow"
+            }
+          },
+          "allowedTargets": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "DevelopmentSampleMediaRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sampleId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "mediaRefId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "mediaName": {
+            "type": "string"
+          },
+          "mediaType": {
+            "type": "string"
+          },
+          "fileFormat": {
+            "type": "string"
+          },
+          "mimeType": {
+            "type": "string"
+          },
+          "contentSha256": {
+            "type": "string"
+          },
+          "byteSize": {
+            "type": "number",
+            "nullable": true
+          },
+          "widthPx": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "heightPx": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "storageKey": {
+            "type": "string"
+          },
+          "uploadedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "note": {
+            "type": "string"
+          },
+          "createdBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "DevelopmentSampleShipmentRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sampleId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "trackingNo": {
+            "type": "string"
+          },
+          "carrierCode": {
+            "type": "string"
+          },
+          "carrierName": {
+            "type": "string"
+          },
+          "logisticsStatus": {
+            "type": "string"
+          },
+          "logisticsStatusLabel": {
+            "type": "string"
+          },
+          "shippedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expectedArrivalAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "deliveredAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "trackingAvailable": {
+            "type": "boolean"
+          },
+          "trackingOwnerModule": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "createdBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "DevelopmentSampleTransitionRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sampleId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "fromStatus": {
+            "type": "string"
+          },
+          "fromStatusLabel": {
+            "type": "string"
+          },
+          "toStatus": {
+            "type": "string"
+          },
+          "toStatusLabel": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "actorId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "actorName": {
+            "type": "string"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "appliedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "DevelopmentSampleOrderCreateInput": {
+        "required": [
+          "currency",
+          "developmentProjectId",
+          "orderNo",
+          "requestedAt",
+          "requesterId",
+          "sourceType",
+          "usageType"
+        ],
+        "type": "object",
+        "properties": {
+          "orderNo": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "developmentProjectId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sourceType": {
+            "type": "string",
+            "enum": [
+              "SUPPLIER",
+              "OWN_FACTORY",
+              "STALL"
+            ]
+          },
+          "usageType": {
+            "type": "string",
+            "enum": [
+              "DEVELOPMENT"
+            ]
+          },
+          "supplierRefId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "supplierCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "supplierName": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "stallId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "stallCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "stallName": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "currency": {
+            "maxLength": 3,
+            "minLength": 3,
+            "type": "string"
+          },
+          "requesterId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "requesterName": {
+            "maxLength": 100,
+            "minLength": 0,
+            "type": "string"
+          },
+          "requestedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expectedDeliveryAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "purposeNote": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "DevelopmentSampleOrderTransitionInput": {
+        "required": [
+          "reason",
+          "toStatus"
+        ],
+        "type": "object",
+        "properties": {
+          "toStatus": {
+            "type": "string",
+            "enum": [
+              "REQUESTED",
+              "IN_PROGRESS",
+              "COMPLETED",
+              "CLOSED",
+              "CANCELLED"
+            ]
+          },
+          "reason": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "DevelopmentSampleCreateInput": {
+        "required": [
+          "quantity",
+          "sampleNo"
+        ],
+        "type": "object",
+        "properties": {
+          "sampleNo": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "specName": {
+            "maxLength": 120,
+            "minLength": 0,
+            "type": "string"
+          },
+          "specValue": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "quantity": {
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "type": "number"
+          },
+          "remark": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "DevelopmentSampleTransitionInput": {
+        "required": [
+          "reason",
+          "toStatus"
+        ],
+        "type": "object",
+        "properties": {
+          "toStatus": {
+            "type": "string",
+            "enum": [
+              "REQUESTED",
+              "MAKING",
+              "SHIPPED",
+              "RECEIVED",
+              "CONFIRMED",
+              "REVISING",
+              "ABANDONED"
+            ]
+          },
+          "reason": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "DevelopmentSampleShipmentInput": {
+        "required": [
+          "logisticsStatus",
+          "shippedAt",
+          "trackingNo"
+        ],
+        "type": "object",
+        "properties": {
+          "trackingNo": {
+            "maxLength": 128,
+            "minLength": 0,
+            "type": "string"
+          },
+          "carrierCode": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string"
+          },
+          "carrierName": {
+            "maxLength": 100,
+            "minLength": 0,
+            "type": "string"
+          },
+          "logisticsStatus": {
+            "type": "string",
+            "enum": [
+              "SHIPPED",
+              "IN_TRANSIT",
+              "DELIVERED",
+              "EXCEPTION",
+              "RETURNED"
+            ]
+          },
+          "shippedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expectedArrivalAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "deliveredAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "DevelopmentSampleMediaInput": {
+        "required": [
+          "mediaRefId"
+        ],
+        "type": "object",
+        "properties": {
+          "mediaRefId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "DevelopmentSampleConfirmationInput": {
+        "required": [
+          "reason",
+          "result"
+        ],
+        "type": "object",
+        "properties": {
+          "result": {
+            "type": "string",
+            "enum": [
+              "PASSED",
+              "MODIFY",
+              "ABANDONED"
+            ]
+          },
+          "reason": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          },
+          "issueNote": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "confirmedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "DevelopmentSampleCostLineInput": {
+        "required": [
+          "amount",
+          "costType",
+          "incurredAt"
+        ],
+        "type": "object",
+        "properties": {
+          "costType": {
+            "type": "string",
+            "enum": [
+              "SAMPLE_FEE",
+              "MATERIAL",
+              "TOOLING",
+              "FREIGHT",
+              "INSPECTION"
+            ]
+          },
+          "amount": {
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "type": "number"
+          },
+          "description": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "incurredAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "DevelopmentSampleOrderPage": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DevelopmentSampleOrderRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "DevelopmentSampleCostCurrencyTotal": {
+        "type": "object",
+        "properties": {
+          "currency": {
+            "type": "string"
+          },
+          "totalAmount": {
+            "type": "number"
+          },
+          "orderCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "DevelopmentSampleOrderStatusCount": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "DevelopmentSampleStatusCount": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "DevelopmentSampleSummary": {
+        "type": "object",
+        "properties": {
+          "totalOrders": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalSamples": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalCost": {
+            "type": "number",
+            "nullable": true
+          },
+          "totalCostCurrency": {
+            "type": "string"
+          },
+          "costByCurrency": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DevelopmentSampleCostCurrencyTotal"
+            }
+          },
+          "orderStatuses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DevelopmentSampleOrderStatusCount"
+            }
+          },
+          "sampleStatuses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DevelopmentSampleStatusCount"
+            }
+          },
+          "recentOrders": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DevelopmentSampleOrderRow"
+            }
+          }
+        }
+      },
+      "DevelopmentSamplePage": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DevelopmentSampleRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "DevelopmentSampleConfirmationOption": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          }
+        }
+      },
+      "DevelopmentSampleCostTypeOption": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          }
+        }
+      },
+      "DevelopmentSampleLogisticsOption": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          }
+        }
+      },
+      "DevelopmentSampleOptions": {
+        "type": "object",
+        "properties": {
+          "sourceTypes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DevelopmentSampleSourceOption"
+            }
+          },
+          "usageTypes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DevelopmentSampleUsageOption"
+            }
+          },
+          "orderStatuses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DevelopmentSampleOrderStatusOption"
+            }
+          },
+          "sampleStatuses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DevelopmentSampleStatusOption"
+            }
+          },
+          "confirmationResults": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DevelopmentSampleConfirmationOption"
+            }
+          },
+          "costTypes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DevelopmentSampleCostTypeOption"
+            }
+          },
+          "logisticsStatuses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DevelopmentSampleLogisticsOption"
+            }
+          }
+        }
+      },
+      "DevelopmentSampleOrderStatusOption": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "terminal": {
+            "type": "boolean"
+          },
+          "allowedTargets": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "DevelopmentSampleSourceOption": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          }
+        }
+      },
+      "DevelopmentSampleStatusOption": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "terminal": {
+            "type": "boolean"
+          },
+          "allowedTargets": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "DevelopmentSampleUsageOption": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          }
+        }
+      },
+      "DevelopmentSampleMediaCandidateRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "mediaType": {
+            "type": "string"
+          },
+          "fileFormat": {
+            "type": "string"
+          },
+          "mimeType": {
+            "type": "string"
+          },
+          "byteSize": {
+            "type": "number",
+            "nullable": true
+          },
+          "widthPx": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "heightPx": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "contentSha256": {
+            "type": "string"
+          },
+          "storageKey": {
+            "type": "string"
+          }
+        }
+      },
+      "DevelopmentSampleCapabilities": {
+        "type": "object",
+        "properties": {
+          "projectReferenceAvailable": {
+            "type": "boolean"
+          },
+          "projectReferenceSource": {
+            "type": "string"
+          },
+          "projectReferenceNote": {
+            "type": "string"
+          },
+          "stallReferenceAvailable": {
+            "type": "boolean"
+          },
+          "stallReferenceSource": {
+            "type": "string"
+          },
+          "stallReferenceNote": {
+            "type": "string"
+          },
+          "supplierDirectoryAvailable": {
+            "type": "boolean"
+          },
+          "supplierDirectorySource": {
+            "type": "string"
+          },
+          "supplierDirectoryNote": {
+            "type": "string"
+          },
+          "mediaLibraryAvailable": {
+            "type": "boolean"
+          },
+          "mediaLibrarySource": {
+            "type": "string"
+          },
+          "mediaLibraryNote": {
+            "type": "string"
+          },
+          "expenseAggregationAvailable": {
+            "type": "boolean"
+          },
+          "expenseAggregationOwnerModule": {
+            "type": "string"
+          },
+          "expenseAggregationNote": {
+            "type": "string"
+          },
+          "logisticsTrackingAvailable": {
+            "type": "boolean"
+          },
+          "logisticsTrackingOwnerModule": {
+            "type": "string"
+          },
+          "logisticsTrackingNote": {
+            "type": "string"
+          },
+          "pilotOrderAvailable": {
+            "type": "boolean"
+          },
+          "pilotOrderOwnerModule": {
+            "type": "string"
+          },
+          "pilotOrderNote": {
+            "type": "string"
+          },
+          "marketingSampleDelivered": {
+            "type": "boolean"
+          },
+          "marketingSampleOwnerModule": {
+            "type": "string"
+          },
+          "marketingSampleNote": {
+            "type": "string"
+          },
+          "sourceUsageNote": {
+            "type": "string"
+          },
+          "orderStateMachineNote": {
+            "type": "string"
+          },
+          "sampleStateMachineNote": {
+            "type": "string"
+          },
+          "costAggregationNote": {
             "type": "string"
           },
           "boundaryNote": {

@@ -142,6 +142,48 @@ public class SupplierPartyQueryPort {
   }
 
   /**
+   * 取供应商的<b>主体 id</b>（{@code party.id}）。
+   *
+   * <p>🔴 <b>两套 id 口径必须分清</b>：
+   *
+   * <ul>
+   *   <li><b>角色 id（roleId）</b>：trade 全线的采购单据都用它寻址供应商
+   *       （6.1.1.x 供应商档案、6.2.2.1 采购申请、6.2.2.2 合并草稿，
+   *       以及 6.3.1.1 的 {@code purchase_order.supplier_ref_id}）。</li>
+   *   <li><b>主体 id（partyId）</b>：<b>报价台账</b>（3.6.2.1 的
+   *       {@code /catalog/supplier-quotes/effective}）用它寻址供应商
+   *       —— 报价挂在「主体」上，优先级也是主体内部的优先级。</li>
+   * </ul>
+   *
+   * <p>⇒ 6.3.1.2 建单时要带出报价，就必须先做这一次换算。
+   * 换算只在 catalog 一侧做（读同一个 {@code VendorRow}），本服务不另造映射表。
+   */
+  public UUID partyId(UUID roleId, String bearer) {
+    VendorPurchaseViewView view;
+    try {
+      view =
+          client
+              .get()
+              .uri("/catalog/supply/vendors/" + roleId)
+              .header("Authorization", bearer)
+              .retrieve()
+              .body(VendorPurchaseViewView.class);
+    } catch (RestClientResponseException e) {
+      if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
+        throw new ResponseStatusException(
+            HttpStatus.NOT_FOUND, "该供应商不存在：SUPPLIER 角色 " + roleId + "，请重新选择");
+      }
+      throw unavailable("商品主数据服务返回 " + e.getStatusCode().value() + "，供应商暂时读不到");
+    } catch (RestClientException e) {
+      throw unavailable("商品主数据服务暂时不可达");
+    }
+    if (view == null || view.summary() == null || view.summary().partyId() == null) {
+      throw unavailable("商品主数据服务没有返回这个供应商的主体");
+    }
+    return view.summary().partyId();
+  }
+
+  /**
    * 不可达一律 503，并把「为什么」如实报出。
    *
    * <p>刻意<b>不</b>返回空清单冒充「这个租户一个供应商都没有」：空清单会被当成
