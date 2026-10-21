@@ -13,6 +13,7 @@ import com.sun.net.httpserver.HttpServer;
 import java.math.BigDecimal;
 import java.net.InetSocketAddress;
 import java.sql.DriverManager;
+import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.LinkedHashMap;
@@ -314,6 +315,14 @@ class OrderChangeCancelIntegrationTest {
     rule("*", kind, allowed, deadlineHours, maxDecrease);
   }
 
+  /**
+   * 种一条平台可变更规则。
+   *
+   * <p><b>effective_from 必须由 DB 自己算</b>：服务端判定规则是否落在生效窗口内用的是 DB 的 now()（PostgreSQL 的
+   * transaction_timestamp），所以「种下去的时刻」也得取自同一个时钟域。写成 JVM 墙钟（{@code OffsetDateTime.now()}）就
+   * 变成跨时钟域比较 —— 两个时钟只要差一点（容器时钟比宿主慢几百毫秒很常见），刚种下的规则会被判成「还没生效」，
+   * 服务层于是报「没有登记「减少数量」的可变更规则」。留 1 分钟余量也贴合语义：刚登记的规则就是已生效的。
+   */
   void rule(
       String shopCode, String kind, boolean allowed, String deadlineHours, String maxDecrease) {
     asA(
@@ -322,7 +331,8 @@ class OrderChangeCancelIntegrationTest {
               "insert into order_platform_change_rule(id,tenant_id,platform_code,shop_code,"
                   + "change_kind,allowed,deadline_hours,max_decrease_qty,requires_platform_ack,"
                   + "effective_from,notes,version,created_by_membership_id,created_at,updated_at)"
-                  + " values(?,?,?,?,?,?,?,?,false,?::timestamptz,'',0,?,?::timestamptz,?::timestamptz)",
+                  + " values(?,?,?,?,?,?,?,?,false,(now() - interval '1 minute'),'',0,?,"
+                  + "?::timestamptz,?::timestamptz)",
               UUID.randomUUID(),
               actorA.tenantId(),
               "AMAZON",
@@ -331,12 +341,25 @@ class OrderChangeCancelIntegrationTest {
               allowed,
               deadlineHours == null ? null : new BigDecimal(deadlineHours),
               maxDecrease == null ? null : new BigDecimal(maxDecrease),
-              OffsetDateTime.now(),
               UUID.randomUUID(),
               OffsetDateTime.now(),
               OffsetDateTime.now());
           return null;
         });
+  }
+
+  /**
+   * DB 时钟的当前时刻（与服务端判定生效窗口用的是同一个时钟域）。
+   *
+   * <p>凡是服务层只收一个 {@code OffsetDateTime} 参数、没法让 DB 自己去算的 effective_from，就取这里的值。
+   */
+  OffsetDateTime dbNow() {
+    return sql.fetchOne("select now() as t").get("t", OffsetDateTime.class);
+  }
+
+  /** DB 时钟口径的「已生效」时刻：DB 当前时刻往前 1 分钟，与种子里的 {@code now() - interval '1 minute'} 同一口径。 */
+  OffsetDateTime dbEffectiveFrom() {
+    return dbNow().minusMinutes(1);
   }
 
   void recordProgress(
@@ -825,6 +848,49 @@ class OrderChangeCancelIntegrationTest {
   // ==========================================================================
   // 四、数量调整需平台允许
   // ==========================================================================
+
+  /**
+   * 生效窗口判定本身的可执行不变量。
+   *
+   * <p>服务端判「规则是否已生效」用的是 DB 的 now()，所以种下去的时刻也必须来自 DB 时钟。这条断言把这件事钉死：
+   * 谁把种子改回 JVM 墙钟（{@code OffsetDateTime.now()}），这里立刻红 —— 要么 effective_from 晚于 DB 当前时刻，
+   * 要么它与 DB 当前时刻的间隔塌到 0（种子留了 1 分钟余量）。
+   */
+  @Test
+  void 规则生效时刻取自DB时钟_种下去就已落在生效窗口内() {
+    rule("QUANTITY_DECREASE", true, "72", null);
+
+    var seeded =
+        asA(
+            () ->
+                sql.fetchOne(
+                        "select effective_from from order_platform_change_rule"
+                            + " where change_kind = ? limit 1",
+                        "QUANTITY_DECREASE")
+                    .get("effective_from", OffsetDateTime.class));
+    var dbNow = asA(() -> sql.fetchOne("select now() as t").get("t", OffsetDateTime.class));
+
+    assertThat(seeded)
+        .as("种下去的生效时刻必须已经落在 DB 当前时刻之前：否则规则还没生效，服务层会当成「没登记」")
+        .isBeforeOrEqualTo(dbNow);
+    assertThat(Duration.between(seeded, dbNow))
+        .as("余量不变量：种子取自 DB 时钟并留了 1 分钟；若被改回 JVM 墙钟，这个间隔会塌到 0（甚至为负）")
+        .isGreaterThanOrEqualTo(Duration.ofSeconds(30));
+
+    // 按服务端同一套 WHERE（DB 时钟）必须能命中刚种下的规则
+    var hit =
+        asA(
+            () ->
+                sql.fetchOne(
+                    "select id from order_platform_change_rule where platform_code = ?"
+                        + " and shop_code in (?, '*') and change_kind = ?"
+                        + " and effective_from <= now()"
+                        + " and (effective_to is null or effective_to > now()) limit 1",
+                    "AMAZON",
+                    "SHOP-1",
+                    "QUANTITY_DECREASE"));
+    assertThat(hit).as("同一条 WHERE 必须查得到刚种下的规则").isNotNull();
+  }
 
   @Test
   void 平台单没有登记可变更规则时_申请被拒而不是默认放行() {
@@ -1320,6 +1386,8 @@ class OrderChangeCancelIntegrationTest {
 
   @Test
   void 平台规则可维护_同维度重复登记被拒_更新带乐观锁() {
+    // effective_from 显式给 DB 时钟的值：服务层的 default 是 JVM 墙钟，而生效窗口由 DB 的 now() 判定，
+    // 两边不同源就等于让「刚登记的规则已生效」这件事取决于两个时钟恰好同步。
     var created =
         asA(
             () ->
@@ -1332,7 +1400,7 @@ class OrderChangeCancelIntegrationTest {
                         new BigDecimal("24"),
                         null,
                         true,
-                        null,
+                        dbEffectiveFrom(),
                         null,
                         "Amazon 24 小时内可改地址",
                         null),
@@ -1354,7 +1422,7 @@ class OrderChangeCancelIntegrationTest {
                             null,
                             null,
                             true,
-                            null,
+                            dbEffectiveFrom(),
                             null,
                             "重复登记",
                             null),
@@ -1376,7 +1444,7 @@ class OrderChangeCancelIntegrationTest {
                             null,
                             null,
                             true,
-                            null,
+                            dbEffectiveFrom(),
                             null,
                             "改窗口",
                             99L),
@@ -1394,7 +1462,7 @@ class OrderChangeCancelIntegrationTest {
                         null,
                         null,
                         true,
-                        null,
+                        dbEffectiveFrom(),
                         null,
                         "改成不允许",
                         created.version()),
