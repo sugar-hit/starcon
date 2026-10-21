@@ -2365,6 +2365,206 @@
         }
       }
     },
+    "/trade/development-projects/{id}": {
+      "get": {
+        "tags": [
+          "development-project-controller"
+        ],
+        "operationId": "get_trade_development_projects_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DevelopmentProjectDetail"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "development-project-controller"
+        ],
+        "operationId": "put_trade_development_projects_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DevelopmentProjectUpdateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DevelopmentProjectDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/development-projects/{id}/milestones/{milestoneId}": {
+      "put": {
+        "tags": [
+          "development-project-controller"
+        ],
+        "operationId": "put_trade_development_projects_id_milestones_milestoneId",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "milestoneId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DevelopmentMilestoneInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DevelopmentMilestoneRow"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "development-project-controller"
+        ],
+        "operationId": "delete_trade_development_projects_id_milestones_milestoneId",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "milestoneId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DevelopmentMilestoneRow"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/trade/dealers/profiles": {
       "get": {
         "tags": [
@@ -23205,6 +23405,750 @@
         }
       }
     },
+    "/trade/development-projects": {
+      "get": {
+        "tags": [
+          "development-project-controller"
+        ],
+        "operationId": "get_trade_development_projects",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "category",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "ownerId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DevelopmentProjectPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "development-project-controller"
+        ],
+        "operationId": "post_trade_development_projects",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DevelopmentProjectCreateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DevelopmentProjectDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/development-projects/{id}/transitions": {
+      "post": {
+        "tags": [
+          "development-project-controller"
+        ],
+        "operationId": "post_trade_development_projects_id_transitions",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DevelopmentTransitionInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DevelopmentProjectDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/development-projects/{id}/spec-candidates": {
+      "get": {
+        "tags": [
+          "development-project-controller"
+        ],
+        "operationId": "get_trade_development_projects_id_spec_candidates",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DevelopmentSpecCandidateRow"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "development-project-controller"
+        ],
+        "operationId": "post_trade_development_projects_id_spec_candidates",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DevelopmentSpecCandidateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DevelopmentSpecCandidateRow"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/development-projects/{id}/milestones": {
+      "get": {
+        "tags": [
+          "development-project-controller"
+        ],
+        "operationId": "get_trade_development_projects_id_milestones",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DevelopmentMilestoneRow"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "development-project-controller"
+        ],
+        "operationId": "post_trade_development_projects_id_milestones",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DevelopmentMilestoneInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DevelopmentMilestoneRow"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/development-projects/{id}/markets": {
+      "get": {
+        "tags": [
+          "development-project-controller"
+        ],
+        "operationId": "get_trade_development_projects_id_markets",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DevelopmentMarketRow"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "development-project-controller"
+        ],
+        "operationId": "post_trade_development_projects_id_markets",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DevelopmentMarketInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DevelopmentMarketRow"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/development-projects/{id}/market-observations": {
+      "get": {
+        "tags": [
+          "development-project-controller"
+        ],
+        "operationId": "get_trade_development_projects_id_market_observations",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DevelopmentMarketObservationRow"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "development-project-controller"
+        ],
+        "operationId": "post_trade_development_projects_id_market_observations",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DevelopmentMarketObservationInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DevelopmentMarketObservationRow"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/development-projects/{id}/handoffs": {
+      "get": {
+        "tags": [
+          "development-project-controller"
+        ],
+        "operationId": "get_trade_development_projects_id_handoffs",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DevelopmentHandoffRow"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "development-project-controller"
+        ],
+        "operationId": "post_trade_development_projects_id_handoffs",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DevelopmentHandoffInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DevelopmentHandoffRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/development-projects/{id}/cost-estimate": {
+      "get": {
+        "tags": [
+          "development-project-controller"
+        ],
+        "operationId": "get_trade_development_projects_id_cost_estimate",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "referenceSkuId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DevelopmentCostEstimateView"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "development-project-controller"
+        ],
+        "operationId": "post_trade_development_projects_id_cost_estimate",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "referenceSkuId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "referenceSkuCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DevelopmentProjectDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/trade/dealers/sales": {
       "get": {
         "tags": [
@@ -36853,6 +37797,139 @@
         }
       }
     },
+    "/trade/development-projects/{id}/sku-candidate": {
+      "get": {
+        "tags": [
+          "development-project-controller"
+        ],
+        "operationId": "get_trade_development_projects_id_sku_candidate",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DevelopmentSkuCandidate"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/development-projects/summary": {
+      "get": {
+        "tags": [
+          "development-project-controller"
+        ],
+        "operationId": "get_trade_development_projects_summary",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DevelopmentProjectSummary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/development-projects/options": {
+      "get": {
+        "tags": [
+          "development-project-controller"
+        ],
+        "operationId": "get_trade_development_projects_options",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DevelopmentProjectOptions"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/development-projects/capabilities": {
+      "get": {
+        "tags": [
+          "development-project-controller"
+        ],
+        "operationId": "get_trade_development_projects_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DevelopmentProjectCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/trade/dealers/rebates": {
       "get": {
         "tags": [
@@ -38137,6 +39214,110 @@
                   "type": "object",
                   "additionalProperties": {
                     "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/development-projects/{id}/spec-candidates/{candidateId}": {
+      "delete": {
+        "tags": [
+          "development-project-controller"
+        ],
+        "operationId": "delete_trade_development_projects_id_spec_candidates_candidateId",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "candidateId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DevelopmentSpecCandidateRow"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/development-projects/{id}/markets/{marketId}": {
+      "delete": {
+        "tags": [
+          "development-project-controller"
+        ],
+        "operationId": "delete_trade_development_projects_id_markets_marketId",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "marketId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DevelopmentMarketRow"
                   }
                 }
               }
@@ -44345,6 +45526,504 @@
           }
         },
         "description": "合单规则（每租户一条）"
+      },
+      "DevelopmentProjectUpdateInput": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "category": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "ownerId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "ownerName": {
+            "maxLength": 100,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "targetPrice": {
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "type": "number",
+            "nullable": true
+          },
+          "currency": {
+            "maxLength": 3,
+            "minLength": 3,
+            "type": "string",
+            "nullable": true
+          },
+          "targetCost": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "nullable": true
+          },
+          "costBasis": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "costEstimatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "referenceSkuId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "referenceSkuCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "decisionNote": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "launchTargetAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "DevelopmentHandoffRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "projectId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "handoffType": {
+            "type": "string"
+          },
+          "handoffTypeLabel": {
+            "type": "string"
+          },
+          "targetModule": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "payload": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "DevelopmentMarketObservationRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "projectId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "marketCode": {
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "metricCode": {
+            "type": "string"
+          },
+          "metricValue": {
+            "type": "number",
+            "nullable": true
+          },
+          "valueUnit": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "collectedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "DevelopmentMarketRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "projectId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "marketCode": {
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "targetPrice": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "priority": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "sortRank": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "DevelopmentMilestoneRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "projectId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "milestoneType": {
+            "type": "string"
+          },
+          "milestoneTypeLabel": {
+            "type": "string"
+          },
+          "plannedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "actualAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "status": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "DevelopmentProjectDetail": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "$ref": "#/components/schemas/DevelopmentProjectRow"
+          },
+          "milestones": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DevelopmentMilestoneRow"
+            }
+          },
+          "markets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DevelopmentMarketRow"
+            }
+          },
+          "specCandidates": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DevelopmentSpecCandidateRow"
+            }
+          },
+          "marketObservations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DevelopmentMarketObservationRow"
+            }
+          },
+          "transitions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DevelopmentTransitionRow"
+            }
+          },
+          "handoffs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DevelopmentHandoffRow"
+            }
+          },
+          "allowedTargets": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "DevelopmentProjectRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "projectNo": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "ownerId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "ownerName": {
+            "type": "string"
+          },
+          "targetPrice": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "targetCost": {
+            "type": "number",
+            "nullable": true
+          },
+          "costCurrency": {
+            "type": "string",
+            "nullable": true
+          },
+          "costAvailable": {
+            "type": "boolean"
+          },
+          "costSource": {
+            "type": "string"
+          },
+          "costSourceLabel": {
+            "type": "string"
+          },
+          "targetMarginRate": {
+            "type": "number",
+            "nullable": true
+          },
+          "marginBasis": {
+            "type": "string",
+            "nullable": true
+          },
+          "marketCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "milestoneCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "launchTargetAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "samplingPlannedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "massProductionPlannedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "DevelopmentSpecCandidateRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "projectId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "specName": {
+            "type": "string"
+          },
+          "specValue": {
+            "type": "string"
+          },
+          "sortRank": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "DevelopmentTransitionRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "projectId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "fromStatus": {
+            "type": "string"
+          },
+          "fromStatusLabel": {
+            "type": "string"
+          },
+          "toStatus": {
+            "type": "string"
+          },
+          "toStatusLabel": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "exemptionCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "exemptionNote": {
+            "type": "string",
+            "nullable": true
+          },
+          "actorId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "appliedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "DevelopmentMilestoneInput": {
+        "required": [
+          "milestoneType",
+          "plannedAt"
+        ],
+        "type": "object",
+        "properties": {
+          "milestoneType": {
+            "type": "string",
+            "enum": [
+              "SAMPLING",
+              "PILOT",
+              "MASS_PRODUCTION",
+              "LAUNCH"
+            ]
+          },
+          "plannedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "actualAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "PLANNED",
+              "REACHED",
+              "MISSED"
+            ]
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
       },
       "DealerProfileInput": {
         "required": [
@@ -65577,6 +67256,282 @@
             "maxLength": 32,
             "minLength": 0,
             "type": "string"
+          }
+        }
+      },
+      "DevelopmentProjectCreateInput": {
+        "required": [
+          "category",
+          "currency",
+          "name",
+          "ownerId",
+          "projectNo",
+          "targetPrice"
+        ],
+        "type": "object",
+        "properties": {
+          "projectNo": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "category": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "ownerId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "ownerName": {
+            "maxLength": 100,
+            "minLength": 0,
+            "type": "string"
+          },
+          "targetPrice": {
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "type": "number"
+          },
+          "currency": {
+            "maxLength": 3,
+            "minLength": 3,
+            "type": "string"
+          },
+          "targetCost": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "nullable": true
+          },
+          "costBasis": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "costEstimatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "referenceSkuId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "referenceSkuCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "decisionNote": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "launchTargetAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "DevelopmentTransitionInput": {
+        "required": [
+          "reason",
+          "toStatus"
+        ],
+        "type": "object",
+        "properties": {
+          "toStatus": {
+            "type": "string",
+            "enum": [
+              "EVALUATION",
+              "APPROVED",
+              "IN_DEVELOPMENT",
+              "SAMPLING",
+              "PILOT",
+              "MASS_PRODUCTION",
+              "TERMINATED"
+            ]
+          },
+          "reason": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          },
+          "exemptionCode": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "exemptionNote": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "DevelopmentSpecCandidateInput": {
+        "required": [
+          "specName",
+          "specValue"
+        ],
+        "type": "object",
+        "properties": {
+          "specName": {
+            "maxLength": 120,
+            "minLength": 0,
+            "type": "string"
+          },
+          "specValue": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "sortRank": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          }
+        }
+      },
+      "DevelopmentMarketInput": {
+        "required": [
+          "currency",
+          "marketCode",
+          "platformCode",
+          "targetPrice"
+        ],
+        "type": "object",
+        "properties": {
+          "marketCode": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string"
+          },
+          "platformCode": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string"
+          },
+          "targetPrice": {
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "type": "number"
+          },
+          "currency": {
+            "maxLength": 3,
+            "minLength": 3,
+            "type": "string"
+          },
+          "priority": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "sortRank": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          }
+        }
+      },
+      "DevelopmentMarketObservationInput": {
+        "required": [
+          "collectedAt",
+          "marketCode",
+          "metricCode",
+          "source"
+        ],
+        "type": "object",
+        "properties": {
+          "marketCode": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string"
+          },
+          "platformCode": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "metricCode": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string"
+          },
+          "metricValue": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "nullable": true
+          },
+          "valueUnit": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "source": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "collectedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "DevelopmentHandoffInput": {
+        "required": [
+          "handoffType"
+        ],
+        "type": "object",
+        "properties": {
+          "handoffType": {
+            "type": "string",
+            "enum": [
+              "SAMPLING_ORDER",
+              "PILOT_ORDER",
+              "SKU_ONBOARDING"
+            ]
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
           }
         }
       },
@@ -90737,6 +92692,317 @@
           "occurredAt": {
             "type": "string",
             "format": "date-time"
+          }
+        }
+      },
+      "DevelopmentProjectPage": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DevelopmentProjectRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "DevelopmentSkuCandidate": {
+        "type": "object",
+        "properties": {
+          "projectId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "projectNo": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string"
+          },
+          "targetMarkets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DevelopmentMarketRow"
+            }
+          },
+          "targetPriceMin": {
+            "type": "number",
+            "nullable": true
+          },
+          "targetPriceMax": {
+            "type": "number",
+            "nullable": true
+          },
+          "currency": {
+            "type": "string",
+            "nullable": true
+          },
+          "specCandidates": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DevelopmentSpecCandidateRow"
+            }
+          },
+          "launchTargetAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "samplingPlannedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "massProductionPlannedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "handoffType": {
+            "type": "string"
+          },
+          "targetModule": {
+            "type": "string"
+          },
+          "handoffReady": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "DevelopmentCostEstimateView": {
+        "type": "object",
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "unitCost": {
+            "type": "number",
+            "nullable": true
+          },
+          "costCurrency": {
+            "type": "string",
+            "nullable": true
+          },
+          "source": {
+            "type": "string"
+          },
+          "sourceLabel": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string",
+            "nullable": true
+          },
+          "unavailableReason": {
+            "type": "string",
+            "nullable": true
+          },
+          "basis": {
+            "type": "string",
+            "nullable": true
+          },
+          "estimatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "DevelopmentProjectSummary": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "statuses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DevelopmentStatusCount"
+            }
+          },
+          "recent": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DevelopmentProjectRow"
+            }
+          }
+        }
+      },
+      "DevelopmentStatusCount": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "CostSourceOption": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          }
+        }
+      },
+      "DevelopmentProjectOptions": {
+        "type": "object",
+        "properties": {
+          "statuses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DevelopmentStatusOption"
+            }
+          },
+          "milestoneTypes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MilestoneOption"
+            }
+          },
+          "costSources": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CostSourceOption"
+            }
+          },
+          "handoffTypes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HandoffOption"
+            }
+          }
+        }
+      },
+      "DevelopmentStatusOption": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "terminal": {
+            "type": "boolean"
+          },
+          "allowedTargets": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "HandoffOption": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "targetModule": {
+            "type": "string"
+          }
+        }
+      },
+      "MilestoneOption": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          }
+        }
+      },
+      "DevelopmentProjectCapabilities": {
+        "type": "object",
+        "properties": {
+          "costEstimateAvailable": {
+            "type": "boolean"
+          },
+          "costEstimateSource": {
+            "type": "string"
+          },
+          "costEstimateNote": {
+            "type": "string"
+          },
+          "marketDataAvailable": {
+            "type": "boolean"
+          },
+          "marketDataOwnerModule": {
+            "type": "string"
+          },
+          "marketDataNote": {
+            "type": "string"
+          },
+          "samplingModuleDelivered": {
+            "type": "boolean"
+          },
+          "samplingModuleNote": {
+            "type": "string"
+          },
+          "pilotModuleDelivered": {
+            "type": "boolean"
+          },
+          "pilotModuleNote": {
+            "type": "string"
+          },
+          "skuOnboardingDelivered": {
+            "type": "boolean"
+          },
+          "skuOnboardingNote": {
+            "type": "string"
+          },
+          "stateMachineNote": {
+            "type": "string"
+          },
+          "marginFormula": {
+            "type": "string"
+          },
+          "marginRoundingNote": {
+            "type": "string"
+          },
+          "boundaryNote": {
+            "type": "string"
           }
         }
       },
