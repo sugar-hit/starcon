@@ -4267,6 +4267,76 @@ const services: readonly {
       /^trial\-productions(?:\/(?:capabilities|options|summary|bom\-version\-candidates|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:transitions|component\-requirements(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:submit|release))?)?|inspection\-items(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|result|cost(?:\/lines(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?)?|cost\-comparison|mass\-production\-recommendation))?))?$/,
   },
   {
+    // 6.6.2.2 转量产与建档（trade 服务，卷 06 采购与供应的 L3 锚点 6.6.2）。
+    //
+    // 蓝图：「试产通过后转正式量产：确定量产 BOM、批量采购/生产计划、目标成本、
+    // 正式 SKU 建档（含编码/条码/属性/报关属性），并把量产参数带入采购与价格模型。」
+    // 输出「量产计划；正式 SKU（3.1.2.1）；量产 BOM 版本；采购需求（6.2.1.2）」。
+    //
+    // 本条目是**新增一条 services[] 元素**，不是往既有 trade 分支的 alternation 里并分支 ——
+    // 那一支是一段超长单行正则，多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在既有 `trial-productions`（6.6.2.1，本模块的**直接上游**）元素**之后**：
+    // 与「`prefix: 'trade/'` 之前」「services[] 最末尾」这两个常见锚点都隔开 ≥ 1700 行，
+    // git 能干净求并。resolve() 是「按顺序逐条匹配、首个命中即返回」，
+    // 同前缀的第二条不会误吃前一条的路径。
+    //
+    // 🔴 为什么用 `mass-productions` 这个独立前缀：
+    //   * 已逐条核对本文件里**全部既有正则**（含 trade 的超长 alternation 分支）：
+    //     本模块的 16 个形状对它们的命中数 = **0**；
+    //   * 邻近首 token `trial-productions` / `development-samples` / `development-projects` /
+    //     `purchase-plans` / `replenishment-suggestions` / `quality-inspections` —— **零命中**；
+    //   * `trial-productions`（6.6.2.1）的正则**不会**吃掉 `mass-productions/**`
+    //     —— 两者是互不相同的前缀字面量。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   mass-productions/capabilities            能力声明（价格模型 / 生产计划下达两条缺口）
+    //   mass-productions/options                 下拉（状态与合法去向 / 决策结论 / 决策来源 / 建档状态 / 属性状态）
+    //   mass-productions/summary                 按状态分组的概览 + 按币种分组的目标成本
+    //   mass-productions/trial-candidates        可转量产的试产单候选（上游 6.6.2.1，同库只读）
+    //   mass-productions/bom-version-candidates  catalog 的 BOM 版本候选（跨服务只读）
+    //   mass-productions/spu-candidates         catalog 的 SPU 候选（SKU 建档的「目标键」）
+    //   mass-productions/spu-attributes          catalog 的商品属性候选（建档载荷的属性取值范围）
+    //   mass-productions                         量产计划清单（GET）/ 新建量产计划（POST）
+    //   mass-productions/{uuid}                  量产计划详情（GET）/ 改量产计划（PUT）
+    //   mass-productions/{uuid}/transitions      推进量产计划状态（POST，状态机只认存在的边）
+    //   mass-productions/{uuid}/bom-lines        量产 BOM 组件行快照（GET）
+    //   mass-productions/{uuid}/sku-filing       SKU 建档请求（GET / POST）
+    //   mass-productions/{uuid}/sku-filing/{uuid}/submit  提交 SKU 建档（POST，真调商品中心）
+    //   mass-productions/{uuid}/handoffs         下游交接留痕（GET）
+    //   mass-productions/{uuid}/handoffs/replenishment  重新触发 6.2.1.2 补货建议重算（POST）
+    //   mass-productions/{uuid}/cost-comparison  量产目标成本 vs 试产实测成本（GET）
+    //
+    // ⚠️ 判别顺序：**字面量子路径（capabilities / options / summary / trial-candidates /
+    //    bom-version-candidates / spu-candidates / spu-attributes）排在 {uuid} 段之前** ——
+    //    alternation 是首个命中即返回，顺序反了会被 uuid 支吃掉半截。
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`（不是
+    //    `[0-9a-f-]+`）：后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `mass-productions/{uuid}/delete` —— 量产计划挂着 BOM 快照、建档请求与全部留痕，
+    //     后端**不提供删除**（删掉它就抹掉了「这个量产经历过什么」的证据）。
+    //   * `mass-productions/{uuid}/skus` —— 🔴 正式 SKU 的**写入所有权在 catalog**
+    //     （3.1.2.1 的 POST /catalog/products/{id}/skus）：本模块只落**建档请求事实**，
+    //     经 catalog 的授权接口建档，**不建 SKU 表**。放行它会让界面以为本模块在直接写 SKU。
+    //   * `mass-productions/{uuid}/inventory-deductions` / `/stock` —— 组件的库存扣减归
+    //     warehouse 侧 8.4.1 组装单，本模块**不扣库存**。
+    //   * `mass-productions/{uuid}/assembly-orders` —— 组装单是 **warehouse 独立库**里
+    //     8.4.1 的事实，本模块只存它的**逻辑引用 + 展示快照**，**不建组装单**。
+    //   * `mass-productions/{uuid}/purchase-orders` —— 采购需求归 6.2.1.2 补货建议
+    //     （**同库但写入所有权是它的**）：本模块只做**重算触发**，**不直接写它的表**。
+    //   * `mass-productions/{uuid}/prices` —— 价格模型归 5.3.1.1 目标定价（**未开发**），
+    //     本模块**不 mock 算价**。
+    //   * `mass-productions/{uuid}/sku-filing/{uuid}` —— 建档请求的**明细**没有独立端点
+    //     （属性与报关要素随建档请求整体返回），放行它只会让界面拿到 404。
+    //   * 任何 DELETE 裸集合形状 —— 白名单是**按路径登记、不区分方法**的，
+    //     所以「不能删」的防线在服务端与 DB，不在这里。
+    prefix: 'trade/',
+    env: 'TRADE_URL',
+    fallback: 'http://127.0.0.1:8085',
+    pattern:
+      /^mass\-productions(?:\/(?:capabilities|options|summary|trial\-candidates|bom\-version\-candidates|spu\-candidates|spu\-attributes|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:transitions|bom\-lines|sku\-filing(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/submit)?|handoffs(?:\/replenishment)?|cost\-comparison))?))?$/,
+  },
+  {
     // 9.3.1.1 拆单（trade 服务）。本条目是**新增一条 services[] 元素**，不是往既有
     // trade 分支的 alternation 里并分支 —— 那一支是一段超长单行正则，
     // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
