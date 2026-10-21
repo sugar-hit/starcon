@@ -5735,6 +5735,78 @@ const services: readonly {
     pattern:
       /^pending-inspections(?:\/(?:capabilities|stock|options|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:request-inspection|record-result|dispose|cancel))?))?$/,
   },
+  {
+    // 11.4.1.1 平台纠纷列表（trade 服务，卷 11「售后与退货」L3 11.4「平台纠纷与客诉」的第一格）。
+    //
+    // 蓝图：「管理平台纠纷/争议（Amazon A-to-Z、eBay 争议、速卖通纠纷）：类型、金额、平台时限、
+    // 举证要求、我方立场、结果记录。」输出：「纠纷单 + 时效倒计时 + 举证清单。」
+    // 加粗句：「**平台纠纷有严格举证时限**，超期自动判败，是硬性时效要求。」
+    //
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 trade 那条巨型 alternation 里并分支 ——
+    //   那一支是单行超长正则，多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在 services[] 的**最末尾**（紧挨着 `];`），
+    // 与同批其它车道（6.3.2.1 / 6.6.2.1 / 6.3.1.3）的插入点互不重叠。
+    //
+    // ---- 首 token「platform-disputes」的零命中核对结论（逐条核过本文件**全部**既有正则）----
+    //   本文件既有 116 条 services[] 正则，**逐条**用本模块的九个真实调用形状
+    //   （platform-disputes / .../capabilities / .../{uuid} / .../evidence-items /
+    //     .../evidence-items/{uuid} / .../start-evidence / .../position / .../submit-evidence /
+    //     .../resolve / .../withdraw / .../settlements / .../settlements/{uuid}/confirm /
+    //     .../settlements/{uuid}/reject）跑过一遍：**命中 0 条**。
+    //   逐条核对的既有首 token（全部零命中）：
+    //     purchase-orders / purchase-order-editor / purchase-followups / purchase-plans /
+    //     purchase-requests / purchase-arrivals / purchase-reconciliation / purchase-analytics /
+    //     replenishment-suggestions / development-projects / development-samples /
+    //     quality-inspections / defective-dispositions / return-dispositions / return-shipbacks /
+    //     quality-analysis / quality-supplier-refs / knowledge / review-requests / review-rules /
+    //     supplier-claims / product-attribution / return-quality / return-receipts /
+    //     rma-authorizations / rma-instructions / refunds / refund-applications /
+    //     platform-order-sync / pending-inspections / putaway-tasks / goods-receipts …
+    //   另外本文件**全部**正则的字面量里也不存在 "platform-dispute" 这个串
+    //   （grep 全文件零命中）—— 所以首 token 既是独立字面量，也不会被既有分支的前缀吃掉。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   platform-disputes                                集合读（GET，真分页 / 真筛选）+ 建单（POST）
+    //   platform-disputes/capabilities                   能力声明（含上下游未交付的逐条说明）
+    //   platform-disputes/{uuid}                         单据详情（GET：头 + 举证清单 + 结算分录 + 留痕）
+    //   platform-disputes/{uuid}/evidence-items          加举证材料项（POST）
+    //   platform-disputes/{uuid}/evidence-items/{uuid}   更新举证材料状态（PUT）/ 移除（DELETE）
+    //   platform-disputes/{uuid}/start-evidence          进入举证准备（POST）
+    //   platform-disputes/{uuid}/position                更新我方立场与责任判定（POST）
+    //   platform-disputes/{uuid}/submit-evidence         提交举证（POST）
+    //   platform-disputes/{uuid}/resolve                 记录平台裁决结果（POST）
+    //   platform-disputes/{uuid}/withdraw                我方撤诉（POST）
+    //   platform-disputes/{uuid}/settlements             登记结算影响（POST）
+    //   platform-disputes/{uuid}/settlements/{uuid}/confirm  财务确认结算生效（POST）
+    //   platform-disputes/{uuid}/settlements/{uuid}/reject   财务驳回结算影响（POST）
+    //
+    // 判别顺序：**字面量子路径（capabilities）排在 {uuid} 段之前** ——
+    // alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    // id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`（不是
+    // `[0-9a-f-]+`）：后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行。
+    // 两个动作段（{uuid}/xxx）挂在单段 {uuid} 组的可选后缀里，否则会被单段分支吃掉半截、
+    // 把动作名留在匹配之外。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   platform-disputes/{uuid}/auto-lose    —— **超期自动判败是系统做的**（后端 DB 守卫①），
+    //     刻意不提供手动入口：一个能提前把自己判负的按钮只会让人用它来提前结案。
+    //   platform-disputes/{uuid}/evidence      —— 举证**清单**在详情里，没有单独的读端点。
+    //   platform-disputes/{uuid}/upload        —— 本模块只落**清单事实**（该交什么 / 齐不齐 / 缺什么），
+    //     不上传材料；材料与申诉属 11.4.1.2（未开发）。
+    //   platform-disputes/{uuid}/appeal        —— 申诉提交属 11.4.1.2（未开发），本模块不越界。
+    //   platform-disputes/{uuid}/sync          —— channel 服务**没有纠纷专用同步端点**
+    //     （已交付的是平台目录 / 连接 / 店铺 / 同步任务 / 同步运行 / 回写 / webhook / 增量补拉），
+    //     放行一个不存在的同步入口等于让界面以为平台会自动拉纠纷。
+    //   platform-disputes/summary              —— 汇总在列表响应里，没有单独的汇总端点。
+    //   platform-disputes/{uuid}/delete        —— 终态不可逆：纠纷凭据不能删（后端 405 + DB 守卫）。
+    //   任何 DELETE / PUT 形状 —— 白名单是**按路径登记、不区分方法**的，
+    //     所以「不能删」的防线在服务端与 DB，不在这里。
+    prefix: 'trade/',
+    env: 'TRADE_URL',
+    fallback: 'http://127.0.0.1:8085',
+    pattern:
+      /^platform-disputes(?:\/(?:capabilities|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:evidence-items(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|start-evidence|position|submit-evidence|resolve|withdraw|settlements(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/(?:confirm|reject))?))?))?$/,
+  },
 ];
 
 function resolve(path: string) {
