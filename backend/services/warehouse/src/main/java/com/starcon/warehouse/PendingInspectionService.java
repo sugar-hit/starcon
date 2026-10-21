@@ -69,9 +69,15 @@ public class PendingInspectionService {
   /** 数量刻度：与 DB 的 numeric(19,6) 对齐。 */
   private static final int QUANTITY_SCALE = 6;
 
+  /** 文本块片段的前导空格兜底（Java 文本块会丢掉首行换行，与 InventoryBucketService 同一条理由）。 */
+  private static String clause(String fragment) {
+    return " " + fragment.stripLeading();
+  }
+
   /** 待检清单的固定 FROM。 */
   private static final String STOCK_FROM =
-      """
+      clause(
+          """
       from stock_bucket b
       join sku_ref s on s.tenant_id=b.tenant_id and s.id=b.sku_id
       join warehouse w on w.tenant_id=b.tenant_id and w.id=b.warehouse_id
@@ -79,15 +85,16 @@ public class PendingInspectionService {
         on loc.tenant_id=b.tenant_id and loc.warehouse_id=b.warehouse_id and loc.id=b.location_id
       left join inventory_lot lot on lot.tenant_id=b.tenant_id and lot.id=b.lot_id
       join inventory_quality_status q on q.tenant_id=b.tenant_id and q.id=b.quality_status_id
-      """;
+          """);
 
   /** 任务列表的固定 FROM。 */
   private static final String TASK_FROM =
-      """
+      clause(
+          """
       from pending_inspection_task t
       join warehouse w on w.tenant_id=t.tenant_id and w.id=t.warehouse_id
       join sku_ref s on s.tenant_id=t.tenant_id and s.id=t.sku_id
-      """;
+          """);
 
   private final DSLContext sql;
   private final QualityInspectionTradePort trade;
@@ -1350,7 +1357,13 @@ public class PendingInspectionService {
 
   private Record requireTask(UUID taskId) {
     Record head =
-        sql.fetchOne("select * from pending_inspection_task where id=?", taskId);
+        sql.fetchOne(
+            "select t.*,w.code as warehouse_code,s.code as sku_code,s.name as sku_name"
+                + " from pending_inspection_task t"
+                + " join warehouse w on w.tenant_id=t.tenant_id and w.id=t.warehouse_id"
+                + " join sku_ref s on s.tenant_id=t.tenant_id and s.id=t.sku_id"
+                + " where t.id=?",
+            taskId);
     if (head == null) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "待检处理单不存在或无权查看");
     }
@@ -1359,7 +1372,13 @@ public class PendingInspectionService {
 
   private Record lockTask(UUID taskId) {
     Record head =
-        sql.fetchOne("select * from pending_inspection_task where id=? for update", taskId);
+        sql.fetchOne(
+            "select t.*,w.code as warehouse_code,s.code as sku_code,s.name as sku_name"
+                + " from pending_inspection_task t"
+                + " join warehouse w on w.tenant_id=t.tenant_id and w.id=t.warehouse_id"
+                + " join sku_ref s on s.tenant_id=t.tenant_id and s.id=t.sku_id"
+                + " where t.id=? for update of t",
+            taskId);
     if (head == null) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "待检处理单不存在或无权查看");
     }
