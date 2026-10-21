@@ -39279,6 +39279,780 @@
           }
         }
       }
+    },
+    "/trade/defective-dispositions/{id}": {
+      "get": {
+        "tags": [
+          "defective-goods-controller"
+        ],
+        "operationId": "get_trade_defective_dispositions_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefectiveOrderDetail"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "defective-goods-controller"
+        ],
+        "operationId": "put_trade_defective_dispositions_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DefectiveOrderInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefectiveOrderRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/defective-dispositions": {
+      "get": {
+        "tags": [
+          "defective-goods-controller"
+        ],
+        "operationId": "get_trade_defective_dispositions",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "dispositionType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "inspectionNo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "skuCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "supplierId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "created"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefectiveOrderPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "defective-goods-controller"
+        ],
+        "operationId": "post_trade_defective_dispositions",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DefectiveOrderInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefectiveOrderRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/defective-dispositions/{id}/dispatch-inventory": {
+      "post": {
+        "tags": [
+          "defective-goods-controller"
+        ],
+        "operationId": "post_trade_defective_dispositions_id_dispatch_inventory",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefectiveOrderRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/defective-dispositions/{id}/decide": {
+      "post": {
+        "tags": [
+          "defective-goods-controller"
+        ],
+        "operationId": "post_trade_defective_dispositions_id_decide",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefectiveOrderRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/defective-dispositions/{id}/complete": {
+      "post": {
+        "tags": [
+          "defective-goods-controller"
+        ],
+        "operationId": "post_trade_defective_dispositions_id_complete",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefectiveOrderRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/defective-dispositions/{id}/claims/{claimId}/withdraw": {
+      "post": {
+        "tags": [
+          "defective-goods-controller"
+        ],
+        "operationId": "post_trade_defective_dispositions_id_claims_claimId_withdraw",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "claimId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DefectiveClaimReasonInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefectiveClaimRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/defective-dispositions/{id}/claims/{claimId}/submit": {
+      "post": {
+        "tags": [
+          "defective-goods-controller"
+        ],
+        "operationId": "post_trade_defective_dispositions_id_claims_claimId_submit",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "claimId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefectiveClaimRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/defective-dispositions/{id}/claims/{claimId}/reject": {
+      "post": {
+        "tags": [
+          "defective-goods-controller"
+        ],
+        "operationId": "post_trade_defective_dispositions_id_claims_claimId_reject",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "claimId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DefectiveClaimReasonInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefectiveClaimRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/defective-dispositions/{id}/claims/{claimId}/agree": {
+      "post": {
+        "tags": [
+          "defective-goods-controller"
+        ],
+        "operationId": "post_trade_defective_dispositions_id_claims_claimId_agree",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "claimId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DefectiveClaimAgreeInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefectiveClaimRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/defective-dispositions/{id}/cancel": {
+      "post": {
+        "tags": [
+          "defective-goods-controller"
+        ],
+        "operationId": "post_trade_defective_dispositions_id_cancel",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DefectiveCancelInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefectiveOrderRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/defective-dispositions/{id}/export": {
+      "get": {
+        "tags": [
+          "defective-goods-controller"
+        ],
+        "operationId": "get_trade_defective_dispositions_id_export",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/csv": {
+                "schema": {
+                  "type": "string",
+                  "format": "byte"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/defective-dispositions/summary": {
+      "get": {
+        "tags": [
+          "defective-goods-controller"
+        ],
+        "operationId": "get_trade_defective_dispositions_summary",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "currencyCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefectiveSummary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/defective-dispositions/options": {
+      "get": {
+        "tags": [
+          "defective-goods-controller"
+        ],
+        "operationId": "get_trade_defective_dispositions_options",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefectiveOptions"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/defective-dispositions/capabilities": {
+      "get": {
+        "tags": [
+          "defective-goods-controller"
+        ],
+        "operationId": "get_trade_defective_dispositions_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefectiveGoodsCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -96568,6 +97342,877 @@
             "type": "string"
           },
           "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "DefectiveLineInput": {
+        "required": [
+          "dispositionType",
+          "quantity"
+        ],
+        "type": "object",
+        "properties": {
+          "dispositionType": {
+            "type": "string",
+            "enum": [
+              "RETURN_EXCHANGE",
+              "REPAIR",
+              "CONCESSION",
+              "SCRAP",
+              "PROMOTION"
+            ]
+          },
+          "quantity": {
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "type": "number"
+          },
+          "releasedQuantity": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "nullable": true
+          },
+          "concessionReason": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "permissionCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "expectedReturnDate": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "repairVendor": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "promotionPlan": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "note": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "DefectiveOrderInput": {
+        "required": [
+          "inspectionOrderId",
+          "lines",
+          "reason"
+        ],
+        "type": "object",
+        "properties": {
+          "inspectionOrderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reason": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "type": "string"
+          },
+          "currencyCode": {
+            "maxLength": 8,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "claimAmount": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "nullable": true
+          },
+          "note": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DefectiveLineInput"
+            }
+          }
+        }
+      },
+      "DefectiveOrderRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "dispositionNo": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "inspectionOrderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "inspectionNo": {
+            "type": "string"
+          },
+          "inspectionResult": {
+            "type": "string"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string",
+            "nullable": true
+          },
+          "supplierId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "supplierName": {
+            "type": "string",
+            "nullable": true
+          },
+          "receiptCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "batchNo": {
+            "type": "string",
+            "nullable": true
+          },
+          "inspectionLotSize": {
+            "type": "number"
+          },
+          "inspectionDefectiveQuantity": {
+            "type": "number"
+          },
+          "inspectionQualifiedQuantity": {
+            "type": "number"
+          },
+          "inspectionConcessionQuantity": {
+            "type": "number"
+          },
+          "sellableCeiling": {
+            "type": "number"
+          },
+          "grossDeductedQuantity": {
+            "type": "number"
+          },
+          "disposedQuantity": {
+            "type": "number"
+          },
+          "releasedQuantity": {
+            "type": "number"
+          },
+          "remainingQuantity": {
+            "type": "number"
+          },
+          "dispositionSummary": {
+            "type": "string"
+          },
+          "dispositionSummaryLabel": {
+            "type": "string"
+          },
+          "inventoryStatus": {
+            "type": "string"
+          },
+          "inventoryStatusLabel": {
+            "type": "string"
+          },
+          "claimStatus": {
+            "type": "string"
+          },
+          "claimStatusLabel": {
+            "type": "string"
+          },
+          "currencyCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "claimAmount": {
+            "type": "number",
+            "nullable": true
+          },
+          "lineCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "instructionCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "claimCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "decidedBy": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "decidedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "completedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "DefectiveClaimReasonInput": {
+        "required": [
+          "reason"
+        ],
+        "type": "object",
+        "properties": {
+          "reason": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "DefectiveClaimRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "claimNo": {
+            "type": "string"
+          },
+          "claimType": {
+            "type": "string"
+          },
+          "claimTypeLabel": {
+            "type": "string"
+          },
+          "supplierId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "supplierName": {
+            "type": "string",
+            "nullable": true
+          },
+          "currencyCode": {
+            "type": "string"
+          },
+          "claimedAmount": {
+            "type": "number"
+          },
+          "agreedAmount": {
+            "type": "number",
+            "nullable": true
+          },
+          "effectiveAmount": {
+            "type": "number"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "financeStatus": {
+            "type": "string"
+          },
+          "financeStatusLabel": {
+            "type": "string"
+          },
+          "financeReference": {
+            "type": "string",
+            "nullable": true
+          },
+          "submittedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "acknowledgedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "settledAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "decidedReason": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "DefectiveClaimAgreeInput": {
+        "required": [
+          "agreedAmount"
+        ],
+        "type": "object",
+        "properties": {
+          "agreedAmount": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number"
+          },
+          "note": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "DefectiveCancelInput": {
+        "required": [
+          "cancelReason"
+        ],
+        "type": "object",
+        "properties": {
+          "cancelReason": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "DefectiveOrderPage": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DefectiveOrderRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "DefectiveEventRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "eventType": {
+            "type": "string"
+          },
+          "eventTypeLabel": {
+            "type": "string"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "actorId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "note": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "DefectiveInstructionRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "lineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "action": {
+            "type": "string"
+          },
+          "actionLabel": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "externalReference": {
+            "type": "string",
+            "nullable": true
+          },
+          "attemptCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "dispatchedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "DefectiveLineRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "dispositionType": {
+            "type": "string"
+          },
+          "dispositionTypeLabel": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "releasedQuantity": {
+            "type": "number"
+          },
+          "concessionReason": {
+            "type": "string",
+            "nullable": true
+          },
+          "permissionCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "expectedReturnDate": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "repairVendor": {
+            "type": "string",
+            "nullable": true
+          },
+          "promotionPlan": {
+            "type": "string",
+            "nullable": true
+          },
+          "note": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "DefectiveOrderDetail": {
+        "type": "object",
+        "properties": {
+          "order": {
+            "$ref": "#/components/schemas/DefectiveOrderRow"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DefectiveLineRow"
+            }
+          },
+          "instructions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DefectiveInstructionRow"
+            }
+          },
+          "claims": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DefectiveClaimRow"
+            }
+          },
+          "events": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DefectiveEventRow"
+            }
+          },
+          "quantityNote": {
+            "type": "string"
+          },
+          "concessionNote": {
+            "type": "string"
+          },
+          "inventoryNote": {
+            "type": "string"
+          },
+          "claimNote": {
+            "type": "string"
+          },
+          "actions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "DefectiveSummary": {
+        "type": "object",
+        "properties": {
+          "orderCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "draftCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "decidedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "executingCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "completedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "cancelledCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "concessionOrderCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "scrapOrderCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "repairOrderCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "returnExchangeOrderCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "promotionOrderCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "disposedQuantity": {
+            "type": "number"
+          },
+          "releasedQuantity": {
+            "type": "number"
+          },
+          "pendingClaimAmount": {
+            "type": "number"
+          },
+          "settledClaimAmount": {
+            "type": "number"
+          },
+          "currencyCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "instructionDispatchedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "instructionUnavailableCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "instructionFailedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "DefectiveInspectionOption": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "inspectionNo": {
+            "type": "string"
+          },
+          "result": {
+            "type": "string"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string",
+            "nullable": true
+          },
+          "supplierId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "supplierName": {
+            "type": "string",
+            "nullable": true
+          },
+          "lotSize": {
+            "type": "number"
+          },
+          "defectiveQuantity": {
+            "type": "number"
+          },
+          "qualifiedQuantity": {
+            "type": "number"
+          },
+          "concessionQuantity": {
+            "type": "number"
+          },
+          "sellableCeiling": {
+            "type": "number"
+          },
+          "grossDeductedQuantity": {
+            "type": "number"
+          },
+          "disposedQuantity": {
+            "type": "number"
+          },
+          "remainingQuantity": {
+            "type": "number"
+          },
+          "completedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "DefectiveOptions": {
+        "type": "object",
+        "properties": {
+          "inspections": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DefectiveInspectionOption"
+            }
+          },
+          "dispositionTypes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "dispositionTypeLabels": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "statuses": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "statusLabels": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "inventoryStatuses": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "inventoryStatusLabels": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "claimStatuses": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "claimStatusLabels": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "DefectiveCapabilityItem": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "ownerModule": {
+            "type": "string",
+            "nullable": true
+          },
+          "impact": {
+            "type": "string",
+            "nullable": true
+          },
+          "reason": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "DefectiveGoodsCapabilities": {
+        "type": "object",
+        "properties": {
+          "upstream": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DefectiveCapabilityItem"
+            }
+          },
+          "downstream": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DefectiveCapabilityItem"
+            }
+          },
+          "actions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DefectiveCapabilityItem"
+            }
+          },
+          "dispositionTypes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "dispositionTypeLabels": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "quantityNote": {
+            "type": "string"
+          },
+          "concessionNote": {
+            "type": "string"
+          },
+          "inventoryNote": {
+            "type": "string"
+          },
+          "claimNote": {
+            "type": "string"
+          },
+          "note": {
             "type": "string"
           }
         }

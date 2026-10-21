@@ -5158,6 +5158,63 @@ const services: readonly {
       /^quality\-inspections(?:\/(?:capabilities|options|summary|templates(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:activate|retire))?)?)|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:items|concessions|complete|cancel|export))?)?$/,
   },
   {
+    // 6.4.2.2 不良品处理（trade 服务，卷 06「采购与供应」的 L3 锚点 6.4.2「来料质检」下的第二格）。
+    //
+    // 蓝图：「不合格品的处置：退换货补货、返修、让步接收、报废、转为促销品，
+    // 处置结论联动库存状态与供应商索赔。」输出「处置单 + 库存状态变更指令 + 供应商索赔记录」。
+    //
+    // 本条目是**新增一条 services[] 元素**，不是往既有 trade 巨型正则里并 ——
+    // 那一支是单行超长 alternation，多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在「6.4.2.1 质检单」元素**之后**，与并行车道的插入点互不重叠；
+    // 既有条目一字未动。
+    //
+    // 🔴 为什么用 `defective-dispositions` 这个独立前缀：
+    //   * 用脚本逐条核对了本文件里**全部 212 条**既有正则：本模块的 **16 个形状**对它们
+    //     **零命中**（既有条目不会先把它吃掉）。
+    //   * trade 侧已有一套 `QualityInspection*`（6.4.2.1 质检单，根路径 `quality-inspections/`），
+    //     路径前缀不同，不会互相吃掉。
+    //   * 11.2.3.3 供应商索赔（V188，根路径 `supplier-claims/` 之类）是**退货侧**的索赔，
+    //     与本模块的**来料不良品**索赔是两条链，前缀不同。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   defective-dispositions                              处置单台账（GET，真分页 + 筛选）+ 新建处置单（POST）
+    //   defective-dispositions/capabilities                 能力声明（上下游可用性 + 四条口径说明）
+    //   defective-dispositions/options                      可处置质检单下拉与词表
+    //   defective-dispositions/summary                      汇总（处置量 / 放行量 / 索赔 / 指令状态）
+    //   defective-dispositions/{uuid}                       处置单详情（GET）+ 改明细（PUT，仅草稿）
+    //   defective-dispositions/{uuid}/decide                决策定稿（POST，生成库存指令与索赔记录）
+    //   defective-dispositions/{uuid}/dispatch-inventory    派发库存状态变更指令（POST）
+    //   defective-dispositions/{uuid}/complete              完成（POST）
+    //   defective-dispositions/{uuid}/cancel                作废（POST，理由必填）
+    //   defective-dispositions/{uuid}/claims/{cid}/submit   提交索赔（POST）
+    //   defective-dispositions/{uuid}/claims/{cid}/agree    供应商认可赔付（POST）
+    //   defective-dispositions/{uuid}/claims/{cid}/reject   供应商拒赔（POST，理由必填）
+    //   defective-dispositions/{uuid}/claims/{cid}/withdraw 撤回索赔（POST，理由必填）
+    //   defective-dispositions/{uuid}/export                导出 CSV（GET）
+    //
+    // ⚠️ 判别顺序：**字面量子路径（capabilities / options / summary）排在 {uuid} 段之前** ——
+    //    否则「capabilities」会被 uuid 支吃掉半截。
+    //
+    // 🔴 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 ——
+    //    界面会以为功能已交付）：
+    //   * defective-dispositions/{uuid}/lines —— 明细随详情一起返回，没有独立的子资源端点。
+    //   * defective-dispositions/{uuid}/instructions —— 库存指令随详情一起返回。
+    //   * defective-dispositions/{uuid}/claims —— 索赔随详情一起返回。
+    //   * defective-dispositions/{uuid}/inventory ——
+    //     🔴 **不存在**「让 trade 直接改库存状态」的端点：warehouse 当前没有可用的授权写端点，
+    //     本模块只记录**指令**。放行它会让界面显示「已改库存」而其实没有。
+    //   * defective-dispositions/{uuid}/claims/{cid} —— 索赔没有按 id 寻址的形状（只随详情返回）。
+    //   * defective-dispositions/{uuid}/claims/{cid}/confirm ——
+    //     🔴 **不存在**「财务确认入账」的端点：12 财务（finance 服务）在本仓不存在，
+    //     已生效冲减金额恒为 0。放行它会让界面显示「已入账」而其实没有。
+    //   * defective-dispositions/bulk —— 没有批量端点。
+    prefix: 'trade/',
+    env: 'TRADE_URL',
+    fallback: 'http://127.0.0.1:8085',
+    pattern:
+      /^defective\-dispositions(?:\/(?:capabilities|options|summary)|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:decide|dispatch\-inventory|complete|cancel|export)|\/claims\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/(?:submit|agree|reject|withdraw))?)?$/,
+  },
+  {
     // 5.3.2.2 价格规则（catalog 服务，卷 05 定价与价目的 L3 锚点 5.3.2）。
     //
     // 蓝图：「定义自动调价规则：触发条件（库存低于阈值/竞品降价/成本上涨/毛利低于下限/库龄超期）
