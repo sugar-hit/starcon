@@ -12,10 +12,10 @@
 | 指标 | 数量 |
 | --- | --- |
 | 模块总数 | 465 |
-| 已交付 | 266 |
+| 已交付 | 267 |
 | 进行中 | 0 |
-| **未开发** | **199** |
-| 完成率 | 57.2% |
+| **未开发** | **198** |
+| 完成率 | 57.4% |
 
 ## 分阶段进度（交付顺序看这里）
 
@@ -25,7 +25,7 @@
 | **D3** | 36 | 0 | 4 | 40 |
 | **D4** | 58 | 0 | 2 | 60 |
 | **D5** | 52 | 0 | 0 | 52 |
-| **D6** | 26 | 0 | 52 | 78 |
+| **D6** | 27 | 0 | 51 | 78 |
 | **D7** | 14 | 0 | 141 | 155 |
 
 ## 分系统进度
@@ -37,7 +37,7 @@
 | 03 | 商品主数据系统 | D1–D2 | 40 | 40 |
 | 04 | 刊登与内容系统 | D5 | 26 | 26 |
 | 05 | 定价与价目系统 | D6 | 15 | 19 |
-| 06 | 采购与供应系统 | D6 | 10 | 26 |
+| 06 | 采购与供应系统 | D6 | 11 | 26 |
 | 07 | 库存核算系统 | D3 | 28 | 31 |
 | 08 | 仓储作业系统 | D3 / D4 | 21 | 22 |
 | 09 | 订单履约系统 | D4 / D5 | 27 | 27 |
@@ -246,7 +246,7 @@
 | 6.4.2.1 | 质检单 | /purchase/quality | D6 | 未开发 | — |
 | 6.4.2.2 | 不良品处理 | /purchase/quality | D6 | 未开发 | — |
 | 6.5.1.1 | 采购对账 | /purchase/reconciliation | D6 | 未开发 | — |
-| 6.5.2.1 | 采购分析 | /purchase/analytics | D6 | 未开发 | — |
+| 6.5.2.1 | 采购分析 | /purchase/analytics | D6 | 已交付 | 迁移 trade `V251__purchase_analytics.sql`（**三张新表、零 ALTER 既有表、零跨库 FK / 视图**，跨车道 DDL 回归面 = 0）：`purchase_analytics_fact` 采购分析事实台账（物化自上游已交付事实；`fact_key` 幂等键 + `ON CONFLICT … DO UPDATE … RETURNING (xmax = 0)` ⇒ **同步可重跑、金额不会翻倍**，并能分清新增与更新）· `purchase_analytics_sync_run` 同步批次留痕（扫了多少 / 新增 / 更新 / 跳过 / 类目未解析 / 汇率未登记，**没有 DELETE** —— 删掉一次同步记录等于让报表上的数失去出处）· `purchase_analytics_sku_dimension` SKU 维度快照（catalog 的类目 + 采购单位箱规，**只读快照不是 SKU 影子表**）；三张表均 `tenant_id NOT NULL` + ENABLE **与 FORCE** ROW LEVEL SECURITY + POLICY isolation（`tenant_id=nullif(current_setting('app.current_tenant',true),'')::uuid`）+ GRANT trade_app / starcon_app，事实台账**收回 DELETE**。**🔴 报表基数只取已交付事实**：`purchase_arrival_tracking` / `purchase_arrival_receipt` / `purchase_arrival_payable_confirmation`（6.3.2.2 到货与逾期，V235）· `purchase_plan` / `purchase_plan_line` / `purchase_plan_campaign`（6.2.1.3 采购计划，V242）· `supplier_claim`（11.2.3.3 供应商索赔，V188，只取**财务已确认生效**的 `applied_offset_amount > 0`）· 8.2.1.1 收货单（warehouse，**授权只读 HTTP 端口**，转发调用方自己的 bearer，租户仍由上游按已认证成员关系解析 ⇒ 两道 RLS，无跨服务 SQL / FK / 视图）；**「采购单原单」6.3.1.x 未交付 ⇒ 不建影子表**（那会造出第二个写入所有者），下钻终点是**到货跟踪单 / 收货单 / 计划行**，能力声明里逐条点名归谁管与影响。**🔴 卷 06 硬约束「必须记录币种、汇率快照、单位换算」落成列与 CHECK**：`currency` + `fx_rate` / `fx_status` / `fx_rate_id` / `fx_rate_effective_date` / `base_amount`（**汇率在事实物化那一刻从 catalog 汇率台账取到并冻结进事实行**，之后 catalog 改汇率历史报表不漂）+ `unit_code` / `unit_factor` / `base_quantity`；`fx_status ∈ SAME_CURRENCY / APPLIED / UNSET / NOT_APPLICABLE`，**UNSET ⇒ `base_amount` 为 NULL（排除在本位币合计之外），绝不按 1:1 折算**，DB 层 CHECK 钉死「APPLIED 必须留汇率证据」「UNSET 必须没有本位币金额」。**🔴 跨币种绝不合并**：金额按币种分列，汇总里多币种时 `purchaseAmountTotal` 为 null 而不是加出来的假数。**口径写在响应里**（每个报表块带 `basis` 原文）：采购金额趋势 = 到货流水口径按发生日归期、**按币种分列**；供应商集中度 = **top-N 占比 + HHI（0–1 标度，响应里写明标度）**，分母是同币种窗口内采购金额合计；采购价格波动 = **环比**（窗口末月 vs 上一月，不是同比），上期无数据时状态 `NO_PREVIOUS_DATA`、变动率给「无数据」而不是 0，维度默认按**供应商**（到货跟踪是单级事实，采购单原单未交付 ⇒ SKU 维度价格波动当前不可得）；到货准时率 = **分母是「承诺到货日落在窗口内且已发生过到货事实的到货跟踪行」**（不是收货行），行内任一次到货晚于承诺日即判 LATE，承诺日当天不算晚（与 6.3.2.2 的 UTC 日历日口径同源），**未到货行单列不进分母**；按类目/店铺维度的采购效率 = 类目维度分母是 6.2.1.3 计划量、分子是 8.2.1.1 实收量（**SKU × 窗口的履约近似**，采购单原单未交付 ⇒ 无单据级关联，口径写明），店铺维度**只有计划侧口径**（收货单不带店铺 ⇒ 分子无法按店铺归属时不给比率，状态 `PLAN_ONLY`）。**🔴 采购成本占销售额比显式标「算不出」**：`available=false` + `ownerModule=13 利润与经营分析` + 影响说明，**分子照算并返回**（按币种分列），分母**不拿采购额凑** —— 本仓没有区间销售额的可用来源（13 未交付；5.3.1.1 是单 SKU 情景测算器，入参是手工假设的售价，拿它当区间销售额就是把假设当实绩；trade 本库 `sales_order` 只有 DRAFT / SUBMITTED 的手工销售单，未确认收入）。端点 14 个：trade `GET /trade/purchase-analytics/capabilities`（逐条点名未交付的归谁管与影响）、`GET /options`（下拉全部来自已物化事实）、`POST /facts/sync`（物化上游事实，幂等）、`GET /facts`（下钻明细：真分页 + 真筛选 + 真排序）、`GET /facts/{id}`、`GET /sync-runs`、`GET /summary`、`GET /trend`、`GET /supplier-concentration`、`GET /price-variance`、`GET /on-time-rate`、`GET /cost-to-sales-ratio`、`GET /efficiency`、`GET /export`（**StreamingResponseBody 分批写出**，峰值内存与结果集大小无关，每批在自己的租户事务里取）；权限沿用 `trade.purchase-analytics.read` / `.update`，租户只来自已认证成员关系（伪造 `X-Tenant-Id` 头改不动 `app.current_tenant`）。页面 `/purchase/analytics`（真实工作区：KPI 卡 + 金额趋势条形图 + 集中度表（top-N + HHI 分级）+ 价格波动表 + 准时率与逾期待到货清单 + 成本占比「算不出」横幅（带归谁管与影响）+ 类目/店铺效率表 + 下钻事实表（分页）+ 导出 CSV + 同步按钮与同步结果留痕，**加载 / 空 / 错误三态齐全**，未交付能力在顶部横幅逐条点名）；api-proxy 白名单**新增一条独立 services[] 元素**（`prefix: 'trade/'` + 自己的 `purchase-analytics` 正则，**不往既有 trade 巨型 alternation 里并分支**），插入锚点固定在 5.2.3.2 物流与头程费用之前；已用脚本逐条核对本文件里**全部 100 条既有正则**：`purchase-analytics/**` **零命中**（并入后仅本条新增元素命中 15 个真实形状，既有分支不会先把它吃掉）。测试 `PurchaseAnalyticsIntegrationTest`（14 例：同步把到货流水物化成**真实金额**（100 × 2.5 = 250，断言金额与时刻写回无 −28800s 漂移）、同步幂等（重跑不新增行）、跨币种不合并（趋势按币种分列）、**汇率登记后按快照折算（250 × 7 = 1750 CNY，等式成立）且汇率取不到时 fx_status=UNSET、本位币金额为空（绝不按 1:1）**、准时率分母是承诺到货行（2 / 准时 1 / 逾期 1 / 未到货 1 不进分母）、集中度给出 top-N 占比与 HHI（1000 : 300 ⇒ 0.769231 / 0.64497）、价格波动是环比且上期无数据给「无数据」而不是 0、成本占比标算不出并点名归属模块、类目维度给出计划量 / 实收量 / 达成率 0.8、店铺维度只给计划侧口径、能力声明逐条点名未交付模块、导出是流式 CSV 且内容与筛选一致、事实台账真分页真筛选、落库的金额与汇率满足数量级约束）+ `PurchaseAnalyticsTenancyIntegrationTest`（5 例：两租户互不可见 / 伪造 tenant header 无效 / **连接池压到 1 条连接**交替读写不串租户 / 跨租户按 id 读 404 / 本模块的表 RLS 是 FORCE 且 trade_app 真的能读）；契约由 codegen 重生成（`contracts/trade.ts` +26 个 `PurchaseAnalytics*` 类型与 `StreamingResponseBody`、`trade.openapi.json` 同步、`index.ts` 桶文件消歧义一行，全部为新增）。 |
 | 6.6.1.1 | 开发立项 | — | D6 | 未开发 | — |
 | 6.6.1.2 | 打样与样品管理 | — | D6 | 未开发 | — |
 | 6.6.2.1 | 试产单 | — | D6 | 未开发 | — |
