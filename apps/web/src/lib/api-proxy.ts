@@ -4963,6 +4963,49 @@ const services: readonly {
       /^purchase\-requests(?:\/(?:capabilities|options)|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/lines(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/(?:adjust|supplier))?|\/(?:submit|convert)|\/approval\/refresh)?)?$/,
   },
   {
+    // 14.1.1.3 批量操作（channel 服务）。纯**新增一条独立的 `services[]` 元素**，
+    // 既有的 `ad-campaigns`（14.1.1.1）、`ad-campaign-details`（14.1.1.2）、
+    // `ad-rules`（14.2.2.2）等**一字未动、也不重排** —— 本文件是多车道共用的累积型白名单，
+    // 往同一条 alternation 里并分支会让多车道同时并入时 git 必然判冲突（结构性，retry 不会自愈）。
+    //
+    // ---- 插入锚点固定在 `listing-templates`（4.2.2.1 刊登模板）那条**之前** ----
+    //   同批其它车道（14.1.2.1 广告组管理 / 14.3.1.2 广告组与词报表 / 14.4.1.1 促销列表）
+    //   都落在 ad-* 与促销相关的区域，与本处相隔 400 行以上，git 能干净求并。
+    //
+    // ---- 首 token「ad-bulk-operations」的零命中核对结论 ----
+    //   本文件既有 100+ 条 services[] 正则里**没有任何一条**含 `ad-bulk-operations` 这个串
+    //   （既有的 ad-* 首 token 是 ad-campaigns / ad-campaign-details / ad-budgets /
+    //   ad-keywords / ad-reports / ad-rules / ad-type-diffs / ad-diagnostics），
+    //   所以首 token 既是独立字面量，也不会被既有分支的前缀吃掉。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   ad-bulk-operations/capabilities       能力声明（未交付段 available=false + ownerModule + 影响）
+    //   ad-bulk-operations/options            筛选项下拉 + **护栏上限**（「本次最多 N 个」要能显示）
+    //   ad-bulk-operations/selection          🔴 按筛选结果全选（GET，服务端解析出 id 集合 + 游标 + 上限）
+    //   ad-bulk-operations/preview            变更预览（POST，**不落库**的预演 + 护栏裁决）
+    //   ad-bulk-operations/tasks              批量任务集合读（GET）/ 受理批量任务（POST，异步）
+    //   ad-bulk-operations/tasks/{uuid}       单个任务 + **逐条执行结果**（GET）
+    //
+    // 判别顺序：字面量子路径（capabilities / options / selection / preview / tasks）排在
+    // {uuid} 段之前 —— alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    // ⚠️ id 段用**完整 UUID 形状** [0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}
+    //（不是 [0-9a-f-]+：后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行）。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸路径 `ad-bulk-operations` —— 本模块没有裸集合读，一切入口都带子路径
+    //   * `ad-bulk-operations/tasks/{uuid}/run` —— 任务由服务端执行器领取，
+    //     手动「跑一下」的端点不存在；界面轮询任务详情即可
+    //   * `ad-bulk-operations/tasks/{uuid}/cancel` —— 任务没有取消语义（未交付）
+    //   * `ad-bulk-operations/preview/{uuid}` —— 预览是**无状态**的预演，不落库、不留 id
+    //   * `ad-bulk-operations/writeback` —— 平台回写队列未交付（平台适配层）
+    // ⚠️ 末尾**刻意不带 `?`**：带了就等于放行裸路径 `ad-bulk-operations`。
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^ad\-bulk\-operations(?:\/(?:capabilities|options|selection|preview|tasks(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?))$/,
+  },
+  {
     // listing-templates 是 4.2.2.1 刊登模板的**独立前缀**（channel 服务，端口 8083）。
     // 本条目是**新增一条 services[] 元素**，不是往既有 channel 长正则的 alternation 里并 ——
     // 那样本车道与并行车道的插入点会被隔开，git 能干净求并。
