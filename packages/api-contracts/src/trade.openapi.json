@@ -38814,6 +38814,471 @@
           }
         }
       }
+    },
+    "/trade/purchase-orders/from-conversions": {
+      "post": {
+        "tags": [
+          "purchase-order-list-controller"
+        ],
+        "operationId": "post_trade_purchase_orders_from_conversions",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PurchaseOrderListConversionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseOrderListConversionResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/purchase-orders/batch/urge": {
+      "post": {
+        "tags": [
+          "purchase-order-list-controller"
+        ],
+        "operationId": "post_trade_purchase_orders_batch_urge",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PurchaseOrderListUrgeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseOrderListBatchResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/purchase-orders/batch/close": {
+      "post": {
+        "tags": [
+          "purchase-order-list-controller"
+        ],
+        "operationId": "post_trade_purchase_orders_batch_close",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PurchaseOrderListCloseRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseOrderListBatchResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/purchase-orders": {
+      "get": {
+        "tags": [
+          "purchase-order-list-controller"
+        ],
+        "operationId": "get_trade_purchase_orders",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "supplierRefId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "targetWarehouseId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "currency",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "skuId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "createdFrom",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "createdTo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "promisedFrom",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "promisedTo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "overdueOnly",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseOrderListPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/purchase-orders/filters": {
+      "get": {
+        "tags": [
+          "purchase-order-list-controller"
+        ],
+        "operationId": "get_trade_purchase_orders_filters",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseOrderListFilterOptions"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/purchase-orders/export": {
+      "get": {
+        "tags": [
+          "purchase-order-list-controller"
+        ],
+        "operationId": "get_trade_purchase_orders_export",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "supplierRefId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "targetWarehouseId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "currency",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "skuId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "createdFrom",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "createdTo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "promisedFrom",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "promisedTo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "overdueOnly",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/purchase-orders/capabilities": {
+      "get": {
+        "tags": [
+          "purchase-order-list-controller"
+        ],
+        "operationId": "get_trade_purchase_orders_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseOrderListCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -95573,6 +96038,536 @@
             "type": "string"
           },
           "note": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchaseOrderListConversionRequest": {
+        "type": "object",
+        "properties": {
+          "conversionIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        }
+      },
+      "PurchaseOrderListConversionResult": {
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "orderNo": {
+            "type": "string",
+            "nullable": true
+          },
+          "lineCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalAmount": {
+            "type": "number",
+            "nullable": true
+          },
+          "currency": {
+            "type": "string",
+            "nullable": true
+          },
+          "functionalCurrency": {
+            "type": "string",
+            "nullable": true
+          },
+          "fxSnapshotStatus": {
+            "type": "string"
+          },
+          "rejected": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseOrderListRejectedConversion"
+            }
+          }
+        }
+      },
+      "PurchaseOrderListRejectedConversion": {
+        "type": "object",
+        "properties": {
+          "conversionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reasonCode": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchaseOrderListUrgeRequest": {
+        "type": "object",
+        "properties": {
+          "orderIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchaseOrderListBatchFailure": {
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderNo": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchaseOrderListBatchResult": {
+        "type": "object",
+        "properties": {
+          "requested": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "succeeded": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "failures": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseOrderListBatchFailure"
+            }
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchaseOrderListCloseRequest": {
+        "type": "object",
+        "properties": {
+          "orderIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchaseOrderListCurrencyAmount": {
+        "type": "object",
+        "properties": {
+          "currency": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "orderCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "PurchaseOrderListFunctionalTotal": {
+        "type": "object",
+        "properties": {
+          "functionalCurrency": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "includedOrderCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "excludedOrderCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "excludedCurrencies": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "note": {
+            "type": "string"
+          }
+        },
+        "nullable": true
+      },
+      "PurchaseOrderListPage": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseOrderListRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/PurchaseOrderListSummary"
+          },
+          "dataScope": {
+            "type": "string"
+          },
+          "dataScopeNote": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchaseOrderListRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderNo": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "supplierRefId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "supplierCode": {
+            "type": "string"
+          },
+          "supplierName": {
+            "type": "string"
+          },
+          "lineCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "skuCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalAmount": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "promisedArrivalDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "receivableQuantity": {
+            "type": "number",
+            "nullable": true
+          },
+          "receivedQuantity": {
+            "type": "number",
+            "nullable": true
+          },
+          "receivedRatio": {
+            "type": "number",
+            "nullable": true
+          },
+          "receivedQuantitySource": {
+            "type": "string"
+          },
+          "arrivalStatus": {
+            "type": "string",
+            "nullable": true
+          },
+          "warehouseReceiptCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "overdue": {
+            "type": "boolean"
+          },
+          "overdueDays": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "targetWarehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "targetWarehouseCode": {
+            "type": "string"
+          },
+          "targetWarehouseName": {
+            "type": "string"
+          },
+          "ownerUserId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "ownerDepartmentId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "urgeCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "lastUrgedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "PurchaseOrderListStatusCount": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "PurchaseOrderListSummary": {
+        "type": "object",
+        "properties": {
+          "totalCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "overdueCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "countsByStatus": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseOrderListStatusCount"
+            }
+          },
+          "amountsByCurrency": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseOrderListCurrencyAmount"
+            }
+          },
+          "functionalTotal": {
+            "$ref": "#/components/schemas/PurchaseOrderListFunctionalTotal"
+          },
+          "totalAmountNote": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchaseOrderListFilterOptions": {
+        "type": "object",
+        "properties": {
+          "statuses": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "currencies": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "suppliers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseOrderListSupplierOption"
+            }
+          },
+          "warehouses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseOrderListWarehouseOption"
+            }
+          },
+          "sorts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseOrderListSortOption"
+            }
+          }
+        }
+      },
+      "PurchaseOrderListSortOption": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchaseOrderListSupplierOption": {
+        "type": "object",
+        "properties": {
+          "supplierRefId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "supplierCode": {
+            "type": "string"
+          },
+          "supplierName": {
+            "type": "string"
+          },
+          "orderCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "PurchaseOrderListWarehouseOption": {
+        "type": "object",
+        "properties": {
+          "warehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "warehouseCode": {
+            "type": "string"
+          },
+          "warehouseName": {
+            "type": "string"
+          },
+          "orderCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "PurchaseOrderListBulkOperation": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "precondition": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchaseOrderListCapabilities": {
+        "type": "object",
+        "properties": {
+          "availableDimensions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "unavailableDimensions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseOrderListDimension"
+            }
+          },
+          "bulkOperations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseOrderListBulkOperation"
+            }
+          },
+          "availableSorts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseOrderListSortOption"
+            }
+          },
+          "filterableNote": {
+            "type": "string"
+          },
+          "exportNote": {
+            "type": "string"
+          },
+          "receivedQuantityNote": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchaseOrderListDimension": {
+        "type": "object",
+        "properties": {
+          "field": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "reason": {
             "type": "string"
           }
         }
