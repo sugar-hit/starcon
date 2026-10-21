@@ -47433,6 +47433,645 @@
           }
         }
       }
+    },
+    "/trade/platform-dispute-appeals/{id}/text": {
+      "put": {
+        "tags": [
+          "platform-dispute-appeal-controller"
+        ],
+        "operationId": "put_trade_platform_dispute_appeals_id_text",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlatformAppealTextUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformAppealDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/platform-dispute-appeals": {
+      "get": {
+        "tags": [
+          "platform-dispute-appeal-controller"
+        ],
+        "operationId": "get_trade_platform_dispute_appeals",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "disputeId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "currency",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "resolutionCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "submissionStatus",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "submittableOnly",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformAppealPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "platform-dispute-appeal-controller"
+        ],
+        "operationId": "post_trade_platform_dispute_appeals",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlatformAppealCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformAppealDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/platform-dispute-appeals/{id}/withdraw": {
+      "post": {
+        "tags": [
+          "platform-dispute-appeal-controller"
+        ],
+        "operationId": "post_trade_platform_dispute_appeals_id_withdraw",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlatformAppealWithdraw"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformAppealDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/platform-dispute-appeals/{id}/submit": {
+      "post": {
+        "tags": [
+          "platform-dispute-appeal-controller"
+        ],
+        "operationId": "post_trade_platform_dispute_appeals_id_submit",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlatformAppealSubmit"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformAppealDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/platform-dispute-appeals/{id}/submission-attempts": {
+      "post": {
+        "tags": [
+          "platform-dispute-appeal-controller"
+        ],
+        "operationId": "post_trade_platform_dispute_appeals_id_submission_attempts",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlatformAppealSubmissionAttempt"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformAppealDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/platform-dispute-appeals/{id}/retry-submission": {
+      "post": {
+        "tags": [
+          "platform-dispute-appeal-controller"
+        ],
+        "operationId": "post_trade_platform_dispute_appeals_id_retry_submission",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlatformAppealRetrySubmission"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformAppealDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/platform-dispute-appeals/{id}/platform-reply": {
+      "post": {
+        "tags": [
+          "platform-dispute-appeal-controller"
+        ],
+        "operationId": "post_trade_platform_dispute_appeals_id_platform_reply",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlatformAppealPlatformReply"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformAppealDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/platform-dispute-appeals/{id}/materials": {
+      "post": {
+        "tags": [
+          "platform-dispute-appeal-controller"
+        ],
+        "operationId": "post_trade_platform_dispute_appeals_id_materials",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlatformAppealMaterialCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformAppealDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/platform-dispute-appeals/{id}": {
+      "get": {
+        "tags": [
+          "platform-dispute-appeal-controller"
+        ],
+        "operationId": "get_trade_platform_dispute_appeals_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformAppealDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/platform-dispute-appeals/capabilities": {
+      "get": {
+        "tags": [
+          "platform-dispute-appeal-controller"
+        ],
+        "operationId": "get_trade_platform_dispute_appeals_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformAppealCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/platform-dispute-appeals/{id}/materials/{materialId}": {
+      "delete": {
+        "tags": [
+          "platform-dispute-appeal-controller"
+        ],
+        "operationId": "delete_trade_platform_dispute_appeals_id_materials_materialId",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "materialId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformAppealDetail"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -114598,6 +115237,798 @@
           },
           "boundary": {
             "type": "string"
+          }
+        }
+      },
+      "PlatformAppealTextUpdate": {
+        "type": "object",
+        "properties": {
+          "appealText": {
+            "type": "string"
+          },
+          "templateCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "expectedVersion": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "PlatformAppealAction": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "allowed": {
+            "type": "boolean"
+          },
+          "method": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "precondition": {
+            "type": "string"
+          },
+          "blockingReason": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "PlatformAppealDetail": {
+        "type": "object",
+        "properties": {
+          "head": {
+            "$ref": "#/components/schemas/PlatformAppealRow"
+          },
+          "appealText": {
+            "type": "string"
+          },
+          "submitNote": {
+            "type": "string"
+          },
+          "platformReplyText": {
+            "type": "string"
+          },
+          "platformReplyReference": {
+            "type": "string"
+          },
+          "platformReplyBy": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "resolutionNote": {
+            "type": "string"
+          },
+          "resolvedBy": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "submittedBy": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "createdBy": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "materials": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlatformAppealMaterialRow"
+            }
+          },
+          "submissions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlatformAppealSubmissionRow"
+            }
+          },
+          "events": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlatformAppealEventRow"
+            }
+          },
+          "gate": {
+            "$ref": "#/components/schemas/PlatformAppealGateView"
+          },
+          "actions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlatformAppealAction"
+            }
+          }
+        }
+      },
+      "PlatformAppealEventRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "eventType": {
+            "type": "string"
+          },
+          "eventTypeLabel": {
+            "type": "string"
+          },
+          "fromStatus": {
+            "type": "string",
+            "nullable": true
+          },
+          "toStatus": {
+            "type": "string",
+            "nullable": true
+          },
+          "reasonNote": {
+            "type": "string"
+          },
+          "occurredBy": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "PlatformAppealGateView": {
+        "type": "object",
+        "properties": {
+          "windowState": {
+            "type": "string"
+          },
+          "windowStateLabel": {
+            "type": "string"
+          },
+          "submittable": {
+            "type": "boolean"
+          },
+          "disputeStatus": {
+            "type": "string"
+          },
+          "evidenceDeadline": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "evidenceSubmittedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "checklistItemCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "missingRequiredCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "coveredItemCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "uncoveredRequiredCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "PlatformAppealMaterialRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "materialSeq": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "evidenceType": {
+            "type": "string"
+          },
+          "evidenceTypeLabel": {
+            "type": "string"
+          },
+          "evidenceItemId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "sourceModule": {
+            "type": "string"
+          },
+          "sourceModuleLabel": {
+            "type": "string"
+          },
+          "sourceRefId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sourceRefNo": {
+            "type": "string"
+          },
+          "sourceLabel": {
+            "type": "string"
+          },
+          "sourceLocator": {
+            "type": "string"
+          },
+          "sourceOccurredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "sourceKind": {
+            "type": "string"
+          },
+          "materialNote": {
+            "type": "string"
+          },
+          "providedChecklistItem": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "PlatformAppealRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "appealNo": {
+            "type": "string"
+          },
+          "disputeId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "disputeNo": {
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "platformDisputeNo": {
+            "type": "string"
+          },
+          "appealStatus": {
+            "type": "string"
+          },
+          "appealStatusLabel": {
+            "type": "string"
+          },
+          "templateCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "claimedCurrency": {
+            "type": "string"
+          },
+          "claimedAmount": {
+            "type": "number"
+          },
+          "awardedAmount": {
+            "type": "number",
+            "nullable": true
+          },
+          "awardedCurrency": {
+            "type": "string",
+            "nullable": true
+          },
+          "submittedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "platformReplyAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "resolutionCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "resolutionCodeLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "resolvedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "materialCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "submissionCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "windowState": {
+            "type": "string"
+          },
+          "windowStateLabel": {
+            "type": "string"
+          },
+          "submittable": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "PlatformAppealSubmissionRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "targetSystem": {
+            "type": "string"
+          },
+          "targetKey": {
+            "type": "string"
+          },
+          "idempotencyKey": {
+            "type": "string"
+          },
+          "submissionStatus": {
+            "type": "string"
+          },
+          "submissionStatusLabel": {
+            "type": "string"
+          },
+          "attemptCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "lastAttemptAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "nextRetryAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "lastError": {
+            "type": "string"
+          },
+          "sentAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "acknowledgedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "PlatformAppealCreate": {
+        "type": "object",
+        "properties": {
+          "disputeId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "appealText": {
+            "type": "string"
+          },
+          "templateCode": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "PlatformAppealWithdraw": {
+        "type": "object",
+        "properties": {
+          "withdrawReason": {
+            "type": "string"
+          },
+          "expectedVersion": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "PlatformAppealSubmit": {
+        "type": "object",
+        "properties": {
+          "submitNote": {
+            "type": "string",
+            "nullable": true
+          },
+          "expectedVersion": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "PlatformAppealSubmissionAttempt": {
+        "type": "object",
+        "properties": {
+          "outcome": {
+            "type": "string"
+          },
+          "errorMessage": {
+            "type": "string",
+            "nullable": true
+          },
+          "nextRetryAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "PlatformAppealRetrySubmission": {
+        "type": "object",
+        "properties": {
+          "lastError": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "PlatformAppealPlatformReply": {
+        "type": "object",
+        "properties": {
+          "platformReplyText": {
+            "type": "string"
+          },
+          "platformReplyReference": {
+            "type": "string",
+            "nullable": true
+          },
+          "result": {
+            "type": "string",
+            "nullable": true
+          },
+          "awardedAmount": {
+            "type": "number",
+            "nullable": true
+          },
+          "awardedCurrency": {
+            "type": "string",
+            "nullable": true
+          },
+          "resolutionNote": {
+            "type": "string",
+            "nullable": true
+          },
+          "expectedVersion": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "PlatformAppealMaterialCreate": {
+        "type": "object",
+        "properties": {
+          "sourceModule": {
+            "type": "string"
+          },
+          "sourceRefId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "evidenceItemId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "materialNote": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "PlatformAppealCurrencyTotal": {
+        "type": "object",
+        "properties": {
+          "currency": {
+            "type": "string"
+          },
+          "appealCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "claimedAmount": {
+            "type": "number"
+          },
+          "awardedAmount": {
+            "type": "number"
+          }
+        }
+      },
+      "PlatformAppealPage": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlatformAppealRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/PlatformAppealSummary"
+          },
+          "generatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "paginationNote": {
+            "type": "string"
+          },
+          "deadlineNote": {
+            "type": "string"
+          },
+          "sourceNote": {
+            "type": "string"
+          },
+          "sortNote": {
+            "type": "string"
+          }
+        }
+      },
+      "PlatformAppealSummary": {
+        "type": "object",
+        "properties": {
+          "totalAppeals": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "draftCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "submittedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "repliedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "wonCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "lostCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "partialCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "withdrawnCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "submittableCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "pendingSubmissionCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "currencyBreakdown": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlatformAppealCurrencyTotal"
+            }
+          }
+        }
+      },
+      "PlatformAppealBoundary": {
+        "type": "object",
+        "properties": {
+          "boundary": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "PlatformAppealCapabilities": {
+        "type": "object",
+        "properties": {
+          "facts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlatformAppealSectionCapability"
+            }
+          },
+          "relatedModules": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlatformAppealRelatedModule"
+            }
+          },
+          "actions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlatformAppealCapabilityAction"
+            }
+          },
+          "boundaries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlatformAppealBoundary"
+            }
+          },
+          "stateMachine": {
+            "type": "string"
+          },
+          "deadlineRule": {
+            "type": "string"
+          },
+          "sourceRule": {
+            "type": "string"
+          },
+          "platformSubmissionRule": {
+            "type": "string"
+          }
+        }
+      },
+      "PlatformAppealCapabilityAction": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "allowed": {
+            "type": "boolean"
+          },
+          "method": {
+            "type": "string",
+            "nullable": true
+          },
+          "path": {
+            "type": "string",
+            "nullable": true
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "precondition": {
+            "type": "string",
+            "nullable": true
+          },
+          "blockingReason": {
+            "type": "string",
+            "nullable": true
+          },
+          "ownerModule": {
+            "type": "string",
+            "nullable": true
+          },
+          "unavailableReason": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "PlatformAppealRelatedModule": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "delivered": {
+            "type": "boolean"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "href": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "PlatformAppealSectionCapability": {
+        "type": "object",
+        "properties": {
+          "section": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "ownerModule": {
+            "type": "string",
+            "nullable": true
+          },
+          "reason": {
+            "type": "string"
+          },
+          "landsIn": {
+            "type": "string",
+            "nullable": true
           }
         }
       }

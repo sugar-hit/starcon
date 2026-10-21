@@ -6069,6 +6069,60 @@ const services: readonly {
       /^pending-inspections(?:\/(?:capabilities|stock|options|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:request-inspection|record-result|dispose|cancel))?))?$/,
   },
   {
+    // 11.4.1.2 证据与申诉（trade 服务，卷 11「售后与退货」L3 11.4「平台纠纷与客诉」的第二格）。
+    //
+    // 蓝图：「组织举证材料（物流签收、沟通记录、商品照片、检测报告）打包提交申诉，
+    // 记录平台回复与结果。」输出：「申诉提交记录 + 平台回复 + 结果（胜诉/败诉/部分）。」
+    // 加粗句：「**举证材料必须来自系统记录**（轨迹、沟通日志），临时拼凑的证据在申诉中往往不被采信。」
+    //
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 trade 那条巨型 alternation 里并分支 ——
+    //   那一支是单行超长正则，多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点选在 **11.4.1.1 那一条之前**（而不是 services[] 的最末尾）：
+    //   最末尾是同批其它车道也会盯着的默认位置，四条车道都往那里插就是四路冲突。
+    //   本锚点绑在 11.4.1.x 这一族自己的注释上，与 6.3.x / 6.6.x / 7.4.x 那些车道的锚点互不重叠。
+    //
+    // ---- 首 token「platform-dispute-appeals」的零命中核对结论 ----
+    //   与上游 11.4.1.1 的首 token「platform-disputes」**不是同一个串**：
+    //   「platform-dispute-appeals」里没有「platform-disputes」这个字面量
+    //   （`platform-dispute` 后面跟的是 `-appeals` 而不是 `s`）⇒ 上游那条正则吃不掉它。
+    //   其余既有首 token（purchase-orders / quality-inspections / knowledge / supplier-claims /
+    //   refund-applications / pending-inspections / platform-disputes …）也都不含这个串
+    //   ⇒ 逐条零命中（核对脚本见本车道交付报告）。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   platform-dispute-appeals                                 集合读（GET，真分页 / 真筛选）+ 建单（POST）
+    //   platform-dispute-appeals/capabilities                    能力声明（含上下游未交付的逐条说明）
+    //   platform-dispute-appeals/{uuid}                          单据详情（GET：头 + 材料 + 提交记录 + 留痕 + 判据）
+    //   platform-dispute-appeals/{uuid}/text                     改申诉文本（PUT，草稿态）
+    //   platform-dispute-appeals/{uuid}/materials                挂证据材料（POST）
+    //   platform-dispute-appeals/{uuid}/materials/{uuid}         移除证据材料（DELETE）
+    //   platform-dispute-appeals/{uuid}/submit                   提交申诉（POST）
+    //   platform-dispute-appeals/{uuid}/retry-submission         重试提交到平台（POST）
+    //   platform-dispute-appeals/{uuid}/submission-attempts      记录一次提交尝试的结果（POST）
+    //   platform-dispute-appeals/{uuid}/platform-reply           收回平台回复与结果（POST）
+    //   platform-dispute-appeals/{uuid}/withdraw                 我方撤诉（POST）
+    //
+    // 判别顺序：**字面量子路径（capabilities）排在 {uuid} 段之前** ——
+    //   alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    // id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`（不是
+    // `[0-9a-f-]+`）：后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   platform-dispute-appeals/{uuid}/upload       —— **不提供「上传任意文件当举证材料」**：
+    //     举证材料必须引用系统里已有的一条事实记录（物流轨迹 / 沟通记录 / 附件 / 质检单）。
+    //   platform-dispute-appeals/{uuid}/delete       —— 终态不可逆：申诉凭据不能删（后端 405 + DB 守卫）。
+    //   platform-dispute-appeals/{uuid}/auto-lose    —— 没有「自动判负」这回事：
+    //     超期自动判负是**上游 11.4.1.1** 的系统行为，本模块只呈现判据结果。
+    //   platform-dispute-appeals/summary            —— 汇总在列表响应里，没有单独的汇总端点。
+    //   任何 DELETE / PUT 形状 —— 白名单是**按路径登记、不区分方法**的，
+    //     所以「不能删」的防线在服务端与 DB，不在这里。
+    prefix: 'trade/',
+    env: 'TRADE_URL',
+    fallback: 'http://127.0.0.1:8085',
+    pattern:
+      /^platform-dispute-appeals(?:\/(?:capabilities|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:text|materials(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|submit|retry-submission|submission-attempts|platform-reply|withdraw))?))?$/,
+  },
+  {
     // 11.4.1.1 平台纠纷列表（trade 服务，卷 11「售后与退货」L3 11.4「平台纠纷与客诉」的第一格）。
     //
     // 蓝图：「管理平台纠纷/争议（Amazon A-to-Z、eBay 争议、速卖通纠纷）：类型、金额、平台时限、
