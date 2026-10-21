@@ -2,10 +2,40 @@
 
 - 创建: 2026-10-21
 - Owner: 开发流水线（`integration/module-dev` 侧）—— 同步任务只读该分支，改不了
-- 优先级: **P0** —— 不修的话，「集成分支经 PR 合入 main」这个每半小时一轮的任务**每一轮都会卡在同一道墙上**
+- 优先级: **P0** —— 不修的话，`main` 自身一直红在 Security Scan 上
 - 关联: `tools/module-progress/MAIN_MERGE_CRON_PROMPT.md` ·
   `docs/sessions/2026-10/2026-10-21-0900-main-sync-vite-baseline-block.md` ·
+  `docs/sessions/2026-10/2026-10-21-0930-main-sync-baseline-refresh-merge.md` ·
   `docs/backlog/2026-10/2026-10-21-main-squash-merge-divergence.md`
+
+---
+
+## 进展更新（2026-10-21 09:30）：合并卡点已解除，本条不再是合并的前置条件
+
+上一轮把解除条件记成「流水线必须把 vite 升到 `>= 7.3.7`」，据此判断
+「每一轮都会卡在同一道墙上」。**这个判断不完整**：卡点来自**基线过期**，
+而过期的基线**可以按需手动刷新**，不必等流水线先改依赖。
+
+做法（同步任务自己做，只读 `main` 的提交，不改任何代码）：
+
+```bash
+# 只重跑基线里过期的那一个作业，拿到它今天的真实结论
+gh run rerun 39423999973 --job 118631807667        # Security Scan
+# 等它跑完后照常让闸工具自己判
+node tools/module-progress/ci-gate.mjs --pr 12
+```
+
+重跑后 `main` 自己的 `Security Scan` 同样失败，输出与 PR 侧逐字相同
+（`6 vulnerabilities found` / `Severity: 4 moderate | 2 high`），
+闸随即判「新增失败作业：无 / 新增失败用例：无」⇒ PR #12 已合入 `main`。
+
+⇒ **第 1 条（升 vite）仍然是欠着的安全债**（`main` 今天真的红），
+但它不再阻塞「集成分支经 PR 合入 main」。两条要分开看：
+**合并卡点已解，安全债未清。**
+
+⚠️ 顺带修正本文件末尾那句结论：「`main` 的基线不会自己刷新」—— 成立，
+但**可以手动刷新**（上面那条 `gh run rerun`）。没有 `schedule` 触发器只说明基线不会**自动**更新，
+不说明它无法被更新。
 
 ---
 
@@ -110,7 +140,11 @@ Build, Typecheck, Catalog Browser & Contract Tests, Lint, Java 21 & PostgreSQL I
 `main` 的基线**不会自己刷新**：CI 只在 `push` 到 `main` 和 `pull_request` 指向 `main` 时触发，
 `.github/workflows/` 下**没有任何 `schedule` 触发器**。
 
-⇒ 在上面第 1 条落地之前，**`main` 的基线永远停留在 2026-10-20 那次 run**，
-每半小时一轮的同步任务会**一轮接一轮地撞同一道墙**。
+⇒ 基线不会**自动**更新，但**可以手动刷新**（见开头「进展更新」里的 `gh run rerun <run-id> --job <job-id>`），
+所以「基线停在 2026-10-20 那次 run」并不等于「每轮必然撞墙」——
+只要在**外部输入漂移**（公告发布、依赖变更、工具链升级）之后刷新一次那一格即可。
+
 这是「周期性任务配了基线相对判据」时必须同时确认的第三件事：
-**基线会不会自己更新**。
+**基线会不会自己更新**。第三件事的完整形态其实是两问：
+① 会不会**自动**更新（没有 `schedule` 就不会）？
+② 能不能**手动**更新（能 —— 否则这条判据在外部输入漂移后就永久失效了）。
