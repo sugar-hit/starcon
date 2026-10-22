@@ -5738,6 +5738,65 @@ const services: readonly {
       /^review-requests(?:\/(?:capabilities|frequency-policy|shops|candidates|recovery-stats|batch)|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:send-records|recoveries))?)?$/,
   },
   {
+    // 15.2.1.1 评价列表（crm 服务，卷 15 的 L3 锚点 15.2.1 下的评价子域）。
+    //
+    // 蓝图：「汇总各店铺评价：星级、内容、变体、图片、平台时间、关联订单、是否已回复、
+    // 店铺评分汇总，支持筛选（星级、含图/含视频、未回复、时间范围）与导出。
+    // 输出：评价列表 + 评分统计。关系：上游 = 2 同步；下游 = 15.2.1.2 回复、15.2.2.1 索评。
+    // **评分趋势比单条评价更重要**：连续下滑要先查是产品问题还是履约问题。」
+    //
+    // 本条目是**新增一条 services[] 元素**，不是往既有 crm 分支的 alternation 里并 ——
+    // 既有 crm 那几条（`^buyer-emails...$` / `^knowledge\/...$` / `^review-requests...$` /
+    // `^review-rules...$`）都是超长单行正则，并进去会让本车道与并行车道的插入点被隔开，
+    // git 判冲突。
+    // 插入锚点固定在 **crm/review-requests 那条之后、crm/review-rules 那条之前**，
+    // 与同批另外三条车道的锚点（crm/knowledge 之后 · crm/review-rules 之后 · services[] 末尾）
+    // 互不重叠；既有 crm 条目**一字未动、也不重排**。
+    //
+    // ---- 首 token「reviews」的零命中核对结论 ----
+    // 本文件既有全部 144 条 services[] 元素的正则**没有一条**命中本模块的 7 个形状
+    // （reviews / reviews/capabilities / reviews/shops / reviews/stats / reviews/export /
+    //   reviews/sync / reviews/{uuid}）—— 已用脚本逐条核对，**命中数为 0**。
+    // 原因：既有 crm 分支的首 token 分别是 buyer-emails / knowledge / review-requests /
+    //   review-rules，与 reviews **首 token 即不同**；而本文件的 resolve() 是
+    //   「按顺序逐条匹配、首个命中即返回」，同前缀的第二条不会误吃前一条的路径。
+    //   特别地，^reviews... **不会**匹配 review-requests/... 或 review-rules/...：
+    //   正则锚定在开头，review- 之后必须紧跟 s。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   reviews               评价列表集合读（GET，真分页 + 真筛选：星级 / 含图 / 含视频 /
+    //                         未回复 / 时间范围 / 店铺 / 商品 / 变体 / 订单号 / 关键字）
+    //   reviews/capabilities  能力声明（逐维 available + ownerModule + impact）
+    //   reviews/shops         店铺目录（来自上游 channel 的真实清单）
+    //   reviews/stats         评分统计（趋势 + 星级分布 + 店铺/商品/变体三个维度的下滑定位）
+    //   reviews/export        导出 CSV（GET + query；text/csv 由代理原样透传）
+    //   reviews/sync          平台评价同步（POST，**当前恒 409**：适配器未交付，不写任何数据）
+    //   reviews/{uuid}        单条评价详情（GET：评价本体 + 关联订单上下文）
+    //
+    // 判别顺序：**字面量子路径（capabilities / shops / stats / export / sync）排在 {uuid} 段之前**
+    //   —— alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    // id 段用**完整 UUID 形状** [0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}（不是 [0-9a-f-]+）：
+    //   后者会把 capabilities 这种非 UUID 形状也当成 id 放行。
+    //
+    // ⚠️ **裸路径 reviews 是放行的**（与「刻意不放行」相反）：本模块的列表入口就是集合根路径
+    //   （GET /crm/reviews = 评价列表），后端确实有这个映射 —— 不放行它，页面会 404。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * reviews/{uuid}/replies —— 评价回复属 **15.2.1.2**（未交付），
+    //     本模块只提供「是否已回复」这一个只读属性；放行回复形状会让界面以为能回复买家。
+    //   * reviews/{uuid}/appeals · /tags —— 差评处理属 **15.2.1.3**（未交付）。
+    //   * reviews/{uuid}/delete —— 评价是评分统计的事实，不可删。
+    //   * reviews/capabilities/{uuid} · reviews/shops/{uuid} · reviews/stats/{uuid} ·
+    //     reviews/export/{uuid} · reviews/sync/{uuid} —— 这五个是能力声明、目录与聚合查询，
+    //     **不按 id 寻址**，所以那段后缀是**必需**的（写成可选会让裸的 capabilities/{uuid} 一起通过）。
+    //   * reviews/not-a-uuid —— 非 UUID 段必须 404，不能被宽松分支吃掉。
+    prefix: 'crm/',
+    env: 'CRM_URL',
+    fallback: 'http://127.0.0.1:8086',
+    pattern:
+      /^reviews(?:\/(?:capabilities|shops|stats|export|sync)|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?$/,
+  },
+  {
     // 15.2.2.2 索评规则（crm 服务，卷 15 的 L3 锚点 15.2.2 的第二个子模块）。
     //
     // 蓝图：「配置索评策略：按店铺、按物流方式（自发货/平台仓）设置不同延后时间，避开节假日，

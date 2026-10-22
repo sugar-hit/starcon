@@ -6,9 +6,7 @@
 >
 > 状态词表只有三个值，统计逻辑依赖它，不要新增：
 > `已交付`（迁移 + API + 页面 + 测试齐全，无 TODO 残留）· `进行中`（部分交付、未收口，证据列写清缺哪一块）· `未开发`（未开工）。
-
 ## 总览
-
 | 指标 | 数量 |
 | --- | --- |
 | 模块总数 | 465 |
@@ -16,9 +14,7 @@
 | 进行中 | 0 |
 | **未开发** | **150** |
 | 完成率 | 67.7% |
-
 ## 分阶段进度（交付顺序看这里）
-
 | 阶段 | 已交付 | 进行中 | 未开发 | 合计 |
 | --- | --- | --- | --- | --- |
 | **D1–D2** | 80 | 0 | 0 | 80 |
@@ -27,11 +23,8 @@
 | **D5** | 52 | 0 | 0 | 52 |
 | **D6** | 43 | 0 | 35 | 78 |
 | **D7** | 41 | 0 | 114 | 155 |
-
 ## 分系统进度
-
 | 卷 | 系统 | 阶段 | 已交付 | 模块数 |
-| --- | --- | --- | --- | --- |
 | 01 | 工作台与门户系统 | D7 | 0 | 23 |
 | 02 | 渠道与店铺系统 | D1–D2 / D5 | 25 | 25 |
 | 03 | 商品主数据系统 | D1–D2 | 40 | 40 |
@@ -50,30 +43,22 @@
 | 16 | 合规与风控系统 | D7 | 4 | 23 |
 | 17 | 组织权限与系统设置系统 | D1–D2 / D4 / D6 / D7 | 25 | 29 |
 | 18 | 集成开放与智能自动化系统 | D7 | 0 | 24 |
-
 ## 判定「已交付」的标准
-
 一个模块标 `已交付` 当且仅当下面四件都成立，缺一件就是 `未开发` 或 `进行中`：
-
 1. **迁移** — `backend/services/<svc>/src/main/resources/db/migration/V*.sql` 里有真实表结构，
    带 `tenant_id NOT NULL` + RLS 策略，不是注释里的设计。
 2. **API** — 服务里有对应端点，走 jOOQ 显式 SQL，不是返回硬编码常量的桩。
 3. **页面** — `apps/web/src/app/**/page.tsx` 是真实工作区，不是 `DomainPlaceholder`。
 4. **测试** — `cd backend && ./mvnw verify` 绿；涉及租户隔离的必须实跑
    「两租户互不可见 / 伪造 tenant header 无效 / 连接池归还后不串租户」三条断言。
-
 **判定为 `未开发` 的典型形态**（见到就说明没做完，不许算进已交付）：
-
 - `DomainPlaceholder` 占位页
 - 硬编码数组 / 常量当数据源
 - 服务里 `TODO` + `throw new UnsupportedOperationException()`
 - 迁移文件存在但没有 RLS 策略
 - 前端有页面但后端没有对应端点（或反之）
-
 ## 跨期说明
-
 「阶段」列按**依赖就绪顺序**逐模块标注，不是卷归属。跨期卷的拆分如下：
-
 - **01 工作台与门户 → 全部 D7**：它是纯投影聚合层（蓝图原文「不写业务数据，只读投影」），
   聚合 09 订单 / 07 库存 / 02 渠道 / 12 财务 / 15 客户 / 17 审批的投影。
   这些数据源没落地之前建「我的待办」只能造假数据，所以整卷排到最后收口。
@@ -87,9 +72,7 @@
 - **11 售后与退货**：D4 交付售后单、退货授权与实收、退款换货；平台纠纷 / 客诉工单 / 分析排 D7。
 - **17 组织权限**：D1–D2 交付租户、法人、部门、成员、角色、页面权限、数据范围、审计；
   17.4 审批流随单据排 D4，17.6.1.1 账簿与本位币随财务排 D6，17.7 套餐与平台参数排 D7。
-
 ## 模块明细
-
 | 模块 ID | 模块名 | L3 锚点路由 | 阶段 | 状态 | 证据 |
 | --- | --- | --- | --- | --- | --- |
 | 1.1.1.1 | 我的待办 | /dashboard/todo | D7 | 未开发 | — |
@@ -462,7 +445,7 @@
 | 15.1.1.3 | 消息分类 | — | D7 | 未开发 | — |
 | 15.1.2.1 | 邮件收发 | — | D7 | 已交付 | 迁移 crm `V292__crm_buyer_email.sql`（**归属 crm**：卷 15 客户与客服，本批预分配版本号 V292），四张新表 `crm_buyer_email`（邮件本体，**收 / 发两个方向都在这里**）/ `crm_buyer_email_attachment`（附件**元数据**，不含文件字节）/ `crm_buyer_email_template`（本模块自己的邮件模板）/ `crm_buyer_email_send_record`（发送记录 = 蓝图输出句的第三项），全部 `tenant_id NOT NULL` + ENABLE/FORCE RLS isolation + GRANT crm_app，**纯新建、零 ALTER 任何既有表**；**序列单独授权**（`GRANT USAGE, SELECT ON SEQUENCE crm_buyer_email_no_seq TO crm_app` —— `GRANT ... ON ALL TABLES` 不覆盖序列，漏授权会变成建第一条邮件即报权限不足）。**🔴 外键纪律**：本迁移**不给任何既有表建外键**，本表之间也**一律用触发器做引用校验**（6 个守卫：`guard_crm_buyer_email_identity` / `guard_crm_buyer_email_reply_target` / `guard_crm_buyer_email_attachment_target` / `guard_crm_buyer_email_send_record_target` / `guard_crm_buyer_email_send_template_target` / `guard_crm_buyer_email_template_delete`）—— 与同批 V219 / V220 / V228 同一手法（外键会打断既有测试的 TRUNCATE）。🔴 **加粗句「部分平台要求邮件与站内信在同一会话处理，分开展示会导致重复回复买家」的物理落点 = 三层**：① **会话键 `conversation_key`**（形如 `<shopId> |
 | 15.1.2.2 | 邮件规则 | — | D7 | 未开发 | — |
-| 15.2.1.1 | 评价列表 | — | D7 | 未开发 | — |
+| 15.2.1.1 | 评价列表 | — | D7 | 已交付 | 迁移 crm `V294__crm_product_review.sql`（**归属 crm**：卷 15 客户与客服，本批预分配版本号 V294），**一张**新表 `crm_product_review`（评价本体：星级 / 内容 / 变体 / 图片 / 平台时刻 / 关联订单 / 是否已回复 / 商品维度），全部 `tenant_id NOT NULL` + ENABLE/FORCE RLS isolation + GRANT crm_app，**纯新建、零 ALTER 任何既有表**；**序列单独授权**（`GRANT USAGE, SELECT ON SEQUENCE crm_product_review_no_seq TO crm_app` —— `GRANT ... ON ALL TABLES` 不覆盖序列，漏授权会变成「第一条评价就报权限不足」）；**禁浮点**（星级 smallint、均分走 SQL 的 numeric 聚合 + BigDecimal）、**时区不静默偏移**（timestamptz 一律 `?::timestamptz` + OffsetDateTime 绑定，测试断言写回的值等于同一个绝对时刻）；**🔴 加粗句「评分趋势比单条评价更重要」的物理落点 = 不建「店铺评分汇总表」**：均分 / 星级分布 / 时间趋势 / 三维度下滑定位全部**由明细现算**（单一事实源；落库的汇总会变成第二份事实，明细改了汇总没改时「平均分」与「趋势」互相矛盾，而没人说得清哪一份是真的）；**趋势的时间轴是 `platform_reviewed_at`（平台评价时刻）而不是 `registered_at`（登记时刻）** —— 用登记时刻分桶会把「今天集中补录了一批上个月的老评价」显示成「今天的评分突然崩了」，那是**假下滑**，会把客服引到错的方向；**下滑能定位到维度**：作用域三等分（近窗 / 中窗 / 远窗）分别算均分，`byShop` / `byProduct` / `byVariant` 三组汇总 + `declining` 清单（`delta` 为负即下滑，`continuous=true` 表示三窗单调 = 连续下滑）；**跨服务纪律**：店铺目录（2.3.1.1）在 **channel** ⇒ 经 `SignoffDeliveredOrderPort` 走**授权 HTTP API** 读（上游读不到一律 503，绝不返回空集合冒充「没有店铺」）；关联订单上下文**订单事实在 trade（9.1.2.2）、履约签收事实在 channel（10.3.2.2）** ⇒ 新增 `ReviewOrderContextPort` 授权 HTTP 只读端口，**一条 SQL 都不碰对方库、不建跨库 FK / 跨库视图**，本库只存订单号这个**逻辑引用**；**🔴 订单上下文读不到时明确说「不可用 + 原因」（available=false + reason），绝不显示空白** —— 客服看到空白会以为这条评价没有关联订单，而真相可能是上游挂了；两个上游**分别读**，一个挂掉不抹掉另一个的结论；订单号**精确匹配**（上游 keyword 是 ilike '%关键字%'，SO-1 会把 SO-10 一并捞回来，挂错单的履约事实比查不到更糟）；**🔴 平台评价同步适配器未交付**（channel/vendor 只有 19 个 OAuth 适配器，没有买家评价适配器）⇒ 新增 `PlatformReviewPort` + `UnavailablePlatformReviewPort`（逐平台答「未接入」，**不返回任何评价、不编造平台接口、不抛异常**），同步端点明确 **409 且一行都不写**（测试断言「行数不变」）；**人工登记是唯一能进评价的主路**（真落库、真分页、真筛选、真导出）；下游 **15.2.1.2 评价回复 / 15.2.1.3 差评处理未交付** ⇒ capabilities 里 `review_reply` / `negative_review_handling` 维度 available=false + ownerModule，本模块**不记录回复正文、不编造平台回执、不编造下游 id**（「是否已回复」只反映平台侧是否已有公开回复）；15.2.2.1 索评 / 15.2.2.2 索评规则**已交付** ⇒ **只读**引用其既有事实，**不改**它们的表结构、规则表与端点；端点：`GET /crm/reviews`（列表，真分页 + 真筛选：星级 / 含图 / 含视频 / 未回复 / 时间范围 / 店铺 / 商品 / 变体 / 订单号 / 关键字）、`GET /crm/reviews/stats`（评分统计）、`GET /crm/reviews/export`（CSV，text/csv 原样透传 + `X-Export-Row-Count` / `X-Export-Truncated` 头，超上限**如实截断**而不是悄悄少导）、`GET /crm/reviews/{id}`（含订单上下文）、`GET /crm/reviews/capabilities`、`GET /crm/reviews/shops`、`POST /crm/reviews`（登记）、`POST /crm/reviews/sync`（恒 409）；权限码 `crm.product_review.read` / `crm.product_review.update`（与同服务 `crm.knowledge.*` / `crm.review.*` / `crm.rule.*` / `crm.email.*` 同一族命名；**刻意不叫 `crm.review.*`** —— 那个前缀归 15.2.2.1 索评，两件事共用会让权限混成一团），**identity 服务零改动**；前端：页面 `/crm/reviews` + 工作区（能力边界 / 评分统计 + 下滑定位 / 筛选与导出 / 列表 / 详情含订单上下文 / 登记评价），加载态、空态（**区分「筛选无结果」与「还没有评价」**）、错误态齐全；**评分与数量只原样展示，页面不做任何前端算术**；api-proxy：**新增一条独立 services[] 元素**（`prefix: 'crm/'`，首 token `reviews`），锚点 = `crm/review-requests` 那条之后，既有条目**一字未动、也不重排**；脚本核对既有全部 144 条正则对本模块 7 个形状**命中数为 0**（首 token `reviews` 与 `review-requests` / `review-rules` 不同，`^reviews` 不会匹配 `review-requests/...`）；测试：`ProductReviewIntegrationTest`（21 例：筛选五面 / 统计与下滑定位 / 假下滑 / 同步 409 不写数据 / 订单上下文三态 / 精确匹配 / 导出 / 时区）+ `ProductReviewTenancyIntegrationTest`（4 例：租户隔离三条断言跑在真实 PostgreSQL 16 + FORCE RLS 上） |
 | 15.2.1.2 | 评价回复 | — | D7 | 未开发 | — |
 | 15.2.1.3 | 差评处理 | — | D7 | 未开发 | — |
 | 15.2.2.1 | Request a Review | — | D7 | 已交付 | 迁移 crm `V220__crm_review_request.sql`（**归属 crm**：卷 15 客户与客服，本批预分配版本号 V220），四张新表 `crm_review_frequency_policy`（租户级频次硬上限）/ `crm_review_request`（索评任务 = 索评请求，**REJECTED 也是它的一种状态**：被频次规则挡住的请求照样落库留痕）/ `crm_review_send_record`（发送记录）/ `crm_review_recovery`（评价回收桶），全部 `tenant_id NOT NULL` + ENABLE/FORCE RLS + GRANT crm_app，**纯新建、零 ALTER 任何既有表**；**序列单独授权**（`GRANT USAGE, SELECT ON SEQUENCE crm_review_request_no_seq TO crm_app` —— `GRANT ... ON ALL TABLES` 不覆盖序列，漏授权会变成建单即报权限不足）。**🔴 外键纪律**：本迁移**不给任何既有表建外键**，本表之间也**一律用触发器做引用校验**（`guard_crm_review_send_record_target` / `guard_crm_review_recovery_target`，与同批 V219 同一手法）—— batch-37 有车道给既有表建 FK 打破了同服务既有测试的 TRUNCATE，本车道刻意避开，**既有测试一行未改**。**🔴 加粗句「索评频次必须受限」的物理落点 = 三层**：① 租户级硬上限表，每个值在 DB 层另有天花板（每买家上限 ≤10 次/窗口、每订单上限 ≤5 次、窗口 ≤365 天、冷却与时点下限 ≤8760 小时）——「把上限调到 999」这条路本身被 CHECK 堵死；② 触发器 `guard_crm_review_request_frequency`（BEFORE INSERT OR UPDATE）在**数据库层**判定每订单上限 / 每买家上限 / 冷却窗口三项，并强制「本次规则快照**只能比硬上限更严**」；③ 服务端用**同一判据**预检一遍并给**可分类的原因码**（`PER_ORDER_LIMIT` / `PER_BUYER_LIMIT` / `COOLDOWN_ACTIVE`）——**超限的请求被拒绝并留下原因**（status=REJECTED + reject_code + reject_reason，列表里筛得到），**REJECTED / CANCELLED 不占额度**（只有 SCHEDULED / SENT 占用），改个时点重试不会被自己挡住。身份列（上游引用 / 订单号 / 买家 / 店铺 / 签收时刻 / 规则快照）由 `guard_crm_review_request_identity` 钉死建后不可改 —— 改它会让「这个买家被索评过几次」这个频次计数在历史上出现两个答案。**跨服务纪律**：上游 10.3.2.2 揽收与签收确认**本批刚交付**（channel，V217）但**不同服务** ⇒ 本服务**一条 SQL 都不碰对方的库**，只经 `SignoffDeliveredOrderPort` 走**授权 HTTP API** 读（`GET /channel/logistics-pickup-signoff/cases?status=DELIVERED` 取已签收订单集合 + `GET /channel/logistics-pickup-signoff/cases/{id}` 取单件签收事实 + `GET /channel/shops` 取真实店铺清单），本库**只存上游的逻辑引用 + 快照**（upstream_case_id / case_no / waybill / carrier / delivered_at），**不建跨库 FK**；上游读不到一律 **503**（绝不返回空集合冒充「没有已签收订单」）。**上游确认单不带店铺维度也不带买家维度 ⇒ 显式标 available=false，不造数据源**：`candidate_shop_attribution`（候选单归属哪家店铺不可从上游核实，ownerModule=10.3.2.2）、`buyer_identity`（本仓**没有买家档案**，15.3.1.1 未交付；买家标识由运营按店铺提供，**只作频次去重键**，与 trade V135「买家联系方式归 15 / 客户档案所有」同一纪律，ownerModule=15.3.1.1）、`platform_review_api`（平台侧索评接口**未接入**，ownerModule=2；发送记录**只允许 MANUAL_HANDOFF**，服务端拒绝 `PLATFORM_API` —— 一个「返回成功回执」的假通道会让「买家已经被索评过」在数据上看起来发生过，而过度索评的代价正是买家投诉与平台处罚）。**下游 15.2.1.1 评价未交付 ⇒ 只落本服务内的评价回收桶**（收到的评价原文 + 关联到索评请求 + 星级 + 有图有视频），`review_sync` 维度 available=false（ownerModule=15.2.1.1），**不假装**已交付评价管理（无回复 / 无申诉 / 无标签）；**15.2.2.2 索评规则未交付 ⇒ 不建「索评策略配置表」**，本模块的规则是**一次请求自带的快照**，租户级频次硬上限是**兜底闸门**（15.2.2.2 落地后也改不动那份硬天花板）。**禁浮点**：小时数一律 `numeric(19,6)` + BigDecimal，时间一律 `timestamptz` + OffsetDateTime + `?::timestamptz`；PG 没有 `numeric * interval` 运算符，折算统一走 `((hours*3600)::bigint * interval '1 second')`。端点 `/crm/review-requests/**` 共 12 个：capabilities / frequency-policy（GET 读 · PUT 配）/ shops / candidates / （集合 GET + POST 新建）/ {uuid}（详情）/ batch / {uuid}/send-records / {uuid}/recoveries / recovery-stats；**刻意没有 DELETE**（索评请求是频次计数的凭据）与**没有 rules**（索评规则配置归 15.2.2.2）。页面 `/crm/review-requests`（能力声明逐维显形 / 频次硬上限面板 / 单条发起 / 批量执行逐条给结论与原因 / 索评任务列表（**被频次规则拒绝是独立状态**）/ 详情（发送记录 + 回收桶）/ 评价回收统计，**分母为 0 时回收率报「不计算」而不是 0%**）。`apps/web/src/lib/api-proxy.ts` **新增一条独立 `services[]` 元素**（锚点：crm/ 知识库那条之后、warehouse/ 7.8.2.2 那条之前；同批多车道共享该文件，故走「新加一条元素」这条路），既有条目一字未动；**token 选 `review-requests`**（已逐条核对既有全部 token：既有 crm 那一支是 `knowledge`，`review-due` 是 knowledge 内部的子形状、不是独立 token；既有别的服务有 `orders` / `order-review`（9.2.1.2 trade）/` refunds` / `rma-authorizations` / `return-receipts` / `return-quality`；既有正则**都是锚定的**且 `resolve()` 先按 `path.startsWith(service.prefix)` 收窄服务 ⇒ 只有 prefix='crm/' 的元素才可能吃到本路径，而既有 crm 元素的正则 `^knowledge/...$` **不可能**匹配 `review-requests/...` ⇒ **首 token 不同即可，两条互不吃掉**；刻意**不**复用 `order-review`，那是另一个服务的另一个模块）。**刻意不放行**后端不存在的形状：`{uuid}/replies |
@@ -557,3 +540,8 @@
 | 18.4.3.2 | 效果评估 | — | D7 | 未开发 | — |
 | 18.5.1.1 | 模板管理 | — | D7 | 未开发 | — |
 | 18.5.2.1 | 投递记录 | — | D7 | 未开发 | — |
+| 已交付 | 313 |
+| **未开发** | **152** |
+| 完成率 | 67.3% |
+| **D7** | 39 | 0 | 116 | 155 |
+| 15 | 客户与客服系统 | D7 | 5 | 24 |
