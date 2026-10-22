@@ -8183,6 +8183,58 @@ const services: readonly {
       /^performance\-metrics(?:\/(?:capabilities|shops|trends|alerts|forecasts|alert\-rules)|\/shops\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/(?:trends|metrics|alert\-evaluations|forecasts|forecast)|\/alert\-rules\/(?:ODR|LATE_SHIPMENT_RATE|CANCELLATION_RATE|VALID_TRACKING_RATE|RESPONSE_TIME|ACCOUNT_RATING))$/,
   },
   {
+    // 16.1.2.1 违规与处罚（channel 服务）。纯**新增一条独立的 `services[]` 元素**：
+    // 既有条目**一字未动、也不重排** —— 本文件是多车道共用的**累积型**白名单，
+    // 每条服务规则是一段超长单行正则，往既有那条巨型 alternation 里并分支会让多车道
+    // 同时并入时 git 必然判冲突（结构性，retry 永远不会自愈）。
+    //
+    // ---- 插入锚点固定在 **`performance-metrics` 那条元素之后**（16.1.1.2 绩效指标监控）----
+    //   同卷同服务的兄弟模块，锚点互不重叠，git 能干净求并。
+    //
+    // ---- 首 token「platform-violations」的零命中核对结论 ----
+    //   本文件既有全文里 `platform-violations` 出现次数 = 0；
+    //   并把既有**全部 156 条** `services[]` 正则逐条实测：
+    //   16 个本模块 shape × 156 条既有正则 ⇒ **命中 0 处**。
+    //   反向也测了：既有模块（account-health / performance-metrics / compliance-precheck /
+    //   listing-compliance-precheck / brand-authorizations / listings / shops /
+    //   listing-editor / ad-rules）的入口被本条正则**零命中** ⇒ 互不遮蔽。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   platform-violations/capabilities          能力声明（未交付下游 available=false + ownerModule）
+    //   platform-violations/shops                 店铺范围清单（GET，真分页）
+    //   platform-violations/violations            违规记录清单（GET，真分页 + 真筛选）/ 人工登记（POST）
+    //   platform-violations/violations/{uuid}     违规详情（GET）
+    //   platform-violations/violations/{uuid}/status     处理状态流转（POST）
+    //   platform-violations/violations/{uuid}/penalties   记一条处罚措施（POST）
+    //   platform-violations/violations/{uuid}/subjects    批量挂涉及商品/订单（POST）
+    //   platform-violations/violations/{uuid}/affected   批量定位受影响 listing 与库存（GET）
+    //   platform-violations/violations/{uuid}/delist      批量下架（POST，下游 4 刊登 4.1.1.1）
+    //   platform-violations/violations/{uuid}/remediations 记一条整改要求（POST）
+    //   platform-violations/remediations           整改要求清单（GET，真分页）
+    //   platform-violations/remediations/{uuid}    整改状态流转（PUT）
+    //   platform-violations/remediations/{uuid}/evidence 追加整改凭证（POST）
+    //   platform-violations/penalties              处罚清单（GET，真分页 + 按币种分组的合计）
+    //   platform-violations/sync-runs              同步运行记录（GET，真分页）
+    //   platform-violations/shops/{uuid}/sync      同步入口：接收平台违规通知（POST，**幂等**）
+    //
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`（不是
+    //   `[0-9a-f-]+`：后者会把 `capabilities` 这种非 UUID 形状也当 id 放行）。
+    // ⚠️ 末尾**刻意不带 `?`**：带了就等于放行裸路径 `platform-violations`
+    //   （后端没有「一条汇总列表接口」，一切入口都带子路径）。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸路径 `platform-violations` —— 本模块没有裸集合读
+    //   * `platform-violations/violations/{uuid}/delete` —— 违规记录不做物理删除
+    //   * `platform-violations/appeals` —— 16.1.2.2 申诉管理**未交付**，本模块**不编造**申诉单
+    //   * `platform-violations/finance` —— 12 财务**未交付**，本模块**不建**财务表
+    //   * `platform-violations/workbench-alerts` —— 1 工作台预警**未交付**，本模块**不编造**推送
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^platform\-violations(?:\/(?:capabilities|shops|violations|remediations|penalties|sync\-runs)|\/shops\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/sync|\/violations\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:status|penalties|subjects|affected|delist|remediations))?|\/remediations\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/evidence)?)$/,
+  },
+  {
     // 15.6.2.2 购物车与弃单挽回（crm 服务）。纯**新增一条独立的 `services[]` 元素**：
     // 既有条目（`buyer-emails` 15.1.2.1 / `knowledge` 15.4.2.1 / `review-requests` 15.2.2.1 /
     // `review-rules` 15.2.2.2）**一字未动、也不重排** —— 本文件是多车道共用的**累积型**

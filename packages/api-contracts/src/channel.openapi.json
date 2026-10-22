@@ -48157,6 +48157,10 @@
       },
       "PerformanceMetricAlertPage": {
         "properties": {
+          "criticalCount": {
+            "format": "int64",
+            "type": "integer"
+          },
           "items": {
             "items": {
               "$ref": "#/components/schemas/PerformanceMetricAlert"
@@ -48175,6 +48179,14 @@
             "type": "integer"
           },
           "total": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "unknownCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "warningCount": {
             "format": "int64",
             "type": "integer"
           }
@@ -48516,11 +48528,23 @@
       },
       "PerformanceMetricForecastPage": {
         "properties": {
+          "alreadyBreachedCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "cannotPredictCount": {
+            "format": "int64",
+            "type": "integer"
+          },
           "items": {
             "items": {
               "$ref": "#/components/schemas/PerformanceMetricForecast"
             },
             "type": "array"
+          },
+          "noBreachCount": {
+            "format": "int64",
+            "type": "integer"
           },
           "note": {
             "type": "string"
@@ -48534,6 +48558,10 @@
             "type": "integer"
           },
           "total": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "willBreachCount": {
             "format": "int64",
             "type": "integer"
           }
@@ -49861,6 +49889,121 @@
         },
         "type": "object"
       },
+      "PlatformPenalty": {
+        "properties": {
+          "effectiveAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "endsAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "measure": {
+            "type": "string"
+          },
+          "measureLabel": {
+            "type": "string"
+          },
+          "moneyText": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "penaltyAmount": {
+            "type": "number"
+          },
+          "penaltyCurrency": {
+            "type": "string"
+          },
+          "penaltyId": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "violationId": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PlatformPenaltyInput": {
+        "properties": {
+          "effectiveAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "endsAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "measure": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "penaltyAmount": {
+            "type": "number"
+          },
+          "penaltyCurrency": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PlatformPenaltyPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/PlatformPenalty"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalNote": {
+            "type": "string"
+          },
+          "totalsByCurrency": {
+            "items": {
+              "$ref": "#/components/schemas/PlatformPenaltyTotal"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "PlatformPenaltyTotal": {
+        "properties": {
+          "amount": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "penaltyCount": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
       "PlatformStatusRequest": {
         "properties": {
           "eventType": {
@@ -49963,6 +50106,963 @@
           },
           "supportStatus": {
             "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PlatformViolation": {
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "deadline": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "externalNoticeId": {
+            "type": "string"
+          },
+          "impactLabel": {
+            "type": "string"
+          },
+          "impactLevel": {
+            "type": "string"
+          },
+          "measureLabels": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "measures": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "nextStatuses": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "notifiedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "occurredAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "openRemediationCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "penaltyCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "remediationCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "shopCode": {
+            "type": "string"
+          },
+          "shopId": {
+            "type": "string"
+          },
+          "shopName": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "sourceLabel": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "subjectCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "title": {
+            "type": "string"
+          },
+          "violationId": {
+            "type": "string"
+          },
+          "violationType": {
+            "type": "string"
+          },
+          "violationTypeLabel": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PlatformViolationAffected": {
+        "properties": {
+          "inventory": {
+            "items": {
+              "$ref": "#/components/schemas/PlatformViolationAffectedInventory"
+            },
+            "type": "array"
+          },
+          "inventoryAvailable": {
+            "type": "boolean"
+          },
+          "inventoryNote": {
+            "type": "string"
+          },
+          "listingCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "listings": {
+            "items": {
+              "$ref": "#/components/schemas/PlatformViolationAffectedListing"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "subjectCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "violationId": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PlatformViolationAffectedInventory": {
+        "properties": {
+          "found": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          },
+          "sellable": {
+            "type": "number"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuId": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PlatformViolationAffectedListing": {
+        "properties": {
+          "externalItemId": {
+            "type": "string"
+          },
+          "listingId": {
+            "type": "string"
+          },
+          "platformStockState": {
+            "type": "string"
+          },
+          "sourceSubjectRef": {
+            "type": "string"
+          },
+          "sourceSubjectType": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PlatformViolationCapabilities": {
+        "properties": {
+          "downstreamNote": {
+            "type": "string"
+          },
+          "gaps": {
+            "items": {
+              "$ref": "#/components/schemas/PlatformViolationCapabilityGap"
+            },
+            "type": "array"
+          },
+          "idempotencySemantics": {
+            "type": "string"
+          },
+          "impactLevels": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "impactSemantics": {
+            "type": "string"
+          },
+          "measureLabels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "measures": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "moneySemantics": {
+            "type": "string"
+          },
+          "remediationStatusLabels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "remediationStatusTransitions": {
+            "additionalProperties": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "type": "object"
+          },
+          "remediationStatuses": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "sources": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "stateMachineSemantics": {
+            "type": "string"
+          },
+          "statusLabels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "statusTransitions": {
+            "additionalProperties": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "type": "object"
+          },
+          "statuses": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "subjectTypes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "typeDomainNote": {
+            "type": "string"
+          },
+          "upstreamNote": {
+            "type": "string"
+          },
+          "violationTypeLabels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "violationTypes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "PlatformViolationCapabilityGap": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "impact": {
+            "type": "string"
+          },
+          "moduleId": {
+            "type": "string"
+          },
+          "moduleName": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PlatformViolationDelistResult": {
+        "properties": {
+          "affectedCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "candidateCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "outcome": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "skipCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "skippedListingIds": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "taskId": {
+            "type": "string"
+          },
+          "violationId": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PlatformViolationDetail": {
+        "properties": {
+          "evidence": {
+            "items": {
+              "$ref": "#/components/schemas/PlatformViolationEvidence"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "penalties": {
+            "items": {
+              "$ref": "#/components/schemas/PlatformPenalty"
+            },
+            "type": "array"
+          },
+          "remediations": {
+            "items": {
+              "$ref": "#/components/schemas/PlatformViolationRemediation"
+            },
+            "type": "array"
+          },
+          "subjects": {
+            "items": {
+              "$ref": "#/components/schemas/PlatformViolationSubject"
+            },
+            "type": "array"
+          },
+          "violation": {
+            "$ref": "#/components/schemas/PlatformViolation"
+          }
+        },
+        "type": "object"
+      },
+      "PlatformViolationEvidence": {
+        "properties": {
+          "evidenceId": {
+            "type": "string"
+          },
+          "evidenceRef": {
+            "type": "string"
+          },
+          "evidenceType": {
+            "type": "string"
+          },
+          "remediationId": {
+            "type": "string"
+          },
+          "submittedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "violationId": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PlatformViolationEvidenceInput": {
+        "properties": {
+          "evidenceRef": {
+            "type": "string"
+          },
+          "evidenceType": {
+            "type": "string"
+          },
+          "submittedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PlatformViolationNotice": {
+        "properties": {
+          "deadline": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "externalNoticeId": {
+            "type": "string"
+          },
+          "notifiedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "occurredAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "penalties": {
+            "items": {
+              "$ref": "#/components/schemas/PlatformPenaltyInput"
+            },
+            "type": "array"
+          },
+          "subjects": {
+            "items": {
+              "$ref": "#/components/schemas/PlatformViolationSubjectInput"
+            },
+            "type": "array"
+          },
+          "title": {
+            "type": "string"
+          },
+          "violationType": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PlatformViolationPage": {
+        "properties": {
+          "appealingCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "closedCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "inProgressCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/PlatformViolation"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "pendingCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "rectifiedCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "PlatformViolationRegisterInput": {
+        "properties": {
+          "deadline": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "externalNoticeId": {
+            "type": "string"
+          },
+          "notifiedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "occurredAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "shopId": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "violationType": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PlatformViolationRegistration": {
+        "properties": {
+          "created": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          },
+          "violation": {
+            "$ref": "#/components/schemas/PlatformViolationDetail"
+          }
+        },
+        "type": "object"
+      },
+      "PlatformViolationRemediation": {
+        "properties": {
+          "completedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "dueAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "evidenceCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "nextStatuses": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "overdue": {
+            "type": "boolean"
+          },
+          "ownerRef": {
+            "type": "string"
+          },
+          "remediationId": {
+            "type": "string"
+          },
+          "requirement": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "verifiedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "violationId": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PlatformViolationRemediationInput": {
+        "properties": {
+          "dueAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "ownerRef": {
+            "type": "string"
+          },
+          "requirement": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PlatformViolationRemediationPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/PlatformViolationRemediation"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "overdueCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "PlatformViolationRemediationStatusInput": {
+        "properties": {
+          "note": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PlatformViolationShop": {
+        "properties": {
+          "openCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "pendingDeductionCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "platformName": {
+            "type": "string"
+          },
+          "shopCode": {
+            "type": "string"
+          },
+          "shopId": {
+            "type": "string"
+          },
+          "shopName": {
+            "type": "string"
+          },
+          "violationCount": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "PlatformViolationShopPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/PlatformViolationShop"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "PlatformViolationStatusInput": {
+        "properties": {
+          "note": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PlatformViolationSubject": {
+        "properties": {
+          "affectedQuantity": {
+            "type": "number"
+          },
+          "listingId": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "orderRef": {
+            "type": "string"
+          },
+          "skuId": {
+            "type": "string"
+          },
+          "subjectId": {
+            "type": "string"
+          },
+          "subjectRef": {
+            "type": "string"
+          },
+          "subjectType": {
+            "type": "string"
+          },
+          "subjectTypeLabel": {
+            "type": "string"
+          },
+          "violationId": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PlatformViolationSubjectBatchResult": {
+        "properties": {
+          "inserted": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "requested": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "skipped": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "skippedRefs": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "violationId": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PlatformViolationSubjectInput": {
+        "properties": {
+          "affectedQuantity": {
+            "type": "number"
+          },
+          "listingId": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "orderRef": {
+            "type": "string"
+          },
+          "skuId": {
+            "type": "string"
+          },
+          "subjectRef": {
+            "type": "string"
+          },
+          "subjectType": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PlatformViolationSyncInput": {
+        "properties": {
+          "notices": {
+            "items": {
+              "$ref": "#/components/schemas/PlatformViolationNotice"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "PlatformViolationSyncResult": {
+        "properties": {
+          "failed": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "failures": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "fetched": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "runId": {
+            "type": "string"
+          },
+          "shopId": {
+            "type": "string"
+          },
+          "skipped": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "written": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "PlatformViolationSyncRun": {
+        "properties": {
+          "failedCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "fetchedCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "finishedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "runId": {
+            "type": "string"
+          },
+          "shopCode": {
+            "type": "string"
+          },
+          "shopId": {
+            "type": "string"
+          },
+          "skippedCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "startedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "writtenCount": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "PlatformViolationSyncRunPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/PlatformViolationSyncRun"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
           }
         },
         "type": "object"
@@ -99108,6 +100208,954 @@
         },
         "tags": [
           "sync-controller"
+        ]
+      }
+    },
+    "/channel/platform-violations/capabilities": {
+      "get": {
+        "operationId": "get_channel_platform_violations_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformViolationCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "platform-violation-controller"
+        ]
+      }
+    },
+    "/channel/platform-violations/penalties": {
+      "get": {
+        "operationId": "get_channel_platform_violations_penalties",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "shopId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "violationId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "measure",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformPenaltyPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "platform-violation-controller"
+        ]
+      }
+    },
+    "/channel/platform-violations/remediations": {
+      "get": {
+        "operationId": "get_channel_platform_violations_remediations",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "shopId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "violationId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "overdueOnly",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformViolationRemediationPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "platform-violation-controller"
+        ]
+      }
+    },
+    "/channel/platform-violations/remediations/{id}": {
+      "put": {
+        "operationId": "put_channel_platform_violations_remediations_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlatformViolationRemediationStatusInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformViolationRemediation"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "platform-violation-controller"
+        ]
+      }
+    },
+    "/channel/platform-violations/remediations/{id}/evidence": {
+      "post": {
+        "operationId": "post_channel_platform_violations_remediations_id_evidence",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlatformViolationEvidenceInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformViolationEvidence"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "platform-violation-controller"
+        ]
+      }
+    },
+    "/channel/platform-violations/shops": {
+      "get": {
+        "operationId": "get_channel_platform_violations_shops",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "platformCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "shopId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformViolationShopPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "platform-violation-controller"
+        ]
+      }
+    },
+    "/channel/platform-violations/shops/{shopId}/sync": {
+      "post": {
+        "operationId": "post_channel_platform_violations_shops_shopId_sync",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "shopId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlatformViolationSyncInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformViolationSyncResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "platform-violation-controller"
+        ]
+      }
+    },
+    "/channel/platform-violations/sync-runs": {
+      "get": {
+        "operationId": "get_channel_platform_violations_sync_runs",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "shopId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformViolationSyncRunPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "platform-violation-controller"
+        ]
+      }
+    },
+    "/channel/platform-violations/violations": {
+      "get": {
+        "operationId": "get_channel_platform_violations_violations",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "shopId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "violationType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "measure",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "source",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformViolationPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "platform-violation-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_channel_platform_violations_violations",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlatformViolationRegisterInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformViolationRegistration"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "platform-violation-controller"
+        ]
+      }
+    },
+    "/channel/platform-violations/violations/{id}": {
+      "get": {
+        "operationId": "get_channel_platform_violations_violations_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformViolationDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "platform-violation-controller"
+        ]
+      }
+    },
+    "/channel/platform-violations/violations/{id}/affected": {
+      "get": {
+        "operationId": "get_channel_platform_violations_violations_id_affected",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "warehouseId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformViolationAffected"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "platform-violation-controller"
+        ]
+      }
+    },
+    "/channel/platform-violations/violations/{id}/delist": {
+      "post": {
+        "operationId": "post_channel_platform_violations_violations_id_delist",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformViolationDelistResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "platform-violation-controller"
+        ]
+      }
+    },
+    "/channel/platform-violations/violations/{id}/penalties": {
+      "post": {
+        "operationId": "post_channel_platform_violations_violations_id_penalties",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlatformPenaltyInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformPenalty"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "platform-violation-controller"
+        ]
+      }
+    },
+    "/channel/platform-violations/violations/{id}/remediations": {
+      "post": {
+        "operationId": "post_channel_platform_violations_violations_id_remediations",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlatformViolationRemediationInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformViolationRemediation"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "platform-violation-controller"
+        ]
+      }
+    },
+    "/channel/platform-violations/violations/{id}/status": {
+      "post": {
+        "operationId": "post_channel_platform_violations_violations_id_status",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlatformViolationStatusInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformViolation"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "platform-violation-controller"
+        ]
+      }
+    },
+    "/channel/platform-violations/violations/{id}/subjects": {
+      "post": {
+        "operationId": "post_channel_platform_violations_violations_id_subjects",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "items": {
+                  "$ref": "#/components/schemas/PlatformViolationSubjectInput"
+                },
+                "type": "array"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformViolationSubjectBatchResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "platform-violation-controller"
         ]
       }
     },
