@@ -1738,6 +1738,705 @@
         ],
         "type": "object"
       },
+      "CrmCustomerContactCapabilities": {
+        "properties": {
+          "actionPolicy": {
+            "type": "string"
+          },
+          "boundaryNote": {
+            "type": "string"
+          },
+          "contactTypes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "dimensions": {
+            "items": {
+              "$ref": "#/components/schemas/CrmCustomerContactCapabilityDimension"
+            },
+            "type": "array"
+          },
+          "directions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "exemptionNote": {
+            "type": "string"
+          },
+          "highlight": {
+            "type": "string"
+          },
+          "optOutScopes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "optOutStates": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "origins": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "CrmCustomerContactCapabilityDimension": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "description": {
+            "type": "string"
+          },
+          "dimension": {
+            "type": "string"
+          },
+          "impact": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmCustomerContactIngestInput": {
+        "properties": {
+          "complianceState": {
+            "nullable": true,
+            "type": "string"
+          },
+          "contactType": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "customerName": {
+            "maxLength": 200,
+            "minLength": 0,
+            "nullable": true,
+            "type": "string"
+          },
+          "customerRef": {
+            "maxLength": 128,
+            "minLength": 0,
+            "type": "string"
+          },
+          "detail": {
+            "additionalProperties": {
+              "nullable": true,
+              "type": "object"
+            },
+            "nullable": true,
+            "type": "object"
+          },
+          "direction": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "durationSeconds": {
+            "nullable": true,
+            "type": "number"
+          },
+          "occurredAt": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "orderReference": {
+            "maxLength": 64,
+            "minLength": 0,
+            "nullable": true,
+            "type": "string"
+          },
+          "platformCode": {
+            "maxLength": 32,
+            "minLength": 0,
+            "nullable": true,
+            "type": "string"
+          },
+          "shopId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "shopName": {
+            "maxLength": 200,
+            "minLength": 0,
+            "nullable": true,
+            "type": "string"
+          },
+          "sourceLabel": {
+            "maxLength": 64,
+            "minLength": 0,
+            "nullable": true,
+            "type": "string"
+          },
+          "sourceModule": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string"
+          },
+          "sourceNo": {
+            "maxLength": 64,
+            "minLength": 0,
+            "nullable": true,
+            "type": "string"
+          },
+          "sourceRef": {
+            "maxLength": 128,
+            "minLength": 0,
+            "type": "string"
+          },
+          "subject": {
+            "maxLength": 400,
+            "minLength": 0,
+            "nullable": true,
+            "type": "string"
+          },
+          "summary": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "contactType",
+          "customerRef",
+          "direction",
+          "occurredAt",
+          "sourceModule",
+          "sourceRef"
+        ],
+        "type": "object"
+      },
+      "CrmCustomerContactIngestResult": {
+        "properties": {
+          "contact": {
+            "$ref": "#/components/schemas/CrmCustomerContactRow"
+          },
+          "created": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmCustomerContactInput": {
+        "properties": {
+          "complianceState": {
+            "nullable": true,
+            "type": "string"
+          },
+          "contactType": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "customerName": {
+            "maxLength": 200,
+            "minLength": 0,
+            "nullable": true,
+            "type": "string"
+          },
+          "customerRef": {
+            "maxLength": 128,
+            "minLength": 0,
+            "type": "string"
+          },
+          "detail": {
+            "additionalProperties": {
+              "nullable": true,
+              "type": "object"
+            },
+            "nullable": true,
+            "type": "object"
+          },
+          "direction": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "durationSeconds": {
+            "nullable": true,
+            "type": "number"
+          },
+          "occurredAt": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "orderReference": {
+            "maxLength": 64,
+            "minLength": 0,
+            "nullable": true,
+            "type": "string"
+          },
+          "platformCode": {
+            "maxLength": 32,
+            "minLength": 0,
+            "nullable": true,
+            "type": "string"
+          },
+          "shopId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "shopName": {
+            "maxLength": 200,
+            "minLength": 0,
+            "nullable": true,
+            "type": "string"
+          },
+          "sourceModule": {
+            "maxLength": 32,
+            "minLength": 0,
+            "nullable": true,
+            "type": "string"
+          },
+          "sourceNo": {
+            "maxLength": 64,
+            "minLength": 0,
+            "nullable": true,
+            "type": "string"
+          },
+          "sourceRef": {
+            "maxLength": 128,
+            "minLength": 0,
+            "nullable": true,
+            "type": "string"
+          },
+          "subject": {
+            "maxLength": 400,
+            "minLength": 0,
+            "nullable": true,
+            "type": "string"
+          },
+          "summary": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "contactType",
+          "customerRef",
+          "direction",
+          "occurredAt"
+        ],
+        "type": "object"
+      },
+      "CrmCustomerContactPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/CrmCustomerContactRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "totalElements": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalPages": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CrmCustomerContactRow": {
+        "properties": {
+          "complianceState": {
+            "type": "string"
+          },
+          "complianceStateLabel": {
+            "type": "string"
+          },
+          "contactNo": {
+            "type": "string"
+          },
+          "contactType": {
+            "type": "string"
+          },
+          "contactTypeLabel": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "createdBy": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "customerName": {
+            "type": "string"
+          },
+          "customerRef": {
+            "type": "string"
+          },
+          "detail": {
+            "additionalProperties": {
+              "type": "object"
+            },
+            "type": "object"
+          },
+          "direction": {
+            "type": "string"
+          },
+          "directionLabel": {
+            "type": "string"
+          },
+          "durationSeconds": {
+            "nullable": true,
+            "type": "number"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "occurredAt": {
+            "type": "string"
+          },
+          "operatorId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "orderReference": {
+            "type": "string"
+          },
+          "origin": {
+            "type": "string"
+          },
+          "originLabel": {
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "shopId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "shopName": {
+            "type": "string"
+          },
+          "sourceLabel": {
+            "type": "string"
+          },
+          "sourceModule": {
+            "type": "string"
+          },
+          "sourceNo": {
+            "type": "string"
+          },
+          "sourceRef": {
+            "type": "string"
+          },
+          "subject": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmCustomerOptOutCheck": {
+        "properties": {
+          "customerName": {
+            "type": "string"
+          },
+          "customerRef": {
+            "type": "string"
+          },
+          "marketingSuppressed": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          },
+          "optOutId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "recordedAt": {
+            "nullable": true,
+            "type": "string"
+          },
+          "recordedBy": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "scope": {
+            "type": "string"
+          },
+          "scopeLabel": {
+            "type": "string"
+          },
+          "suppressed": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "CrmCustomerOptOutCheckResult": {
+        "properties": {
+          "checkedCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/CrmCustomerOptOutCheck"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "suppressedCount": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CrmCustomerOptOutEventPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/CrmCustomerOptOutEventRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "totalElements": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalPages": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CrmCustomerOptOutEventRow": {
+        "properties": {
+          "actorId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "customerRef": {
+            "type": "string"
+          },
+          "detail": {
+            "additionalProperties": {
+              "type": "object"
+            },
+            "type": "object"
+          },
+          "eventType": {
+            "type": "string"
+          },
+          "eventTypeLabel": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "occurredAt": {
+            "type": "string"
+          },
+          "optOutId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmCustomerOptOutInput": {
+        "properties": {
+          "customerName": {
+            "maxLength": 200,
+            "minLength": 0,
+            "nullable": true,
+            "type": "string"
+          },
+          "customerRef": {
+            "maxLength": 128,
+            "minLength": 0,
+            "type": "string"
+          },
+          "evidence": {
+            "additionalProperties": {
+              "nullable": true,
+              "type": "object"
+            },
+            "nullable": true,
+            "type": "object"
+          },
+          "reason": {
+            "maxLength": 600,
+            "minLength": 0,
+            "type": "string"
+          },
+          "scope": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "customerRef",
+          "reason",
+          "scope"
+        ],
+        "type": "object"
+      },
+      "CrmCustomerOptOutPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/CrmCustomerOptOutRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "totalElements": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalPages": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CrmCustomerOptOutRevokeInput": {
+        "properties": {
+          "reason": {
+            "maxLength": 600,
+            "minLength": 0,
+            "type": "string"
+          }
+        },
+        "required": [
+          "reason"
+        ],
+        "type": "object"
+      },
+      "CrmCustomerOptOutRow": {
+        "properties": {
+          "createdAt": {
+            "type": "string"
+          },
+          "customerName": {
+            "type": "string"
+          },
+          "customerRef": {
+            "type": "string"
+          },
+          "evidence": {
+            "additionalProperties": {
+              "type": "object"
+            },
+            "type": "object"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "recordedAt": {
+            "type": "string"
+          },
+          "recordedBy": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "revokeReason": {
+            "type": "string"
+          },
+          "revokedAt": {
+            "nullable": true,
+            "type": "string"
+          },
+          "revokedBy": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "scope": {
+            "type": "string"
+          },
+          "scopeLabel": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string"
+          },
+          "stateLabel": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "CrmCustomerTagAssignmentInput": {
         "properties": {
           "customerName": {
@@ -2610,6 +3309,42 @@
           },
           "windowTo": {
             "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmCustomerTimelinePage": {
+        "properties": {
+          "customerName": {
+            "type": "string"
+          },
+          "customerRef": {
+            "type": "string"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/CrmCustomerContactRow"
+            },
+            "type": "array"
+          },
+          "optOut": {
+            "$ref": "#/components/schemas/CrmCustomerOptOutCheck"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "totalElements": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalPages": {
+            "format": "int32",
+            "type": "integer"
           }
         },
         "type": "object"
@@ -8008,6 +8743,677 @@
         },
         "tags": [
           "cart-recovery-controller"
+        ]
+      }
+    },
+    "/crm/customer-contacts/capabilities": {
+      "get": {
+        "operationId": "get_crm_customer_contacts_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCustomerContactCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "customer-contact-controller"
+        ]
+      }
+    },
+    "/crm/customer-contacts/contacts": {
+      "get": {
+        "operationId": "get_crm_customer_contacts_contacts",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "customerRef",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "contactType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "direction",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "origin",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sourceModule",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "complianceState",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCustomerContactPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "customer-contact-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_crm_customer_contacts_contacts",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmCustomerContactInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCustomerContactRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "customer-contact-controller"
+        ]
+      }
+    },
+    "/crm/customer-contacts/contacts/{contactId}": {
+      "get": {
+        "operationId": "get_crm_customer_contacts_contacts_contactId",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "contactId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCustomerContactRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "customer-contact-controller"
+        ]
+      }
+    },
+    "/crm/customer-contacts/ingest": {
+      "post": {
+        "operationId": "post_crm_customer_contacts_ingest",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmCustomerContactIngestInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCustomerContactIngestResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "customer-contact-controller"
+        ]
+      }
+    },
+    "/crm/customer-contacts/opt-out-check": {
+      "get": {
+        "operationId": "get_crm_customer_contacts_opt_out_check",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "customerRef",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "customerRefs",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCustomerOptOutCheckResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "customer-contact-controller"
+        ]
+      }
+    },
+    "/crm/customer-contacts/opt-outs": {
+      "get": {
+        "operationId": "get_crm_customer_contacts_opt_outs",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "customerRef",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "scope",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "state",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCustomerOptOutPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "customer-contact-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_crm_customer_contacts_opt_outs",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmCustomerOptOutInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCustomerOptOutRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "customer-contact-controller"
+        ]
+      }
+    },
+    "/crm/customer-contacts/opt-outs/{optOutId}": {
+      "get": {
+        "operationId": "get_crm_customer_contacts_opt_outs_optOutId",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "optOutId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCustomerOptOutRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "customer-contact-controller"
+        ]
+      }
+    },
+    "/crm/customer-contacts/opt-outs/{optOutId}/events": {
+      "get": {
+        "operationId": "get_crm_customer_contacts_opt_outs_optOutId_events",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "optOutId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCustomerOptOutEventPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "customer-contact-controller"
+        ]
+      }
+    },
+    "/crm/customer-contacts/opt-outs/{optOutId}/revoke": {
+      "post": {
+        "operationId": "post_crm_customer_contacts_opt_outs_optOutId_revoke",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "optOutId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmCustomerOptOutRevokeInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCustomerOptOutRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "customer-contact-controller"
+        ]
+      }
+    },
+    "/crm/customer-contacts/timeline": {
+      "get": {
+        "operationId": "get_crm_customer_contacts_timeline",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "customerRef",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "contactType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCustomerTimelinePage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "customer-contact-controller"
         ]
       }
     },
