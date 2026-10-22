@@ -115,10 +115,16 @@ git checkout -B chore/sync-module-dev upstream/integration/module-dev
 ```bash
 # 横幅在首行
 git show upstream/main:packages/api-contracts/src/catalog.openapi.json | head -1
-# JS 指纹应为 0，Python 形态应为正
-git show upstream/main:packages/api-contracts/src/catalog.openapi.json | grep -c '0\.000001' # 期望 0
-git show upstream/main:packages/api-contracts/src/catalog.openapi.json | grep -c '1e-06'    # 期望 > 0
+# JS 形态指纹：任何服务都必须为 0
+for s in catalog channel crm trade warehouse identity; do
+  printf '%s %s\n' "$s" \
+    "$(git show upstream/main:packages/api-contracts/src/$s.openapi.json | grep -c '0\.000001')"
+done
 ```
+
+⚠️ **别把「必须有 `1e-06`」当判据**：`1e-06` 只在部分服务出现
+（catalog 2 / channel 5 / crm 6；identity / warehouse / trade **一次都没有**），
+写成「期望 > 0」会在这三个服务上误判 FAIL。**通用判据只有一条：不得出现 `0.000001`。**
 
 **数量不变量**（变了就是内容丢失 = 回归，不是排版变更）：
 导出声明 identity 158 / catalog 863 / channel 1348 / warehouse 1077 / trade 1717 / crm 159；
@@ -196,6 +202,18 @@ node tools/module-progress/lane.mjs gate release     # 收尾必须放，无论�
 
 **所以「CI 全绿」不是可用的闸** —— 拿它当闸，这个任务永远合不进去，等于没有闸。
 本任务用**基线相对判据**：PR 的失败不得**比 `main` 基线更多**。见 7.3。
+
+⚠️ **`Lint` 作业的覆盖面含 `.md`**：`ci.yml:26` 跑 `pnpm format:check`，
+匹配 `**/*.{ts,tsx,js,jsx,json,md,yaml,yml}` ⇒ **Markdown 也在格式闸门内**。
+`main` 上现有 **621 个文件**不合 Prettier（多为历史 `.tsx` / `.test.ts`）⇒ `Lint` 早已红，
+这是**存量债**；但**本次合入带进来的新文件不许再增加这个数**。
+⇒ 提交前对本 PR 触及的文件逐个跑一遍：
+
+```bash
+pnpm exec prettier --check <本 PR 改动的 .md / .ts / .json / .yaml>
+```
+
+⇒ 判据看**失败文件集合的差集**（见 7.3），不是看仓库总数。
 
 ---
 
