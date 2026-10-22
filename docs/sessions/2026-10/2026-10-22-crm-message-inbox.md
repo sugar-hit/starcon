@@ -1,7 +1,8 @@
 # 2026-10-22 —— 15.1.1.1 消息收件箱（卷 15 客户与客服 / D7）
 
 > 车道 `15.1.1.1`，分支 `feat/15-1-1-1`，基线 `integration/module-dev`（7c1e688f）。
-> 迁移版本号 **V291**（本批预分配：V289 / V290 / V292 属另外三条车道，V287 属上一批 14.4.2.1）。
+> 迁移版本号 **V293**（上一轮预分配的是 **V291** —— 该号从未并入任何分支，只存在于本车道分支上，
+> 本轮调度器改分配 **V293**；同批另三条车道用 V294 / V295 / V296，V287 属上一批 14.4.2.1）。
 > 归属服务：**crm**（`backend/services/crm`，端口 8086，DB 角色 `crm_app`）—— 不是 channel。
 
 ---
@@ -111,7 +112,7 @@ TRUNCATE（PG：cannot truncate a table referenced in a foreign key constraint�
 
 **后端（crm 服务）**
 
-- `backend/services/crm/src/main/resources/db/migration/V291__crm_message_inbox.sql` —— 三表 + RLS + 索引 + GRANT + 序列单独授权 + 四个触发器
+- `backend/services/crm/src/main/resources/db/migration/V293__crm_message_inbox.sql` —— 三表 + RLS + 索引 + GRANT + 序列单独授权 + 四个触发器
 - `backend/services/crm/src/main/java/com/starcon/crm/MessageInboxModels.java` —— 传输模型
 - `backend/services/crm/src/main/java/com/starcon/crm/MessageInboxService.java` —— jOOQ 显式 SQL + 能力声明 + 列表 / 详情 / 登记 / 批量 / 同步
 - `backend/services/crm/src/main/java/com/starcon/crm/MessageInboxController.java` —— 8 path / 10 端点
@@ -128,7 +129,7 @@ TRUNCATE（PG：cannot truncate a table referenced in a foreign key constraint�
 - `apps/web/src/components/crm/message-inbox-workspace.tsx` —— 工作区
 - `apps/web/src/components/crm/message-inbox-model.test.ts` —— 14 例
 - `apps/web/src/app/api/crm/message-inbox-allowlist.test.ts` —— 5 例（白名单双向断言）
-- `apps/web/src/lib/api-proxy.ts` —— **新增一条独立 `crm/` 元素**（锚点：`identity/` 那条之后）
+- `apps/web/src/lib/api-proxy.ts` —— **新增一条独立 `crm/` 元素**（锚点：`crm/knowledge`（15.4.2.1 客服知识库）那条元素之后；见下方「本轮修复」）
 
 **契约与台账**
 
@@ -182,3 +183,118 @@ crm 契约**纯增量**（+8 path / +21 schema / 0 删除）。
 
 **本车道刻意没做的事**（都如实记在台账「已知缺口」里）：没有 mock 平台同步、没有 fake 下游单据 id、
 没有把「订单上下文查不到」渲染成空白、没有在前端做任何金额/数量的 JS 侧算术。
+
+---
+
+## 本轮修复（2026-10-22 · 第二轮：重派）
+
+> 第一轮的 3 个 commit **全部保留**（`1a6a13a7` / `44b55b13` / `3d427a25`），本轮**没有重写任何功能**。
+> 本轮只做三件事：改迁移号、换 api-proxy 锚点、重跑验证。
+
+### 1. 冲突根因：锚点撞车，不是代码问题
+
+上一轮 `apps/web/src/lib/api-proxy.ts` 的插入锚点选在「**`identity/` 那条元素之后**」。
+同批的 **14.5.1.2 建联与样品**（首 token `outreach`）选了**同一个锚点** ——
+两条车道在同一位置插入 `services[]` 元素 ⇒ git 必然判冲突。
+
+已核实在集成头（`integration/module-dev` @ `da1f96f9`）上：
+`outreach` 那条元素现在**就落在 `prefix: 'identity/'` 之后**（集成头 `apps/web/src/lib/api-proxy.ts` 第 278 行注释
+「插入锚点固定在 `prefix: 'identity/'` 那条元素**之后**」）⇒ 根因确认。
+
+**这是结构性的，重试不会自愈** —— 换锚点是唯一的解法。
+
+### 2. 锚点怎么换的
+
+**新锚点 = `prefix: 'crm/'` 的 `^knowledge\/...$`（15.4.2.1 客服知识库）那条元素之后。**
+本车道那条元素**从「`identity/` 之后」整体挪到 `crm/knowledge` 之后**，
+`crm/review-requests`（15.2.2.1）之前 —— 既有条目**一字未动、也不重排**。
+
+> ⚠️ 任务书里的括号写的是「`knowledge` 那条元素的 `],` 之后、`crm/review-requests` 那条之前」，
+> 但文件里 `crm/knowledge` 与 `crm/review-requests` **之间还夹着 16.4.2.1 品牌授权（channel 服务）**。
+> 按任务书⭐ 标的**「紧跟 `crm/knowledge` 那条元素之后」**执行 —— 那是本车道**专属**的锚点。
+
+**首 token `message-inbox` 的零命中核对结论（重核）：**
+
+- 本文件既有 **142 条** `services[]` 正则里**没有任何一条**含 `message-inbox` 这个串（`grep -c` 实测）。
+- 含 `message` 的只有两处，两处都**吃不掉**本条目：
+  ① `aftersales/cases/{uuid}/messages`（11.1.1.2 售后单详情，**活着的正则**）——
+     首 token 是 `aftersales`，挂在 `prefix: 'trade/'` 下；
+  ② `service-tickets/{uuid}/messages` —— **只出现在 15.4 工单那条的注释里**，
+     且是**刻意不放行**的形状（工单那条正则里根本没有 `messages` 分支）。
+  > ⚠️ 上一轮注释把 ② 说成「既有含 `message` 的只有 `service-tickets/{uuid}/messages`」——
+  > 那是不准确的（它不在任何活正则里）；本轮已按实际文件改正。
+- 且 `resolve()` 先按 `path.startsWith(service.prefix)` 收窄服务、再判别正则
+  ⇒ 只有 `prefix: 'crm/'` 的元素才有机会吃到 `crm/message-inbox/...`，
+  而 `crm/` 的另外几条（`knowledge` / `buyer-emails` / `review-requests` / `review-rules`）
+  正则**不可能**匹配 `message-inbox/...` ⇒ 互不遮蔽。
+
+### 3. 迁移号为什么改：V291 → V293
+
+V291 **从未并入过任何分支**（它只存在本车道分支上），所以对集成头来说仍是空闲号；
+调度器本轮把 **V293** 分配给本车道并写进了车道状态文件
+（`.dev-agent/lanes.json` → `15.1.1.1` → `migrationVersion: "V293"`）。
+若交出 V291，调度器台账与状态文件里的版本号就会和磁盘对不上 ⇒ **必须改名**。
+
+改名后同步更新了源码里指向该迁移版本的注释与断言文案
+（`MessageInboxService.java` / `MessageInboxModels.java` / 两个集成测试），
+避免留下指向已不存在版本的悬空引用。
+
+> ⚠️ **改名后必须先 `./mvnw -pl services/crm clean`**：
+> `target/classes/db/migration/` 会留着上一版 `V291__crm_message_inbox.sql` 的副本，
+> Flyway 会把 **V291 与 V293 一起执行** ⇒ 第二次执行撞
+> `relation "crm_message_no_seq" already exists`（SQLSTATE 42P07），
+> 表现为**全部 23 例报 ApplicationContext 加载失败**。
+> 本轮实测确认：不清 ⇒ 19 + 4 全 errors；clean 后重跑 ⇒ 23 例全绿。
+> `src/main/resources/db/migration/` 里自始至终**只有 V293 一个文件**（V291 是 build 产物，不是源码）。
+
+### 4. 本轮验证结果（真实数字）
+
+```bash
+# L0 编译闸
+cd backend && ./mvnw -q compile          # 绿（exit 0）
+cd .. && pnpm typecheck                   # 绿（3 包：web / ui / config-tailwind）
+
+# L1 模块闸
+cd backend && ./mvnw -pl services/crm clean        # ⚠️ 必须，见上
+./mvnw -pl services/crm -am test -Dtest='MessageInbox*' \
+  -Dsurefire.failIfNoSpecifiedTests=false -DfailIfNoSpecifiedTests=false
+#   Tests run: 19 (MessageInboxIntegrationTest)        绿
+#   Tests run:  4 (MessageInboxTenancyIntegrationTest) 绿
+#   Tests run: 23, Failures: 0, Errors: 0 → BUILD SUCCESS（MAVEN_EXIT=0）
+
+# ⚠️ 改了 api-proxy.ts ⇒ 全量 allowlist 回归
+pnpm vitest run apps/web/src/app/api
+#   Test Files 165 passed (165)，Tests 956 passed (956)   ← 与第一轮逐个相同，没有路由被静默删掉
+
+# 本模块前端
+pnpm vitest run apps/web/src/components/crm/message-inbox-model.test.ts \
+                  apps/web/src/app/api/crm/message-inbox-allowlist.test.ts
+#   Test Files 2 passed (2)，Tests 19 passed (19)
+
+# 静态检查
+npx eslint src/lib/api-proxy.ts             # 绿（exit 0）
+npx prettier --check apps/web/src/lib/api-proxy.ts
+#   ⚠️ 报 1 处 —— **既有**问题（`ad-budgets` 那条正则的缩进，HEAD 上同样存在、同样 1 处），
+#   本轮 diff 未触碰那一行 ⇒ 本轮**没有新增**任何格式偏差。
+```
+
+**PG 容器**：verify 期间最多 **2 个** Testcontainers PostgreSQL 16 容器同时存活
+（`busy_hopper` + `vigorous_banzai`；重跑时是 `brave_tesla` + `festive_kowalevski`），
+外加 1 个 `testcontainers/ryuk` 回收器。
+运行结束后两个 PG 容器**均已被 ryuk 回收**（`docker ps` 只剩一个与本车道无关、
+已 Up 2 天的 `langfuse-postgres-1`（PG 15）开发服务）。
+
+### 5. 本轮改动的文件
+
+| 文件 | 改动 |
+| --- | --- |
+| `backend/services/crm/src/main/resources/db/migration/V291__…sql` → `V293__…sql` | **改名**（git mv，内容不变） |
+| `backend/services/crm/src/main/java/com/starcon/crm/MessageInboxService.java` | 注释里的 `V291` → `V293` |
+| `backend/services/crm/src/main/java/com/starcon/crm/MessageInboxModels.java` | 注释里的 `V291` → `V293` |
+| `backend/services/crm/src/test/java/com/starcon/crm/MessageInboxIntegrationTest.java` | 断言文案里的 `V291` → `V293` |
+| `backend/services/crm/src/test/java/com/starcon/crm/MessageInboxTenancyIntegrationTest.java` | 断言文案里的 `V291` → `V293` |
+| `apps/web/src/lib/api-proxy.ts` | 元素**移位**（identity/ 之后 → crm/knowledge 之后）+ 锚点与零命中注释重写 |
+| `docs/product/capability-blueprint/module-progress.md` | 只改 15.1.1.1 那一行的「状态」「证据」两格 |
+| `docs/sessions/2026-10/2026-10-22-crm-message-inbox.md` | 本节 |
+
+**功能面零改动**：端点、表结构、页面、契约、权限码全部未动。
