@@ -103,7 +103,7 @@ backend/**/target/
 # Python 字节码 — codegen 的单测用 importlib 加载 tools/codegen/catalog-contracts.py，
 # 跑一次 `pnpm test:codegen` 就会生成它。不忽略的话，脏工作区会挡住 lane.mjs land，
 # 也可能被 `git add -A` 误提交进版本库。
-# tools/module-progress/json-format.py 由 python3 执行
+# 另外 tools/module-progress/json-format.py 由 python3 执行，同样会生成 __pycache__。
 __pycache__/
 *.py[cod]
 
