@@ -20860,6 +20860,778 @@
         },
         "type": "object"
       },
+      "ComplianceAppeal": {
+        "properties": {
+          "appealId": {
+            "type": "string"
+          },
+          "appealText": {
+            "type": "string"
+          },
+          "appealType": {
+            "type": "string"
+          },
+          "appealTypeLabel": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "decisionCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "evidenceCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "impactLabel": {
+            "type": "string"
+          },
+          "impactLevel": {
+            "type": "string"
+          },
+          "lastDecidedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "lastOutcome": {
+            "type": "string"
+          },
+          "lastOutcomeLabel": {
+            "type": "string"
+          },
+          "lastOutcomeReason": {
+            "type": "string"
+          },
+          "nextStatuses": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "shopCode": {
+            "type": "string"
+          },
+          "shopId": {
+            "type": "string"
+          },
+          "shopName": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "submissionCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "submittedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "violationId": {
+            "type": "string"
+          },
+          "violationTitle": {
+            "type": "string"
+          },
+          "violationType": {
+            "type": "string"
+          },
+          "violationTypeLabel": {
+            "type": "string"
+          },
+          "withdrawnAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ComplianceAppealCapabilities": {
+        "properties": {
+          "appealTypeLabels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "appealTypes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "appendOnlySemantics": {
+            "type": "string"
+          },
+          "downstreamNote": {
+            "type": "string"
+          },
+          "evidenceTypeLabels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "evidenceTypes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "gaps": {
+            "items": {
+              "$ref": "#/components/schemas/ComplianceAppealCapabilityGap"
+            },
+            "type": "array"
+          },
+          "impactLevels": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "outcomeLabels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "outcomes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "priorityNote": {
+            "type": "string"
+          },
+          "quotaNote": {
+            "type": "string"
+          },
+          "stateMachineSemantics": {
+            "type": "string"
+          },
+          "statusLabels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "statusTransitions": {
+            "additionalProperties": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "type": "object"
+          },
+          "statuses": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "typeDomainNote": {
+            "type": "string"
+          },
+          "upstreamNote": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ComplianceAppealCapabilityGap": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "impact": {
+            "type": "string"
+          },
+          "moduleId": {
+            "type": "string"
+          },
+          "moduleName": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ComplianceAppealCreateInput": {
+        "properties": {
+          "appealText": {
+            "type": "string"
+          },
+          "appealType": {
+            "type": "string"
+          },
+          "violationId": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ComplianceAppealDecision": {
+        "properties": {
+          "appealId": {
+            "type": "string"
+          },
+          "decidedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "decisionId": {
+            "type": "string"
+          },
+          "outcome": {
+            "type": "string"
+          },
+          "outcomeLabel": {
+            "type": "string"
+          },
+          "platformReference": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ComplianceAppealDecisionInput": {
+        "properties": {
+          "decidedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "outcome": {
+            "type": "string"
+          },
+          "platformReference": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ComplianceAppealDecisionResult": {
+        "properties": {
+          "appeal": {
+            "$ref": "#/components/schemas/ComplianceAppeal"
+          },
+          "decision": {
+            "$ref": "#/components/schemas/ComplianceAppealDecision"
+          },
+          "note": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ComplianceAppealDetail": {
+        "properties": {
+          "appeal": {
+            "$ref": "#/components/schemas/ComplianceAppeal"
+          },
+          "decisions": {
+            "items": {
+              "$ref": "#/components/schemas/ComplianceAppealDecision"
+            },
+            "type": "array"
+          },
+          "evidence": {
+            "items": {
+              "$ref": "#/components/schemas/ComplianceAppealEvidence"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "quota": {
+            "$ref": "#/components/schemas/ComplianceAppealQuota"
+          },
+          "submissions": {
+            "items": {
+              "$ref": "#/components/schemas/ComplianceAppealSubmission"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "ComplianceAppealEvidence": {
+        "properties": {
+          "appealId": {
+            "type": "string"
+          },
+          "evidenceId": {
+            "type": "string"
+          },
+          "evidenceRef": {
+            "type": "string"
+          },
+          "evidenceType": {
+            "type": "string"
+          },
+          "submittedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ComplianceAppealEvidenceInput": {
+        "properties": {
+          "evidenceRef": {
+            "type": "string"
+          },
+          "evidenceType": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ComplianceAppealPage": {
+        "properties": {
+          "approvedCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "draftCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ComplianceAppeal"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "rejectedCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "submissionCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "submittedCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "withdrawnCount": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ComplianceAppealPriorityCandidate": {
+        "properties": {
+          "appealable": {
+            "type": "boolean"
+          },
+          "deadline": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "impactLabel": {
+            "type": "string"
+          },
+          "impactLevel": {
+            "type": "string"
+          },
+          "occurredAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "openAppealId": {
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "quotaConfigured": {
+            "type": "boolean"
+          },
+          "quotaRemaining": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "shopCode": {
+            "type": "string"
+          },
+          "shopId": {
+            "type": "string"
+          },
+          "shopName": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "violationId": {
+            "type": "string"
+          },
+          "violationStatus": {
+            "type": "string"
+          },
+          "violationType": {
+            "type": "string"
+          },
+          "violationTypeLabel": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ComplianceAppealPriorityPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ComplianceAppealPriorityCandidate"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ComplianceAppealQuota": {
+        "properties": {
+          "configured": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          },
+          "periodEnd": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "periodStart": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "quotaLimit": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "remaining": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "shopCode": {
+            "type": "string"
+          },
+          "shopId": {
+            "type": "string"
+          },
+          "shopName": {
+            "type": "string"
+          },
+          "usedCount": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ComplianceAppealQuotaInput": {
+        "properties": {
+          "periodEnd": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "periodStart": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "quotaLimit": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "shopId": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ComplianceAppealQuotaPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ComplianceAppealQuota"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ComplianceAppealQuotaUpdate": {
+        "properties": {
+          "created": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          },
+          "quota": {
+            "$ref": "#/components/schemas/ComplianceAppealQuota"
+          }
+        },
+        "type": "object"
+      },
+      "ComplianceAppealShop": {
+        "properties": {
+          "appealCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "openAppealCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "platformName": {
+            "type": "string"
+          },
+          "quotaLimit": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "quotaRemaining": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "quotaUsed": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "shopCode": {
+            "type": "string"
+          },
+          "shopId": {
+            "type": "string"
+          },
+          "shopName": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ComplianceAppealShopPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ComplianceAppealShop"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ComplianceAppealStats": {
+        "properties": {
+          "approvedCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "byStatus": {
+            "additionalProperties": {
+              "format": "int64",
+              "type": "integer"
+            },
+            "type": "object"
+          },
+          "byType": {
+            "additionalProperties": {
+              "format": "int64",
+              "type": "integer"
+            },
+            "type": "object"
+          },
+          "note": {
+            "type": "string"
+          },
+          "quota": {
+            "$ref": "#/components/schemas/ComplianceAppealQuota"
+          },
+          "rejectedCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "shopId": {
+            "type": "string"
+          },
+          "totalAppeals": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalSubmissions": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ComplianceAppealSubmission": {
+        "properties": {
+          "appealId": {
+            "type": "string"
+          },
+          "attemptNo": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "platformReference": {
+            "type": "string"
+          },
+          "submissionId": {
+            "type": "string"
+          },
+          "submittedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ComplianceAppealSubmissionResult": {
+        "properties": {
+          "appeal": {
+            "$ref": "#/components/schemas/ComplianceAppeal"
+          },
+          "attemptNo": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "quota": {
+            "$ref": "#/components/schemas/ComplianceAppealQuota"
+          },
+          "submission": {
+            "$ref": "#/components/schemas/ComplianceAppealSubmission"
+          }
+        },
+        "type": "object"
+      },
+      "ComplianceAppealSubmitInput": {
+        "properties": {
+          "note": {
+            "type": "string"
+          },
+          "platformReference": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ComplianceAppealTextInput": {
+        "properties": {
+          "appealText": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ComplianceAppealWithdrawInput": {
+        "properties": {
+          "note": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "CompliancePrecheckCapabilities": {
         "properties": {
           "boundaryNote": {
@@ -99912,6 +100684,800 @@
         },
         "tags": [
           "performance-metric-controller"
+        ]
+      }
+    },
+    "/channel/platform-appeals/appeals": {
+      "get": {
+        "operationId": "get_channel_platform_appeals_appeals",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "shopId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "appealType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "violationId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "impactLevel",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "required": false,
+            "schema": {
+              "default": "priority",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ComplianceAppealPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "compliance-appeal-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_channel_platform_appeals_appeals",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ComplianceAppealCreateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ComplianceAppeal"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "compliance-appeal-controller"
+        ]
+      }
+    },
+    "/channel/platform-appeals/appeals/{id}": {
+      "get": {
+        "operationId": "get_channel_platform_appeals_appeals_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ComplianceAppealDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "compliance-appeal-controller"
+        ]
+      }
+    },
+    "/channel/platform-appeals/appeals/{id}/decision": {
+      "post": {
+        "operationId": "post_channel_platform_appeals_appeals_id_decision",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ComplianceAppealDecisionInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ComplianceAppealDecisionResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "compliance-appeal-controller"
+        ]
+      }
+    },
+    "/channel/platform-appeals/appeals/{id}/evidence": {
+      "post": {
+        "operationId": "post_channel_platform_appeals_appeals_id_evidence",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ComplianceAppealEvidenceInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ComplianceAppealEvidence"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "compliance-appeal-controller"
+        ]
+      }
+    },
+    "/channel/platform-appeals/appeals/{id}/reopen": {
+      "post": {
+        "operationId": "post_channel_platform_appeals_appeals_id_reopen",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ComplianceAppeal"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "compliance-appeal-controller"
+        ]
+      }
+    },
+    "/channel/platform-appeals/appeals/{id}/submit": {
+      "post": {
+        "operationId": "post_channel_platform_appeals_appeals_id_submit",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ComplianceAppealSubmitInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ComplianceAppealSubmissionResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "compliance-appeal-controller"
+        ]
+      }
+    },
+    "/channel/platform-appeals/appeals/{id}/text": {
+      "put": {
+        "operationId": "put_channel_platform_appeals_appeals_id_text",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ComplianceAppealTextInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ComplianceAppeal"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "compliance-appeal-controller"
+        ]
+      }
+    },
+    "/channel/platform-appeals/appeals/{id}/withdraw": {
+      "post": {
+        "operationId": "post_channel_platform_appeals_appeals_id_withdraw",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ComplianceAppealWithdrawInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ComplianceAppeal"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "compliance-appeal-controller"
+        ]
+      }
+    },
+    "/channel/platform-appeals/capabilities": {
+      "get": {
+        "operationId": "get_channel_platform_appeals_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ComplianceAppealCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "compliance-appeal-controller"
+        ]
+      }
+    },
+    "/channel/platform-appeals/priority-queue": {
+      "get": {
+        "operationId": "get_channel_platform_appeals_priority_queue",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "shopId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "appealableOnly",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ComplianceAppealPriorityPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "compliance-appeal-controller"
+        ]
+      }
+    },
+    "/channel/platform-appeals/quotas": {
+      "get": {
+        "operationId": "get_channel_platform_appeals_quotas",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "shopId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ComplianceAppealQuotaPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "compliance-appeal-controller"
+        ]
+      },
+      "put": {
+        "operationId": "put_channel_platform_appeals_quotas",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ComplianceAppealQuotaInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ComplianceAppealQuotaUpdate"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "compliance-appeal-controller"
+        ]
+      }
+    },
+    "/channel/platform-appeals/shops": {
+      "get": {
+        "operationId": "get_channel_platform_appeals_shops",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "platformCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "shopId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ComplianceAppealShopPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "compliance-appeal-controller"
+        ]
+      }
+    },
+    "/channel/platform-appeals/stats": {
+      "get": {
+        "operationId": "get_channel_platform_appeals_stats",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "shopId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ComplianceAppealStats"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "compliance-appeal-controller"
         ]
       }
     },
