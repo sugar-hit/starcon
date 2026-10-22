@@ -5624,6 +5624,77 @@ const services: readonly {
       /^message\-inbox(?:\/(?:capabilities|shops|options|platforms|batch|sync)|\/messages(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?)$/,
   },
   {
+    // 15.1.1.2 消息发送（crm 服务，卷 15 的 L3 锚点 15.1.1）。
+    //
+    // 蓝图：「回复买家消息：调用模板、手工编辑、附件支持、发送记录、失败重试；
+    //   支持批量相同回复（同类问题）。输出：发送记录 + 平台回执 + 失败原因。
+    //   **发送失败要保留原消息状态**，不能让客服以为已回复。」
+    //
+    // 本条目是**新增一条 services[] 元素**，不是往既有 crm 分支的 alternation 里并 ——
+    // 既有 crm 分支分别是 `^knowledge\/...$`（15.4.2.1 客服知识库）、
+    // `^message-inbox...$`（15.1.1.1 消息收件箱）、`^buyer-emails...$`（15.1.2.1 邮件收发）、
+    // `^review-requests...$`（15.2.2.1 索评）、`^review-rules...$`（15.2.2.2 索评规则）、
+    // `^cart-recovery...$`（15.6.2.2 弃单挽回），首 token 都与 `message-sends` 不同，互不吃掉。
+    //
+    // ---- 插入锚点 ----
+    //   固定在 **`prefix: 'crm/'` 的 `^message\-inbox...$`（15.1.1.1 消息收件箱）那条元素之后**。
+    //   本批另三条车道的锚点分别是：`^reviews...` 之后（15.2.1.2）、`^customer\-tags...` 之后
+    //   （15.3.2.2）、channel 的 `^ad\-rules...` 之后（16.1.1.1）—— **四个锚点互不重叠**，
+    //   并入时 git 能干净求并；既有条目**一字未动、也不重排**。
+    //
+    // ---- 首 token「message-sends」的零命中核对结论 ----
+    //   本文件既有 190+ 条 services[] 正则里**没有任何一条**含 `message-sends` 这个串
+    //   （`grep -c -- "message-sends" apps/web/src/lib/api-proxy.ts` = 0）。
+    //   含 `message` 的只有两处，且都**不可能**吃掉本条目：
+    //   ① `aftersales/cases/{uuid}/messages`（11.1.1.2 售后单详情，**活着的正则**）——
+    //      首 token 是 `aftersales`，挂在 `prefix: 'trade/'` 下；
+    //   ② `service-tickets/{uuid}/messages` —— 只出现在 15.4 工单那条的**注释**里。
+    //   且既有正则都是**锚定**的（`^token(...)?$`），而 `resolve()` 先按
+    //   `path.startsWith(service.prefix)` 收窄服务、再判别正则 ⇒ 只有 prefix='crm/' 的
+    //   元素才有机会吃到 `crm/message-sends/...`，而本文件里 prefix='crm/' 的另外几条
+    //   正则**不可能**匹配 `message-sends/...` ⇒ 首 token 不同即可，互不遮蔽。
+    //
+    // 形状逐条列出（**只放行本模块真实实现的路径**）：
+    //   message-sends/capabilities            能力声明（逐维 available + ownerModule + impact）
+    //   message-sends/templates               回复模板集合（GET 真分页真筛选 / POST 新建）
+    //   message-sends/templates/{uuid}        单条模板（GET 详情 / PUT 更新 / DELETE 删除）
+    //   message-sends/knowledge-templates     知识库话术来源（15.4.2 上游，只列生效版本）
+    //   message-sends/targets                 可回复的目标消息（GET，带推导出的已回复状态）
+    //   message-sends/sends                   发送记录集合（GET 真分页真筛选）/ 登记（POST）
+    //   message-sends/sends/{uuid}            单条发送记录详情（GET）
+    //   message-sends/sends/{uuid}/result     登记投递结果（POST，人工交接）
+    //   message-sends/sends/{uuid}/retry      失败重试（POST，开一次新的尝试）
+    //   message-sends/batch                   批量相同回复（POST，逐条给出结论与原因）
+    //
+    // 判别顺序：**字面量子路径（capabilities / knowledge-templates / targets / batch）
+    // 排在 {uuid} 段之前** —— alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    // `templates` 与 `sends` 两支**自带**可选的 {uuid} 段（`templates/{uuid}` 是真实形状），
+    // 它们与裸 {uuid} 支首字符不同，互不吃掉。
+    // id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    // （不是 `[0-9a-f-]+`）：后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸路径 `message-sends` —— 后端**没有**这个映射（集合在 `sends` 与 `templates` 上），
+    //     所以末尾**刻意不带 `?`**：带了就把裸路径一起放行，而那是一个不存在的端点。
+    //   * `message-sends/sends/{uuid}/classify` —— 15.1.1.3 消息分类**未交付**。
+    //   * `message-sends/sends/{uuid}/auto-reply` —— 15.5.1 自动回复**未交付**，
+    //     本模块的发送全部由**人工**发起。
+    //   * `message-sends/sends/{uuid}/after-sales` / `/tickets` ——
+    //     11 售后与 15.4 工单**未交付**，本模块不写下游单据、不编下游单号。
+    //   * `message-sends/sends/{uuid}/delete` —— 发送记录是纠纷举证材料，不提供删除。
+    //   * `message-sends/sends/{uuid}/attachments/{attachmentId}` ——
+    //     附件按发送记录整体读，不按单条附件寻址（后端没有这个映射）。
+    //   * `message-sends/capabilities/{uuid}` / `/targets/{uuid}` / `/knowledge-templates/{uuid}` ——
+    //     这三个是能力声明与目录，**不按 id 寻址**，所以那段后缀是**必需**的
+    //     （写成可选会让裸的 `capabilities/{uuid}` 一起通过）。
+    //   * 非 UUID 段 —— `message-sends/sends/not-a-uuid` 必须 404。
+    prefix: 'crm/',
+    env: 'CRM_URL',
+    fallback: 'http://127.0.0.1:8086',
+    pattern:
+      /^message\-sends(?:\/(?:capabilities|knowledge\-templates|targets|batch)|\/templates(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|\/sends(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:result|retry))?)?)$/,
+  },
+  {
     // 16.4.2.1 品牌授权（channel 服务，卷 16 的 L3 锚点 16.4.2）。
     //
     // 蓝图：「管理品牌授权：授权方、授权范围（店铺/国家/类目/期限）、授权文件、被授权主体，
