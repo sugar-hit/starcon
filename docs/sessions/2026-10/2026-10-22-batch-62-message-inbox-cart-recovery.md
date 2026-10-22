@@ -1,17 +1,19 @@
 # 2026-10-22 batch-62 —— 15.1.1.1 消息收件箱 + 15.6.2.2 购物车与弃单挽回
 
-> ⚠️ **本文件是「补记」**：这四条模块已进入集成头，但**尚未经过批次 L2 全量验证** ——
-> 2026-10-22 那一轮 L2 **跑了，但红在 batch 之外的 warehouse 既有测试**（墙钟依赖），
-> 根因与处置见文末「本批的异常与处置」与
-> [`docs/backlog/2026-10-22-in-transit-eta-test-wall-clock-dependency.md`](../../backlog/2026-10-22-in-transit-eta-test-wall-clock-dependency.md)。
-> 说明先写、commit 先做（协议要求），**push 等 L2 转绿了再一起推**。
+> ✅ **本批已通过批次 L2 全量验证**（2026-10-22 11:57:49 → 12:43:17，
+> 日志 `.dev-agent/l2-run-batch-62-rerun2.log`）：后端 `mvnw verify` **绿**，
+> reactor 七模块**全部 SUCCESS**（含**第一次真正跑到**的 crm 段：`Tests run: 195, Failures: 0`），
+> 前端四段（typecheck / lint / vitest / Next build）与 `sync --check` **全部通过**。
+> 详见文末「L2 第二次重跑：✅ 绿」。
 >
-> 🔴 **本轮（10:20–11:04）L2 重跑后状态**：warehouse 的墙钟缺陷**已修复并通过**，
-> L2 第一次**跑过了 warehouse**，但**又红在 trade 的既有缺陷**上
-> ⇒ **crm 段仍被 Maven fail-fast 跳过（这已是第三轮没跑到 crm 的后端测试）**，
-> 前端四段（typecheck / lint / vitest / Next build）**依然一次都没执行过**。
-> 详见文末「本批的 L2 重跑（2026-10-22 10:20 起）」与
-> [`docs/backlog/2026-10-22-trade-replenishment-upstream-404-flake.md`](../../backlog/2026-10-22-trade-replenishment-upstream-404-flake.md)。
+> 本文件最初是「补记」—— 当时 L2 连续两轮红在 batch 之外的既有缺陷上
+> （warehouse 墙钟依赖、trade 补货建议上游 404），**说明先写、commit 先做、成果留本地**。
+> 那两个既有缺陷已各自派修复车道闭环（`10.4.1.2` / `6.2.1.2`），
+> 绿之后本批连同这两条修复一并推送到 `origin/integration/module-dev`。
+> 缺陷复盘见
+> [`docs/backlog/2026-10-22-in-transit-eta-test-wall-clock-dependency.md`](../../backlog/2026-10-22-in-transit-eta-test-wall-clock-dependency.md)、
+> [`docs/backlog/2026-10-22-trade-replenishment-upstream-404-flake.md`](../../backlog/2026-10-22-trade-replenishment-upstream-404-flake.md)、
+> [`docs/backlog/2026-10/2026-10-22-concurrent-build-same-worktree-target-collision.md`](../../backlog/2026-10/2026-10-22-concurrent-build-same-worktree-target-collision.md)。
 
 ---
 
@@ -352,9 +354,87 @@
 → **禁止**放宽断言 / `@Disabled` / `assumeTrue` / 减例数 / 改领域规则 / 动别人车道的文件。
 修复车道落地后，下一轮 L2 跑完整个 reactor（后端 → 前端四段）即可转绿并 push。
 
+### 修复车道 `6.2.1.2` 落地（已并入）
+
+- commit `a1d00226`（5 个文件：新增 `trade/src/test/resources/application.properties` 兜底把上游地址改哨兵
+  `http://127.0.0.1:1`、新增 `TradeUpstreamAddressIsolationTest` 3 例、2 份 backlog/会话日志、台账证据列更新），
+  并入 commit `83d66230`；
+- **生产代码一行未动**，**断言未弱化**，整模块 trade 验证 `Tests run: 2383, Failures: 0`（2380 不减 +3 新例）。
+
+### L2 第二次重跑：✅ 绿（11:57:49 → 12:43:17）
+
+日志 `.dev-agent/l2-run-batch-62-rerun2.log`。**这一轮跑完了整个 reactor + 前端四段** ——
+前几轮从未执行过的后半段全部真正跑过一遍。
+
+| 段 | 结果 |
+| --- | --- |
+| 后端 `mvnw verify` | ✅ `MVN_EXIT=0`（`Total time: 43:35 min`） |
+| reactor | ✅ tenancy / identity / catalog / channel / warehouse / trade / **crm** **全部 SUCCESS**，**无一 SKIPPED** |
+| crm 段 | ✅ `Tests run: 195, Failures: 0, Errors: 0, Skipped: 0` —— **本批 4 条 crm 车道第一次被 L2 真正跑到** |
+| trade 段 | ✅ `ReplenishmentSuggestionTenancyIntegrationTest` **4/4 绿**（上一轮那三条 503 全绿） |
+| typecheck / lint / pnpm test / Next build / sync --check | ✅ `TYPECHECK_EXIT=0` `LINT_EXIT=0` `TEST_EXIT=0` `BUILD_EXIT=0` `SYNCCHECK_EXIT=0` |
+
+reactor 摘要原文：
+
+```
+[INFO] identity ........................................... SUCCESS [01:17 min]
+[INFO] catalog ............................................ SUCCESS [05:15 min]
+[INFO] channel ............................................ SUCCESS [09:29 min]
+[INFO] warehouse .......................................... SUCCESS [11:43 min]
+[INFO] trade .............................................. SUCCESS [15:15 min]
+[INFO] crm ................................................ SUCCESS [ 34.124 s]
+[INFO] Total time:  43:35 min
+```
+
+crm 段逐类结果（本批 4 条新车道加粗）：
+
+| 测试类 | 例数 | 结果 |
+| --- | --- | --- |
+| **MessageInboxIntegrationTest**（15.1.1.1） | 19 | ✅ |
+| **MessageInboxTenancyIntegrationTest**（15.1.1.1 租户） | 4 | ✅ |
+| **ProductReviewIntegrationTest**（15.2.1.1） | 21 | ✅ |
+| **ProductReviewTenancyIntegrationTest**（15.2.1.1 租户） | 4 | ✅ |
+| **CustomerTagIntegrationTest**（15.3.2.1） | 16 | ✅ |
+| **CustomerTagTenancyIntegrationTest**（15.3.2.1 租户） | 4 | ✅ |
+| **CartRecoveryIntegrationTest**（15.6.2.2） | 28 | ✅ |
+| **CartRecoveryTenancyIntegrationTest**（15.6.2.2 租户） | 4 | ✅ |
+| 其余 9 个既有 crm 测试类 | 95 | ✅ |
+
+⇒ **「crm 段连续三轮被 fail-fast 跳过」这个状态到此结束**：
+本批 4 条车道的后端测试（含各自的 RLS 三断言租户用例）第一次被全量 reactor 验证。
+
+### 两条修复车道都验证到位
+
+- `10.4.1.2`（warehouse 墙钟）：warehouse 段 `SUCCESS [11:43 min]` —— 上一轮就是死在这一段。
+- `6.2.1.2`（trade 补货建议）：`ReplenishmentSuggestionTenancyIntegrationTest` 4/4 绿。
+
+### 本轮 L2 的纪律：同 worktree 无并发构建
+
+起跑前确认该 worktree 只有自己一条 maven 进程；期间无第二进程。
+与 11:15 的 main→module-dev 同步任务**事先协调**（对方确认守闸、不构建、不 push）
+⇒ 本轮 `target/` 未被第二方覆盖 ⇒ **原始 surefire 报告仍在磁盘上**（这正是上一轮做不到的事）。
+
 ---
 
 ## 台账
 
 `sync.mjs` 复核：**465 行、0 重复**；已交付 **316** / 进行中 0 / 未开发 **149**。
 四条新模块行的行尾 `|` 均正常（7 根竖线），不触发「缺尾随竖线静默抹除交付记录」那条 backlog。
+
+## 收尾三件套
+
+| # | 动作 | 状态 |
+| --- | --- | --- |
+| 1 | **写说明**（本文件） | ✅ 本文件；台账变更与说明**同一 commit** |
+| 2 | **commit** | ✅ 本 commit 即为批次成果（`docs/` + 台账） |
+| 3 | **push** | ✅ 推送 `origin/integration/module-dev`（**非 main**）；推送后远端指向本 commit |
+
+推送前置条件（已逐条核对）：
+
+- `git merge-base --is-ancestor origin/integration/module-dev HEAD` ⇒ **可快进**，无强推、无 merge commit；
+- 工作区干净（`git status --porcelain` 空）；
+- `node tools/module-progress/sync.mjs --check` ⇒ 绿；
+- L2 六段全绿（`MVN_EXIT` / `TYPECHECK_EXIT` / `LINT_EXIT` / `TEST_EXIT` / `BUILD_EXIT` / `SYNCCHECK_EXIT` 均为 0）。
+
+> ⚠️ 推送**不包含**本机 `target/`、`.next`、日志等构建产物；
+> `.dev-agent/l2-run-batch-62-rerun2.log` 是本地证据，未入库。
