@@ -3,6 +3,7 @@ package com.starcon.channel;
 import static com.starcon.channel.ListingPublishJobModels.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.starcon.channel.ComplianceInterceptModels.ComplianceInterceptFieldInput;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -62,16 +63,19 @@ public class ListingPublishJobService {
   private final ObjectMapper json;
   private final ListingPublishContentResolver resolver;
   private final SellableQuantityQueryPort sellable;
+  private final ComplianceInterceptService intercept;
 
   public ListingPublishJobService(
       DSLContext sql,
       ObjectMapper json,
       ListingPublishContentResolver resolver,
-      SellableQuantityQueryPort sellable) {
+      SellableQuantityQueryPort sellable,
+      ComplianceInterceptService intercept) {
     this.sql = sql;
     this.json = json;
     this.resolver = resolver;
     this.sellable = sellable;
+    this.intercept = intercept;
   }
 
   // ==================================================================
@@ -818,8 +822,15 @@ public class ListingPublishJobService {
     List<ListingPublishDispatchEntry> entries = new ArrayList<>();
     for (Record target : targets) {
       UUID targetId = target.get("id", UUID.class);
+      // 🔴🔴 16.2.1.2 服务端合规闸门：派发**之前**读服务端结论。
+      //   判定凭据写在 savepoint **之外** ⇒ 目标被拦下时那次判定仍然留得住
+      //   （写在 savepoint 里会跟着回滚滚没 —— 那就没有凭据可查了）。
+      String complianceBlock = complianceBlockReason(tenant, job, target);
       sql.execute("savepoint publish_target");
       try {
+        if (complianceBlock != null) {
+          throw new IllegalStateException(complianceBlock);
+        }
         dispatchTarget(tenant, job, target);
         sql.execute("release savepoint publish_target");
         entries.add(
@@ -863,6 +874,42 @@ public class ListingPublishJobService {
         refreshed == null ? "DRAFT" : refreshed.get("state", String.class),
         entries,
         progress(tenant, jobId));
+  }
+
+  /**
+   * 🔴🔴 16.2.1.2 合规闸门：派发 / 重试之前问一次服务端结论。
+   *
+   * <p>返回 {@code null} = 放行；返回非空 = 阻断原因（人话，含逐条原因）。
+   *
+   * <p>被校验的内容取自**目标行冻结的内容快照**（标题 / 描述 / 卖点）——
+   * 不是「现在长什么样」，而是「当时发的是什么」：内容快照本身在 DB 层不可改写。
+   *
+   * <p>🔴 拦截**默认不生效**（租户没在 16.2.1.2 开启对应拦截点就不拦）——
+   * 把「还没开合规」当成「违规」会让刊登链一步都走不动。
+   */
+  private String complianceBlockReason(UUID tenant, Record job, Record target) {
+    ListingPublishContentSnapshot snapshot = readSnapshot(target.get("content_snapshot"));
+    List<ComplianceInterceptFieldInput> fields = new ArrayList<>();
+    if (snapshot != null) {
+      if (snapshot.title() != null) {
+        fields.add(new ComplianceInterceptFieldInput("TITLE", snapshot.title()));
+      }
+      if (snapshot.description() != null) {
+        fields.add(new ComplianceInterceptFieldInput("DESCRIPTION", snapshot.description()));
+      }
+      if (snapshot.bullets() != null && !snapshot.bullets().isEmpty()) {
+        fields.add(
+            new ComplianceInterceptFieldInput("BULLETS", String.join("\n", snapshot.bullets())));
+      }
+    }
+    return intercept.enforceListingPublish(
+        tenant,
+        job.get("source_sku_id", UUID.class),
+        target.get("shop_id", UUID.class),
+        target.get("platform_id", UUID.class),
+        target.get("marketplace_id", UUID.class),
+        fields,
+        List.of());
   }
 
   /** 一个目标的派发：生成 2.5.1.1 的回写任务 + 把目标推进到「审核中」。 */
@@ -1076,8 +1123,15 @@ public class ListingPublishJobService {
       throw notFound();
     }
 
+    // 🔴🔴 16.2.1.2 合规闸门：重试也要读服务端结论
+    //   （内容快照不变，但**豁免可能刚被批准** —— 批了就该放行）。
+    //   判定凭据写在 savepoint **之外** ⇒ 被拦下时那次判定仍然留得住。
+    String complianceBlock = complianceBlockReason(tenant, job, target);
     sql.execute("savepoint publish_target");
     try {
+      if (complianceBlock != null) {
+        throw new IllegalStateException(complianceBlock);
+      }
       UUID operationId = enqueuePlatformOperation(tenant, job, target);
       sql.execute(
           """

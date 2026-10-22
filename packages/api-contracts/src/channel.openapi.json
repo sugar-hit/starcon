@@ -21632,6 +21632,597 @@
         },
         "type": "object"
       },
+      "ComplianceInterceptCapabilities": {
+        "properties": {
+          "conclusionLabels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "conclusionNote": {
+            "type": "string"
+          },
+          "conclusions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "downstreamNote": {
+            "type": "string"
+          },
+          "enforcementNote": {
+            "type": "string"
+          },
+          "exemptionNote": {
+            "type": "string"
+          },
+          "exemptionStatusLabels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "exemptionStatuses": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "gaps": {
+            "items": {
+              "$ref": "#/components/schemas/ComplianceInterceptCapabilityGap"
+            },
+            "type": "array"
+          },
+          "reasonCodeLabels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "reasonCodes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "sceneLabels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "scenes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "subjectTypeLabels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "subjectTypes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "upstreamNote": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ComplianceInterceptCapabilityGap": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "impact": {
+            "type": "string"
+          },
+          "moduleId": {
+            "type": "string"
+          },
+          "moduleName": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ComplianceInterceptDecision": {
+        "properties": {
+          "blocked": {
+            "type": "boolean"
+          },
+          "blockingReasonCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "conclusion": {
+            "type": "string"
+          },
+          "conclusionLabel": {
+            "type": "string"
+          },
+          "decidedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "decidedBy": {
+            "type": "string"
+          },
+          "decisionId": {
+            "type": "string"
+          },
+          "exemptions": {
+            "items": {
+              "$ref": "#/components/schemas/ComplianceInterceptExemptionRef"
+            },
+            "type": "array"
+          },
+          "marketplaceId": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "platformId": {
+            "type": "string"
+          },
+          "reasonCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "reasons": {
+            "items": {
+              "$ref": "#/components/schemas/ComplianceInterceptReasonRow"
+            },
+            "type": "array"
+          },
+          "releaseGranted": {
+            "type": "boolean"
+          },
+          "remedies": {
+            "items": {
+              "$ref": "#/components/schemas/ComplianceInterceptRemedy"
+            },
+            "type": "array"
+          },
+          "ruleCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "scene": {
+            "type": "string"
+          },
+          "sceneLabel": {
+            "type": "string"
+          },
+          "shopId": {
+            "type": "string"
+          },
+          "subjectId": {
+            "type": "string"
+          },
+          "subjectType": {
+            "type": "string"
+          },
+          "subjectTypeLabel": {
+            "type": "string"
+          },
+          "undecidableReasonCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "waivedReasonCount": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ComplianceInterceptDecisionInput": {
+        "properties": {
+          "note": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ComplianceInterceptDecisionPage": {
+        "properties": {
+          "blockCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ComplianceInterceptDecision"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "passCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "undecidableCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "warnCount": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ComplianceInterceptEvaluateInput": {
+        "properties": {
+          "fields": {
+            "items": {
+              "$ref": "#/components/schemas/ComplianceInterceptFieldInput"
+            },
+            "type": "array"
+          },
+          "marketplaceId": {
+            "type": "string"
+          },
+          "platformId": {
+            "type": "string"
+          },
+          "requirements": {
+            "items": {
+              "$ref": "#/components/schemas/ComplianceInterceptRequirementInput"
+            },
+            "type": "array"
+          },
+          "scene": {
+            "type": "string"
+          },
+          "shopId": {
+            "type": "string"
+          },
+          "subjectId": {
+            "type": "string"
+          },
+          "subjectType": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ComplianceInterceptExemptionInput": {
+        "properties": {
+          "reason": {
+            "type": "string"
+          },
+          "ruleId": {
+            "type": "string"
+          },
+          "scene": {
+            "type": "string"
+          },
+          "subjectId": {
+            "type": "string"
+          },
+          "subjectType": {
+            "type": "string"
+          },
+          "validFrom": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "validTo": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ComplianceInterceptExemptionPage": {
+        "properties": {
+          "approvedCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "effectiveCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ComplianceInterceptExemptionRow"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "pendingCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "rejectedCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ComplianceInterceptExemptionRef": {
+        "properties": {
+          "exemptionId": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "ruleCode": {
+            "type": "string"
+          },
+          "ruleId": {
+            "type": "string"
+          },
+          "validFrom": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "validTo": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ComplianceInterceptExemptionRow": {
+        "properties": {
+          "applicantId": {
+            "type": "string"
+          },
+          "applicantReason": {
+            "type": "string"
+          },
+          "approverId": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "decidable": {
+            "type": "boolean"
+          },
+          "decidedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "decisionNote": {
+            "type": "string"
+          },
+          "effective": {
+            "type": "boolean"
+          },
+          "exemptionId": {
+            "type": "string"
+          },
+          "expired": {
+            "type": "boolean"
+          },
+          "ruleCode": {
+            "type": "string"
+          },
+          "ruleId": {
+            "type": "string"
+          },
+          "ruleTitle": {
+            "type": "string"
+          },
+          "scene": {
+            "type": "string"
+          },
+          "sceneLabel": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "subjectId": {
+            "type": "string"
+          },
+          "subjectType": {
+            "type": "string"
+          },
+          "subjectTypeLabel": {
+            "type": "string"
+          },
+          "validFrom": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "validTo": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ComplianceInterceptFieldInput": {
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ComplianceInterceptPolicyInput": {
+        "properties": {
+          "enabled": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "undecidableAction": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ComplianceInterceptPolicyRow": {
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          },
+          "scene": {
+            "type": "string"
+          },
+          "sceneLabel": {
+            "type": "string"
+          },
+          "undecidableAction": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ComplianceInterceptPolicySet": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ComplianceInterceptPolicyRow"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ComplianceInterceptReasonRow": {
+        "properties": {
+          "exemptionId": {
+            "type": "string"
+          },
+          "fieldKey": {
+            "type": "string"
+          },
+          "matchedTerm": {
+            "type": "string"
+          },
+          "reasonCode": {
+            "type": "string"
+          },
+          "reasonCodeLabel": {
+            "type": "string"
+          },
+          "reasonId": {
+            "type": "string"
+          },
+          "reasonText": {
+            "type": "string"
+          },
+          "ruleCode": {
+            "type": "string"
+          },
+          "ruleId": {
+            "type": "string"
+          },
+          "ruleType": {
+            "type": "string"
+          },
+          "ruleVersionId": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string"
+          },
+          "undecidable": {
+            "type": "boolean"
+          },
+          "waived": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "ComplianceInterceptRemedy": {
+        "properties": {
+          "canApplyExemption": {
+            "type": "boolean"
+          },
+          "reasonCode": {
+            "type": "string"
+          },
+          "remedy": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ComplianceInterceptRequirementInput": {
+        "properties": {
+          "evidence": {
+            "type": "string"
+          },
+          "ruleCode": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "CompliancePrecheckCapabilities": {
         "properties": {
           "boundaryNote": {
@@ -79613,6 +80204,553 @@
         },
         "tags": [
           "carrier-controller"
+        ]
+      }
+    },
+    "/channel/compliance-intercepts/capabilities": {
+      "get": {
+        "operationId": "get_channel_compliance_intercepts_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ComplianceInterceptCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "compliance-intercept-controller"
+        ]
+      }
+    },
+    "/channel/compliance-intercepts/decisions": {
+      "get": {
+        "operationId": "get_channel_compliance_intercepts_decisions",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "scene",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "subjectType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "conclusion",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "subjectId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "shopId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ComplianceInterceptDecisionPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "compliance-intercept-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_channel_compliance_intercepts_decisions",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ComplianceInterceptEvaluateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ComplianceInterceptDecision"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "compliance-intercept-controller"
+        ]
+      }
+    },
+    "/channel/compliance-intercepts/decisions/{id}": {
+      "get": {
+        "operationId": "get_channel_compliance_intercepts_decisions_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ComplianceInterceptDecision"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "compliance-intercept-controller"
+        ]
+      }
+    },
+    "/channel/compliance-intercepts/exemptions": {
+      "get": {
+        "operationId": "get_channel_compliance_intercepts_exemptions",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "scene",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "subjectType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "subjectId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "ruleCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ComplianceInterceptExemptionPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "compliance-intercept-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_channel_compliance_intercepts_exemptions",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ComplianceInterceptExemptionInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ComplianceInterceptExemptionRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "compliance-intercept-controller"
+        ]
+      }
+    },
+    "/channel/compliance-intercepts/exemptions/{id}": {
+      "get": {
+        "operationId": "get_channel_compliance_intercepts_exemptions_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ComplianceInterceptExemptionRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "compliance-intercept-controller"
+        ]
+      }
+    },
+    "/channel/compliance-intercepts/exemptions/{id}/approve": {
+      "post": {
+        "operationId": "post_channel_compliance_intercepts_exemptions_id_approve",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ComplianceInterceptDecisionInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ComplianceInterceptExemptionRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "compliance-intercept-controller"
+        ]
+      }
+    },
+    "/channel/compliance-intercepts/exemptions/{id}/reject": {
+      "post": {
+        "operationId": "post_channel_compliance_intercepts_exemptions_id_reject",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ComplianceInterceptDecisionInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ComplianceInterceptExemptionRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "compliance-intercept-controller"
+        ]
+      }
+    },
+    "/channel/compliance-intercepts/policy": {
+      "get": {
+        "operationId": "get_channel_compliance_intercepts_policy",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ComplianceInterceptPolicySet"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "compliance-intercept-controller"
+        ]
+      }
+    },
+    "/channel/compliance-intercepts/policy/{scene}": {
+      "put": {
+        "operationId": "put_channel_compliance_intercepts_policy_scene",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "scene",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ComplianceInterceptPolicyInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ComplianceInterceptPolicyRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "compliance-intercept-controller"
         ]
       }
     },
