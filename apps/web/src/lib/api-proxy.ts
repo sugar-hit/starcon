@@ -7953,6 +7953,66 @@ const services: readonly {
       /^account\-health(?:\/(?:capabilities|shops|ranking|pending\-items|thresholds|assessments)|\/shops\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:metrics|assess|sync))?|\/thresholds\/(?:ODR|LATE_SHIPMENT_RATE|CANCELLATION_RATE|VALID_TRACKING_RATE))$/,
   },
   {
+    // 16.1.1.2 绩效指标监控（channel 服务）。纯**新增一条独立的 `services[]` 元素**：
+    // 既有条目**一字未动、也不重排** —— 本文件是多车道共用的**累积型**白名单，
+    // 每条服务规则是一段超长单行正则，往既有那条巨型 alternation 里并分支会让多车道
+    // 同时并入时 git 必然判冲突（结构性，retry 永远不会自愈）。
+    //
+    // ---- 插入锚点固定在 **`account-health` 那条元素之后**（16.1.1.1 账号健康总览）----
+    //   同批另外三条车道的锚点分别是「`message-sends` 之后」（15.1.1.2）、
+    //   「`review-replies` 之后」（15.2.1.2）、「`customer-contacts` 之后」（15.3.2.2），
+    //   与本锚点互不重叠，git 能干净求并。
+    //
+    // ---- 首 token「performance-metrics」的零命中核对结论 ----
+    //   本文件既有全文里 `performance-metrics` 出现次数 = 0；
+    //   并把既有**全部 153 条** `services[]` 正则（单行与多行都抽出来）逐条实测：
+    //   13 个本模块 shape × 153 条既有正则 ⇒ **命中 0 处**。
+    //   既有 `account-health` 那条正则（首 token 是 `account\-health`，与本条同为 `^` 锚定）
+    //   对本模块 13 个 shape **零命中** —— 两者互不遮蔽。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   performance-metrics/capabilities          能力声明（未交付下游 available=false + ownerModule）
+    //   performance-metrics/shops                  店铺范围清单（GET，真分页 + 真筛选）
+    //   performance-metrics/trends                 趋势序列清单（GET，真分页 + 真筛选）
+    //   performance-metrics/alerts                 阈值预警凭据（GET，真分页 + 真筛选）
+    //   performance-metrics/forecasts              跌破预测凭据（GET，真分页 + 真筛选）
+    //   performance-metrics/alert-rules            生效预警阈值清单（GET）
+    //   performance-metrics/alert-rules/{metric}   改预警阈值（PUT，metric 是**六个字面量指标码**之一）
+    //   performance-metrics/shops/{uuid}/trends             单店全部指标的趋势序列（GET）
+    //   performance-metrics/shops/{uuid}/metrics            录入本模块自有指标（POST，source 恒为 MANUAL）
+    //   performance-metrics/shops/{uuid}/alert-evaluations  跑一次阈值预警评估（POST，落追加式凭据）
+    //   performance-metrics/shops/{uuid}/forecasts           跑一次跌破预测（POST，落追加式凭据）
+    //   performance-metrics/shops/{uuid}/forecast            该店最近一次的预测结论（GET）
+    //
+    // 判别顺序：字面量子路径（capabilities / shops / trends / alerts / forecasts / alert-rules）
+    // 排在 {uuid} 段**之前** —— alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`（不是
+    //   `[0-9a-f-]+`：后者会把 `capabilities` 这种非 UUID 形状也当 id 放行）。
+    // ⚠️ `shops/{uuid}` 后面**必须**跟一个动作段（trends / metrics / alert-evaluations /
+    //   forecasts / forecast）：本模块**没有**「单个店铺详情」这个端点，
+    //   所以 {uuid} 段后面的动作段**刻意不带 `?`**（带了就把 `shops/{uuid}` 本身也放行了）。
+    // ⚠️ `alert-rules/{metric}` 段的 metric 是**六个字面量指标码**（ODR /
+    //   LATE_SHIPMENT_RATE / CANCELLATION_RATE / VALID_TRACKING_RATE / RESPONSE_TIME /
+    //   ACCOUNT_RATING），**不是 UUID** —— 用宽松的 id 段会把 `/alert-rules/任意串` 放行，
+    //   那是后端不存在的映射。
+    // ⚠️ 末尾**刻意不带 `?`**：带了就等于放行裸路径 `performance-metrics`
+    //   （后端没有「一条汇总列表接口」，一切入口都带子路径）。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸路径 `performance-metrics` —— 本模块没有裸集合读
+    //   * `performance-metrics/shops/{uuid}` —— 没有「单个店铺详情」端点
+    //   * `performance-metrics/workbench-alerts` —— 1 工作台预警**未交付**，本模块**不编造**推送
+    //   * `performance-metrics/fulfillment-alerts` —— 9 订单履约（迟发预警前置）**未交付**，
+    //     本模块**不编造**履约侧联动
+    //   * `performance-metrics/shops/{uuid}/delete` —— 指标是「当前周期的口径」，
+    //     改写走录入更新（POST metrics），不做物理删除
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^performance\-metrics(?:\/(?:capabilities|shops|trends|alerts|forecasts|alert\-rules)|\/shops\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/(?:trends|metrics|alert\-evaluations|forecasts|forecast)|\/alert\-rules\/(?:ODR|LATE_SHIPMENT_RATE|CANCELLATION_RATE|VALID_TRACKING_RATE|RESPONSE_TIME|ACCOUNT_RATING))$/,
+  },
+  {
     // 15.6.2.2 购物车与弃单挽回（crm 服务）。纯**新增一条独立的 `services[]` 元素**：
     // 既有条目（`buyer-emails` 15.1.2.1 / `knowledge` 15.4.2.1 / `review-requests` 15.2.2.1 /
     // `review-rules` 15.2.2.2）**一字未动、也不重排** —— 本文件是多车道共用的**累积型**

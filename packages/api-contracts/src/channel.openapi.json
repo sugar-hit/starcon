@@ -48030,6 +48030,768 @@
         ],
         "type": "object"
       },
+      "PerformanceMetricAlert": {
+        "properties": {
+          "alertId": {
+            "type": "string"
+          },
+          "direction": {
+            "type": "string"
+          },
+          "evaluatedAt": {
+            "type": "string"
+          },
+          "evaluationId": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "metricCode": {
+            "type": "string"
+          },
+          "metricLabel": {
+            "type": "string"
+          },
+          "metricValue": {
+            "type": "number"
+          },
+          "metricValueText": {
+            "type": "string"
+          },
+          "periodEnd": {
+            "type": "string"
+          },
+          "periodStart": {
+            "type": "string"
+          },
+          "ruleSource": {
+            "type": "string"
+          },
+          "ruleSourceLabel": {
+            "type": "string"
+          },
+          "ruleVersion": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "severity": {
+            "type": "string"
+          },
+          "severityLabel": {
+            "type": "string"
+          },
+          "shopCode": {
+            "type": "string"
+          },
+          "shopId": {
+            "type": "string"
+          },
+          "shopName": {
+            "type": "string"
+          },
+          "thresholdKind": {
+            "type": "string"
+          },
+          "thresholdValue": {
+            "type": "number"
+          },
+          "thresholdValueText": {
+            "type": "string"
+          },
+          "thresholds": {
+            "additionalProperties": {
+              "type": "object"
+            },
+            "type": "object"
+          },
+          "unit": {
+            "type": "string"
+          },
+          "unitLabel": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PerformanceMetricAlertEvaluation": {
+        "properties": {
+          "alerts": {
+            "items": {
+              "$ref": "#/components/schemas/PerformanceMetricAlert"
+            },
+            "type": "array"
+          },
+          "evaluatedAt": {
+            "type": "string"
+          },
+          "evaluatedMetricCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "evaluationId": {
+            "type": "string"
+          },
+          "knownMetricCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "shopCode": {
+            "type": "string"
+          },
+          "shopId": {
+            "type": "string"
+          },
+          "shopName": {
+            "type": "string"
+          },
+          "unknownMetricCount": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "PerformanceMetricAlertPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/PerformanceMetricAlert"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "PerformanceMetricAlertRule": {
+        "properties": {
+          "builtin": {
+            "type": "boolean"
+          },
+          "criticalValue": {
+            "type": "number"
+          },
+          "direction": {
+            "type": "string"
+          },
+          "directionLabel": {
+            "type": "string"
+          },
+          "editable": {
+            "type": "boolean"
+          },
+          "effectiveFrom": {
+            "type": "string"
+          },
+          "metricCode": {
+            "type": "string"
+          },
+          "metricLabel": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "ruleSource": {
+            "type": "string"
+          },
+          "ruleSourceLabel": {
+            "type": "string"
+          },
+          "ruleVersion": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "unit": {
+            "type": "string"
+          },
+          "unitLabel": {
+            "type": "string"
+          },
+          "warnValue": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "PerformanceMetricAlertRuleInput": {
+        "properties": {
+          "criticalValue": {
+            "type": "number"
+          },
+          "direction": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "warnValue": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "PerformanceMetricAlertRuleList": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/PerformanceMetricAlertRule"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PerformanceMetricCapabilities": {
+        "properties": {
+          "downstreamNote": {
+            "type": "string"
+          },
+          "forecastSemantics": {
+            "type": "string"
+          },
+          "gaps": {
+            "items": {
+              "$ref": "#/components/schemas/PerformanceMetricCapabilityGap"
+            },
+            "type": "array"
+          },
+          "granularitySemantics": {
+            "type": "string"
+          },
+          "metricCatalog": {
+            "items": {
+              "$ref": "#/components/schemas/PerformanceMetricDescriptor"
+            },
+            "type": "array"
+          },
+          "metricCodes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "metricSources": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "severities": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "sourceNote": {
+            "type": "string"
+          },
+          "thresholdSemantics": {
+            "type": "string"
+          },
+          "trendSemantics": {
+            "type": "string"
+          },
+          "units": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "unknownSemantics": {
+            "type": "string"
+          },
+          "upstreamNote": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PerformanceMetricCapabilityGap": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "impact": {
+            "type": "string"
+          },
+          "moduleId": {
+            "type": "string"
+          },
+          "moduleName": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PerformanceMetricDescriptor": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "direction": {
+            "type": "string"
+          },
+          "directionLabel": {
+            "type": "string"
+          },
+          "metricCode": {
+            "type": "string"
+          },
+          "metricLabel": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "sourceLabel": {
+            "type": "string"
+          },
+          "sourceModule": {
+            "type": "string"
+          },
+          "unit": {
+            "type": "string"
+          },
+          "unitLabel": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PerformanceMetricForecast": {
+        "properties": {
+          "breachInPeriods": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "breachLevel": {
+            "type": "string"
+          },
+          "breachLevelLabel": {
+            "type": "string"
+          },
+          "direction": {
+            "type": "string"
+          },
+          "directionLabel": {
+            "type": "string"
+          },
+          "forecastId": {
+            "type": "string"
+          },
+          "forecastedAt": {
+            "type": "string"
+          },
+          "knownPoints": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "method": {
+            "type": "string"
+          },
+          "methodNote": {
+            "type": "string"
+          },
+          "metricCode": {
+            "type": "string"
+          },
+          "metricLabel": {
+            "type": "string"
+          },
+          "predictedValue": {
+            "type": "number"
+          },
+          "predictedValueText": {
+            "type": "string"
+          },
+          "result": {
+            "type": "string"
+          },
+          "resultLabel": {
+            "type": "string"
+          },
+          "resultReason": {
+            "type": "string"
+          },
+          "ruleSource": {
+            "type": "string"
+          },
+          "ruleSourceLabel": {
+            "type": "string"
+          },
+          "ruleVersion": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "shopCode": {
+            "type": "string"
+          },
+          "shopId": {
+            "type": "string"
+          },
+          "shopName": {
+            "type": "string"
+          },
+          "slope": {
+            "type": "number"
+          },
+          "thresholdKind": {
+            "type": "string"
+          },
+          "thresholdValue": {
+            "type": "number"
+          },
+          "thresholdValueText": {
+            "type": "string"
+          },
+          "thresholds": {
+            "additionalProperties": {
+              "type": "object"
+            },
+            "type": "object"
+          },
+          "unit": {
+            "type": "string"
+          },
+          "unitLabel": {
+            "type": "string"
+          },
+          "unknownPoints": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "usedPeriods": {
+            "items": {
+              "$ref": "#/components/schemas/PerformanceMetricUsedPeriod"
+            },
+            "type": "array"
+          },
+          "windowPoints": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "PerformanceMetricForecastInput": {
+        "properties": {
+          "horizonPeriods": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "windowPoints": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "PerformanceMetricForecastPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/PerformanceMetricForecast"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "PerformanceMetricForecastRun": {
+        "properties": {
+          "forecastedAt": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "results": {
+            "items": {
+              "$ref": "#/components/schemas/PerformanceMetricForecast"
+            },
+            "type": "array"
+          },
+          "shopCode": {
+            "type": "string"
+          },
+          "shopId": {
+            "type": "string"
+          },
+          "shopName": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PerformanceMetricMetricInput": {
+        "properties": {
+          "metricCode": {
+            "type": "string"
+          },
+          "metricValue": {
+            "type": "number"
+          },
+          "note": {
+            "type": "string"
+          },
+          "periodEnd": {
+            "type": "string"
+          },
+          "periodStart": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PerformanceMetricPoint": {
+        "properties": {
+          "capturedAt": {
+            "type": "string"
+          },
+          "known": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          },
+          "periodEnd": {
+            "type": "string"
+          },
+          "periodStart": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "sourceLabel": {
+            "type": "string"
+          },
+          "value": {
+            "description": "null = 该周期量不到（不是 0）",
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "PerformanceMetricSeries": {
+        "properties": {
+          "average": {
+            "description": "分母只算量到的点；一个都没量到时为 null",
+            "type": "number"
+          },
+          "averageNote": {
+            "type": "string"
+          },
+          "changeNote": {
+            "type": "string"
+          },
+          "granularity": {
+            "type": "string"
+          },
+          "knownPointCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "latestChange": {
+            "type": "number"
+          },
+          "latestPeriodEnd": {
+            "type": "string"
+          },
+          "latestPeriodStart": {
+            "type": "string"
+          },
+          "latestValue": {
+            "type": "number"
+          },
+          "metricCode": {
+            "type": "string"
+          },
+          "metricLabel": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "points": {
+            "items": {
+              "$ref": "#/components/schemas/PerformanceMetricPoint"
+            },
+            "type": "array"
+          },
+          "shopCode": {
+            "type": "string"
+          },
+          "shopId": {
+            "type": "string"
+          },
+          "shopName": {
+            "type": "string"
+          },
+          "sourceLabel": {
+            "type": "string"
+          },
+          "sourceModule": {
+            "type": "string"
+          },
+          "unit": {
+            "type": "string"
+          },
+          "unitLabel": {
+            "type": "string"
+          },
+          "unknownPointCount": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "PerformanceMetricShop": {
+        "properties": {
+          "knownPointCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "platformName": {
+            "type": "string"
+          },
+          "seriesCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "shopCode": {
+            "type": "string"
+          },
+          "shopId": {
+            "type": "string"
+          },
+          "shopName": {
+            "type": "string"
+          },
+          "unknownPointCount": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "PerformanceMetricShopPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/PerformanceMetricShop"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "PerformanceMetricTrendPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/PerformanceMetricSeries"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "PerformanceMetricUsedPeriod": {
+        "properties": {
+          "index": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "periodEnd": {
+            "type": "string"
+          },
+          "periodStart": {
+            "type": "string"
+          },
+          "value": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
       "PerformanceSnapshotInput": {
         "description": "🔴 本批的平台表现快照（按统计日）",
         "properties": {
@@ -97396,6 +98158,660 @@
         },
         "tags": [
           "influencer-outreach-controller"
+        ]
+      }
+    },
+    "/channel/performance-metrics/alert-rules": {
+      "get": {
+        "operationId": "get_channel_performance_metrics_alert_rules",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PerformanceMetricAlertRuleList"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "performance-metric-controller"
+        ]
+      }
+    },
+    "/channel/performance-metrics/alert-rules/{metricCode}": {
+      "put": {
+        "operationId": "put_channel_performance_metrics_alert_rules_metricCode",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "metricCode",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PerformanceMetricAlertRuleInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PerformanceMetricAlertRule"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "performance-metric-controller"
+        ]
+      }
+    },
+    "/channel/performance-metrics/alerts": {
+      "get": {
+        "operationId": "get_channel_performance_metrics_alerts",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "shopId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "metricCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "severity",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PerformanceMetricAlertPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "performance-metric-controller"
+        ]
+      }
+    },
+    "/channel/performance-metrics/capabilities": {
+      "get": {
+        "operationId": "get_channel_performance_metrics_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PerformanceMetricCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "performance-metric-controller"
+        ]
+      }
+    },
+    "/channel/performance-metrics/forecasts": {
+      "get": {
+        "operationId": "get_channel_performance_metrics_forecasts",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "shopId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "metricCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "result",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PerformanceMetricForecastPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "performance-metric-controller"
+        ]
+      }
+    },
+    "/channel/performance-metrics/shops": {
+      "get": {
+        "operationId": "get_channel_performance_metrics_shops",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "platformCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PerformanceMetricShopPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "performance-metric-controller"
+        ]
+      }
+    },
+    "/channel/performance-metrics/shops/{id}/alert-evaluations": {
+      "post": {
+        "operationId": "post_channel_performance_metrics_shops_id_alert_evaluations",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PerformanceMetricAlertEvaluation"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "performance-metric-controller"
+        ]
+      }
+    },
+    "/channel/performance-metrics/shops/{id}/forecast": {
+      "get": {
+        "operationId": "get_channel_performance_metrics_shops_id_forecast",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PerformanceMetricForecastRun"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "performance-metric-controller"
+        ]
+      }
+    },
+    "/channel/performance-metrics/shops/{id}/forecasts": {
+      "post": {
+        "operationId": "post_channel_performance_metrics_shops_id_forecasts",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PerformanceMetricForecastInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PerformanceMetricForecastRun"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "performance-metric-controller"
+        ]
+      }
+    },
+    "/channel/performance-metrics/shops/{id}/metrics": {
+      "post": {
+        "operationId": "post_channel_performance_metrics_shops_id_metrics",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PerformanceMetricMetricInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PerformanceMetricSeries"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "performance-metric-controller"
+        ]
+      }
+    },
+    "/channel/performance-metrics/shops/{id}/trends": {
+      "get": {
+        "operationId": "get_channel_performance_metrics_shops_id_trends",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "metricCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "window",
+            "required": false,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/PerformanceMetricSeries"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "performance-metric-controller"
+        ]
+      }
+    },
+    "/channel/performance-metrics/trends": {
+      "get": {
+        "operationId": "get_channel_performance_metrics_trends",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "platformCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "shopId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "metricCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "window",
+            "required": false,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 10,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PerformanceMetricTrendPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "performance-metric-controller"
         ]
       }
     },
