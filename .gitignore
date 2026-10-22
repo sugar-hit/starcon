@@ -105,3 +105,6 @@ backend/**/target/
 
 # 并行车道的独立 worktree（tools/module-progress/lane.mjs 管理）
 .worktrees/
+
+# 进度看板构建产物
+tools/progress-site/.shots/

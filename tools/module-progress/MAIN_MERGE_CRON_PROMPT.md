@@ -149,9 +149,17 @@ git rev-list --left-right --count upstream/main...upstream/integration/module-de
 echo "=== 真实增量（看树差异，不看提交数）==="
 git diff --stat upstream/main upstream/integration/module-dev | tail -3
 git diff --quiet upstream/main upstream/integration/module-dev \
-  && echo "无新内容" || echo "有新增内容"
+  && echo "树差异为空" || echo "树差异非空（仍要过本节末尾的落地树判定）"
 echo "=== 合并预演（无副作用，不碰工作区）==="
 git merge-tree --write-tree --name-only upstream/main upstream/integration/module-dev
+echo "=== 落地树 vs main 树（两者相同 = 零变更）==="
+MT_OUT=$(git merge-tree --write-tree --name-only upstream/main upstream/integration/module-dev 2>&1)
+MT_TREE=$(printf '%s\n' "$MT_OUT" | head -1)
+MAIN_TREE=$(git rev-parse upstream/main^{tree})
+echo "落地树: $MT_TREE"
+echo "main 树: $MAIN_TREE"
+[ "$MT_TREE" = "$MAIN_TREE" ] \
+  && echo "零变更：本轮不开 PR" || echo "有新增内容：走第 4–7 节"
 ```
 
 `merge-tree` 会**提前告诉你哪些文件会真冲突**。它是只读的，**不要跳过**。
@@ -169,17 +177,65 @@ git merge-tree --write-tree --name-only upstream/main upstream/integration/modul
 同理，第 3.2 节的「可快进」判据在 squash 合入后**基本不成立** ——
 正常形态是「真合并」，且冲突解法见第 4 节。
 
+⚠️ **树差异非空 ≠ 有新内容要合入 —— 最终判据是「落地树哈希」**：
+
+树差异回答的是「两个分支的内容是否不同」，但**你要回答的是「合入后 `main` 会不会变」**。
+这两件事不等价：`main` 上可能已经有集成分支**没有**的文件（上一轮同步留下的会话记录、
+其他 PR 带进 `main` 的产物），这些差异会让树差异恒为非空，
+而**把集成分支合进来，`main` 一个字节都不会变**。
+
+⚠️ 2026-10-22 实测：树差异 31 个文件、12 万行增删，但**落地树哈希与 `main` 完全相同**
+（`git merge-tree --write-tree` 的输出 == `git rev-parse upstream/main^{tree}`），
+真合并后 `git diff upstream/main HEAD` 为空 ⇒ **零变更，不该开 PR**。
+
+⇒ **判断该不该开 PR，最终看落地树哈希**：
+
+| 落地树 vs `main` 树 | 含义                         | 本轮动作                        |
+| ------------------- | ---------------------------- | ------------------------------- |
+| **相同**            | 合入后 `main` 不变（零变更） | **本轮不开 PR**，简短汇报后结束 |
+| 不同                | 确有新内容要合入             | 走第 4–7 节                     |
+
+**为什么不能只看树差异**：树差异是**双向**的（既含「集成分支有、`main` 没有」，
+也含「`main` 有、集成分支没有」）。后一部分**不该**被合入动作改变 ——
+真合并时 git 会自动保留 `main` 侧，所以最终树与 `main` 相同。
+⇒ **树差异只用来提示「值得看一眼」，落地树哈希才是「该不该开 PR」的判据。**
+
+⚠️ **只跑 `merge-tree` 不够**：它给出的是**预演**结果。
+真合并后必须再核一次 `git write-tree` == `git rev-parse upstream/main^{tree}`，
+确认落地树确实等于 `main`，才敢断言「零变更」。
+
 ### 3.1 同步 PR 的现状（决定本轮走哪条路）
 
 ```bash
 gh pr list --base main --head chore/sync-module-dev --state open
 ```
 
-| 现状                            | 本轮动作                                                                              |
-| ------------------------------- | ------------------------------------------------------------------------------------- |
-| 没有开着的 PR **且** 没有新内容 | **本轮无动作**，简短汇报后结束                                                        |
-| 没有开着的 PR **且** 有新内容   | 走第 4–7 节：建分支 → 合并 → 解冲突 → 验证 → 推送 → 建 PR                             |
-| 有开着的 PR                     | 看它的 CI 状态（第 7 节）：绿了就合；红了就报告；跑着就等；**有更新的内容就刷新分支** |
+| 现状                                               | 本轮动作                                                                              |
+| -------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| 没有开着的 PR **且** 落地树 == `main` 树（零变更） | **本轮无动作**，简短汇报后结束                                                        |
+| 没有开着的 PR **且** 落地树 != `main` 树           | 走第 4–7 节：建分支 → 合并 → 解冲突 → 验证 → 推送 → 建 PR                             |
+| 有开着的 PR                                        | 看它的 CI 状态（第 7 节）：绿了就合；红了就报告；跑着就等；**有更新的内容就刷新分支** |
+
+⚠️ **「有没有新内容」在第 3 节末尾已经换了判据** ——
+不要再用「树差异是否为空」直接决定开不开 PR，用**落地树哈希**。
+
+⚠️ **并发会话可能在同一轮内把 PR 合掉 —— 远端跟踪 ref「消失」是成功信号，不是故障。**
+
+共享仓库的另一个执行者（并发会话、人工操作）可能在你核验期间完成合并。
+合并后远端分支被删除，本地 `upstream/<pr-branch>` 立刻解析不出来：
+
+```
+fatal: ambiguous argument 'upstream/chore/sync-module-dev': unknown revision
+```
+
+这个报错看起来像 ref 损坏，**实际是合并已经成功**。判据顺序：
+
+1. `gh pr view <PR号> --json state,mergedAt,mergeCommit` —— 显示 `MERGED` 就是合上了。
+2. `upstream/main` 的指针是否已前进到合并提交。
+3. 确认后再判断「这一轮还剩什么没做」。
+
+⚠️ **不要因为 ref 解析失败就重跑合并流程** —— 那会造出第二个 PR。
+也不要据此断定「合并没发生」—— 以 PR 状态与 `main` 指针为准。
 
 ### 3.2 三种合并形态，处理方式不同
 
@@ -288,6 +344,49 @@ node tools/module-progress/merge-resolve.mjs --base upstream/main --head upstrea
 - 解完必须 `git add` 冲突文件，确认 `git diff --name-only --diff-filter=U` **为空**。
 - 冲突解到一半**不许提交**。半解状态推上去会毁掉 `main`。
 
+### 4.6 判定工具的 `[并入（人工）]` 是保守警报，不是判决
+
+工具标出「并入（人工）」只证明**不能机械取一边**，不证明**必须两侧都留**。
+还要自己取证；取证后若证明「并集 == 一侧」，就**只留那一侧** ——
+无脑求并会把已被替换掉的旧措辞重新塞回文档（本文件第 3 节的判据章节就是这么被塞回去过的）。
+
+**取证配方（行级差集）**：
+
+⚠️ **必须在 `git add` 解冲突文件之前跑这套取证** ——
+`git add` 一执行，stage 2 / stage 3 就被清掉，之后再取就只剩 stage 0：
+
+```
+fatal: path '<file>' is in the index, but not at stage 2
+```
+
+⇒ 顺序是：**先取证 → 再 `git checkout --ours/--theirs` → 再 `git add`**。
+若已经 `add` 过了，改用显式 ref 取同一份数据（结果等价）：
+
+```bash
+git show upstream/main:<file> | sort -u > /tmp/side_main.txt        # main 侧
+git show upstream/integration/module-dev:<file> | sort -u > /tmp/side_head.txt   # 集成分支侧
+comm -23 /tmp/side_head.txt /tmp/side_main.txt      # 集成分支侧独有行
+comm -13 /tmp/side_head.txt /tmp/side_main.txt      # main 侧独有行
+```
+
+⚠️ **两侧必须用同一条命令归一化**，否则表格列宽差异会被当成「集成侧独有内容」：
+
+```bash
+norm() { awk '{gsub(/[ \t]+/," "); sub(/^ /,""); sub(/ $/,""); print}'; }
+git show :2:<file> | norm | sort -u > /tmp/side_main.txt
+git show :3:<file> | norm | sort -u > /tmp/side_head.txt
+```
+
+（不归一化时，Markdown 表格的分隔行与列宽会被算成独有行，差集结论会失真。
+2026-10-22 12:00 那轮实测：未归一化时集成侧独有 6 行，归一化后只有 4 行。）
+
+判据：**集成分支侧独有行是否逐条都能在 main 侧找到对应的新版形态**。
+若每一行都是「旧措辞被新版替换」（而不是独有内容），则 **main 侧是更新的快照，取 main 侧零丢失**。
+
+⚠️ 本任务书（`MAIN_MERGE_CRON_PROMPT.md`）自己就是一个高频冲突文件 ——
+集成分支侧的副本总是落后于 `main` 侧（本文件在 `main` 上被修正过，集成侧没有这些修正）。
+⇒ 它的冲突**默认取 main 侧**，但仍要用上面的行级差集确认一遍。
+
 ---
 
 ## 5. 验证（决定能不能推 PR 分支的闸）
@@ -331,6 +430,62 @@ node tools/module-progress/sync.mjs --check
 # ④ 冲突面专项（解过 api-proxy 冲突时必跑）
 cd apps/web && pnpm vitest run src/app/api/\[...path\]/route.test.ts
 ```
+
+**① 静态预检要读成「相对 `main` 基线的增量」，不是绝对命中数。**
+仓库里这些形状的绝对命中数是几百条存量债（实测 `ADD COLUMN` 160+、`SET NOT NULL` 43、
+`ADD CONSTRAINT CHECK` 21），**绝对数字对本次合入没有信息量**。
+判据是「合入后比 `main` 基线多了几条」：
+
+```bash
+for pat in 'ADD COLUMN' 'SET NOT NULL' 'ADD CONSTRAINT.*CHECK'; do
+  a=$(git grep -E "$pat" upstream/main -- backend/services | wc -l)
+  b=$(git grep -E "$pat" HEAD -- backend/services | wc -l)
+  echo "$pat main=$a HEAD=$b 增量=$((b-a))"
+done
+```
+
+⚠️ **命中「无 DEFAULT 的 `ADD COLUMN`」不等于危险形状 —— 要看列的可空性与后续约束。**
+危险的是**加在既有表上、且不可空**的列（既有行会违约）。
+可空列加在既有表上，既有行取到 `NULL`，不破坏任何写入路径 ⇒ 放行。
+逐条核对时看三件事：列是否可空、有没有后续 `SET NOT NULL`、有没有回填。
+
+**④ `api-proxy.ts` 白名单的真实测试面比这一行写的更大，且路径写法会失效。**
+
+- `apps/web/src/app/api/[...path]/route.test.ts` **不存在**（没有这个顶层目录）。
+  真实的是按服务分的 4 个路由测试：
+  `apps/web/src/app/api/{catalog,channel,iam,warehouse}/[...path]/route.test.ts`；
+- 另有 `apps/web/src/app/api/<service>/<module>-allowlist.test.ts` 一大批
+  （实测 141 个），以及 `apps/web/src/lib/api-proxy.test.ts`、
+  `apps/web/src/lib/api-proxy-union.test.ts` 两个专职守卫。
+
+⚠️ **vitest v4 选不中带方括号的目录** ——
+`vitest run "apps/web/src/app/api/**"`、`--dir`、`\[...path\]` 转义写法**全部**返回
+`No test files found`（filter 被规范化时把 `]` 当字符类收尾吃掉）。
+唯一可靠做法是临时 scoped config 显式写 `include`：
+
+```ts
+// vitest.api-scratch.config.ts（放在 worktree 根，用完随 worktree 一起删）
+import { defineConfig } from 'vitest/config';
+export default defineConfig({
+  test: {
+    include: [
+      'apps/web/src/app/api/**/*.test.ts',
+      'apps/web/src/lib/api-proxy.test.ts',
+      'apps/web/src/lib/api-proxy-union.test.ts',
+    ],
+    environment: 'node',
+  },
+});
+```
+
+```bash
+npx vitest run --config vitest.api-scratch.config.ts   # 实测 170 文件 / 1235 例全绿
+```
+
+⚠️ vitest v4 **已删掉 `--reporter=basic`**（会被当成自定义 reporter 模块去加载而报错），
+用默认 reporter 即可。
+⚠️ 在 worktree 里删临时文件要用**绝对路径** + 可恢复删除：
+相对路径会被权限闸按**主工作区**解析，报「dangerous removal target」。
 
 ### 5.3 红了怎么归因（别把环境问题当回归）
 
@@ -525,6 +680,38 @@ node tools/module-progress/ci-gate.mjs --pr <PR号>
 
 - **CI 仍在跑** → **本轮不合**，报告「CI 仍在运行」，下一轮继续跟进。
   （CI 是远端 runner，不要为了等它在本机空转。）
+
+⚠️ **闸工具挑基线时不会检查基线 run 是否已跑完 —— 在跑的基线会被读成「无失败」。**
+
+闸工具取「`main` 最近一次 run」当基线。**若那个 run 还在 `in_progress`**，
+尚未出结论的作业会被读成「基线没有失败」⇒ PR 侧同样的失败就被算成**新增失败**
+⇒ 结论变成**假阻塞**。
+
+判据顺序：
+
+1. 闸工具报「阻塞」时，**先看基线 run 的状态**：
+   `gh run view <基线run> --json status,conclusion`。
+2. 基线还在跑 ⇒ **这是工具的假阻塞，不是真回归**；等基线跑完**重跑闸工具**再判。
+   ⚠️ **不要**因为闸工具说「阻塞」就放弃，**也不要**绕过它硬合 —— 两种都错。
+3. 基线已 completed 还报新增失败 ⇒ 那才是真回归。
+
+⚠️ **「明细不可比的作业」按持平放行时，要补一层更强的证据**（不能只靠作业粒度）：
+
+- **Lint**：比**失败文件集合的差集**，不是比文件数。差集应为空。
+  （仓库级格式债会让绝对数在两次 run 之间变，但**差集**才说明是不是本次引入的。）
+  取失败文件清单：
+  ```bash
+  gh api "repos/<owner>/<repo>/actions/jobs/<jobId>/logs" \
+    | sed -E 's/\x1b\[[0-9;]*m//g' | grep -E '\[warn\] ' \
+    | sed -E 's/^[^ ]+ \[warn\] //' | sort -u
+  ```
+  ⚠️ 日志行带 ISO 时间戳前缀，按 `^\[warn\]` 锚定会抽出 **0 条**，
+  会误判成「没有失败文件」—— 必须用 `grep -E '\[warn\] '`。
+- **Security Scan**：比**审计条目数与严重度分布**。若两次数字不同，
+  先确认 `pnpm-lock.yaml` 的 blob 在两侧**逐字节相同**且本次改动不碰依赖清单
+  ⇒ 差异只能来自 registry 在两次 run 之间新增 advisory，不是本次引入。
+- **Catalog Browser & Contract Tests**：比**失败的根因链**（异常类型与创建失败的 bean 名），
+  相同即持平。
 
 ### 7.4 合并 PR
 

@@ -696,7 +696,7 @@ const services: readonly {
     env: 'CHANNEL_URL',
     fallback: 'http://127.0.0.1:8083',
     pattern:
-      /^ad\-budgets(?:\/(?:capabilities|options|rebalances|plans(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|pools(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|rules(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|tasks(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/apply)?)?))$/,
+            /^ad\-budgets(?:\/(?:capabilities|options|rebalances|plans(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|pools(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|rules(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|tasks(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/apply)?)?))$/,
   },
   {
     // 5.2.1.1 成本构成：SKU 的单位成本构成（分项 + 合计 + 生效时间）与成本变动历史。
@@ -4171,8 +4171,7 @@ const services: readonly {
     prefix: 'channel/',
     env: 'CHANNEL_URL',
     fallback: 'http://127.0.0.1:8083',
-    pattern:
-      /^ad-promotion-analysis\/(?:capabilities|options|report|runs|exports(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/csv)?|cost-snapshots)$/,
+    pattern: /^ad-promotion-analysis\/(?:capabilities|options|report|runs|exports(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/csv)?|cost-snapshots)$/,
   },
   {
     // 11.1.1.3 售后受理（trade 服务）。本条目是**新增一条 services[] 元素**，
