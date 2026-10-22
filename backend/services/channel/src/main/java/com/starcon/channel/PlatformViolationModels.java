@@ -22,9 +22,11 @@ import java.util.Map;
  *       「不同币种直接相加」在这个模块里是<b>被禁止</b>的，不是「暂时没做」。</li>
  *   <li><b>影响档位是派生的</b>：{@code impactLevel} 由处罚措施集合算出，
  *       <b>没有</b>一个可以被单独改掉的「严重度」列。</li>
- *   <li><b>下游缺口是可查的事实</b>：12 财务（罚扣款）与 16.1.2.2 申诉管理当前
+ *   <li><b>下游缺口是可查的事实</b>：12 财务（罚扣款）当前
  *       <b>未交付</b> ⇒ 能力声明里 {@code available=false} + {@code ownerModule} + 影响说明，
- *       <b>不编造</b>指向不存在入口的放行形状。</li>
+ *       <b>不编造</b>指向不存在入口的放行形状；
+ *       16.1.2.2 申诉管理<b>已交付</b> ⇒ {@code available=true}，
+ *       本模块只记「申诉中」这个状态，申诉数据由它记录、<b>不复制</b>一份。</li>
  * </ol>
  */
 public final class PlatformViolationModels {

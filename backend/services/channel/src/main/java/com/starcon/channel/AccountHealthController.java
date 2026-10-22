@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
  * <p>🔴 端点清单：
  *
  * <ul>
- *   <li>{@code GET /capabilities} —— 能力声明：哪些下游未交付、量不到归谁、等级与排序的口径。
+ *   <li>{@code GET /capabilities} —— 能力声明：哪些下游未交付 / 本模块未接入、量不到归谁、等级与排序的口径。
  *   <li>{@code GET /shops} —— 店铺健康卡片（**真分页 + 真筛选**，排序恒为风险优先）。
  *   <li>{@code GET /shops/{id}} —— 单家店的卡片（指标 + 逐条依据 + 排序名次）。
  *   <li>{@code GET /ranking} —— 跨店铺风险排序（**真分页**，名次是全局名次 + 为什么排这个位置）。
@@ -31,7 +31,8 @@ import org.springframework.web.bind.annotation.*;
  * </ul>
  *
  * <p>🔴 <b>刻意没有的形状</b>：没有「违规计数」端点、没有「申诉状态」端点 ——
- * 16.1.2.1 / 16.1.2.2 未交付，**放行一个不存在的入口比 404 更糟**（界面会以为功能已交付）。
+ * 16.1.2.1 / 16.1.2.2 <b>已交付</b>但<b>本模块未接入</b>，
+ * **放行一个本模块没有实现的入口比 404 更糟**（界面会以为功能已交付）。
  *
  * <p>权限码<b>复用</b> identity 已有的 {@code channel.operation.*}（读 / 录 / 改）
  * 与 {@code channel.sync.trigger}（触发同步），identity 服务零改动。
@@ -55,7 +56,7 @@ public class AccountHealthController {
 
   // ---- 能力声明 ----
 
-  /** 能力声明：未交付的下游逐条列出（available=false + ownerModule + 影响说明）。 */
+  /** 能力声明：未交付 / 本模块未接入的下游逐条列出（available=false + ownerModule + 影响说明）。 */
   @GetMapping("/capabilities")
   public AccountHealthCapabilities capabilities(
       @RequestHeader(value = "Authorization", defaultValue = "") String auth) {
