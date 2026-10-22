@@ -94,11 +94,12 @@ public class ServiceTicketListService {
   /**
    * 能力声明：前端在渲染前就知道哪些能力有、哪些没有，而不是靠试。
    *
-   * <p>🔴 刻意如实报出下游缺口：**15.4.1.2 工单处理未交付** ⇒
-   * {@code ticket_processing} 这一维 {@code available=false}，
-   * ownerModule 指向 15.4.1.2 —— 本模块是<b>只读列表</b>，
+   * <p>🔴 刻意如实报出下游：**15.4.1.2 工单处理已交付** ⇒
+   * {@code ticket_processing} 这一维 {@code available=true}，
+   * ownerModule 仍指向 15.4.1.2（归属说明），处理入口是它**真实存在**的
+   * {@code /crm/service-ticket-process}（同服务同库）—— 本模块自身仍是<b>只读列表</b>，
    * <b>不提供</b>回复 / 备注 / 状态流转 / 解决确认 / 满意度回收 / SLA 暂停恢复，
-   * 也<b>不指向</b>任何不存在的入口。
+   * 也<b>不指向</b>任何不存在的入口（{@code {uuid}/process} 仍不放行）。
    */
   public CrmServiceTicketCapabilities capabilities() {
     List<CrmServiceTicketCapabilityDimension> dimensions =
@@ -161,11 +162,13 @@ public class ServiceTicketListService {
             new CrmServiceTicketCapabilityDimension(
                 "ticket_processing",
                 "工单处理（回复 / 备注 / 状态流转 / 解决确认 / 满意度回收 / SLA 暂停恢复）",
-                false,
-                "15.4.1.2 工单处理**未交付**",
+                true,
+                "15.4.1.2 工单处理**已交付**（同服务同库，V309）：处理入口是 "
+                    + "/crm/service-ticket-process",
                 "15.4.1.2",
-                "本模块是**只读列表**：不提供处理入口，也不指向任何不存在的入口 —— "
-                    + "工单的写动作仍然只在 trade 服务（11.4.2.1）"),
+                "处理动作由 15.4.1.2 承担（真实入口 /crm/service-ticket-process）；"
+                    + "本模块自身仍是**只读列表**，不提供处理入口，"
+                    + "也**不指向**任何不存在的入口 —— 工单事实的写动作仍然只在 trade 服务（11.4.2.1）"),
             new CrmServiceTicketCapabilityDimension(
                 "ticket_write",
                 "工单创建（人工 / 来自消息 / 自动触发）",
@@ -192,9 +195,10 @@ public class ServiceTicketListService {
                 "9.1.1.1", "全渠道统一订单列表（trade 服务）", true, null,
                 "已交付：关联订单的事实来源，经授权 HTTP API 只读", null),
             new CrmServiceTicketRelatedModule(
-                "15.4.1.2", "工单处理", false, "15.4.1.2",
-                "**未交付**：本模块是只读列表，处理动作（回复 / 备注 / 状态流转 / 解决确认 / "
-                    + "满意度回收 / SLA 暂停恢复）由它负责；本模块**不指向**不存在的入口",
+                "15.4.1.2", "工单处理", true, "15.4.1.2",
+                "**已交付**（同服务同库，V309）：处理动作（回复 / 备注 / 状态流转 / 解决确认 / "
+                    + "满意度回收 / SLA 暂停恢复）由它承担，入口是 /crm/service-ticket-process；"
+                    + "本模块是只读列表，不复制它的处理数据",
                 null),
             new CrmServiceTicketRelatedModule(
                 "15.3.1.1", "客户列表（买家档案）", false, "15.3.1.1",
@@ -206,9 +210,10 @@ public class ServiceTicketListService {
                 null,
                 "AGENTS.md 模块边界纪律：跨服务只经授权 API / event"),
             new CrmServiceTicketBoundary(
-                "不提供任何工单处理动作（回复 / 备注 / 状态流转 / 解决确认 / 满意度 / SLA 暂停恢复）",
+                "本模块自身不提供任何工单处理动作（回复 / 备注 / 状态流转 / 解决确认 / 满意度 / SLA 暂停恢复）",
                 "15.4.1.2",
-                "15.4.1.2 未交付；工单的写动作仍然只在 trade 服务"),
+                "处理动作由 15.4.1.2 承担（同服务同库，入口 /crm/service-ticket-process）；"
+                    + "工单事实的写动作仍然只在 trade 服务（11.4.2.1）"),
             new CrmServiceTicketBoundary(
                 "不在库里存会自己过期的「剩余小时数」",
                 null,
@@ -232,7 +237,8 @@ public class ServiceTicketListService {
         "上游事实来源：trade 11.4.2.1（GET /trade/service-tickets，GET /trade/service-tickets/{id}）"
             + "与 trade 9.1.1.1（GET /trade/sales-orders/list）；"
             + "转发的是**调用方自己的** Authorization bearer，租户由上游按已认证成员关系解析并强制 RLS。",
-        "下游 15.4.1.2 工单处理**未交付**：本模块只读，不提供处理动作。");
+        "下游 15.4.1.2 工单处理**已交付**（同服务同库，入口 /crm/service-ticket-process）："
+            + "处理动作由它承担；本模块只读，不提供处理动作，也不复制它的处理数据。");
   }
 
   // ================================================================ 列表

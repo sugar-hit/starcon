@@ -80,15 +80,19 @@ import org.springframework.web.server.ResponseStatusException;
  *       MANUAL_HANDOFF，<b>不假装已发出</b>。</li>
  *   <li><b>🔴 记录只追加</b>：自动回复记录、转人工标记、人工接管标记三张表都由 DB 触发器
  *       拒绝 UPDATE / DELETE —— <b>改规则不追溯改变历史记录</b>。</li>
- *   <li><b>不编造指向不存在入口的形状</b>：平台自动回复准入清单、15.4.1.2 工单介入动作、
- *       平台站内信 webhook 全部<b>未交付</b> ⇒ 能力声明里如实标 {@code available=false}
- *       + {@code ownerModule}，<b>不编</b>一份假的白名单。</li>
+ *   <li><b>不编造指向不存在入口的形状</b>：平台自动回复准入清单、平台站内信 webhook
+ *       <b>未交付</b> ⇒ 能力声明里如实标 {@code available=false}
+ *       + {@code ownerModule}，<b>不编</b>一份假的白名单；
+ *       15.4.1.2 工单介入动作<b>已交付</b>（同服务同库），但<b>本模块当前仍未把它纳入豁免判定</b>
+ *       ⇒ 该维仍然如实标 {@code available=false}。</li>
  * </ol>
  *
  * <p><b>人工介入的判定口径</b>（可审阅）：一条消息被认为「已被人工介入」⇔
  * 15.1.1.2 里存在一条 {@code status='SENT'} 的发送记录指向它，<b>且</b>该发送记录
  * <b>不是</b>本模块产生的（{@code crm_auto_reply_record.send_id} 里没有它）。
- * 15.4.1.2 工单处理未交付 ⇒ 工单侧的介入动作本模块<b>读不到</b>。
+ * 15.4.1.2 工单处理<b>已交付</b>（同服务同库，{@code crm_service_ticket_action} 是工单侧
+ * 介入动作的事实表），但<b>本模块当前仍未把工单侧介入动作纳入豁免判定</b> ⇒
+ * 工单侧的介入动作本模块仍<b>读不到</b>（口径统一是另一条车道的活）。
  */
 @Service
 public class AutoReplyService {
@@ -257,10 +261,13 @@ public class AutoReplyService {
                 "human_intervention_signal",
                 "人工介入信号（客服回复 / 工单处理动作）",
                 false,
-                "15.4.1.2 工单处理**未交付**；只有 15.1.1.2 的 SENT 发送记录可判定",
+                "15.4.1.2 工单处理**已交付**（同服务同库，crm_service_ticket_action 是工单侧"
+                    + "介入动作的事实表）；但**本模块当前仍未把工单侧介入动作纳入豁免判定** ⇒ "
+                    + "目前仍只有 15.1.1.2 的 SENT 发送记录可判定",
                 "15.4.1.2",
                 "「无人工介入超时」目前**只能**依据发送记录判定；"
-                    + "工单侧的介入动作读不到，超时口径会偏长"),
+                    + "工单侧的介入动作本模块仍读不到（口径统一是另一条车道的活），"
+                    + "超时口径会偏长"),
             new CrmAutoReplyCapabilityDimension(
                 "platform_message_webhook",
                 "平台站内信 webhook（收到消息即自动评估）",
@@ -292,7 +299,8 @@ public class AutoReplyService {
         "「同一会话」= (shop_id, buyer_reference)：同一店铺里的同一位买家。"
             + "上游**没有**会话实体，这是本模块自己的定义。",
         "人工介入 = 15.1.1.2 里一条**不是本模块产生**的 SENT 发送记录；"
-            + "15.4.1.2 工单处理未交付 ⇒ 工单侧的介入动作读不到。",
+            + "15.4.1.2 工单处理**已交付**（同服务同库），但**本模块当前仍未把工单侧"
+            + "介入动作纳入豁免判定** ⇒ 工单侧的介入动作仍读不到。",
         "本模块**不重造发送**：一律经 15.1.1.2 登记发送；"
             + "平台侧投递未接入 ⇒ transport 恒为 MANUAL_HANDOFF，记录停在「已登记待发」。",
         "上游 15.1.1.3 分类结论**只读**（不另造平行分类表）；"

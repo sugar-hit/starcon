@@ -36,8 +36,9 @@ import org.springframework.web.bind.annotation.*;
  *   <li>{@code GET /sync-runs} —— 同步运行记录（**真分页**）。
  * </ul>
  *
- * <p>🔴 <b>刻意没有的形状</b>：没有申诉端点、没有财务端点 —— 16.1.2.2 申诉管理与 12 财务
- * <b>都未交付</b>，放行一个不存在的入口比 404 更糟（界面会以为功能已交付）。
+ * <p>🔴 <b>刻意没有的形状</b>：没有申诉端点、没有财务端点 —— 16.1.2.2 申诉管理走的是
+ * <b>自己的</b> {@code /channel/platform-appeals} 前缀，12 财务<b>尚未落地</b>，
+ * 在本前缀放行一个不存在的入口比 404 更糟（界面会以为功能已交付）。
  *
  * <p>权限码<b>复用</b> identity 已有的 {@code channel.operation.*}（读 / 录 / 改）
  * 与 {@code channel.sync.trigger}（触发同步），identity 服务零改动。

@@ -53,8 +53,9 @@ import org.testcontainers.containers.PostgreSQLContainer;
  *   <li><b>关联买家与订单不复制一份</b>：订单来自上游 trade（工单 → 售后单 → 订单），
  *       买家来自本服务自己的 {@code crm_message} / {@code crm_customer_contact}。</li>
  *   <li><b>转派历史与升级去向</b>读上游的既有事实，不另造一套。</li>
- *   <li><b>下游未交付</b>：能力声明里 15.4.1.2 如实标 {@code available=false} +
- *       ownerModule，<b>不指向</b>任何不存在的入口。</li>
+ *   <li><b>下游如实报出</b>：能力声明里 15.4.1.2 已交付 ⇒ 如实标 {@code available=true} +
+ *       ownerModule，指向**真实存在**的入口 {@code /crm/service-ticket-process}，
+ *       <b>不指向</b>任何不存在的入口。</li>
  *   <li><b>上游读不到就 503</b>：绝不返回空列表冒充「上游没有工单」。</li>
  *   <li><b>库里没有会自己过期的剩余列</b>（information_schema 实查）。</li>
  * </ul>
@@ -892,7 +893,7 @@ class ServiceTicketListIntegrationTest {
   // ================================================================ 能力声明
 
   @Test
-  void 能力声明如实标出下游未交付() throws Exception {
+  void 能力声明如实标出下游交付状态() throws Exception {
     JsonNode caps = getJson("/crm/service-tickets/capabilities");
     JsonNode processing = null;
     for (JsonNode dimension : caps.get("dimensions")) {
@@ -902,9 +903,12 @@ class ServiceTicketListIntegrationTest {
     }
     assertThat(processing).as("能力声明必须有 ticket_processing 这一维").isNotNull();
     assertThat(processing.get("available").asBoolean())
-        .as("15.4.1.2 工单处理未交付 ⇒ available=false")
-        .isFalse();
+        .as("15.4.1.2 工单处理已交付 ⇒ available=true")
+        .isTrue();
     assertThat(processing.get("ownerModule").asText()).isEqualTo("15.4.1.2");
+    assertThat(processing.get("source").asText())
+        .as("能力声明要指向真实存在的处理入口，不得指向不存在的入口")
+        .contains("/crm/service-ticket-process");
     assertThat(caps.get("upstreamNote").asText()).contains("/trade/service-tickets");
     assertThat(caps.get("slaBasisNote").asText()).contains("营业时间");
   }

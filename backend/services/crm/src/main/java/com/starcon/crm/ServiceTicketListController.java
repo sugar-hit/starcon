@@ -30,7 +30,8 @@ import org.springframework.web.bind.annotation.RestController;
  *
  * <p>🔴 <b>本模块是只读列表</b>：工单的**写**动作（建单 / 派单 / 转派 / 关闭 / 升级）
  * 仍然只在 trade 服务（11.4.2.1），本模块**不提供**任何处理动作
- * （15.4.1.2 工单处理未交付 ⇒ 能力声明里如实标 {@code available=false} + ownerModule）。
+ * （15.4.1.2 工单处理已交付 ⇒ 能力声明里如实标 {@code available=true} + ownerModule，
+ * 处理入口是它**真实存在**的 {@code /crm/service-ticket-process}）。
  *
  * <p>租户<b>不</b>来自任何请求头：先向 identity 确认已认证成员关系与权限，
  * 再在一个事务里绑定 {@code app.current_tenant}，由 RLS 在数据库层强制隔离。
@@ -65,8 +66,9 @@ public class ServiceTicketListController {
   /**
    * 能力声明：前端在渲染前就知道哪些能力有、哪些没有，而不是靠试。
    *
-   * <p>🔴 里面显式说明下游缺口：**15.4.1.2 工单处理未交付** ⇒
-   * {@code ticket_processing} 为 {@code available=false} + ownerModule=15.4.1.2，
+   * <p>🔴 里面显式说明下游：**15.4.1.2 工单处理已交付** ⇒
+   * {@code ticket_processing} 为 {@code available=true} + ownerModule=15.4.1.2，
+   * 指向**真实存在**的入口 {@code /crm/service-ticket-process}，
    * <b>不指向</b>任何不存在的入口。
    */
   @GetMapping("/capabilities")
