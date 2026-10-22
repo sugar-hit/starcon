@@ -696,7 +696,7 @@ const services: readonly {
     env: 'CHANNEL_URL',
     fallback: 'http://127.0.0.1:8083',
     pattern:
-            /^ad\-budgets(?:\/(?:capabilities|options|rebalances|plans(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|pools(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|rules(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|tasks(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/apply)?)?))$/,
+      /^ad\-budgets(?:\/(?:capabilities|options|rebalances|plans(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|pools(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|rules(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|tasks(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/apply)?)?))$/,
   },
   {
     // 5.2.1.1 成本构成：SKU 的单位成本构成（分项 + 合计 + 生效时间）与成本变动历史。
@@ -4171,7 +4171,8 @@ const services: readonly {
     prefix: 'channel/',
     env: 'CHANNEL_URL',
     fallback: 'http://127.0.0.1:8083',
-    pattern: /^ad-promotion-analysis\/(?:capabilities|options|report|runs|exports(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/csv)?|cost-snapshots)$/,
+    pattern:
+      /^ad-promotion-analysis\/(?:capabilities|options|report|runs|exports(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/csv)?|cost-snapshots)$/,
   },
   {
     // 11.1.1.3 售后受理（trade 服务）。本条目是**新增一条 services[] 元素**，
@@ -5730,6 +5731,67 @@ const services: readonly {
     fallback: 'http://127.0.0.1:8086',
     pattern:
       /^review-rules(?:\/(?:capabilities|shops|effective|effect-comparison|candidates)|\/(?:templates|holidays|assignments)(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?$/,
+  },
+  {
+    // 15.3.2.1 客户标签（crm 服务，卷 15 L3 锚点 15.3.2 下的客户标签子域）。
+    //
+    // ⚠️ 本条目是**新增一条独立的 `services[]` 元素**，不是往既有 crm 那几条巨型 alternation 里
+    //   并分支 —— 那些是超长单行正则，多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    //   既有条目**一字未动、也不重排**。
+    //
+    // ---- 插入锚点：紧跟 `crm/review-rules`（15.2.2.2 索评规则）那条元素之后 ----
+    //   同批另外三条车道的锚点分别是：`crm/knowledge` 之后（15.1.1.1 重派）、
+    //   `crm/review-requests` 之后（15.2.1.1）、services[] 数组末尾（15.6.2.2）——
+    //   都与本处相距足够远，git 能干净求并。
+    //
+    // ---- 首 token「customer-tags」的零命中核对结论 ----
+    //   本文件既有全部 services[] 正则里**没有任何一条**含 `customer-tags` 这个串
+    //   （既有的是 `knowledge` / `review-requests` / `review-rules` / `buyer-emails` 一类），
+    //   所以首 token 既是独立字面量，也不会被既有分支的前缀吃掉。
+    //   既有 crm 四条的正则都是**锚定**的（`^knowledge/…`、`^review-requests/…`、
+    //   `^review-rules/…`、`^buyer-emails/…`），逐条实测对 `customer-tags/…` **全部零命中**。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   customer-tags/capabilities                   能力声明（未交付段 available=false + ownerModule）
+    //   customer-tags/tags                           标签定义集合读（GET，真分页 + 真筛选）
+    //   customer-tags/tags/{uuid}                    标签定义详情（GET）/ 改（PUT）/ 删（DELETE）
+    //   customer-tags/rules                          规则集合读（GET）/ 登记规则（POST）
+    //   customer-tags/rules/{uuid}                   规则详情（GET）/ 改（PUT）/ 删（DELETE）
+    //   customer-tags/rules/{uuid}/run               执行一次规则评估（POST，写动作）
+    //   customer-tags/runs                           运行记录集合读（GET，真分页 + 真筛选）
+    //   customer-tags/runs/{uuid}                    单次运行详情（GET，含事实汇总）
+    //   customer-tags/runs/{uuid}/evaluations        逐客户判定结论（GET，真分页 + 真筛选）
+    //   customer-tags/assignments                    标签记录集合读（GET）/ 手工打标（POST）
+    //   customer-tags/assignments/{uuid}             标签记录详情（GET，含判定依据快照）
+    //   customer-tags/assignments/{uuid}/review      人工复核（POST：确认 / 撤销）
+    //   customer-tags/distribution                   标签分布统计（GET）
+    //   customer-tags/customer-candidates            候选客户（GET，来自上游订单事实的真实聚合）
+    //
+    // 判别顺序：字面量子路径（capabilities / distribution / customer-candidates）排在 {uuid} 段之前 ——
+    // alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //（不是 `[0-9a-f-]+`：后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行）。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   customer-tags                                  —— 裸路径：后端没有「一条不存在的汇总列表接口」，
+    //     一律走 `customer-tags/tags` / `customer-tags/assignments` 等带子路径的入口。
+    //   customer-tags/tags/{uuid}/delete               —— 删除走 `DELETE customer-tags/tags/{uuid}`。
+    //   customer-tags/rules/{uuid}/recompute          —— 重算走 `POST customer-tags/rules/{uuid}/run`。
+    //   customer-tags/segments                        —— **按标签筛出人群**属 15.3.1.1（未交付）：
+    //     放行它等于让界面以为「人群已经筛好了」。
+    //   customer-tags/promotions / customer-tags/campaigns —— 促销定向属 14.4（未交付）。
+    //   customer-tags/care-emails                     —— 关怀邮件属 15.5.2.1（未交付）。
+    //   customer-tags/assignments/{uuid}/delete       —— 标签记录是**凭据**（判定依据的载体），
+    //     不提供删除；要撤销走 `POST …/review`。
+    //   customer-tags/runs/{uuid}/replay              —— 历史运行不可重放，重跑走 `rules/{uuid}/run`。
+    //   任何非 UUID 段（如 `customer-tags/not-a-uuid`）—— 必须 404，不能被宽松分支吃掉。
+    //
+    // ⚠️ 末尾**刻意不带 `?`**：带了就等于放行裸路径 `customer-tags`。
+    prefix: 'crm/',
+    env: 'CRM_URL',
+    fallback: 'http://127.0.0.1:8086',
+    pattern:
+      /^customer\-tags(?:\/(?:capabilities|distribution|customer-candidates)|\/tags(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|\/rules(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/run)?)?|\/runs(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/evaluations)?)?|\/assignments(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/review)?)?)$/,
   },
   {
     // 7.8.2.2 缺货与饥饿预警（warehouse 服务，7.8.2 的第二个 L3 锚点）。

@@ -400,6 +400,244 @@
         }
       }
     },
+    "/crm/customer-tags/tags/{tagId}": {
+      "get": {
+        "tags": [
+          "customer-tag-controller"
+        ],
+        "operationId": "get_crm_customer_tags_tags_tagId",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "tagId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCustomerTagRow"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "customer-tag-controller"
+        ],
+        "operationId": "put_crm_customer_tags_tags_tagId",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "tagId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmCustomerTagInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCustomerTagRow"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "customer-tag-controller"
+        ],
+        "operationId": "delete_crm_customer_tags_tags_tagId",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "tagId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/crm/customer-tags/rules/{ruleId}": {
+      "get": {
+        "tags": [
+          "customer-tag-controller"
+        ],
+        "operationId": "get_crm_customer_tags_rules_ruleId",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "ruleId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCustomerTagRuleRow"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "customer-tag-controller"
+        ],
+        "operationId": "put_crm_customer_tags_rules_ruleId",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "ruleId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmCustomerTagRuleInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCustomerTagRuleRow"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "customer-tag-controller"
+        ],
+        "operationId": "delete_crm_customer_tags_rules_ruleId",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "ruleId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/crm/buyer-emails/templates/{templateId}": {
       "get": {
         "tags": [
@@ -1691,6 +1929,473 @@
         }
       }
     },
+    "/crm/customer-tags/tags": {
+      "get": {
+        "tags": [
+          "customer-tag-controller"
+        ],
+        "operationId": "get_crm_customer_tags_tags",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "category",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCustomerTagPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "customer-tag-controller"
+        ],
+        "operationId": "post_crm_customer_tags_tags",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmCustomerTagInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCustomerTagRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/crm/customer-tags/rules": {
+      "get": {
+        "tags": [
+          "customer-tag-controller"
+        ],
+        "operationId": "get_crm_customer_tags_rules",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "tagId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "metric",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCustomerTagRulePage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "customer-tag-controller"
+        ],
+        "operationId": "post_crm_customer_tags_rules",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmCustomerTagRuleInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCustomerTagRuleRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/crm/customer-tags/rules/{ruleId}/run": {
+      "post": {
+        "tags": [
+          "customer-tag-controller"
+        ],
+        "operationId": "post_crm_customer_tags_rules_ruleId_run",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "ruleId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmCustomerTagRunInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCustomerTagRunRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/crm/customer-tags/assignments": {
+      "get": {
+        "tags": [
+          "customer-tag-controller"
+        ],
+        "operationId": "get_crm_customer_tags_assignments",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "tagId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "customerRef",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "source",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "state",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCustomerTagAssignmentPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "customer-tag-controller"
+        ],
+        "operationId": "post_crm_customer_tags_assignments",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmCustomerTagAssignmentInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCustomerTagAssignmentRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/crm/customer-tags/assignments/{assignmentId}/review": {
+      "post": {
+        "tags": [
+          "customer-tag-controller"
+        ],
+        "operationId": "post_crm_customer_tags_assignments_assignmentId_review",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "assignmentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmCustomerTagReviewInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCustomerTagAssignmentRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/crm/buyer-emails": {
       "get": {
         "tags": [
@@ -2954,6 +3659,343 @@
         }
       }
     },
+    "/crm/customer-tags/runs": {
+      "get": {
+        "tags": [
+          "customer-tag-controller"
+        ],
+        "operationId": "get_crm_customer_tags_runs",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "ruleId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCustomerTagRunPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/crm/customer-tags/runs/{runId}": {
+      "get": {
+        "tags": [
+          "customer-tag-controller"
+        ],
+        "operationId": "get_crm_customer_tags_runs_runId",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "runId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCustomerTagRunRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/crm/customer-tags/runs/{runId}/evaluations": {
+      "get": {
+        "tags": [
+          "customer-tag-controller"
+        ],
+        "operationId": "get_crm_customer_tags_runs_runId_evaluations",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "runId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "outcome",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCustomerTagEvaluationPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/crm/customer-tags/distribution": {
+      "get": {
+        "tags": [
+          "customer-tag-controller"
+        ],
+        "operationId": "get_crm_customer_tags_distribution",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCustomerTagDistribution"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/crm/customer-tags/customer-candidates": {
+      "get": {
+        "tags": [
+          "customer-tag-controller"
+        ],
+        "operationId": "get_crm_customer_tags_customer_candidates",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCustomerTagCustomerCandidatePage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/crm/customer-tags/capabilities": {
+      "get": {
+        "tags": [
+          "customer-tag-controller"
+        ],
+        "operationId": "get_crm_customer_tags_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCustomerTagCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/crm/customer-tags/assignments/{assignmentId}": {
+      "get": {
+        "tags": [
+          "customer-tag-controller"
+        ],
+        "operationId": "get_crm_customer_tags_assignments_assignmentId",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "assignmentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCustomerTagAssignmentRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/crm/buyer-emails/{emailId}": {
       "get": {
         "tags": [
@@ -3560,6 +4602,247 @@
           "maxBatchSize": {
             "type": "integer",
             "format": "int32"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        }
+      },
+      "CrmCustomerTagInput": {
+        "required": [
+          "category",
+          "name",
+          "tagCode"
+        ],
+        "type": "object",
+        "properties": {
+          "tagCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 120,
+            "minLength": 0,
+            "type": "string"
+          },
+          "category": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "description": {
+            "maxLength": 600,
+            "minLength": 0,
+            "type": "string"
+          },
+          "color": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "contestable": {
+            "type": "boolean"
+          },
+          "reviewRequired": {
+            "type": "boolean"
+          }
+        }
+      },
+      "CrmCustomerTagRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "tagCode": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string"
+          },
+          "categoryLabel": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "color": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "contestable": {
+            "type": "boolean"
+          },
+          "reviewRequired": {
+            "type": "boolean"
+          },
+          "createdBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        }
+      },
+      "CrmCustomerTagRuleInput": {
+        "required": [
+          "metric",
+          "name",
+          "ruleCode",
+          "tagId"
+        ],
+        "type": "object",
+        "properties": {
+          "ruleCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 120,
+            "minLength": 0,
+            "type": "string"
+          },
+          "tagId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "metric": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "threshold": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "nullable": true
+          },
+          "currency": {
+            "maxLength": 16,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "conditionValue": {
+            "maxLength": 120,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "minSample": {
+            "minimum": 1,
+            "exclusiveMinimum": false,
+            "type": "number"
+          },
+          "windowDays": {
+            "minimum": 1,
+            "exclusiveMinimum": false,
+            "type": "number"
+          },
+          "baselineMultiplier": {
+            "minimum": 1.000001,
+            "exclusiveMinimum": false,
+            "type": "number"
+          },
+          "status": {
+            "type": "string"
+          },
+          "note": {
+            "maxLength": 600,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "CrmCustomerTagRuleRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "ruleCode": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "tagId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "tagCode": {
+            "type": "string"
+          },
+          "tagName": {
+            "type": "string"
+          },
+          "metric": {
+            "type": "string"
+          },
+          "metricLabel": {
+            "type": "string"
+          },
+          "threshold": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "conditionValue": {
+            "type": "string"
+          },
+          "minSample": {
+            "type": "number"
+          },
+          "windowDays": {
+            "type": "number"
+          },
+          "baselineMultiplier": {
+            "type": "number"
+          },
+          "status": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "lastRunId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "lastRunNo": {
+            "type": "string",
+            "nullable": true
+          },
+          "lastRunStatus": {
+            "type": "string",
+            "nullable": true
+          },
+          "lastRunAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string"
           },
           "updatedAt": {
             "type": "string"
@@ -4517,6 +5800,235 @@
             "maxLength": 500,
             "minLength": 0,
             "type": "string"
+          }
+        }
+      },
+      "CrmCustomerTagRunInput": {
+        "type": "object",
+        "properties": {
+          "windowFrom": {
+            "type": "string",
+            "nullable": true
+          },
+          "windowTo": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "CrmCustomerTagRunRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "runNo": {
+            "type": "string"
+          },
+          "ruleId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "ruleCode": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "windowFrom": {
+            "type": "string"
+          },
+          "windowTo": {
+            "type": "string"
+          },
+          "customerCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "taggedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "unchangedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "revokedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "indeterminateCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "revokedSkippedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "truncated": {
+            "type": "boolean"
+          },
+          "baseline": {
+            "type": "number",
+            "nullable": true
+          },
+          "facts": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object"
+            }
+          },
+          "failureReason": {
+            "type": "string"
+          },
+          "operatorId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "startedAt": {
+            "type": "string"
+          },
+          "finishedAt": {
+            "type": "string"
+          }
+        }
+      },
+      "CrmCustomerTagAssignmentInput": {
+        "required": [
+          "customerRef",
+          "tagId"
+        ],
+        "type": "object",
+        "properties": {
+          "customerRef": {
+            "maxLength": 128,
+            "minLength": 0,
+            "type": "string"
+          },
+          "customerName": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "tagId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reason": {
+            "maxLength": 600,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "CrmCustomerTagAssignmentRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "customerRef": {
+            "type": "string"
+          },
+          "customerName": {
+            "type": "string"
+          },
+          "tagId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "tagCode": {
+            "type": "string"
+          },
+          "tagName": {
+            "type": "string"
+          },
+          "tagCategory": {
+            "type": "string"
+          },
+          "contestable": {
+            "type": "boolean"
+          },
+          "source": {
+            "type": "string"
+          },
+          "sourceLabel": {
+            "type": "string"
+          },
+          "originKey": {
+            "type": "string"
+          },
+          "ruleId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "ruleCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "state": {
+            "type": "string"
+          },
+          "stateLabel": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "evidence": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object"
+            }
+          },
+          "pendingReview": {
+            "type": "boolean"
+          },
+          "decidedBy": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "decidedAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        }
+      },
+      "CrmCustomerTagReviewInput": {
+        "required": [
+          "decision"
+        ],
+        "type": "object",
+        "properties": {
+          "decision": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "reason": {
+            "maxLength": 600,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
           }
         }
       },
@@ -5812,6 +7324,412 @@
             "items": {
               "type": "string"
             }
+          }
+        }
+      },
+      "CrmCustomerTagPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CrmCustomerTagRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalElements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "CrmCustomerTagRunPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CrmCustomerTagRunRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalElements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "CrmCustomerTagEvaluationPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CrmCustomerTagEvaluationRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalElements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "CrmCustomerTagEvaluationRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "runId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "customerRef": {
+            "type": "string"
+          },
+          "customerName": {
+            "type": "string"
+          },
+          "outcome": {
+            "type": "string"
+          },
+          "outcomeLabel": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "evidence": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object"
+            }
+          },
+          "createdAt": {
+            "type": "string"
+          }
+        }
+      },
+      "CrmCustomerTagRulePage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CrmCustomerTagRuleRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalElements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "CrmCustomerTagDistribution": {
+        "type": "object",
+        "properties": {
+          "totalTaggedCustomers": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalActiveAssignments": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CrmCustomerTagDistributionRow"
+            }
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "CrmCustomerTagDistributionRow": {
+        "type": "object",
+        "properties": {
+          "tagId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "tagCode": {
+            "type": "string"
+          },
+          "tagName": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string"
+          },
+          "categoryLabel": {
+            "type": "string"
+          },
+          "contestable": {
+            "type": "boolean"
+          },
+          "activeCustomerCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "manualCustomerCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "ruleCustomerCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pendingReviewCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "revokedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "share": {
+            "type": "number",
+            "nullable": true
+          },
+          "sharePercent": {
+            "type": "number",
+            "nullable": true
+          }
+        }
+      },
+      "CrmCustomerTagCustomerCandidate": {
+        "type": "object",
+        "properties": {
+          "customerRef": {
+            "type": "string"
+          },
+          "customerName": {
+            "type": "string"
+          },
+          "orderCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "amountsByCurrency": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "number"
+            }
+          },
+          "channelSources": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "firstOrderAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "lastOrderAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "taggedCount": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "CrmCustomerTagCustomerCandidatePage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CrmCustomerTagCustomerCandidate"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalElements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "truncated": {
+            "type": "boolean"
+          },
+          "scannedOrderCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "scannedCaseCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "unattributedCaseCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "CrmCustomerTagCapabilities": {
+        "type": "object",
+        "properties": {
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CrmCustomerTagCapabilityDimension"
+            }
+          },
+          "categories": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "metrics": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "sources": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "assignmentStates": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "evaluationOutcomes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "metricNote": {
+            "type": "string"
+          },
+          "actionPolicy": {
+            "type": "string"
+          },
+          "boundaryNote": {
+            "type": "string"
+          },
+          "highlight": {
+            "type": "string"
+          }
+        }
+      },
+      "CrmCustomerTagCapabilityDimension": {
+        "type": "object",
+        "properties": {
+          "dimension": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "source": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "impact": {
+            "type": "string"
+          }
+        }
+      },
+      "CrmCustomerTagAssignmentPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CrmCustomerTagAssignmentRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalElements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },
