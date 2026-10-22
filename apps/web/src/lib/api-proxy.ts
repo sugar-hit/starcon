@@ -7788,6 +7788,53 @@ const services: readonly {
       /^platform-dispute-appeals(?:\/(?:capabilities|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:text|materials(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|submit|retry-submission|submission-attempts|platform-reply|withdraw))?))?$/,
   },
   {
+    // 15.4.1.1 工单列表（crm 服务，卷 15「客户与客服」的 L3 锚点 15.4.1 下的第一格）。
+    //
+    // 蓝图：「客服工单列表：类型、优先级、状态、SLA 剩余、关联买家与订单、分配客服、
+    //   转派与升级。」「工单创建（自动/人工）；筛选条件」→「工单列表 + SLA 预警。」
+    //   关系：上游 = 15.1.1.3、11.4.2.1；下游 = 15.4.1.2 处理。
+    //   **SLA 计时需按营业时间而非自然时间**，否则夜间积压会造成误判。
+    //
+    // 本条目是**新增一条独立的 `crm/` 元素**，不是往既有 crm 分支的 alternation 里并分支 ——
+    // 既有 crm 分支分别是 `^knowledge\/...$`（15.4.2.1 客服知识库）、
+    // `^message\-inbox...$`（15.1.1.1 消息收件箱）、`^care\-reminders...$`（15.5.2.1 关怀与催办）等，
+    // 每一支都是单行超长正则，多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    //
+    // ---- 插入锚点 ----
+    //   固定在 `platform-dispute-appeals`（11.4.1.2 平台纠纷申诉，trade 服务）那条元素**之后**。
+    //   本文件里的 `crm/` 元素集中在 3700~6300 与 8000 附近，而本锚点在 7700 一带，
+    //   与任何一条既有 `crm/` 元素相距 **250 行以上** ⇒ 同为 crm 车道的并行改动
+    //   （15.1.2.2 / 15.5.1.1 等）无论插在哪条 crm 元素附近，git 都能干净求并。
+    //
+    // ---- 首 token「service-tickets」的零命中核对结论 ----
+    //   本文件既有全文里 `service-tickets` 出现次数 = **0**（既有的是 `service-ticket-*` 一类的
+    //   其它命名也不存在），所以首 token 既是独立字面量，也不会被既有分支的前缀吃掉。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   service-tickets                          工单列表（GET，真分页 + 多维筛选 + 排序白名单）
+    //   service-tickets/capabilities             能力声明（15.4.1.2 未交付 ⇒ available=false + ownerModule）
+    //   service-tickets/{uuid}                   单张工单（GET，含上游的转派历史）
+    //   service-tickets/business-hours           营业时间口径（GET 读 / PUT 改）
+    //   service-tickets/business-hours/holidays  节假日例外（PUT 改写）
+    //
+    // 判别顺序：**字面量子路径（capabilities / business-hours）排在 {uuid} 段之前** ——
+    // alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //（不是 `[0-9a-f-]+`）：后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `service-tickets/{uuid}/assign|transfer|claim|release|close|reply` ——
+    //     工单的**写**动作仍然只在 trade 服务（11.4.2.1），本模块是只读列表；
+    //   * `service-tickets/{uuid}/process` —— 15.4.1.2 工单处理**未交付**，
+    //     放行它会让界面以为「已能处理工单」；
+    //   * 任何 `service-tickets/{uuid}/delete` —— 工单不是可删的事实。
+    prefix: 'crm/',
+    env: 'CRM_URL',
+    fallback: 'http://127.0.0.1:8086',
+    pattern:
+      /^service\-tickets(?:\/(?:capabilities|business\-hours(?:\/holidays)?|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}))?$/,
+  },
+  {
     // 14.1.2.1 广告组管理（channel 服务）。纯**新增一条独立的 `channel/` 元素**，
     // 既有的 `ad-campaigns`（14.1.1.1）、`ad-campaign-details`（14.1.1.2）、
     // `ad-type-diffs`（14.1.2.2）、`ad-reports`（14.3.1.1）等**一字未动、也不重排** ——
