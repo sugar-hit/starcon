@@ -12,6 +12,7 @@ import java.sql.DriverManager;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.UUID;
 import org.jooq.DSLContext;
@@ -181,6 +182,12 @@ class InTransitTrackingIntegrationTest {
     }
   }
 
+  /** 回归用例会钉死时钟；用完必须还原，免得钉死的时钟漏到别的用例里。 */
+  @AfterEach
+  void restoreClockSource() {
+    clockSource = WALL_CLOCK;
+  }
+
   private void seedTenant(UUID tenant) {
     sql.execute(
         "insert into legal_entity_ref(id,tenant_id,code,name) values(?,?,?,?)",
@@ -309,9 +316,27 @@ class InTransitTrackingIntegrationTest {
 
   // ================================================================ 夹具：走 10.4.1.1 + 7.5.1.2 的真路径
 
+  /**
+   * 🔴 测试时钟源：默认读 JVM 墙钟；回归用例可以把它钉死成「可复现的脚本时钟」。
+   *
+   * <p>之所以把时钟抽出来：本模块的 ETA 夹具一律是「相对现在」算的（{@link #eta(int)}），而 ETA 又
+   * 要跟**记录里当前存着的那个 ETA** 比大小（领域规则：新的预计到港不许早于当前 ETA）。两边的基准必须
+   * 同源，否则测试就成了墙钟的地雷：同一个用例在 07 点跑绿、09 点跑红（2026-10-22 批次 L2 红的正是这条）。
+   * 时钟可钉死，才能**确定性地**把每个小时基准都跑一遍，而不是靠运气等它炸。
+   */
+  static final java.util.function.Supplier<OffsetDateTime> WALL_CLOCK =
+      () -> OffsetDateTime.now(ZoneOffset.ofHours(8));
+
+  static java.util.function.Supplier<OffsetDateTime> clockSource = WALL_CLOCK;
+
+  /** 当前测试时钟（默认 JVM 墙钟）。 */
+  static OffsetDateTime now() {
+    return clockSource.get();
+  }
+
   /** ETA：相对现在的天数。 */
   static OffsetDateTime eta(int daysFromNow) {
-    return OffsetDateTime.now(ZoneOffset.ofHours(8))
+    return now()
         .plusDays(daysFromNow)
         .withMinute(0)
         .withSecond(0)
@@ -412,6 +437,46 @@ class InTransitTrackingIntegrationTest {
             tracking.create(
                 user,
                 new TrackingCreateRequest(shipmentId, "上海洋山港", eta(0), null, null, null, null)));
+  }
+
+  /**
+   * 登记一次 ETA 改期，返回**实际写入的新 ETA**。
+   *
+   * <p>新 ETA 必须与「记录里当前的 ETA」同源推导，不能自己写死一个绝对时刻。
+   *
+   * <p>为什么：领域规则（{@code InTransitTrackingService.recordEvent}）规定「新的预计到港不许早于当前 ETA」——
+   * 往前调会让「已经晚了几天」算成负数。而当前 ETA 是建跟踪时从发运单抄下的快照（{@code original_eta}），
+   * 它来自 {@link #eta(int)} 这个**相对现在的天数**基准，跟着墙钟走。
+   *
+   * <p>所以：若把新 ETA 写死成某个绝对时刻（曾经写的是 {@code 2026-12-01T08:00+08:00}），
+   * 它只有在墙钟小时数 &lt; 08 时才碰巧晚于当前 ETA；09 点一过，新 ETA 就变成「往前调」，
+   * 被领域规则当场拒掉 —— 2026-10-22 的批次 L2 就是这样红的（warehouse 之后 trade/crm 整个没跑）。
+   *
+   * <p>这里从传入的跟踪行（{@code head}，即记录里此刻真正存着的当前 ETA）往后推一天：
+   * 无论墙钟是几点，新 ETA 都严格晚于当前 ETA。
+   */
+  private OffsetDateTime 改期(
+      TrackingRow head,
+      UUID trackingId,
+      String sourceSystem,
+      String referenceId,
+      String reason,
+      String detail) {
+    var currentEta = head.effectiveEta();
+    assertThat(currentEta).as("改期前必须读得到当前 ETA").isNotNull();
+    var newEta = currentEta.plusDays(1);
+    asAWrite(
+        () ->
+            tracking.recordEvent(
+                trackingId,
+                user,
+                ev().kind("ETA_REVISED")
+                    .source(sourceSystem, referenceId)
+                    .eta(newEta, reason)
+                    .detail(detail)
+                    .occurredAt(eta(0))
+                    .build()));
+    return newEta;
   }
 
   // ================================================================ 建跟踪的前置约束
@@ -714,18 +779,9 @@ class InTransitTrackingIntegrationTest {
     assertThat(detail.tracking().currentLocation()).isEqualTo("Singapore");
     assertThat(detail.tracking().locationOccurredAt().toInstant()).isEqualTo(locatedAt.toInstant());
 
-    var newEta = OffsetDateTime.of(2026, 12, 1, 8, 0, 0, 0, ZoneOffset.ofHours(8));
-    asAWrite(
-        () ->
-            tracking.recordEvent(
-                trackingId,
-                user,
-                ev().kind("ETA_REVISED")
-                    .source("FORWARDER", "FF-BOOK-77")
-                    .eta(newEta, "船公司跳港")
-                    .detail("船公司通知跳港")
-                    .occurredAt(eta(0))
-                    .build()));
+    // 新 ETA 与「记录里当前的 ETA」同源推导（见 改期(...) 的说明）。
+    var newEta =
+        改期(detail.tracking(), trackingId, "FORWARDER", "FF-BOOK-77", "船公司跳港", "船公司通知跳港");
     var after = asA(() -> tracking.detail(trackingId));
     assertThat(after.tracking().revisedEta().toInstant()).isEqualTo(newEta.toInstant());
     assertThat(after.tracking().effectiveEta().toInstant()).isEqualTo(newEta.toInstant());
@@ -737,6 +793,65 @@ class InTransitTrackingIntegrationTest {
             .orElseThrow();
     assertThat(external.sourceSystem()).isEqualTo("FORWARDER");
     assertThat(external.referenceId()).isEqualTo("FF-BOOK-77");
+  }
+
+  /**
+   * 🔴 确定性证明：ETA 改期的基准与墙钟的小时数无关。
+   *
+   * <p>领域规则「新的预计到港不许早于当前 ETA」是**对**的，不该动。缺陷在测试里：新 ETA 曾被写死成
+   * {@code 2026-12-01T08:00+08:00}，而记录里当前 ETA 是 {@code eta(ETA_ONT)} —— 它跟着墙钟走
+   * （{@link #eta(int)} 保留当前的小时数）。于是那个写死值**只在墙钟小时数 &lt; 08 时**才碰巧晚于基线：
+   * 09 点一过，新 ETA 就成了「往前调 ETA」，被领域规则当场拒掉（2026-10-22 的批次 L2 就红在这里，
+   * warehouse 之后 trade/crm 整个没跑）。
+   *
+   * <p>本用例把时钟钉死在 07 / 09 / 23 三个小时基准上各跑一遍「建单 → 建跟踪 → 改期」：改期必须都被接受，
+   * 且新 ETA 必须**精确等于**「记录里当前 ETA + 1 天」—— 一旦有人把绝对时刻写回测试里，这三个基准上都会
+   * 当场红，而不是等到下一个 09 点才炸。
+   */
+  @Test
+  @DisplayName("改期基准与墙钟小时数无关：07/09/23 点三个基准都成立")
+  void 改期基准_与墙钟小时数无关() {
+    // 基准日取真实「今天」、只换小时：既不跨天翻转，也不会把 ETA 推到过去而改变预警档位。
+    var base = OffsetDateTime.now(ZoneOffset.ofHours(8)).truncatedTo(ChronoUnit.DAYS);
+    for (var hour : List.of(7, 9, 23)) {
+      clockSource = () -> base.withHour(hour);
+      try {
+        var shipmentId = dispatched(a, ETA_ONT, "100");
+        var trackingId = createTracking(a, shipmentId).id();
+
+        // 记录里当前的 ETA = 建跟踪时从发运单抄下的快照，它带着钉死的小时数。
+        var head = asA(() -> tracking.detail(trackingId).tracking());
+        var currentEta = head.effectiveEta();
+        assertThat(currentEta.toInstant())
+            .as("%d 点基准：当前 ETA 必须正好是 eta(ETA_ONT)（= 基线 + 40 天）", hour)
+            .isEqualTo(base.withHour(hour).plusDays(ETA_ONT).toInstant());
+
+        var newEta =
+            改期(
+                head,
+                trackingId,
+                "FORWARDER",
+                "FF-BOOK-77-H" + hour,
+                "船公司跳港",
+                "船公司通知跳港");
+
+        // 新 ETA 与当前 ETA 同源：精确等于「当前 ETA + 1 天」，且严格晚于当前 ETA。
+        assertThat(newEta.toInstant())
+            .as("%d 点基准：新 ETA 必须等于当前 ETA + 1 天（与墙钟无关）", hour)
+            .isEqualTo(currentEta.plusDays(1).toInstant());
+        assertThat(newEta).as("%d 点基准：新 ETA 必须严格晚于当前 ETA", hour).isAfter(currentEta);
+
+        var after = asA(() -> tracking.detail(trackingId));
+        assertThat(after.tracking().revisedEta().toInstant())
+            .as("%d 点基准：改期后的 ETA 必须写回新值", hour)
+            .isEqualTo(newEta.toInstant());
+        assertThat(after.tracking().effectiveEta().toInstant())
+            .as("%d 点基准：生效 ETA 必须等于新值", hour)
+            .isEqualTo(newEta.toInstant());
+      } finally {
+        clockSource = WALL_CLOCK;
+      }
+    }
   }
 
   @Test
