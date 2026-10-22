@@ -204,3 +204,77 @@ SpringDoc 静默丢掉后一个，契约字段串味，而 typecheck / lint / vi
   ⇒ 实测约 **1.19 个/小时 ≈ 29 个/天**，**明显低于理论值**（回收轮要跑 L2，会吃掉整格并顺延下一格）。
 - **剩余 149 个未开发** ⇒ 按理论口径约 **2.2 天**，按实测口径约 **5.2 天**。
   **诚实区间：约 2–6 天**，随 L2 红绿比例与长尾车道占位浮动。**这是估算，不是承诺，也不是完成日期。**
+
+---
+
+## 附一：三条已落地车道的并入预演（`git merge-tree` 干跑，2026-10-22 16:5x）
+
+本批已有 **3 条车道 land**（`state=ready`）：
+
+| 车道                  | head       | 迁移              | api-proxy 首 token  | 落点核对                                                |
+| --------------------- | ---------- | ----------------- | ------------------- | ------------------------------------------------------- |
+| 15.2.1.2 评价回复     | `598e41c7` | `V298`（crm）     | `review-replies`    | 落在 `reviews` 与 `review-rules` **之间** = 指定锚点 ✅ |
+| 15.3.2.2 接触记录     | `2bd54d3`  | `V299`（crm）     | `customer-contacts` | 落在 `customer-tags` 之后 = 指定锚点 ✅                 |
+| 16.1.1.1 账号健康总览 | `31dc6cfd` | `V300`（channel） | `account-health`    | 落在 channel 的 `ad-rules` 之后 = 指定锚点 ✅           |
+
+三条车道**同时改**了协议点名的四个求并文件：`packages/api-contracts/src/contracts/crm.ts`、
+`packages/api-contracts/src/crm.openapi.json`、`apps/web/src/lib/api-proxy.ts`、
+`docs/product/capability-blueprint/module-progress.md`（第三条另加 `channel.ts` / `channel.openapi.json`）。
+
+### 结论（`git merge-tree --write-tree` 干跑：**不改 ref、不改工作区、不产生合并 commit**）
+
+按**下一轮 tick 的真实顺序**逐条合并（base → 15.2.1.2 → 15.3.2.2 → 16.1.1.1），
+每步都是一次带并集驱动的 2 路合并，**三步 exit 0，无一步出现 `CONFLICT_KEYS`**。
+最终合并树 `e6419d08`。
+
+| 检查项                 | 结果                                                                                                |
+| ---------------------- | --------------------------------------------------------------------------------------------------- |
+| 合并是否报冲突         | **否**，三步全 exit 0                                                                               |
+| `CONFLICT_KEYS`        | **三步均未出现** ⇒ 契约按「导出类型名 / paths / schemas 名」求并成功，无同名键冲突                  |
+| `services[]` 元素数    | base **191** → 合并后 **194**（三条车道各 +1，精确相等）                                            |
+| **从 base 掉落的元素** | **0 个**                                                                                            |
+| 新增首 token           | `crm/:review-replies` · `crm/:customer-contacts` · `channel/:account-health`                        |
+| 台账行                 | **465 行**、**重复 ID 0 个**；15.2.1.2 / 15.3.2.2 / 16.1.1.1 **均为「已交付」**                     |
+| 迁移文件               | `V298` / `V299` / `V300` **各 1 份，无重复无缺失**                                                  |
+| 契约 type 数           | `crm.ts` **159 → 199**；`channel.ts` **1348 → 1365**（+17 = 车道自报值）                            |
+| 契约 path 数           | `crm.openapi.json` **91 → 114**；`channel.openapi.json` **710 → 721**（+11 = 车道自报值）           |
+| **重名 `export type`** | `crm.ts` **0 个**、`channel.ts` **0 个**（batch-56 抓过的「契约静默串味」形态，本次未复现）         |
+| 车道纪律               | 三条都**零 ALTER / 零 DROP / 零外键**（`ALTER TABLE … ADD/DROP/ALTER` 计数 0、`REFERENCES` 计数 0） |
+
+⚠️ 干跑 stderr 里出现 `merge-union: 走了行级兜底并集，请人工确认这个文件改对了` ——
+这是**台账分支**的固定提示（`merge-union.mjs` 第 374 行），紧跟着的
+`台账按模块 ID 求并集，折叠了 465 行同 ID 记录` 证明台账走的是**按模块 ID 的确定性求并**
+（证据非占位优先 → 状态 已交付 > 进行中 > 未开发 → 证据更长者优先），**不是内容丢失**。
+
+### 🔎 逐条复核的三处关键纪律
+
+- **V298 / V299 / V300 的 RLS**：V298 对 6 张表、**V299 与 V300 用一条 DO 循环**对各自 3 张表
+  逐张 `ENABLE` + `FORCE ROW LEVEL SECURITY` + `CREATE POLICY isolation`（USING 与 WITH CHECK 同表达式）。
+  V300 另在 `account_health_metric` / `account_health_assessment` 上加 `data_scope` **RESTRICTIVE** 策略，
+  写法与已交付的 V197（16.2.2.1）**逐字同构**（`channel_scope(channel_operation(), s.owner_id, s.department_id)`）；
+  `account_health_threshold` 无 `shop_id`、是租户级阈值配置，**故不加店铺维度的 data_scope** —— 这是对的，不是漏。
+- **权限码**：三条车道分别用 `crm.product_review.reply` / `crm.contact.read`+`crm.contact.update` / `channel.account.read`+`channel.account.update`，
+  与 `AccessService.require` 的「同 grant 内必须同时命中该动作与同族 `.read`」判据兼容。
+- **表名前缀不撞车**：`crm_review_reply_*` **不**复用索评的 `crm_review_send_record` / `crm_review_message_template`；
+  `crm_message_send_*` **不**复用邮件的 `crm_buyer_email_send_record` —— 两条车道各自另起命名空间。
+
+⇒ **下一轮 tick 可以直接走 `merge-ready`，不必再做并入预演。**
+
+### ⛔ 但仍然**不要**在最后一条车道未齐时跑 L2
+
+15.1.1.2 此刻仍在跑（后端已交付：V297 迁移 + 服务/端点 + 30 个集成测试全绿含租户三断言，正在做契约与前端）。
+**L2 不得与在途车道的 L1 并发**（2026-10-19 20:00 实测的成片假红：PG 峰值 16，1364 例里 3 failures + 24 errors **全是假红**）。
+⇒ 等 4 条车道全部 land，再一次性 `merge-ready` + **一次** L2 —— 这正是组批模式「每组只验证一次」的本意。
+
+### 🔍 给下一轮 L2 的一条取证线索（重要）
+
+本批开工后，**main→集成头同步任务**在本 worktree 里合入了 `origin/main`：
+
+```
+8663273f merge(main): sync from origin/main
+```
+
+⇒ 下一轮 L2 跑的那个集成头，**同时包含**「4 条车道的新代码」**和**「这一笔 main 同步」。
+按 `PIPELINE.md` §5.6：**若 L2 红，`8663273f` 是跨车道破坏的首要嫌疑对象**
+（它的代码没经过本流水线的 L1/L2）。⇒ 二分定位时**先切掉这一笔**再看是不是车道的问题；
+若确认是 main 带进来的回归，**不要去修 main 的代码**，如实上报交由同步任务处理。

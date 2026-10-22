@@ -2,18 +2,22 @@
 
 **优先级：P1 —— 不是 bug，是「修复落地那一轮同步」的验收清单。**
 
-**状态（2026-10-22 14:5x 实测）**：
+**状态（2026-10-22 16:3x 实测 · PR#1 与 PR#2 均已落地 main）**：
 
 - ✅ 修复 `e5cb2f11`（驱动 + 生成器 `sort_keys`）与产物 `c862c529`（11 个重生成产物）
   **都已并入 `origin/integration/module-dev`**（经 `2d2f2ea3`）；
-- ⛔ **两者都还不在 `origin/main`**（main 仍是 `b49fe44c`）；
-- ⛔ **`__pycache__` 的 gitignore 条目还没进集成头**（实测 `.gitignore` 里无 `__pycache__`）；
-- ⚠️ ⇒ **§0 的守卫断言当前输出 STOP**，module-dev→main **只能先放 PR#1**。
+- ✅ **两者都已在 `origin/main`**：PR#1（驱动修复）落于 `a29a4277`，PR#2（11 个产物 + 文档对齐）
+  落于 `4ab1d8d1`；`origin/main` tip = `4ab1d8d1`；
+- ✅ **`__pycache__` 的 gitignore 条目已在集成头**（实测 `.gitignore` 第 107 行 `__pycache__/`、
+  第 108 行 `*.py[cod]`，`git check-ignore` 两个模式都命中）；
+- ✅ ⇒ **§0 的守卫断言当前输出 OK**，module-dev→main 的「PR#1 必须先于 PR#2」次序约束
+  **已全部满足**（`origin/main` 的 `MAIN_MERGE_CRON_PROMPT.md` 已含 §1.5，第 67 行）。
 
 落地后由 batch-62 流水线会话知会同步任务，
 下一轮 `main → integration/module-dev` 同步必须按本清单逐项校验。**
 
-> 本清单的数据全部是 **2026-10-22 14:3x–14:5x 实测**（`origin/integration/module-dev` = `75ef992a` 的树）。
+> 本清单的判据结论以 **2026-10-22 14:3x–14:5x 实测** 为准；
+> 状态块、itest 断言数、判据 H 表述与基线数字订正于 **2026-10-22 16:3x**（同步轮次实测复验）。
 
 ---
 
@@ -75,7 +79,9 @@ git show origin/main:tools/module-progress/merge-union.mjs | grep -q 'json-forma
 ⇒ 增删行数**完全相等** ⇒ 纯重排、零内容丢失（与修复车道复验的结论一致）。
 ⇒ 但这 11 个文件一旦被旧驱动处理，就**全部**退回 JS 形态 ⇒ main 的 CI 继续红。
 
-**当前实测（14:5x）：守卫断言输出 `STOP` ⇒ PR#2 现在不能走。**
+**当前实测（16:3x）：守卫断言输出 `OK` ⇒ PR#2 可以走**
+（实测 `git show origin/main:tools/module-progress/merge-union.mjs | grep -c 'json-format.py'` = **6**）
+**；且 PR#2 已于 `4ab1d8d1` 落地 `origin/main`**（11 个产物 + 5 份文档 + `MAIN_MERGE_CRON_PROMPT.md`）。
 
 ### 复核复现配方（任何人可重跑）
 
@@ -175,10 +181,10 @@ git merge feat && cat /tmp/drivertest/log.txt
 | `lane.mjs:927` 对 `merge-union.itest.mjs` 的引用 | 是**未跟踪文件清理白名单**，**不是执行点**                             |
 
 ⇒ 仓库里有 **13 个** `tools/module-progress/*.itest.mjs`（含修复车道新增的
-`merge-union.itest.mjs`，33 条断言），**CI 不跑、L2 不跑、任何脚本都不跑**，
+`merge-union.itest.mjs`，**32** 条断言），**CI 不跑、L2 不跑、任何脚本都不跑**，
 只有人手动 `node <file>` 才会执行 ⇒ **回归测试形同虚设**。
 
-⇒ 本轮 14:00 tick **显式手动跑过** `merge-union.itest.mjs`（33 断言全绿），
+⇒ 本轮 14:00 tick **显式手动跑过** `merge-union.itest.mjs`（**32** 断言全绿），
 但这**不是**自动保障 ⇒ **下轮同步必须显式再跑一遍**（见判据 G）。
 
 ### ⚠️ 已知缺口三：**turbo 缓存不覆盖 `packages/api-contracts/`** ⇒ 缓存会骗人
@@ -258,8 +264,8 @@ git show --name-only --format='' <本轮 merge commit> \
 
 ### 📌 附：`__pycache__` 与 prettier 两件事的当前状态
 
-- `__pycache__/` **已在 `origin/integration/module-dev` 的 `.gitignore` 第 106 行** ✓
-  （14:00 tick 的独立 `chore(gitignore)` commit 已落地）⇒ 下轮按「module-dev 侧已有」处理，
+- `__pycache__/` **已在 `origin/integration/module-dev` 的 `.gitignore` 第 107 行** ✓
+  （第 108 行 `*.py[cod]`；16:3x 复测 `git check-ignore` 两个模式都命中）—— 14:00 tick 的独立 `chore(gitignore)` commit 已落地 ⇒ 下轮按「module-dev 侧已有」处理，
   **不回加到 PR#1 分支**（避免两边各加同一行撞 add/add）。
 - 本清单文件的 prettier 修复**已由本会话的自执行脚本完成**
   （提交前跑了 `prettier --write`，`ef45304a` 已 prettier-clean）⇒ **不需要再找 tick 补这一步**。
@@ -415,17 +421,21 @@ packages/api-contracts/src/warehouse.openapi.json  |  2 +-
 ### 判据 G —— ⭐ 回归测试必须**显式执行**（CI 与 L2 都不跑它）
 
 ```bash
-node tools/module-progress/merge-union.itest.mjs                       # 驱动回归（33 断言）
+node tools/module-progress/merge-union.itest.mjs                       # 驱动回归（32 断言）
 python3 -m unittest discover -s tools/codegen -p 'test_*.py'          # 生成器回归（17 例，等价 pnpm test:codegen）
 ```
 
 ⇒ 两条都必须 **exit 0**。
+
+📌 **断言数口径（16:3x 实测订正）**：驱动 itest 的断言数是 **32**，不是 v7 原文写的 33 ——
+实测 `grep -c -E '^\s*check\(' tools/module-progress/merge-union.itest.mjs` = **32**
+（合并前后两侧都是 32），且实跑输出「全部通过」exit 0。
 ⚠️ **为什么必须显式跑**：见 §2「已知缺口二」—— `*.itest.mjs` 不在 vitest include 里、
 没有任何 package.json script 跑它、CI 不跑、L2 不跑 ⇒ **不显式跑就等于没跑**。
 ⇒ 修复的正确性就架在这两组测试上；下轮若不显式执行，判据 E 即使绿，
 也只能证明「这一次的产物是 canonical 的」，证明不了「驱动不会再次写坏」。
 
-### 判据 H —— ⭐ 契约有变更时，L2 的前端三步**必须带 `--force`**
+### 判据 H —— ⭐ **拟新增**：契约有变更时，L2 的前端三步**必须带 `--force`**
 
 ```bash
 pnpm typecheck --force && pnpm lint --force && pnpm test --force
@@ -434,8 +444,13 @@ pnpm typecheck --force && pnpm lint --force && pnpm test --force
 ⚠️ **理由（见 §2 已知缺口三）**：`packages/api-contracts/` **不是 turbo 包**、
 不在任何 task 的 `inputs` 里、也不在 `globalDependencies` 里
 ⇒ 改契约**不会**让 turbo 缓存失效 ⇒ 三步可以**整段 replay 旧缓存**。
-⇒ 且协议里**没有**任何 `--force` 规则（三处 `force` 字样全在说别清闸）。
-⇒ **契约有变更时，不带 `--force` 的前端三步等于没跑。**
+⚠️ **本条是「拟新增」的规则，协议里目前并不存在** ——
+实测 `PIPELINE.md` / `PIPELINE_CRON_PROMPT.md` / `.dev-agent/l2-run.sh` 里
+**`--force` 一次都没出现**；三处 `force` 字样全在说
+**「不要为了让 tick 通过而 force 清掉别人持有的调度闸」**（与 turbo 无关）：
+`PIPELINE.md:895`、`PIPELINE_CRON_PROMPT.md:252`、`PIPELINE_CRON_PROMPT.md:584`。
+⇒ **拟新增**：契约有变更时，不带 `--force` 的前端三步等于没跑。
+⇒ 是否写进协议（L2 清单 / `PIPELINE.md`）**待用户定夺**，未擅自改协议文件。
 
 ### 判据 I —— ⭐ L2 缺的那道 canonical 闸，由同步任务补上
 
@@ -456,7 +471,9 @@ git diff --exit-code -- packages/api-contracts/src
 1. 明确写出契约文件的变化属于**类别①（回归）还是类别②（预期的一次性排版变更）**。
 2. 若属类别②，列出具体变了哪几个文件、**导出声明数与 `paths` 数是否不变**。
    ⇒ **数量不变** 是「排版变更」与「内容丢失」的**分界线**：数量若变了 ⇒ 是内容丢失 ⇒ **回归**，要查。
-   （本次实测的基线数字：导出声明 158/863/1348/1077/1717/159；`paths` 数 112/494/518/710/91/789。）
+   （本次实测的基线数字，按 **identity / catalog / warehouse / channel / trade / crm** 顺序：
+   导出声明 **158 / 863 / 1077 / 1348 / 1717 / 159**；`paths` 数 **112 / 494 / 518 / 710 / 789 / 91**。
+   ⚠️ 16:3x 实测复验：v7 原文把这两组的第 3/4 位与第 5/6 位**写反了**，已订正。）
 3. 判据 A / B / B' / C1-C3 / D / E / F 各组的实际结果**逐条列出**。
 4. ⭐ **显式声明旧 backlog 的过时前提**：
    `docs/backlog/2026-10-20-contract-drift-ci-gate.md` 的标题与 §① 里
@@ -468,7 +485,7 @@ git diff --exit-code -- packages/api-contracts/src
 6. ⭐ 报出 **§0 的前置断言结果**（main 是否已是修好的驱动）—— 这是 module-dev→main 能否放行的前提。
 7. ⭐ 报出 **判据 G 的两条回归结果**（驱动 itest + codegen 单测的 exit code 与断言数）——
    CI 与 L2 都不跑它们，只能靠下轮同步显式执行。
-8. ⭐ 报出 **判据 H 的执行方式**（契约有变更时前端三步是否带了 `--force`）——
+8. ⭐ 报出 **判据 H（拟新增规则）的执行方式**（契约有变更时前端三步是否带了 `--force`）——
    不带 `--force` 的前端三步在契约变更后可能全是缓存回放。
 9. ⭐ 报出 **判据 I 的结果**（本地 `contracts:generate` + `git diff --exit-code` 是否为空）——
    L2 四步里没有这道闸，只能靠同步任务补。
@@ -490,4 +507,4 @@ git diff --exit-code -- packages/api-contracts/src
   ⚠️ 其中「缺 `contracts:check` 闸」的前提**已过时**，见判据 B' 与汇报义务第 4 条）
 - 修复车道：`fix/contract-union-driver`（worktree `.worktrees/tooling.contract-union`，
   由 14:00 流水线 tick `mvs_629b82e64bd04f6e87cd5f5975eeb503` 派出）；
-  修复 commit `e5cb2f11`（**尚未**到 `origin/main`）
+  修复 commit `e5cb2f11`（**已**到 `origin/main`，经 PR#1 的 `a29a4277`）
