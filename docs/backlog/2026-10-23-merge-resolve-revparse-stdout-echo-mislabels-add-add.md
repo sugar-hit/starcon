@@ -95,5 +95,5 @@ const kind = baseAtMergeBase === null ? 'add/add（…）' : 'content（…）';
 
 ## 相关
 
-- `docs/sessions/2026-10/2026-10-23-0515-main-sync-round43-zero-net-change.md` —— 本条的发现现场。
+- `docs/sessions/2026-10/2026-10-23-0509-main-sync-round43-zero-net-change.md` —— 本条的发现现场。
 - `docs/backlog/2026-10-20-merge-union-ledger-markdown-structure-collapse.md` —— 同一条合并链路的另一个结构缺陷。
