@@ -52,7 +52,9 @@ public final class AutoReplyModels {
    * 触发条件 —— 蓝图职责句点名的三种，<b>互斥</b>。
    *
    * <p>🔴 {@link #HUMAN_TIMEOUT}（无人工介入超时）的「人工介入」= 15.1.1.2 里一条
-   * <b>不是本模块产生</b>的 SENT 发送记录；15.4.1.2 工单处理未交付 ⇒ 工单侧的介入动作读不到。
+   * <b>不是本模块产生</b>的 SENT 发送记录；15.4.1.2 工单处理<b>已交付</b>（同服务同库，
+   * {@code crm_service_ticket_action} 是工单侧介入动作的事实表），但<b>本模块当前仍未把
+   * 工单侧介入动作纳入豁免判定</b> ⇒ 工单侧的介入动作仍读不到。
    */
   public enum CrmAutoReplyTriggerType {
     CLASSIFICATION("收到消息分类命中"),

@@ -41,8 +41,10 @@ import org.springframework.web.server.ResponseStatusException;
  *       重复同步命中唯一键 ⇒ 跳过，<b>不产生第二条记录</b>。</li>
  *   <li><b>批量定位真的批量</b>：受影响 listing 一次 SQL 查出，库存**一次**调 07 的
  *       可售量接口（<b>不是</b>一条条循环调上游）。</li>
- *   <li><b>下游未交付一律不编</b>：12 财务（罚扣款）与 16.1.2.2 申诉管理当前<b>都未交付</b>
- *       ⇒ 能力声明里 {@code available=false} + {@code ownerModule} + 影响说明。</li>
+ *   <li><b>下游未交付一律不编</b>：12 财务（罚扣款）在本仓<b>尚未落地</b>
+ *       ⇒ 能力声明里 {@code available=false} + {@code ownerModule} + 影响说明；
+ *       16.1.2.2 申诉管理<b>已交付</b>（同服务同库）⇒ 本模块只把违规的处理状态记到
+ *       「申诉中」，申诉单 / 举证材料 / 提交与结果由它记录，本模块<b>不复制</b>。</li>
  * </ol>
  */
 @Service
@@ -86,8 +88,9 @@ public class PlatformViolationService {
           + "整改 = 待整改 → 整改中 → 已提交 → 已验收 / 已驳回。"
           + "**非法转换在服务层（422，带人话）与 DB 层（23514，兜底）都会被拒**。"
           + "「已提交」必须真的提交过、「已验收」必须真的验收过（DB 层 CHECK 钉住时刻）。"
-          + "「申诉中」只表示**已在申诉** —— 16.1.2.2 申诉管理未交付，"
-          + "本模块**不编造申诉单、不编造申诉结果**。";
+          + "「申诉中」只表示**已在申诉** —— 申诉单、举证材料、提交与结果由 "
+          + "**16.1.2.2 申诉管理**记录（同服务同库）；"
+          + "本模块**不复制**申诉数据、**不编造**申诉结果。";
 
   private static final String IDEMPOTENCY_SEMANTICS =
       "🔴 幂等锚点是**平台侧的通知 id**（external_notice_id），"
@@ -98,7 +101,7 @@ public class PlatformViolationService {
   private static final String UPSTREAM_NOTE =
       "上游 = **2 同步**（平台违规通知同步）。平台违规通知是**平台推送**的形态，"
           + "所以本模块的同步入口是**接收通知**（按 external_notice_id 幂等登记），"
-          + "不是拉取；每批同步都落一条**同步运行记录**（取到几条 / 写了���条 / 跳过几条 / 失败几条）。"
+          + "不是拉取；每批同步都落一条**同步运行记录**（取到几条 / 写了几条 / 跳过几条 / 失败几条）。"
           + "**人工登记**是同步入口之外的第二条正当路径，但它**恒标 MANUAL**，不冒充平台同步。";
 
   private static final String DOWNSTREAM_NOTE =
@@ -106,9 +109,10 @@ public class PlatformViolationService {
           + "**不建财务表、不编造放行形状**）、"
           + "**4 刊登（问题商品下架）**（**已交付**：4.1.1.1 的批量下架就在本服务，"
           + "本模块真的能把那批 listing 下架）、"
-          + "**16.1.2.2 申诉管理**（**未交付** ⇒ 只记「申诉中」这个状态，"
-          + "**不编造**申诉单与申诉结果）。"
-          + "这两条缺口在能力声明里是**可查的事实**（available=false + ownerModule + 影响说明），"
+          + "**16.1.2.2 申诉管理**（**已交付**：同服务同库，申诉单 / 举证材料 / 提交与结果"
+          + "由它记录，本模块**不复制**申诉数据）。"
+          + "剩下的这条缺口（12 财务）在能力声明里是**可查的事实**"
+          + "（available=false + ownerModule + 影响说明），"
           + "不是文档里的一句话。";
 
   private final DSLContext sql;
@@ -225,8 +229,10 @@ public class PlatformViolationService {
   /**
    * 能力声明：值域、状态机、口径、以及**哪些下游未交付**。
    *
-   * <p>🔴 下游 **12 财务（罚扣款）** 与 **16.1.2.2 申诉管理** 当前<b>都未交付</b>，
-   * 如实报出 ownerModule 与影响；**4 刊登（问题商品下架）已交付**（4.1.1.1 批量下架在本服务内）。
+   * <p>🔴 下游 **12 财务（罚扣款）** 在本仓<b>尚未落地</b>，
+   * 如实报出 ownerModule 与影响；**16.1.2.2 申诉管理已交付**（同服务同库，
+   * 入口在自己的 {@code /channel/platform-appeals} 前缀）、
+   * **4 刊登（问题商品下架）已交付**（4.1.1.1 批量下架在本服务内）。
    */
   public PlatformViolationCapabilities capabilities() {
     List<PlatformViolationCapabilityGap> gaps =
@@ -252,10 +258,13 @@ public class PlatformViolationService {
                 "16.1.2.2",
                 "申诉管理",
                 "16.1.2.2 申诉管理",
-                false,
-                "申诉管理**未交付** ⇒ 本模块的处理状态只到「申诉中」这个状态为止，"
-                    + "**不编造**申诉单、举证材料、提交跟踪与申诉结果；"
-                    + "违规详情里也**没有**申诉入口（放行一个不存在的入口比 404 更糟）。"));
+                true,
+                "申诉管理**已交付**（同服务同库，V310 platform_appeal*）："
+                    + "本模块只把违规的处理状态记到「申诉中」；"
+                    + "申诉单、举证材料、提交与结果由 16.1.2.2 记录，"
+                    + "本模块**不复制**申诉数据、**不编造**申诉结果；"
+                    + "违规详情里也**没有**申诉入口 —— 申诉入口在它自己的 "
+                    + "/channel/platform-appeals 前缀。"));
 
     return new PlatformViolationCapabilities(
         gaps,
@@ -759,7 +768,7 @@ public class PlatformViolationService {
    * 每条通知按 {@code external_notice_id} <b>幂等</b>：已存在 ⇒ 跳过（不新建、不改写），
    * 不存在 ⇒ 落违规记录 + 涉及主体 + 处罚措施。
    *
-   * <p>🔴 每批同步落一条**同步运行记录**（取到几条 / 写了���条 / 跳过几条 / 失败几条）——
+   * <p>🔴 每批同步落一条**同步运行记录**（取到几条 / 写了几条 / 跳过几条 / 失败几条）——
    * 「同步跑了没有、写了多少」是可查的事实，不是口头承诺。
    */
   public PlatformViolationSyncResult sync(String shopId, PlatformViolationSyncInput input) {

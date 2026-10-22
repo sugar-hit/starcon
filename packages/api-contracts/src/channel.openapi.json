@@ -20860,6 +20860,778 @@
         },
         "type": "object"
       },
+      "ComplianceAppeal": {
+        "properties": {
+          "appealId": {
+            "type": "string"
+          },
+          "appealText": {
+            "type": "string"
+          },
+          "appealType": {
+            "type": "string"
+          },
+          "appealTypeLabel": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "decisionCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "evidenceCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "impactLabel": {
+            "type": "string"
+          },
+          "impactLevel": {
+            "type": "string"
+          },
+          "lastDecidedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "lastOutcome": {
+            "type": "string"
+          },
+          "lastOutcomeLabel": {
+            "type": "string"
+          },
+          "lastOutcomeReason": {
+            "type": "string"
+          },
+          "nextStatuses": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "shopCode": {
+            "type": "string"
+          },
+          "shopId": {
+            "type": "string"
+          },
+          "shopName": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "submissionCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "submittedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "violationId": {
+            "type": "string"
+          },
+          "violationTitle": {
+            "type": "string"
+          },
+          "violationType": {
+            "type": "string"
+          },
+          "violationTypeLabel": {
+            "type": "string"
+          },
+          "withdrawnAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ComplianceAppealCapabilities": {
+        "properties": {
+          "appealTypeLabels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "appealTypes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "appendOnlySemantics": {
+            "type": "string"
+          },
+          "downstreamNote": {
+            "type": "string"
+          },
+          "evidenceTypeLabels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "evidenceTypes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "gaps": {
+            "items": {
+              "$ref": "#/components/schemas/ComplianceAppealCapabilityGap"
+            },
+            "type": "array"
+          },
+          "impactLevels": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "outcomeLabels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "outcomes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "priorityNote": {
+            "type": "string"
+          },
+          "quotaNote": {
+            "type": "string"
+          },
+          "stateMachineSemantics": {
+            "type": "string"
+          },
+          "statusLabels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "statusTransitions": {
+            "additionalProperties": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "type": "object"
+          },
+          "statuses": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "typeDomainNote": {
+            "type": "string"
+          },
+          "upstreamNote": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ComplianceAppealCapabilityGap": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "impact": {
+            "type": "string"
+          },
+          "moduleId": {
+            "type": "string"
+          },
+          "moduleName": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ComplianceAppealCreateInput": {
+        "properties": {
+          "appealText": {
+            "type": "string"
+          },
+          "appealType": {
+            "type": "string"
+          },
+          "violationId": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ComplianceAppealDecision": {
+        "properties": {
+          "appealId": {
+            "type": "string"
+          },
+          "decidedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "decisionId": {
+            "type": "string"
+          },
+          "outcome": {
+            "type": "string"
+          },
+          "outcomeLabel": {
+            "type": "string"
+          },
+          "platformReference": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ComplianceAppealDecisionInput": {
+        "properties": {
+          "decidedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "outcome": {
+            "type": "string"
+          },
+          "platformReference": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ComplianceAppealDecisionResult": {
+        "properties": {
+          "appeal": {
+            "$ref": "#/components/schemas/ComplianceAppeal"
+          },
+          "decision": {
+            "$ref": "#/components/schemas/ComplianceAppealDecision"
+          },
+          "note": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ComplianceAppealDetail": {
+        "properties": {
+          "appeal": {
+            "$ref": "#/components/schemas/ComplianceAppeal"
+          },
+          "decisions": {
+            "items": {
+              "$ref": "#/components/schemas/ComplianceAppealDecision"
+            },
+            "type": "array"
+          },
+          "evidence": {
+            "items": {
+              "$ref": "#/components/schemas/ComplianceAppealEvidence"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "quota": {
+            "$ref": "#/components/schemas/ComplianceAppealQuota"
+          },
+          "submissions": {
+            "items": {
+              "$ref": "#/components/schemas/ComplianceAppealSubmission"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "ComplianceAppealEvidence": {
+        "properties": {
+          "appealId": {
+            "type": "string"
+          },
+          "evidenceId": {
+            "type": "string"
+          },
+          "evidenceRef": {
+            "type": "string"
+          },
+          "evidenceType": {
+            "type": "string"
+          },
+          "submittedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ComplianceAppealEvidenceInput": {
+        "properties": {
+          "evidenceRef": {
+            "type": "string"
+          },
+          "evidenceType": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ComplianceAppealPage": {
+        "properties": {
+          "approvedCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "draftCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ComplianceAppeal"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "rejectedCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "submissionCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "submittedCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "withdrawnCount": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ComplianceAppealPriorityCandidate": {
+        "properties": {
+          "appealable": {
+            "type": "boolean"
+          },
+          "deadline": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "impactLabel": {
+            "type": "string"
+          },
+          "impactLevel": {
+            "type": "string"
+          },
+          "occurredAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "openAppealId": {
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "quotaConfigured": {
+            "type": "boolean"
+          },
+          "quotaRemaining": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "shopCode": {
+            "type": "string"
+          },
+          "shopId": {
+            "type": "string"
+          },
+          "shopName": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "violationId": {
+            "type": "string"
+          },
+          "violationStatus": {
+            "type": "string"
+          },
+          "violationType": {
+            "type": "string"
+          },
+          "violationTypeLabel": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ComplianceAppealPriorityPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ComplianceAppealPriorityCandidate"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ComplianceAppealQuota": {
+        "properties": {
+          "configured": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          },
+          "periodEnd": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "periodStart": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "quotaLimit": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "remaining": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "shopCode": {
+            "type": "string"
+          },
+          "shopId": {
+            "type": "string"
+          },
+          "shopName": {
+            "type": "string"
+          },
+          "usedCount": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ComplianceAppealQuotaInput": {
+        "properties": {
+          "periodEnd": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "periodStart": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "quotaLimit": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "shopId": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ComplianceAppealQuotaPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ComplianceAppealQuota"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ComplianceAppealQuotaUpdate": {
+        "properties": {
+          "created": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          },
+          "quota": {
+            "$ref": "#/components/schemas/ComplianceAppealQuota"
+          }
+        },
+        "type": "object"
+      },
+      "ComplianceAppealShop": {
+        "properties": {
+          "appealCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "openAppealCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "platformName": {
+            "type": "string"
+          },
+          "quotaLimit": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "quotaRemaining": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "quotaUsed": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "shopCode": {
+            "type": "string"
+          },
+          "shopId": {
+            "type": "string"
+          },
+          "shopName": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ComplianceAppealShopPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ComplianceAppealShop"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ComplianceAppealStats": {
+        "properties": {
+          "approvedCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "byStatus": {
+            "additionalProperties": {
+              "format": "int64",
+              "type": "integer"
+            },
+            "type": "object"
+          },
+          "byType": {
+            "additionalProperties": {
+              "format": "int64",
+              "type": "integer"
+            },
+            "type": "object"
+          },
+          "note": {
+            "type": "string"
+          },
+          "quota": {
+            "$ref": "#/components/schemas/ComplianceAppealQuota"
+          },
+          "rejectedCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "shopId": {
+            "type": "string"
+          },
+          "totalAppeals": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalSubmissions": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ComplianceAppealSubmission": {
+        "properties": {
+          "appealId": {
+            "type": "string"
+          },
+          "attemptNo": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "platformReference": {
+            "type": "string"
+          },
+          "submissionId": {
+            "type": "string"
+          },
+          "submittedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ComplianceAppealSubmissionResult": {
+        "properties": {
+          "appeal": {
+            "$ref": "#/components/schemas/ComplianceAppeal"
+          },
+          "attemptNo": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "quota": {
+            "$ref": "#/components/schemas/ComplianceAppealQuota"
+          },
+          "submission": {
+            "$ref": "#/components/schemas/ComplianceAppealSubmission"
+          }
+        },
+        "type": "object"
+      },
+      "ComplianceAppealSubmitInput": {
+        "properties": {
+          "note": {
+            "type": "string"
+          },
+          "platformReference": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ComplianceAppealTextInput": {
+        "properties": {
+          "appealText": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ComplianceAppealWithdrawInput": {
+        "properties": {
+          "note": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "CompliancePrecheckCapabilities": {
         "properties": {
           "boundaryNote": {
@@ -21271,6 +22043,816 @@
           },
           "verdict": {
             "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ComplianceRule": {
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "currentEffectiveFrom": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "currentEffectiveTo": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "currentVersionId": {
+            "type": "string"
+          },
+          "currentVersionNo": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "description": {
+            "type": "string"
+          },
+          "inForce": {
+            "type": "boolean"
+          },
+          "ruleCode": {
+            "type": "string"
+          },
+          "ruleId": {
+            "type": "string"
+          },
+          "ruleType": {
+            "type": "string"
+          },
+          "ruleTypeLabel": {
+            "type": "string"
+          },
+          "scopeCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "severity": {
+            "type": "string"
+          },
+          "severityLabel": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "termCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "title": {
+            "type": "string"
+          },
+          "versionCount": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ComplianceRuleCapabilities": {
+        "properties": {
+          "downstreamNote": {
+            "type": "string"
+          },
+          "gaps": {
+            "items": {
+              "$ref": "#/components/schemas/ComplianceRuleCapabilityGap"
+            },
+            "type": "array"
+          },
+          "ruleTypeLabels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "ruleTypeNote": {
+            "type": "string"
+          },
+          "ruleTypes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "scopeNote": {
+            "type": "string"
+          },
+          "severities": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "severityLabels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "severityNote": {
+            "type": "string"
+          },
+          "statusLabels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "statuses": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "termKindLabels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "termKinds": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "upstreamNote": {
+            "type": "string"
+          },
+          "versioningNote": {
+            "type": "string"
+          },
+          "wordLibraryNote": {
+            "type": "string"
+          },
+          "wordRuleTypes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "ComplianceRuleCapabilityGap": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "impact": {
+            "type": "string"
+          },
+          "moduleId": {
+            "type": "string"
+          },
+          "moduleName": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ComplianceRuleCreateInput": {
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "ruleCode": {
+            "type": "string"
+          },
+          "ruleType": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ComplianceRuleCreation": {
+        "properties": {
+          "created": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          },
+          "rule": {
+            "$ref": "#/components/schemas/ComplianceRule"
+          }
+        },
+        "type": "object"
+      },
+      "ComplianceRuleDetail": {
+        "properties": {
+          "note": {
+            "type": "string"
+          },
+          "rule": {
+            "$ref": "#/components/schemas/ComplianceRule"
+          },
+          "versions": {
+            "items": {
+              "$ref": "#/components/schemas/ComplianceRuleVersion"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "ComplianceRuleEffectiveEntry": {
+        "properties": {
+          "marketplaceCodes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "platformCodes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "rule": {
+            "$ref": "#/components/schemas/ComplianceRule"
+          },
+          "shopCodes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "termCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "version": {
+            "$ref": "#/components/schemas/ComplianceRuleVersion"
+          }
+        },
+        "type": "object"
+      },
+      "ComplianceRuleEffectiveSet": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ComplianceRuleEffectiveEntry"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "resolvedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ComplianceRuleEffectiveVersion": {
+        "properties": {
+          "note": {
+            "type": "string"
+          },
+          "resolvedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "rule": {
+            "$ref": "#/components/schemas/ComplianceRule"
+          },
+          "scopes": {
+            "items": {
+              "$ref": "#/components/schemas/ComplianceRuleScope"
+            },
+            "type": "array"
+          },
+          "terms": {
+            "items": {
+              "$ref": "#/components/schemas/ComplianceRuleTerm"
+            },
+            "type": "array"
+          },
+          "version": {
+            "$ref": "#/components/schemas/ComplianceRuleVersion"
+          }
+        },
+        "type": "object"
+      },
+      "ComplianceRulePage": {
+        "properties": {
+          "activeCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ComplianceRule"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "retiredCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "severityCounts": {
+            "additionalProperties": {
+              "format": "int64",
+              "type": "integer"
+            },
+            "type": "object"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "typeCounts": {
+            "additionalProperties": {
+              "format": "int64",
+              "type": "integer"
+            },
+            "type": "object"
+          }
+        },
+        "type": "object"
+      },
+      "ComplianceRuleScope": {
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "marketplaceCode": {
+            "type": "string"
+          },
+          "marketplaceId": {
+            "type": "string"
+          },
+          "marketplaceName": {
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "platformId": {
+            "type": "string"
+          },
+          "platformName": {
+            "type": "string"
+          },
+          "ruleVersionId": {
+            "type": "string"
+          },
+          "scopeId": {
+            "type": "string"
+          },
+          "shopCode": {
+            "type": "string"
+          },
+          "shopId": {
+            "type": "string"
+          },
+          "shopName": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ComplianceRuleScopeBatchResult": {
+        "properties": {
+          "inserted": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "requested": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "ruleVersionId": {
+            "type": "string"
+          },
+          "skipped": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "skippedScopes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "ComplianceRuleScopeInput": {
+        "properties": {
+          "marketplaceId": {
+            "type": "string"
+          },
+          "platformId": {
+            "type": "string"
+          },
+          "shopId": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ComplianceRuleScopePage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ComplianceRuleScope"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ComplianceRuleScopesInput": {
+        "properties": {
+          "scopes": {
+            "items": {
+              "$ref": "#/components/schemas/ComplianceRuleScopeInput"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "ComplianceRuleShop": {
+        "properties": {
+          "effectiveRuleCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "platformId": {
+            "type": "string"
+          },
+          "platformName": {
+            "type": "string"
+          },
+          "ruleCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "shopCode": {
+            "type": "string"
+          },
+          "shopId": {
+            "type": "string"
+          },
+          "shopName": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ComplianceRuleShopPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ComplianceRuleShop"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ComplianceRuleTerm": {
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "ruleVersionId": {
+            "type": "string"
+          },
+          "term": {
+            "type": "string"
+          },
+          "termId": {
+            "type": "string"
+          },
+          "termKind": {
+            "type": "string"
+          },
+          "termKindLabel": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ComplianceRuleTermBatchResult": {
+        "properties": {
+          "inserted": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "requested": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "ruleVersionId": {
+            "type": "string"
+          },
+          "skipped": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "skippedTerms": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "ComplianceRuleTermInput": {
+        "properties": {
+          "note": {
+            "type": "string"
+          },
+          "term": {
+            "type": "string"
+          },
+          "termKind": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ComplianceRuleTermPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ComplianceRuleTerm"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ComplianceRuleTermsInput": {
+        "properties": {
+          "terms": {
+            "items": {
+              "$ref": "#/components/schemas/ComplianceRuleTermInput"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "ComplianceRuleTermsUploadInput": {
+        "properties": {
+          "content": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ComplianceRuleUpdateInput": {
+        "properties": {
+          "status": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ComplianceRuleVersion": {
+        "properties": {
+          "changeNote": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "effectiveFrom": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "effectiveTo": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "inForce": {
+            "type": "boolean"
+          },
+          "ruleCode": {
+            "type": "string"
+          },
+          "ruleId": {
+            "type": "string"
+          },
+          "scopeCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "severity": {
+            "type": "string"
+          },
+          "severityLabel": {
+            "type": "string"
+          },
+          "termCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "title": {
+            "type": "string"
+          },
+          "versionId": {
+            "type": "string"
+          },
+          "versionNo": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ComplianceRuleVersionDetail": {
+        "properties": {
+          "note": {
+            "type": "string"
+          },
+          "rule": {
+            "$ref": "#/components/schemas/ComplianceRule"
+          },
+          "scopes": {
+            "items": {
+              "$ref": "#/components/schemas/ComplianceRuleScope"
+            },
+            "type": "array"
+          },
+          "terms": {
+            "items": {
+              "$ref": "#/components/schemas/ComplianceRuleTerm"
+            },
+            "type": "array"
+          },
+          "version": {
+            "$ref": "#/components/schemas/ComplianceRuleVersion"
+          }
+        },
+        "type": "object"
+      },
+      "ComplianceRuleVersionInput": {
+        "properties": {
+          "changeNote": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "effectiveFrom": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "scopes": {
+            "items": {
+              "$ref": "#/components/schemas/ComplianceRuleScopeInput"
+            },
+            "type": "array"
+          },
+          "severity": {
+            "type": "string"
+          },
+          "terms": {
+            "items": {
+              "$ref": "#/components/schemas/ComplianceRuleTermInput"
+            },
+            "type": "array"
+          },
+          "termsText": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ComplianceRuleVersionPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ComplianceRuleVersion"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
           }
         },
         "type": "object"
@@ -59884,6 +61466,589 @@
         },
         "type": "object"
       },
+      "TaxCoverageItem": {
+        "properties": {
+          "covered": {
+            "type": "boolean"
+          },
+          "jurisdictionCode": {
+            "type": "string"
+          },
+          "jurisdictionName": {
+            "type": "string"
+          },
+          "registrationId": {
+            "type": "string"
+          },
+          "registrationState": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "TaxCoverageList": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/TaxCoverageRow"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "total": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "TaxCoverageRow": {
+        "properties": {
+          "coverageStatus": {
+            "type": "string"
+          },
+          "coverageStatusLabel": {
+            "type": "string"
+          },
+          "coveredJurisdictionCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "gapCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "jurisdictions": {
+            "items": {
+              "$ref": "#/components/schemas/TaxCoverageItem"
+            },
+            "type": "array"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "requiredJurisdictionCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "shopCode": {
+            "type": "string"
+          },
+          "shopId": {
+            "type": "string"
+          },
+          "shopName": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "TaxGapItem": {
+        "properties": {
+          "gapType": {
+            "type": "string"
+          },
+          "gapTypeLabel": {
+            "type": "string"
+          },
+          "jurisdictionCode": {
+            "type": "string"
+          },
+          "jurisdictionName": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "remediation": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string"
+          },
+          "shopCode": {
+            "type": "string"
+          },
+          "shopId": {
+            "type": "string"
+          },
+          "shopName": {
+            "type": "string"
+          },
+          "subjectCode": {
+            "type": "string"
+          },
+          "subjectId": {
+            "type": "string"
+          },
+          "subjectName": {
+            "type": "string"
+          },
+          "subjectType": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "TaxGapPage": {
+        "properties": {
+          "affectedShopCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "highCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/TaxGapItem"
+            },
+            "type": "array"
+          },
+          "mediumCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "TaxGapSummary": {
+        "properties": {
+          "affectedShopCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "affectedSubjectCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "byGapType": {
+            "additionalProperties": {
+              "format": "int64",
+              "type": "integer"
+            },
+            "type": "object"
+          },
+          "gapTypeCounts": {
+            "items": {
+              "$ref": "#/components/schemas/TaxGapTypeCount"
+            },
+            "type": "array"
+          },
+          "highCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "mediumCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "TaxGapTypeCount": {
+        "properties": {
+          "count": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "gapType": {
+            "type": "string"
+          },
+          "gapTypeLabel": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "TaxJurisdictionList": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/TaxJurisdictionView"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "total": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "TaxJurisdictionView": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "countryCode": {
+            "type": "string"
+          },
+          "defaultFilingCycle": {
+            "type": "string"
+          },
+          "derivationScope": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "region": {
+            "type": "string"
+          },
+          "requiresEpr": {
+            "type": "boolean"
+          },
+          "subdivisionCode": {
+            "type": "string"
+          },
+          "taxRegime": {
+            "type": "string"
+          },
+          "vatRequired": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "TaxRegistrationCapabilities": {
+        "properties": {
+          "downstreamNote": {
+            "type": "string"
+          },
+          "filingCycles": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "gapSemantics": {
+            "type": "string"
+          },
+          "gapSeverities": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "gapTypes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "gaps": {
+            "items": {
+              "$ref": "#/components/schemas/TaxRegistrationCapabilityGap"
+            },
+            "type": "array"
+          },
+          "jurisdictionSemantics": {
+            "type": "string"
+          },
+          "reportingScopeNote": {
+            "type": "string"
+          },
+          "subjectSemantics": {
+            "type": "string"
+          },
+          "subjectTypes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "upstreamNote": {
+            "type": "string"
+          },
+          "upstreams": {
+            "items": {
+              "$ref": "#/components/schemas/TaxRegistrationUpstream"
+            },
+            "type": "array"
+          },
+          "vatStatuses": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "TaxRegistrationCapabilityGap": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "impact": {
+            "type": "string"
+          },
+          "moduleId": {
+            "type": "string"
+          },
+          "moduleName": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "TaxRegistrationInput": {
+        "properties": {
+          "eprRegistrationNo": {
+            "type": "string"
+          },
+          "filingCycle": {
+            "type": "string"
+          },
+          "isRegistered": {
+            "type": "boolean"
+          },
+          "jurisdictionCode": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "registrationValidFrom": {
+            "type": "string"
+          },
+          "registrationValidUntil": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "subjectId": {
+            "type": "string"
+          },
+          "subjectType": {
+            "type": "string"
+          },
+          "taxNumber": {
+            "type": "string"
+          },
+          "vatNumber": {
+            "type": "string"
+          },
+          "vatStatus": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "TaxRegistrationPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/TaxRegistrationView"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "TaxRegistrationUpstream": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "impact": {
+            "type": "string"
+          },
+          "moduleId": {
+            "type": "string"
+          },
+          "moduleName": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "TaxRegistrationView": {
+        "properties": {
+          "createdAt": {
+            "type": "string"
+          },
+          "daysToExpiry": {
+            "description": "距失效还有几天；负数 = 已过期；null = 没记有效期",
+            "format": "int32",
+            "type": "integer"
+          },
+          "effectiveStatus": {
+            "type": "string"
+          },
+          "eprRegistrationNo": {
+            "type": "string"
+          },
+          "filingCycle": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "isRegistered": {
+            "type": "boolean"
+          },
+          "jurisdictionCode": {
+            "type": "string"
+          },
+          "jurisdictionName": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "registrationValidFrom": {
+            "type": "string"
+          },
+          "registrationValidUntil": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "subjectAvailable": {
+            "type": "boolean"
+          },
+          "subjectCode": {
+            "type": "string"
+          },
+          "subjectId": {
+            "type": "string"
+          },
+          "subjectName": {
+            "type": "string"
+          },
+          "subjectNote": {
+            "type": "string"
+          },
+          "subjectType": {
+            "type": "string"
+          },
+          "taxNumber": {
+            "type": "string"
+          },
+          "taxRegime": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          },
+          "vatNumber": {
+            "type": "string"
+          },
+          "vatStatus": {
+            "type": "string"
+          },
+          "vatStatusLabel": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "TaxShopList": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/TaxShopView"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "total": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "TaxShopView": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "legalEntityId": {
+            "type": "string"
+          },
+          "marketplaceCodes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "name": {
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "platformName": {
+            "type": "string"
+          },
+          "requiredJurisdictionCodes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "shopId": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "TimelinessAnomalyCell": {
         "properties": {
           "avgDeviationHours": {
@@ -77724,6 +79889,888 @@
         },
         "tags": [
           "compliance-precheck-controller"
+        ]
+      }
+    },
+    "/channel/compliance-rules/capabilities": {
+      "get": {
+        "operationId": "get_channel_compliance_rules_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ComplianceRuleCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "compliance-rule-controller"
+        ]
+      }
+    },
+    "/channel/compliance-rules/effective": {
+      "get": {
+        "operationId": "get_channel_compliance_rules_effective",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "at",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "platformCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "shopId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ComplianceRuleEffectiveSet"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "compliance-rule-controller"
+        ]
+      }
+    },
+    "/channel/compliance-rules/rules": {
+      "get": {
+        "operationId": "get_channel_compliance_rules_rules",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "ruleType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "platformCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ComplianceRulePage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "compliance-rule-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_channel_compliance_rules_rules",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ComplianceRuleCreateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ComplianceRuleCreation"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "compliance-rule-controller"
+        ]
+      }
+    },
+    "/channel/compliance-rules/rules/{id}": {
+      "get": {
+        "operationId": "get_channel_compliance_rules_rules_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ComplianceRuleDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "compliance-rule-controller"
+        ]
+      },
+      "put": {
+        "operationId": "put_channel_compliance_rules_rules_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ComplianceRuleUpdateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ComplianceRule"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "compliance-rule-controller"
+        ]
+      }
+    },
+    "/channel/compliance-rules/rules/{id}/versions": {
+      "get": {
+        "operationId": "get_channel_compliance_rules_rules_id_versions",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ComplianceRuleVersionPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "compliance-rule-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_channel_compliance_rules_rules_id_versions",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ComplianceRuleVersionInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ComplianceRuleVersionDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "compliance-rule-controller"
+        ]
+      }
+    },
+    "/channel/compliance-rules/rules/{id}/versions/effective": {
+      "get": {
+        "operationId": "get_channel_compliance_rules_rules_id_versions_effective",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "at",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ComplianceRuleEffectiveVersion"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "compliance-rule-controller"
+        ]
+      }
+    },
+    "/channel/compliance-rules/rules/{id}/versions/{versionId}": {
+      "get": {
+        "operationId": "get_channel_compliance_rules_rules_id_versions_versionId",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "versionId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ComplianceRuleVersionDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "compliance-rule-controller"
+        ]
+      }
+    },
+    "/channel/compliance-rules/rules/{id}/versions/{versionId}/scopes": {
+      "get": {
+        "operationId": "get_channel_compliance_rules_rules_id_versions_versionId_scopes",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "versionId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ComplianceRuleScopePage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "compliance-rule-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_channel_compliance_rules_rules_id_versions_versionId_scopes",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "versionId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ComplianceRuleScopesInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ComplianceRuleScopeBatchResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "compliance-rule-controller"
+        ]
+      }
+    },
+    "/channel/compliance-rules/rules/{id}/versions/{versionId}/terms": {
+      "get": {
+        "operationId": "get_channel_compliance_rules_rules_id_versions_versionId_terms",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "versionId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ComplianceRuleTermPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "compliance-rule-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_channel_compliance_rules_rules_id_versions_versionId_terms",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "versionId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ComplianceRuleTermsInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ComplianceRuleTermBatchResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "compliance-rule-controller"
+        ]
+      }
+    },
+    "/channel/compliance-rules/rules/{id}/versions/{versionId}/terms/upload": {
+      "post": {
+        "operationId": "post_channel_compliance_rules_rules_id_versions_versionId_terms_upload",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "versionId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ComplianceRuleTermsUploadInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ComplianceRuleTermBatchResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "compliance-rule-controller"
+        ]
+      }
+    },
+    "/channel/compliance-rules/shops": {
+      "get": {
+        "operationId": "get_channel_compliance_rules_shops",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "platformCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ComplianceRuleShopPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "compliance-rule-controller"
         ]
       }
     },
@@ -99915,6 +102962,800 @@
         ]
       }
     },
+    "/channel/platform-appeals/appeals": {
+      "get": {
+        "operationId": "get_channel_platform_appeals_appeals",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "shopId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "appealType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "violationId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "impactLevel",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "required": false,
+            "schema": {
+              "default": "priority",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ComplianceAppealPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "compliance-appeal-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_channel_platform_appeals_appeals",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ComplianceAppealCreateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ComplianceAppeal"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "compliance-appeal-controller"
+        ]
+      }
+    },
+    "/channel/platform-appeals/appeals/{id}": {
+      "get": {
+        "operationId": "get_channel_platform_appeals_appeals_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ComplianceAppealDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "compliance-appeal-controller"
+        ]
+      }
+    },
+    "/channel/platform-appeals/appeals/{id}/decision": {
+      "post": {
+        "operationId": "post_channel_platform_appeals_appeals_id_decision",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ComplianceAppealDecisionInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ComplianceAppealDecisionResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "compliance-appeal-controller"
+        ]
+      }
+    },
+    "/channel/platform-appeals/appeals/{id}/evidence": {
+      "post": {
+        "operationId": "post_channel_platform_appeals_appeals_id_evidence",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ComplianceAppealEvidenceInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ComplianceAppealEvidence"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "compliance-appeal-controller"
+        ]
+      }
+    },
+    "/channel/platform-appeals/appeals/{id}/reopen": {
+      "post": {
+        "operationId": "post_channel_platform_appeals_appeals_id_reopen",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ComplianceAppeal"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "compliance-appeal-controller"
+        ]
+      }
+    },
+    "/channel/platform-appeals/appeals/{id}/submit": {
+      "post": {
+        "operationId": "post_channel_platform_appeals_appeals_id_submit",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ComplianceAppealSubmitInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ComplianceAppealSubmissionResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "compliance-appeal-controller"
+        ]
+      }
+    },
+    "/channel/platform-appeals/appeals/{id}/text": {
+      "put": {
+        "operationId": "put_channel_platform_appeals_appeals_id_text",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ComplianceAppealTextInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ComplianceAppeal"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "compliance-appeal-controller"
+        ]
+      }
+    },
+    "/channel/platform-appeals/appeals/{id}/withdraw": {
+      "post": {
+        "operationId": "post_channel_platform_appeals_appeals_id_withdraw",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ComplianceAppealWithdrawInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ComplianceAppeal"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "compliance-appeal-controller"
+        ]
+      }
+    },
+    "/channel/platform-appeals/capabilities": {
+      "get": {
+        "operationId": "get_channel_platform_appeals_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ComplianceAppealCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "compliance-appeal-controller"
+        ]
+      }
+    },
+    "/channel/platform-appeals/priority-queue": {
+      "get": {
+        "operationId": "get_channel_platform_appeals_priority_queue",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "shopId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "appealableOnly",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ComplianceAppealPriorityPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "compliance-appeal-controller"
+        ]
+      }
+    },
+    "/channel/platform-appeals/quotas": {
+      "get": {
+        "operationId": "get_channel_platform_appeals_quotas",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "shopId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ComplianceAppealQuotaPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "compliance-appeal-controller"
+        ]
+      },
+      "put": {
+        "operationId": "put_channel_platform_appeals_quotas",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ComplianceAppealQuotaInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ComplianceAppealQuotaUpdate"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "compliance-appeal-controller"
+        ]
+      }
+    },
+    "/channel/platform-appeals/shops": {
+      "get": {
+        "operationId": "get_channel_platform_appeals_shops",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "platformCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "shopId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ComplianceAppealShopPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "compliance-appeal-controller"
+        ]
+      }
+    },
+    "/channel/platform-appeals/stats": {
+      "get": {
+        "operationId": "get_channel_platform_appeals_stats",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "shopId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ComplianceAppealStats"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "compliance-appeal-controller"
+        ]
+      }
+    },
     "/channel/platform-operations": {
       "get": {
         "operationId": "get_channel_platform_operations",
@@ -107425,6 +111266,532 @@
         },
         "tags": [
           "sync-controller"
+        ]
+      }
+    },
+    "/channel/tax-registration/capabilities": {
+      "get": {
+        "operationId": "get_channel_tax_registration_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaxRegistrationCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "tax-registration-controller"
+        ]
+      }
+    },
+    "/channel/tax-registration/coverage": {
+      "get": {
+        "operationId": "get_channel_tax_registration_coverage",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaxCoverageList"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "tax-registration-controller"
+        ]
+      }
+    },
+    "/channel/tax-registration/gap-summary": {
+      "get": {
+        "operationId": "get_channel_tax_registration_gap_summary",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "gapType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "severity",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "subjectType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "shopId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "jurisdictionCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaxGapSummary"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "tax-registration-controller"
+        ]
+      }
+    },
+    "/channel/tax-registration/gaps": {
+      "get": {
+        "operationId": "get_channel_tax_registration_gaps",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "gapType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "severity",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "subjectType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "shopId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "jurisdictionCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaxGapPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "tax-registration-controller"
+        ]
+      }
+    },
+    "/channel/tax-registration/jurisdictions": {
+      "get": {
+        "operationId": "get_channel_tax_registration_jurisdictions",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaxJurisdictionList"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "tax-registration-controller"
+        ]
+      }
+    },
+    "/channel/tax-registration/registrations": {
+      "get": {
+        "operationId": "get_channel_tax_registration_registrations",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "subjectType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "subjectId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "jurisdictionCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "vatStatus",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "registered",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaxRegistrationPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "tax-registration-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_channel_tax_registration_registrations",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TaxRegistrationInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaxRegistrationView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "tax-registration-controller"
+        ]
+      }
+    },
+    "/channel/tax-registration/registrations/{id}": {
+      "get": {
+        "operationId": "get_channel_tax_registration_registrations_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaxRegistrationView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "tax-registration-controller"
+        ]
+      },
+      "put": {
+        "operationId": "put_channel_tax_registration_registrations_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TaxRegistrationInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaxRegistrationView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "tax-registration-controller"
+        ]
+      }
+    },
+    "/channel/tax-registration/shops": {
+      "get": {
+        "operationId": "get_channel_tax_registration_shops",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "platformCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaxShopList"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "tax-registration-controller"
         ]
       }
     },
