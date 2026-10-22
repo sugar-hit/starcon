@@ -18595,6 +18595,738 @@
         },
         "type": "object"
       },
+      "BuyerRiskBuyerPage": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/BuyerRiskBuyerRow"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "BuyerRiskBuyerRow": {
+        "properties": {
+          "blacklistReason": {
+            "type": "string"
+          },
+          "blacklisted": {
+            "type": "boolean"
+          },
+          "buyerEmail": {
+            "type": "string"
+          },
+          "buyerKey": {
+            "type": "string"
+          },
+          "buyerLevel": {
+            "type": "string"
+          },
+          "buyerName": {
+            "type": "string"
+          },
+          "buyerPhone": {
+            "type": "string"
+          },
+          "latestEvaluationStatus": {
+            "nullable": true,
+            "type": "string"
+          },
+          "latestRecommendedAction": {
+            "nullable": true,
+            "type": "string"
+          },
+          "latestRiskScore": {
+            "nullable": true,
+            "type": "number"
+          },
+          "latestScoreId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "BuyerRiskCapabilities": {
+        "properties": {
+          "boundaryNote": {
+            "type": "string"
+          },
+          "dimensions": {
+            "items": {
+              "$ref": "#/components/schemas/BuyerRiskDimensionCapability"
+            },
+            "type": "array"
+          },
+          "downstreamNote": {
+            "type": "string"
+          },
+          "explainSemantics": {
+            "type": "string"
+          },
+          "identityChoiceNote": {
+            "type": "string"
+          },
+          "missingSignalSemantics": {
+            "type": "string"
+          },
+          "scoreSemantics": {
+            "type": "string"
+          },
+          "sources": {
+            "items": {
+              "$ref": "#/components/schemas/BuyerRiskSourceState"
+            },
+            "type": "array"
+          },
+          "subjectKeySemantics": {
+            "type": "string"
+          },
+          "writebackNote": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "BuyerRiskDimensionCapability": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "dimensionCode": {
+            "type": "string"
+          },
+          "dimensionLabel": {
+            "type": "string"
+          },
+          "featureCode": {
+            "type": "string"
+          },
+          "impact": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "BuyerRiskEvaluateInput": {
+        "properties": {
+          "buyerKey": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "BuyerRiskEvaluateResult": {
+        "properties": {
+          "buyerCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "evaluatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "insufficientCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "missingSignalPolicy": {
+            "type": "string"
+          },
+          "ordersScanned": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "ordersUnresolved": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "ruleName": {
+            "type": "string"
+          },
+          "ruleVersion": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "scoredCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "scores": {
+            "items": {
+              "$ref": "#/components/schemas/BuyerRiskScoreView"
+            },
+            "type": "array"
+          },
+          "sources": {
+            "items": {
+              "$ref": "#/components/schemas/BuyerRiskSourceState"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "BuyerRiskFeatureView": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "contribution": {
+            "nullable": true,
+            "type": "number"
+          },
+          "dimensionCode": {
+            "type": "string"
+          },
+          "dimensionLabel": {
+            "type": "string"
+          },
+          "featureCode": {
+            "type": "string"
+          },
+          "featureId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "featureLabel": {
+            "type": "string"
+          },
+          "normalizedValue": {
+            "nullable": true,
+            "type": "number"
+          },
+          "note": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "rawValue": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "weight": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "BuyerRiskRuleInput": {
+        "properties": {
+          "addressSingleRatioThreshold": {
+            "exclusiveMaximum": false,
+            "exclusiveMinimum": false,
+            "maximum": 0.9999,
+            "minimum": 0,
+            "type": "number"
+          },
+          "fraudBlacklistedScore": {
+            "exclusiveMaximum": false,
+            "exclusiveMinimum": false,
+            "maximum": 1,
+            "minimum": 0,
+            "type": "number"
+          },
+          "fraudCaseFullRisk": {
+            "exclusiveMaximum": false,
+            "exclusiveMinimum": false,
+            "maximum": 1,
+            "minimum": 0.0001,
+            "type": "number"
+          },
+          "fraudRiskLevelScore": {
+            "exclusiveMaximum": false,
+            "exclusiveMinimum": false,
+            "maximum": 1,
+            "minimum": 0,
+            "type": "number"
+          },
+          "holdThreshold": {
+            "exclusiveMaximum": false,
+            "exclusiveMinimum": false,
+            "maximum": 100,
+            "minimum": 0,
+            "type": "number"
+          },
+          "manualReviewThreshold": {
+            "exclusiveMaximum": false,
+            "exclusiveMinimum": false,
+            "maximum": 100,
+            "minimum": 0,
+            "type": "number"
+          },
+          "missingSignalPolicy": {
+            "pattern": "SCORE_KNOWN_ONLY|BLOCK_EVALUATION",
+            "type": "string"
+          },
+          "orderBurstThreshold": {
+            "format": "int32",
+            "maximum": 100,
+            "minimum": 2,
+            "type": "integer"
+          },
+          "orderBurstWindowHours": {
+            "format": "int32",
+            "maximum": 720,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "orderFrequencyFullRisk": {
+            "exclusiveMinimum": false,
+            "minimum": 0.0001,
+            "type": "number"
+          },
+          "orderLookbackDays": {
+            "format": "int32",
+            "maximum": 3650,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "refundRateFullRisk": {
+            "exclusiveMaximum": false,
+            "exclusiveMinimum": false,
+            "maximum": 1,
+            "minimum": 0.0001,
+            "type": "number"
+          },
+          "ruleName": {
+            "maxLength": 120,
+            "minLength": 0,
+            "type": "string"
+          },
+          "version": {
+            "format": "int64",
+            "nullable": true,
+            "type": "integer"
+          },
+          "weightAddressPattern": {
+            "exclusiveMaximum": false,
+            "exclusiveMinimum": false,
+            "maximum": 1,
+            "minimum": 0,
+            "type": "number"
+          },
+          "weightDisputeHistory": {
+            "exclusiveMaximum": false,
+            "exclusiveMinimum": false,
+            "maximum": 1,
+            "minimum": 0,
+            "type": "number"
+          },
+          "weightFraudProfile": {
+            "exclusiveMaximum": false,
+            "exclusiveMinimum": false,
+            "maximum": 1,
+            "minimum": 0,
+            "type": "number"
+          },
+          "weightOrderBehavior": {
+            "exclusiveMaximum": false,
+            "exclusiveMinimum": false,
+            "maximum": 1,
+            "minimum": 0,
+            "type": "number"
+          },
+          "weightRefundHistory": {
+            "exclusiveMaximum": false,
+            "exclusiveMinimum": false,
+            "maximum": 1,
+            "minimum": 0,
+            "type": "number"
+          }
+        },
+        "required": [
+          "addressSingleRatioThreshold",
+          "fraudBlacklistedScore",
+          "fraudCaseFullRisk",
+          "fraudRiskLevelScore",
+          "holdThreshold",
+          "manualReviewThreshold",
+          "missingSignalPolicy",
+          "orderBurstThreshold",
+          "orderBurstWindowHours",
+          "orderFrequencyFullRisk",
+          "orderLookbackDays",
+          "refundRateFullRisk",
+          "ruleName",
+          "weightAddressPattern",
+          "weightDisputeHistory",
+          "weightFraudProfile",
+          "weightOrderBehavior",
+          "weightRefundHistory"
+        ],
+        "type": "object"
+      },
+      "BuyerRiskRuleView": {
+        "properties": {
+          "addressSingleRatioThreshold": {
+            "type": "number"
+          },
+          "configured": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "fraudBlacklistedScore": {
+            "type": "number"
+          },
+          "fraudCaseFullRisk": {
+            "type": "number"
+          },
+          "fraudRiskLevelScore": {
+            "type": "number"
+          },
+          "holdThreshold": {
+            "type": "number"
+          },
+          "manualReviewThreshold": {
+            "type": "number"
+          },
+          "missingSignalPolicy": {
+            "type": "string"
+          },
+          "orderBurstThreshold": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "orderBurstWindowHours": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "orderFrequencyFullRisk": {
+            "type": "number"
+          },
+          "orderLookbackDays": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "refundRateFullRisk": {
+            "type": "number"
+          },
+          "ruleId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "ruleName": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "version": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "weightAddressPattern": {
+            "type": "number"
+          },
+          "weightDisputeHistory": {
+            "type": "number"
+          },
+          "weightFraudProfile": {
+            "type": "number"
+          },
+          "weightOrderBehavior": {
+            "type": "number"
+          },
+          "weightRefundHistory": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "BuyerRiskScorePage": {
+        "properties": {
+          "counts": {
+            "$ref": "#/components/schemas/BuyerRiskScoreSummaryCounts"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/BuyerRiskScoreSummary"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "BuyerRiskScoreSummary": {
+        "properties": {
+          "buyerEmail": {
+            "type": "string"
+          },
+          "buyerKey": {
+            "type": "string"
+          },
+          "buyerLevel": {
+            "type": "string"
+          },
+          "buyerName": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "evaluatedReferenceAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "evaluationStatus": {
+            "type": "string"
+          },
+          "missingDimensionCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "orderCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "recommendedAction": {
+            "type": "string"
+          },
+          "refundedOrderCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "riskScore": {
+            "nullable": true,
+            "type": "number"
+          },
+          "scoreId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "scoredDimensionCount": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "BuyerRiskScoreSummaryCounts": {
+        "properties": {
+          "hold": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "insufficientSignals": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "manualReview": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "release": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "scored": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "BuyerRiskScoreView": {
+        "properties": {
+          "blacklistReason": {
+            "type": "string"
+          },
+          "blacklisted": {
+            "type": "boolean"
+          },
+          "buyerEmail": {
+            "type": "string"
+          },
+          "buyerKey": {
+            "type": "string"
+          },
+          "buyerLevel": {
+            "type": "string"
+          },
+          "buyerName": {
+            "type": "string"
+          },
+          "buyerPhone": {
+            "type": "string"
+          },
+          "conclusion": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "evaluatedReferenceAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "evaluationStatus": {
+            "type": "string"
+          },
+          "features": {
+            "items": {
+              "$ref": "#/components/schemas/BuyerRiskFeatureView"
+            },
+            "type": "array"
+          },
+          "lookbackDays": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "missingDimensionCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "missingSignalPolicy": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "orderCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "ordersScanned": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "recommendedAction": {
+            "type": "string"
+          },
+          "refundedOrderCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "riskScore": {
+            "nullable": true,
+            "type": "number"
+          },
+          "ruleId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "ruleName": {
+            "type": "string"
+          },
+          "ruleVersion": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "scoreId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "scoredDimensionCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "writebacks": {
+            "items": {
+              "$ref": "#/components/schemas/BuyerRiskWritebackView"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "BuyerRiskSourceState": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          },
+          "sourceCode": {
+            "type": "string"
+          },
+          "sourceLabel": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "BuyerRiskWritebackView": {
+        "properties": {
+          "attemptedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "featureCode": {
+            "type": "string"
+          },
+          "measuredValue": {
+            "type": "number"
+          },
+          "signalCode": {
+            "type": "string"
+          },
+          "subjectKey": {
+            "type": "string"
+          },
+          "writebackNote": {
+            "type": "string"
+          },
+          "writebackStatus": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "CancelDispatchRequest": {
         "properties": {
           "reason": {
@@ -79276,6 +80008,320 @@
         },
         "tags": [
           "listing-bundle-component-controller"
+        ]
+      }
+    },
+    "/channel/buyer-risk-scores/buyers": {
+      "get": {
+        "operationId": "get_channel_buyer_risk_scores_buyers",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BuyerRiskBuyerPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "buyer-risk-score-controller"
+        ]
+      }
+    },
+    "/channel/buyer-risk-scores/capabilities": {
+      "get": {
+        "operationId": "get_channel_buyer_risk_scores_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BuyerRiskCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "buyer-risk-score-controller"
+        ]
+      }
+    },
+    "/channel/buyer-risk-scores/evaluate": {
+      "post": {
+        "operationId": "post_channel_buyer_risk_scores_evaluate",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BuyerRiskEvaluateInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BuyerRiskEvaluateResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "buyer-risk-score-controller"
+        ]
+      }
+    },
+    "/channel/buyer-risk-scores/rule": {
+      "get": {
+        "operationId": "get_channel_buyer_risk_scores_rule",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BuyerRiskRuleView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "buyer-risk-score-controller"
+        ]
+      },
+      "put": {
+        "operationId": "put_channel_buyer_risk_scores_rule",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BuyerRiskRuleInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BuyerRiskRuleView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "buyer-risk-score-controller"
+        ]
+      }
+    },
+    "/channel/buyer-risk-scores/scores": {
+      "get": {
+        "operationId": "get_channel_buyer_risk_scores_scores",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "buyerKey",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "action",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BuyerRiskScorePage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "buyer-risk-score-controller"
+        ]
+      }
+    },
+    "/channel/buyer-risk-scores/scores/{id}": {
+      "get": {
+        "operationId": "get_channel_buyer_risk_scores_scores_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BuyerRiskScoreView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "buyer-risk-score-controller"
         ]
       }
     },
