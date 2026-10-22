@@ -244,17 +244,35 @@
      （纯 CREATE TABLE + FORCE RLS，无 `ADD COLUMN` 无 DEFAULT / 无 `SET NOT NULL` / 无新增 CHECK）；
    - **Flyway 版本号无重复**（crm 8 个：V99/V220/V228/V292/V293/V294/V295/V296）；
    - `sync.mjs --check` ⇒ **✓ 台账与蓝图一致**。
-   - ⚠️ **新发现**：合并驱动器把 `contracts/crm.ts` 的 codegen 横幅从第 1 行挪到了约第 160 行
-     （**类型零丢失**，纯观感与漂移面）⇒ 已追加到
-     [`docs/backlog/2026-10-20-contract-drift-ci-gate.md`](../../backlog/2026-10-20-contract-drift-ci-gate.md)。
+   - ⚠️ **新发现**：合并驱动器把 `contracts/crm.ts` 的 codegen 横幅从第 1 行**挪到了文件末行**
+     （`crm.ts` 160 行 ⇒ 横幅在第 160 行；`channel.ts` 1349 行 / `trade.ts` 1718 行的横幅**基线里本来就在末行**
+     ⇒ 属既有漂移，本批把 crm 也拖成同一形状）。`grep -c 'DO NOT EDIT'` 恒为 1 ⇒ **横幅一个都没丢**，
+     **类型零丢失**（车道提交 `bdceadbd` 有 91 个 `export type`，HEAD 有 159 个，
+     「车道有而 HEAD 没有」= 0，多出的 68 个来自同批另 3 条车道）⇒ 纯观感与漂移面，
+     已追加到 [`docs/backlog/2026-10-20-contract-drift-ci-gate.md`](../../backlog/2026-10-20-contract-drift-ci-gate.md)。
 
-6. **已派修复车道**：车道 `10.4.1.2`（分支 `fix/10-4-1-2-eta-clock`，
+6. **⚠️ 本批 4 条车道全在 `crm`、迁移连号（V293–V296）⇒ 跨车道组合安全性专项核验**：
+   同批 4 条 crm 车道在**同一个 Flyway schema** 里连号落地，组合运行才有暴露面。
+   已逐项核对（结论：**DDL 轴上安全**）：
+   - **对象名零重复**：全 crm 迁移的 `CREATE TABLE / TRIGGER / SEQUENCE / INDEX` **无任何同名**
+     （本批新建 15 张表：3 + 1 + 5 + 6）；
+   - **零跨车道引用**：4 条迁移里**没有一条 `REFERENCES`（无跨车道 FK）**、
+     **没有 `DROP` / `RENAME`**；
+   - **只 ALTER 自己建的表**：全部 `ALTER TABLE` 都是
+     `ENABLE / FORCE ROW LEVEL SECURITY`（且在各自 `DO` 块里只遍历自己建的表），
+     **没有一条 ALTER 既有表** ⇒ 与既有表零交互面；
+   - ⇒ **V293–V296 连号一起跑不会因对象名撞车或版本顺序而炸**。
+     剩下唯一的组合风险面是**行为层**（同一 service 内 4 套 RLS/守卫触发器并存），
+     由下一轮**跑完整个 reactor** 的 L2 兜底 —— 上轮在 warehouse 中止，
+     **crm / trade 被 SKIPPED，本批 4 条 crm 模块至今没在批次 L2 里跑过一次**。
+
+7. **已派修复车道**：车道 `10.4.1.2`（分支 `fix/10-4-1-2-eta-clock`，
    worktree `.worktrees/10.4.1.2-fix`），修法约束：
    新 ETA 与当前 ETA **同源推导**、**禁止**硬编码绝对时刻去"对齐"、
    **禁止**放宽断言 / `@Disabled` / `assumeTrue` 绕过、必须用**至少两个不同时刻基准**证明墙钟无关、
    **领域规则（ETA 不许往前调）不许动**。
    修复车道落地后，下一个 tick 的批次 L2 即可转绿，届时本批 4 条模块 + 本说明一并推上远端。
-7. **本轮未 push**：`origin/integration/module-dev` 仍停在 `da1f96f9`（batch-61，绿批次），
+8. **本轮未 push**：`origin/integration/module-dev` 仍停在 `da1f96f9`（batch-61，绿批次），
    上述合并、4 条模块、本说明文件与 backlog 诊断条目都留在集成头本地，
    **等修复车道落地 + 批次 L2 转绿后一起推**（协议：L2 没绿不 push，但说明照写、commit 照做）。
 
