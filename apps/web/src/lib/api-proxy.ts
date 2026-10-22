@@ -8289,6 +8289,55 @@ const services: readonly {
       /^compliance\-rules(?:\/(?:capabilities|shops|effective|rules)|\/rules\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/versions(?:\/(?:effective|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:terms(?:\/upload)?|scopes))?))?)?)$/,
   },
   {
+    // 16.2.1.2 拦截执行（channel 服务）。纯**新增一条独立的 `services[]` 元素**：
+    // 既有条目**一字未动、也不重排** —— 本文件是多车道共用的**累积型**白名单，
+    // 每条服务规则是一段超长单行正则，往既有那条巨型 alternation 里并分支会让多车道
+    // 同时并入时 git 必然判冲突（结构性，retry 永远不会自愈）。
+    //
+    // ---- 插入锚点固定在 **`compliance-rules` 那条元素之后**（16.2.1.1 规则管理）----
+    //   同批另外三条车道的锚点是「`platform-appeals` 之后」/「`cart-recovery` 之后」
+    //   /「`service-ticket-process` 之后」，与本锚点互不重叠，git 能干净求并。
+    //
+    // ---- 首 token「compliance-intercepts」的零命中核对结论 ----
+    //   本文件既有全文里 `compliance-intercepts` 出现次数 = 0（实测）；
+    //   既有条目里的合规前缀是 `compliance-rules`（16.2.1.1）/ `compliance-precheck`（16.2.2.1）
+    //   / `listing-compliance-precheck`（4.2.3.2）—— **首 token 独立，互不遮蔽**。
+    //   🔴 刻意**不**用 `compliance-rules` 前缀扩展：那是 16.2.1.1 的，
+    //   扩展它会把 16.2.1.1 已交付的路由遮蔽掉（页面 404，而 typecheck / lint / vitest 全绿）。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   compliance-intercepts/capabilities          能力声明（未交付下游 available=false + ownerModule）
+    //   compliance-intercepts/policy                 拦截策略清单（GET）
+    //   compliance-intercepts/policy/{scene}         改拦截策略（PUT，**拦截默认不生效**，这里才开）
+    //   compliance-intercepts/decisions              判定端点（POST）+ 判定历史（GET，真分页 + 真筛选）
+    //   compliance-intercepts/decisions/{uuid}       单次判定详情（GET）
+    //   compliance-intercepts/exemptions             申请豁免（POST）/ 豁免单清单（GET，真分页 + 真筛选）
+    //   compliance-intercepts/exemptions/{uuid}      豁免单详情（GET）
+    //   compliance-intercepts/exemptions/{uuid}/approve  审批豁免（POST，**申请人 ≠ 审批人**）
+    //   compliance-intercepts/exemptions/{uuid}/reject   驳回豁免（POST）
+    //
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`（不是
+    //   `[0-9a-f-]+`：后者会把 `capabilities` 这种非 UUID 形状也当 id 放行）。
+    // ⚠️ `policy/{scene}` 段的 scene 是**受控枚举字面量**（三个拦截点），不是自由文本 ——
+    //   放行任意字符串等于放行一条后端不存在的路径。
+    // ⚠️ 末尾**刻意不带 `?`**：带了就等于放行裸路径 `compliance-intercepts`
+    //   （后端没有「一条汇总列表接口」，一切入口都带子路径）。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸路径 `compliance-intercepts` —— 本模块没有裸集合读
+    //   * `compliance-intercepts/exemptions/{uuid}/delete` —— 豁免单是「凭什么放行」的证据，不可删
+    //   * `compliance-intercepts/exemptions/{uuid}/revoke` —— 豁免**终态不可回退**，没有「撤销」这个动作
+    //   * `compliance-intercepts/decisions/{uuid}/edit` —— 判定凭据**只追加**，不可改写
+    //   * `compliance-intercepts/withdrawals` / `shipments` —— 12 提现与 8.3.4.1 发货
+    //     **未接入**（能力声明里 available=false），**不编**放行形状
+    //   * `compliance-intercepts/rules` —— 规则库归 16.2.1.1，走它自己的 `compliance-rules` 前缀
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^compliance\-intercepts(?:\/(?:capabilities|policy(?:\/(?:LISTING_PUBLISH|SHIPMENT|WITHDRAWAL))?|decisions(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|exemptions(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:approve|reject))?)?))$/,
+  },
+  {
     // 16.1.2.1 违规与处罚（channel 服务）。纯**新增一条独立的 `services[]` 元素**：
     // 既有条目**一字未动、也不重排** —— 本文件是多车道共用的**累积型**白名单，
     // 每条服务规则是一段超长单行正则，往既有那条巨型 alternation 里并分支会让多车道
