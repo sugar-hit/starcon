@@ -40838,6 +40838,968 @@
         },
         "type": "object"
       },
+      "LinkageRiskAlertActionInput": {
+        "properties": {
+          "reason": {
+            "maxLength": 600,
+            "minLength": 0,
+            "type": "string"
+          }
+        },
+        "required": [
+          "reason"
+        ],
+        "type": "object"
+      },
+      "LinkageRiskAlertActionView": {
+        "properties": {
+          "action": {
+            "type": "string"
+          },
+          "actionId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "actorName": {
+            "type": "string"
+          },
+          "fromStatus": {
+            "type": "string"
+          },
+          "occurredAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "toStatus": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "LinkageRiskAlertPage": {
+        "properties": {
+          "acknowledgedCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "dismissedCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "highCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/LinkageRiskAlertView"
+            },
+            "type": "array"
+          },
+          "openCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "remediatedCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "LinkageRiskAlertShopView": {
+        "properties": {
+          "platformCode": {
+            "type": "string"
+          },
+          "shopCode": {
+            "type": "string"
+          },
+          "shopId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "shopName": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "LinkageRiskAlertView": {
+        "properties": {
+          "acknowledgeReason": {
+            "type": "string"
+          },
+          "acknowledgedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "acknowledgedBy": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "actions": {
+            "items": {
+              "$ref": "#/components/schemas/LinkageRiskAlertActionView"
+            },
+            "type": "array"
+          },
+          "alertId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "alertType": {
+            "type": "string"
+          },
+          "clusterId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "clusterKey": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "detectedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "dimensions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "dismissReason": {
+            "type": "string"
+          },
+          "dismissedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "dismissedBy": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "remediations": {
+            "items": {
+              "$ref": "#/components/schemas/LinkageRiskRemediationView"
+            },
+            "type": "array"
+          },
+          "resolutionNote": {
+            "type": "string"
+          },
+          "resolvedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "resolvedBy": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "severity": {
+            "type": "string"
+          },
+          "severityLabel": {
+            "type": "string"
+          },
+          "shopCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "shops": {
+            "items": {
+              "$ref": "#/components/schemas/LinkageRiskAlertShopView"
+            },
+            "type": "array"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "version": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "LinkageRiskCapabilities": {
+        "properties": {
+          "alertNote": {
+            "type": "string"
+          },
+          "capabilities": {
+            "items": {
+              "$ref": "#/components/schemas/LinkageRiskCapability"
+            },
+            "type": "array"
+          },
+          "dimensionNote": {
+            "type": "string"
+          },
+          "downstreamNote": {
+            "type": "string"
+          },
+          "financeNote": {
+            "type": "string"
+          },
+          "graphNote": {
+            "type": "string"
+          },
+          "officialApiNote": {
+            "type": "string"
+          },
+          "registerNote": {
+            "type": "string"
+          },
+          "remediationNote": {
+            "type": "string"
+          },
+          "shopSourceNote": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "LinkageRiskCapability": {
+        "properties": {
+          "autoDiscoverable": {
+            "type": "boolean"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "code": {
+            "type": "string"
+          },
+          "impact": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "LinkageRiskGraph": {
+        "properties": {
+          "clusterCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "clusters": {
+            "items": {
+              "$ref": "#/components/schemas/LinkageRiskGraphCluster"
+            },
+            "type": "array"
+          },
+          "known": {
+            "type": "boolean"
+          },
+          "linkCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "links": {
+            "items": {
+              "$ref": "#/components/schemas/LinkageRiskGraphLink"
+            },
+            "type": "array"
+          },
+          "nodes": {
+            "items": {
+              "$ref": "#/components/schemas/LinkageRiskGraphNode"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "shopCount": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "LinkageRiskGraphCluster": {
+        "properties": {
+          "clusterKey": {
+            "type": "string"
+          },
+          "crossPlatform": {
+            "type": "boolean"
+          },
+          "dimensions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "riskLevel": {
+            "type": "string"
+          },
+          "riskLevelLabel": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string"
+          },
+          "severityLabel": {
+            "type": "string"
+          },
+          "shopCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "shopIds": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "summary": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "LinkageRiskGraphLink": {
+        "properties": {
+          "autoDiscovered": {
+            "type": "boolean"
+          },
+          "dimension": {
+            "type": "string"
+          },
+          "dimensionLabel": {
+            "type": "string"
+          },
+          "factorKey": {
+            "type": "string"
+          },
+          "factorLabel": {
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "sensitivity": {
+            "type": "string"
+          },
+          "shopCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "shopIds": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "LinkageRiskGraphNode": {
+        "properties": {
+          "dimensions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "linkCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "shopCode": {
+            "type": "string"
+          },
+          "shopId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "shopName": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "LinkageRiskIdentifierInput": {
+        "properties": {
+          "dimension": {
+            "pattern": "DEVICE|NETWORK_IP|ADDRESS|OTHER",
+            "type": "string"
+          },
+          "displayLabel": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "firstObservedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "identifierKey": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "note": {
+            "maxLength": 600,
+            "minLength": 0,
+            "type": "string"
+          }
+        },
+        "required": [
+          "dimension",
+          "identifierKey"
+        ],
+        "type": "object"
+      },
+      "LinkageRiskIdentifierPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/LinkageRiskIdentifierView"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "LinkageRiskIdentifierShopView": {
+        "properties": {
+          "platformCode": {
+            "type": "string"
+          },
+          "shopCode": {
+            "type": "string"
+          },
+          "shopId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "shopName": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "LinkageRiskIdentifierUpdateInput": {
+        "properties": {
+          "displayLabel": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "note": {
+            "maxLength": 600,
+            "minLength": 0,
+            "type": "string"
+          },
+          "status": {
+            "pattern": "ACTIVE|RETIRED",
+            "type": "string"
+          },
+          "version": {
+            "format": "int64",
+            "nullable": true,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "type": "object"
+      },
+      "LinkageRiskIdentifierView": {
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "dimension": {
+            "type": "string"
+          },
+          "dimensionLabel": {
+            "type": "string"
+          },
+          "displayLabel": {
+            "type": "string"
+          },
+          "firstObservedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "identifierId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "identifierKey": {
+            "type": "string"
+          },
+          "lastObservedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "shopCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "shops": {
+            "items": {
+              "$ref": "#/components/schemas/LinkageRiskIdentifierShopView"
+            },
+            "type": "array"
+          },
+          "status": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "version": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "LinkageRiskPolicyDimensionInput": {
+        "properties": {
+          "dimension": {
+            "pattern": "LEGAL_ENTITY|DEVICE|NETWORK_IP|ADDRESS|OTHER",
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "minShopCount": {
+            "format": "int32",
+            "maximum": 50,
+            "minimum": 2,
+            "type": "integer"
+          },
+          "policyBasis": {
+            "maxLength": 400,
+            "minLength": 0,
+            "type": "string"
+          },
+          "sensitivity": {
+            "pattern": "HIGH|MEDIUM|LOW",
+            "type": "string"
+          }
+        },
+        "required": [
+          "dimension",
+          "minShopCount",
+          "sensitivity"
+        ],
+        "type": "object"
+      },
+      "LinkageRiskPolicyDimensionView": {
+        "properties": {
+          "dimension": {
+            "type": "string"
+          },
+          "dimensionId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "dimensionLabel": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "minShopCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "policyBasis": {
+            "type": "string"
+          },
+          "sensitivity": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "LinkageRiskPolicyInput": {
+        "properties": {
+          "dimensions": {
+            "items": {
+              "$ref": "#/components/schemas/LinkageRiskPolicyDimensionInput"
+            },
+            "maxItems": 20,
+            "minItems": 1,
+            "type": "array"
+          },
+          "evaluationScope": {
+            "pattern": "TENANT|PLATFORM",
+            "type": "string"
+          },
+          "minSharedShopCount": {
+            "format": "int32",
+            "maximum": 50,
+            "minimum": 2,
+            "type": "integer"
+          },
+          "policyName": {
+            "maxLength": 120,
+            "minLength": 0,
+            "type": "string"
+          },
+          "status": {
+            "pattern": "DRAFT|ACTIVE",
+            "type": "string"
+          }
+        },
+        "required": [
+          "dimensions",
+          "evaluationScope",
+          "minSharedShopCount",
+          "policyName",
+          "status"
+        ],
+        "type": "object"
+      },
+      "LinkageRiskPolicyView": {
+        "properties": {
+          "configured": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "dimensions": {
+            "items": {
+              "$ref": "#/components/schemas/LinkageRiskPolicyDimensionView"
+            },
+            "type": "array"
+          },
+          "evaluationScope": {
+            "type": "string"
+          },
+          "minSharedShopCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "policyId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "policyName": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "version": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "LinkageRiskRemediationPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/LinkageRiskRemediationView"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "LinkageRiskRemediationStatusInput": {
+        "properties": {
+          "note": {
+            "maxLength": 600,
+            "minLength": 0,
+            "type": "string"
+          },
+          "status": {
+            "pattern": "ACCEPTED|DISMISSED|DONE",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "type": "object"
+      },
+      "LinkageRiskRemediationView": {
+        "properties": {
+          "decidedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "decisionNote": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "dimension": {
+            "type": "string"
+          },
+          "priority": {
+            "type": "string"
+          },
+          "recommendationCode": {
+            "type": "string"
+          },
+          "recommendationLabel": {
+            "type": "string"
+          },
+          "remediationId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "version": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "LinkageRiskScanResult": {
+        "properties": {
+          "alertsCreated": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "alertsUpdated": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "clusters": {
+            "items": {
+              "$ref": "#/components/schemas/LinkageRiskGraphCluster"
+            },
+            "type": "array"
+          },
+          "clustersCreated": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "clustersFound": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "clustersUpdated": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "known": {
+            "type": "boolean"
+          },
+          "linksFound": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "remediationsCreated": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "shopsScanned": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "LinkageRiskShopLinkInput": {
+        "properties": {
+          "note": {
+            "maxLength": 600,
+            "minLength": 0,
+            "type": "string"
+          },
+          "observedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "shopId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "source": {
+            "pattern": "MANUAL|PLATFORM_NOTICE|OPS_REPORT",
+            "type": "string"
+          }
+        },
+        "required": [
+          "shopId",
+          "source"
+        ],
+        "type": "object"
+      },
+      "LinkageRiskShopPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/LinkageRiskShopView"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "LinkageRiskShopView": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "dimensions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "legalEntityId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "legalEntityName": {
+            "nullable": true,
+            "type": "string"
+          },
+          "legalEntityNameAvailable": {
+            "type": "boolean"
+          },
+          "linkCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "platformName": {
+            "type": "string"
+          },
+          "shopId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "ListingBatchRequest": {
         "properties": {
           "action": {
@@ -96423,6 +97385,863 @@
         },
         "tags": [
           "label-template-controller"
+        ]
+      }
+    },
+    "/channel/linkage-risk/alerts": {
+      "get": {
+        "operationId": "get_channel_linkage_risk_alerts",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "severity",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LinkageRiskAlertPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "linkage-risk-controller"
+        ]
+      }
+    },
+    "/channel/linkage-risk/alerts/{id}": {
+      "get": {
+        "operationId": "get_channel_linkage_risk_alerts_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LinkageRiskAlertView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "linkage-risk-controller"
+        ]
+      }
+    },
+    "/channel/linkage-risk/alerts/{id}/acknowledge": {
+      "post": {
+        "operationId": "post_channel_linkage_risk_alerts_id_acknowledge",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LinkageRiskAlertActionInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LinkageRiskAlertView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "linkage-risk-controller"
+        ]
+      }
+    },
+    "/channel/linkage-risk/alerts/{id}/dismiss": {
+      "post": {
+        "operationId": "post_channel_linkage_risk_alerts_id_dismiss",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LinkageRiskAlertActionInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LinkageRiskAlertView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "linkage-risk-controller"
+        ]
+      }
+    },
+    "/channel/linkage-risk/alerts/{id}/resolve": {
+      "post": {
+        "operationId": "post_channel_linkage_risk_alerts_id_resolve",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LinkageRiskAlertActionInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LinkageRiskAlertView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "linkage-risk-controller"
+        ]
+      }
+    },
+    "/channel/linkage-risk/capabilities": {
+      "get": {
+        "operationId": "get_channel_linkage_risk_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LinkageRiskCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "linkage-risk-controller"
+        ]
+      }
+    },
+    "/channel/linkage-risk/graph": {
+      "get": {
+        "operationId": "get_channel_linkage_risk_graph",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LinkageRiskGraph"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "linkage-risk-controller"
+        ]
+      }
+    },
+    "/channel/linkage-risk/identifiers": {
+      "get": {
+        "operationId": "get_channel_linkage_risk_identifiers",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dimension",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LinkageRiskIdentifierPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "linkage-risk-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_channel_linkage_risk_identifiers",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LinkageRiskIdentifierInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LinkageRiskIdentifierView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "linkage-risk-controller"
+        ]
+      }
+    },
+    "/channel/linkage-risk/identifiers/{id}": {
+      "delete": {
+        "operationId": "delete_channel_linkage_risk_identifiers_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "linkage-risk-controller"
+        ]
+      },
+      "put": {
+        "operationId": "put_channel_linkage_risk_identifiers_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LinkageRiskIdentifierUpdateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LinkageRiskIdentifierView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "linkage-risk-controller"
+        ]
+      }
+    },
+    "/channel/linkage-risk/identifiers/{id}/shops": {
+      "post": {
+        "operationId": "post_channel_linkage_risk_identifiers_id_shops",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LinkageRiskShopLinkInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LinkageRiskIdentifierView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "linkage-risk-controller"
+        ]
+      }
+    },
+    "/channel/linkage-risk/identifiers/{id}/shops/{shopId}": {
+      "delete": {
+        "operationId": "delete_channel_linkage_risk_identifiers_id_shops_shopId",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "shopId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "linkage-risk-controller"
+        ]
+      }
+    },
+    "/channel/linkage-risk/policy": {
+      "get": {
+        "operationId": "get_channel_linkage_risk_policy",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LinkageRiskPolicyView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "linkage-risk-controller"
+        ]
+      },
+      "put": {
+        "operationId": "put_channel_linkage_risk_policy",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LinkageRiskPolicyInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LinkageRiskPolicyView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "linkage-risk-controller"
+        ]
+      }
+    },
+    "/channel/linkage-risk/remediations": {
+      "get": {
+        "operationId": "get_channel_linkage_risk_remediations",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LinkageRiskRemediationPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "linkage-risk-controller"
+        ]
+      }
+    },
+    "/channel/linkage-risk/remediations/{id}/status": {
+      "put": {
+        "operationId": "put_channel_linkage_risk_remediations_id_status",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LinkageRiskRemediationStatusInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LinkageRiskRemediationView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "linkage-risk-controller"
+        ]
+      }
+    },
+    "/channel/linkage-risk/scan": {
+      "post": {
+        "operationId": "post_channel_linkage_risk_scan",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LinkageRiskScanResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "linkage-risk-controller"
+        ]
+      }
+    },
+    "/channel/linkage-risk/shops": {
+      "get": {
+        "operationId": "get_channel_linkage_risk_shops",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LinkageRiskShopPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "linkage-risk-controller"
         ]
       }
     },
