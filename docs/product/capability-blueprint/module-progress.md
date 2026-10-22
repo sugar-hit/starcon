@@ -6,9 +6,7 @@
 >
 > 状态词表只有三个值，统计逻辑依赖它，不要新增：
 > `已交付`（迁移 + API + 页面 + 测试齐全，无 TODO 残留）· `进行中`（部分交付、未收口，证据列写清缺哪一块）· `未开发`（未开工）。
-
 ## 总览
-
 | 指标 | 数量 |
 | --- | --- |
 | 模块总数 | 465 |
@@ -16,9 +14,7 @@
 | 进行中 | 0 |
 | **未开发** | **151** |
 | 完成率 | 67.5% |
-
 ## 分阶段进度（交付顺序看这里）
-
 | 阶段 | 已交付 | 进行中 | 未开发 | 合计 |
 | --- | --- | --- | --- | --- |
 | **D1–D2** | 80 | 0 | 0 | 80 |
@@ -27,11 +23,8 @@
 | **D5** | 52 | 0 | 0 | 52 |
 | **D6** | 43 | 0 | 35 | 78 |
 | **D7** | 40 | 0 | 115 | 155 |
-
 ## 分系统进度
-
 | 卷 | 系统 | 阶段 | 已交付 | 模块数 |
-| --- | --- | --- | --- | --- |
 | 01 | 工作台与门户系统 | D7 | 0 | 23 |
 | 02 | 渠道与店铺系统 | D1–D2 / D5 | 25 | 25 |
 | 03 | 商品主数据系统 | D1–D2 | 40 | 40 |
@@ -50,30 +43,22 @@
 | 16 | 合规与风控系统 | D7 | 4 | 23 |
 | 17 | 组织权限与系统设置系统 | D1–D2 / D4 / D6 / D7 | 25 | 29 |
 | 18 | 集成开放与智能自动化系统 | D7 | 0 | 24 |
-
 ## 判定「已交付」的标准
-
 一个模块标 `已交付` 当且仅当下面四件都成立，缺一件就是 `未开发` 或 `进行中`：
-
 1. **迁移** — `backend/services/<svc>/src/main/resources/db/migration/V*.sql` 里有真实表结构，
    带 `tenant_id NOT NULL` + RLS 策略，不是注释里的设计。
 2. **API** — 服务里有对应端点，走 jOOQ 显式 SQL，不是返回硬编码常量的桩。
 3. **页面** — `apps/web/src/app/**/page.tsx` 是真实工作区，不是 `DomainPlaceholder`。
 4. **测试** — `cd backend && ./mvnw verify` 绿；涉及租户隔离的必须实跑
    「两租户互不可见 / 伪造 tenant header 无效 / 连接池归还后不串租户」三条断言。
-
 **判定为 `未开发` 的典型形态**（见到就说明没做完，不许算进已交付）：
-
 - `DomainPlaceholder` 占位页
 - 硬编码数组 / 常量当数据源
 - 服务里 `TODO` + `throw new UnsupportedOperationException()`
 - 迁移文件存在但没有 RLS 策略
 - 前端有页面但后端没有对应端点（或反之）
-
 ## 跨期说明
-
 「阶段」列按**依赖就绪顺序**逐模块标注，不是卷归属。跨期卷的拆分如下：
-
 - **01 工作台与门户 → 全部 D7**：它是纯投影聚合层（蓝图原文「不写业务数据，只读投影」），
   聚合 09 订单 / 07 库存 / 02 渠道 / 12 财务 / 15 客户 / 17 审批的投影。
   这些数据源没落地之前建「我的待办」只能造假数据，所以整卷排到最后收口。
@@ -87,9 +72,7 @@
 - **11 售后与退货**：D4 交付售后单、退货授权与实收、退款换货；平台纠纷 / 客诉工单 / 分析排 D7。
 - **17 组织权限**：D1–D2 交付租户、法人、部门、成员、角色、页面权限、数据范围、审计；
   17.4 审批流随单据排 D4，17.6.1.1 账簿与本位币随财务排 D6，17.7 套餐与平台参数排 D7。
-
 ## 模块明细
-
 | 模块 ID | 模块名 | L3 锚点路由 | 阶段 | 状态 | 证据 |
 | --- | --- | --- | --- | --- | --- |
 | 1.1.1.1 | 我的待办 | /dashboard/todo | D7 | 未开发 | — |
@@ -470,7 +453,7 @@
 | 15.3.1.1 | 客户列表 | — | D7 | 未开发 | — |
 | 15.3.1.2 | 客户详情 | — | D7 | 未开发 | — |
 | 15.3.1.3 | 跨店合并 | — | D7 | 未开发 | — |
-| 15.3.2.1 | 客户标签 | — | D7 | 未开发 | — |
+| 15.3.2.1 | 客户标签 | — | D7 | 已交付 | 迁移 crm `V295__crm_customer_tag.sql`（**归属 crm**：卷 15 客户与客服，本车道预分配版本号 V295），五张新表 `crm_customer_tag`（标签**定义**，含 `contestable` / `review_required` 两个可争议标记）/ `crm_customer_tag_rule`（判定规则，metric 五种 + `min_sample` / `window_days` / `baseline_multiplier`）/ `crm_customer_tag_assignment`（**标签记录** = 客户身上的一个标签，source MANUAL/RULE + `origin_key` + `evidence` jsonb 判定依据快照 + `pending_review`）/ `crm_customer_tag_run`（规则运行记录，含 failure_reason）/ `crm_customer_tag_evaluation`（**逐客户判定结论**，outcome 六态含 `INDETERMINATE`），全部 `tenant_id NOT NULL` + ENABLE/FORCE ROW LEVEL SECURITY isolation（USING 与 WITH CHECK 均为 `tenant_id = nullif(current_setting('app.current_tenant',true),'')::uuid`）+ `GRANT SELECT,INSERT,UPDATE,DELETE … TO crm_app` 与 `TO starcon_app`，**序列单独授权**（`crm_customer_tag_run_no_seq` —— `GRANT … ON ALL TABLES` 不覆盖序列，漏授权会变成「第一条运行记录就报权限不足」）+ `REVOKE ALL ON flyway_schema_history FROM crm_app`，**纯新建、零 ALTER 任何既有表**。**🔴 外键纪律**：本迁移**零外键**（含本文件自己新建的五张表之间），引用校验一律用**触发器**（9 个守卫：标签/规则的引用回表校验、被引用的标签与规则删不掉、身份列建后不可改、可争议标签必须带原因等）—— 与同批 V292 / V228 / V220 同一手法：**外键会打破同服务既有测试的 TRUNCATE**，故刻意避开，**既有测试一行未改**。**幂等与「不覆盖人工」靠 `origin_key` 落成唯一键**：MANUAL 恒为 `MANUAL`，RULE 恒为 `RULE:<rule_code>`，`UNIQUE (tenant_id, customer_ref, tag_id, origin_key)` ⇒ 规则重跑只更新**自己**那行；**人工已撤销的行自动不恢复**（结论 `SKIPPED_REVOKED`）—— 自动流程不该偷偷把运营手工撤销过的判断加回来。**🔴 「退货率高」不是拍脑袋的标签，是可审计的判定**（本模块的加粗句落在这一条）：① **样本量门槛**（`min_sample`，不足 ⇒ 判定**不可判定**，`INDETERMINATE`，**不打标**）；② **显著高于租户基线**（必须 `rate ≥ baseline × baseline_multiplier`，倍率 > 1，基线 = 同窗口全体 `售后单数 ÷ 订单数`，算不出基线 ⇒ 同样 `INDETERMINATE`）；③ **可争议标签必须带原因与证据**（`contestable=1` 的标签在 DB 层被触发器强制要求填写原因，判定依据快照进 `evidence` jsonb：订单号 / 订单 id / 金额按币种 / 渠道来源 / 售后单号 / 退货率 / 基线 / 窗口）；④ **可人工复核纠正**（`POST /assignments/{uuid}/review` 记确认或撤销，撤销走 `state=REVOKED` 不删行 —— 标签记录是**凭据**，删了这段历史就凭空消失）；⑤ **不得触发任何歧视性动作** —— 本模块**只产出标签与判定**，不触发任何面向客户的动作（无屏蔽 / 无自动拒付 / 无差别定价），下游定向能力一律 `available=false`。**跨服务纪律**：上游在 **trade 服务**（端口 8085），只经 `CustomerFactsPort` 走**授权 HTTP API** 读 `GET /trade/sales-orders/list`（订单事实）与 `GET /trade/aftersales/cases`（售后单事实），**转发调用方自己的 `Authorization` bearer、不传租户号**（租户由 trade 从成员关系自行解析），显式超时（connect 3s / read 15s），**读不到一律 503 / 显式失败**（绝不返回空集合冒充「没有订单」）。**售后单不带买家维度 ⇒ 归因链路是「售后单 → orderId → 订单 → customer_party_id → 客户」**，不猜买家。**下游 15.3.1.1 客户列表筛选 / 14.4 促销定向 / 15.5.2.1 关怀邮件均未交付 ⇒ 只留意图与能力声明 `available=false` + `ownerModule`**，不假装已筛出人群、不编造下游 id。**禁浮点**：数量与比率一律 `numeric(19,6)` + BigDecimal（禁浮点记账），金额用 `BigDecimal` + `NUMERIC`，时间一律 `timestamptz` + `OffsetDateTime` + `?::timestamptz`（禁 `Timestamp.valueOf`）。端点 `/crm/customer-tags/**` 共 **21 个方法映射 / 14 条路径**：capabilities / tags（集合 GET + POST）/ tags/{uuid}（GET·PUT·DELETE）/ rules（集合 GET + POST）/ rules/{uuid}（GET·PUT·DELETE）/ rules/{uuid}/run（执行一次评估）/ runs（集合 GET）/ runs/{uuid}（详情）/ runs/{uuid}/evaluations（逐客户判定结论）/ assignments（集合 GET + POST 手工打标）/ assignments/{uuid}（详情，含判定依据快照）/ assignments/{uuid}/review（人工复核）/ distribution（标签分布统计）/ customer-candidates（候选客户，来自上游订单事实的真实聚合）；**刻意没有** `segments`（按标签筛人群属 15.3.1.1）这类后端不存在的映射。**分布占比由服务端算**（`share` 0..1 与 `sharePercent` 0..100 两字段并存），前端**只原样拼 `%`、不做算术**；分母为 0 ⇒ 两者为 `null`，页面显示「不计算」而不是 0%。**上游不可用时的运行记录**：写一条 `status=FAILED` + `failure_reason` 的 run（**一条标签都不打**），HTTP 仍 200 —— 事务内抛异常会回滚掉这条记录，而 `REQUIRES_NEW` 在**池大小=1** 时有死锁风险；`customer-candidates` 无回退记录可写 ⇒ 硬 503。**权限码**用兄弟族约定 `crm.tag.read` / `crm.tag.update`（`crm.operation.*` 在**全仓任何文件里都不存在**，identity 服务零改动）。页面 `/crm/tags`（真实工作区，非占位页）：能力声明逐维显形 / 标签定义增删改查 / 规则管理与执行 / 运行记录与**逐客户判定结论**（`INDETERMINATE` 与 `NOT_MATCHED` 文案**严格区分** —— 「不可判定」不是「不匹配」）/ 手工打标与人工复核 / 标签分布统计，**加载 / 空 / 错误三态齐全**，且空态**区分「筛选无结果」与「还没有标签定义」**。`apps/web/src/lib/api-proxy.ts` **新增一条独立 `services[]` 元素**（锚点：**紧跟 `crm/review-rules`（15.2.2.2 索评规则）那条之后**；同批另三条车道锚点在 `crm/knowledge` 之后 / `crm/review-requests` 之后 / 数组末尾，相距足够远，git 能干净求并），既有条目**一字未动、也不重排**（元素数 145 → **146**）；**首 token 选 `customer-tags`** —— 基线全文 145 条正则里 `customer-tags` 出现次数 **= 0**，且既有 crm 四条（`knowledge` / `review-requests` / `review-rules` / `buyer-emails`）的正则都是**锚定**的，对 `customer-tags/…` **逐条实测零命中** ⇒ 两条互不吃掉；id 段用**完整 UUID 形状**（不是宽松的 `[0-9a-f-]+`，后者会把 `capabilities` 这类非 UUID 段也当 id 放行）；**刻意不放行**裸路径 `customer-tags`、`tags/{uuid}/delete`、`rules/{uuid}/recompute`、`segments` / `promotions` / `campaigns` / `care-emails`、`assignments/{uuid}/delete`（标签记录是凭据，撤销走 review）、`runs/{uuid}/replay`。**契约**：codegen 重生成 `packages/api-contracts/src/contracts/crm.ts` 与 `packages/api-contracts/src/crm.openapi.json`（新增 21 个 `CrmCustomerTag*` 类型）；跑 codegen 时 channel / trade 的既有文件也被重排（**基线里就有的漂移**，与本车道无关），已**刻意复原为基线版本**，保持本车道 diff 只含 crm。测试：后端 **20 例全绿**（`CustomerTagIntegrationTest` 16 例 + `CustomerTagTenancyIntegrationTest` 4 例，Testcontainers PostgreSQL 16，**真跑 RLS 隔离三断言**：两租户互不可见 / 伪造 `X-Tenant-Id` 头无效且**行落在会话租户名下** / 连接池固定 1 条时归还后不串租户；另有幂等、手工不覆盖人工、样本不足不可判定、基线倍率、上游失败不假成功、禁浮点、时区偏移写回断言），前端 model + allowlist **14 例**、**全量 api allowlist 回归 978 例**全绿，`pnpm typecheck` 3/3、`pnpm lint` 3/3 通过。 |
 | 15.3.2.2 | 接触记录 | — | D7 | 未开发 | — |
 | 15.4.1.1 | 工单列表 | — | D7 | 未开发 | — |
 | 15.4.1.2 | 工单处理 | — | D7 | 未开发 | — |
@@ -557,3 +540,8 @@
 | 18.4.3.2 | 效果评估 | — | D7 | 未开发 | — |
 | 18.5.1.1 | 模板管理 | — | D7 | 未开发 | — |
 | 18.5.2.1 | 投递记录 | — | D7 | 未开发 | — |
+| 已交付 | 312 |
+| **未开发** | **153** |
+| 完成率 | 67.1% |
+| **D7** | 38 | 0 | 117 | 155 |
+| 15 | 客户与客服系统 | D7 | 4 | 24 |
