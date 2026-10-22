@@ -6108,6 +6108,67 @@ const services: readonly {
       /^customer\-contacts(?:\/(?:capabilities|opt-out-check|timeline|ingest)|\/contacts(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|\/opt-outs(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:revoke|events))?)?)$/,
   },
   {
+    // 15.5.2.1 关怀与催办（crm 服务，卷 15 L3 锚点 15.5.2 下的触达子域）。
+    //
+    // ⚠️ 本条目是**新增一条独立的 `services[]` 元素**，不是往既有 crm 那几条巨型 alternation 里
+    //   并分支 —— 那些是超长单行正则，多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    //   既有条目**一字未动、也不重排**。
+    //
+    // ---- 插入锚点：紧跟 `crm/customer-contacts`（15.3.2.2 接触记录）那条元素之后 ----
+    //   本批另外三条车道的锚点分别是：`crm/message-sends` 之后（15.1.1.2）、
+    //   `crm/review-replies` 之后（15.2.1.2）、channel 的 `crm/ad-rules` 之后（16.1.1.1）
+    //   —— 四个锚点互不重叠，git 能干净求并。
+    //
+    // ---- 首 token「care-reminders」的零命中核对结论（**实测**，非目测）----
+    //   ① 字面量核对：本文件既有全文里 `care-reminders` 出现次数 = **0**（既有的是
+    //      `customer-contacts` / `customer-tags` / `knowledge` / `review-requests` /
+    //      `review-rules` / `buyer-emails` / `message-sends` / `cart-recovery` 一类），
+    //      所以首 token 既是独立字面量，也不会被既有分支的前缀吃掉。
+    //   ② 逐条实测：把本文件既有 services[] 的**全部 148 条**正则逐条抽出来，
+    //      对本模块的**全部 12 个 path shape** 逐个 `new RegExp(pat).test(path.slice(prefix.length))`
+    //      （与 `resolve()` 同一套判别口径：`path.startsWith(prefix)` 收窄后再测正则），
+    //      结果是**零命中** —— 既没有既有条目会放行本模块的路径，
+    //      也没有本模块的路径会被既有条目误吞。
+    //      （实测脚本：`.tmp/verify-api-proxy.mjs`，随车道提交前可重跑复现。）
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   care-reminders/capabilities                    能力声明（各维度的依据与下游归属）
+    //   care-reminders/rules                           触达规则列表（GET，真分页 + 真筛选）
+    //   care-reminders/rules/{uuid}                    单条触达规则（GET）
+    //   care-reminders/rules/{uuid}/status             启用 / 停用规则（POST）
+    //   care-reminders/rules/{uuid}/generate           按规则生成触达任务（POST）
+    //   care-reminders/tasks                           触达任务列表（GET，真分页 + 真筛选）
+    //   care-reminders/tasks/{uuid}                    单条触达任务（GET）
+    //   care-reminders/tasks/{uuid}/dispatch           人工交接登记发送结果（POST）
+    //   care-reminders/stats                           统计汇总（GET，**服务端算**）
+    //   care-reminders/stats/events                    录入打开 / 点击事件（POST）
+    //   care-reminders/stats/platform-events           平台回执自动采集（GET，恒「未接入」）
+    //   care-reminders/stats/tasks/{uuid}/events       某条触达的打开 / 点击事件（GET）
+    //
+    // 判别顺序：字面量子路径（capabilities / stats / stats/events / stats/platform-events）
+    // 排在 {uuid} 段**之前** —— alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //（不是 `[0-9a-f-]+`：后者会把 `rules` 这种非 UUID 形状也当成 id 放行）。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   care-reminders                                  —— 裸路径：后端没有「一条不存在的汇总列表接口」。
+    //   care-reminders/finance                          —— **12 财务未交付**：
+    //     催付只落任务与「已提醒回款」的意图，**没有**财务单据路径可放行。
+    //   care-reminders/segments                         —— 按客户主档筛人群属 15.3.1.1（未交付）。
+    //   care-reminders/outreach                         —— 「群发触达」与 15.1.1.2 消息发送
+    //     （既有 `crm/message-sends` 条目）**不是**本模块的职责：本模块只排期与登记。
+    //   care-reminders/rules/{uuid}/delete              —— 触达任务不提供删除（事实不可删）。
+    //   care-reminders/tasks/{uuid}/delete              —— 同上。
+    //   任何非 UUID 段（如 `care-reminders/rules/not-a-uuid`）—— 必须 404。
+    //
+    // ⚠️ 末尾**刻意不带 `?`**：带了就等于放行裸路径 `care-reminders`。
+    prefix: 'crm/',
+    env: 'CRM_URL',
+    fallback: 'http://127.0.0.1:8086',
+    pattern:
+      /^care\-reminders(?:\/(?:capabilities|stats\/events|stats\/platform-events|stats)|\/stats\/tasks\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/events|\/rules(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:status|generate))?)?|\/tasks(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/dispatch)?)?)$/,
+  },
+  {
     // 7.8.2.2 缺货与饥饿预警（warehouse 服务，7.8.2 的第二个 L3 锚点）。
     //
     // 蓝图：「识别因分摊/优先级导致的店铺"饥饿"（长期分不到货、影响绩效），以及真正的全网缺货，

@@ -683,6 +683,685 @@
         },
         "type": "object"
       },
+      "CrmCareReminderCapabilities": {
+        "properties": {
+          "actionPolicy": {
+            "type": "string"
+          },
+          "blockCodes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "boundaryNote": {
+            "type": "string"
+          },
+          "dimensions": {
+            "items": {
+              "$ref": "#/components/schemas/CrmCareReminderCapabilityDimension"
+            },
+            "type": "array"
+          },
+          "frequencyPolicy": {
+            "type": "string"
+          },
+          "highlight": {
+            "type": "string"
+          },
+          "marketingReminderTypes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "optOutPolicy": {
+            "type": "string"
+          },
+          "paymentDemandAllowedPlatforms": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "reminderStatuses": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "reminderTypes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "CrmCareReminderCapabilityDimension": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "description": {
+            "type": "string"
+          },
+          "dimension": {
+            "type": "string"
+          },
+          "impact": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmCareReminderDispatchInput": {
+        "properties": {
+          "failureReason": {
+            "nullable": true,
+            "type": "string"
+          },
+          "note": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "nullable": true,
+            "type": "string"
+          },
+          "outcome": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "platformReceipt": {
+            "nullable": true,
+            "type": "string"
+          },
+          "sentAt": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "outcome"
+        ],
+        "type": "object"
+      },
+      "CrmCareReminderGenerateInput": {
+        "properties": {
+          "customerRefs": {
+            "items": {
+              "nullable": true,
+              "type": "string"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "lookbackDays": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "minAmount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "orderSource": {
+            "maxLength": 32,
+            "minLength": 0,
+            "nullable": true,
+            "type": "string"
+          },
+          "plannedAt": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmCareReminderGenerateResult": {
+        "properties": {
+          "blocked": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "created": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "idempotentHits": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "matchedCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "plannedAt": {
+            "type": "string"
+          },
+          "reasons": {
+            "additionalProperties": {
+              "format": "int32",
+              "type": "integer"
+            },
+            "type": "object"
+          },
+          "ruleCode": {
+            "type": "string"
+          },
+          "ruleId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "upstreamCandidateCount": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CrmCareReminderPlatformReceiptStatus": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmCareReminderRuleInput": {
+        "properties": {
+          "body": {
+            "nullable": true,
+            "type": "string"
+          },
+          "frequencyLimit": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "frequencyWindowHours": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "note": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "nullable": true,
+            "type": "string"
+          },
+          "platformCode": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string"
+          },
+          "quietHoursEnd": {
+            "nullable": true,
+            "type": "string"
+          },
+          "quietHoursStart": {
+            "nullable": true,
+            "type": "string"
+          },
+          "reminderType": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "ruleCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "ruleName": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "sendTime": {
+            "nullable": true,
+            "type": "string"
+          },
+          "shopId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "shopName": {
+            "maxLength": 200,
+            "minLength": 0,
+            "nullable": true,
+            "type": "string"
+          },
+          "subject": {
+            "maxLength": 400,
+            "minLength": 0,
+            "nullable": true,
+            "type": "string"
+          },
+          "targetFilter": {
+            "additionalProperties": {
+              "nullable": true,
+              "type": "object"
+            },
+            "nullable": true,
+            "type": "object"
+          },
+          "templateCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "nullable": true,
+            "type": "string"
+          },
+          "timezone": {
+            "maxLength": 64,
+            "minLength": 0,
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "platformCode",
+          "reminderType",
+          "ruleCode",
+          "ruleName"
+        ],
+        "type": "object"
+      },
+      "CrmCareReminderRulePage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/CrmCareReminderRuleRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "totalElements": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalPages": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CrmCareReminderRuleRow": {
+        "properties": {
+          "body": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "createdBy": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "frequencyLimit": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "frequencyWindowHours": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "quietHoursEnd": {
+            "nullable": true,
+            "type": "string"
+          },
+          "quietHoursStart": {
+            "nullable": true,
+            "type": "string"
+          },
+          "reminderType": {
+            "type": "string"
+          },
+          "reminderTypeLabel": {
+            "type": "string"
+          },
+          "ruleCode": {
+            "type": "string"
+          },
+          "ruleName": {
+            "type": "string"
+          },
+          "sendTime": {
+            "type": "string"
+          },
+          "shopId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "shopName": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "subject": {
+            "type": "string"
+          },
+          "targetFilter": {
+            "additionalProperties": {
+              "type": "object"
+            },
+            "type": "object"
+          },
+          "templateCode": {
+            "type": "string"
+          },
+          "timezone": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmCareReminderStatEventInput": {
+        "properties": {
+          "eventType": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "occurredAt": {
+            "nullable": true,
+            "type": "string"
+          },
+          "source": {
+            "maxLength": 120,
+            "minLength": 0,
+            "nullable": true,
+            "type": "string"
+          },
+          "taskId": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "eventType",
+          "taskId"
+        ],
+        "type": "object"
+      },
+      "CrmCareReminderStatEventPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/CrmCareReminderStatEventRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "totalElements": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalPages": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CrmCareReminderStatEventRow": {
+        "properties": {
+          "createdAt": {
+            "type": "string"
+          },
+          "eventType": {
+            "type": "string"
+          },
+          "eventTypeLabel": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "occurredAt": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "taskId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "taskNo": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmCareReminderStats": {
+        "properties": {
+          "blockedTasks": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "cancelledTasks": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "clickCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "failedTasks": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "frequencyBlockedCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "openCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "optOutBlockedCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "queuedTasks": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "sentTasks": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalTasks": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CrmCareReminderTaskPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/CrmCareReminderTaskRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "totalElements": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalPages": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CrmCareReminderTaskRow": {
+        "properties": {
+          "blockCode": {
+            "type": "string"
+          },
+          "blockReason": {
+            "type": "string"
+          },
+          "body": {
+            "type": "string"
+          },
+          "clickCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "createdBy": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "customerName": {
+            "type": "string"
+          },
+          "customerRef": {
+            "type": "string"
+          },
+          "failureReason": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "openCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "orderReference": {
+            "type": "string"
+          },
+          "plannedAt": {
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "platformReceipt": {
+            "type": "string"
+          },
+          "reminderType": {
+            "type": "string"
+          },
+          "reminderTypeLabel": {
+            "type": "string"
+          },
+          "ruleCode": {
+            "type": "string"
+          },
+          "ruleId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "sentAt": {
+            "nullable": true,
+            "type": "string"
+          },
+          "shopId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "shopName": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "subject": {
+            "type": "string"
+          },
+          "taskNo": {
+            "type": "string"
+          },
+          "transport": {
+            "type": "string"
+          },
+          "transportLabel": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "CrmCartAbandonmentDetail": {
         "properties": {
           "abandonment": {
@@ -9468,6 +10147,754 @@
         },
         "tags": [
           "buyer-email-controller"
+        ]
+      }
+    },
+    "/crm/care-reminders/capabilities": {
+      "get": {
+        "operationId": "get_crm_care_reminders_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCareReminderCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "care-reminder-controller"
+        ]
+      }
+    },
+    "/crm/care-reminders/rules": {
+      "get": {
+        "operationId": "get_crm_care_reminders_rules",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "reminderType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "platformCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCareReminderRulePage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "care-reminder-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_crm_care_reminders_rules",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmCareReminderRuleInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCareReminderRuleRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "care-reminder-controller"
+        ]
+      }
+    },
+    "/crm/care-reminders/rules/{ruleId}": {
+      "get": {
+        "operationId": "get_crm_care_reminders_rules_ruleId",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "ruleId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCareReminderRuleRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "care-reminder-controller"
+        ]
+      },
+      "put": {
+        "operationId": "put_crm_care_reminders_rules_ruleId",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "ruleId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmCareReminderRuleInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCareReminderRuleRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "care-reminder-controller"
+        ]
+      }
+    },
+    "/crm/care-reminders/rules/{ruleId}/generate": {
+      "post": {
+        "operationId": "post_crm_care_reminders_rules_ruleId_generate",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "ruleId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmCareReminderGenerateInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCareReminderGenerateResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "care-reminder-controller"
+        ]
+      }
+    },
+    "/crm/care-reminders/rules/{ruleId}/status": {
+      "post": {
+        "operationId": "post_crm_care_reminders_rules_ruleId_status",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "ruleId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCareReminderRuleRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "care-reminder-controller"
+        ]
+      }
+    },
+    "/crm/care-reminders/stats": {
+      "get": {
+        "operationId": "get_crm_care_reminders_stats",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "ruleId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "reminderType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCareReminderStats"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "care-reminder-controller"
+        ]
+      }
+    },
+    "/crm/care-reminders/stats/events": {
+      "post": {
+        "operationId": "post_crm_care_reminders_stats_events",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmCareReminderStatEventInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCareReminderStatEventRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "care-reminder-controller"
+        ]
+      }
+    },
+    "/crm/care-reminders/stats/platform-events": {
+      "get": {
+        "operationId": "get_crm_care_reminders_stats_platform_events",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCareReminderPlatformReceiptStatus"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "care-reminder-controller"
+        ]
+      }
+    },
+    "/crm/care-reminders/stats/tasks/{taskId}/events": {
+      "get": {
+        "operationId": "get_crm_care_reminders_stats_tasks_taskId_events",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "taskId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCareReminderStatEventPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "care-reminder-controller"
+        ]
+      }
+    },
+    "/crm/care-reminders/tasks": {
+      "get": {
+        "operationId": "get_crm_care_reminders_tasks",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "ruleId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "reminderType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "blockCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "customerRef",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "platformCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCareReminderTaskPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "care-reminder-controller"
+        ]
+      }
+    },
+    "/crm/care-reminders/tasks/{taskId}": {
+      "get": {
+        "operationId": "get_crm_care_reminders_tasks_taskId",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "taskId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCareReminderTaskRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "care-reminder-controller"
+        ]
+      }
+    },
+    "/crm/care-reminders/tasks/{taskId}/dispatch": {
+      "post": {
+        "operationId": "post_crm_care_reminders_tasks_taskId_dispatch",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "taskId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmCareReminderDispatchInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCareReminderTaskRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "care-reminder-controller"
         ]
       }
     },
