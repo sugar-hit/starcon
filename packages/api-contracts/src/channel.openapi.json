@@ -9461,7 +9461,7 @@
           "bid": {
             "description": "🔴 关键词当前竞价（不给 = 0）",
             "exclusiveMinimum": false,
-            "minimum": 0,
+            "minimum": 0.0,
             "type": "number"
           },
           "bidCurrency": {
@@ -9658,13 +9658,13 @@
           "sales": {
             "description": "销售额（金额 numeric(19,4)）",
             "exclusiveMinimum": false,
-            "minimum": 0,
+            "minimum": 0.0,
             "type": "number"
           },
           "spend": {
             "description": "花费（金额 numeric(19,4)）",
             "exclusiveMinimum": false,
-            "minimum": 0,
+            "minimum": 0.0,
             "type": "number"
           },
           "syncedAt": {
@@ -13180,7 +13180,7 @@
           "sales": {
             "description": "销售额（金额 numeric(19,4)）",
             "exclusiveMinimum": false,
-            "minimum": 0,
+            "minimum": 0.0,
             "type": "number"
           },
           "searchTerm": {
@@ -13192,7 +13192,7 @@
           "spend": {
             "description": "花费（金额 numeric(19,4)）",
             "exclusiveMinimum": false,
-            "minimum": 0,
+            "minimum": 0.0,
             "type": "number"
           },
           "syncedAt": {
@@ -16086,8 +16086,8 @@
             "exclusiveMaximum": false,
             "exclusiveMinimum": false,
             "format": "double",
-            "maximum": 1,
-            "minimum": 0,
+            "maximum": 1.0,
+            "minimum": 0.0,
             "type": "number"
           },
           "rule": {
@@ -25234,7 +25234,7 @@
           "priceAmount": {
             "description": "价格金额（priceSource=MANUAL 时必填；NUMERIC(19,4)，禁浮点）",
             "exclusiveMinimum": false,
-            "minimum": 0,
+            "minimum": 0.0,
             "type": "number"
           },
           "priceCurrency": {
@@ -46989,7 +46989,7 @@
         "properties": {
           "amountPerWaybill": {
             "exclusiveMinimum": false,
-            "minimum": 0,
+            "minimum": 0.0,
             "type": "number"
           },
           "component": {
