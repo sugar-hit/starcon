@@ -119,6 +119,77 @@ const services: readonly {
     pattern: /^(login|logout|session|memberships|switch)$/,
   },
   {
+    // 14.4.1.2 优惠券与秒杀（channel 服务）。纯**增量**追加一条独立的 `channel/` 元素：
+    // 既有分支（`ad-promotions` / `ad-campaigns` / `ad-budgets` / `ad-keywords` …）**一字未动、
+    // 也不重排** —— 同批多车道共享这一个文件，往同一条 alternation 里并分支会让 git 必然判冲突
+    // 且 retry 永远不会自愈。
+    //
+    // ---- 插入锚点选在 `auth/`（login/logout/session/memberships/switch）那条**之后** ----
+    //   本批其它三条车道（14.1.3.2 / 14.4.2.1 / 14.5.1.1）各自锚在别的行上
+    //   （`listing-collects` / `aftersales/...` / `purchase-followups` 那行之后），
+    //   彼此相距很远 ⇒ git 能干净求并。
+    //
+    // ---- 首 token「ad-coupons」与「ad-flash-sales」的零命中核对结论 ----
+    //   本文件既有 **134** 条 services[] 正则里**没有任何一条**含 `ad-coupons` 或 `ad-flash-sales`
+    //   （既有的是 `ad-campaigns` / `ad-budgets` / `ad-keywords` / `ad-rules` / `ad-reports` /
+    //   `ad-type-diffs` / `ad-promotions` 一类），
+    //   且逐条用 `new RegExp(pat).test('…')` 实测过：既有 134 条对本模块的 19 个 shape
+    //   **全部零命中** ⇒ 首 token 既是独立字面量，也不会被既有分支的前缀吃掉。
+    //   `ad-promotions` 不匹配 `ad-coupons` / `ad-flash-sales`（14.4.1.1 兄弟模块不撞车）。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   ad-coupons/capabilities                    能力声明（平台营销回写 / 客户主数据 /
+    //                                               买赠补贴成本三个维度 available=false）
+    //   ad-coupons/options                         下拉项（券类型 / 状态 / 同步状态 / 领取方式 / 渠道）
+    //   ad-coupons/coupons                         券列表（GET，真分页 + 真筛选）/ 登记券（POST）
+    //   ad-coupons/coupons/{uuid}                  券详情（GET）/ 改券规则（POST，替换语义）
+    //   ad-coupons/coupons/{uuid}/status           改本地状态（POST；上线 / 暂停 / 结束 / 停用）
+    //   ad-coupons/coupons/{uuid}/codes            批量生成券码（POST，真库存计数）/ 券码列表（GET）
+    //   ad-coupons/coupons/{uuid}/claims           领取 / 定向发放（POST，限领累计校验）
+    //   ad-coupons/coupons/{uuid}/redemptions      核销（POST，**必须绑定订单标识**）
+    //   ad-coupons/coupons/{uuid}/statistics        核销统计（GET，真聚合）
+    //   ad-coupons/coupons/{uuid}/channels         投放渠道与投放计划（GET 读 / POST 登记）
+    //   ad-flash-sales/capabilities                秒杀能力声明（平台营销回写 / 毛利两个维度 false）
+    //   ad-flash-sales/options                     秒杀下拉项
+    //   ad-flash-sales/flash-sales                 秒杀列表（GET）/ 登记秒杀（POST）
+    //   ad-flash-sales/flash-sales/{uuid}          秒杀详情（GET）/ 改秒杀（POST）
+    //   ad-flash-sales/flash-sales/{uuid}/status   改本地状态（POST）
+    //   ad-flash-sales/flash-sales/{uuid}/claims   领取秒杀（POST，库存真扣 + 按人限领）
+    //   ad-flash-sales/flash-sales/{uuid}/redemptions 核销秒杀（POST，绑定订单标识）
+    //   ad-flash-sales/flash-sales/{uuid}/statistics   秒杀统计（GET，真聚合）
+    //
+    // 判别顺序：字面量子路径（capabilities / options / coupons / flash-sales）排在 {uuid} 段之前
+    // —— alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸路径 `ad-coupons` / `ad-flash-sales` —— 本模块没有裸集合读，一切入口都带子路径
+    //   * `ad-coupons/coupons/{uuid}/delete` —— 券是事实，撤下走 status=CANCELLED
+    //   * `ad-coupons/coupons/{uuid}/platform-writeback` —— **平台营销接口未交付**，
+    //     放行它等于让界面以为「券已经回写到平台了」
+    //   * `ad-coupons/coupons/{uuid}/recipients` —— **15 客户未交付** ⇒ 定向发放只记收件人标识
+    //   * `ad-coupons/coupons/{uuid}/margins` —— 毛利不可用（成本价在 05 定价，跨服务不可读）
+    //   * 非 UUID 段 —— `ad-coupons/coupons/not-a-uuid` 必须 404
+    //
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //（不是 `[0-9a-f-]+`：后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行）。
+    // 末尾**刻意不带 `?`**：带了就等于放行裸路径 `ad-coupons`。
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^ad\-coupons(?:\/(?:capabilities|options|coupons(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:status|codes|claims|redemptions|statistics|channels))?)?))$/,
+  },
+  {
+    // 14.4.1.2 优惠券与秒杀 —— **秒杀**这一半（channel 服务）。
+    // 与上面 `ad-coupons` 那条**独立成条**，不并进同一条 alternation（同批多车道并入时
+    // git 才能干净求并）。形状与理由完全对齐优惠券那一条，注释不再重复。
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^ad\-flash\-sales(?:\/(?:capabilities|options|flash\-sales(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:status|claims|redemptions|statistics))?)?))$/,
+  },
+  {
     prefix: 'identity/',
     env: 'IDENTITY_URL',
     fallback: 'http://127.0.0.1:8081',
@@ -196,6 +267,86 @@ const services: readonly {
       //   **刻意不放行 onboardings/{id}**：后端没有「按 id 取单条入职记录」这个端点，
       //   放行它会让界面以为已交付——放行不该存在的路径比 404 更糟。
       /^(permissions|owner-transfer|legal-entities(?:\/[0-9a-f-]+)?|legal-entities\/(?:[0-9a-f-]+\/accounting-books|references)|(?:roles|members|departments|children)(?:\/[0-9a-f-]+)?|tenants(?:\/current)?|audit(?:\/(?:export|[0-9a-f-]+))?|operation-log(?:\/(?:export|trace\/[0-9a-zA-Z-]+|[0-9a-f-]+))?||approval-records(?:\/(?:statistics|capabilities|export|by-actor\/[0-9a-f-]+|[0-9a-f-]+))?|hierarchy-authorizations(?:\/check|\/[0-9a-f-]+(?:\/revoke)?)?|accounting-books(?:\/[0-9a-f-]+)?|business-parameters(?:\/(?:effective|history|overrides(?:\/[0-9a-f-]+)?|freezes(?:\/[^/]+\/[^/]+)?))?|numbering(?:\/(?:entities|preview|sequences|issued|rules(?:\/conflicts|\/[0-9a-f-]+(?:\/next)?)?))?|approval-flows(?:\/(?:document-types|registrations|active|positions(?:\/[0-9a-f-]+)?|[0-9a-f-]+(?:\/validation)?))?|approval-rules(?:\/(?:effective-policy|evaluate|[0-9a-f-]+(?:\/validation)?))?|my-approvals(?:\/(?:capabilities|batch|[0-9a-f-]+(?:\/(?:decide|transfer))?))?|approval-instances|onboardings(?:\/[0-9a-f-]+\/complete)?|department-leaders|departments\/[0-9a-f-]+\/(?:leader(?:\/(?:proxies|grants)(?:\/[0-9a-f-]+)?)?|approval-chain)|offboarding(?:\/[0-9a-f-]+(?:\/revert|\/responsibility-items(?:\/[0-9a-f-]+(?:\/transfer)?)?|\/reclaim-items(?:\/[0-9a-f-]+(?:\/reclaim)?)?)?)?|legal-entities\/(?:[0-9a-f-]+\/(?:accounting-books|ledger-books|default-book)|references)|accounting-books(?:\/[0-9a-f-]+(?:\/fact-assignments(?:\/[0-9a-f-]+)?)?)?)$/,
+  },
+  {
+    // 14.5.1.2 建联与样品（channel 服务，卷 14 广告与增长 / L3 14.5.1 达人管理下的第二格）。
+    //
+    // 本条目是**新增一条独立的 services[] 元素**，不是往既有 channel 分支的 alternation 里
+    // 并分支 —— 那些分支是一段超长单行正则，多车道同时并进去 git 必然判冲突（结构性，
+    // retry 不会自愈）。
+    //
+    // ---- 插入锚点固定在 `prefix: 'identity/'` 那条元素**之后** ----
+    //   本仓历史上用过的锚点是「数组最开头」「`auth/` 前后」「`trade/` 之前」
+    //   「`catalog/` 之前」「`warehouse/` 前后」「数组末尾」与「`purchase-followups` 之后」
+    //   （14.5.1.1 达人库用的就是最后一个）。`identity/` 元素**之后**这个位置本仓
+    //   还没有车道用过，与同批其它车道常见的锚点相距 2000 行以上 ⇒ git 能干净求并。
+    //   锚点相邻的既有条目是 `identity/`（前缀 `identity/`）与 `price-anomaly-alerts`
+    //   （前缀 `catalog/`）—— 前缀都不同，不会与本条目抢同一条路径。
+    //
+    // ⚠️ 首 token「outreach」的零命中核对结论：
+    //   本文件既有 100+ 条 services[] 正则里**没有任何一条**含 `outreach` 这个串
+    //   （全文唯一的 `outreach` 出现在 14.5.1.1 那条条目的**注释**里 ——
+    //   `influencers/outreach —— 建联与样品（14.5.1.2）未交付`，那是注释不是正则）。
+    //   所以首 token 既是独立字面量，也不会被既有分支的前缀吃掉。
+    //   resolve() 是「按顺序逐条匹配、首个命中即返回」，而本条目**之前**的三条
+    //   `channel/` 元素（`ad-campaigns` / `ad-coupons` / `ad-flash-sales`）的正则
+    //   都是 `^ad\-…` 锚定的，**零命中** `outreach/…` ⇒ 本条目不会被它们遮蔽。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   outreach/capabilities                能力声明（未交付段 available=false + ownerModule）
+    //   outreach/options                     下拉项（状态 / 跟进方式 / 佣金形态 / 平台 / 店铺 / 模板变量）
+    //   outreach/summary                     概览统计
+    //   outreach/outreach-availability       逐平台的达人私信官方接口接入情况 + 今日发送数
+    //   outreach/segments                    筛选条件（GET 列表 / POST 新建）
+    //   outreach/segments/{uuid}             筛选条件（POST 改 / DELETE 删）
+    //   outreach/segments/{uuid}/candidates  按规则筛出的候选达人（真筛选）
+    //   outreach/templates                   邀约模板（GET 列表 / POST 新建）
+    //   outreach/templates/{uuid}            邀约模板（POST 改 / DELETE 删）
+    //   outreach/templates/{uuid}/preview    模板预览（真渲染）
+    //   outreach/policies                    风控策略（按平台：每日上限 + 最小间隔）
+    //   outreach/outreachs                   建联记录（GET 列表 / POST 新建）
+    //   outreach/outreachs/{uuid}            建联记录（GET 详情 / POST 改 / DELETE 删）
+    //   outreach/outreachs/batch             批量建联（**只生成草稿**，不是批量群发）
+    //   outreach/outreachs/{uuid}/receipt    手动登记「已发送 + 平台回执」
+    //   outreach/outreachs/{uuid}/send       走官方接口发送（适配器未接入 ⇒ 明确失败且不写数据）
+    //   outreach/outreachs/{uuid}/status     推进建联状态
+    //   outreach/outreachs/{uuid}/followups  登记合作跟进
+    //   outreach/followups                   跟进列表（GET）
+    //   outreach/samples                     样品单（GET 列表 / POST 新建）
+    //   outreach/samples/{uuid}              样品单（POST 改）
+    //   outreach/samples/{uuid}/status       手动推进样品单（只能到 OUTBOUNDED / CANCELLED）
+    //   outreach/samples/{uuid}/shipments    登记样品包裹（发货 / 物流单号）
+    //   outreach/shipments                   包裹列表（GET）
+    //   outreach/shipments/{uuid}/status     推进包裹状态（送达 / 签收 / 丢件 / 退回）
+    //   outreach/commission-rules            佣金规则（GET 列表 / POST 新建）
+    //   outreach/commission-rules/{uuid}     佣金规则（POST 改 / DELETE 删）
+    //   outreach/commission-accruals          佣金计提（GET 列表 / POST 登记）
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸路径 `outreach` —— 本模块没有裸集合读，一切入口都带子路径。
+    //     末尾**刻意不带 `?`**：带了等于放行裸路径。
+    //   * `outreach/outreachs/{uuid}/batch-send` —— **批量群发不存在**：蓝图红线是
+    //     「建联必须走官方接口，批量私信是平台风控重点」。批量能力只到
+    //     `POST /outreachs/batch`（批量生成**草稿**），每一条仍要逐条登记回执才发出。
+    //   * `outreach/outreachs/{uuid}/delete` —— 已发出的私信是举证凭据，删不掉（DELETE 打在
+    //     `{uuid}` 上本身就是删整条，不是动作）。
+    //   * `outreach/samples/{uuid}/shipments/{uuid}` —— 包裹是**样品单的子资源**，
+    //     读包裹走 `outreach/shipments`（带 `sampleOrderId` 筛选）。
+    //   * `outreach/attributions` —— 带货归因（14.5.2.1）**未交付**。
+    //   * `influencers/outreach` —— 14.5.1.1 达人库那条条目里**刻意不放行**的形状：
+    //     本模块的端点在前缀 `outreach/` 下，不在 `influencers/` 下。
+    //   * 非 UUID 段 —— `outreach/outreachs/not-a-uuid` 必须 404。
+    //
+    // id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    // （不是 `[0-9a-f-]+`）：后者会把 `batch` 这种非 UUID 形状也当成 id 放行。
+    // 字面量子路径（capabilities / options / summary / policies / followups /
+    // outreach-availability / commission-accruals 那一组）排在 {uuid} 段之前判别 ——
+    // alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^outreach(?:\/(?:capabilities|options|summary|outreach\-availability|followups)|\/segments(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/candidates)?)?|\/templates(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/preview)?)?|\/policies|\/outreachs(?:\/batch|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:receipt|send|status|followups))?)?|\/samples(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:status|shipments))?)?|\/shipments(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/status)?|\/commission\-rules(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|\/commission\-accruals)$/,
   },
   {
     // 5.5.2.1 异常告警（**本条目是新增一条 services[] 元素**，不是往既有 catalog 分支的
@@ -497,6 +648,57 @@ const services: readonly {
       /^(products(?:\/[0-9a-f-]+(?:\/(?:attributes|skus)(?:\/[0-9a-f-]+)?)?)?|attributes(?:\/(?:overview|category-rules|options(?:\/(?:lifecycle|order))?|[0-9a-f-]+(?:\/(?:options|category-rules))?))?|brands(?:\/(?:overview|candidates|listing-eligibility|[0-9a-f-]+(?:\/(?:listing-eligibility|enabled|authorizations(?:\/[0-9a-f-]+(?:\/enabled)?)?))?))?|parties(?:\/(?:overview|candidates|[0-9a-f-]+(?:\/(?:status|roles(?:\/[0-9a-f-]+)?|role-profiles|(?:supplier|customer|carrier)-profile|addresses(?:\/(?:defaults|candidates|[0-9a-f-]+(?:\/(?:usages|default|versions(?:\/[0-9]+)?))?))?|contacts(?:\/(?:default|candidates|[0-9a-f-]+(?:\/primary)?))?))?))?|categories(?:\/(?:overview|trees(?:\/[0-9a-f-]+(?:\/nodes)?)?|nodes\/[0-9a-f-]+(?:\/(?:move|enabled))?|spus\/[0-9a-f-]+|attribute-requirements(?:\/overview|\/[0-9a-f-]+(?:\/[0-9a-f-]+(?:\/enabled)?|\/(?:effective|entry-form-schema|validate))?)))|category-mappings(?:\/(?:overview|platform-sites|attribute-options|resolve|[0-9a-f-]+(?:\/(?:default|enabled|attributes(?:\/[0-9a-f-]+(?:\/enabled)?)?))?))?|records\/(research|compliance|assets)(?:\/[0-9a-f-]+)?|media(?:\/(?:overview|verify-sweep|references|tags|processing(?:\/(?:overview|recipes(?:\/[0-9a-f-]+(?:\/enabled)?)?|jobs(?:\/[0-9a-f-]+(?:\/(?:items|cancel))?)?|assets\/[0-9a-f-]+\/history)?)?)|[0-9a-f-]+(?:\/(?:versions|references(?:\/[0-9a-f-]+)?|integrity-checks|enabled))?|tags\/[0-9a-f-]+(?:\/enabled)?)?|skus(?:\/(?:capabilities|batch|export))?|unit-groups(?:\/(?:overview|convert|[0-9a-f-]+(?:\/(?:enabled|conversions(?:\/[0-9a-f-]+)?))?))?|unit-conversion(?:\/(?:units(?:\/[0-9a-f-]+)?|overview|skus\/[0-9a-f-]+(?:\/conversions)?|convert|snapshots))?|spec-axis(?:\/(?:overview|axes(?:\/[0-9a-f-]+(?:\/options)?)?|spus\/[0-9a-f-]+(?:\/axes(?:\/[0-9a-f-]+)?)?|category-rules))?|variant-combination(?:\/(?:overview|spus\/[0-9a-f-]+(?:\/(?:combinations|check|drafts(?:\/[0-9a-f-]+)?))?))?|sku-attribute-override\/skus\/[0-9a-f-]+(?:\/attribute-overrides\/[0-9a-f-]+(?:\/clear)?)?|titles(?:\/(?:overview|templates(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/enabled)?)?|keywords(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/enabled)?)?|generations(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/skus)?)?|records(?:\/export|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:select|deselect|reject))?)?))?|descriptions(?:\/(?:overview|templates(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:enabled|translation-coveragetranslations(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?))?)?|phrases(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/enabled)?)?|renders(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:skus|missing-variables))?)?|translations\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}|sections(?:\/export)?))?|bundles(?:\/(?:overview|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:status|effective|versions))?))?|versions(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:publish|close|components|component-check))?)?|components(?:\/(?:overview|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}))?|bundle-skus(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|boms(?:\/(?:overview|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:status|effective|versions))?))?|bom-versions(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:publish|close|copy|components|requirement))?)?|bom-components\/usage|bom-explosions(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|import-templates(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/file)?)?|import-field-mappings(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|import-jobs(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:mapping|prevalidate|execute|cancel|rows|errors|report(?:\/(?:issues|exports(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/file)?))?))?)?|supplier-quotes(?:\/(?:overview|options|effective(?:\/resolve)?|[0-9a-f-]+(?:\/tiers)?))?|role-profiles(?:\/(?:overview|options))?|translations(?:\/(?:overview|locales(?:\/(?:requirements|sync|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/enabled)?))?|spus\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/entries)?|skus\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/entries)?|entries(?:\/export|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/status)?)?|coverage|suggestions(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:adopt|reject))?)?|batches(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?))|duplicate-scans(?:\/(?:overview|[0-9a-f-]+(?:\/candidates)?)?)?|duplicate-candidates\/[0-9a-f-]+(?:\/(?:decision|merge-preview|merge)?)?|export-sources|export-jobs(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:file|cancel))?)?|zombie-candidates(?:\/(?:overview|options|rules(?:\/[A-Za-z0-9_]+)?|evidence|reference-stats|deactivate|records|deactivation-targets))?|completeness(?:\/(?:overview|options|gaps(?:\/summary)?|evaluations(?:\/[0-9a-f-]+)?|precheck\/(?:listing|customs)|customs\/skus\/[0-9a-f-]+|certifications\/skus\/[0-9a-f-]+(?:\/[0-9a-f-]+)?|(?:SPU|SKU)\/[0-9a-f-]+))?|customs-attributes(?:\/profiles|\/skus\/[0-9a-f-]+(?:\/(?:submit|review))?|\/declaration-ready)|sku-merges(?:\/overview|\/by-candidate\/[0-9a-f-]+|\/by-sku\/[0-9a-f-]+|\/[0-9a-f-]+)?|description-templates(?:\/(?:overview|options|templates(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:enabled|sections))?)?|renders(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?))?|kb(?:\/(?:overview|options|entries(?:\/[0-9a-f-]+(?:\/(?:enabled|translations(?:\/[0-9a-f-]+)?|translation-coverage|rule-bindings(?:\/[0-9a-f-]+)?|usages))?)?|translations\/[0-9a-f-]+|rule-versions(?:\/[0-9a-f-]+)?|review-tasks(?:\/[0-9a-f-]+)?|usages|hit-rates))?|customs-destination-versions(?:\/effective|\/requirements|\/skus\/[0-9a-f-]+|\/[0-9a-f-]+\/publish)|customs-declaration\/resolve|supply\/vendors(?:\/(?:options|overview)|\/[0-9a-f-]+(?:\/(?:profile|panorama|purchase-history|quotes|settlement-terms|deliveries(?:\/[0-9a-f-]+\/void)?|quality-inspections(?:\/[0-9a-f-]+\/void)?|qualifications(?:\/[0-9a-f-]+)?))?)?)$/,
   },
   {
+    // 14.2.2.1 预算分配（channel 服务）。纯**新增一条独立的 `services[]` 元素**，
+    // 既有的 `ad-campaigns`（14.1.1.1）、`ad-rules`（14.2.2.2）、`ad-keywords`（14.1.3.1）
+    // 等**一字未动、也不重排** —— 本文件是多车道共用的累积型白名单，每条服务规则是一段
+    // 超长单行正则，往同一条 alternation 里并分支会让多车道同时并入时 git 必然判冲突
+    // （结构性，retry 不会自愈）。
+    //
+    // ---- 插入锚点固定在 `sku-cost-compositions`（5.2.1.1，`prefix: 'catalog/'`）那条**之前** ----
+    //   同批其它车道的插入点分别是「`ad-campaigns` 那条不动」「`location-allocations` 那条之前」
+    //   与「`compliance-precheck` 那条之前」，彼此相距数百行 ⇒ git 能干净求并。
+    //
+    // ---- 首 token「ad-budgets」的零命中核对结论 ----
+    //   本文件既有 100+ 条 services[] 正则里**没有任何一条**含 `ad-budgets` 这个串
+    //   （既有的是 `ad-campaigns` / `ad-keywords` / `ad-rules` / `ad-type-diffs` 一类），
+    //   所以首 token 既是独立字面量，也不会被既有分支的前缀吃掉。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   ad-budgets/capabilities              能力声明（利润维度 available=false + ownerModule + 影响）
+    //   ad-budgets/options                   下拉项 + 护栏上限 + 可用指标日期区间
+    //   ad-budgets/rules                     分配规则集合读（GET，真分页 + 筛选）/ 登记规则（POST）
+    //   ad-budgets/rules/{uuid}              规则详情（GET，含权重位与销售目标）
+    //   ad-budgets/pools                     预算池集合读（GET）/ 登记预算池（POST）
+    //   ad-budgets/pools/{uuid}              预算池详情（GET）
+    //   ad-budgets/plans                     分配方案集合读（GET）/ 计算并落库一份方案（POST）
+    //   ad-budgets/plans/{uuid}              方案详情（GET，含明细 + 未纳入清单 + 再平衡建议）
+    //   ad-budgets/rebalances                再平衡建议集合读（GET，真分页 + 筛选）
+    //   ad-budgets/tasks                     执行任务集合读（GET）/ 生成任务（POST）
+    //   ad-budgets/tasks/{uuid}              任务详情（GET，含逐条结果）
+    //   ad-budgets/tasks/{uuid}/apply        执行任务（POST，逐条落预算 + 逐条留痕）
+    //
+    // 判别顺序：字面量子路径（capabilities / options / rebalances / plans / pools / rules / tasks）
+    // 排在 {uuid} 段之前 —— alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸路径 `ad-budgets` —— 本模块没有裸集合读，一切入口都带子路径
+    //   * `ad-budgets/plans/{uuid}/rebalance` —— 再平衡建议随方案详情一起返回，
+    //     另有集合读 `ad-budgets/rebalances`，没有按方案 id 取再平衡的独立形状
+    //   * `ad-budgets/tasks/{uuid}/cancel` —— 执行任务**不可撤销**（跑了就是跑了，
+    //     要改只能再算一份新方案），放行一个不存在的动作只会让界面以为已交付
+    //   * `ad-budgets/rules/{uuid}/delete` —— 规则是配置事实，撤下走 status=ARCHIVED
+    //   * `ad-budgets/plans/{uuid}/approve` —— 方案状态由执行任务推进，本模块没有审批动作
+    //
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //（不是 `[0-9a-f-]+`：后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行）。
+    // 末尾**刻意不带 `?`**：带了就等于放行裸路径 `ad-budgets`。
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+            /^ad\-budgets(?:\/(?:capabilities|options|rebalances|plans(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|pools(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|rules(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|tasks(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/apply)?)?))$/,
+  },
+  {
     // 5.2.1.1 成本构成：SKU 的单位成本构成（分项 + 合计 + 生效时间）与成本变动历史。
     //
     // 形状逐个列出（**只放行本模块真实实现的路径**）：
@@ -589,6 +791,103 @@ const services: readonly {
     fallback: 'http://127.0.0.1:8083',
     pattern:
       /^ad\-keywords(?:\/(?:capabilities|filter\-options|metrics|search\-terms|negative\-suggestions|negatives|bulk\-actions|report|frequency)|\/negatives\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/result|\/bulk\-actions\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?$/,
+  },
+  {
+    // 14.3.1.1 活动报表（channel 服务）。纯**新增一条独立的 `services[]` 元素**，
+    // 既有的 `ad-campaigns`（14.1.1.1）、`ad-keywords`（14.1.3.1）等**一字未动、也不重排** ——
+    // 本文件是多车道共用的累积型白名单，每条服务规则是一段超长单行正则，往同一条 alternation 里
+    // 并分支会让多车道同时并入时 git 必然判冲突（结构性，retry 不会自愈）。
+    //
+    // ---- 插入锚点固定在 `prefix: 'warehouse/'` 那条**元素之前**（仓库那条的注释块很长，
+    //   它的 `prefix` 在文件 850 行附近，元素本体从 656 行开始）----
+    //   同批其它车道的插入点分别是「`sku-cost-compositions` 那条之前」与「`compliance-precheck`
+    //   那条之前」，与本处相距 150 行以上，git 能干净求并。
+    //
+    // ---- 首 token「ad-reports」的零命中核对结论 ----
+    //   本文件既有 100+ 条 services[] 正则里**没有任何一条**含 `ad-reports` 这个串
+    //   （既有的是 `ad-campaigns` / `ad-keywords` / `ad-rules` / `ad-type-diffs` 一类），
+    //   所以首 token 既是独立字面量，也不会被既有分支的前缀吃掉。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   ad-reports/capabilities          能力声明（TACOS / 跨币种统一显式 available=false）
+    //   ad-reports/options               筛选项下拉 + 三个口径的定义 + 时间跨度上限说明
+    //   ad-reports/rows                  报表表（GET，真分页 + 真筛选 + 真排序 + 汇总 + 口径说明）
+    //   ad-reports/trend                 趋势图（GET，按日/周/月分桶，按币种拆成多条线）
+    //   ad-reports/export                导出 CSV（GET + query；text/csv 由代理原样透传）
+    //   ad-reports/exports               导出留痕历史（GET，真分页）
+    //
+    // ⚠️ **本模块的六个形状都没有 id 段**，所以这里**不写 uuid 段**（写了反而会把
+    //   `capabilities` 这类字面量子路径当成 id 放行）。将来若新增按 id 的形状，
+    //   必须用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //   （不是 `[0-9a-f-]+`），并把字面量子路径排在 `{uuid}` 段**之前** ——
+    //   alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸路径 `ad-reports` —— 本模块没有裸集合读，一切入口都带子路径
+    //   * `ad-reports/rows/{id}` —— 报表是按维度聚合的，没有「单行报表详情」这个形状
+    //   * `ad-reports/tacos` —— TACOS 没有分母（总销售额口径 13.4 未接入），
+    //     放行它会让界面以为「TACOS 这一列有数」
+    //   * `ad-reports/export/{id}` —— 导出是**集合级**（按当前筛选整体导出），没有单条导出
+    //   * `ad-reports/keywords` / `ad-reports/products` —— 关键词级与商品级报表分别归
+    //     14.3.1.2 与 14.3.1.3，放行它们等于让界面以为那两个模块已交付
+    //   * `ad-reports/capabilities/{id}` —— 字面量子路径不接 id 段
+    //   * `ad-reports/rows/not-a-uuid` —— 本模块没有 id 段，任何带尾段的形状都不是真实端点
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    // 末尾**刻意不带 `?`**：带了就等于放行裸路径 `ad-reports`。
+    // `exports` 排在 `export` 之前：alternation 是首个命中即返回，
+    // 虽然带 `$` 时回溯也能匹配，但显式排序免得后人读错。
+    pattern: /^ad\-reports(?:\/(?:capabilities|options|rows|trend|exports|export))$/,
+  },
+  {
+    // 14.3.1.2 广告组与词报表（channel 服务）。纯**新增一条独立的 `services[]` 元素**，
+    // 既有的 `ad-campaigns`（14.1.1.1）、`ad-keywords`（14.1.3.1）、`ad-reports`（14.3.1.1）
+    // 等**一字未动、也不重排** —— 本文件是多车道共用的累积型白名单，每条服务规则是一段超长
+    // 单行正则，往同一条 alternation 里并分支会让多车道同时并入时 git 必然判冲突
+    // （结构性，retry 不会自愈）。
+    //
+    // ---- 插入锚点固定在 `ad-reports` 那条元素的 `pattern:` 行**之后** ----
+    //   锚点行是本文件里唯一的字面量
+    //   `pattern: /^ad\-reports(?:\/(?:capabilities|options|rows|trend|exports|export))$/,`
+    //   同批其它车道（14.1.2.1 广告组管理 / 14.1.1.3 批量操作 / 14.4.1.1 促销列表）
+    //   各自锚在别的行上，git 能干净求并。
+    //
+    // ---- 首 token「ad-group-keyword-reports」的零命中核对结论 ----
+    //   本文件既有 100+ 条 services[] 正则里**没有任何一条**含 `ad-group-keyword-reports`
+    //   这个串（既有的是 `ad-campaigns` / `ad-keywords` / `ad-reports` / `ad-rules` /
+    //   `ad-type-diffs` / `ad-diagnostics` 一类），所以首 token 既是独立字面量，
+    //   也不会被既有分支的前缀吃掉。
+    //   （`ad-group-reports` 与 `ad-keyword-reports` 同样零命中；本车道取最长的那个，
+    //   避免与 14.1.2.1 将来可能用的 `ad-groups` 撞车。）
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   ad-group-keyword-reports/capabilities   能力声明（组级指标显式 available=false）
+    //   ad-group-keyword-reports/options        筛选项下拉 + 口径定义 + 缓存说明
+    //   ad-group-keyword-reports/rows           报表表（GET，真分页 + 真筛选 + 真排序 + 汇总）
+    //   ad-group-keyword-reports/exports        导出留痕（GET 列表 / POST 批量选中导出）
+    //   ad-group-keyword-reports/exports/{uuid} 单条导出留痕详情
+    //   ad-group-keyword-reports/exports/{uuid}/csv  导出 CSV（text/csv 由代理原样透传）
+    //
+    // 判别顺序：`exports` 排在 `{uuid}` 段之前 —— alternation 是首个命中即返回，
+    // 顺序反了会被通配支吃掉半截。`{uuid}` 段用**完整 UUID 形状**
+    // `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`（不是 `[0-9a-f-]+`：
+    // 后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行）。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸路径 `ad-group-keyword-reports` —— 本模块没有裸集合读，一切入口都带子路径
+    //   * `ad-group-keyword-reports/rows/{id}` —— 报表是按维度聚合的，没有「单行报表详情」
+    //   * `ad-group-keyword-reports/export`（单数）—— 导出走 POST /exports + 按 id 下载 CSV
+    //   * `ad-group-keyword-reports/exports/{id}/preview` —— 没有「变更预览」这个形状
+    //   * `ad-group-keyword-reports/exports/{id}/metrics` —— 指标随报表一起返回
+    //   * `ad-group-keyword-reports/capabilities/{id}` —— 字面量子路径不接 id 段
+    //   * `ad-group-keyword-reports/rows/not-a-uuid` —— 任何非 UUID 尾段都不是真实端点
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    // 末尾**刻意不带 `?`**：带了就等于放行裸路径 `ad-group-keyword-reports`。
+    pattern:
+      /^ad\-group\-keyword\-reports\/(?:capabilities|options|rows|exports(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/csv)?)?)$/,
   },
   {
     // 02 渠道与店铺：平台目录、授权连接、店铺与站点。
@@ -1132,6 +1431,65 @@ const services: readonly {
     pattern:
       /^logistics\-channels(?:\/(?:capabilities|overview|eligibility|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}))?$/,
     // 裸路径 logistics-channels **放行**：它就是本模块的集合读 + POST 登记入口。
+  },
+  {
+    // 14.5.2.1 带货归因（channel 服务，卷 14 广告与增长 / L3 14.5.2 达人效果下的第三格）。
+    //
+    // 本条目是**新增一条独立的 `services[]` 元素**，不是往既有 channel 分支的 alternation 里
+    // 并分支 —— 那一支是一段超长单行正则，多车道同时并进去 git 必然判冲突（结构性，
+    // retry 不会自愈）。
+    //
+    // ---- 插入锚点固定在 10.1.1.2 `logistics-channels` 那一条**之后** ----
+    //   与同批其它三条车道各自用过的锚点（`auth/` 前后 / `listing-claims` 之前 /
+    //   `purchase-followups` 之后 / `listing-performance` 之后 / `one-click-publish` 之后 /
+    //   数组开头 / 数组末尾）**全部不重叠**，本车道这一段是**物流区**，离它们都隔着
+    //   上千行 ⇒ git 能干净求并。
+    //
+    // ---- 首 token「attributions」的零命中核对结论 ----
+    //   本文件既有 140+ 条 services[] 正则里，**首 token** 是 `attributions` 的**一条也没有**：
+    //   既有含 `attributions` 这个串的两条是 `product-attribution/attributions`
+    //   与 `aftersales/reasons/attributions` —— 它们的 `attributions` 是**第二段**
+    //   （首 token 分别是 `product-attribution` 与 `aftersales`），且两条都挂在
+    //   `prefix: 'trade/'` 下，**根本不会被 `channel/` 这个前缀取到**。
+    //   本条目的首 token `attributions` 是**独立字面量**，不会被既有分支的前缀吃掉，
+    //   也不会吃掉它们（`^attributions` 与 `^product-attribution` / `^aftersales` 互不为前缀）。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   attributions/capabilities            能力声明（平台带货数据同步 / 佣金进利润表 13.4 /
+    //                                          订单级事实三个维度 available=false + ownerModule）
+    //   attributions/options                 下拉项（归因模型 / 分摊基准 / 退款口径 / 佣金口径 /
+    //                                          计提状态 / 平台 / 店铺 / 币种）
+    //   attributions/sync-status             逐平台的带货数据同步接入情况
+    //   attributions/sync                    触发一次同步（适配器未接入 ⇒ 明确 409，不写数据）
+    //   attributions/rules                   归因规则列表（GET，真分页 + 真筛选）
+    //   attributions/rules/current           当前生效的归因规则（GET）
+    //   attributions/rules                   配置归因规则（POST；保存新规则时旧的自动停用）
+    //   attributions/run                     归因批次（POST；没有生效规则 ⇒ 409）
+    //   attributions/records                 归因记录列表（GET，真分页 + 多维筛选 + 真排序）
+    //   attributions/records/{uuid}          归因详情（GET）
+    //   attributions/records/{uuid}/accrual  佣金计提状态变更（POST）
+    //   attributions/report                  达人效果报表（GET，真分页 + 真筛选）
+    //
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //（不是 `[0-9a-f-]+`：后者会把 `run` 这种非 UUID 形状也当成 id 放行）。
+    // ⚠️ 字面量子路径（capabilities / options / sync-status / sync / rules / rules/current /
+    //    run / report / records）排在 {uuid} 段之前判别 —— alternation 是首个命中即返回，
+    //    顺序反了会被通配支吃掉半截。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸路径 `attributions` —— 后端没有「一条不存在的汇总接口」。
+    //     末尾**刻意不带 `?`**：带了等于放行裸路径。
+    //   * `attributions/export`              —— 本模块不提供导出
+    //   * `attributions/records/{uuid}/delete` —— 归因是事实，不提供删除
+    //   * `attributions/profit`               —— 🔴 13.4 利润（reporting 服务）**未交付**，
+    //     放行它等于让界面以为「佣金成本已经进利润表了」
+    //   * `attributions/{uuid}`               —— 没有「按 id 取单条」这个形状（详情走 records/{uuid}）
+    //   * `attributions/records/not-a-uuid`   —— 非 UUID 段不应被 uuid 分支吃掉
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^attributions(?:\/(?:capabilities|options|sync-status|sync|rules(?:\/current)?|run|report|records(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/accrual)?)?))$/,
   },
   {
     // 10.3.1.1 轨迹查询（**本条目是新增一条 services[] 元素**，不是往既有 channel
@@ -2322,6 +2680,58 @@ const services: readonly {
     pattern: /^listing\-collects(?:\/capabilities|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?$/,
   },
   {
+    // 14.1.3.2 投放定位（channel 服务）。本条目是**新增一条独立的 services[] 元素**，
+    // 既有条目**一字未动、也不重排** —— 本文件是多车道共用的累积型白名单，
+    // 每条服务规则是一段超长单行正则，往同一条 alternation 里并分支会让多车道同时并入时
+    // git 必然判冲突（结构性，retry 不会自愈）。
+    //
+    // 插入锚点固定在 4.4.1.1 `listing-collects` 那条**元素之后**（锚点字面量：
+    // `pattern: /^listing\-collects...$/,`）—— 与本批其它三条车道的插入点互不重叠，
+    // git 能干净求并。
+    //
+    // ---- 首 token「ad-targetings」的零命中核对结论 ----
+    //   本文件既有 100+ 条 services[] 正则里**没有任何一条**含 `ad-targetings` 这个串
+    //   （既有的是 `ad-campaigns` / `ad-campaign-details` / `ad-keywords` / `ad-groups` /
+    //   `ad-reports` / `ad-rules` 一类），所以首 token 既是独立字面量，
+    //   也不会被既有分支的前缀吃掉。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   ad-targetings                    定位设置集合读（GET，真分页 + 真筛选 + 真排序）/ 新建（POST）
+    //   ad-targetings/capabilities       能力声明（未交付段 available=false + ownerModule）
+    //   ad-targetings/options            筛选项下拉 + 建议门槛与系数护栏
+    //   ad-targetings/summary            定位设置汇总（条数；不做跨币种金额相加）
+    //   ad-targetings/effects            🔴 定位效果对比表（GET，真分页 + 真筛选 + 真排序 + 汇总）
+    //   ad-targetings/suggestions        🔴 调整建议（GET，带依据数值与口径）
+    //   ad-targetings/daypart-profile    🔴 时段画像（GET，供下游 14.2.1.2 分时策略复用）
+    //   ad-targetings/interpret          🔴 解读平台原文定位串（POST，预览 / 落库）
+    //   ad-targetings/metrics            🔴 定位维度效果数据同步（POST，真实写入口）
+    //   ad-targetings/{uuid}             定位设置详情（GET）/ 改（PATCH）/ 归档（DELETE）
+    //   ad-targetings/{uuid}/operations  定位操作留痕（GET，真分页）
+    //   ad-targetings/{uuid}/narrow      🔴 收窄投放（POST，带证据门槛）
+    //
+    // ⚠️ 判别顺序：字面量子路径（capabilities / options / summary / effects / suggestions /
+    //   daypart-profile / interpret / metrics）必须排在 uuid 段**之前**判别，
+    //   否则它们会被当成「id=capabilities 的那个 UUID」拼出去（这是本仓反复踩过的坑）。
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //   （**不是** `[0-9a-f-]+` —— 后者会把 `capabilities` 这种非 UUID 形状也当 id 放行）。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `ad-targetings/{uuid}/metrics`      —— 效果数据是**批量**入口，不按设置下钻
+    //   * `ad-targetings/{uuid}/suggestions` —— 建议按维度聚合，不按单条设置出建议
+    //   * `ad-targetings/{uuid}/interpret`    —— 解读是**活动 / 组**级的，不是单条设置
+    //   * `ad-targetings/{uuid}/daypart-profile` —— 时段画像是集合级的
+    //   * `ad-targetings/{uuid}/bid` / `/bid-factor` —— 🔴 改竞价归 14.2.1.1（尚未交付），
+    //     本模块只给**出价系数建议**与**系数记录**，放行它会让界面以为能改价
+    //   * `ad-targetings/export`             —— 本模块没有导出入口
+    //   * `ad-targetings/batch`              —— 本模块没有批量动作入口
+    //   * `ad-targetings/writeback`          —— 🔴 平台回写队列未交付，放行它会让人以为能回写平台
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^ad\-targetings(?:\/(?:capabilities|options|summary|effects|suggestions|daypart\-profile|interpret|metrics)|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:operations|narrow))?)?$/,
+  },
+  {
     // 4.4.1.2 批量/插件采集（channel 服务）。本条目是**新增一条 services[] 元素**，
     // 不是往既有 channel 分支的超长 alternation 里并分支 —— 那一支是单行超长正则，
     // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
@@ -3270,6 +3680,79 @@ const services: readonly {
       /^return-receipts(?:\/(?:capabilities|receivable|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:post|cancel|photos))?))?$/,
   },
   {
+    // 15.1.2.1 邮件收发（crm 服务，卷 15 的 L3 锚点 15.1.2 的买家邮件子域）。
+    //
+    // 蓝图：「管理买家邮件（Amazon Buyer-Seller Messaging、eBay 邮件等）：收发、附件、模板、
+    // 与站内信的双向同步或标记为同源。输入：邮件同步；发送请求。输出：邮件列表与详情 + 发送记录。
+    // 关系：上游 = 2 同步；下游 = 15.1.1.2 发送。
+    // **部分平台要求邮件与站内信在同一会话处理**，分开展示会导致重复回复买家。」
+    //
+    // 本条目是**新增一条独立的 services[] 元素**，不是往既有 crm 分支的 alternation 里并分支 ——
+    // 既有三条 crm 分支分别是 `^knowledge\/...$`（15.4.2.1 客服知识库）、
+    // `^review-requests...$`（15.2.2.1 索评）与 `^review-rules...$`（15.2.2.2 索评规则），
+    // 首 token 都与 `buyer-emails` 不同，三条互不吃掉；同批并行的 15.1.1.1 消息收件箱
+    // 也各自**新增独立元素**（首 token `message-inbox`），本车道不碰它那条。
+    //
+    // ---- 插入锚点选在 **11.2.2.1 `return-receipts` 之后 / 11.2.2.2 `receipt-allocations` 之前** ----
+    //   这一段是 **trade 服务的 11 卷退货收件**区，与本批另外三条车道的落点
+    //   （crm/ 知识库 · 索评 · 索评规则那条带，以及 channel 的广告 / 达人区）**相距 1700 行以上**，
+    //   并入时 git 能干净求并。既有条目一字未动。
+    //
+    // ---- 首 token「buyer-emails」的零命中核对结论 ----
+    //   本文件既有 **143 条** services[] 正则里**没有任何一条**含 `buyer-emails` 这个串
+    //   （全文出现次数 = 0）。带 `buyer` 字样的只有两条，且首 token 与本模块完全不同：
+    //     * `^order-review\/...`（9.2.1.2 trade 订单审核）—— 它内部的 `buyer-profiles` 是子形状；
+    //     * `^purchase-order-approvals(?:\/...|members(?:\/(?:buyers|approvers))`（trade 采购订单审批）
+    //       —— 它的 `buyers` 是 `members` 下的子形状。
+    //   两者都在 `prefix: 'trade/'` 下，首 token 与 `buyer-emails` 不同 ⇒ **互不吃掉**。
+    //   既有正则都是**锚定**的（`^token(...)?$`），而本文件的 `resolve()` 先按
+    //   `path.startsWith(service.prefix)` 收窄服务、再判别正则 ⇒ 只有 prefix='crm/' 的元素
+    //   才有机会吃到 `crm/buyer-emails/...`。
+    //
+    // 形状逐条列出：
+    //   buyer-emails                          邮件集合读（GET，真分页 + 真筛选）/ 新建（POST，登记收到的邮件）
+    //   buyer-emails/capabilities             能力声明（逐维 available + ownerModule + impact）
+    //   buyer-emails/shops                    店铺目录（来自上游 channel 的真实清单 + 每平台接入状态）
+    //   buyer-emails/sync                     平台买家邮件同步（POST）—— 🔴 适配器未接入，端点恒 409
+    //   buyer-emails/templates                邮件模板集合（GET 真分页真筛选 / POST 新建）
+    //   buyer-emails/templates/{uuid}         单条模板（GET 详情 / PUT 更新 / DELETE 删除）
+    //   buyer-emails/{uuid}                   单封邮件详情（GET）
+    //   buyer-emails/{uuid}/conversation      会话视图（GET，同会话的收 + 发两行）
+    //   buyer-emails/{uuid}/attachments       登记附件元数据（POST）
+    //   buyer-emails/{uuid}/send-records      发送记录（GET 列表 / POST 登记）
+    //
+    // 判别顺序：**字面量子路径（capabilities / shops / sync / templates）排在 {uuid} 段之前** ——
+    //   alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    //   `templates` 那一支**自带**可选的 {uuid} 段（`templates/{uuid}` 是真实形状），
+    //   它排在裸 {uuid} 支之前，两支首字符不同（`t` vs 十六进制串），互不吃掉。
+    // id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`（不是
+    // `[0-9a-f-]+`）：后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行。
+    //
+    // ⚠️ **裸路径 `buyer-emails` 是放行的**：本模块的集合读与新建都在裸路径上，
+    //   与同服务的 15.2.2.1 `review-requests` 同一形状。蓝图输出句点名「邮件列表与详情」，
+    //   列表必须有集合路径 —— 把它挡掉只会让页面 404（白名单漏登记的真实后果）。
+    //   与之相对，字面量段（capabilities / shops / sync / templates）**刻意不接** {uuid} 段，
+    //   它们是能力声明、目录、聚合与配置，**不按 id 寻址**。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `buyer-emails/{uuid}/delete` —— 邮件是会话与「有没有重复回复」的凭据，不可删；
+    //   * `buyer-emails/{uuid}/replies` —— 回复是**发送记录**（send-records），不是另一个资源；
+    //   * `buyer-emails/{uuid}/tags` / `/attachments/{uuid}` / `/send-records/{uuid}` ——
+    //     后端没有「按单条附件 / 单条发送记录寻址」的映射；
+    //   * `buyer-emails/{uuid}/inbox` —— 站内信原文属 **15.1.1.1，未交付**，
+    //     放行一个站内信入口等于让界面以为「邮件与站内信已经合并」；
+    //   * `buyer-emails/{uuid}/rules` —— 邮件规则属 **15.2.2.2，未交付**；
+    //   * `buyer-emails/templates/{uuid}/publish` —— 模板没有「发布」这个动作，只有启停；
+    //   * 任何 `capabilities/{uuid}` / `shops/{uuid}` / `sync/{uuid}` —— 字面量段不接 id 段；
+    //   * 非 UUID 段（如 `buyer-emails/not-a-uuid`）必须 404，不能被宽松分支吃掉。
+    //   * PUT / DELETE 之外的第三层子路径 —— 后端只有上面列出的那些。
+    prefix: 'crm/',
+    env: 'CRM_URL',
+    fallback: 'http://127.0.0.1:8086',
+    pattern:
+      /^buyer-emails(?:\/(?:capabilities|shops|sync)|\/templates(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:attachments|conversation|send-records))?)?$/,
+  },
+  {
     // 11.2.2.2 实收分配（trade 服务）。本条目是**新增一条 services[] 元素**，
     // 11.2.3.1 质检与判定（trade 服务）。本条目是**新增一条 services[] 元素**，
     // 不是往既有 trade 分支的超长单行 alternation 里并分支 —— 那一支多车道同时并进去
@@ -3646,6 +4129,49 @@ const services: readonly {
     env: 'TRADE_URL',
     fallback: 'http://127.0.0.1:8085',
     pattern: /^aftersales\/(?:capabilities|filters|cases(?:\/bulk)?)$/,
+  },
+  {
+    // 14.4.2.1 促销效果分析（channel 服务）。本条目是**新增一条独立的 services[] 元素**，
+    // 不是往既有 channel 分支的 alternation 里并分支 —— 那一支是一段超长单行正则，
+    // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在既有 `pattern: /^aftersales\/(?:capabilities|filters|cases(?:\/bulk)?)$/,`
+    // **之后**：与并行车道的插入点被既有条目隔开，git 能干净求并。
+    // resolve() 是「按顺序逐条匹配、首个命中即返回」，同前缀的第二条不会误吃前一条的路径。
+    //
+    // ---- 首 token「ad-promotion-analysis」的零命中核对结论 ----
+    //   本文件既有 100+ 条 services[] 正则里**没有任何一条**含 `ad-promotion-analysis`
+    //   （既有的是 `ad-promotions/` / `ad-budgets/` / `ad-campaigns/`），所以首 token 既是
+    //   独立字面量，也不会被既有分支的前缀吃掉。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   ad-promotion-analysis/capabilities      能力声明（十个维度各自的依据与下游归属）
+    //   ad-promotion-analysis/options           词表（判定 / 维度 / 排序 / 促销 / 平台 / 店铺 / 币种）
+    //   ad-promotion-analysis/report            效果报表（GET，真聚合 + 真分页 + 真筛选 + 真排序）
+    //   ad-promotion-analysis/runs              发起一次分析（POST）+ 运行留痕（GET）
+    //   ad-promotion-analysis/exports           导出留痕登记（POST）+ 留痕列表（GET）
+    //   ad-promotion-analysis/exports/{uuid}/csv  按留痕 id 下载 CSV
+    //   ad-promotion-analysis/cost-snapshots    成本与售价快照（GET 列表 / POST 登记）
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   ad-promotion-analysis                   —— 裸路径：后端没有「一条不存在的汇总接口」，
+    //                                               一切入口都带子路径。
+    //   ad-promotion-analysis/effects           —— 效果数据来自 report 端点的真聚合，
+    //                                               没有独立的「效果表」读取接口。
+    //   ad-promotion-analysis/runs/{uuid}       —— 运行留痕是追加式证据，不提供单条详情。
+    //   ad-promotion-analysis/exports/{uuid}    —— 下载只走 `/{uuid}/csv`；
+    //                                               详情在列表里已经有。
+    //   ad-promotion-analysis/cost-snapshots/{uuid} —— 快照是登记 + 列表，不给单条更新端点。
+    //   ad-promotion-analysis/profit            —— 13.4 利润（reporting 服务）未交付，
+    //                                               本模块自算毛利，**不开第二条映射**。
+    //   ad-promotion-analysis/attribution       —— 平台促销归因接口未交付，
+    //                                               本模块的增量是「活动前 vs 活动期」的对比。
+    //
+    // id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`（不是 `[0-9a-f-]+`）：
+    // 后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行。
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern: /^ad-promotion-analysis\/(?:capabilities|options|report|runs|exports(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/csv)?|cost-snapshots)$/,
   },
   {
     // 11.1.1.3 售后受理（trade 服务）。本条目是**新增一条 services[] 元素**，
@@ -4193,6 +4719,60 @@ const services: readonly {
     env: 'TRADE_URL',
     fallback: 'http://127.0.0.1:8085',
     pattern: /^purchase\-followups(?:\/(?:capabilities|changes|timeline|stats|delivery))?$/,
+  },
+  {
+    // 14.5.1.1 达人库（channel 服务，卷 14 广告与增长 / L3 14.5.1 达人管理下的第一格）。
+    //
+    // 本条目是**新增一条独立的 services[] 元素**，不是往既有 channel 分支的 alternation 里
+    // 并分支 —— 那一支是一段超长单行正则，多车道同时并进去 git 必然判冲突（结构性，
+    // retry 不会自愈）。
+    // 插入锚点固定在既有 `purchase-followups`（6.3.2.1 跟单与交期）那条**之后**：
+    // 同批其它三条车道的插入点各在别的行上，四条插入点被既有条目隔开，git 能干净求并。
+    //
+    // ⚠️ 首 token「influencers」的零命中核对结论：
+    //   本文件既有 100+ 条 services[] 正则里**没有任何一条**含 `influencers` 这个串
+    //   （既有的是 `ad-campaigns` / `ad-keywords` / `ad-reports` / `ad-promotions` /
+    //   `listing-*` / `aftersales` 一类），所以首 token 既是独立字面量，
+    //   也不会被既有分支的前缀吃掉。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   influencers/capabilities                能力声明（未交付段 available=false）
+    //   influencers/options                     下拉项（粉丝层级 / 拉黑原因 / 合作状态 / 平台 / 店铺 / 币种 / 类目）
+    //   influencers/sync-status                 逐平台的达人数据同步接入情况
+    //   influencers/sync                        触发一次同步（适配器未接入 ⇒ 明确 409，不写数据）
+    //   influencers/profiles                    达人库（真分页 + 多维筛选 + 真排序）
+    //   influencers/profiles/{uuid}             达人详情（档案 + 标签 + 合作历史 + 黑名单）
+    //   influencers/profiles/{uuid}/tags        批量打标
+    //   influencers/profiles/{uuid}/tags/{uuid} 移除一个标签
+    //   influencers/profiles/{uuid}/rating      重算评级
+    //   influencers/tag-groups                  标签分组（GET 列表 / POST 新建）
+    //   influencers/tag-groups/{uuid}           标签分组（POST 改 / DELETE 删）
+    //   influencers/tags                        标签（GET 列表 / POST 新建）
+    //   influencers/tags/{uuid}                 标签（POST 改 / DELETE 删）
+    //   influencers/rating-tiers                评级档位（GET 列表 / POST 新建）
+    //   influencers/rating-tiers/{uuid}         评级档位（POST 改 / DELETE 删）
+    //   influencers/rating-rules                评分口径（GET 读 / POST 配）
+    //   influencers/blacklist                   黑名单（GET 列表 / POST 拉黑）
+    //   influencers/blacklist/{uuid}/release    解除黑名单（留痕：时刻 + 理由）
+    //   influencers/cooperations                合作历史（GET 列表 / POST 登记）
+    //   influencers/cooperations/{uuid}         合作记录（POST 改）
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `influencers`                          —— 裸路径：后端没有「一条不存在的汇总接口」。
+    //                                                末尾**刻意不带 `?`**：带了等于放行裸路径。
+    //   * `influencers/profiles/{uuid}/export`   —— 本模块不提供导出。
+    //   * `influencers/attributions`             —— 带货归因（14.5.2.1）**未交付**，
+    //                                                放行它会让界面以为归因口径已经可用。
+    //   * `influencers/outreach`                 —— 建联与样品（14.5.1.2）**未交付**。
+    //   * `influencers/profiles/not-a-uuid`      —— 非 UUID 段不应被 uuid 分支吃掉。
+    //
+    // id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    // （不是 `[0-9a-f-]+`）：后者会把 `tags` 这种非 UUID 形状也当成 id 放行。
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^influencers(?:\/(?:capabilities|options|sync-status|sync|profiles|tags|tag-groups|rating-tiers|rating-rules|blacklist|cooperations)|\/profiles\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/tags(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|\/rating)?|\/tags\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}|\/tag-groups\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}|\/rating-tiers\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}|\/blacklist\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/release|\/cooperations\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})$/,
   },
   {
     // 9.3.1.2 合单（trade 服务）。本条目是**新增一条 services[] 元素**，不是往既有
@@ -4864,6 +5444,49 @@ const services: readonly {
       /^purchase\-requests(?:\/(?:capabilities|options)|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/lines(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/(?:adjust|supplier))?|\/(?:submit|convert)|\/approval\/refresh)?)?$/,
   },
   {
+    // 14.1.1.3 批量操作（channel 服务）。纯**新增一条独立的 `services[]` 元素**，
+    // 既有的 `ad-campaigns`（14.1.1.1）、`ad-campaign-details`（14.1.1.2）、
+    // `ad-rules`（14.2.2.2）等**一字未动、也不重排** —— 本文件是多车道共用的累积型白名单，
+    // 往同一条 alternation 里并分支会让多车道同时并入时 git 必然判冲突（结构性，retry 不会自愈）。
+    //
+    // ---- 插入锚点固定在 `listing-templates`（4.2.2.1 刊登模板）那条**之前** ----
+    //   同批其它车道（14.1.2.1 广告组管理 / 14.3.1.2 广告组与词报表 / 14.4.1.1 促销列表）
+    //   都落在 ad-* 与促销相关的区域，与本处相隔 400 行以上，git 能干净求并。
+    //
+    // ---- 首 token「ad-bulk-operations」的零命中核对结论 ----
+    //   本文件既有 100+ 条 services[] 正则里**没有任何一条**含 `ad-bulk-operations` 这个串
+    //   （既有的 ad-* 首 token 是 ad-campaigns / ad-campaign-details / ad-budgets /
+    //   ad-keywords / ad-reports / ad-rules / ad-type-diffs / ad-diagnostics），
+    //   所以首 token 既是独立字面量，也不会被既有分支的前缀吃掉。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   ad-bulk-operations/capabilities       能力声明（未交付段 available=false + ownerModule + 影响）
+    //   ad-bulk-operations/options            筛选项下拉 + **护栏上限**（「本次最多 N 个」要能显示）
+    //   ad-bulk-operations/selection          🔴 按筛选结果全选（GET，服务端解析出 id 集合 + 游标 + 上限）
+    //   ad-bulk-operations/preview            变更预览（POST，**不落库**的预演 + 护栏裁决）
+    //   ad-bulk-operations/tasks              批量任务集合读（GET）/ 受理批量任务（POST，异步）
+    //   ad-bulk-operations/tasks/{uuid}       单个任务 + **逐条执行结果**（GET）
+    //
+    // 判别顺序：字面量子路径（capabilities / options / selection / preview / tasks）排在
+    // {uuid} 段之前 —— alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    // ⚠️ id 段用**完整 UUID 形状** [0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}
+    //（不是 [0-9a-f-]+：后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行）。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸路径 `ad-bulk-operations` —— 本模块没有裸集合读，一切入口都带子路径
+    //   * `ad-bulk-operations/tasks/{uuid}/run` —— 任务由服务端执行器领取，
+    //     手动「跑一下」的端点不存在；界面轮询任务详情即可
+    //   * `ad-bulk-operations/tasks/{uuid}/cancel` —— 任务没有取消语义（未交付）
+    //   * `ad-bulk-operations/preview/{uuid}` —— 预览是**无状态**的预演，不落库、不留 id
+    //   * `ad-bulk-operations/writeback` —— 平台回写队列未交付（平台适配层）
+    // ⚠️ 末尾**刻意不带 `?`**：带了就等于放行裸路径 `ad-bulk-operations`。
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^ad\-bulk\-operations(?:\/(?:capabilities|options|selection|preview|tasks(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?))$/,
+  },
+  {
     // listing-templates 是 4.2.2.1 刊登模板的**独立前缀**（channel 服务，端口 8083）。
     // 本条目是**新增一条 services[] 元素**，不是往既有 channel 长正则的 alternation 里并 ——
     // 那样本车道与并行车道的插入点会被隔开，git 能干净求并。
@@ -5231,6 +5854,58 @@ const services: readonly {
       /^inventory\/consignment-stock\/(?:capabilities|forecast-preview|shops\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}|orders(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:lines|ship|confirm-receipt|close|cancel|receipts|settlement-receipts|ledger|reconciliation|settlement-basis|audit))?)?)$/,
   },
   {
+    // 14.1.1.2 活动详情（channel 服务）。纯**新增一条独立的 `services[]` 元素**，
+    // 既有的 `ad-campaigns`（14.1.1.1）、`ad-keywords`（14.1.3.1）、`ad-rules`（14.2.2.2）、
+    // `ad-type-diffs`（14.1.2.2）等**一字未动、也不重排** ——
+    // 本文件是多车道共用的累积型白名单，每条服务规则是一段超长单行正则，往同一条 alternation 里
+    // 并分支会让多车道同时并入时 git 必然判冲突（结构性，retry 不会自愈）。
+    //
+    // ---- 插入锚点固定在 `compliance-precheck`（16.2.2.1）那条**之前** ----
+    //   同批其它车道的插入点分别是「`sku-cost-compositions` 那条之前」「`location-allocations` 那条之前」
+    //   与「`ad-campaigns` 那条不动」，彼此相距数百行 ⇒ git 能干净求并。
+    //
+    // ---- 首 token「ad-campaign-details」的零命中核对结论 ----
+    //   本文件既有 100+ 条 services[] 正则里**没有任何一条**含 `ad-campaign-details` 这个串
+    //   （既有的是 `ad-campaigns` / `ad-keywords` / `ad-rules` / `ad-type-diffs` 一类），
+    //   所以首 token 既是独立字面量，也不会被既有分支的前缀吃掉。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   ad-campaign-details/capabilities                   能力声明（未交付段 available=false + ownerModule）
+    //   ad-campaign-details/campaigns/{uuid}               单活动全景（GET：基本设置 + 预算与消耗曲线 + 每日明细 + 结构条数）
+    //   ad-campaign-details/campaigns/{uuid}/groups        广告组列表（GET，真分页 + 真筛选）
+    //   ad-campaign-details/campaigns/{uuid}/products      投放商品列表（GET，真分页 + 真筛选）
+    //   ad-campaign-details/campaigns/{uuid}/creatives     创意列表（GET，真分页 + 按类型筛选）
+    //   ad-campaign-details/campaigns/{uuid}/keywords      关键词列表（GET，读上游 14.1.3.1）
+    //   ad-campaign-details/campaigns/{uuid}/change-history 平台侧修改历史（GET，**恒为 available=false** + 本地操作审计）
+    //   ad-campaign-details/campaigns/{uuid}/structure      登记结构（POST，结构数据的真实写入口）
+    //   ad-campaign-details/campaigns/{uuid}/bids          改竞价（POST，逐条结果 + 护栏 + 审计）
+    //   ad-campaign-details/campaigns/{uuid}/copy          复制结构（POST，结构副本真落库 + 平台侧待回写）
+    //
+    // 判别顺序：字面量子路径（capabilities）排在 {uuid} 段之前 —— alternation 是首个命中即返回，
+    // 顺序反了会被通配支吃掉半截。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸路径 `ad-campaign-details` —— 本模块没有裸路径资源。
+    //   * `ad-campaign-details/campaigns` —— 活动列表归 14.1.1.1 的 `ad-campaigns` 元素，本模块不重开一条。
+    //   * `ad-campaign-details/campaigns/{uuid}/budget` —— 预算曲线随全景一起返回，不单独开一条。
+    //   * `ad-campaign-details/campaigns/{uuid}/platform-history` —— 平台侧改历史**没有同步源**，
+    //     放行它会让界面以为「平台侧改历史」已交付。
+    //   * `ad-campaign-details/campaigns/{uuid}/writeback` —— 平台回写队列未交付（平台适配层）。
+    //   * `ad-campaign-details/campaigns/{uuid}/groups/{uuid}` —— 广告组的单条详情与增删改归 14.1.2.1（未交付）。
+    //   * `ad-campaign-details/campaigns/{uuid}/copy/preview` —— 变更预览属 14.1.1.3（未交付）。
+    //
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //（不是 `[0-9a-f-]+`：后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行）。
+    // ⚠️ `campaigns` 后面**必须**跟 id 段（uuid 段不可省）：本模块没有「活动列表」这个资源，
+    //    那是 14.1.1.1 的 `ad-campaigns` 元素的活。
+    // 末尾**刻意不带 `?`**：带了就等于放行裸路径 `ad-campaign-details`。
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^ad\-campaign\-details(?:\/capabilities|\/campaigns\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:groups|products|creatives|keywords|change-history|structure|bids|copy))?)$/,
+  },
+  {
     // 16.2.2.1 合规预检（channel 服务，卷 16「合规与风控」的 L3 锚点 16.2.2）。
     //
     // 蓝图：「发布前的合规体检：内容违规、认证缺失、尺寸规格不符、材质与描述不符、危险品与运输限制、
@@ -5282,6 +5957,63 @@ const services: readonly {
     fallback: 'http://127.0.0.1:8083',
     pattern:
       /^compliance-precheck(?:\/capabilities|\/drafts(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/(?:check|precheck))?|\/reports(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?)$/,
+  },
+  {
+    // 14.3.2.2 效率诊断（channel 服务，卷 14「广告与增长」的 L3 锚点 14.3.2）。
+    //
+    // 蓝图：「诊断投放效率问题：高花费零转化、ACOS 长期超标、预算受限、竞价过低曝光不足、创意衰退，
+    // 给出可执行建议与一键调整。输入：14.3 报表指标；诊断规则。输出：诊断清单 + 建议动作。
+    // 关系：上游 = 14.3.1；下游 = 14.2.1.1、14.1.3.1。**诊断要给动作而不是只报警**，
+    // 否则用户看完还是要自己想怎么办。」
+    //
+    // 本条目是**新增一条 services[] 元素**，不是往既有 channel 分支的超长 alternation 里并 ——
+    // 那一支是单行超长正则，多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在 10.4.2.2 的 `stock-forecasts` 元素**之前**（`prefix: 'channel/'`，
+    // pattern 首 token 为 `^stock-forecasts`，全文件唯一）——
+    // 与同批 14.1.1.2 活动详情（`ad-campaign-details`，落在 `compliance-precheck` 之前）相隔 60+ 行，
+    // 与另外三条车道（catalog 调价单 / catalog 价格历史 / trade 采购计划）也互不重叠，git 能干净求并。
+    //
+    // ---- 首 token「ad-diagnostics」的零命中核对结论 ----
+    //   本文件既有 100+ 条 services[] 正则里**没有任何一条**含 `ad-diagnostics` 这个串
+    //   （既有的是 `ad-campaigns` / `ad-keywords` / `ad-rules` / `ad-type-diffs` / `ad-campaign-details`
+    //   一类的其它命名），所以首 token 既是独立字面量，也不会被既有分支的前缀吃掉。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   ad-diagnostics/capabilities                能力声明（未交付段 available=false + ownerModule + impact）
+    //   ad-diagnostics/rules                       规则集合读（GET）/ 登记规则（POST）
+    //   ad-diagnostics/rules/defaults              初始化默认诊断规则（POST，幂等：已存在的不覆盖）
+    //   ad-diagnostics/rules/{uuid}                规则详情（GET）
+    //   ad-diagnostics/rules/{uuid}/status         启用 / 停用一条规则（POST）
+    //   ad-diagnostics/runs                        运行历史（GET）/ 跑一次诊断（POST）
+    //   ad-diagnostics/runs/{uuid}                 运行详情（GET：逐条规则的评估结论 + 结论 + 建议动作）
+    //   ad-diagnostics/diagnoses                   诊断清单（GET，真分页 + 真筛选）
+    //   ad-diagnostics/diagnoses/{uuid}            诊断详情（GET：结论 + 观察量快照 + 建议动作）
+    //   ad-diagnostics/actions                     建议动作集合读（GET，真分页 + 真筛选）
+    //   ad-diagnostics/actions/{uuid}              建议动作详情（GET）
+    //   ad-diagnostics/actions/{uuid}/apply        🔴 一键调整（POST，走 14.1.1.1 已交付的写路径与护栏）
+    //
+    // ⚠️ 判别顺序：**字面量子路径（capabilities / rules / rules/defaults / runs / diagnoses / actions）
+    //    排在 {uuid} 段之前** —— alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //（不是 `[0-9a-f-]+`：后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行）。
+    // 末尾**刻意不带 `?`**：带了就等于放行裸路径 `ad-diagnostics`。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸路径 `ad-diagnostics` —— 本模块没有裸集合读，一切入口都带子路径。
+    //   * `ad-diagnostics/rules/{uuid}/delete` —— 规则是配置事实，撤下走 status=DISABLED，不物理删除。
+    //   * `ad-diagnostics/diagnoses/{uuid}/delete` —— 诊断结论是那一次判定的凭据，不可删。
+    //   * `ad-diagnostics/diagnoses/{uuid}/apply` —— 调整挂在**建议动作**上，不挂在结论上。
+    //   * `ad-diagnostics/actions/{uuid}/dispatch` / `/sync` —— 平台侧真实下发**未交付**
+    //     （平台回写队列未接通），放行它只会让界面以为「已回写平台」。
+    //   * `ad-diagnostics/actions/{uuid}/bid` —— 竞价调整归 14.2.1.1 竞价管理（**未交付**），
+    //     本模块**不跳过它直接写平台**。
+    //   * `ad-diagnostics/creative-decay` —— 创意衰退的数据源未就绪（14.1.1.2 未交付），
+    //     没有这个资源；它只是诊断清单里一条被显式标为「数据源未就绪」的规则。
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^ad\-diagnostics(?:\/(?:capabilities|rules(?:\/defaults|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/status)?)?|runs(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|diagnoses(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|actions(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/apply)?)?))$/,
   },
   {
     // 10.4.2.2 备货预报（channel 服务，卷 10「物流与货运」的 L3 锚点 10.4.2）。
@@ -5515,6 +6247,57 @@ const services: readonly {
     fallback: 'http://127.0.0.1:8083',
     pattern:
       /^brand-credentials\/(?:capabilities|overview|verifications|authorizations|credentials(?:\/verify-batch|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:revoke|verify|signatories(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|documents))?)?|documents\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/file)?)$/,
+  },
+  {
+    // 14.4.1.1 促销列表（channel 服务）。纯**增量**追加一条独立的 `channel/` 元素：
+    // 既有分支（`ad-budgets` / `ad-campaigns` / `ad-keywords` / `ad-rules` / `ad-reports` …）
+    // **一字未动、也不重排** —— 同批多车道共享这一个文件，每条服务规则是一段超长单行正则，
+    // 往同一条 alternation 里并分支会让 git 必然判冲突且 retry 永远不会自愈。
+    //
+    // ---- 插入锚点选在 **5.2.2.1 汇率查询**（`prefix: 'catalog/'`）那条**之前** ----
+    //   本批其它三条车道（14.1.2.1 广告组管理 / 14.1.1.3 批量操作 / 14.3.1.2 广告组与词报表）
+    //   都是 **ads 域**的 `channel/` 元素，插入点会落在广告簇附近（`ad-budgets` 那条在第 544 行、
+    //   `ad-keywords` 那条在第 638 行附近）；本条落在 **5200 行开外的 catalog 区**，
+    //   彼此相距数千行 ⇒ git 能干净求并。
+    //
+    // ---- 首 token「ad-promotions」的零命中核对结论 ----
+    //   本文件既有 129 条 services[] 正则里**没有任何一条**含 `ad-promotions` 这个串
+    //   （既有的是 `ad-campaigns` / `ad-budgets` / `ad-keywords` / `ad-rules` / `ad-reports` /
+    //   `ad-type-diffs` / `ad-campaign-details` / `ad-diagnostics` 一类），
+    //   且逐条用 `new RegExp(pat).test('ad-promotions…')` 实测过：既有 129 条对
+    //   `ad-promotions`、`ad-promotions/capabilities`、`ad-promotions/promotions`、
+    //   `ad-promotions/promotions/{uuid}`、`ad-promotions/promotions/{uuid}/status`、
+    //   `ad-promotions/guardrails` **全部零命中** ⇒ 首 token 既是独立字面量，
+    //   也不会被既有分支的前缀吃掉。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   ad-promotions/capabilities              能力声明（毛利 / 平台效果 / 平台回写 / 促销费用
+    //                                            四个维度 available=false + ownerModule + 影响）
+    //   ad-promotions/options                   下拉项（促销类型 / 状态 / 同步状态 / 规则 / 严重级别）
+    //   ad-promotions/promotions                促销列表（GET，真分页 + 真筛选）/ 登记促销（POST）
+    //   ad-promotions/promotions/{uuid}         促销详情（GET）/ 改促销定义（POST，替换语义）
+    //   ad-promotions/promotions/{uuid}/status  改本地状态（POST；排期 / 上线被拦截时 409）
+    //   ad-promotions/promotions/{uuid}/check   重跑拦截 / 预警检查（POST）
+    //   ad-promotions/guardrails                护栏规则（GET 读 / POST 登记或修改）
+    //
+    // 判别顺序：字面量子路径（capabilities / options / guardrails / promotions）排在 {uuid} 段之前
+    // —— alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸路径 `ad-promotions` —— 本模块没有裸集合读，一切入口都带子路径
+    //   * `ad-promotions/effects` —— **平台效果维度未交付**（没有平台促销同步源 ⇒ 不建空的效果表）
+    //   * `ad-promotions/promotions/{uuid}/delete` —— 促销是事实，撤下走 status=CANCELLED
+    //   * `ad-promotions/promotions/{uuid}/expenses` —— **促销费用维度未交付**（12 财务不在本仓）
+    //   * 非 UUID 段 —— `ad-promotions/promotions/not-a-uuid` 必须 404
+    //
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //（不是 `[0-9a-f-]+`：后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行）。
+    // 末尾**刻意不带 `?`**：带了就等于放行裸路径 `ad-promotions`。
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^ad\-promotions(?:\/(?:capabilities|options|guardrails|promotions(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:status|check))?)?))$/,
   },
   {
     // 5.2.2.1 汇率查询：各币种对各本位币的汇率（方向 + 汇率 + 生效日 + 来源）、来源配置与外部拉取。
@@ -6359,6 +7142,59 @@ const services: readonly {
     fallback: 'http://127.0.0.1:8085',
     pattern:
       /^platform-dispute-appeals(?:\/(?:capabilities|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:text|materials(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|submit|retry-submission|submission-attempts|platform-reply|withdraw))?))?$/,
+  },
+  {
+    // 14.1.2.1 广告组管理（channel 服务）。纯**新增一条独立的 `channel/` 元素**，
+    // 既有的 `ad-campaigns`（14.1.1.1）、`ad-campaign-details`（14.1.1.2）、
+    // `ad-type-diffs`（14.1.2.2）、`ad-reports`（14.3.1.1）等**一字未动、也不重排** ——
+    // 本文件是多车道共用的累积型白名单，每条服务规则是一段超长单行正则，
+    // 往既有那条 alternation 里并分支会让多车道同时并入时 git 必然判冲突。
+    //
+    // ---- 插入锚点固定在 `platform-disputes`（11.4.1.1）那条**之后**、`platform-disputes`
+    //      之后的第一条 trade 元素**之前**（即 `11.4.1.1 平台纠纷列表` 那条**之前**）----
+    //   同批其它车道（14.1.1.3 / 14.3.1.2 / 14.4.1.1）的插入点都在卷 14 的相邻元素附近
+    //   （`ad-campaigns` 之前 / `ad-reports` 附近 / 促销那一族），
+    //   与本锚点相距 600 行以上 ⇒ git 能干净求并。
+    //
+    // ---- 首 token「ad-groups」的零命中核对结论 ----
+    //   本文件既有 100+ 条 services[] 正则里**没有任何一条**含 `ad-groups` 这个串
+    //   （既有的是 `ad-campaigns` / `ad-campaign-details` / `ad-keywords` / `ad-rules` /
+    //   `ad-type-diffs` / `ad-reports` 一类），所以首 token 既是独立字面量，
+    //   也不会被既有分支的前缀吃掉。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   ad-groups                              广告组列表（GET，真分页 + 真筛选 + 真排序）
+    //   ad-groups/capabilities                 能力声明（未交付段 available=false + ownerModule）
+    //   ad-groups/options                      下拉项 + 护栏上限 + 组级报表路由标识
+    //   ad-groups/summary                      组级汇总（GET，只给条数，不做跨币种金额相加）
+    //   ad-groups/product-candidates           可选投放商品候选（GET，该活动所在店铺的 listing）
+    //   ad-groups/{uuid}                       广告组详情（GET，含投放商品 / SKU 映射现状 / 审计）
+    //   ad-groups/{uuid}/operations            组级操作审计（GET，真分页）
+    //   ad-groups/{uuid}/products              设投放商品（PUT，**替换**语义）
+    //
+    // 判别顺序：字面量子路径（capabilities / options / summary / product-candidates）排在
+    // {uuid} 段之前 —— alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `ad-groups/{uuid}/bids` —— 改竞价**复用**上游 14.1.1.2 的
+    //     `ad-campaign-details/campaigns/{uuid}/bids`（带单次上限与绝对上限、逐条留审计）。
+    //     本模块**不另起同义端点**：两个端点改同一笔钱，审计就会分叉。
+    //   * `ad-groups/{uuid}/metrics` —— 组级指标**没有事实来源**（没有组级指标表，
+    //     ad_campaign_daily_metric 是 campaign 维度），capabilities 里 available=false。
+    //   * `ad-groups/{uuid}/report` —— 组级报表归 14.3.1.2（同批并行开发）。
+    //   * `ad-groups/{uuid}/keywords` —— 关键词归 14.1.3.1（且只有活动维度）。
+    //   * `ad-groups/{uuid}/delete` —— 广告组是事实，不提供删除。
+    //   * `ad-groups/{uuid}/writeback` —— 平台回写队列未交付（平台适配层）。
+    //   * `ad-groups/groups` —— 不重开一条集合读。
+    //
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //（不是 `[0-9a-f-]+`：后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行）。
+    // 裸路径 `ad-groups` **刻意放行**：本模块真的有「广告组列表」这个集合读。
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^ad\-groups(?:\/(?:capabilities|options|summary|product\-candidates|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:operations|products))?))?$/,
   },
   {
     // 11.4.1.1 平台纠纷列表（trade 服务，卷 11「售后与退货」L3 11.4「平台纠纷与客诉」的第一格）。

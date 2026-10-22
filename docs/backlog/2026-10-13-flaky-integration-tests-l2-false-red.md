@@ -391,3 +391,68 @@ to be after or equal to:
 
 > 批次 36 的 push 建立在这个 flake 的**干净窗口补跑全绿**之上，不是首次全量绿。
 > 已在 `docs/sessions/2026-10/2026-10-20-batch-36-merge-4-lanes-and-l2.md` 如实记录。
+
+---
+
+## 八、批次 60：**并发车道手动删容器**导致 L2 假红（2026-10-22）—— **新根因类**
+
+**现象**：L2 第一轮后端红，`trade` 模块 FAILURE（identity / catalog / channel / warehouse 全 SUCCESS，
+**crm 被 SKIPPED**）。失败的不是断言，是**连接**：
+
+```
+[ERROR] AftersalesCaseDetailTenancyIntegrationTest.clean:124 » PSQL 尝试连线已失败。
+[ERROR] AftersalesCaseDetailTenancyIntegrationTest.断言3_连接池归还后不串租户:333->asB:138
+        » TransactionSystem JDBC rollback failed
+[ERROR] RefundStatusIntegrationTest.clean:129 » PSQL Connection to localhost:58039 refused.
+        Check that the hostname and port are correct and that the postmaster is accepting TCP/IP connections.
+```
+
+`clean()` 是 `@BeforeEach` 的清库动作，**报的是连不上，不是数据不对** ⇒ 容器在测试中途**消失了**。
+
+**取证（按 §「判据」三步走，结论：与本批代码无关）**：
+
+| 步骤 | 结果 |
+| --- | --- |
+| 判据① `git diff --name-only 7c38f7d2..7c1e688f \| grep -i trade` | **空** —— 本批 4 个改动面是 `backend/services/channel` / `apps/web/src` / `packages/api-contracts` / docs，**零 trade 文件** |
+| 判据② 隔离复跑失败的两个类 | **连跑 3 轮，每轮 46/46 全绿、BUILD SUCCESS ×3**（`RefundStatusIntegrationTest` 42 + `AftersalesCaseDetailTenancyIntegrationTest` 4） |
+| 判据③ `.dumpstream` | `2026-10-22T05-10-57_834-jvmRun1.dumpstream`（trade，创建于 05:55:39）：`Surefire is going to kill self fork JVM. The exit has elapsed 30 seconds after System.exit(0).` —— 但 **catalog / warehouse 的 dumpstream 有同样一行而它们 SUCCESS** ⇒ 这是**次生症状**（容器被提前删 ⇒ fork JVM 退不出），不是根因 |
+
+**根因（钉死）**：另一条车道 **14.5.2.1** 的 worker 在**收尾时手动删掉了自己的 12 个 PG 容器**
+（其交付报告原文：「All 12 PG containers are from my own test runs (created 05:40–05:52).
+Cleaning up my stale ones before landing.」），而**那一刻 L2 正在跑 trade 的集成测试**。
+
+时间轴逐秒重合：
+
+| 时刻 | 事件 |
+| --- | --- |
+| 05:52:46 | `RefundStatusIntegrationTest` 的 surefire 报告写出（**报错**：连不上 58039 端口） |
+| 05:53:03 | `AftersalesCaseDetailTenancyIntegrationTest` 的 surefire 报告写出（**报错**） |
+| 05:53:18 | 14.5.2.1 worker 结束（= 它清理容器 + `land` 的时刻） |
+| 05:55:39 | surefire 判定 fork JVM 退出超时并强杀 ⇒ reactor 报 trade FAILURE |
+
+⇒ **L2 的 trade 容器被 14.5.2.1 的清理连带删掉**。Ryuk 只会回收**自己那条 session**，
+worker 手写的 `docker rm` 若不带精确的 session 过滤，就会误伤**正在跑的其它 session**。
+
+### 这条与前七条的根本区别
+
+§一–§七全是**同一份代码在环境里不稳定**（时钟域、临时端口、固件隔离）。
+**§八是新的一类：L2 被人为破坏**。⇒ 判据①②③ 全部成立（"不是本批的锅"），
+但**根因不在被测代码里，而在流水线自身的并发行为里**。
+
+### 处置与纪律（已在本轮生效）
+
+1. **不二分**：非确定性失败二分无意义（与批次 32/33 同一处置）。
+2. **L2 不绿不 push** ⇒ 干净窗口重跑**整批** L2，绿了才 push。
+3. **纪律（写进车道任务书与本条 backlog）**：
+   - worker **不得手动 `docker rm` / `docker stop` 任何 Testcontainers 容器** ——
+     **Ryuk 会在自己的 JVM 退出时自动回收自己那条 session 的容器，worker 什么都不用做**。
+   - 看到「自己的容器还活着」是**正常的**：同批其它车道也在跑 Testcontainers，
+     Ryuk 按 session 标签回收，**别的 session 的容器不该由你来清**。
+4. **与 §「容器泄漏」那条的关系**：
+   `docs/backlog/2026-10-22-testcontainers-pg-container-leak.md` 记的是**不删 ⇒ 单次 session 内累积 62+ 个**；
+   本条记的是**手动删 ⇒ 误伤别人的 session**。
+   ⇒ 两条合起来说明：**正确做法是「既不手动删，也不手动清」**，交给 Ryuk 按 session 回收。
+   真正的根治是让 97 个未 `.stop()` 的集成测试类自己把容器收干净（见那条的方案 A），
+   根治之后既不需要手动删，也不会累积。
+
+> 批次 60 的 push 建立在这个 flake 的**干净窗口补跑全绿**之上，不是首次全量绿。
