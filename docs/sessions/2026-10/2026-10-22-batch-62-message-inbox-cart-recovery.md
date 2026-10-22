@@ -7,8 +7,9 @@
 > 说明先写、commit 先做（协议要求），**push 等 L2 转绿了再一起推**。
 >
 > 🔴 **本轮（10:20–11:04）L2 重跑后状态**：warehouse 的墙钟缺陷**已修复并通过**，
-> L2 第一次**跑过了 warehouse**（trade 段红 ⇒ **crm 段第一次真的跑到了**），
-> 但**又红在 trade 的既有缺陷**上 ⇒ **仍未绿，仍不 push**。
+> L2 第一次**跑过了 warehouse**，但**又红在 trade 的既有缺陷**上
+> ⇒ **crm 段仍被 Maven fail-fast 跳过（这已是第三轮没跑到 crm 的后端测试）**，
+> 前端四段（typecheck / lint / vitest / Next build）**依然一次都没执行过**。
 > 详见文末「本批的 L2 重跑（2026-10-22 10:20 起）」与
 > [`docs/backlog/2026-10-22-trade-replenishment-upstream-404-flake.md`](../../backlog/2026-10-22-trade-replenishment-upstream-404-flake.md)。
 
@@ -323,11 +324,11 @@
 | 后端 `mvnw verify` | 🔴 `MVN_EXIT=1`，**红在 trade**（`Tests run: 2380, Failures: 3`） |
 | warehouse 段 | ✅ **过**（墙钟缺陷已修；上一轮就是死在这一段） |
 | trade 段 | 🔴 3 例失败，全在 `ReplenishmentSuggestionTenancyIntegrationTest`（6.2.1.2 补货建议） |
-| crm 段 | ✅ **第一次真的跑到了**（reactor 顺序 `… → warehouse(✅) → trade(🔴) → crm(✅)`） |
+| crm 段 | ⏸ **SKIPPED**（Maven fail-fast：trade 失败 ⇒ 下游不跑。reactor 摘要原文 `crm … SKIPPED`）⇒ **本批 4 条 crm 模块的后端测试至今仍未在任何一次批次 L2 里跑过** |
 | typecheck / lint / 前端全量 / Next build / sync --check | ⏸ **未执行**（后端段失败即中止） |
 
-⇒ **本批 4 条 crm 模块的后端测试这一轮真的跑了**（上一轮被 SKIPPED），
-且 **warehouse 的墙钟缺陷确认已修复**（同一段本轮全绿）。
+⇒ **本批 4 条 crm 模块的后端测试这一轮仍然没跑到**（连续第三轮被跳过），
+**warehouse 的墙钟缺陷确认已修复**（同一段本轮全绿）。
 但**全量仍未走完**，L2 依旧红 ⇒ **协议硬规则：不 push**。
 
 ### 新的红点：trade 的既有缺陷（与本批无关）

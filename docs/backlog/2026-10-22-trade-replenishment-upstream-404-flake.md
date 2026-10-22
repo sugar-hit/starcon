@@ -36,11 +36,12 @@ trade 至今**没在批次 L2 里跑过一次**；这一轮第一次跑到，就
 
 ```
 backend ✅ → tenancy ✅ → identity ✅ → catalog ✅ → channel ✅
-→ warehouse ✅（本轮新绿：10.4.1.2 的墙钟缺陷已修）→ trade 🔴 → crm ✅（本轮第一次真跑到）
+→ warehouse ✅（本轮新绿：10.4.1.2 的墙钟缺陷已修）→ trade 🔴 → crm ⏸ SKIPPED（Maven fail-fast）
 ```
 
-⇒ **warehouse 的墙钟缺陷已确认修好**（同一段本轮全绿），
-**crm 段本轮第一次真的执行了**；但全量仍未走完 ⇒ **协议硬规则：不 push**。
+⇒ **warehouse 的墙钟缺陷已确认修好**（同一段本轮全绿）；
+⇒ 但 **crm 段连续第三轮被 fail-fast 跳过** ⇒ **本批 4 条 crm 模块的后端测试至今没在任何一次批次 L2 里跑过**，
+前端四段也一次都没执行过 ⇒ **全量仍未走完 ⇒ 不 push**。
 
 ## 已实测的事实（可直接采信）
 
