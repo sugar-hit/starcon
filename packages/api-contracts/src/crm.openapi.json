@@ -1,6 +1,133 @@
 {
   "components": {
     "schemas": {
+      "CrmBusinessHoliday": {
+        "properties": {
+          "closed": {
+            "type": "boolean"
+          },
+          "date": {
+            "format": "date",
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmBusinessHolidayInput": {
+        "properties": {
+          "holidays": {
+            "items": {
+              "$ref": "#/components/schemas/CrmBusinessHoliday"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "shopId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmBusinessHourWindow": {
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "endTime": {
+            "type": "string"
+          },
+          "startTime": {
+            "type": "string"
+          },
+          "weekday": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CrmBusinessHoursConfig": {
+        "properties": {
+          "auditId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "configured": {
+            "type": "boolean"
+          },
+          "holidays": {
+            "items": {
+              "$ref": "#/components/schemas/CrmBusinessHoliday"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "scopeKey": {
+            "type": "string"
+          },
+          "scopeType": {
+            "type": "string"
+          },
+          "shopId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "timezone": {
+            "nullable": true,
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "updatedBy": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "windows": {
+            "items": {
+              "$ref": "#/components/schemas/CrmBusinessHourWindow"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "CrmBusinessHoursInput": {
+        "properties": {
+          "note": {
+            "type": "string"
+          },
+          "shopId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "timezone": {
+            "type": "string"
+          },
+          "windows": {
+            "items": {
+              "$ref": "#/components/schemas/CrmBusinessHourWindow"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
       "CrmBuyerEmailAttachment": {
         "properties": {
           "checksumSha256": {
@@ -11695,6 +11822,612 @@
         },
         "type": "object"
       },
+      "CrmServiceTicketBoundary": {
+        "properties": {
+          "boundary": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "nullable": true,
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmServiceTicketBuyer": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "buyerName": {
+            "nullable": true,
+            "type": "string"
+          },
+          "buyerReference": {
+            "nullable": true,
+            "type": "string"
+          },
+          "contactName": {
+            "nullable": true,
+            "type": "string"
+          },
+          "contactRef": {
+            "nullable": true,
+            "type": "string"
+          },
+          "customerPartyId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "platformCode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "shopId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "shopName": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmServiceTicketCapabilities": {
+        "properties": {
+          "boundaries": {
+            "items": {
+              "$ref": "#/components/schemas/CrmServiceTicketBoundary"
+            },
+            "type": "array"
+          },
+          "dimensions": {
+            "items": {
+              "$ref": "#/components/schemas/CrmServiceTicketCapabilityDimension"
+            },
+            "type": "array"
+          },
+          "downstreamNote": {
+            "type": "string"
+          },
+          "priorities": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "related": {
+            "items": {
+              "$ref": "#/components/schemas/CrmServiceTicketRelatedModule"
+            },
+            "type": "array"
+          },
+          "slaBasisNote": {
+            "type": "string"
+          },
+          "slaStates": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "sorts": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "sourceChannels": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "ticketStatuses": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "ticketTypes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "upstreamNote": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmServiceTicketCapabilityDimension": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "description": {
+            "type": "string"
+          },
+          "dimension": {
+            "type": "string"
+          },
+          "impact": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "nullable": true,
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmServiceTicketOrder": {
+        "properties": {
+          "aftersalesStatus": {
+            "nullable": true,
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "caseNo": {
+            "nullable": true,
+            "type": "string"
+          },
+          "currency": {
+            "nullable": true,
+            "type": "string"
+          },
+          "documentStatus": {
+            "nullable": true,
+            "type": "string"
+          },
+          "externalOrderNo": {
+            "nullable": true,
+            "type": "string"
+          },
+          "fulfillmentStatus": {
+            "nullable": true,
+            "type": "string"
+          },
+          "grandTotalAmount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "note": {
+            "type": "string"
+          },
+          "orderNo": {
+            "nullable": true,
+            "type": "string"
+          },
+          "orderSource": {
+            "nullable": true,
+            "type": "string"
+          },
+          "paymentStatus": {
+            "nullable": true,
+            "type": "string"
+          },
+          "platformStatus": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmServiceTicketPage": {
+        "properties": {
+          "enrichmentNote": {
+            "type": "string"
+          },
+          "evaluatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "paginationNote": {
+            "type": "string"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/CrmServiceTicketRow"
+            },
+            "type": "array"
+          },
+          "scanTruncated": {
+            "type": "boolean"
+          },
+          "scannedRows": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "slaNote": {
+            "type": "string"
+          },
+          "sourceNote": {
+            "type": "string"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/CrmServiceTicketSummary"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalExact": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "CrmServiceTicketRelatedModule": {
+        "properties": {
+          "delivered": {
+            "type": "boolean"
+          },
+          "href": {
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "nullable": true,
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmServiceTicketRow": {
+        "properties": {
+          "assignedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "assignedToRef": {
+            "type": "string"
+          },
+          "assignedToUserId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "buyer": {
+            "$ref": "#/components/schemas/CrmServiceTicketBuyer"
+          },
+          "caseId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "caseNo": {
+            "nullable": true,
+            "type": "string"
+          },
+          "caseStatus": {
+            "nullable": true,
+            "type": "string"
+          },
+          "caseType": {
+            "nullable": true,
+            "type": "string"
+          },
+          "closeNote": {
+            "nullable": true,
+            "type": "string"
+          },
+          "closeReason": {
+            "nullable": true,
+            "type": "string"
+          },
+          "closedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "firstReplyAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "order": {
+            "$ref": "#/components/schemas/CrmServiceTicketOrder"
+          },
+          "platformScope": {
+            "nullable": true,
+            "type": "string"
+          },
+          "priority": {
+            "type": "string"
+          },
+          "priorityLabel": {
+            "type": "string"
+          },
+          "reasonNote": {
+            "type": "string"
+          },
+          "satisfactionRating": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "sla": {
+            "$ref": "#/components/schemas/CrmServiceTicketSla"
+          },
+          "sourceChannel": {
+            "type": "string"
+          },
+          "sourceChannelLabel": {
+            "type": "string"
+          },
+          "sourceRef": {
+            "type": "string"
+          },
+          "subject": {
+            "type": "string"
+          },
+          "ticketNo": {
+            "type": "string"
+          },
+          "ticketStatus": {
+            "type": "string"
+          },
+          "ticketStatusLabel": {
+            "type": "string"
+          },
+          "ticketType": {
+            "type": "string"
+          },
+          "ticketTypeLabel": {
+            "type": "string"
+          },
+          "transfer": {
+            "$ref": "#/components/schemas/CrmServiceTicketTransfer"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "version": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "waitingBuyerAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmServiceTicketSla": {
+        "properties": {
+          "basis": {
+            "type": "string"
+          },
+          "basisLabel": {
+            "type": "string"
+          },
+          "calendarConfigured": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          },
+          "replyBusinessSecondsRemaining": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "replyDueAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "replyHours": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "replyState": {
+            "type": "string"
+          },
+          "replyStateLabel": {
+            "type": "string"
+          },
+          "replyWallClockSecondsRemaining": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "resolveBusinessSecondsRemaining": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "resolveDueAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "resolveHours": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "resolveState": {
+            "type": "string"
+          },
+          "resolveStateLabel": {
+            "type": "string"
+          },
+          "resolveWallClockSecondsRemaining": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "scopeKey": {
+            "type": "string"
+          },
+          "timezone": {
+            "nullable": true,
+            "type": "string"
+          },
+          "upstreamReplyDueAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "upstreamResolveDueAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmServiceTicketSummary": {
+        "properties": {
+          "cancelled": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "complaint": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "inProgress": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "inquiry": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "noCalendar": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "open": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "overdue": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "resolved": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "scopeNote": {
+            "type": "string"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "unassigned": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "waitingBuyer": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CrmServiceTicketTransfer": {
+        "properties": {
+          "assignedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "assignmentCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "currentOwnerRef": {
+            "type": "string"
+          },
+          "currentOwnerUserId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "escalatedCaseNo": {
+            "nullable": true,
+            "type": "string"
+          },
+          "escalatedDisputeNo": {
+            "nullable": true,
+            "type": "string"
+          },
+          "historyAvailable": {
+            "type": "boolean"
+          },
+          "lastFromOwnerRef": {
+            "nullable": true,
+            "type": "string"
+          },
+          "lastReasonNote": {
+            "nullable": true,
+            "type": "string"
+          },
+          "lastToOwnerRef": {
+            "nullable": true,
+            "type": "string"
+          },
+          "lastTransferAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "transferCount": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
       "PlatformMessageAvailability": {
         "properties": {
           "connected": {
@@ -23068,6 +23801,370 @@
         },
         "tags": [
           "product-review-controller"
+        ]
+      }
+    },
+    "/crm/service-tickets": {
+      "get": {
+        "operationId": "get_crm_service_tickets",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "ticketType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "priority",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sourceChannel",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "assignedToRef",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "caseId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "slaState",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "overdueOnly",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "unassignedOnly",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "format": "date-time",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "format": "date-time",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "enrich",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "shopId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmServiceTicketPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "service-ticket-list-controller"
+        ]
+      }
+    },
+    "/crm/service-tickets/business-hours": {
+      "get": {
+        "operationId": "get_crm_service_tickets_business_hours",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "shopId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmBusinessHoursConfig"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "service-ticket-list-controller"
+        ]
+      },
+      "put": {
+        "operationId": "put_crm_service_tickets_business_hours",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmBusinessHoursInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmBusinessHoursConfig"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "service-ticket-list-controller"
+        ]
+      }
+    },
+    "/crm/service-tickets/business-hours/holidays": {
+      "put": {
+        "operationId": "put_crm_service_tickets_business_hours_holidays",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmBusinessHolidayInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmBusinessHoursConfig"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "service-ticket-list-controller"
+        ]
+      }
+    },
+    "/crm/service-tickets/capabilities": {
+      "get": {
+        "operationId": "get_crm_service_tickets_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmServiceTicketCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "service-ticket-list-controller"
+        ]
+      }
+    },
+    "/crm/service-tickets/{id}": {
+      "get": {
+        "operationId": "get_crm_service_tickets_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmServiceTicketRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "service-ticket-list-controller"
         ]
       }
     }
