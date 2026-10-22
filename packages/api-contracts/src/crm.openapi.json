@@ -3529,6 +3529,1144 @@
           }
         }
       }
+    },
+    "/crm/cart-recovery/shops/{shopId}": {
+      "put": {
+        "tags": [
+          "cart-recovery-controller"
+        ],
+        "operationId": "put_crm_cart_recovery_shops_shopId",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "shopId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmCartShopProfileInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCartShopView"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/crm/cart-recovery/policy": {
+      "get": {
+        "tags": [
+          "cart-recovery-controller"
+        ],
+        "operationId": "get_crm_cart_recovery_policy",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCartPolicy"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "cart-recovery-controller"
+        ],
+        "operationId": "put_crm_cart_recovery_policy",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmCartPolicyInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCartPolicy"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/crm/cart-recovery/messages/{messageId}": {
+      "get": {
+        "tags": [
+          "cart-recovery-controller"
+        ],
+        "operationId": "get_crm_cart_recovery_messages_messageId",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "messageId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCartMessageRow"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "cart-recovery-controller"
+        ],
+        "operationId": "put_crm_cart_recovery_messages_messageId",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "messageId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmCartMessageInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCartMessageRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/crm/cart-recovery/unsubscribes": {
+      "get": {
+        "tags": [
+          "cart-recovery-controller"
+        ],
+        "operationId": "get_crm_cart_recovery_unsubscribes",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "contactType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "contactValue",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "shopId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCartUnsubscribePage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "cart-recovery-controller"
+        ],
+        "operationId": "post_crm_cart_recovery_unsubscribes",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmCartUnsubscribeInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCartUnsubscribeRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/crm/cart-recovery/touches/{touchId}/result": {
+      "post": {
+        "tags": [
+          "cart-recovery-controller"
+        ],
+        "operationId": "post_crm_cart_recovery_touches_touchId_result",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "touchId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmCartTouchResultInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCartTouchRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/crm/cart-recovery/sync": {
+      "post": {
+        "tags": [
+          "cart-recovery-controller"
+        ],
+        "operationId": "post_crm_cart_recovery_sync",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmCartSyncInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCartSyncResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/crm/cart-recovery/messages": {
+      "get": {
+        "tags": [
+          "cart-recovery-controller"
+        ],
+        "operationId": "get_crm_cart_recovery_messages",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "channel",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCartMessagePage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "cart-recovery-controller"
+        ],
+        "operationId": "post_crm_cart_recovery_messages",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmCartMessageInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCartMessageRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/crm/cart-recovery/messages/{messageId}/enable": {
+      "post": {
+        "tags": [
+          "cart-recovery-controller"
+        ],
+        "operationId": "post_crm_cart_recovery_messages_messageId_enable",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "messageId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCartMessageRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/crm/cart-recovery/messages/{messageId}/disable": {
+      "post": {
+        "tags": [
+          "cart-recovery-controller"
+        ],
+        "operationId": "post_crm_cart_recovery_messages_messageId_disable",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "messageId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCartMessageRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/crm/cart-recovery/messages/{messageId}/approve": {
+      "post": {
+        "tags": [
+          "cart-recovery-controller"
+        ],
+        "operationId": "post_crm_cart_recovery_messages_messageId_approve",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "messageId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCartMessageRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/crm/cart-recovery/abandonments": {
+      "get": {
+        "tags": [
+          "cart-recovery-controller"
+        ],
+        "operationId": "get_crm_cart_recovery_abandonments",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "shopId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "stage",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "buyerRef",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "cartRef",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "abandonedFrom",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "abandonedTo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCartAbandonmentPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "cart-recovery-controller"
+        ],
+        "operationId": "post_crm_cart_recovery_abandonments",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmCartAbandonmentInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCartAbandonmentRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/crm/cart-recovery/abandonments/{cartId}/touches": {
+      "get": {
+        "tags": [
+          "cart-recovery-controller"
+        ],
+        "operationId": "get_crm_cart_recovery_abandonments_cartId_touches",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "cartId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CrmCartTouchRow"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "cart-recovery-controller"
+        ],
+        "operationId": "post_crm_cart_recovery_abandonments_cartId_touches",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "cartId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmCartTouchInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCartTouchResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/crm/cart-recovery/abandonments/{cartId}/recoveries": {
+      "post": {
+        "tags": [
+          "cart-recovery-controller"
+        ],
+        "operationId": "post_crm_cart_recovery_abandonments_cartId_recoveries",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "cartId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmCartRecoveryInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCartAbandonmentRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/crm/cart-recovery/shops": {
+      "get": {
+        "tags": [
+          "cart-recovery-controller"
+        ],
+        "operationId": "get_crm_cart_recovery_shops",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CrmCartShopView"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/crm/cart-recovery/recovery-rate": {
+      "get": {
+        "tags": [
+          "cart-recovery-controller"
+        ],
+        "operationId": "get_crm_cart_recovery_recovery_rate",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "shopId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "abandonedFrom",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "abandonedTo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCartRecoveryRate"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/crm/cart-recovery/capabilities": {
+      "get": {
+        "tags": [
+          "cart-recovery-controller"
+        ],
+        "operationId": "get_crm_cart_recovery_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCartCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/crm/cart-recovery/abandonments/{cartId}": {
+      "get": {
+        "tags": [
+          "cart-recovery-controller"
+        ],
+        "operationId": "get_crm_cart_recovery_abandonments_cartId",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "cartId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCartAbandonmentDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/crm/cart-recovery/unsubscribes/{unsubscribeId}": {
+      "delete": {
+        "tags": [
+          "cart-recovery-controller"
+        ],
+        "operationId": "delete_crm_cart_recovery_unsubscribes_unsubscribeId",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "unsubscribeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -7219,6 +8357,952 @@
           },
           "impact": {
             "type": "string"
+          }
+        }
+      },
+      "CrmCartShopProfileInput": {
+        "required": [
+          "platformType"
+        ],
+        "type": "object",
+        "properties": {
+          "platformType": {
+            "minLength": 1,
+            "pattern": "DTC|MARKETPLACE",
+            "type": "string"
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "CrmCartShopView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "platformName": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "platformType": {
+            "type": "string"
+          },
+          "platformTypeSource": {
+            "type": "string"
+          },
+          "cartEventAvailable": {
+            "type": "boolean"
+          },
+          "cartEventNote": {
+            "type": "string"
+          }
+        }
+      },
+      "CrmCartPolicyInput": {
+        "required": [
+          "abandonTimeoutHours",
+          "cycleDays",
+          "maxTouchesPerCycle",
+          "maxTouchesPerDay"
+        ],
+        "type": "object",
+        "properties": {
+          "maxTouchesPerDay": {
+            "minimum": 1,
+            "exclusiveMinimum": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          "maxTouchesPerCycle": {
+            "minimum": 1,
+            "exclusiveMinimum": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          "cycleDays": {
+            "minimum": 1,
+            "exclusiveMinimum": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          "abandonTimeoutHours": {
+            "minimum": 1,
+            "exclusiveMinimum": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "CrmCartPolicy": {
+        "type": "object",
+        "properties": {
+          "maxTouchesPerDay": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "maxTouchesPerCycle": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "cycleDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "abandonTimeoutHours": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "note": {
+            "type": "string"
+          },
+          "customized": {
+            "type": "boolean"
+          },
+          "updatedAt": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "CrmCartMessageInput": {
+        "required": [
+          "channel",
+          "messageCode",
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "messageCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "channel": {
+            "minLength": 1,
+            "pattern": "EMAIL|SMS|IN_APP",
+            "type": "string"
+          },
+          "locale": {
+            "pattern": "^[a-z]{2,3}(-[A-Za-z0-9]{2,8})*$",
+            "type": "string"
+          },
+          "subject": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          },
+          "body": {
+            "maxLength": 20000,
+            "minLength": 0,
+            "type": "string"
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "CrmCartMessageRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "messageCode": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "channel": {
+            "type": "string"
+          },
+          "locale": {
+            "type": "string"
+          },
+          "subject": {
+            "type": "string"
+          },
+          "body": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "approvedBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "approvedAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "approvedVersion": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "enabledBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "enabledAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "enabledVersion": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "disabledBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "disabledAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "usageCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "createdBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "note": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        }
+      },
+      "CrmCartUnsubscribeInput": {
+        "required": [
+          "contactType",
+          "contactValue"
+        ],
+        "type": "object",
+        "properties": {
+          "contactType": {
+            "minLength": 1,
+            "pattern": "EMAIL|SMS|IN_APP",
+            "type": "string"
+          },
+          "contactValue": {
+            "maxLength": 320,
+            "minLength": 0,
+            "type": "string"
+          },
+          "shopId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "reason": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "CrmCartUnsubscribeRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "contactType": {
+            "type": "string"
+          },
+          "contactValue": {
+            "type": "string"
+          },
+          "shopId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "reason": {
+            "type": "string"
+          },
+          "unsubscribedAt": {
+            "type": "string"
+          },
+          "createdBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "note": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          }
+        }
+      },
+      "CrmCartTouchResultInput": {
+        "required": [
+          "status"
+        ],
+        "type": "object",
+        "properties": {
+          "status": {
+            "minLength": 1,
+            "pattern": "SENT|FAILED",
+            "type": "string"
+          },
+          "failureReason": {
+            "maxLength": 600,
+            "minLength": 0,
+            "type": "string"
+          },
+          "sentAt": {
+            "type": "string",
+            "description": "实际发出时刻，例如 2026-10-10T09:00:00+08:00；留空即取登记时刻",
+            "nullable": true
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "CrmCartTouchRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "cartId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "cartNo": {
+            "type": "string"
+          },
+          "messageId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "messageCode": {
+            "type": "string"
+          },
+          "channel": {
+            "type": "string"
+          },
+          "transport": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "recipient": {
+            "type": "string"
+          },
+          "subject": {
+            "type": "string"
+          },
+          "body": {
+            "type": "string"
+          },
+          "failureReason": {
+            "type": "string"
+          },
+          "sentAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "operatorId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        }
+      },
+      "CrmCartSyncInput": {
+        "required": [
+          "shopId"
+        ],
+        "type": "object",
+        "properties": {
+          "shopId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "CrmCartSyncResult": {
+        "type": "object",
+        "properties": {
+          "synced": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "CrmCartAbandonmentInput": {
+        "required": [
+          "abandonedAt",
+          "buyerRef",
+          "shopId",
+          "stage"
+        ],
+        "type": "object",
+        "properties": {
+          "shopId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "cartRef": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "externalEventId": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "stage": {
+            "minLength": 1,
+            "pattern": "CART|CHECKOUT",
+            "type": "string"
+          },
+          "buyerRef": {
+            "maxLength": 128,
+            "minLength": 0,
+            "type": "string"
+          },
+          "buyerEmail": {
+            "maxLength": 320,
+            "minLength": 0,
+            "type": "string"
+          },
+          "buyerPhone": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "currency": {
+            "maxLength": 8,
+            "minLength": 0,
+            "type": "string"
+          },
+          "amount": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number"
+          },
+          "itemCount": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number"
+          },
+          "itemSummary": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          },
+          "abandonedAt": {
+            "minLength": 1,
+            "type": "string",
+            "description": "购物车被放弃的时刻，例如 2026-10-10T08:00:00+08:00"
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "CrmCartAbandonmentRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "cartNo": {
+            "type": "string"
+          },
+          "shopId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "shopName": {
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "platformType": {
+            "type": "string"
+          },
+          "cartRef": {
+            "type": "string"
+          },
+          "externalEventId": {
+            "type": "string"
+          },
+          "stage": {
+            "type": "string"
+          },
+          "buyerRef": {
+            "type": "string"
+          },
+          "buyerEmail": {
+            "type": "string"
+          },
+          "buyerPhone": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "itemCount": {
+            "type": "number"
+          },
+          "itemSummary": {
+            "type": "string"
+          },
+          "abandonedAt": {
+            "type": "string"
+          },
+          "recoverDeadlineAt": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "recoveredAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "recoveredAmount": {
+            "type": "number"
+          },
+          "recoveredOrderNo": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "touchCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "createdBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "note": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        }
+      },
+      "CrmCartTouchInput": {
+        "required": [
+          "messageId"
+        ],
+        "type": "object",
+        "properties": {
+          "messageId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "CrmCartTouchResult": {
+        "type": "object",
+        "properties": {
+          "touch": {
+            "$ref": "#/components/schemas/CrmCartTouchRow"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "CrmCartRecoveryInput": {
+        "required": [
+          "recoveredAt",
+          "salesOrderNo"
+        ],
+        "type": "object",
+        "properties": {
+          "salesOrderNo": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "recoveredAmount": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number"
+          },
+          "recoveredAt": {
+            "minLength": 1,
+            "type": "string",
+            "description": "成交时刻，例如 2026-10-12T20:30:00+08:00"
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "CrmCartUnsubscribePage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CrmCartUnsubscribeRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalElements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "CrmCartRecoveryRate": {
+        "type": "object",
+        "properties": {
+          "totalAbandonments": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "recoveredCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "pendingCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "expiredCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "recoveryRate": {
+            "type": "number",
+            "nullable": true
+          },
+          "totalAmount": {
+            "type": "number"
+          },
+          "recoveredAmount": {
+            "type": "number"
+          },
+          "touchCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "unsubscribedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "byShop": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CrmCartRecoveryRateBucket"
+            }
+          },
+          "byChannel": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CrmCartTouchChannelBucket"
+            }
+          },
+          "windowNote": {
+            "type": "string"
+          }
+        }
+      },
+      "CrmCartRecoveryRateBucket": {
+        "type": "object",
+        "properties": {
+          "shopId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "shopName": {
+            "type": "string"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "recovered": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "recoveryRate": {
+            "type": "number",
+            "nullable": true
+          },
+          "totalAmount": {
+            "type": "number"
+          },
+          "recoveredAmount": {
+            "type": "number"
+          }
+        }
+      },
+      "CrmCartTouchChannelBucket": {
+        "type": "object",
+        "properties": {
+          "channel": {
+            "type": "string"
+          },
+          "touchCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "CrmCartMessagePage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CrmCartMessageRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalElements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "CrmCartCapabilities": {
+        "type": "object",
+        "properties": {
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CrmCartCapabilityDimension"
+            }
+          },
+          "platformTypes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "stages": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "abandonmentStatuses": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "messageStatuses": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "channels": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "touchStatuses": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "transports": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "platformTypeRule": {
+            "type": "string"
+          },
+          "messageLifecycle": {
+            "type": "string"
+          },
+          "boundaryNote": {
+            "type": "string"
+          },
+          "highlight": {
+            "type": "string"
+          }
+        }
+      },
+      "CrmCartCapabilityDimension": {
+        "type": "object",
+        "properties": {
+          "dimension": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "source": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "impact": {
+            "type": "string"
+          }
+        }
+      },
+      "CrmCartAbandonmentPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CrmCartAbandonmentRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalElements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "CrmCartAbandonmentDetail": {
+        "type": "object",
+        "properties": {
+          "abandonment": {
+            "$ref": "#/components/schemas/CrmCartAbandonmentRow"
+          },
+          "touches": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CrmCartTouchRow"
+            }
           }
         }
       }
