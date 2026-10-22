@@ -8635,6 +8635,57 @@ const services: readonly {
     pattern:
       /^service\-ticket\-process\/(?:capabilities|tickets(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:notes|replies|status|close|resolutions|satisfaction|links|actions|escalate)(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/revoke)?|\/sla\/(?:pause|resume))?)?)?$/,
   },
+  {
+    // ---------------------------------------------------------------------------
+    // 16.5.1.2 买家风险评分（channel 服务）
+    // ---------------------------------------------------------------------------
+    //
+    // ---- 插入锚点固定在 **services[] 数组的末尾**（最后一条元素之后、数组结尾的 `];` 之前）----
+    //   同批另外三条车道的锚点分别是「`compliance-rules` 之后」「`platform-appeals` 之后」
+    //   「`cart-recovery` 之后」，与本锚点互不重叠，git 能干净求并。
+    //
+    // ---- 纯**新增一条独立的 `services[]` 元素** ----
+    //   既有条目**一字未动、也不重排、不格式化整文件**。往既有那条巨型 alternation 里并分支
+    //   会让多车道同时并入时 git 必然判冲突（结构性，retry 永远不会自愈）。
+    //
+    // ---- 首 token「buyer-risk-scores」的零命中核对结论 ----
+    //   本文件既有 services[] 正则里**没有任何一条**含 `buyer-risk-scores` 这个串
+    //   （既有的是 `buyer-emails` —— 15.1.2.1 买家邮箱，在 crm 服务下；
+    //   以及 trade 侧的 `order-review` / `risk-validation` 分支）。
+    //   ⚠️ `buyer-risk-scores` 与 `buyer-emails` **不是前缀关系**：
+    //   前者的第 6 个字符是 `-`、后者是 `-`，但第 7 个字符就分叉（`r` vs `e`），
+    //   所以既有那条 `^buyer\-emails...$` 分支**不会**吃掉本模块的任何路径，
+    //   本模块的分支也**不会**吃掉 15.1.2.1 的任何路径（双向都实测过）。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   buyer-risk-scores/capabilities                   能力声明（逐维 available + ownerModule）
+    //   buyer-risk-scores/rule                          评分规则（GET 读 / PUT 改）
+    //   buyer-risk-scores/buyers                        买家名册（GET，真分页 / 真搜索）
+    //   buyer-risk-scores/evaluate                      跑一次评分（POST）
+    //   buyer-risk-scores/scores                        评分历史（GET，真分页 / 真筛选）
+    //   buyer-risk-scores/scores/{uuid}                 单次评分详情（GET）
+    //
+    // 判别顺序：**字面量子路径（capabilities / rule / buyers / evaluate / scores）排在
+    // {uuid} 段之前** —— alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //   （不是 `[0-9a-f-]+`）：后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行。
+    // ⚠️ **末尾刻意不带 `?`**：带了就等于放行裸路径 `buyer-risk-scores` ——
+    //   后端没有「一条汇总列表接口」，放行它会让界面以为可用。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸路径 `buyer-risk-scores` —— 本模块没有裸集合读
+    //   * `buyer-risk-scores/scores/{uuid}/delete` —— 评分是判定凭据，**append-only**，不做删除
+    //   * `buyer-risk-scores/blacklist` —— 16.5.1.1 黑名单**未交付**，本模块**不写黑名单**
+    //   * `buyer-risk-scores/related-accounts` —— 16.5.2.2 关联风险**未交付**，
+    //     本模块**不编一张「关联账号」表**
+    //   * `buyer-risk-scores/orders/{uuid}/status` —— 改订单状态是 9.2 的事，
+    //     本模块**只出建议**
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^buyer\-risk\-scores\/(?:capabilities|rule|buyers|evaluate|scores(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?)$/,
+  },
 ];
 
 function resolve(path: string) {
