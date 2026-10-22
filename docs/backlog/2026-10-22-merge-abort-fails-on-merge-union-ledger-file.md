@@ -52,7 +52,7 @@ docs/product/capability-blueprint/module-progress.md  merge=contract-union
 
 协议 `SYNC-MAIN.md` §3 明确写着：
 
-> `git merge --abort`  # 必须 abort，否则 MERGE_HEAD 残留会堵死流水线的 merge-ready
+> `git merge --abort` # 必须 abort，否则 MERGE_HEAD 残留会堵死流水线的 merge-ready
 
 而 `lane.mjs` 的 `merge-ready` 正是靠
 
@@ -78,11 +78,11 @@ git grep -l -E '^(<<<<<<<|>>>>>>>) ' -- .  # 必须无命中
 
 ## 三个可选修法（建议选 ①）
 
-| 选项 | 做法 | 代价 | 风险 |
-| --- | --- | --- | --- |
-| **①（建议）** | **改协议**：`SYNC-MAIN.md` §3 的 abort 步骤改成「`git merge --abort` **失败也必须继续**用 `git reset --hard HEAD` 兜底 + 显式校验 `MERGE_HEAD`/`status`/`冲突标记` 三项」 | 只改文档，不碰驱动器 | 无；本轮已实证可行 |
-| ② | **改驱动**：`merge-union` 驱动改成只写 index、不写工作区（或反之），让 abort 不再撞「not uptodate」 | 要动 `tools/module-progress/lane.mjs` 里注册驱动的代码 | 中；驱动是求并逻辑的核心，改动面大，且要重跑契约求并回归 |
-| ③ | **给台账退出驱动名单** | 去掉 `.gitattributes` 里台账那行 | **高**：台账会退回普通三方合并 → 每轮必冲突在台账上，且会丢汇总块 |
+| 选项          | 做法                                                                                                                                                                      | 代价                                                   | 风险                                                              |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------ | ----------------------------------------------------------------- |
+| **①（建议）** | **改协议**：`SYNC-MAIN.md` §3 的 abort 步骤改成「`git merge --abort` **失败也必须继续**用 `git reset --hard HEAD` 兜底 + 显式校验 `MERGE_HEAD`/`status`/`冲突标记` 三项」 | 只改文档，不碰驱动器                                   | 无；本轮已实证可行                                                |
+| ②             | **改驱动**：`merge-union` 驱动改成只写 index、不写工作区（或反之），让 abort 不再撞「not uptodate」                                                                       | 要动 `tools/module-progress/lane.mjs` 里注册驱动的代码 | 中；驱动是求并逻辑的核心，改动面大，且要重跑契约求并回归          |
+| ③             | **给台账退出驱动名单**                                                                                                                                                    | 去掉 `.gitattributes` 里台账那行                       | **高**：台账会退回普通三方合并 → 每轮必冲突在台账上，且会丢汇总块 |
 
 ## 为什么不能靠「冲突了就不 abort」
 
