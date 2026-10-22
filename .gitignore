@@ -100,6 +100,10 @@ test-results/
 # Java/Maven generated output
 backend/**/target/
 
+# Python bytecode cache (tools/module-progress/json-format.py 由 python3 执行)
+__pycache__/
+*.pyc
+
 # 定时开发任务的互斥锁与运行痕迹 — 本机状态，不进版本库
 .dev-agent/
 
