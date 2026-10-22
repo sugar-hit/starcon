@@ -233,13 +233,28 @@
    - 第二次（08:45–09:13）**跑了，红在 warehouse**（见上）。
      本次跑 L2 时在途车道为 0、无并发干扰 ⇒ **不是假红**。
 
-5. **已派修复车道**：车道 `10.4.1.2`（分支 `fix/10-4-1-2-eta-clock`，
+5. **本批的只读核验（调度者 + 09:00 只读 tick 双向独立复核，结论一致）**：
+   - **api-proxy 白名单**：`services[]` 正则净 **+4**（新增 `message-inbox` / `reviews` /
+     `customer-tags` / `cart-recovery`），**基线正则丢失 0 条**
+     ⇒ 这一类风险（L2 抓不到、静态检查全绿、页面却 404）已被排除；
+   - **OpenAPI 契约**：`crm.openapi.json` paths **44 → 91**、schemas **76 → 159**，
+     **被删 0**；逐车道分支核对类型集合：**4 条车道的类型在集成头里一个不缺**（159 = 76 + 83）
+     ⇒ 语义纯增量；
+   - **本批 4 条迁移的「互相破坏三形状」静态预检**：**全部 0 命中**
+     （纯 CREATE TABLE + FORCE RLS，无 `ADD COLUMN` 无 DEFAULT / 无 `SET NOT NULL` / 无新增 CHECK）；
+   - **Flyway 版本号无重复**（crm 8 个：V99/V220/V228/V292/V293/V294/V295/V296）；
+   - `sync.mjs --check` ⇒ **✓ 台账与蓝图一致**。
+   - ⚠️ **新发现**：合并驱动器把 `contracts/crm.ts` 的 codegen 横幅从第 1 行挪到了约第 160 行
+     （**类型零丢失**，纯观感与漂移面）⇒ 已追加到
+     [`docs/backlog/2026-10-20-contract-drift-ci-gate.md`](../../backlog/2026-10-20-contract-drift-ci-gate.md)。
+
+6. **已派修复车道**：车道 `10.4.1.2`（分支 `fix/10-4-1-2-eta-clock`，
    worktree `.worktrees/10.4.1.2-fix`），修法约束：
    新 ETA 与当前 ETA **同源推导**、**禁止**硬编码绝对时刻去"对齐"、
    **禁止**放宽断言 / `@Disabled` / `assumeTrue` 绕过、必须用**至少两个不同时刻基准**证明墙钟无关、
    **领域规则（ETA 不许往前调）不许动**。
    修复车道落地后，下一个 tick 的批次 L2 即可转绿，届时本批 4 条模块 + 本说明一并推上远端。
-6. **本轮未 push**：`origin/integration/module-dev` 仍停在 `da1f96f9`（batch-61，绿批次），
+7. **本轮未 push**：`origin/integration/module-dev` 仍停在 `da1f96f9`（batch-61，绿批次），
    上述合并、4 条模块、本说明文件与 backlog 诊断条目都留在集成头本地，
    **等修复车道落地 + 批次 L2 转绿后一起推**（协议：L2 没绿不 push，但说明照写、commit 照做）。
 
