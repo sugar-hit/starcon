@@ -38,9 +38,9 @@ if (!basePath || !oursPath || !theirsPath) {
 }
 
 /**
- * JSON 快照的序列化器 —— 与 codegen 共用同一个 json.dumps 路径（见 json-format.py）。
- * 用 import.meta.url 定位，不依赖进程 cwd（git 跑 merge driver 时 cwd 是仓库根，
- * 但集成脚本可能从别处调用它）。
+ * JSON 侧（.openapi.json 求并 + 序列化）的唯一实现 —— 与 codegen 共用同一个 json 路径
+ * （见 json-format.py）。用 import.meta.url 定位，不依赖进程 cwd（git 跑 merge driver 时
+ * cwd 是仓库根，但集成脚本可能从别处调用它）。
  */
 const JSON_FORMATTER = join(dirname(fileURLToPath(import.meta.url)), 'json-format.py');
 
@@ -72,32 +72,44 @@ const conflictKeys = [];
 const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 
 /**
- * 用 codegen 同款的 json.dumps 序列化路径把合并结果写成字节（见 json-format.py）。
+ * 把 .openapi.json 的**求并 + 序列化**整个交给 Python（见 json-format.py --merge）。
  *
- * 为什么不在 JS 里手搓：Python 的 repr 与 JS 的 Number.toString 在指数边界上
- * 不同（1e-6：Python 写 1e-06，JS 写 0.000001；1e-8：Python 写 1e-08，JS 写 1e-8），
- * 键序规则与末尾换行也不同。手搓 = 两份真相 = 迟早对不上。
+ * 为什么不再在 JS 里求并（2026-10-23 修）：JS 的 JSON 没有 int/float 之分。
+ * `JSON.parse("0.0")` 得到的 double，再 `JSON.stringify` 就写成 `0`；
+ * `JSON.parse("1e-06")` 再 stringify 就写成 `0.000001`。
+ * 于是**只要在 JS 里过一遍**，字面量就在 JS 序列化那一步被抹掉了 ——
+ * Python 端 json.load 拿到的已经是 int `0`，写出来自然是 `0`。
+ * 后果（2026-10-23 batch-68 实测）：6 个 channel schema 的 `minimum` 从 `0.0` 塌成 `0`，
+ * 与 codegen 的输出对不上 ⇒ L2 契约闸红。
  *
- * python3 不可用 / 脚本执行失败时返回 null —— 调用方必须**保留原文件内容不动**
+ * Python 的 json 模块天生分得清 int 与 float（json.load 保留类型），
+ * 且求并 + 序列化用的就是 codegen 那套 json.load / json.dumps 调用 ⇒ 只有一份真相。
+ *
+ * python3 不可用 / 脚本执行失败时返回 status=1 —— 调用方必须**保留原文件内容不动**
  * 并大声报出来：宁可这次合并不生效，也不要写出一个与生成器不一致的坏文件。
+ * status=3 表示「输入不是 JSON」—— 调用方走行级兜底并集。
  */
-function formatJsonSnapshot(value) {
-  const result = spawnSync('python3', [JSON_FORMATTER], {
-    input: JSON.stringify(value),
-    encoding: 'utf8',
-    // 默认 1MB 装不下 trade/channel 的快照（1.4MB~1.6MB），必须放开。
-    maxBuffer: 256 * 1024 * 1024,
-  });
+function mergeOpenApiSnapshot() {
+  const result = spawnSync(
+    'python3',
+    [JSON_FORMATTER, '--merge', basePath ?? '', oursPath, theirsPath],
+    {
+      encoding: 'utf8',
+      // 默认 1MB 装不下 trade/channel 的快照（1.4MB~3MB），必须放开。
+      maxBuffer: 256 * 1024 * 1024,
+    },
+  );
   if (result.error) {
     process.stderr.write(`merge-union: 调用 python3 失败：${result.error.message}\n`);
-    return null;
+    return { status: 1 };
   }
+  if (result.stderr) process.stderr.write(result.stderr);
+  if (result.status === 3) return { status: 3 };
   if (result.status !== 0) {
     process.stderr.write(`merge-union: json-format.py 退出码 ${result.status}\n`);
-    if (result.stderr) process.stderr.write(result.stderr);
-    return null;
+    return { status: 1 };
   }
-  return result.stdout;
+  return { status: 0, text: result.stdout };
 }
 
 /**
@@ -242,69 +254,35 @@ if (TS_KEY.test(ours) && TS_KEY.test(theirs)) {
   process.exit(0);
 }
 
-/* ── 3. OpenAPI json：paths 与 components.schemas 等按对象键三方求并 ───── */
-let specs = null;
-try {
-  specs = {
-    a: JSON.parse(ours),
-    b: JSON.parse(theirs),
-    g: base === null ? {} : JSON.parse(base),
-  };
-} catch {
-  specs = null; /* 不是 JSON，落到下面的兜底 */
-}
+/* ── 3. OpenAPI json：求并与序列化**整体在 Python 侧** ──────────────────── */
+/*
+ * 2026-10-23 起，.openapi.json 的求并不再在 JS 里做 —— 理由见 mergeOpenApiSnapshot()
+ * 的说明：JS 的 JSON 分不清 int 与 float，`0.0` 在 JS 序列化那一步就被抹成 `0`，
+ * 与 codegen 的输出对不上（L2 契约闸红）。
+ *
+ * 「是不是 JSON」这件事也交给 Python 判断（退出码 3 = 不是 JSON），
+ * 这样 JS 与 Python 对「合法 JSON」的口径完全一致（NaN / Infinity 两边都拒绝）。
+ *
+ * 键序 / 缩进 / 末尾换行 / 数字字面量，全部由 Python 侧的同一个 json.dumps 调用决定 ——
+ * 那是 codegen 用的那一个调用，只有一份真相。
+ */
+const mergedSnapshot = mergeOpenApiSnapshot();
 
-if (specs) {
-  const { a, b, g } = specs;
-
-  const mergeObj = (o, t, baseObj, label) => {
-    const asMap = (v) =>
-      v && typeof v === 'object' && !Array.isArray(v) ? new Map(Object.entries(v)) : new Map();
-    const merged = mergeEntries(asMap(baseObj), asMap(o), asMap(t), label);
-    return Object.fromEntries(merged.map(([k, v]) => [k, v]));
-  };
-
-  if (a.paths || b.paths) a.paths = mergeObj(a.paths, b.paths, g.paths, 'paths');
-  if (a.components || b.components) {
-    // 注意：components 本身要浅合并，但 components.schemas 要深合并。
-    // 早期版本先做了 {...a.components, ...b.components} 把 a.schemas 直接顶掉，
-    // 导致车道 A 的 schema 静默丢失 —— 深合并必须在覆盖之前取到两边的原值。
-    const ac = a.components ?? {};
-    const bc = b.components ?? {};
-    const gc = g.components ?? {};
-    const out = { ...ac };
-    for (const k of new Set([...Object.keys(ac), ...Object.keys(bc)])) {
-      if (['schemas', 'responses', 'parameters', 'examples', 'requestBodies'].includes(k)) {
-        out[k] = mergeObj(ac[k], bc[k], gc[k], `components.${k}`);
-      } else {
-        out[k] = bc[k] ?? ac[k];
-      }
-    }
-    a.components = out;
-  }
-
-  /*
-   * 落盘必须与 codegen 写快照的路径**逐字节相同**，否则每并入一次 .openapi.json
-   * 就让 CI 的「重新生成后无差异」检查红一次。JS 的 JSON.stringify 做不到：
-   *   数字：1e-6 → 0.000001（Python 是 1e-06）、1e-8 → 1e-8（Python 是 1e-08）
-   *   键序：插入序（codegen 那边是 sort_keys=True 的字典序）
-   *   末尾：不补换行（codegen 补）
-   * 所以把合并结果交给 python3 tools/module-progress/json-format.py ——
-   * 同一个 json.dumps 序列化路径，只有一份真相。
-   */
-  const text = formatJsonSnapshot(a);
-  if (text === null) {
-    // python3 不可用 / 格式化失败：**保留原文件内容不动**。
-    // 宁可这次合并不生效（git 报冲突，人来看），也不要写出一个与生成器不一致的坏文件。
-    process.stderr.write(
-      'merge-union: python3 不可用或 json-format.py 执行失败 —— 已保留原文件内容不动，本次合并不生效\n',
-    );
-    process.exit(1);
-  }
-  writeFileSync(oursPath, text);
-  if (conflictKeys.length) process.stderr.write(`CONFLICT_KEYS ${conflictKeys.join(' ')}\n`);
+if (mergedSnapshot.status === 0) {
+  writeFileSync(oursPath, mergedSnapshot.text);
   process.exit(0);
 }
+
+if (mergedSnapshot.status !== 3) {
+  // python3 不可用 / 格式化失败：**保留原文件内容不动**。
+  // 宁可这次合并不生效（git 报冲突，人来看），也不要写出一个与生成器不一致的坏文件。
+  process.stderr.write(
+    'merge-union: python3 不可用或 json-format.py 执行失败 —— 已保留原文件内容不动，本次合并不生效\n',
+  );
+  process.exit(1);
+}
+
+/* status === 3：不是 JSON —— 落到下面的行级兜底并集 */
 
 /* ── 兜底：行级去重并集。解析不了语义时至少不丢内容，但要报出来 ───────── */
 
