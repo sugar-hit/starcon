@@ -8183,6 +8183,68 @@ const services: readonly {
       /^performance\-metrics(?:\/(?:capabilities|shops|trends|alerts|forecasts|alert\-rules)|\/shops\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/(?:trends|metrics|alert\-evaluations|forecasts|forecast)|\/alert\-rules\/(?:ODR|LATE_SHIPMENT_RATE|CANCELLATION_RATE|VALID_TRACKING_RATE|RESPONSE_TIME|ACCOUNT_RATING))$/,
   },
   {
+    // 16.2.1.1 规则库（channel 服务）。纯**新增一条独立的 `services[]` 元素**：
+    // 既有条目**一字未动、也不重排** —— 本文件是多车道共用的**累积型**白名单，
+    // 每条服务规则是一段超长单行正则，往既有那条巨型 alternation 里并分支会让多车道
+    // 同时并入时 git 必然判冲突（结构性，retry 永远不会自愈）。
+    //
+    // ---- 插入锚点固定在 **`performance-metrics` 那条元素之后**（16.1.1.2 绩效指标监控）----
+    //   同批另外三条车道的锚点是「`account-health` 之后」/「`platform-violations` 之后」
+    //   /「`cart-recovery` 之后」，与本锚点互不重叠，git 能干净求并。
+    //
+    // ---- 首 token「compliance-rules」的零命中核对结论 ----
+    //   本文件既有全文里 `compliance-rules` 出现次数 = 0；
+    //   并把既有**全部 160 条** `services[]` 正则逐条实测：
+    //   11 个本模块 shape × 160 条既有正则 ⇒ **命中 0 处**
+    //   （实测脚本 `.tmp/verify-api-proxy.mjs`）。
+    //   反向也测了：既有模块入口（account-health / performance-metrics /
+    //   platform-violations / compliance-precheck / listing-compliance-precheck /
+    //   brand-authorizations / listings / shops / listing-editor / ad-rules）
+    //   被本条正则**零命中** ⇒ 互不遮蔽。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   compliance-rules/capabilities          能力声明（未交付下游 available=false + ownerModule）
+    //   compliance-rules/shops                  店铺范围清单（GET，真分页 + 真统计）
+    //   compliance-rules/rules                  规则集（GET，真分页 + 真筛选）/ 建规则（POST，**幂等**）
+    //   compliance-rules/rules/{uuid}           规则详情（GET，含全部版本）/ 改生命周期（PUT）
+    //   compliance-rules/rules/{uuid}/versions  版本清单（GET）/ **发新版本**（POST，规则改动的唯一入口）
+    //   compliance-rules/rules/{uuid}/versions/effective      某一刻生效的是哪一版（GET，**可解释性**）
+    //   compliance-rules/rules/{uuid}/versions/{versionId}     版本详情（GET）
+    //   compliance-rules/rules/{uuid}/versions/{versionId}/terms        词条清单（GET）/ 追加词条（POST）
+    //   compliance-rules/rules/{uuid}/versions/{versionId}/terms/upload 词库上传（POST，**整份一次落库**）
+    //   compliance-rules/rules/{uuid}/versions/{versionId}/scopes       适用范围清单（GET）/ 追加（POST）
+    //   compliance-rules/effective               生效规则集（GET，真分页；解析时刻可指定）
+    //
+    // 判别顺序：字面量子路径（capabilities / shops / effective / rules）排在 {uuid} 段
+    // **之前** —— alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`（不是
+    //   `[0-9a-f-]+`：后者会把 `capabilities` 这种非 UUID 形状也当 id 放行）。
+    // ⚠️ `versions/{versionId}` 后面**必须**跟一个动作段（terms / scopes）：
+    //   本模块**没有**「只按版本 id 取详情」以外的其它动作，
+    //   所以 {versionId} 段后面的动作段**刻意不带 `?`**。
+    // ⚠️ `versions/effective` 是**字面量**：它是「某一刻生效的是哪一版」这个端点，
+    //   不是 uuid 段的一部分 —— 放在 uuid 段之前才不会被吃掉。
+    // ⚠️ 末尾**刻意不带 `?`**：带了就等于放行裸路径 `compliance-rules`
+    //   （后端没有「一条汇总列表接口」，一切入口都带子路径）。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸路径 `compliance-rules` —— 本模块没有裸集合读
+    //   * `compliance-rules/executions` / `rules/{uuid}/executions` / `rules/{uuid}/validate`
+    //     / `rules/{uuid}/exemptions` —— 16.2.1.2 拦截执行**未交付**，本模块**不编造**放行形状
+    //   * `compliance-rules/precheck` / `compliance-rules/scans` —— 4.2.3.2 合规预检走的是
+    //     **它自己的** `listing-compliance-precheck` 前缀，不是本模块的
+    //   * `rules/{uuid}/terms` / `rules/{uuid}/severity` / `rules/{uuid}/scopes`
+    //     —— 改规则**只能发新版本**，没有「就地改词 / 改严重度」的入口
+    //   * `rules/{uuid}/versions/{versionId}/delete` / `rules/{uuid}/delete`
+    //     —— 版本 / 词条 / 适用范围都不做物理删除
+    //   * `compliance-rules/overview` / `compliance-rules/stats` —— 没有这两个汇总端点
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^compliance\-rules(?:\/(?:capabilities|shops|effective|rules)|\/rules\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/versions(?:\/(?:effective|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:terms(?:\/upload)?|scopes))?))?)?)$/,
+  },
+  {
     // 16.1.2.1 违规与处罚（channel 服务）。纯**新增一条独立的 `services[]` 元素**：
     // 既有条目**一字未动、也不重排** —— 本文件是多车道共用的**累积型**白名单，
     // 每条服务规则是一段超长单行正则，往既有那条巨型 alternation 里并分支会让多车道
