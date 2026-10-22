@@ -126,16 +126,16 @@ NULL 的点**不进已知数、不算通过**，并产出一条 **UNKNOWN 预警
 
 **前端**
 
-- `apps/web/src/components/performance-metrics/performance-metrics-model.ts` + `.test.ts`（22 例）
+- `apps/web/src/components/performance-metrics/performance-metrics-model.ts` + `.test.ts`（23 例）
 - `apps/web/src/components/performance-metrics/performance-metrics-workspace.tsx`
 - `apps/web/src/app/compliance/metrics/page.tsx`（路由 `/compliance/metrics`）
-- `apps/web/src/app/api/channel/performance-metrics-allowlist.test.ts`（7 例）
+- `apps/web/src/app/api/channel/performance-metrics-allowlist.test.ts`（6 例）
 - `apps/web/src/lib/api-proxy.ts` —— **只新增一条** `services[]` 元素（锚点：`account-health` 之后）。
 
 **契约（codegen 产物，只 channel 一份有改动）**
 
-- `packages/api-contracts/src/channel.openapi.json`（+11 条路径，零删除零改写）
-- `packages/api-contracts/src/contracts/channel.ts`（+18 个 DTO）
+- `packages/api-contracts/src/channel.openapi.json`（+12 条路径，零删除零改写）
+- `packages/api-contracts/src/contracts/channel.ts`（+20 个 DTO）
 
 **台账 / 会话**
 
