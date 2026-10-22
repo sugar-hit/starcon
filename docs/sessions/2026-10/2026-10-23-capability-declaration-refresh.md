@@ -11,6 +11,11 @@ batch-68 把三个下游交付了（15.4.1.2 工单处理 / 16.1.2.2 申诉管�
 （某次按字节截断的写入把「几」字的 3 个字节打坏），其中 1 处在**运行时字符串**里，
 会真的出现在 `/channel/platform-violations/capabilities` 的响应中。
 
+调度者随后追加第 ⑤ ⑥ 项，同一条车道继续做：
+**⑤** `AccountHealthService.java` 里同样过期的下游声明（16.1.1.1 的能力声明）；
+**⑥** batch-68 自己带入的 8 个 `U+FFFD`（16.3.1.1 车道的 3 个文件）。
+两条都是**纯文本**：不改业务逻辑、不改数据流、不改表结构、不新增迁移。
+
 ## 决策 / 结论
 
 1. **16.1.2.1 违规与处罚（channel）**：`16.1.2.2` 那一维 `available` 由 `false` 翻成 **`true`**，
@@ -52,6 +57,26 @@ batch-68 把三个下游交付了（15.4.1.2 工单处理 / 16.1.2.2 申诉管�
    `service-ticket-list-workspace.tsx:41`、`platform-violations-model.ts:21` 等）仍写着「未交付」，
    属**前端车道自己的文件**，本车道**不碰**（见「后续待办」）。
 
+8. **⑤ 16.1.1.1 账号健康总览（channel）**：取证发现 —— `AccountHealthService` 的 SQL
+   **只**读 `account_health_threshold` / `account_health_assessment` / `account_health_metric`
+   加本服务的 `shop` / `platform` 目录，**不读** `account_health_performance_*`（16.1.1.2）、
+   `platform_violation*` / `platform_penalty*`（16.1.2.1）、`platform_appeal*`（16.1.2.2）。
+   台账上这三个下游**都是「已交付」** ⇒ 该文件里关于它们的「**未交付**」全是假话。
+   处理方式与 ③ 一致：三者**保持 `available=false`**（本模块确实没接入），
+   **只把理由**从「下游未交付」改成「**已交付**（同服务同库）但**本模块未接入**」。
+   真正未交付的下游只剩 **2.4 平台账号绩效适配器**（同步恒 409，指标只能人工录入）。
+   ⚠️ 调度者只点名了 `AccountHealthService.java:97` 那一条，但**同一个常量、同一个 payload**
+   里还有 16.1.1.2 / 16.1.2.1 两处同型假话 —— 只改一条会让那段话**自相矛盾**
+   （「16.1.2.1 未交付、16.1.2.2 已交付」），故一并校正（同文件、同类缺陷、纯文本）。
+
+9. **⑥ batch-68 自带的 8 个 `U+FFFD`**（16.3.1.1 车道的 3 个文件，**全部装饰性、零功能影响**）：
+   `TaxRegistrationController.java` 的 javadoc（`推导出「应当登记的辖区」`）、
+   `V312__channel_tax_registration.sql` 的 `--` 注释（`不产生缺口`）、
+   `tax-registration-allowlist.test.ts` 的断言消息（`POST 登记未被放行`）。
+   仍用 python3 按字节读写，避免**再次**按字节截断。
+   ⚠️ `V312` 是**本批首次落地**的新迁移，改它的注释**不涉及「已应用迁移不可改」**
+   （尚未被任何环境应用过）；改完用 `TaxRegistration*` 实跑 Testcontainers PG16 证明它还能跑。
+
 ## 涉及文件
 
 **主源码（声明层）**
@@ -61,6 +86,11 @@ batch-68 把三个下游交付了（15.4.1.2 工单处理 / 16.1.2.2 申诉管�
   `16.1.2.2` 那一维 payload（`available` + `impact`）/ 类 javadoc；**另含 ④ 的 6 处 U+FFFD 修复**
 - `backend/services/channel/src/main/java/com/starcon/channel/PlatformViolationModels.java` —— 类 javadoc
 - `backend/services/channel/src/main/java/com/starcon/channel/PlatformViolationController.java` —— 类 javadoc
+- `backend/services/channel/src/main/java/com/starcon/channel/AccountHealthService.java`（⑤）
+  —— `DOWNSTREAM_NOTE` / `capabilities()` javadoc / 16.1.1.2、16.1.2.1、16.1.2.2 三条 gap 的
+  `impact` 理由 / `pendingItems()` javadoc
+- `backend/services/channel/src/main/java/com/starcon/channel/AccountHealthModels.java`（⑤）—— 类 javadoc + 记录字段文档
+- `backend/services/channel/src/main/java/com/starcon/channel/AccountHealthController.java`（⑤）—— 类 javadoc
 - `backend/services/crm/src/main/java/com/starcon/crm/ServiceTicketListService.java`
   —— `capabilities()` javadoc / `ticket_processing` 维 payload / `related` 里 15.4.1.2 条目 /
   `boundaries` 里对应边界 / `downstreamNote`
@@ -69,6 +99,12 @@ batch-68 把三个下游交付了（15.4.1.2 工单处理 / 16.1.2.2 申诉管�
   —— 类 javadoc（两条纪律 + 人工介入判定口径）/ `human_intervention_signal` 维 payload / 口径说明串
 - `backend/services/crm/src/main/java/com/starcon/crm/AutoReplyModels.java` —— `CrmAutoReplyTriggerType` javadoc
 
+**⑥ 字符修复（batch-68 自带的 8 处）**
+
+- `backend/services/channel/src/main/java/com/starcon/channel/TaxRegistrationController.java` —— 3 处
+- `backend/services/channel/src/main/resources/db/migration/V312__channel_tax_registration.sql` —— 3 处
+- `apps/web/src/app/api/channel/tax-registration-allowlist.test.ts` —— 2 处
+
 **测试（同步改断言）**
 
 - `backend/services/channel/src/test/java/com/starcon/channel/PlatformViolationIntegrationTest.java`
@@ -76,11 +112,16 @@ batch-68 把三个下游交付了（15.4.1.2 工单处理 / 16.1.2.2 申诉管�
 - `backend/services/crm/src/test/java/com/starcon/crm/ServiceTicketListIntegrationTest.java`
   —— `ticket_processing` 维断言由 `isFalse()` 翻成 `isTrue()`（并补 `source` 含
   `/crm/service-ticket-process` 的断言）+ 类 javadoc
+- `backend/services/channel/src/test/java/com/starcon/channel/AccountHealthIntegrationTest.java`（⑤）
+  —— 能力声明用例改名并补断言：16.1.1.2 / 16.1.2.1 / 16.1.2.2 三条 gap
+  `available=false` 且 `impact` **必须**含「已交付」「本模块未接入」且**不得**再含「未交付」；
+  2.4 那条仍含「未交付」
 
 **台账 / 文档**
 
 - `docs/product/capability-blueprint/module-progress.md`
   —— **只动 15.4.1.1 / 15.5.1.1 / 16.1.2.1 三行的证据格**（各补一句「batch-68 交付校正」）；
+  第 ⑤ 项追加**只动 16.1.1.1 一行**（补「下游交付校正（batch-68 追加）」）；
   状态格、总览计数**未动**（总览由调度者统一刷新）
 - `docs/sessions/2026-10/2026-10-23-capability-declaration-refresh.md` —— 本文件
 
@@ -117,14 +158,13 @@ batch-68 把三个下游交付了（15.4.1.2 工单处理 / 16.1.2.2 申诉管�
    `platform-violations-allowlist.test.ts:163`、`account-health-allowlist.test.ts:161`
    的注释前提已过期；**放行结论本身仍正确**（申诉走 `/channel/platform-appeals`、
    工单处理走 `/crm/service-ticket-process`，都是**独立前缀**）。
-4. **其它模块的同类过期声明**（不在本车道）：`AccountHealthService.java:97`（16.1.2.1/16.1.1.1 的
-   `16.1.2.2` 维仍标「未交付」）、`ServiceTicketListModels.java` 之外的
-   `AutoReplyService` 类 javadoc 之外的 `crm` / `channel` 其它声明点 —— 需要**逐个取证**后
-   决定是否同批校正。
+4. **其它模块的同类过期声明**（不在本车道）：`ServiceTicketListModels.java` 之外的
+   `crm` / `channel` 其它声明点 —— 需要**逐个取证**后决定是否同批校正。
+   （`AccountHealthService.java` 那条已由本车道第 ⑤ 项处理完毕。）
 
 ## 关联
 
-- 蓝图：`docs/product/capability-blueprint/module-progress.md`（15.4.1.1 / 15.5.1.1 / 16.1.2.1 三行）
+- 蓝图：`docs/product/capability-blueprint/module-progress.md`（15.4.1.1 / 15.5.1.1 / 16.1.2.1 / 16.1.1.1 四行）
 - 本批交付：16.1.2.2 申诉管理（`V310__channel_platform_appeal.sql`）、
   15.4.1.2 工单处理（`V309__crm_service_ticket_process.sql`）
 - 相关会话：`docs/sessions/2026-10/2026-10-23-platform-appeal-management.md`、
