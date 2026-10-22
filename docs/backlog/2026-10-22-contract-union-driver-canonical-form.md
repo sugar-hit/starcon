@@ -97,6 +97,73 @@ pnpm contracts:generate && git diff --exit-code -- packages/api-contracts/src
 
 ---
 
+## 三之二、修复落地时新发现的 3 个缺口（**均未修**，另开车道）
+
+### 缺口 A：桶文件 `index.ts` 仍会在并入时漂（**未修 · 潜在缺口，当前未损坏**）
+
+**实测**：`TS_KEY.test(index.ts)` = **false** —— 桶文件里只有 `export type { X } from …` 形式，
+没有 `export type X =` ⇒ **不走 TS 语义分支**，落最底下的「行级去重并集」兜底。
+
+**当前状态是好的**（避免误报）：桶文件的 `export *` 顺序 =
+`identity / catalog / channel / warehouse / trade / crm`，与生成器 `SERVICES` 序**逐条一致**
+⇒ 判据 E 能零差异是合理的 ⇒ **这是潜在缺口，不是已发生的损坏**。
+
+**触发条件比「两条车道都改桶文件」更宽**：兜底分支开头的短路
+`if (ours === theirs) { 原样落盘; exit }` **只在两边逐字节相同时**生效
+⇒ **只要桶文件真的进入冲突（双方都改）就必然落兜底**，不必是特定组合。
+本轮 11 个产物**不含 `index.ts`** ⇒ 本轮未触发。
+
+**危害形态是「顺序」，不是内容丢失**（下轮判读时别把它当回归）：
+兜底对非台账行是**整行去重并集** —— `for (const line of \`${ours}\n${theirs}\`.split('\n'))`⇒ **ours 的行按原序在前，theirs 独有的行追加到末尾**
+⇒ 桶文件若这样被求并 ⇒ **类型一个都不丢**，但`export _`的顺序脱离`SERVICES`序
+⇒ 而生成器`render_index`按`SERVICES`序输出 ⇒ **契约闸在`index.ts` 上变红_*
+⇒ 归类属**类别②（排版/顺序变更）**，但它会让 CI 红，所以必须处理。
+
+**⭐ 一条现成的可检测信号（比事后 diff 更快，不用等 CI）**：
+兜底分支会往 stderr 打这一行（`merge-union.mjs:374`）：
+
+```
+merge-union: 走了行级兜底并集，请人工确认这个文件改对了
+```
+
+⇒ **任何一次并入后，只要 stderr 出现这行、且涉及 `packages/api-contracts/src/index.ts`
+⇒ 直接判红、人工处理。**
+
+**修法**：给 TS 分支补一套「桶文件键」—— 按 service 名键控 `export *`，输出按 `SERVICES` 顺序排列。
+
+**验收判据**：造一份「桶文件 ours/theirs 双方都改」的**真冲突**，跑驱动，
+输出必须与生成器 `render_index` **逐字节相同**，且 **stderr 不得出现上面那行兜底告警**。
+
+### 缺口 B：`pnpm typecheck` 的 turbo 缓存**不含契约文件**（**未修**）
+
+`packages/api-contracts/` **没有 `package.json`** ⇒ 不是 workspace 包 ⇒ 不在 turbo 的 input hash 里
+⇒ **契约变了也可能命中旧缓存**，typecheck 假绿。
+
+⇒ 验证契约相关改动时**必须**用 `pnpm turbo run typecheck --force`（或直接跑 `apps/web` 的
+`tsc --noEmit` —— web 用相对路径 import 契约，确实覆盖到）。
+⇒ 根治方案：给契约目录一个包身份，或让 turbo 显式声明它为输入。
+
+### 缺口 C：merge driver 现在**依赖 `python3`**（**设计已知**）
+
+仓库本来就有 python3 依赖（`contracts:generate` / `test:codegen` 都要它），
+但集成环境若缺 python3，契约并入会失败。已按「宁可合并不生效，也不写坏文件」设计：
+**stderr 响亮告警 + 保留原文件内容不动 + 非零退出**（实测通过）。
+
+### 缺口 D：单轮 L2 内部的 Testcontainers 容器峰值远超 PG 闸额度（**未修 · 观察项**）
+
+本轮 L2（`mvnw verify`）实测：**同一个 Testcontainers session** 内 PG 容器数从 10 一路涨到 **65**
+（合计约 **5.1GB**），容器年龄分布为 2–7 分钟（按测试类成波次回收，非永久堆积），
+`ryuk` 在跑、构建结束时回收。
+
+⚠️ **PG 闸（`PG_CONTAINER_LIMIT=6`）的口径是「跨车道的并发额度」，管不到单轮 L2 自身的容器churn** ——
+本轮单车道就跑到 65 个，是额度的 10 倍以上。
+⇒ 观测到的副作用：swap 用到 **3.4GB / 4GB**（macOS 会压缩内存优先，load 仍只有 4.4、可用内存 44%），
+**没有造成失败**，但这是「L2 是发热高峰」的又一处实证。
+⇒ 建议（未做）：后端测试侧评估 **Testcontainers 容器复用/提前 stop**，
+或给 surefire 配 `reuseForks`/受控并发，避免单轮峰值堆到这个量级。
+
+---
+
 ## 四、后续待办（未完成，别当已完成）
 
 1. **把 `tools/module-progress/*.itest.mjs` 接进 CI 或流水线 L2**（当前无人自动执行）。

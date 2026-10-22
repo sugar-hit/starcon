@@ -64,6 +64,72 @@ PR 分支：`chore/sync-module-dev`（固定名，复用同一个分支，不每
 
 **不许每轮都重跑一遍全量验证来「确认没事」** —— 那是发热高峰，且没有信息增量。
 
+### 1.5 ⛔ 契约产物必须拆成两个 PR，PR#1 必须先于 PR#2
+
+**背景（2026-10-22 实测）**：`merge.contract-union.driver` 注册在**仓库本地** `.git/config`，
+且注册的是**相对路径** `node tools/module-progress/merge-union.mjs %O %A %B`。
+git 执行合并驱动时的工作目录 = **工作树顶层** ⇒ 跑的是**当前检出分支**那份驱动。
+
+第 7.1 节的流程是「从 `upstream/main` 建 worktree → `git checkout -B chore/sync-module-dev`
+→ `git merge upstream/integration/module-dev`」。此刻检出的分支基于 `main`，
+**跑的是 `main` 那份驱动**。若 `main` 上的驱动还是旧版（横幅写末行 + 类型名不排序），
+这次合并会把集成分支里已经 canonical 化的 11 个契约产物**重新写回 JS 形态** ——
+结果就是「合进去了，但 CI 的契约校验照样红」。
+
+**所以带契约产物的合并必须分两步走**：
+
+**PR#1 —— 只修工具链，一个契约产物都不许带**。内容白名单：
+
+| 文件                                          | 作用                                |
+| --------------------------------------------- | ----------------------------------- |
+| `tools/module-progress/merge-union.mjs`       | 横幅归首行 + 类型名字典序           |
+| `tools/module-progress/json-format.py`        | JSON 快照统一格式化（与生成器同参） |
+| `tools/codegen/catalog-contracts.py`          | `sort_keys=True`                    |
+| `tools/module-progress/merge-union.itest.mjs` | 驱动回归测试                        |
+
+`.gitignore` 的 `__pycache__/` **可以随任意一个 PR 带入**；
+但**集成分支若已经带了，就不要重复加** —— 两边各加同一行会撞 add/add 冲突。
+
+**PR#2 —— 才带 11 个契约产物**（6 个 `*.openapi.json` + 5 个 `contracts/*.ts`）。
+
+**放行判据（开 PR#2 之前必须为真）**：
+
+```bash
+git show upstream/main:tools/module-progress/merge-union.mjs | grep -q 'json-format.py'
+```
+
+为 **假** ⇒ `main` 上还是旧驱动 ⇒ **STOP，不许开 PR#2**，先把 PR#1 合了再回来。
+
+**另一条更稳的路（可选）**：本轮只搬契约产物、不想触发任何本地合并时，
+把第 7.1 节的 ②③ 换成「不 merge，直接把同步分支指到集成分支」：
+
+```bash
+git checkout -B chore/sync-module-dev upstream/integration/module-dev
+```
+
+这样驱动根本不跑，产物原样搬运。**但 CI 的 `contracts:generate` 要求 `main` 上的
+生成器与产物一致** ⇒ 无论走哪条路，**PR#1 都必须先合**。
+
+**合入后自检（PR#2 合完必跑）**：
+
+```bash
+# 横幅在首行
+git show upstream/main:packages/api-contracts/src/catalog.openapi.json | head -1
+# JS 形态指纹：任何服务都必须为 0
+for s in catalog channel crm trade warehouse identity; do
+  printf '%s %s\n' "$s" \
+    "$(git show upstream/main:packages/api-contracts/src/$s.openapi.json | grep -c '0\.000001')"
+done
+```
+
+⚠️ **别把「必须有 `1e-06`」当判据**：`1e-06` 只在部分服务出现
+（catalog 2 / channel 5 / crm 6；identity / warehouse / trade **一次都没有**），
+写成「期望 > 0」会在这三个服务上误判 FAIL。**通用判据只有一条：不得出现 `0.000001`。**
+
+**数量不变量**（变了就是内容丢失 = 回归，不是排版变更）：
+导出声明 identity 158 / catalog 863 / channel 1348 / warehouse 1077 / trade 1717 / crm 159；
+paths identity 112 / catalog 494 / channel 710 / warehouse 518 / trade 789 / crm 91。
+
 ---
 
 ## 2. 🔒 并发闸（与流水线共享，必须先查）
@@ -136,6 +202,18 @@ node tools/module-progress/lane.mjs gate release     # 收尾必须放，无论�
 
 **所以「CI 全绿」不是可用的闸** —— 拿它当闸，这个任务永远合不进去，等于没有闸。
 本任务用**基线相对判据**：PR 的失败不得**比 `main` 基线更多**。见 7.3。
+
+⚠️ **`Lint` 作业的覆盖面含 `.md`**：`ci.yml:26` 跑 `pnpm format:check`，
+匹配 `**/*.{ts,tsx,js,jsx,json,md,yaml,yml}` ⇒ **Markdown 也在格式闸门内**。
+`main` 上现有 **621 个文件**不合 Prettier（多为历史 `.tsx` / `.test.ts`）⇒ `Lint` 早已红，
+这是**存量债**；但**本次合入带进来的新文件不许再增加这个数**。
+⇒ 提交前对本 PR 触及的文件逐个跑一遍：
+
+```bash
+pnpm exec prettier --check <本 PR 改动的 .md / .ts / .json / .yaml>
+```
+
+⇒ 判据看**失败文件集合的差集**（见 7.3），不是看仓库总数。
 
 ---
 
@@ -323,6 +401,12 @@ node tools/module-progress/merge-resolve.mjs --base upstream/main --head upstrea
 
 驱动已注册在 `.git/config`（`merge.contract-union.driver`，**仓库本地配置，worktree 共享**）。
 它按「键」做**三方**求并（类型名 / OpenAPI 路径 / 模块 ID），base 才是裁判。
+
+⚠️ **驱动跑的是「当前检出分支」那份**（注册的是相对路径，git 的工作目录 = 工作树顶层）。
+第 7.1 节建 worktree 时检出的是基于 `main` 的同步分支 ⇒ **跑 `main` 那份驱动**。
+契约产物的正确形态是：**横幅在首行 + 类型名按字典序 + JSON 键按字典序 + 浮点用 Python 形态
+（`1e-06` 而非 `0.000001`）**，且与 `tools/codegen/catalog-contracts.py` 的输出**逐字节相同**。
+产出不是这个形态 ⇒ 不要接受，先查 1.5。
 
 - 输出 `merge-union: 走了行级兜底并集，请人工确认这个文件改对了` ⇒ **它没认出这个格式**，
   走了行级兜底。**必须人工核对**这个文件的每一行。
@@ -612,6 +696,8 @@ cd "$WT"
 git checkout -B chore/sync-module-dev
 
 # ③ 合并集成分支
+#    ⚠️ 本轮若要带 packages/api-contracts/ 的产物，先过 1.5 的放行判据！
+#       否则会用 main 那份旧驱动把产物写回 JS 形态（合了也白合，CI 照样红）。
 git merge --no-ff --no-commit upstream/integration/module-dev
 
 # ④ 看冲突

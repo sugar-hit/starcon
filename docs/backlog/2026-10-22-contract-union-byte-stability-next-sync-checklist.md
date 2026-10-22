@@ -181,6 +181,103 @@ git merge feat && cat /tmp/drivertest/log.txt
 ⇒ 本轮 14:00 tick **显式手动跑过** `merge-union.itest.mjs`（33 断言全绿），
 但这**不是**自动保障 ⇒ **下轮同步必须显式再跑一遍**（见判据 G）。
 
+### ⚠️ 已知缺口三：**turbo 缓存不覆盖 `packages/api-contracts/`** ⇒ 缓存会骗人
+
+实测（2026-10-22 15:0x）：
+
+| 检查项                                | 结果                                                                 |
+| ------------------------------------- | -------------------------------------------------------------------- |
+| `packages/api-contracts/package.json` | **不存在** ⇒ **不是 turbo 包**                                       |
+| `turbo.json` 各 task 的 `inputs`      | `["src/**", "package.json", "tsconfig.json", ...]` ⇒ **按包作用域**  |
+| `turbo.json` 的 `globalDependencies`  | 只有 `["**/.env.*local", "tsconfig.base.json"]` ⇒ 不含契约           |
+| `turbo run typecheck` 的 scope        | `@starcon/config-tailwind, @starcon/ui, @starcon/web` ⇒ **不含契约** |
+
+⇒ **改 `packages/api-contracts/**` 不会让 turbo 的任何 task 缓存失效**
+⇒ `pnpm typecheck` / `pnpm lint` / `pnpm test` 可以**整段 replay 旧缓存**。
+
+⚠️ **并且：协议里并不存在「契约类变更强制 `--force` typecheck」这条规则** ——
+实测 `PIPELINE.md` / `PIPELINE_CRON_PROMPT.md` / `.dev-agent/l2-run.sh` 里
+**`--force` 一次都没出现**；三处 `force` 字样全部在说
+**「不要为了让 tick 通过而 force 清掉别人持有的调度闸」**（与 turbo 无关）。
+
+⇒ 结论：L2 的前端三步（`pnpm typecheck && pnpm lint && pnpm test`）
+**在契约变更后可能全是缓存回放**，**不能证明**契约相关的前端类型是绿的
+⇒ 下轮同步在契约有变更时，**必须带 `--force`**（见判据 H）。
+
+### ⚠️ 已知缺口四：集成头的 L2 **从不验证契约是否 canonical**
+
+`.dev-agent/l2-run.sh` 的四步实测：
+
+```
+[1/4] backend ./mvnw verify
+[2/4] pnpm typecheck && pnpm lint && pnpm test     ← 无 --force
+[3/4] NEXT_TELEMETRY_DISABLED=1 pnpm --filter @starcon/web build
+[4/4] node tools/module-progress/sync.mjs --check
+```
+
+⇒ **四步里没有 `contracts:generate`** ⇒ **集成头的 L2 永远不跑 canonical 契约闸**。
+canonical 闸目前**只存在于 CI**（`.github/workflows/ci.yml:140-141`：
+`pnpm contracts:generate` + `git diff --exit-code -- packages/api-contracts/src`）。
+
+⇒ ⇒ **契约类变更在集成头上是「无闸区」** —— 只有 CI 会拦，流水线本地拦不住。
+⇒ 这正是判据 E 必须在同步任务里**显式**跑的原因（它补的是 L2 缺的那道闸）。
+
+### 📌 附：canonical 重生成命令**已在协议里**
+
+`PIPELINE.md` 第 6 条（车道任务书纪律）原文：
+「契约是 codegen 产物，**禁止手改**：
+`python3 tools/codegen/catalog-contracts.py --spec-dir backend/target/openapi`」
+
+⇒ 判据 E 用的正是这条协议命令，不是自创配方。
+
+### ⚠️ 已知缺口五：`Lint` job **长期红**（存量债），判据要看**差集**而不是总数
+
+实测（2026-10-22 15:5x）：
+
+| 检查项                                                                            | 结果                                       |
+| --------------------------------------------------------------------------------- | ------------------------------------------ |
+| `pnpm format:check` 全仓失败文件数                                                | **620 个**（多为历史 `.tsx` / `.test.ts`） |
+| 近期三个提交（`937e2430` / `ef45304a` / `50bc8264`）改动文件的 `prettier --check` | **全部 clean ✓（0 个新增格式债）**         |
+
+⇒ **`Lint` job 早就是红的**，这是**存量债**，不是本轮合入造成的。
+⇒ ⚠️ **下轮汇报绝不能报「仓库总数 620 个文件不合 Prettier」** ——
+那是存量，会被误当成回归。**判据必须是「本轮改动文件的 prettier 失败数」= 0**，
+也就是**失败文件集合的差集**，不是仓库总数。
+
+具体断言方式（逐文件，覆盖 CI 的匹配范围 `**/*.{ts,tsx,js,jsx,json,md,yaml,yml}`）：
+
+```bash
+# 本轮 merge commit 改动的每个源文件都必须 prettier-clean
+git show --name-only --format='' <本轮 merge commit> \
+  | grep -E '\.(ts|tsx|js|jsx|json|md|yaml|yml)$' \
+  | while read -r f; do [ -f "$f" ] || continue; \
+      pnpm exec prettier --check "$f" >/dev/null 2>&1 || echo "DIRTY: $f"; done
+```
+
+⇒ 期望输出为空。**非空 ⇒ 本轮新增了格式债 ⇒ 要报。**
+
+### 📌 附：`__pycache__` 与 prettier 两件事的当前状态
+
+- `__pycache__/` **已在 `origin/integration/module-dev` 的 `.gitignore` 第 106 行** ✓
+  （14:00 tick 的独立 `chore(gitignore)` commit 已落地）⇒ 下轮按「module-dev 侧已有」处理，
+  **不回加到 PR#1 分支**（避免两边各加同一行撞 add/add）。
+- 本清单文件的 prettier 修复**已由本会话的自执行脚本完成**
+  （提交前跑了 `prettier --write`，`ef45304a` 已 prettier-clean）⇒ **不需要再找 tick 补这一步**。
+
+### 📌 `1e-06` 的逐服务出现次数（断言口径，2026-10-22 实测）
+
+| 服务      | `1e-06` 次数 | `0.000001` 次数 |
+| --------- | ------------ | --------------- |
+| identity  | **0**        | 0               |
+| catalog   | 2            | 0               |
+| channel   | 5            | 0               |
+| warehouse | **0**        | 0               |
+| trade     | **0**        | 0               |
+| crm       | 6            | 0               |
+
+⇒ ⚠️ **断言必须写成「不得有 `0.000001`（JS 形态指纹）」**，
+写成「必须有 `1e-06`」会在 identity / warehouse / trade 上**误判 FAIL**。
+
 ## §3 本清单要区分的两类「契约文件变化」
 
 | 类别                           | 含义                                                       | 判定                 | 标注写法                                       |
@@ -328,6 +425,32 @@ python3 -m unittest discover -s tools/codegen -p 'test_*.py'          # 生成�
 ⇒ 修复的正确性就架在这两组测试上；下轮若不显式执行，判据 E 即使绿，
 也只能证明「这一次的产物是 canonical 的」，证明不了「驱动不会再次写坏」。
 
+### 判据 H —— ⭐ 契约有变更时，L2 的前端三步**必须带 `--force`**
+
+```bash
+pnpm typecheck --force && pnpm lint --force && pnpm test --force
+```
+
+⚠️ **理由（见 §2 已知缺口三）**：`packages/api-contracts/` **不是 turbo 包**、
+不在任何 task 的 `inputs` 里、也不在 `globalDependencies` 里
+⇒ 改契约**不会**让 turbo 缓存失效 ⇒ 三步可以**整段 replay 旧缓存**。
+⇒ 且协议里**没有**任何 `--force` 规则（三处 `force` 字样全在说别清闸）。
+⇒ **契约有变更时，不带 `--force` 的前端三步等于没跑。**
+
+### 判据 I —— ⭐ L2 缺的那道 canonical 闸，由同步任务补上
+
+```bash
+# 等价于 CI 的 catalog-e2e 同款（ci.yml:140-141），但在集成头本地显式跑
+pnpm contracts:generate
+git diff --exit-code -- packages/api-contracts/src
+```
+
+⚠️ **理由（见 §2 已知缺口四）**：`.dev-agent/l2-run.sh` 的四步**没有** `contracts:generate`
+⇒ 集成头的 L2 **从不验证契约是否 canonical** ⇒ canonical 闸只存在于 CI。
+⇒ 下轮同步必须显式补上，否则「集成头 L2 全绿」**不包含**「契约是 canonical 的」这层保证。
+⚠️ `pnpm contracts:generate` **会写仓库里的契约产物** ⇒ 执行前先确认工作区干净，
+跑完若产生改动必须**明确归因**（是「本次生成与已提交不一致」＝问题，还是「纯排版」＝预期）。
+
 ## §5 下一轮同步的汇报义务
 
 1. 明确写出契约文件的变化属于**类别①（回归）还是类别②（预期的一次性排版变更）**。
@@ -345,6 +468,19 @@ python3 -m unittest discover -s tools/codegen -p 'test_*.py'          # 生成�
 6. ⭐ 报出 **§0 的前置断言结果**（main 是否已是修好的驱动）—— 这是 module-dev→main 能否放行的前提。
 7. ⭐ 报出 **判据 G 的两条回归结果**（驱动 itest + codegen 单测的 exit code 与断言数）——
    CI 与 L2 都不跑它们，只能靠下轮同步显式执行。
+8. ⭐ 报出 **判据 H 的执行方式**（契约有变更时前端三步是否带了 `--force`）——
+   不带 `--force` 的前端三步在契约变更后可能全是缓存回放。
+9. ⭐ 报出 **判据 I 的结果**（本地 `contracts:generate` + `git diff --exit-code` 是否为空）——
+   L2 四步里没有这道闸，只能靠同步任务补。
+10. ⭐ 核对 **`__pycache__` 是否真的进了集成头**：
+    `git show origin/integration/module-dev:.gitignore | grep __pycache__`
+    （**已确认在第 106 行 ✓** —— 14:00 tick 的独立 `chore(gitignore)` commit 已落地；
+    下轮按「module-dev 侧已有」处理，**不回加到 PR#1 分支**）。
+11. ⭐ 报出 **本轮新增的格式债 = 本轮改动文件的 prettier 失败数**（期望 **0**）。
+    ⚠️ **不要**报「仓库总数 620 个文件不合 Prettier」—— 那是**存量债**，`Lint` 早已长期红，
+    报总数会被当成回归（见 §2 已知缺口五）。
+12. ⭐ 报出 **判据 J（itest 接入 CI/L2）的当前状态** —— 13 个 `*.itest.mjs` 目前仍无自动执行点；
+    「接进 CI 或写进 PIPELINE.md 的 L2 清单」已被列为**待用户定夺的协议建议**（未擅自改协议文件）。
 
 ## §6 相关链接
 
