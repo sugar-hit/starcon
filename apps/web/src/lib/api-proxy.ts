@@ -8285,6 +8285,57 @@ const services: readonly {
     pattern:
       /^cart\-recovery\/(?:capabilities|policy|recovery\-rate|sync|shops(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|messages(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:approve|enable|disable))?)?|unsubscribes(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|touches(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/result)?|abandonments(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:touches|recoveries))?)?)$/,
   },
+  {
+    // ---------------------------------------------------------------------------
+    // 15.4.1.2 工单处理（crm 服务）
+    // ---------------------------------------------------------------------------
+    //
+    // ---- 插入锚点固定在 **services[] 数组的末尾**（最后一条元素之后、数组结尾的 `];` 之前）----
+    //   同批另外三条车道的锚点分别是「`account-health` 之后」「`performance-metrics` 之后」
+    //   「`platform-violations` 之后」，与本锚点互不重叠，git 能干净求并。
+    //
+    // ---- 纯**新增一条独立的 `services[]` 元素** ----
+    //   既有条目**一字未动、也不重排**。往既有那条巨型 alternation 里并分支会让多车道
+    //   同时并入时 git 必然判冲突（结构性，retry 永远不会自愈）。
+    //
+    // ---- 首 token「service-ticket-process」的零命中核对结论 ----
+    //   本文件既有 services[] 正则里**没有任何一条**含 `service-ticket-process` 这个串
+    //   （既有的同族首 token 是 `service-tickets` —— 15.4.1.1 工单列表，
+    //   以及 trade 侧那条 `service-tickets` 写端点分支）。
+    //   ⚠️ `service-ticket-process` 与 `service-tickets` **不是前缀关系**：
+    //   前者的第 5 段是 `process`、后者是 `s`，两者在第 13 个字符处就分叉，
+    //   所以既有那条 `^service\-tickets...$` 分支**不会**吃掉本模块的任何路径，
+    //   本模块的分支也**不会**吃掉 15.4.1.1 的任何路径（双向都实测过）。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   service-ticket-process/capabilities                   能力声明（逐维 available + ownerModule）
+    //   service-ticket-process/tickets                        处理队列（GET，真分页 / 真筛选）
+    //   service-ticket-process/tickets/{uuid}                 单张工单的处理视图（GET）
+    //   service-ticket-process/tickets/{uuid}/notes           备注与回复（GET 列表 / POST 新建）
+    //   service-ticket-process/tickets/{uuid}/actions         处理记录（GET，append-only 动作时间线）
+    //   service-ticket-process/tickets/{uuid}/links           关联单据（GET 列表 / POST 关联）
+    //   service-ticket-process/tickets/{uuid}/resolutions      解决确认（GET 列表 / POST 确认）
+    //   service-ticket-process/tickets/{uuid}/resolutions/{uuid}/revoke  撤销解决确认（POST）
+    //   service-ticket-process/tickets/{uuid}/replies         回复（POST）
+    //   service-ticket-process/tickets/{uuid}/status          状态流转（POST）
+    //   service-ticket-process/tickets/{uuid}/close           关闭工单（POST，**≠ 解决**）
+    //   service-ticket-process/tickets/{uuid}/satisfaction    满意度回收（POST）
+    //   service-ticket-process/tickets/{uuid}/sla/pause       SLA 暂停（POST）
+    //   service-ticket-process/tickets/{uuid}/sla/resume      SLA 恢复（POST）
+    //   service-ticket-process/tickets/{uuid}/escalate        升级（POST）
+    //
+    // 判别顺序：**字面量子路径（capabilities / tickets）排在 {uuid} 段之前** ——
+    //   alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //   （不是 `[0-9a-f-]+`）：后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行。
+    // ⚠️ **末尾刻意不带 `?`**：带了就等于放行裸路径 `service-ticket-process` ——
+    //   后端没有「一条不存在的汇总列表接口」，放行它会让界面以为可用。
+    prefix: 'crm/',
+    env: 'CRM_URL',
+    fallback: 'http://127.0.0.1:8086',
+    pattern:
+      /^service\-ticket\-process\/(?:capabilities|tickets(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:notes|replies|status|close|resolutions|satisfaction|links|actions|escalate)(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/revoke)?|\/sla\/(?:pause|resume))?)?)?$/,
+  },
 ];
 
 function resolve(path: string) {
