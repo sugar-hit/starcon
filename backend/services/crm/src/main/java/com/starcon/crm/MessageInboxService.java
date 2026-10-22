@@ -52,7 +52,7 @@ import org.springframework.web.server.ResponseStatusException;
  * <p><b>加粗句「消息必须关联到买家与订单」在本服务落成三层</b>：
  *
  * <ol>
- *   <li><b>DB 层</b>（V291）：{@code crm_message.buyer_reference} / {@code order_reference}
+ *   <li><b>DB 层</b>（V293）：{@code crm_message.buyer_reference} / {@code order_reference}
  *       是 NOT NULL + CHECK（空串也不行）—— 一条没有买家、没有订单的消息<b>根本存不进去</b>。
  *   <li><b>服务层</b>（本类）：登记时**必填**，且订单标识不能是空白。
  *   <li><b>展示层</b>：详情视图给出<b>订单上下文</b>；查不到时显示
@@ -75,7 +75,7 @@ public class MessageInboxService {
 
   // ================================================================ 常量
 
-  /** 已读状态（与 V291 的 CHECK 同词表）。 */
+  /** 已读状态（与 V293 的 CHECK 同词表）。 */
   static final List<String> READ_STATUSES = List.of("UNREAD", "READ", "ARCHIVED");
 
   /** 收发方向。 */
@@ -144,7 +144,7 @@ public class MessageInboxService {
                 "buyer_order_linkage",
                 "🔴 消息必须关联到买家与订单",
                 true,
-                "本服务 V291 crm_message.buyer_reference / order_reference（NOT NULL + CHECK）",
+                "本服务 V293 crm_message.buyer_reference / order_reference（NOT NULL + CHECK）",
                 "",
                 "一条**没有买家、没有订单**的消息在本库里存不进去 —— "
                     + "「留空以后再补」在客服场景里等于「永远补不上」"),
@@ -207,7 +207,7 @@ public class MessageInboxService {
                 "batch_processing",
                 "批量处理（已读 / 优先级 / 归档 / 处置意图）",
                 true,
-                "本服务 V291 + POST /crm/message-inbox/batch（逐条给出结论与原因）",
+                "本服务 V293 + POST /crm/message-inbox/batch（逐条给出结论与原因）",
                 "",
                 "批量处理**逐条**给出成功与否与原因；失败的条目不会被悄悄跳过"),
             new CrmMessageCapabilityDimension(
@@ -273,7 +273,7 @@ public class MessageInboxService {
    * 筛选下拉的词表。
    *
    * <p>平台与店铺来自**本租户真实数据**（不是硬编码词表）；
-   * 类型 / 优先级 / 方向 / 已读状态是 **DB CHECK 允许的取值域**（V291 钉死），
+   * 类型 / 优先级 / 方向 / 已读状态是 **DB CHECK 允许的取值域**（V293 钉死），
    * 列出来是为了让界面能筛，而不是为了让界面自己编一套取值。
    */
   public CrmMessageOptions options() {
@@ -1043,7 +1043,7 @@ public class MessageInboxService {
             + "对着不存在的店铺登记消息，它在「按店铺」筛选下会永远不出现。");
   }
 
-  /** 消息号：MSG-yyyyMMdd-000001（序列单独授权，见 V291 授权段）。 */
+  /** 消息号：MSG-yyyyMMdd-000001（序列单独授权，见 V293 授权段）。 */
   private String nextMessageNo() {
     var row =
         sql.fetchOne(

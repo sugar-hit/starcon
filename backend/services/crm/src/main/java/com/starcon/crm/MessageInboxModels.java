@@ -29,7 +29,7 @@ import java.util.UUID;
  *
  * <ul>
  *   <li><b>买家与订单是必填，不是可选</b>：{@code buyerReference} / {@code orderReference}
- *       在 V291 里是 NOT NULL + CHECK（空串也不行），模型层用 {@code @NotBlank} 与之一致 ——
+ *       在 V293 里是 NOT NULL + CHECK（空串也不行），模型层用 {@code @NotBlank} 与之一致 ——
  *       蓝图加粗句说「消息必须关联到买家与订单」，那是<b>硬要求</b>，
  *       做成可选输入框等于把它降级成「建议填」。</li>
  *   <li><b>金额与数量原样透传</b>：订单上下文里的金额是 {@link BigDecimal}（trade 侧 numeric），

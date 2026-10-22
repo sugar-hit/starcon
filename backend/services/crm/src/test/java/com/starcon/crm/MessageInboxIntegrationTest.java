@@ -323,7 +323,7 @@ class MessageInboxIntegrationTest {
       var row =
           sql.fetchOne(
               "select relrowsecurity, relforcerowsecurity from pg_class where relname = ?", table);
-      assertThat(row).as("V291 必须真的建出 " + table).isNotNull();
+      assertThat(row).as("V293 必须真的建出 " + table).isNotNull();
       assertThat(row.get(0, Boolean.class)).as(table + " 未启用 RLS").isTrue();
       assertThat(row.get(1, Boolean.class)).as(table + " 只有 FORCE 才挡得住").isTrue();
       assertThat(
