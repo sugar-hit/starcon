@@ -2,8 +2,14 @@
 
 **优先级：P1 —— 不是 bug，是「修复落地那一轮同步」的验收清单。**
 
-**状态：修复车道已提交 `e5cb2f11`（驱动修复 + 生成器 `sort_keys`）但**尚未落地到 `origin/main`**；
-11 个契约产物待提交（第 2 笔）。落地后由 batch-62 流水线会话知会同步任务，
+**状态（2026-10-22 14:5x 实测）**：
+- ✅ 修复 `e5cb2f11`（驱动 + 生成器 `sort_keys`）与产物 `c862c529`（11 个重生成产物）
+  **都已并入 `origin/integration/module-dev`**（经 `2d2f2ea3`）；
+- ⛔ **两者都还不在 `origin/main`**（main 仍是 `b49fe44c`）；
+- ⛔ **`__pycache__` 的 gitignore 条目还没进集成头**（实测 `.gitignore` 里无 `__pycache__`）；
+- ⚠️ ⇒ **§0 的守卫断言当前输出 STOP**，module-dev→main **只能先放 PR#1**。
+
+落地后由 batch-62 流水线会话知会同步任务，
 下一轮 `main → integration/module-dev` 同步必须按本清单逐项校验。**
 
 > 本清单的数据全部是 **2026-10-22 14:3x–14:5x 实测**（`origin/integration/module-dev` = `75ef992a` 的树）。
@@ -52,6 +58,23 @@ git show origin/main:tools/module-progress/merge-union.mjs | grep -q 'json-forma
 ```
 
 ⇒ **未通过 ⇒ 绝不放行任何契约产物。**
+
+### ⚠️ 风险规模：**全量重写**，不是「个别文件」
+
+用判据 F 反推：module-dev 与 main 的契约差异面 = **11 个文件**（产物落地后）。
+⇒ module-dev→main 合并时**这 11 个文件全部会被触及 ⇒ 驱动对全部触发**
+⇒ 旧驱动会把 11 个文件**全部**写回 JS 形态。
+
+实测该差异面的规模（`git diff --shortstat origin/main origin/integration/module-dev -- packages/api-contracts/`）：
+
+```
+11 files changed, 347473 insertions(+), 347473 deletions(-)
+```
+
+⇒ 增删行数**完全相等** ⇒ 纯重排、零内容丢失（与修复车道复验的结论一致）。
+⇒ 但这 11 个文件一旦被旧驱动处理，就**全部**退回 JS 形态 ⇒ main 的 CI 继续红。
+
+**当前实测（14:5x）：守卫断言输出 `STOP` ⇒ PR#2 现在不能走。**
 
 ### 复核复现配方（任何人可重跑）
 
@@ -138,6 +161,25 @@ git merge feat && cat /tmp/drivertest/log.txt
 
 ⇒ **`__pycache__` gitignore 条目必须随 PR#1 一起进**（实测：`git check-ignore` 无命中）。
 
+### ⚠️ 已知缺口二：`*.itest.mjs` 回归测试**没有任何自动执行点**
+
+实测（2026-10-22 14:5x）：
+
+| 检查项                                                       | 结果                                             |
+| ------------------------------------------------------------ | ------------------------------------------------ |
+| `vitest.config` 的 include                                     | `['apps/**/*.test.ts', 'packages/**/*.test.ts']` ⇒ **不含** `tools/**` |
+| `package.json` scripts                                        | **没有任何** script 跑 `*.itest.mjs`             |
+| `.github/workflows/**`                                        | **无** `itest` 引用                              |
+| `tools/module-progress/PIPELINE.md`（L2 步骤）                 | **无** `itest` 引用                              |
+| `lane.mjs:927` 对 `merge-union.itest.mjs` 的引用               | 是**未跟踪文件清理白名单**，**不是执行点**        |
+
+⇒ 仓库里有 **13 个** `tools/module-progress/*.itest.mjs`（含修复车道新增的
+`merge-union.itest.mjs`，33 条断言），**CI 不跑、L2 不跑、任何脚本都不跑**，
+只有人手动 `node <file>` 才会执行 ⇒ **回归测试形同虚设**。
+
+⇒ 本轮 14:00 tick **显式手动跑过** `merge-union.itest.mjs`（33 断言全绿），
+但这**不是**自动保障 ⇒ **下轮同步必须显式再跑一遍**（见判据 G）。
+
 ## §3 本清单要区分的两类「契约文件变化」
 
 | 类别 | 含义 | 判定 | 标注写法 |
@@ -206,16 +248,34 @@ diff -r /tmp/canon_contracts packages/api-contracts/src
 实测 `git ls-files backend/target/` = **0**）⇒ 它只是**某次 `mvnw verify` 跑契约测试时的产物**，
 且 6 份快照**随 reactor 推进逐个写出**（实测 13:13:24 identity → 13:55:05 crm，跨 42 分钟）。
 
-⇒ **前置：本轮 `mvnw verify` 必须已跑完**，且快照来自**当前 HEAD 的后端代码**。机械判定（两条都要过）：
+⇒ **前置：本轮 `mvnw verify` 必须已跑完**，且快照来自**当前 HEAD 的后端代码**。
+机械判定（两条都要过）：
 
 ```bash
 ls backend/target/openapi/*.openapi.json | wc -l        # == 6，且每份 mtime 晚于本轮 merge commit 的提交时间
 git diff --name-only <生成快照时的 commit> HEAD -- backend/services/        # 必须为空
-git diff --name-only <生成快照时的 commit> HEAD -- packages/api-contracts/ # 必须为空
 ```
 
-⚠️ **拿旧快照跑判据 E 会假绿**：旧快照比当前 spec 少 path，本该「更容易对不上」；
-但若旧快照恰好与旧已提交文件同源，就会被误判成「已 canonical」。
+⚠️ **只有 `backend/services/` 是前置条件，`packages/api-contracts/` 不是。**
+（v4 初稿把两者都列成前置，是**错的** —— 已于 2026-10-22 14:5x 修正。）
+理由：**契约文件就是判据 E 的测量目标**，不是前置。
+判据 E 要回答的是「**当前已提交的契约**，对当前后端 spec 来说，是不是 canonical 的」——
+所以「契约相对快照变了」恰恰是它要测的东西；
+只有**后端代码变了**才会让快照里的 spec 过期，从而让判据 E 失去意义。
+
+**实测印证（2026-10-22 14:5x，集成头 `e328e9c2`）**：
+`git diff --name-only 2f784133 HEAD -- backend/services/` = **0**（后端代码未变 ⇒ 快照仍是当前的）
+、`-- packages/api-contracts/` = **11**（契约变了 = 正是要测的）
+⇒ 判据 E 实跑 `diff -rq` ⇒ **零输出、逐字节一致 ✓** ⇒ 集成头侧的 11 个产物**已是 canonical**。
+
+⚠️ **假绿风险的正确表述**（v4 初稿也写错过一次）：
+**只有当 `backend/services/` 在快照生成之后变过时，判据 E 才会假绿** ——
+旧快照对应的是旧 spec，若旧 spec 恰好与旧已提交契约同源，
+就会把「契约已经过期于当前后端」误判成「已 canonical」。
+⇒ 判据 E 的结论**必须与 `backend/services/` 未变这一条一起报**，
+单独报「判据 E 通过」是不够的。
+
+
 
 #### 判据 E 与 CI 等价吗？—— 等价（构造性论证，下轮不必重推）
 
@@ -256,8 +316,20 @@ packages/api-contracts/src/warehouse.openapi.json  |  2 +-
 所以没被本轮改写 —— 它们的大漂移**来自更早的车道合并**，不是本轮引入。
 ⇒ **下轮判读漂移来源时，先跑判据 F 定位改写面，再区分本轮引入 vs 历史遗留。**
 
-## §5 下一轮同步的汇报义务
+### 判据 G —— ⭐ 回归测试必须**显式执行**（CI 与 L2 都不跑它）
 
+```bash
+node tools/module-progress/merge-union.itest.mjs                       # 驱动回归（33 断言）
+python3 -m unittest discover -s tools/codegen -p 'test_*.py'          # 生成器回归（17 例，等价 pnpm test:codegen）
+```
+
+⇒ 两条都必须 **exit 0**。
+⚠️ **为什么必须显式跑**：见 §2「已知缺口二」—— `*.itest.mjs` 不在 vitest include 里、
+没有任何 package.json script 跑它、CI 不跑、L2 不跑 ⇒ **不显式跑就等于没跑**。
+⇒ 修复的正确性就架在这两组测试上；下轮若不显式执行，判据 E 即使绿，
+也只能证明「这一次的产物是 canonical 的」，证明不了「驱动不会再次写坏」。
+
+## §5 下一轮同步的汇报义务
 1. 明确写出契约文件的变化属于**类别①（回归）还是类别②（预期的一次性排版变更）**。
 2. 若属类别②，列出具体变了哪几个文件、**导出声明数与 `paths` 数是否不变**。
    ⇒ **数量不变** 是「排版变更」与「内容丢失」的**分界线**：数量若变了 ⇒ 是内容丢失 ⇒ **回归**，要查。
@@ -271,6 +343,8 @@ packages/api-contracts/src/warehouse.openapi.json  |  2 +-
    若将来要改正文，**只能在 module-dev→main 方向落**，那边 main 已有该文件 ⇒ 不会 add/add）。
 5. 报出**判据 F 的清单**（本轮 merge 改了哪些契约文件），用它区分「本轮引入」与「历史遗留」。
 6. ⭐ 报出 **§0 的前置断言结果**（main 是否已是修好的驱动）—— 这是 module-dev→main 能否放行的前提。
+7. ⭐ 报出 **判据 G 的两条回归结果**（驱动 itest + codegen 单测的 exit code 与断言数）——
+   CI 与 L2 都不跑它们，只能靠下轮同步显式执行。
 
 ## §6 相关链接
 
