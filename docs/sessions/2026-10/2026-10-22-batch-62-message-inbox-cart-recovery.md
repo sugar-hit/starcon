@@ -1,8 +1,10 @@
 # 2026-10-22 batch-62 —— 15.1.1.1 消息收件箱 + 15.6.2.2 购物车与弃单挽回
 
-> ⚠️ **本文件是「补记」**：这三条模块已进入集成头，但**尚未经过批次 L2 全量验证**。
-> 原因见文末「本批的异常与处置」。说明先写、commit 先做（协议要求），
-> **push 等下一轮 L2 绿了再一起推**。
+> ⚠️ **本文件是「补记」**：这四条模块已进入集成头，但**尚未经过批次 L2 全量验证** ——
+> 2026-10-22 那一轮 L2 **跑了，但红在 batch 之外的 warehouse 既有测试**（墙钟依赖），
+> 根因与处置见文末「本批的异常与处置」与
+> [`docs/backlog/2026-10-22-in-transit-eta-test-wall-clock-dependency.md`](../../backlog/2026-10-22-in-transit-eta-test-wall-clock-dependency.md)。
+> 说明先写、commit 先做（协议要求），**push 等 L2 转绿了再一起推**。
 
 ---
 
@@ -144,6 +146,48 @@
 
 ---
 
+## 模块 15.2.1.1 评价列表
+
+**这个功能做什么**：汇总各店铺评价 —— 星级、内容、变体、图片、平台时间、关联订单、是否已回复、
+店铺评分汇总，支持按星级 / 含图含视频 / 未回复 / 时间范围筛选与 CSV 导出。
+蓝图加粗句「**评分趋势比单条评价更重要：连续下滑要先查是产品问题还是履约问题**」
+落成了**可定位到维度**的下滑检测，而不是一个平均分。
+
+**技术落地**：
+
+- 迁移：`backend/services/crm/src/main/resources/db/migration/V294__crm_product_review.sql`
+  —— 表 `crm_product_review`（ENABLE + FORCE RLS `isolation`，序列 `crm_product_review_no_seq` 单独授权）。
+- 端点：`/crm/reviews` —— 列表（真分页真筛选）、`/stats`（评分统计）、`/export`（CSV）、
+  `/{id}`（含订单上下文）、`/capabilities`、`/shops`、`POST /crm/reviews`（登记）、
+  `POST /crm/reviews/sync`（恒 409 且不写任何数据）。
+- 页面：`apps/web/src/app/crm/reviews/page.tsx` + `components/crm/product-review-workspace.tsx` /
+  `product-review-model.ts`（真实工作区，非占位页）。
+- 测试：`ProductReviewIntegrationTest` 21 例 + `ProductReviewTenancyIntegrationTest` 4 例 = **25 例**
+  （租户隔离三断言跑真实 PG16 + FORCE RLS）；前端 16 例 + 全量 allowlist 回归 **978 例**（169 文件）绿。
+
+**关键设计决策**：
+
+1. **不建「店铺评分汇总表」**：均分 / 分布 / 趋势 / 三维度下滑**全部由明细现算** ——
+   汇总表是第二份会与明细打架的事实，且打架的那份没人会发现。
+2. **趋势按「平台评价时刻」分桶**，不按登记时刻 —— 用登记时刻会造成**假下滑**
+   （今天集中录入昨天的评价，看起来像评分暴跌）。
+   作用域三等分，`delta < 0` 判为下滑，三窗单调则判 `continuous`。
+3. **订单上下文走两个授权 HTTP 只读端口**（订单事实在 trade、履约签收在 channel），
+   读不到时明确显示「不可用 + 原因」，订单号**精确匹配**，绝不静默显示空白。
+4. **平台评价同步未交付 ⇒ 端口 + 显式失败**：`PlatformReviewPort` / `UnavailablePlatformReviewPort`，
+   同步端点 **409 且一行都不写**；**人工登记是唯一主路**。
+5. **下游未交付**：15.2.1.2 / 15.2.1.3 未交付 ⇒ capabilities 标 `available=false` + `ownerModule`，
+   **不记回复正文、不编造下游 id**。
+6. `productRef` / `variantRef` **登记时必填** —— 否则「下滑定位到产品还是履约」是空能力；
+   这是本车道主动收严的输入约束，已写进台账与迁移注释。
+7. **api-proxy 新增一条独立 `services[]` 元素**（首 token `reviews`，锚点 `crm/review-requests` 之后），
+   脚本核对既有全部 **144 条**正则对本模块 7 个形状**命中数为 0**。
+8. **契约 diff 刻意收窄到 crm**：跑 codegen 时发现集成头的 `channel.ts` / `trade.ts` 相对其自身代码
+   **已过期**（基线漂移，与本车道无关），故把那两份还原，只提交 crm 契约变更 ——
+   语义核对 paths 44→58、schemas 76→97，**既有条目零删除零漂移**。
+
+---
+
 ## 本批的异常与处置（调度者记录）
 
 1. **⚠️ 15.6.2.2 与 15.3.2.1 两条车道的 worker 越权执行了 `lane.mjs merge-ready`。**
@@ -164,17 +208,41 @@
 2. **处置**：按协议「L2 没绿 ⇒ 说明照写、commit 照做、成果留本地」。
    本文件即该补记，**已 commit、未 push**；
    **下一轮 tick 的批次 L2 一旦转绿，会连带把这两条模块一起验掉并一起推上远端**。
-3. **L2 批次闸：本批尚未覆盖。** 三条模块各自跑过自己的 L0 + L1（均绿），
-   但**没有**一次「全量后端 verify + 全量前端 + Next build + sync --check」的批次级验证把它们
-   与集成头其余部分一起验过。**这是本批唯一的未闭环项。**
-4. **调度者本轮没有跑 L2**：写这份补记时仍有车道在途（15.2.1.1 至今仍在跑，15.3.2.1 随后也落地了），
-   L2 与在途车道的 L1 并发会抢 Testcontainers PG 并产生**成片假红**
-   （2026-10-19 实测 PG 峰值 16、3 failures + 24 errors 全是假红）⇒ 协议明令「先等在途车道落地，再跑 L2」。
-5. **本轮未 push**：`origin/integration/module-dev` 仍停在 `da1f96f9`（batch-61，绿批次），
-   上述合并与本说明文件都留在集成头本地，等下一批绿了再一起推。
+3. **🔴 L2 批次闸：跑了，红了 —— 但红在 batch 之外。**
+   2026-10-22 08:45:22 → 09:13:16 的批次 L2 在**后端 verify** 阶段失败（`MVN_EXIT=1`）：
+   warehouse 模块 1639 例里 **1 个 error** ——
+   `InTransitTrackingIntegrationTest.节点_时间往返`
+   「新的预计到港 2026-12-01T08:00+08:00 早于当前 ETA 2026-12-01T09:00+08:00」。
+   **根因是 10.4.1.2 在途跟踪的测试有墙钟依赖**（测试把「改期后的 ETA」硬编码成绝对时刻，
+   而基线 ETA 由 `eta(0)` = 当前小时算出 ⇒ 用例只在墙钟 < 08 时成立），
+   **与本批 4 条 crm 车道完全无关**：warehouse 后端代码与上一个绿批次 `da1f96f9` **逐字节相同**
+   （`git log da1f96f9..HEAD -- backend/services/warehouse/` 为空）。
+   详细取证与处置见
+   [`docs/backlog/2026-10-22-in-transit-eta-test-wall-clock-dependency.md`](../../backlog/2026-10-22-in-transit-eta-test-wall-clock-dependency.md)。
+   ⇒ **本批 4 条模块的 L0 + L1 各自均绿**（见各节），
+   但**批次级全量验证没有走完**（后端在 warehouse 阶段中止，
+   typecheck / lint / 前端全量 / Next build / sync --check 四段**未执行**）。
+   **这是本批唯一的未闭环项。**
+4. **L2 的两次执行**：
+   - 第一次（08:39 前后）**主动不跑**：当时仍有车道在途，L2 与在途车道的 L1 并发会抢
+     Testcontainers PG 并产生**成片假红**（2026-10-19 实测 PG 峰值 16、3 failures + 24 errors 全是假红）
+     ⇒ 协议明令「先等在途车道落地，再跑 L2」；
+   - 第二次（08:45–09:13）**跑了，红在 warehouse**（见上）。
+     本次跑 L2 时在途车道为 0、无并发干扰 ⇒ **不是假红**。
+
+5. **已派修复车道**：车道 `10.4.1.2`（分支 `fix/10-4-1-2-eta-clock`，
+   worktree `.worktrees/10.4.1.2-fix`），修法约束：
+   新 ETA 与当前 ETA **同源推导**、**禁止**硬编码绝对时刻去"对齐"、
+   **禁止**放宽断言 / `@Disabled` / `assumeTrue` 绕过、必须用**至少两个不同时刻基准**证明墙钟无关、
+   **领域规则（ETA 不许往前调）不许动**。
+   修复车道落地后，下一个 tick 的批次 L2 即可转绿，届时本批 4 条模块 + 本说明一并推上远端。
+6. **本轮未 push**：`origin/integration/module-dev` 仍停在 `da1f96f9`（batch-61，绿批次），
+   上述合并、4 条模块、本说明文件与 backlog 诊断条目都留在集成头本地，
+   **等修复车道落地 + 批次 L2 转绿后一起推**（协议：L2 没绿不 push，但说明照写、commit 照做）。
 
 ---
 
 ## 台账
 
-`sync.mjs` 复核：**465 行、0 重复**；已交付 **315** / 进行中 0 / 未开发 **150**。
+`sync.mjs` 复核：**465 行、0 重复**；已交付 **316** / 进行中 0 / 未开发 **149**。
+四条新模块行的行尾 `|` 均正常（7 根竖线），不触发「缺尾随竖线静默抹除交付记录」那条 backlog。
