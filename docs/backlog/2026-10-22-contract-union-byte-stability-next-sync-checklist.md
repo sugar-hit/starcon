@@ -230,6 +230,40 @@ canonical 闸目前**只存在于 CI**（`.github/workflows/ci.yml:140-141`：
 
 ⇒ 判据 E 用的正是这条协议命令，不是自创配方。
 
+### ⚠️ 已知缺口五：`Lint` job **长期红**（存量债），判据要看**差集**而不是总数
+
+实测（2026-10-22 15:5x）：
+
+| 检查项                                                                            | 结果                                       |
+| --------------------------------------------------------------------------------- | ------------------------------------------ |
+| `pnpm format:check` 全仓失败文件数                                                | **620 个**（多为历史 `.tsx` / `.test.ts`） |
+| 近期三个提交（`937e2430` / `ef45304a` / `50bc8264`）改动文件的 `prettier --check` | **全部 clean ✓（0 个新增格式债）**         |
+
+⇒ **`Lint` job 早就是红的**，这是**存量债**，不是本轮合入造成的。
+⇒ ⚠️ **下轮汇报绝不能报「仓库总数 620 个文件不合 Prettier」** ——
+那是存量，会被误当成回归。**判据必须是「本轮改动文件的 prettier 失败数」= 0**，
+也就是**失败文件集合的差集**，不是仓库总数。
+
+具体断言方式（逐文件，覆盖 CI 的匹配范围 `**/*.{ts,tsx,js,jsx,json,md,yaml,yml}`）：
+
+```bash
+# 本轮 merge commit 改动的每个源文件都必须 prettier-clean
+git show --name-only --format='' <本轮 merge commit> \
+  | grep -E '\.(ts|tsx|js|jsx|json|md|yaml|yml)$' \
+  | while read -r f; do [ -f "$f" ] || continue; \
+      pnpm exec prettier --check "$f" >/dev/null 2>&1 || echo "DIRTY: $f"; done
+```
+
+⇒ 期望输出为空。**非空 ⇒ 本轮新增了格式债 ⇒ 要报。**
+
+### 📌 附：`__pycache__` 与 prettier 两件事的当前状态
+
+- `__pycache__/` **已在 `origin/integration/module-dev` 的 `.gitignore` 第 106 行** ✓
+  （14:00 tick 的独立 `chore(gitignore)` commit 已落地）⇒ 下轮按「module-dev 侧已有」处理，
+  **不回加到 PR#1 分支**（避免两边各加同一行撞 add/add）。
+- 本清单文件的 prettier 修复**已由本会话的自执行脚本完成**
+  （提交前跑了 `prettier --write`，`ef45304a` 已 prettier-clean）⇒ **不需要再找 tick 补这一步**。
+
 ### 📌 `1e-06` 的逐服务出现次数（断言口径，2026-10-22 实测）
 
 | 服务      | `1e-06` 次数 | `0.000001` 次数 |
@@ -440,7 +474,13 @@ git diff --exit-code -- packages/api-contracts/src
    L2 四步里没有这道闸，只能靠同步任务补。
 10. ⭐ 核对 **`__pycache__` 是否真的进了集成头**：
     `git show origin/integration/module-dev:.gitignore | grep __pycache__`
-    （14:00 tick 承诺本轮补一个独立 `chore(gitignore)` commit ⇒ 下轮**验证它真的进了**）。
+    （**已确认在第 106 行 ✓** —— 14:00 tick 的独立 `chore(gitignore)` commit 已落地；
+    下轮按「module-dev 侧已有」处理，**不回加到 PR#1 分支**）。
+11. ⭐ 报出 **本轮新增的格式债 = 本轮改动文件的 prettier 失败数**（期望 **0**）。
+    ⚠️ **不要**报「仓库总数 620 个文件不合 Prettier」—— 那是**存量债**，`Lint` 早已长期红，
+    报总数会被当成回归（见 §2 已知缺口五）。
+12. ⭐ 报出 **判据 J（itest 接入 CI/L2）的当前状态** —— 13 个 `*.itest.mjs` 目前仍无自动执行点；
+    「接进 CI 或写进 PIPELINE.md 的 L2 清单」已被列为**待用户定夺的协议建议**（未擅自改协议文件）。
 
 ## §6 相关链接
 
