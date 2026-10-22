@@ -49,7 +49,17 @@ class StockForecastAvailabilityPortTest {
 
   @BeforeEach
   void startUpstream() throws Exception {
-    upstream = HttpServer.create(new InetSocketAddress(0), 0);
+    // 🔴 **必须显式绑 127.0.0.1，不能用通配地址 new InetSocketAddress(0)。**
+    //
+    //    macOS 的 JDK 默认开 SO_REUSEADDR：通配地址（0.0.0.0）的 bind 在
+    //    同一端口已被**更具体的** 127.0.0.1 绑定占用时**照样成功**，
+    //    而客户端连上的是那台更具体的（= 别的测试的 stub）——
+    //    于是本测试收到的是**别的 stub 的响应**（404 No context found），
+    //    端口把它翻成 503「读不到」，表现为一条**顺序/时序型的假红**。
+    //
+    //    显式绑回环后，同端口冲突会**响亮地抛 BindException**，
+    //    把「静默给出错误答案」变成「明确报错」。
+    upstream = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
     upstream.createContext(
         "/",
         e -> {
@@ -63,12 +73,16 @@ class StockForecastAvailabilityPortTest {
           }
         });
     upstream.start();
-    base = "http://localhost:" + upstream.getAddress().getPort();
+    // base 与绑定地址保持一致（127.0.0.1）：localhost 在本机可能解析到 ::1，
+    // 而桩只绑了 IPv4 回环 ⇒ 会变成「连接被拒」，而不是连上桩。
+    base = "http://127.0.0.1:" + upstream.getAddress().getPort();
   }
 
   @AfterEach
   void stopUpstream() {
-    upstream.stop(0);
+    // 桩起不来时（端口冲突 ⇒ BindException）upstream 为 null：
+    // 这里必须容错，否则会把真正的原因（端口冲突）盖成一个 NPE。
+    if (upstream != null) upstream.stop(0);
   }
 
   // ==================================================================
