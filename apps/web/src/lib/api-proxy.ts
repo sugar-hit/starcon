@@ -713,6 +713,75 @@ const services: readonly {
       /^(products(?:\/[0-9a-f-]+(?:\/(?:attributes|skus)(?:\/[0-9a-f-]+)?)?)?|attributes(?:\/(?:overview|category-rules|options(?:\/(?:lifecycle|order))?|[0-9a-f-]+(?:\/(?:options|category-rules))?))?|brands(?:\/(?:overview|candidates|listing-eligibility|[0-9a-f-]+(?:\/(?:listing-eligibility|enabled|authorizations(?:\/[0-9a-f-]+(?:\/enabled)?)?))?))?|parties(?:\/(?:overview|candidates|[0-9a-f-]+(?:\/(?:status|roles(?:\/[0-9a-f-]+)?|role-profiles|(?:supplier|customer|carrier)-profile|addresses(?:\/(?:defaults|candidates|[0-9a-f-]+(?:\/(?:usages|default|versions(?:\/[0-9]+)?))?))?|contacts(?:\/(?:default|candidates|[0-9a-f-]+(?:\/primary)?))?))?))?|categories(?:\/(?:overview|trees(?:\/[0-9a-f-]+(?:\/nodes)?)?|nodes\/[0-9a-f-]+(?:\/(?:move|enabled))?|spus\/[0-9a-f-]+|attribute-requirements(?:\/overview|\/[0-9a-f-]+(?:\/[0-9a-f-]+(?:\/enabled)?|\/(?:effective|entry-form-schema|validate))?)))|category-mappings(?:\/(?:overview|platform-sites|attribute-options|resolve|[0-9a-f-]+(?:\/(?:default|enabled|attributes(?:\/[0-9a-f-]+(?:\/enabled)?)?))?))?|records\/(research|compliance|assets)(?:\/[0-9a-f-]+)?|media(?:\/(?:overview|verify-sweep|references|tags|processing(?:\/(?:overview|recipes(?:\/[0-9a-f-]+(?:\/enabled)?)?|jobs(?:\/[0-9a-f-]+(?:\/(?:items|cancel))?)?|assets\/[0-9a-f-]+\/history)?)?)|[0-9a-f-]+(?:\/(?:versions|references(?:\/[0-9a-f-]+)?|integrity-checks|enabled))?|tags\/[0-9a-f-]+(?:\/enabled)?)?|skus(?:\/(?:capabilities|batch|export))?|unit-groups(?:\/(?:overview|convert|[0-9a-f-]+(?:\/(?:enabled|conversions(?:\/[0-9a-f-]+)?))?))?|unit-conversion(?:\/(?:units(?:\/[0-9a-f-]+)?|overview|skus\/[0-9a-f-]+(?:\/conversions)?|convert|snapshots))?|spec-axis(?:\/(?:overview|axes(?:\/[0-9a-f-]+(?:\/options)?)?|spus\/[0-9a-f-]+(?:\/axes(?:\/[0-9a-f-]+)?)?|category-rules))?|variant-combination(?:\/(?:overview|spus\/[0-9a-f-]+(?:\/(?:combinations|check|drafts(?:\/[0-9a-f-]+)?))?))?|sku-attribute-override\/skus\/[0-9a-f-]+(?:\/attribute-overrides\/[0-9a-f-]+(?:\/clear)?)?|titles(?:\/(?:overview|templates(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/enabled)?)?|keywords(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/enabled)?)?|generations(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/skus)?)?|records(?:\/export|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:select|deselect|reject))?)?))?|descriptions(?:\/(?:overview|templates(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:enabled|translation-coveragetranslations(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?))?)?|phrases(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/enabled)?)?|renders(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:skus|missing-variables))?)?|translations\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}|sections(?:\/export)?))?|bundles(?:\/(?:overview|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:status|effective|versions))?))?|versions(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:publish|close|components|component-check))?)?|components(?:\/(?:overview|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}))?|bundle-skus(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|boms(?:\/(?:overview|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:status|effective|versions))?))?|bom-versions(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:publish|close|copy|components|requirement))?)?|bom-components\/usage|bom-explosions(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|import-templates(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/file)?)?|import-field-mappings(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|import-jobs(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:mapping|prevalidate|execute|cancel|rows|errors|report(?:\/(?:issues|exports(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/file)?))?))?)?|supplier-quotes(?:\/(?:overview|options|effective(?:\/resolve)?|[0-9a-f-]+(?:\/tiers)?))?|role-profiles(?:\/(?:overview|options))?|translations(?:\/(?:overview|locales(?:\/(?:requirements|sync|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/enabled)?))?|spus\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/entries)?|skus\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/entries)?|entries(?:\/export|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/status)?)?|coverage|suggestions(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:adopt|reject))?)?|batches(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?))|duplicate-scans(?:\/(?:overview|[0-9a-f-]+(?:\/candidates)?)?)?|duplicate-candidates\/[0-9a-f-]+(?:\/(?:decision|merge-preview|merge)?)?|export-sources|export-jobs(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:file|cancel))?)?|zombie-candidates(?:\/(?:overview|options|rules(?:\/[A-Za-z0-9_]+)?|evidence|reference-stats|deactivate|records|deactivation-targets))?|completeness(?:\/(?:overview|options|gaps(?:\/summary)?|evaluations(?:\/[0-9a-f-]+)?|precheck\/(?:listing|customs)|customs\/skus\/[0-9a-f-]+|certifications\/skus\/[0-9a-f-]+(?:\/[0-9a-f-]+)?|(?:SPU|SKU)\/[0-9a-f-]+))?|customs-attributes(?:\/profiles|\/skus\/[0-9a-f-]+(?:\/(?:submit|review))?|\/declaration-ready)|sku-merges(?:\/overview|\/by-candidate\/[0-9a-f-]+|\/by-sku\/[0-9a-f-]+|\/[0-9a-f-]+)?|description-templates(?:\/(?:overview|options|templates(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:enabled|sections))?)?|renders(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?))?|kb(?:\/(?:overview|options|entries(?:\/[0-9a-f-]+(?:\/(?:enabled|translations(?:\/[0-9a-f-]+)?|translation-coverage|rule-bindings(?:\/[0-9a-f-]+)?|usages))?)?|translations\/[0-9a-f-]+|rule-versions(?:\/[0-9a-f-]+)?|review-tasks(?:\/[0-9a-f-]+)?|usages|hit-rates))?|customs-destination-versions(?:\/effective|\/requirements|\/skus\/[0-9a-f-]+|\/[0-9a-f-]+\/publish)|customs-declaration\/resolve|supply\/vendors(?:\/(?:options|overview)|\/[0-9a-f-]+(?:\/(?:profile|panorama|purchase-history|quotes|settlement-terms|deliveries(?:\/[0-9a-f-]+\/void)?|quality-inspections(?:\/[0-9a-f-]+\/void)?|qualifications(?:\/[0-9a-f-]+)?))?)?)$/,
   },
   {
+    // 17.5.2.1 数据字典（identity 服务）。纯**新增一条独立的 `services[]` 元素**，
+    // 既有的 identity 那条巨型 alternation（`permissions` / `roles` / `legal-entities` /
+    // `accounting-books` / `business-parameters` / `numbering` / `approval-*` …）**一字未动、
+    // 也不重排** —— 本文件是多车道共用的累积型白名单，每条服务规则是一段超长单行正则，
+    // 往同一条 alternation 里并分支会让多车道同时并入时 git 必然判冲突（结构性，
+    // retry 不会自愈）。
+    //
+    // ---- 插入锚点固定在 `// 14.2.2.1 预算分配（channel 服务）` 那条**之前** ----
+    //   同批其它车道的锚点分别是「`// 5.5.1.1 价格历史` 之前」「`// 07 库存：库存总览` 之前」
+    //   「`// 2.4.2.3 映射缺失队列` 之前」「数组末尾」，与本处相距 200 行以上，git 能干净求并。
+    //
+    // ---- 首 token「dict-」的零命中核对结论 ----
+    //   `grep -c 'dict\-' apps/web/src/lib/api-proxy.ts` = **0**（基线全文 173 条既有正则里
+    //   没有任何一条含 `dict` 这个串）⇒ 首 token 是独立字面量，既不会被既有分支的前缀吃掉，
+    //   也不会吃掉它们（`^dict\-` 与既有任何首 token 互不为前缀）。
+    //
+    // ---- 逐条核对过的后端端点清单 ----
+    //   backend/services/identity/src/main/java/com/starcon/identity/DictionaryController.java
+    //   （类级 `@RequestMapping("/identity")`）逐条抄下来：
+    //     GET    /dict-catalog                   字典目录（全局码表 + 每个字典的字典项计数）
+    //     GET    /dict-items                     字典项列表（可按 dictCode / status / search 过滤；
+    //                                             默认**包含**停用项）
+    //     GET    /dict-items/options/{dictCode}  下拉选项（只给 ACTIVE）
+    //     GET    /dict-items/{id}                单条字典项（`@PathVariable UUID id`）
+    //     GET    /dict-items/{id}/usage          引用台账明细（按来源系统列出）
+    //     GET    /dict-history                   变更历史（只追加、不可改）
+    //     POST   /dict-items                     登记字典项
+    //     PUT    /dict-items/{id}                改字典项
+    //     POST   /dict-items/{id}/deactivate     停用
+    //     POST   /dict-items/{id}/reactivate     启用
+    //     POST   /dict-items/{id}/usage          登记一条引用（下游经授权 API 回报用量）
+    //   以上 **11 条全部**在后端存在，本条**逐条放行**。
+    //   （前端目前用到其中 9 条：`GET /dict-items/options/{dictCode}` 与
+    //   `POST /dict-items/{id}/usage` 后端已交付但前端还没调，一并登记免得下次再漏。）
+    //
+    //   ⚠️ 后端**没有** DELETE 端点 —— V53 迁移的四道防线之一（控制器不提供 DELETE、
+    //     迁移只授予 SELECT/INSERT/UPDATE、dict_item_usage.item_id 外键 ON DELETE RESTRICT、
+    //     dict_item_delete_guard() 触发器在数据库层挡掉一切 DELETE）。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `dict-items/{uuid}/delete`      —— 后端没有删除端点；字典项只能停用。
+    //   * `dict-items/{uuid}/archive`     —— 后端只有 activate / deactivate 两个动作。
+    //   * `dict-items/{uuid}/enable`      —— 启用的正式名字是 `reactivate`。
+    //   * `dict-items/options`（缺 dictCode）—— 后端没有「所有字典的选项」这个形状，
+    //                                           下拉必须指明是哪一本字典。
+    //   * `dict-catalog/{uuid}`            —— 目录是集合读，没有「按 id 取一条目录」。
+    //   * `dict-history/{uuid}`            —— 历史是集合读（可按 dictCode / itemId 过滤），
+    //                                           没有单条形状。
+    //   * `dict-items/not-a-uuid`         —— 非 UUID 段不应被 uuid 分支吃掉。
+    //   * `dict-items/{uuid}/usage-list`  —— 引用台账就是 `/usage` 这一个形状。
+    //
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //   （不是 `[0-9a-f-]+`：后者会把 `options` 这种非 UUID 形状也当成 id 放行）。
+    // ⚠️ `{dictCode}` 段用**受控值域** `[A-Z][A-Z0-9_]{0,63}`：字典编码是平台随代码发布的
+    //   **全局码表**（V53 迁移 `dict_catalog.code varchar(64)`，种子是 ORDER_STATUS /
+    //   SHELF_STATUS / ORDER_CANCEL_REASON / AFTERSALE_REASON / INVENTORY_ADJUST_REASON /
+    //   PRODUCT_CATEGORY 等大写蛇形）。值域是**开放**的 ——「加一类字典只是往这张表加一行」，
+    //   CHECK 跟着放宽即可 —— 所以这里用紧收紧的字符集而不是写死枚举；
+    //   **绝不用** `[^/]+`（那等于把任意路径都当成字典编码放行）。
+    //   后端 `dictCode.trim()` 是**大小写敏感**的精确匹配，所以只放行大写形态。
+    // ⚠️ 字面量子路径（`options`）排在 `{uuid}` 段之前判别 —— alternation 是首个命中即返回，
+    //   顺序反了会被通配支吃掉半截。
+    prefix: 'identity/',
+    env: 'IDENTITY_URL',
+    fallback: 'http://127.0.0.1:8081',
+    pattern:
+      /^dict\-(?:catalog|history|items(?:\/options\/[A-Z][A-Z0-9_]{0,63}|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:usage|deactivate|reactivate))?)?)$/,
+  },
+  {
     // 14.2.2.1 预算分配（channel 服务）。纯**新增一条独立的 `services[]` 元素**，
     // 既有的 `ad-campaigns`（14.1.1.1）、`ad-rules`（14.2.2.2）、`ad-keywords`（14.1.3.1）
     // 等**一字未动、也不重排** —— 本文件是多车道共用的累积型白名单，每条服务规则是一段
@@ -1790,6 +1859,77 @@ const services: readonly {
     fallback: 'http://127.0.0.1:8083',
     pattern:
       /^logistics\-pickup\-signoff(?:\/(?:capabilities|overview|cases|reconcile|reminders|notifications|events|sla-rules)|\/cases\/(?:sync|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})(?:\/attest)?|\/reminders\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/(?:acknowledge|resolve)|\/notifications\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/consume)$/,
+  },
+  {
+    // 17.5.2.1 商品生命周期规则（catalog 服务，卷 03 商品主数据）。
+    //
+    // 纯**新增一条独立的 `services[]` 元素**，既有的 catalog 那条巨型 alternation
+    // （`products` / `attributes` / `brands` / `parties` / `categories` / `category-mappings` /
+    // `records` / `media` / `skus` / `unit-groups` / `spec-axis` …）**一字未动、也不重排** ——
+    // 往同一条 alternation 里并分支会让多车道同时并入时 git 必然判冲突（结构性，
+    // retry 不会自愈）。
+    //
+    // ---- 插入锚点固定在 `// 10.7.1.1 退货接收与处置决策` 那条**之前** ----
+    //   同批其它车道的锚点与本处相距 200 行以上，git 能干净求并。
+    //
+    // ---- 首 token「lifecycle」的零命中核对结论 ----
+    //   `grep -c '\^lifecycle' apps/web/src/lib/api-proxy.ts` = **0**：基线全文 173 条既有正则里
+    //   **没有任何一条以 `lifecycle` 开头**。文件里 21 处 `lifecycle` 逐个核过：
+    //     * `attributes/options/lifecycle`（3.2.1.2 的批量重排）—— 是**第二段**，首 token 是
+    //       `attributes`，本条的首 token 与它互不为前缀；
+    //     * `listing-lifecycles`（4.1.1.3）—— 首 token 是 `listing-lifecycles`，
+    //       与 `lifecycle` 在第 3 个字符就分叉（`lif` vs `lis`），互不为前缀；
+    //     * `listing-details/{uuid}/lifecycle` —— 该条目**刻意不放行**（七态状态机归 4.1.1.3），
+    //       与本条不同前缀、不同控制器，无关。
+    //   ⇒ 本条的首 token `lifecycle` 是独立字面量，不会被既有分支吃掉，也不会吃掉它们。
+    //
+    // ---- 逐条核对过的后端端点清单 ----
+    //   backend/services/catalog/src/main/java/com/starcon/catalog/LifecycleController.java
+    //   （类级 `@RequestMapping("/catalog")`）逐条抄下来：
+    //     GET    /products/{id}/lifecycle       单个 SPU 的生命周期视图（`@PathVariable UUID id`）
+    //     POST   /products/{id}/lifecycle       推进该 SPU 的生命周期
+    //     GET    /lifecycle/metrics             生命周期指标字典
+    //     GET    /lifecycle/rules               生命周期规则列表
+    //     POST   /lifecycle/rules               新建生命周期规则
+    //     PUT    /lifecycle/rules/{id}          改规则
+    //     DELETE /lifecycle/rules/{id}          删规则（带 version 乐观锁）
+    //     GET    /lifecycle/rules/{id}/preview   规则试跑预览
+    //     POST   /lifecycle/rules/{id}/run      执行规则
+    //   以上 **9 条全部**在后端存在，本条**逐条放行**。
+    //   （`/products/{id}/lifecycle` 这一组前端页面在用 —— `spu-lifecycle.tsx` 的
+    //   `catalog/products/${spuId}/lifecycle` GET / POST —— 同样在本次漏登记之列。）
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `lifecycle/rules/{uuid}/delete`    —— 删除就是 `DELETE /lifecycle/rules/{id}` 本体，
+    //                                            没有单独的 `/delete` 子动作。
+    //   * `lifecycle/rules/{uuid}/executions`—— 执行结果随 `POST /lifecycle/rules/{id}/run`
+    //                                            的返回值给出，没有独立的执行记录集合。
+    //   * `lifecycle/rules/{uuid}/preview/{x}`—— 预览是一段带 limit 的查询串，不是子资源。
+    //   * `lifecycle/rules/{uuid}/history`    —— 规则没有独立的变更历史端点。
+    //   * `lifecycle/metrics/{uuid}`          —— 指标是字典，不是集合资源。
+    //   * `lifecycle/rules/not-a-uuid`        —— 非 UUID 段不应被 uuid 分支吃掉。
+    //   * `lifecycle/transitions`             —— 生命周期状态机的枚举不在本控制器的端点里。
+    //
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //   （不是 `[0-9a-f-]+`：后者会把 `preview` / `run` 这种非 UUID 形状也当成 id 放行）。
+    // ⚠️ 字面量子路径（`metrics` / `rules`）排在 `{uuid}` 段之前判别 —— alternation 是首个
+    //   命中即返回，顺序反了会被通配支吃掉半截。
+    //
+    // ---- `catalog/records/{kind}`（3.1.x 商品档案）**刻意不在本条重复登记** ----
+    //   它**已经**由既有 3.1.x 那条 catalog 元素登记（既有巨型 alternation 里的
+    //   `records/(research|compliance|assets)` 分支）。既有条目在数组里**更靠前**，
+    //   resolve() 首个命中即返回 ⇒ 本条再写一遍只会是**永远走不到的死分支**。
+    //   实测（resolve 脚本）：`catalog/records/research` / `catalog/records/compliance` /
+    //   `catalog/records/assets` / `catalog/records/assets/{uuid}` 既有元素**已放行**；
+    //   `catalog/records`（裸路径）/ `catalog/records/products`（不存在的 kind）/
+    //   `catalog/records/assets/{uuid}/x` 既有元素**已拒**。
+    //   后端 `CatalogService.table(kind)` 的取值域就是 research / compliance / assets 三个
+    //   （`default -> throw missing()`），与既有条目的 alternation **完全一致**，无需放宽。
+    prefix: 'catalog/',
+    env: 'CATALOG_URL',
+    fallback: 'http://127.0.0.1:8082',
+    pattern:
+      /^(?:lifecycle\/(?:metrics|rules(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:preview|run))?)?)|products\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/lifecycle)$/,
   },
   {
     // 10.7.1.1 退货接收与处置决策（**本条目是新增一条 services[] 元素**，不是往既有
