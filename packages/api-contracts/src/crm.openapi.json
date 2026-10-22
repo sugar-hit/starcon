@@ -1,6 +1,1148 @@
 {
   "components": {
     "schemas": {
+      "CrmAutoReplyBucket": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "count": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "label": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmAutoReplyCapabilities": {
+        "properties": {
+          "actionPolicy": {
+            "type": "string"
+          },
+          "boundaryNote": {
+            "type": "string"
+          },
+          "classificationLabels": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "conversationScope": {
+            "type": "string"
+          },
+          "dimensions": {
+            "items": {
+              "$ref": "#/components/schemas/CrmAutoReplyCapabilityDimension"
+            },
+            "type": "array"
+          },
+          "dutyModes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "dutyScopes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "escalationReasons": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "globalKillSwitch": {
+            "type": "string"
+          },
+          "highlight": {
+            "type": "string"
+          },
+          "humanInterventionBasis": {
+            "type": "string"
+          },
+          "outcomes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "platformAutoReplyPolicy": {
+            "type": "string"
+          },
+          "triggerTypes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "CrmAutoReplyCapabilityDimension": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "description": {
+            "type": "string"
+          },
+          "dimension": {
+            "type": "string"
+          },
+          "impact": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmAutoReplyDutyCalendarInput": {
+        "properties": {
+          "autoReplyAllowed": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "calendarDate": {
+            "description": "生效日期（当地日期），ISO 形如 2026-10-23",
+            "minLength": 1,
+            "type": "string"
+          },
+          "dutyEnd": {
+            "maxLength": 5,
+            "minLength": 0,
+            "nullable": true,
+            "type": "string"
+          },
+          "dutyMode": {
+            "minLength": 1,
+            "pattern": "UNATTENDED|ATTENDED|CLOSED",
+            "type": "string"
+          },
+          "dutyStart": {
+            "maxLength": 5,
+            "minLength": 0,
+            "nullable": true,
+            "type": "string"
+          },
+          "holidayName": {
+            "maxLength": 100,
+            "minLength": 0,
+            "nullable": true,
+            "type": "string"
+          },
+          "note": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "nullable": true,
+            "type": "string"
+          },
+          "platformCode": {
+            "nullable": true,
+            "pattern": "^[A-Z][A-Z0-9_]*$",
+            "type": "string"
+          },
+          "ruleId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "scope": {
+            "minLength": 1,
+            "pattern": "GLOBAL|PLATFORM|RULE",
+            "type": "string"
+          },
+          "timezone": {
+            "maxLength": 64,
+            "minLength": 0,
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "calendarDate",
+          "dutyMode",
+          "scope"
+        ],
+        "type": "object"
+      },
+      "CrmAutoReplyDutyCalendarPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/CrmAutoReplyDutyCalendarRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "totalElements": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalPages": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CrmAutoReplyDutyCalendarRow": {
+        "properties": {
+          "autoReplyAllowed": {
+            "type": "boolean"
+          },
+          "calendarDate": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "createdBy": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "dutyEnd": {
+            "nullable": true,
+            "type": "string"
+          },
+          "dutyMode": {
+            "type": "string"
+          },
+          "dutyModeLabel": {
+            "type": "string"
+          },
+          "dutyStart": {
+            "nullable": true,
+            "type": "string"
+          },
+          "holidayName": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "platformCode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "ruleCode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "ruleId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "scope": {
+            "type": "string"
+          },
+          "scopeLabel": {
+            "type": "string"
+          },
+          "timezone": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmAutoReplyEscalateInput": {
+        "properties": {
+          "note": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "nullable": true,
+            "type": "string"
+          },
+          "reason": {
+            "maxLength": 1000,
+            "minLength": 0,
+            "type": "string"
+          }
+        },
+        "required": [
+          "reason"
+        ],
+        "type": "object"
+      },
+      "CrmAutoReplyEscalationPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/CrmAutoReplyEscalationRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "totalElements": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalPages": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CrmAutoReplyEscalationRow": {
+        "properties": {
+          "buyerReference": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "escalatedAt": {
+            "type": "string"
+          },
+          "escalatedBy": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "level": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "messageId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "messageNo": {
+            "type": "string"
+          },
+          "orderReference": {
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "reasonCode": {
+            "type": "string"
+          },
+          "reasonCodeLabel": {
+            "type": "string"
+          },
+          "recordId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "ruleCode": {
+            "type": "string"
+          },
+          "ruleId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "shopId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "shopName": {
+            "type": "string"
+          },
+          "takenOver": {
+            "type": "boolean"
+          },
+          "takeoverId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmAutoReplyRecordPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/CrmAutoReplyRecordRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "totalElements": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalPages": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CrmAutoReplyRecordRow": {
+        "properties": {
+          "bodySnapshot": {
+            "type": "string"
+          },
+          "buyerReference": {
+            "type": "string"
+          },
+          "classificationId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "classificationLabel": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "escalated": {
+            "type": "boolean"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "knowledgeVersionId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "knowledgeVersionNo": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "ladderCode": {
+            "type": "string"
+          },
+          "level": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "messageId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "messageNo": {
+            "type": "string"
+          },
+          "occurredAt": {
+            "type": "string"
+          },
+          "orderReference": {
+            "type": "string"
+          },
+          "originRecordId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "outcome": {
+            "type": "string"
+          },
+          "outcomeLabel": {
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "recordNo": {
+            "type": "string"
+          },
+          "ruleCode": {
+            "type": "string"
+          },
+          "ruleId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "ruleName": {
+            "type": "string"
+          },
+          "sendFailureReason": {
+            "type": "string"
+          },
+          "sendId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "sendNo": {
+            "type": "string"
+          },
+          "sendStatus": {
+            "type": "string"
+          },
+          "shopId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "shopName": {
+            "type": "string"
+          },
+          "templateBodySnapshot": {
+            "type": "string"
+          },
+          "templateCode": {
+            "type": "string"
+          },
+          "templateId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "triggerReason": {
+            "type": "string"
+          },
+          "triggerType": {
+            "type": "string"
+          },
+          "triggerTypeLabel": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmAutoReplyRuleInput": {
+        "properties": {
+          "body": {
+            "nullable": true,
+            "type": "string"
+          },
+          "classificationLabels": {
+            "nullable": true,
+            "type": "string"
+          },
+          "enabled": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "escalateToHuman": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "humanTimeoutMinutes": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "keywords": {
+            "nullable": true,
+            "type": "string"
+          },
+          "knowledgeVersionId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "ladderCode": {
+            "description": "阶梯标识：同一阶梯的多级规则共用它",
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "level": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "levelWaitMinutes": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "matchMode": {
+            "nullable": true,
+            "pattern": "ANY|ALL",
+            "type": "string"
+          },
+          "note": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "nullable": true,
+            "type": "string"
+          },
+          "platformCodes": {
+            "nullable": true,
+            "type": "string"
+          },
+          "ruleCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "ruleName": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "subject": {
+            "maxLength": 500,
+            "minLength": 0,
+            "nullable": true,
+            "type": "string"
+          },
+          "templateId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "triggerType": {
+            "minLength": 1,
+            "pattern": "CLASSIFICATION|KEYWORD|HUMAN_TIMEOUT",
+            "type": "string"
+          },
+          "unattendedAutoReplyAllowed": {
+            "nullable": true,
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "ladderCode",
+          "ruleCode",
+          "ruleName",
+          "triggerType"
+        ],
+        "type": "object"
+      },
+      "CrmAutoReplyRulePage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/CrmAutoReplyRuleRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "totalElements": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalPages": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CrmAutoReplyRuleRow": {
+        "properties": {
+          "body": {
+            "type": "string"
+          },
+          "classificationLabels": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "createdBy": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "escalateToHuman": {
+            "type": "boolean"
+          },
+          "humanTimeoutMinutes": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "keywords": {
+            "type": "string"
+          },
+          "knowledgeVersionId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "ladderCode": {
+            "type": "string"
+          },
+          "level": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "levelWaitMinutes": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "matchMode": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "platformCodes": {
+            "type": "string"
+          },
+          "ruleCode": {
+            "type": "string"
+          },
+          "ruleName": {
+            "type": "string"
+          },
+          "subject": {
+            "type": "string"
+          },
+          "templateCode": {
+            "type": "string"
+          },
+          "templateId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "triggerType": {
+            "type": "string"
+          },
+          "triggerTypeLabel": {
+            "type": "string"
+          },
+          "unattendedAutoReplyAllowed": {
+            "type": "boolean"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmAutoReplySettingRow": {
+        "properties": {
+          "autoReplyEnabled": {
+            "type": "boolean"
+          },
+          "closedAt": {
+            "nullable": true,
+            "type": "string"
+          },
+          "closedBy": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "closedReason": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "pendingCancelledCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmAutoReplySettingToggleInput": {
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "reason": {
+            "maxLength": 500,
+            "minLength": 0,
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "enabled"
+        ],
+        "type": "object"
+      },
+      "CrmAutoReplyStats": {
+        "properties": {
+          "byOutcome": {
+            "items": {
+              "$ref": "#/components/schemas/CrmAutoReplyBucket"
+            },
+            "type": "array"
+          },
+          "byTriggerType": {
+            "items": {
+              "$ref": "#/components/schemas/CrmAutoReplyBucket"
+            },
+            "type": "array"
+          },
+          "cancelled": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "escalated": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "escalations": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "escalationsTakenOver": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "recordsByLevelLater": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "recordsByLevelOne": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "sendRegistered": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "suppressed": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "takeovers": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalRecords": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CrmAutoReplyTakeoverInput": {
+        "properties": {
+          "escalationId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "messageId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "note": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "nullable": true,
+            "type": "string"
+          },
+          "reason": {
+            "maxLength": 1000,
+            "minLength": 0,
+            "type": "string"
+          },
+          "recordId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "shopId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "takenOverAt": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "reason"
+        ],
+        "type": "object"
+      },
+      "CrmAutoReplyTakeoverPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/CrmAutoReplyTakeoverRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "totalElements": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalPages": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CrmAutoReplyTakeoverRow": {
+        "properties": {
+          "buyerReference": {
+            "type": "string"
+          },
+          "conversationKey": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "escalationId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "messageId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "recordId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "shopId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "shopName": {
+            "type": "string"
+          },
+          "takenOverAt": {
+            "type": "string"
+          },
+          "takenOverBy": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmAutoReplyTriggerInput": {
+        "properties": {
+          "at": {
+            "nullable": true,
+            "type": "string"
+          },
+          "messageId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "messageId"
+        ],
+        "type": "object"
+      },
+      "CrmAutoReplyTriggerResult": {
+        "properties": {
+          "classificationAutoReplyEligible": {
+            "type": "boolean"
+          },
+          "classificationLabel": {
+            "type": "string"
+          },
+          "closedReason": {
+            "type": "string"
+          },
+          "conversationTakenOver": {
+            "type": "boolean"
+          },
+          "escalatedCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "evaluated": {
+            "type": "boolean"
+          },
+          "evaluatedAt": {
+            "type": "string"
+          },
+          "firedCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "globalClosed": {
+            "type": "boolean"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/CrmAutoReplyTriggeredItem"
+            },
+            "type": "array"
+          },
+          "matchedCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "messageId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "messageNo": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "suppressedCount": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CrmAutoReplyTriggeredItem": {
+        "properties": {
+          "escalated": {
+            "type": "boolean"
+          },
+          "escalationId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "fired": {
+            "type": "boolean"
+          },
+          "ladderCode": {
+            "type": "string"
+          },
+          "level": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "matched": {
+            "type": "boolean"
+          },
+          "outcome": {
+            "type": "string"
+          },
+          "outcomeLabel": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "recordId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "recordNo": {
+            "nullable": true,
+            "type": "string"
+          },
+          "ruleCode": {
+            "type": "string"
+          },
+          "ruleId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "ruleName": {
+            "type": "string"
+          },
+          "sendId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "sendNo": {
+            "nullable": true,
+            "type": "string"
+          },
+          "triggerType": {
+            "type": "string"
+          },
+          "triggerTypeLabel": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "CrmBusinessHoliday": {
         "properties": {
           "closed": {
@@ -13749,6 +14891,984 @@
   },
   "openapi": "3.0.1",
   "paths": {
+    "/crm/auto-replies/calendar": {
+      "get": {
+        "operationId": "get_crm_auto_replies_calendar",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "scope",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "platformCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmAutoReplyDutyCalendarPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "auto-reply-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_crm_auto_replies_calendar",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmAutoReplyDutyCalendarInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmAutoReplyDutyCalendarRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "auto-reply-controller"
+        ]
+      }
+    },
+    "/crm/auto-replies/calendar/{entryId}": {
+      "delete": {
+        "operationId": "delete_crm_auto_replies_calendar_entryId",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "entryId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "auto-reply-controller"
+        ]
+      }
+    },
+    "/crm/auto-replies/capabilities": {
+      "get": {
+        "operationId": "get_crm_auto_replies_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmAutoReplyCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "auto-reply-controller"
+        ]
+      }
+    },
+    "/crm/auto-replies/escalations": {
+      "get": {
+        "operationId": "get_crm_auto_replies_escalations",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "reasonCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "shopId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "takenOver",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmAutoReplyEscalationPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "auto-reply-controller"
+        ]
+      }
+    },
+    "/crm/auto-replies/records": {
+      "get": {
+        "operationId": "get_crm_auto_replies_records",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "outcome",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "triggerType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "ruleId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "messageId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "ladderCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "escalated",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmAutoReplyRecordPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "auto-reply-controller"
+        ]
+      }
+    },
+    "/crm/auto-replies/records/{recordId}": {
+      "get": {
+        "operationId": "get_crm_auto_replies_records_recordId",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "recordId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmAutoReplyRecordRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "auto-reply-controller"
+        ]
+      }
+    },
+    "/crm/auto-replies/records/{recordId}/escalate": {
+      "post": {
+        "operationId": "post_crm_auto_replies_records_recordId_escalate",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "recordId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmAutoReplyEscalateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmAutoReplyEscalationRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "auto-reply-controller"
+        ]
+      }
+    },
+    "/crm/auto-replies/rules": {
+      "get": {
+        "operationId": "get_crm_auto_replies_rules",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "triggerType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "platformCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "enabled",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "ladderCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmAutoReplyRulePage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "auto-reply-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_crm_auto_replies_rules",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmAutoReplyRuleInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmAutoReplyRuleRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "auto-reply-controller"
+        ]
+      }
+    },
+    "/crm/auto-replies/rules/{ruleId}": {
+      "get": {
+        "operationId": "get_crm_auto_replies_rules_ruleId",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "ruleId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmAutoReplyRuleRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "auto-reply-controller"
+        ]
+      },
+      "put": {
+        "operationId": "put_crm_auto_replies_rules_ruleId",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "ruleId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmAutoReplyRuleInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmAutoReplyRuleRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "auto-reply-controller"
+        ]
+      }
+    },
+    "/crm/auto-replies/settings": {
+      "get": {
+        "operationId": "get_crm_auto_replies_settings",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmAutoReplySettingRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "auto-reply-controller"
+        ]
+      }
+    },
+    "/crm/auto-replies/settings/toggle": {
+      "post": {
+        "operationId": "post_crm_auto_replies_settings_toggle",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmAutoReplySettingToggleInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmAutoReplySettingRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "auto-reply-controller"
+        ]
+      }
+    },
+    "/crm/auto-replies/stats": {
+      "get": {
+        "operationId": "get_crm_auto_replies_stats",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmAutoReplyStats"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "auto-reply-controller"
+        ]
+      }
+    },
+    "/crm/auto-replies/takeovers": {
+      "get": {
+        "operationId": "get_crm_auto_replies_takeovers",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "shopId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "buyerReference",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmAutoReplyTakeoverPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "auto-reply-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_crm_auto_replies_takeovers",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmAutoReplyTakeoverInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmAutoReplyTakeoverRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "auto-reply-controller"
+        ]
+      }
+    },
+    "/crm/auto-replies/trigger": {
+      "post": {
+        "operationId": "post_crm_auto_replies_trigger",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmAutoReplyTriggerInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmAutoReplyTriggerResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "auto-reply-controller"
+        ]
+      }
+    },
     "/crm/buyer-emails": {
       "get": {
         "operationId": "get_crm_buyer_emails",

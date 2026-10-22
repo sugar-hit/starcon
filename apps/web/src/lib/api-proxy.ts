@@ -6376,6 +6376,68 @@ const services: readonly {
       /^care\-reminders(?:\/(?:capabilities|stats\/events|stats\/platform-events|stats)|\/stats\/tasks\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/events|\/rules(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:status|generate))?)?|\/tasks(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/dispatch)?)?)$/,
   },
   {
+    // 15.5.1.1 自动回复（crm 服务，卷 15 L3 锚点 15.5.1 下的自动回复子域）。
+    //
+    // ⚠️ 本条目是**新增一条独立的 `services[]` 元素**，不是往既有 crm 那几条巨型 alternation 里
+    //   并分支 —— 那些是超长单行正则，多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    //   既有条目**一字未动、也不重排**。
+    //
+    // ---- 插入锚点：紧跟 `crm/care-reminders`（15.5.2.1 关怀与催办）那条元素之后 ----
+    //   本车道选的是**同卷 15.5 簇**里的锚点（15.5.2.1），与另外三条车道
+    //   （15.1.2.2 邮件规则 / 15.4.1.1 工单分配 / 16.1.2.1 合规）各自的锚点互不重叠。
+    //
+    // ---- 首 token「auto-replies」的零命中核对结论（**实测**，非目测）----
+    //   ① 字面量核对：本文件既有全文里 `auto-replies` 出现次数 = **0**
+    //      （既有的是 `buyer-emails` / `knowledge` / `review-requests` / `review-rules` /
+    //      `message-inbox` / `message-sends` / `message-classifications` / `review-replies` /
+    //      `reviews` / `customer-tags` / `customer-contacts` / `care-reminders` /
+    //      `cart-recovery` 一类），所以首 token 既是独立字面量，也不会被既有分支的前缀吃掉。
+    //   ② 逐条实测：把本文件既有 services[] 的**全部正则**逐条抽出来，对本模块的
+    //      **全部 14 个 path shape** 逐个 `new RegExp(pat).test(path.slice(prefix.length))`
+    //      （与 `resolve()` 同一套判别口径），结果是**零命中**。
+    //      （实测脚本：`.tmp/verify-api-proxy.mjs`，随车道提交前可重跑复现。）
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   auto-replies/capabilities               能力声明（各维度的依据与下游归属）
+    //   auto-replies/settings                  全局开关现状（🔴 一键关闭）
+    //   auto-replies/settings/toggle           一键开关（POST；关闭时必须带原因）
+    //   auto-replies/rules                     规则列表（GET，真分页 + 真筛选）/ 新建（POST）
+    //   auto-replies/rules/{uuid}              规则详情（GET）/ 改（PUT）
+    //   auto-replies/calendar                  值班日历列表（GET）/ 登记（POST）
+    //   auto-replies/calendar/{uuid}           删除值班日历条目（DELETE）
+    //   auto-replies/trigger                   触发一次自动回复评估（POST）
+    //   auto-replies/records                   自动回复记录列表（GET，真分页 + 真筛选）
+    //   auto-replies/records/{uuid}            单条自动回复记录（GET）
+    //   auto-replies/records/{uuid}/escalate   人工手动标记转人工（POST）
+    //   auto-replies/escalations               转人工标记列表（GET，真分页 + 真筛选）
+    //   auto-replies/takeovers                 人工接管标记列表（GET）/ 登记（POST）
+    //   auto-replies/stats                     统计汇总（GET，**服务端算**）
+    //
+    // 判别顺序：字面量子路径（capabilities / stats / trigger / settings / settings\/toggle /
+    // takeovers / escalations）排在 {uuid} 段**之前** —— alternation 是首个命中即返回，
+    // 顺序反了会被通配支吃掉半截。
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //（不是 `[0-9a-f-]+`：后者会把 `rules` 这种非 UUID 形状也当成 id 放行）。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   auto-replies                          —— 裸路径：后端没有「一条不存在的汇总列表接口」。
+    //   auto-replies/rules/{uuid}/delete      —— 规则不提供删除（历史记录要引用它的编码）。
+    //   auto-replies/records/{uuid}/delete    —— 自动回复记录是**只追加**的事实，不提供删除。
+    //   auto-replies/escalations/{uuid}       —— 转人工标记没有详情端点（列表里已带全部字段）。
+    //   auto-replies/takeovers/{uuid}         —— 人工接管标记没有详情端点（同上）。
+    //   auto-replies/platform-policy          —— 平台对纯自动回复的限制**本仓拿不到**
+    //     （channel/vendor 下只有 OAuth 适配器）：放行它等于让界面以为「限制已知」。
+    //   auto-replies/webhooks                 —— 平台站内信 webhook **未接入**。
+    //   任何非 UUID 段（如 `auto-replies/rules/not-a-uuid`）—— 必须 404。
+    //
+    // ⚠️ 末尾**刻意不带 `?`**：带了就等于放行裸路径 `auto-replies`。
+    prefix: 'crm/',
+    env: 'CRM_URL',
+    fallback: 'http://127.0.0.1:8086',
+    pattern:
+      /^auto\-replies(?:\/(?:capabilities|stats|trigger|settings\/toggle|settings|takeovers|escalations|calendar(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|rules(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|records(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/escalate)?)?))$/,
+  },
+  {
     // 7.8.2.2 缺货与饥饿预警（warehouse 服务，7.8.2 的第二个 L3 锚点）。
     //
     // 蓝图：「识别因分摊/优先级导致的店铺"饥饿"（长期分不到货、影响绩效），以及真正的全网缺货，
