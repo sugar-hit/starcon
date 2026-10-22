@@ -7507,6 +7507,59 @@ const services: readonly {
       /^ad\-rules(?:\/(?:capabilities|rules|metrics|runs|hits|executions|dispatches|effects(?:\/evaluate)?)|\/rules\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:status|conditions))?|\/metrics\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}|\/runs\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}|\/executions\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}|\/dispatches\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/cancel)$/,
   },
   {
+    // 16.1.1.1 账号健康总览（channel 服务）。纯**新增一条独立的 `services[]` 元素**：
+    // 既有 channel 分支（listing / ad-rules / compliance-precheck / brand-authorizations …）
+    // **一字未动、也不重排** —— 本文件是多车道共用的**累积型**白名单，每条服务规则是一段
+    // 超长单行正则，往既有那条 alternation 里并分支会让多车道同时并入时 git 必然判冲突
+    // （结构性，retry 永远不会自愈）。
+    //
+    // ---- 插入锚点固定在 **`ad-rules` 那条元素之后**（channel 的最后一条元素）----
+    //   同批另外三条车道的锚点分别是「`crm/message-inbox` 之后」（15.1.1.2）、
+    //   「`crm/reviews` 之后」（15.2.1.2）、「`crm/customer-tags` 之后」（15.3.2.2），
+    //   与本锚点互不重叠，git 能干净求并。
+    //
+    // ---- 首 token「account-health」的零命中核对结论 ----
+    //   本文件既有全文里 `account-health` 出现次数 = 0（并用 `new RegExp(pat).test('…')`
+    //   逐条实测过：既有全部正则对本模块的 13 个 shape **零命中**）⇒ 首 token 既是独立
+    //   字面量，也不会被既有分支的前缀吃掉。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   account-health/capabilities          能力声明（未交付段 available=false + ownerModule）
+    //   account-health/shops                  店铺健康卡片（GET，真分页 + 真筛选）/ 手工录入指标（POST shops/{uuid}/metrics）
+    //   account-health/shops/{uuid}           单家店的健康卡片（GET）
+    //   account-health/shops/{uuid}/metrics   手工录入一条绩效指标（POST，source 恒为 MANUAL）
+    //   account-health/shops/{uuid}/assess    跑一次判定，落一条不可改写的凭据（POST）
+    //   account-health/shops/{uuid}/sync      平台账号绩效同步（POST，**未接入 ⇒ 恒 409**）
+    //   account-health/ranking                跨店铺风险排序（GET，真分页）
+    //   account-health/pending-items          需处理项（GET，只给本模块真实存在的待处理项）
+    //   account-health/thresholds             生效阈值清单（GET）
+    //   account-health/thresholds/{metric}    改阈值（PUT，metric 是**四个字面量指标码**之一）
+    //   account-health/assessments            判定历史（GET，真分页）
+    //
+    // 判别顺序：字面量子路径（capabilities / shops / ranking / pending-items / thresholds /
+    // assessments）排在 {uuid} 段**之前** —— alternation 是首个命中即返回，顺序反了会被
+    // 通配支吃掉半截。
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`（不是
+    // `[0-9a-f-]+`：后者会把 `capabilities` 这种非 UUID 形状也当 id 放行）。
+    // ⚠️ `thresholds/{metric}` 段的 metric 是**四个字面量指标码**（ODR /
+    //   LATE_SHIPMENT_RATE / CANCELLATION_RATE / VALID_TRACKING_RATE），**不是 UUID** ——
+    //   用宽松的 id 段会把 `/thresholds/任意串` 放行，那是后端不存在的映射。
+    // ⚠️ 末尾**刻意不带 `?`**：带了就等于放行裸路径 `account-health`。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸路径 `account-health` —— 本模块没有裸集合读，一切入口都带子路径
+    //   * `account-health/violations` / `account-health/appeals` —— 16.1.2.1 违规与处罚、
+    //     16.1.2.2 申诉管理**未交付**，放行等于让界面以为「违规计数 / 申诉状态」已经有了
+    //   * `account-health/trends` —— 16.1.1.2 绩效指标监控（趋势 / 预警 / 跌破预测）**未交付**
+    //   * `account-health/shops/{uuid}/delete` —— 指标是「当前周期的口径」，改写走录入更新，
+    //     不做物理删除
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^account\-health(?:\/(?:capabilities|shops|ranking|pending\-items|thresholds|assessments)|\/shops\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:metrics|assess|sync))?|\/thresholds\/(?:ODR|LATE_SHIPMENT_RATE|CANCELLATION_RATE|VALID_TRACKING_RATE))$/,
+  },
+  {
     // 15.6.2.2 购物车与弃单挽回（crm 服务）。纯**新增一条独立的 `services[]` 元素**：
     // 既有条目（`buyer-emails` 15.1.2.1 / `knowledge` 15.4.2.1 / `review-requests` 15.2.2.1 /
     // `review-rules` 15.2.2.2）**一字未动、也不重排** —— 本文件是多车道共用的**累积型**
