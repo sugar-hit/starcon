@@ -5554,6 +5554,75 @@ const services: readonly {
     // 放行它会让界面以为「一条不存在的列表接口」可用。
   },
   {
+    // 15.1.1.1 消息收件箱（crm 服务，卷 15 的 L3 锚点 15.1.1）。
+    //
+    // 蓝图：「集中展示各店铺的平台站内信与买家消息：店铺、买家、主题、正文、附件、平台时间、
+    //   收发方向、已读状态、关联订单，支持按店铺/类型/优先级/未读筛选与批量处理。
+    //   输出：消息列表 + 详情视图 + 关联订单上下文。
+    //   **消息必须关联到买家与订单**，否则客服看到消息还要去猜是哪一单。」
+    //
+    // 本条目是**新增一条 services[] 元素**，不是往既有 crm 分支的 alternation 里并 ——
+    // 既有 crm 分支分别是 `^knowledge\/...$`（15.4.2.1 客服知识库）、
+    // `^buyer-emails...$`（15.1.2.1 邮件收发）、`^review-requests...$`（15.2.2.1 索评）、
+    // `^review-rules...$`（15.2.2.2 索评规则），首 token 都与 `message-inbox` 不同，互不吃掉。
+    //
+    // ---- 插入锚点 ----
+    //   固定在 **`prefix: 'crm/'` 的 `^knowledge\/...$`（15.4.2.1 客服知识库）那条元素之后**。
+    //   ⚠️ 上一版锚在「`identity/` 那条之后」—— 与同批 14.5.1.2 建联与样品（首 token `outreach`）
+    //   选了**同一个锚点**，两条车道在同一位置插入元素 ⇒ git 必然判冲突（结构性，retry 不会自愈）。
+    //   本轮改锚到 `crm/knowledge` 之后：这条锚点本批**只有本车道**用，
+    //   与另外三条车道的锚点互不重叠，并入时 git 能干净求并 —— 既有条目**一字未动、也不重排**。
+    //
+    // ---- 首 token「message-inbox」的零命中核对结论 ----
+    //   本文件既有 140+ 条 services[] 正则里**没有任何一条**含 `message-inbox` 这个串。
+    //   含 `message` 的只有两处，且都**不可能**吃掉本条目：
+    //   ① `aftersales/cases/{uuid}/messages`（11.1.1.2 售后单详情，**活着的正则**）——
+    //      首 token 是 `aftersales`，挂在 `prefix: 'trade/'` 下；
+    //   ② `service-tickets/{uuid}/messages` —— 只出现在 15.4 工单那条的**注释**里，
+    //      且是**刻意不放行**的形状（工单那条正则里根本没有 `messages` 分支）。
+    //   且既有正则都是**锚定**的（`^token(...)?$`），而 `resolve()` 先按
+    //   `path.startsWith(service.prefix)` 收窄服务、再判别正则 ⇒ 只有 prefix='crm/' 的
+    //   元素才有机会吃到 `crm/message-inbox/...`，而本文件里 prefix='crm/' 的另外几条
+    //   正则**不可能**匹配 `message-inbox/...` ⇒ 首 token 不同即可，互不遮蔽。
+    //
+    // 形状逐条列出（**只放行本模块真实实现的路径**）：
+    //   message-inbox/messages            消息集合读（GET，真分页 + 真筛选）/ 登记（POST）
+    //   message-inbox/messages/{uuid}     单条消息详情（GET）
+    //   message-inbox/capabilities        能力声明（逐维 available + ownerModule + impact）
+    //   message-inbox/shops               店铺目录（来自上游 channel 的真实清单）
+    //   message-inbox/options             筛选词表（平台与店铺来自本租户真实数据）
+    //   message-inbox/platforms           逐平台的站内信接入状态（平台清单来自真实店铺目录）
+    //   message-inbox/batch               批量处理（POST，逐条给出结论与原因）
+    //   message-inbox/sync                平台消息同步（POST；当前逐平台未接入 ⇒ 后端 409）
+    //
+    // 判别顺序：**字面量子路径（capabilities / shops / options / platforms / batch / sync）
+    // 排在 {uuid} 段之前** —— alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    // id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    // （不是 `[0-9a-f-]+`）：后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸路径 `message-inbox` —— 后端**没有**这个映射（消息集合在 `messages` 上），
+    //     所以末尾**刻意不带 `?`**：带了就把裸路径一起放行，而那是一个不存在的端点。
+    //   * `message-inbox/messages/{uuid}/replies` —— 15.1.1.2 消息发送**未交付**，
+    //     放行它会让界面以为能回复买家。
+    //   * `message-inbox/messages/{uuid}/classify` —— 15.1.1.3 消息分类**未交付**，
+    //     本模块的优先级由**人工**设置。
+    //   * `message-inbox/messages/{uuid}/after-sales` 与 `/tickets` ——
+    //     11 售后与 15.4 工单**未交付**，本模块只落**处置意图**，不写下游单据。
+    //   * `message-inbox/messages/{uuid}/delete` —— 消息是纠纷举证材料，不提供删除。
+    //   * `message-inbox/messages/{uuid}/attachments/{attachmentId}` ——
+    //     附件按消息整体读，不按单条附件寻址（后端没有这个映射）。
+    //   * `message-inbox/capabilities/{uuid}` / `/shops/{uuid}` / `/options/{uuid}` /
+    //     `/platforms/{uuid}` —— 这四个是能力声明与目录，**不按 id 寻址**，
+    //     所以那段后缀是**必需**的（写成可选会让裸的 `capabilities/{uuid}` 一起通过）。
+    //   * 非 UUID 段 —— `message-inbox/messages/not-a-uuid` 必须 404。
+    prefix: 'crm/',
+    env: 'CRM_URL',
+    fallback: 'http://127.0.0.1:8086',
+    pattern:
+      /^message\-inbox(?:\/(?:capabilities|shops|options|platforms|batch|sync)|\/messages(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?)$/,
+  },
+  {
     // 16.4.2.1 品牌授权（channel 服务，卷 16 的 L3 锚点 16.4.2）。
     //
     // 蓝图：「管理品牌授权：授权方、授权范围（店铺/国家/类目/期限）、授权文件、被授权主体，
