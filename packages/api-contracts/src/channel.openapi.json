@@ -18595,6 +18595,689 @@
         },
         "type": "object"
       },
+      "BuyerBlacklistAppealDecisionInput": {
+        "properties": {
+          "decision": {
+            "minLength": 1,
+            "pattern": "APPROVED|REJECTED",
+            "type": "string"
+          },
+          "decisionReason": {
+            "maxLength": 800,
+            "minLength": 0,
+            "type": "string"
+          }
+        },
+        "required": [
+          "decision",
+          "decisionReason"
+        ],
+        "type": "object"
+      },
+      "BuyerBlacklistAppealInput": {
+        "properties": {
+          "appealReason": {
+            "maxLength": 800,
+            "minLength": 0,
+            "type": "string"
+          }
+        },
+        "required": [
+          "appealReason"
+        ],
+        "type": "object"
+      },
+      "BuyerBlacklistAppealView": {
+        "properties": {
+          "appealId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "appealReason": {
+            "type": "string"
+          },
+          "decidedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "decidedBy": {
+            "type": "string"
+          },
+          "decision": {
+            "type": "string"
+          },
+          "decisionReason": {
+            "type": "string"
+          },
+          "entryId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "submittedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "submittedBy": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "BuyerBlacklistAutoInput": {
+        "properties": {
+          "buyerKey": {
+            "minLength": 1,
+            "pattern": "^[0-9a-f]{32}$",
+            "type": "string"
+          },
+          "note": {
+            "maxLength": 600,
+            "minLength": 0,
+            "nullable": true,
+            "type": "string"
+          },
+          "reason": {
+            "maxLength": 600,
+            "minLength": 0,
+            "type": "string"
+          },
+          "riskLevel": {
+            "minLength": 1,
+            "pattern": "LOW|MEDIUM|HIGH|CRITICAL",
+            "type": "string"
+          },
+          "scope": {
+            "minLength": 1,
+            "pattern": "SHOP_ONLY|ALL_SHOPS",
+            "type": "string"
+          },
+          "shopCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "nullable": true,
+            "type": "string"
+          },
+          "signalRef": {
+            "maxLength": 160,
+            "minLength": 0,
+            "type": "string"
+          }
+        },
+        "required": [
+          "buyerKey",
+          "reason",
+          "riskLevel",
+          "scope",
+          "signalRef"
+        ],
+        "type": "object"
+      },
+      "BuyerBlacklistCapabilities": {
+        "properties": {
+          "appealSemantics": {
+            "type": "string"
+          },
+          "boundaryNote": {
+            "type": "string"
+          },
+          "capabilities": {
+            "items": {
+              "$ref": "#/components/schemas/BuyerBlacklistCapability"
+            },
+            "type": "array"
+          },
+          "downstreamNote": {
+            "type": "string"
+          },
+          "flagSemantics": {
+            "type": "string"
+          },
+          "releaseSemantics": {
+            "type": "string"
+          },
+          "scopeSemantics": {
+            "type": "string"
+          },
+          "sources": {
+            "items": {
+              "$ref": "#/components/schemas/BuyerBlacklistSourceState"
+            },
+            "type": "array"
+          },
+          "subjectKeySemantics": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "BuyerBlacklistCapability": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "capabilityCode": {
+            "type": "string"
+          },
+          "capabilityLabel": {
+            "type": "string"
+          },
+          "impact": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "BuyerBlacklistCheckInput": {
+        "properties": {
+          "buyerEmail": {
+            "maxLength": 254,
+            "minLength": 0,
+            "type": "string"
+          },
+          "buyerName": {
+            "maxLength": 120,
+            "minLength": 0,
+            "type": "string"
+          },
+          "buyerPhone": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "orderRef": {
+            "maxLength": 160,
+            "minLength": 0,
+            "nullable": true,
+            "type": "string"
+          },
+          "shopCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "buyerEmail",
+          "buyerName",
+          "buyerPhone"
+        ],
+        "type": "object"
+      },
+      "BuyerBlacklistCheckResult": {
+        "properties": {
+          "blacklisted": {
+            "type": "boolean"
+          },
+          "buyerKey": {
+            "type": "string"
+          },
+          "buyerKnown": {
+            "type": "boolean"
+          },
+          "buyerName": {
+            "type": "string"
+          },
+          "entryId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "flagId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "flagWritten": {
+            "type": "boolean"
+          },
+          "latestEvaluationStatus": {
+            "nullable": true,
+            "type": "string"
+          },
+          "latestRecommendedAction": {
+            "nullable": true,
+            "type": "string"
+          },
+          "latestRiskScore": {
+            "nullable": true,
+            "type": "number"
+          },
+          "latestScoreId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "matchedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "matchedScope": {
+            "type": "string"
+          },
+          "matchedScopeLabel": {
+            "type": "string"
+          },
+          "matchedShopCode": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "recommendedAction": {
+            "type": "string"
+          },
+          "recommendedActionLabel": {
+            "type": "string"
+          },
+          "riskLevel": {
+            "type": "string"
+          },
+          "riskLevelLabel": {
+            "type": "string"
+          },
+          "shopCode": {
+            "type": "string"
+          },
+          "upstreamAvailable": {
+            "type": "boolean"
+          },
+          "upstreamNote": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "BuyerBlacklistCounts": {
+        "properties": {
+          "active": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "allShops": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "critical": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "high": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "released": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "shopOnly": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "BuyerBlacklistEntryDetail": {
+        "properties": {
+          "appeals": {
+            "items": {
+              "$ref": "#/components/schemas/BuyerBlacklistAppealView"
+            },
+            "type": "array"
+          },
+          "entry": {
+            "$ref": "#/components/schemas/BuyerBlacklistEntryView"
+          },
+          "events": {
+            "items": {
+              "$ref": "#/components/schemas/BuyerBlacklistStatusEventView"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "BuyerBlacklistEntryPage": {
+        "properties": {
+          "counts": {
+            "$ref": "#/components/schemas/BuyerBlacklistCounts"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/BuyerBlacklistEntryView"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "BuyerBlacklistEntryView": {
+        "properties": {
+          "appealCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "buyerEmail": {
+            "type": "string"
+          },
+          "buyerKey": {
+            "type": "string"
+          },
+          "buyerName": {
+            "type": "string"
+          },
+          "buyerPhone": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "entryId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "flagCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "openAppealCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "registeredAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "registeredBy": {
+            "type": "string"
+          },
+          "riskLevel": {
+            "type": "string"
+          },
+          "riskLevelLabel": {
+            "type": "string"
+          },
+          "scope": {
+            "type": "string"
+          },
+          "scopeLabel": {
+            "type": "string"
+          },
+          "shopCode": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "sourceLabel": {
+            "type": "string"
+          },
+          "sourceRef": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusActor": {
+            "type": "string"
+          },
+          "statusAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "statusEventLabel": {
+            "type": "string"
+          },
+          "statusEventType": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "statusReason": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "BuyerBlacklistFlagCounts": {
+        "properties": {
+          "block": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "review": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "watch": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "BuyerBlacklistFlagPage": {
+        "properties": {
+          "counts": {
+            "$ref": "#/components/schemas/BuyerBlacklistFlagCounts"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/BuyerBlacklistOrderFlagView"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "BuyerBlacklistOrderFlagView": {
+        "properties": {
+          "buyerKey": {
+            "type": "string"
+          },
+          "buyerName": {
+            "type": "string"
+          },
+          "entryId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "flagId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "flaggedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "matchedScope": {
+            "type": "string"
+          },
+          "orderRef": {
+            "type": "string"
+          },
+          "recommendedAction": {
+            "type": "string"
+          },
+          "recommendedActionLabel": {
+            "type": "string"
+          },
+          "riskLevel": {
+            "type": "string"
+          },
+          "shopCode": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "BuyerBlacklistRegisterInput": {
+        "properties": {
+          "buyerEmail": {
+            "maxLength": 254,
+            "minLength": 0,
+            "type": "string"
+          },
+          "buyerName": {
+            "maxLength": 120,
+            "minLength": 0,
+            "type": "string"
+          },
+          "buyerPhone": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "note": {
+            "maxLength": 600,
+            "minLength": 0,
+            "nullable": true,
+            "type": "string"
+          },
+          "reason": {
+            "maxLength": 600,
+            "minLength": 0,
+            "type": "string"
+          },
+          "riskLevel": {
+            "minLength": 1,
+            "pattern": "LOW|MEDIUM|HIGH|CRITICAL",
+            "type": "string"
+          },
+          "scope": {
+            "minLength": 1,
+            "pattern": "SHOP_ONLY|ALL_SHOPS",
+            "type": "string"
+          },
+          "shopCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "buyerEmail",
+          "buyerName",
+          "buyerPhone",
+          "reason",
+          "riskLevel",
+          "scope"
+        ],
+        "type": "object"
+      },
+      "BuyerBlacklistReleaseInput": {
+        "properties": {
+          "reason": {
+            "maxLength": 600,
+            "minLength": 0,
+            "type": "string"
+          }
+        },
+        "required": [
+          "reason"
+        ],
+        "type": "object"
+      },
+      "BuyerBlacklistSourceState": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          },
+          "sourceCode": {
+            "type": "string"
+          },
+          "sourceLabel": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "BuyerBlacklistStatusEventView": {
+        "properties": {
+          "actor": {
+            "type": "string"
+          },
+          "appealId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "eventId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "eventLabel": {
+            "type": "string"
+          },
+          "eventSeq": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "eventType": {
+            "type": "string"
+          },
+          "fromStatus": {
+            "type": "string"
+          },
+          "occurredAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "riskLevel": {
+            "type": "string"
+          },
+          "toStatus": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "BuyerRiskBuyerPage": {
         "properties": {
           "available": {
@@ -82430,6 +83113,510 @@
         },
         "tags": [
           "listing-bundle-component-controller"
+        ]
+      }
+    },
+    "/channel/buyer-blacklist/appeals/{id}/decision": {
+      "post": {
+        "operationId": "post_channel_buyer_blacklist_appeals_id_decision",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BuyerBlacklistAppealDecisionInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BuyerBlacklistAppealView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "buyer-blacklist-controller"
+        ]
+      }
+    },
+    "/channel/buyer-blacklist/capabilities": {
+      "get": {
+        "operationId": "get_channel_buyer_blacklist_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BuyerBlacklistCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "buyer-blacklist-controller"
+        ]
+      }
+    },
+    "/channel/buyer-blacklist/check": {
+      "post": {
+        "operationId": "post_channel_buyer_blacklist_check",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BuyerBlacklistCheckInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BuyerBlacklistCheckResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "buyer-blacklist-controller"
+        ]
+      }
+    },
+    "/channel/buyer-blacklist/entries": {
+      "get": {
+        "operationId": "get_channel_buyer_blacklist_entries",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "scope",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "riskLevel",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "shopCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "source",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BuyerBlacklistEntryPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "buyer-blacklist-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_channel_buyer_blacklist_entries",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BuyerBlacklistRegisterInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BuyerBlacklistEntryView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "buyer-blacklist-controller"
+        ]
+      }
+    },
+    "/channel/buyer-blacklist/entries/auto": {
+      "post": {
+        "operationId": "post_channel_buyer_blacklist_entries_auto",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BuyerBlacklistAutoInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BuyerBlacklistEntryView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "buyer-blacklist-controller"
+        ]
+      }
+    },
+    "/channel/buyer-blacklist/entries/{id}": {
+      "get": {
+        "operationId": "get_channel_buyer_blacklist_entries_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BuyerBlacklistEntryDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "buyer-blacklist-controller"
+        ]
+      }
+    },
+    "/channel/buyer-blacklist/entries/{id}/appeals": {
+      "post": {
+        "operationId": "post_channel_buyer_blacklist_entries_id_appeals",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BuyerBlacklistAppealInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BuyerBlacklistAppealView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "buyer-blacklist-controller"
+        ]
+      }
+    },
+    "/channel/buyer-blacklist/entries/{id}/release": {
+      "post": {
+        "operationId": "post_channel_buyer_blacklist_entries_id_release",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BuyerBlacklistReleaseInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BuyerBlacklistEntryView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "buyer-blacklist-controller"
+        ]
+      }
+    },
+    "/channel/buyer-blacklist/flags": {
+      "get": {
+        "operationId": "get_channel_buyer_blacklist_flags",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "buyerKey",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "action",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BuyerBlacklistFlagPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "buyer-blacklist-controller"
         ]
       }
     },
