@@ -213,15 +213,18 @@
    warehouse 模块 1639 例里 **1 个 error** ——
    `InTransitTrackingIntegrationTest.节点_时间往返`
    「新的预计到港 2026-12-01T08:00+08:00 早于当前 ETA 2026-12-01T09:00+08:00」。
-   **根因是 10.4.1.2 在途跟踪的测试有墙钟依赖**（测试把「改期后的 ETA」硬编码成绝对时刻，
-   而基线 ETA 由 `eta(0)` = 当前小时算出 ⇒ 用例只在墙钟 < 08 时成立），
+   **根因是 10.4.1.2 在途跟踪的测试有墙钟依赖**（测试把「改期后的 ETA」硬编码成绝对时刻
+   `2026-12-01T08:00+08:00`，而跟踪记录的基线 ETA = `eta(40)` = 今天 + 40 天、保留当前小时
+   ⇒ 用例只在墙钟（UTC+8）小时数 < 08 时成立），
    **与本批 4 条 crm 车道完全无关**：warehouse 后端代码与上一个绿批次 `da1f96f9` **逐字节相同**
    （`git log da1f96f9..HEAD -- backend/services/warehouse/` 为空）。
    详细取证与处置见
    [`docs/backlog/2026-10-22-in-transit-eta-test-wall-clock-dependency.md`](../../backlog/2026-10-22-in-transit-eta-test-wall-clock-dependency.md)。
+   **本轮 reactor 顺序**：`backend → tenancy → identity → catalog → channel → warehouse(FAILURE)
+   → trade(SKIPPED) → crm(SKIPPED)` ⇒ **本批 4 条 crm 模块的后端测试本轮根本没跑到**（crm 被 SKIPPED）。
    ⇒ **本批 4 条模块的 L0 + L1 各自均绿**（见各节），
-   但**批次级全量验证没有走完**（后端在 warehouse 阶段中止，
-   typecheck / lint / 前端全量 / Next build / sync --check 四段**未执行**）。
+   但**批次级全量验证没有走完**：后端在 warehouse 中止，
+   typecheck / lint / 前端全量 / Next build / sync --check 四段**全部未执行**。
    **这是本批唯一的未闭环项。**
 4. **L2 的两次执行**：
    - 第一次（08:39 前后）**主动不跑**：当时仍有车道在途，L2 与在途车道的 L1 并发会抢
