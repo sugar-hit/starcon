@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
  * <ul>
  *   <li>{@code GET /capabilities} —— 能力声明：哪些下游未交付、量不到归谁、缺口口径是什么。
  *   <li>{@code GET /jurisdictions} —— 受控辖区码表（**不是自由文本**，值域钉死在 DB 层）。
- *   <li>{@code GET /shops} —— 店铺目录（**读本服务自己的 `shop` 表**）+ 推导出���应当登记的辖区」。
+ *   <li>{@code GET /shops} —— 店铺目录（**读本服务自己的 `shop` 表**）+ 推导出「应当登记的辖区」。
  *   <li>{@code GET /registrations} —— 登记档案清单（**真分页 + 真筛选**）。
  *   <li>{@code POST /registrations} —— 登记一条（**一个主体一个辖区只有一条**）。
  *   <li>{@code GET /registrations/{id}} —— 单条登记详情。

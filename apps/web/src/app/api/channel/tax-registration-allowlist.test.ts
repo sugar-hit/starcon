@@ -123,7 +123,7 @@ it('写形状（POST / PUT）被放行，且真的转发到 8083', async () => {
   const created = await POST(request('channel/tax-registration/registrations', 'POST'), {
     params: Promise.resolve({ path: 'channel/tax-registration/registrations'.split('/') }),
   });
-  expect(created.status, 'POST 登记未��放行').toBe(200);
+  expect(created.status, 'POST 登记未被放行').toBe(200);
 
   await PUT(request(`channel/tax-registration/registrations/${ID}`, 'PUT'), {
     params: Promise.resolve({ path: `channel/tax-registration/registrations/${ID}`.split('/') }),
