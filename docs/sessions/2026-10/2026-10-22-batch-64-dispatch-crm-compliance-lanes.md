@@ -204,3 +204,59 @@ SpringDoc 静默丢掉后一个，契约字段串味，而 typecheck / lint / vi
   ⇒ 实测约 **1.19 个/小时 ≈ 29 个/天**，**明显低于理论值**（回收轮要跑 L2，会吃掉整格并顺延下一格）。
 - **剩余 149 个未开发** ⇒ 按理论口径约 **2.2 天**，按实测口径约 **5.2 天**。
   **诚实区间：约 2–6 天**，随 L2 红绿比例与长尾车道占位浮动。**这是估算，不是承诺，也不是完成日期。**
+
+---
+
+## 附一：两条已落地车道的并入预演（`git merge-tree` 干跑，2026-10-22 16:5x）
+
+本批已有 **2 条车道 land**（`state=ready`）：
+
+| 车道 | head | 迁移 | api-proxy 首 token | 落点核对 |
+| --- | --- | --- | --- | --- |
+| 15.2.1.2 评价回复 | `598e41c7` | `V298` | `review-replies` | 落在 `reviews` 与 `review-rules` **之间** = 指定锚点 ✅ |
+| 15.3.2.2 接触记录 | `2bd54d3` | `V299` | `customer-contacts` | 落在 `customer-tags` 之后 = 指定锚点 ✅ |
+
+两条车道**同时改**了协议点名的四个求并文件：`packages/api-contracts/src/contracts/crm.ts`、
+`packages/api-contracts/src/crm.openapi.json`、`apps/web/src/lib/api-proxy.ts`、
+`docs/product/capability-blueprint/module-progress.md`。
+
+### 结论（`git merge-tree --write-tree` 干跑：**不改 ref、不改工作区、不产生合并 commit**）
+
+| 检查项 | 结果 |
+| --- | --- |
+| 合并是否报冲突 | **否**，exit 0，合并树 `db26b7de` |
+| `CONFLICT_KEYS` | **未出现** ⇒ 契约按「导出类型名 / paths / schemas 名」求并成功，无同名键冲突 |
+| `services[]` 元素数 | base **191** → 合并后 **193**（每车道恰好 +1） |
+| **从 base 掉落的元素** | **0 个** |
+| 新增首 token | `crm/:review-replies` · `crm/:customer-contacts` |
+| 台账行 | **465 行**、**重复 ID 0 个**；15.2.1.2 与 15.3.2.2 **均为「已交付」** |
+| 迁移文件 | `V298` / `V299` **两个都在** |
+| 车道纪律 | 两条都**零 ALTER / 零 DROP / 零外键**（V298：`ALTER TABLE … ADD/DROP/ALTER` 计数 **0**、`REFERENCES` 计数 **0**；V299 同） |
+
+⚠️ 干跑 stderr 里有一行 `merge-union: 走了行级兜底并集，请人工确认这个文件改对了` ——
+这是**台账分支**的固定提示（`merge-union.mjs` 第 374 行），紧跟着的
+`台账按模块 ID 求并集，折叠了 465 行同 ID 记录` 证明台账走的是**按模块 ID 的确定性求并**
+（证据非占位优先 → 状态 已交付 > 进行中 > 未开发 → 证据更长者优先），**不是内容丢失**。
+契约分支的 `CONFLICT_KEYS` **没有出现**。
+
+⇒ **下一轮 tick 可以直接走 `merge-ready`，不必再做并入预演。**
+
+### ⛔ 但仍然**不要**在车道未齐时跑 L2
+
+15.1.1.2 与 16.1.1.1 此刻仍在跑（后端已交付：V297 迁移 + 30 测试全绿 / V300 迁移 + 11 端点 + 36 测试全绿，
+正在做契约与前端）。
+**L2 不得与在途车道的 L1 并发**（2026-10-19 20:00 实测的成片假红：PG 峰值 16，1364 例里 3 failures + 24 errors **全是假红**）。
+⇒ 等 4 条车道全部 land，再一次性 `merge-ready` + **一次** L2 —— 这正是组批模式「每组只验证一次」的本意。
+
+### 🔍 给下一轮 L2 的一条取证线索（重要）
+
+本批开工后，**main→集成头同步任务**在本 worktree 里合入了 `origin/main`：
+
+```
+8663273f merge(main): sync from origin/main
+```
+
+⇒ 下一轮 L2 跑的那个集成头，**同时包含**「4 条车道的新代码」**和**「这一笔 main 同步」。
+按 `PIPELINE.md` §5.6：**若 L2 红，`8663273f` 是跨车道破坏的首要嫌疑对象**
+（它的代码没经过本流水线的 L1/L2）。⇒ 二分定位时**先切掉这一笔**再看是不是车道的问题；
+若确认是 main 带进来的回归，**不要去修 main 的代码**，如实上报交由同步任务处理。
