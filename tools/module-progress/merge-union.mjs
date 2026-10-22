@@ -26,13 +26,23 @@
  * 输出写回 %A。撞车时打印 CONFLICT_KEYS 并让 git 知道，人能看见而不是被静默吃掉。
  */
 
+import { spawnSync } from 'node:child_process';
 import { readFileSync, writeFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const [, , basePath, oursPath, theirsPath] = process.argv;
 if (!basePath || !oursPath || !theirsPath) {
   process.stderr.write('usage: merge-union.mjs <base> <ours> <theirs>\n');
   process.exit(1);
 }
+
+/**
+ * JSON 快照的序列化器 —— 与 codegen 共用同一个 json.dumps 路径（见 json-format.py）。
+ * 用 import.meta.url 定位，不依赖进程 cwd（git 跑 merge driver 时 cwd 是仓库根，
+ * 但集成脚本可能从别处调用它）。
+ */
+const JSON_FORMATTER = join(dirname(fileURLToPath(import.meta.url)), 'json-format.py');
 
 const read = (p) => {
   try {
@@ -51,14 +61,44 @@ if (ours === null || theirs === null) {
   process.exit(1);
 }
 
-/** 两边完全一样，没有可合并的东西 */
-if (ours === theirs) {
-  writeFileSync(oursPath, ours);
-  process.exit(0);
-}
+/*
+ * 注意：**没有**「两边完全一样就直接落盘」的全局短路。
+ * 契约分支与 JSON 分支都必须走一遍，好把输出**规范化**成 codegen 的形状 ——
+ * 否则一份「两边一样但排版是坏的」的契约文件会原样留在仓库里，
+ * CI 的「重新生成后无差异」检查照样红。短路只留在最下面的兜底分支里。
+ */
 
 const conflictKeys = [];
 const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+
+/**
+ * 用 codegen 同款的 json.dumps 序列化路径把合并结果写成字节（见 json-format.py）。
+ *
+ * 为什么不在 JS 里手搓：Python 的 repr 与 JS 的 Number.toString 在指数边界上
+ * 不同（1e-6：Python 写 1e-06，JS 写 0.000001；1e-8：Python 写 1e-08，JS 写 1e-8），
+ * 键序规则与末尾换行也不同。手搓 = 两份真相 = 迟早对不上。
+ *
+ * python3 不可用 / 脚本执行失败时返回 null —— 调用方必须**保留原文件内容不动**
+ * 并大声报出来：宁可这次合并不生效，也不要写出一个与生成器不一致的坏文件。
+ */
+function formatJsonSnapshot(value) {
+  const result = spawnSync('python3', [JSON_FORMATTER], {
+    input: JSON.stringify(value),
+    encoding: 'utf8',
+    // 默认 1MB 装不下 trade/channel 的快照（1.4MB~1.6MB），必须放开。
+    maxBuffer: 256 * 1024 * 1024,
+  });
+  if (result.error) {
+    process.stderr.write(`merge-union: 调用 python3 失败：${result.error.message}\n`);
+    return null;
+  }
+  if (result.status !== 0) {
+    process.stderr.write(`merge-union: json-format.py 退出码 ${result.status}\n`);
+    if (result.stderr) process.stderr.write(result.stderr);
+    return null;
+  }
+  return result.stdout;
+}
 
 /**
  * 三方按键合并。base 为 null 表示「这个键在基线里不存在」。
@@ -157,32 +197,65 @@ if (LEDGER_KEY.test(ours) && LEDGER_KEY.test(theirs)) {
  */
 const TS_KEY = /^export\s+(?:type|interface|const|enum)\s+([A-Za-z0-9_$]+)/m;
 
+/*
+ * ── 输出形状必须与 codegen 的 render_types() **逐字节一致** ─────────────────
+ * CI 的契约闸是「重新生成后 git diff 必须为空」，所以驱动写出的字节必须等于
+ * 生成器写出的字节。生成器那边（tools/codegen/catalog-contracts.py:render_types）是：
+ *   第 1 行 = 横幅，然后按类型名字典序的 export 行，每行一个 \n，**一个空行都没有**。
+ * 这里曾经有三处偏差，每一处都会让契约闸变红：
+ *   1. 横幅被挪到**末行**（head 被拼在导出之后）—— 现在横幅回到首行；
+ *   2. 类型顺序 = 三方求并的**插入序**，不是字典序 —— 现在输出层按类型名排序；
+ *   3. 空行被原样保留 —— 现在空行直接丢（生成器不产出空行）。
+ *
+ * 排序键用**默认的 Array.prototype.sort()**（UTF-16 码元序，等价 Python 的 sorted()），
+ * 禁止 localeCompare：本地化序对大小写 / 下划线 / 数字的先后与码元序不同，
+ * 同一份内容会排出两种顺序 ⇒ 字节不一致。
+ *
+ * mergeEntries() 的返回值顺序（ours 插入序 + theirs 独有键）**不能改** ——
+ * 它被台账与 JSON 路径共用；排序只加在这一层的**输出**上。
+ */
 if (TS_KEY.test(ours) && TS_KEY.test(theirs)) {
   const toMap = (text) => {
     const map = new Map();
-    const head = [];
+    const banner = [];
     for (const line of text.split('\n')) {
       const m = TS_KEY.exec(line);
       if (m) map.set(m[1], line);
-      else head.push(line);
+      // 非 export 行分两类：横幅等**前导块**要保留（放到首行，保持相对顺序），
+      // 空行**不要输出**（生成器一个空行都不产生）。
+      else if (line.trim() !== '') banner.push(line);
     }
-    return { map, head };
+    return { map, banner };
   };
 
-  const b = base === null ? { map: new Map(), head: [] } : toMap(base);
+  const b = base === null ? { map: new Map(), banner: [] } : toMap(base);
   const o = toMap(ours);
   const t = toMap(theirs);
   const merged = mergeEntries(b.map, o.map, t.map, '契约');
-  writeFileSync(oursPath, `${merged.map(([, v]) => v).join('\n')}\n${o.head.join('\n')}`);
+
+  const byKey = new Map(merged);
+  const keys = [...byKey.keys()].sort(); // 默认排序 = UTF-16 码元序 = Python sorted()
+  const body = keys.map((k) => byKey.get(k));
+  const head = o.banner.length ? o.banner : t.banner.length ? t.banner : b.banner;
+  writeFileSync(oursPath, `${[...head, ...body].join('\n')}\n`);
   if (conflictKeys.length) process.stderr.write(`CONFLICT_KEYS ${conflictKeys.join(' ')}\n`);
   process.exit(0);
 }
 
 /* ── 3. OpenAPI json：paths 与 components.schemas 等按对象键三方求并 ───── */
+let specs = null;
 try {
-  const a = JSON.parse(ours);
-  const b = JSON.parse(theirs);
-  const g = base === null ? {} : JSON.parse(base);
+  specs = {
+    a: JSON.parse(ours),
+    b: JSON.parse(theirs),
+    g: base === null ? {} : JSON.parse(base),
+  };
+} catch {
+  specs = null; /* 不是 JSON，落到下面的兜底 */
+}
+
+if (specs) {
+  const { a, b, g } = specs;
 
   const mergeObj = (o, t, baseObj, label) => {
     const asMap = (v) =>
@@ -210,14 +283,39 @@ try {
     a.components = out;
   }
 
-  writeFileSync(oursPath, JSON.stringify(a, null, 2));
+  /*
+   * 落盘必须与 codegen 写快照的路径**逐字节相同**，否则每并入一次 .openapi.json
+   * 就让 CI 的「重新生成后无差异」检查红一次。JS 的 JSON.stringify 做不到：
+   *   数字：1e-6 → 0.000001（Python 是 1e-06）、1e-8 → 1e-8（Python 是 1e-08）
+   *   键序：插入序（codegen 那边是 sort_keys=True 的字典序）
+   *   末尾：不补换行（codegen 补）
+   * 所以把合并结果交给 python3 tools/module-progress/json-format.py ——
+   * 同一个 json.dumps 序列化路径，只有一份真相。
+   */
+  const text = formatJsonSnapshot(a);
+  if (text === null) {
+    // python3 不可用 / 格式化失败：**保留原文件内容不动**。
+    // 宁可这次合并不生效（git 报冲突，人来看），也不要写出一个与生成器不一致的坏文件。
+    process.stderr.write(
+      'merge-union: python3 不可用或 json-format.py 执行失败 —— 已保留原文件内容不动，本次合并不生效\n',
+    );
+    process.exit(1);
+  }
+  writeFileSync(oursPath, text);
   if (conflictKeys.length) process.stderr.write(`CONFLICT_KEYS ${conflictKeys.join(' ')}\n`);
   process.exit(0);
-} catch {
-  /* 不是 JSON，落到下面的兜底 */
 }
 
 /* ── 兜底：行级去重并集。解析不了语义时至少不丢内容，但要报出来 ───────── */
+
+/*
+ * 两边完全一样 → 没什么可合并的，原样落盘。
+ * 短路只放在这里：契约分支与 JSON 分支必须走一遍，好把输出规范化成 codegen 的形状。
+ */
+if (ours === theirs) {
+  writeFileSync(oursPath, ours);
+  process.exit(0);
+}
 
 /*
  * 台账（module-progress.md）不能按整行去重，必须按**模块 ID** 求并集。
