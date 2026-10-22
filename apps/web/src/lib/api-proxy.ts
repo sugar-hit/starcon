@@ -8289,6 +8289,55 @@ const services: readonly {
       /^compliance\-rules(?:\/(?:capabilities|shops|effective|rules)|\/rules\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/versions(?:\/(?:effective|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:terms(?:\/upload)?|scopes))?))?)?)$/,
   },
   {
+    // 16.2.1.2 拦截执行（channel 服务）。纯**新增一条独立的 `services[]` 元素**：
+    // 既有条目**一字未动、也不重排** —— 本文件是多车道共用的**累积型**白名单，
+    // 每条服务规则是一段超长单行正则，往既有那条巨型 alternation 里并分支会让多车道
+    // 同时并入时 git 必然判冲突（结构性，retry 永远不会自愈）。
+    //
+    // ---- 插入锚点固定在 **`compliance-rules` 那条元素之后**（16.2.1.1 规则管理）----
+    //   同批另外三条车道的锚点是「`platform-appeals` 之后」/「`cart-recovery` 之后」
+    //   /「`service-ticket-process` 之后」，与本锚点互不重叠，git 能干净求并。
+    //
+    // ---- 首 token「compliance-intercepts」的零命中核对结论 ----
+    //   本文件既有全文里 `compliance-intercepts` 出现次数 = 0（实测）；
+    //   既有条目里的合规前缀是 `compliance-rules`（16.2.1.1）/ `compliance-precheck`（16.2.2.1）
+    //   / `listing-compliance-precheck`（4.2.3.2）—— **首 token 独立，互不遮蔽**。
+    //   🔴 刻意**不**用 `compliance-rules` 前缀扩展：那是 16.2.1.1 的，
+    //   扩展它会把 16.2.1.1 已交付的路由遮蔽掉（页面 404，而 typecheck / lint / vitest 全绿）。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   compliance-intercepts/capabilities          能力声明（未交付下游 available=false + ownerModule）
+    //   compliance-intercepts/policy                 拦截策略清单（GET）
+    //   compliance-intercepts/policy/{scene}         改拦截策略（PUT，**拦截默认不生效**，这里才开）
+    //   compliance-intercepts/decisions              判定端点（POST）+ 判定历史（GET，真分页 + 真筛选）
+    //   compliance-intercepts/decisions/{uuid}       单次判定详情（GET）
+    //   compliance-intercepts/exemptions             申请豁免（POST）/ 豁免单清单（GET，真分页 + 真筛选）
+    //   compliance-intercepts/exemptions/{uuid}      豁免单详情（GET）
+    //   compliance-intercepts/exemptions/{uuid}/approve  审批豁免（POST，**申请人 ≠ 审批人**）
+    //   compliance-intercepts/exemptions/{uuid}/reject   驳回豁免（POST）
+    //
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`（不是
+    //   `[0-9a-f-]+`：后者会把 `capabilities` 这种非 UUID 形状也当 id 放行）。
+    // ⚠️ `policy/{scene}` 段的 scene 是**受控枚举字面量**（三个拦截点），不是自由文本 ——
+    //   放行任意字符串等于放行一条后端不存在的路径。
+    // ⚠️ 末尾**刻意不带 `?`**：带了就等于放行裸路径 `compliance-intercepts`
+    //   （后端没有「一条汇总列表接口」，一切入口都带子路径）。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸路径 `compliance-intercepts` —— 本模块没有裸集合读
+    //   * `compliance-intercepts/exemptions/{uuid}/delete` —— 豁免单是「凭什么放行」的证据，不可删
+    //   * `compliance-intercepts/exemptions/{uuid}/revoke` —— 豁免**终态不可回退**，没有「撤销」这个动作
+    //   * `compliance-intercepts/decisions/{uuid}/edit` —— 判定凭据**只追加**，不可改写
+    //   * `compliance-intercepts/withdrawals` / `shipments` —— 12 提现与 8.3.4.1 发货
+    //     **未接入**（能力声明里 available=false），**不编**放行形状
+    //   * `compliance-intercepts/rules` —— 规则库归 16.2.1.1，走它自己的 `compliance-rules` 前缀
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^compliance\-intercepts(?:\/(?:capabilities|policy(?:\/(?:LISTING_PUBLISH|SHIPMENT|WITHDRAWAL))?|decisions(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|exemptions(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:approve|reject))?)?))$/,
+  },
+  {
     // 16.1.2.1 违规与处罚（channel 服务）。纯**新增一条独立的 `services[]` 元素**：
     // 既有条目**一字未动、也不重排** —— 本文件是多车道共用的**累积型**白名单，
     // 每条服务规则是一段超长单行正则，往既有那条巨型 alternation 里并分支会让多车道
@@ -8393,6 +8442,58 @@ const services: readonly {
       /^platform\-appeals(?:\/(?:capabilities|shops|appeals|quotas|stats|priority\-queue)|\/appeals\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:text|evidence|submit|decision|withdraw|reopen))?)$/,
   },
   {
+    // 16.3.2.2 EPR / 包装法（channel 服务）。纯**新增一条独立的 `services[]` 元素**：
+    // 既有条目（`platform-violations` 16.1.2.1 / `platform-appeals` 16.1.2.2 /
+    // `account-health` 16.1.1.1 / `performance-metrics` 16.1.1.2 / `compliance-precheck` 16.2.2.1 …）
+    // **一字未动、也不重排** —— 本文件是多车道共用的**累积型**白名单，每条服务规则是一段超长单行正则，
+    // 往既有那条巨型 alternation 里并分支会让多车道同时并入时 git 必然判冲突。
+    //
+    // ---- 插入锚点固定在 **`platform-appeals` 那条元素之后**（16.1.2.2 申诉管理）----
+    //   同批同服务的兄弟模块，锚点互不重叠，git 能干净求并。
+    //
+    // ---- 首 token「epr-registrations」的零命中核对结论 ----
+    //   本文件既有 `services[]` 正则里含 `epr` 的只有 `tax-registration` 那条元素里的一句**注释**
+    //   （`tax-registration/epr` 是 16.3.1.1 白名单里被**拒**的形状），**没有任何正则**以 `epr` 开头。
+    //   实测本文件全文出现 `epr-registrations` **0** 次、出现 `epr-registration` **0** 次。
+    //   ⚠️ **不要**用 `tax-registration` 前缀扩展 —— 那是 16.3.1.1 的，会遮蔽它的路由。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   epr-registrations/capabilities          能力声明（下游 available=false + ownerModule）
+    //   epr-registrations/regimes               制度码表 + 每个制度在哪些国家适用、适用哪些品类
+    //   epr-registrations/categories            适用品类码表（受控值域）
+    //   epr-registrations/shops                 店铺目录（GET，真分页）+ 推导出的「需要 EPR 的国家」
+    //   epr-registrations/registrations         登记档案清单（GET，真分页 + 真筛选）/ 新建登记（POST）
+    //   epr-registrations/registrations/{uuid}  登记详情（GET）/ 改登记（PUT，**版本化**：关旧版 + 建新版）
+    //   epr-registrations/registrations/{uuid}/versions  生效版本历史（GET）
+    //   epr-registrations/coverage              覆盖情况（GET，真分页 + 真筛选；国家 × 品类反查）
+    //   epr-registrations/compliance-status     按国家的合规状态（GET）
+    //   epr-registrations/publish-gate          **刊登闸门**（POST，服务端真算的结论 + 逐条原因）
+    //   epr-registrations/publish-gate/batch    批量刊登闸门（POST）
+    //   epr-registrations/filings               申报期状态（GET，真分页 + 真筛选）
+    //   epr-registrations/fees                  费用清单（GET，真分页 + 真筛选）/ 记一笔（POST）
+    //   epr-registrations/fees/{uuid}           改一笔费用（PUT）
+    //   epr-registrations/fee-summary           费用汇总（GET，**按币种分组**）
+    //   epr-registrations/exemptions            不适用声明清单（GET）/ 声明不适用（POST）
+    //   epr-registrations/exemptions/{uuid}     撤销不适用声明（PUT，关窗口不删行）
+    //
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`（不是
+    //   `[0-9a-f-]+`：后者会把 `capabilities` 这种非 UUID 形状也当 id 放行）。
+    // ⚠️ 末尾**刻意不带 `?`**：带了就等于放行裸路径 `epr-registrations`
+    //   （后端没有「一条汇总列表接口」，一切入口都带子路径）。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸路径 `epr-registrations` —— 本模块没有裸集合读
+    //   * `epr-registrations/registrations/{uuid}/delete` —— 登记不做物理删除（改 = 新版本）
+    //   * `epr-registrations/finance` —— 12 财务在本仓**尚未落地**，本模块**不建**财务凭证表
+    //   * `epr-registrations/vat` / `epr-registrations/ioss` —— 16.3.2.1 VAT/IOSS **未交付**
+    //   * `epr-registrations/calendar` —— 16.3.1.2 申报日历**未交付**（本模块只算申报期窗口）
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^epr\-registrations(?:\/(?:capabilities|regimes|categories|shops|registrations|coverage|compliance\-status|publish\-gate|filings|fees|fee\-summary|exemptions)|\/publish\-gate\/batch|\/registrations\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/versions)?|\/fees\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}|\/exemptions\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})$/,
+  },
+  {
     // 15.6.2.2 购物车与弃单挽回（crm 服务）。纯**新增一条独立的 `services[]` 元素**：
     // 既有条目（`buyer-emails` 15.1.2.1 / `knowledge` 15.4.2.1 / `review-requests` 15.2.2.1 /
     // `review-rules` 15.2.2.2）**一字未动、也不重排** —— 本文件是多车道共用的**累积型**
@@ -8444,6 +8545,46 @@ const services: readonly {
       /^cart\-recovery\/(?:capabilities|policy|recovery\-rate|sync|shops(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|messages(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:approve|enable|disable))?)?|unsubscribes(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|touches(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/result)?|abandonments(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:touches|recoveries))?)?)$/,
   },
   {
+    // 16.4.1.1 侵权库（channel 服务）。纯**新增一条独立的 `services[]` 元素**：
+    // 既有条目（`brand-authorizations` 16.4.2.1 / `brand-credentials` 16.4.2.2 /
+    // `compliance-rules` 16.2.1.1 / `cart-recovery` 15.6.2.2 …）**一字未动、也不重排** ——
+    // 本文件是多车道共用的**累积型**白名单，每条服务规则是一段超长单行正则，
+    // 往既有那条巨型 alternation 里并分支会让多车道同时并入时 git 必然判冲突
+    // （结构性，retry 永远不会自愈）。
+    //
+    // ---- 插入锚点固定在 **`cart-recovery` 那条元素之后**（15.6.2.2 弃单挽回）----
+    //   同批另外三条车道的锚点分别是「`compliance-rules` 之后」/「`platform-appeals` 之后」/
+    //   「`service-ticket-process` 之后」，与本锚点互不重叠，git 能干净求并。
+    //
+    // ---- 首 token「ip-risk-library」的零命中核对结论 ----
+    //   本文件既有全文里 `ip-risk-library` 出现次数 = **0**（已实测），
+    //   且它与既有首 token（`brand-authorizations` / `brand-credentials` /
+    //   `compliance-rules` / `cart-recovery` …）**不是前缀关系** ⇒ 双向都不会误吃。
+    //   ⚠️ **不要**用 `brand-authorizations` / `brand-credentials` 前缀扩展 ——
+    //   那是 16.4.2.1 / 16.4.2.2 的，会遮蔽它们的路由。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   ip-risk-library/capabilities      能力声明（未交付下游 available=false + ownerModule）
+    //   ip-risk-library/platforms         适用平台目录（channel 自己的 `platform` 目录）
+    //   ip-risk-library/brands            3.3.2 品牌候选（catalog，**跨服务只读**）
+    //   ip-risk-library/entries           条目清单（GET，真分页 + 真筛选）/ 登记条目（POST，**幂等**）
+    //   ip-risk-library/entries/{uuid}    条目详情（GET）/ 改条目（PUT，**整体替换**）
+    //   ip-risk-library/entries/{uuid}/status  启用 · 停用（PUT，**停用必写理由**）
+    //   ip-risk-library/imports           批量导入（POST，**行级结果 + 幂等 + 部分失败不回滚**）
+    //   ip-risk-library/imports/{uuid}    导入批次详情（逐行结果）
+    //   ip-risk-library/platform-summary  平台风险汇总（**反查**入口）
+    //
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //（不是 `[0-9a-f-]+`）：后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行。
+    // ⚠️ 末尾**刻意不带 `?`**：带了就等于放行裸路径 `ip-risk-library` ——
+    //   后端没有「一条汇总列表接口」，放行它会让界面以为可用。
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^ip\-risk\-library\/(?:capabilities|platforms|brands|platform\-summary|entries(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/status)?)?|imports(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?)$/,
+  },
+  {
     // ---------------------------------------------------------------------------
     // 15.4.1.2 工单处理（crm 服务）
     // ---------------------------------------------------------------------------
@@ -8493,6 +8634,57 @@ const services: readonly {
     fallback: 'http://127.0.0.1:8086',
     pattern:
       /^service\-ticket\-process\/(?:capabilities|tickets(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:notes|replies|status|close|resolutions|satisfaction|links|actions|escalate)(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/revoke)?|\/sla\/(?:pause|resume))?)?)?$/,
+  },
+  {
+    // ---------------------------------------------------------------------------
+    // 16.5.1.2 买家风险评分（channel 服务）
+    // ---------------------------------------------------------------------------
+    //
+    // ---- 插入锚点固定在 **services[] 数组的末尾**（最后一条元素之后、数组结尾的 `];` 之前）----
+    //   同批另外三条车道的锚点分别是「`compliance-rules` 之后」「`platform-appeals` 之后」
+    //   「`cart-recovery` 之后」，与本锚点互不重叠，git 能干净求并。
+    //
+    // ---- 纯**新增一条独立的 `services[]` 元素** ----
+    //   既有条目**一字未动、也不重排、不格式化整文件**。往既有那条巨型 alternation 里并分支
+    //   会让多车道同时并入时 git 必然判冲突（结构性，retry 永远不会自愈）。
+    //
+    // ---- 首 token「buyer-risk-scores」的零命中核对结论 ----
+    //   本文件既有 services[] 正则里**没有任何一条**含 `buyer-risk-scores` 这个串
+    //   （既有的是 `buyer-emails` —— 15.1.2.1 买家邮箱，在 crm 服务下；
+    //   以及 trade 侧的 `order-review` / `risk-validation` 分支）。
+    //   ⚠️ `buyer-risk-scores` 与 `buyer-emails` **不是前缀关系**：
+    //   前者的第 6 个字符是 `-`、后者是 `-`，但第 7 个字符就分叉（`r` vs `e`），
+    //   所以既有那条 `^buyer\-emails...$` 分支**不会**吃掉本模块的任何路径，
+    //   本模块的分支也**不会**吃掉 15.1.2.1 的任何路径（双向都实测过）。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   buyer-risk-scores/capabilities                   能力声明（逐维 available + ownerModule）
+    //   buyer-risk-scores/rule                          评分规则（GET 读 / PUT 改）
+    //   buyer-risk-scores/buyers                        买家名册（GET，真分页 / 真搜索）
+    //   buyer-risk-scores/evaluate                      跑一次评分（POST）
+    //   buyer-risk-scores/scores                        评分历史（GET，真分页 / 真筛选）
+    //   buyer-risk-scores/scores/{uuid}                 单次评分详情（GET）
+    //
+    // 判别顺序：**字面量子路径（capabilities / rule / buyers / evaluate / scores）排在
+    // {uuid} 段之前** —— alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //   （不是 `[0-9a-f-]+`）：后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行。
+    // ⚠️ **末尾刻意不带 `?`**：带了就等于放行裸路径 `buyer-risk-scores` ——
+    //   后端没有「一条汇总列表接口」，放行它会让界面以为可用。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸路径 `buyer-risk-scores` —— 本模块没有裸集合读
+    //   * `buyer-risk-scores/scores/{uuid}/delete` —— 评分是判定凭据，**append-only**，不做删除
+    //   * `buyer-risk-scores/blacklist` —— 16.5.1.1 黑名单**未交付**，本模块**不写黑名单**
+    //   * `buyer-risk-scores/related-accounts` —— 16.5.2.2 关联风险**未交付**，
+    //     本模块**不编一张「关联账号」表**
+    //   * `buyer-risk-scores/orders/{uuid}/status` —— 改订单状态是 9.2 的事，
+    //     本模块**只出建议**
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^buyer\-risk\-scores\/(?:capabilities|rule|buyers|evaluate|scores(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?)$/,
   },
 ];
 
