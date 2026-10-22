@@ -8123,6 +8123,50 @@ const services: readonly {
       /^account\-health(?:\/(?:capabilities|shops|ranking|pending\-items|thresholds|assessments)|\/shops\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:metrics|assess|sync))?|\/thresholds\/(?:ODR|LATE_SHIPMENT_RATE|CANCELLATION_RATE|VALID_TRACKING_RATE))$/,
   },
   {
+    // 16.3.1.1 税号与辖区（channel 服务）。纯**新增一条独立的 `services[]` 元素**：
+    // 既有条目**一字未动、也不重排** —— 本文件是多车道共用的**累积型**白名单，
+    // 每条服务规则是一段超长单行正则，往既有那条巨型 alternation 里并分支会让多车道
+    // 同时并入时 git 必然判冲突（结构性，retry 永远不会自愈）。
+    //
+    // ---- 插入锚点固定在 **`account-health` 那条元素之后**（16.1.1.1 账号健康总览）----
+    //   同批另外三条车道的锚点分别是「`performance-metrics` 之后」、
+    //   「`platform-violations` 之后」、「`cart-recovery` 之后」，
+    //   与本锚点互不重叠，git 能干净求并。
+    //
+    // ---- 首 token「tax-registration」的零命中核对结论 ----
+    //   本文件既有全文里 `tax-registration` 出现次数 = 0；
+    //   并把既有**全部 services[] 正则**逐条实测：本模块的 8 个 shape 命中 0 处。
+    //   首 token 既是独立字面量，也不会被既有分支的前缀吃掉。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   tax-registration/capabilities        能力声明（未交付下游 available=false + ownerModule）
+    //   tax-registration/jurisdictions       受控辖区码表（**不是自由文本**，值域钉死在 DB 层）
+    //   tax-registration/shops               店铺目录（读本服务自己的 shop 表）+ 应当登记的辖区
+    //   tax-registration/registrations       登记档案清单（GET，真分页 + 真筛选）/ 登记一条（POST）
+    //   tax-registration/registrations/{uuid} 单条登记详情（GET）/ 改登记（PUT，含 status=ARCHIVED 撤下）
+    //   tax-registration/gaps                🔴 缺失项清单（GET，真分页 + 真筛选 + 汇总计数）
+    //   tax-registration/gap-summary         🔴 缺失项汇总（GET，按类型计数 + 受影响店铺 / 主体数）
+    //   tax-registration/coverage            逐店铺的辖区覆盖情况（GET）
+    //
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`。
+    // ⚠️ 末尾**刻意不带 `?`**：带了就等于放行裸路径 `tax-registration` ——
+    //   本模块没有裸集合读，一切入口都带子路径。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸路径 `tax-registration` —— 本模块没有裸集合读
+    //   * `tax-registration/calendar` —— 16.3.1.2 申报日历**未交付**
+    //   * `tax-registration/vat` / `tax-registration/ioss` —— 16.3.2.1 VAT/IOSS**未交付**
+    //   * `tax-registration/epr` —— 16.3.2.2 EPR/包装法**未交付**
+    //   * `tax-registration/tax-returns` —— 12.6 税务（finance 服务在本仓尚未落地）**未交付**
+    //   * `tax-registration/registrations/{uuid}/delete` —— 登记是事实，撤下走 status=ARCHIVED，
+    //     不做物理删除
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^tax\-registration(?:\/(?:capabilities|jurisdictions|shops|registrations|gaps|gap\-summary|coverage)|\/registrations\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})$/,
+  },
+  {
     // 16.1.1.2 绩效指标监控（channel 服务）。纯**新增一条独立的 `services[]` 元素**：
     // 既有条目**一字未动、也不重排** —— 本文件是多车道共用的**累积型**白名单，
     // 每条服务规则是一段超长单行正则，往既有那条巨型 alternation 里并分支会让多车道
