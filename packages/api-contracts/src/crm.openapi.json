@@ -4028,6 +4028,1302 @@
         },
         "type": "object"
       },
+      "CrmEmailRuleAssignmentPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/CrmEmailRuleAssignmentRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CrmEmailRuleAssignmentRow": {
+        "properties": {
+          "assignTargetCode": {
+            "type": "string"
+          },
+          "assignTargetType": {
+            "type": "string"
+          },
+          "assignedAt": {
+            "type": "string"
+          },
+          "assignmentNo": {
+            "type": "string"
+          },
+          "buyerEmail": {
+            "type": "string"
+          },
+          "cancelReason": {
+            "type": "string"
+          },
+          "cancelledAt": {
+            "nullable": true,
+            "type": "string"
+          },
+          "cancelledBy": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "dispatchNote": {
+            "type": "string"
+          },
+          "emailId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "emailNo": {
+            "type": "string"
+          },
+          "hitId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "ruleCode": {
+            "type": "string"
+          },
+          "ruleId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "ruleVersion": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "status": {
+            "type": "string"
+          },
+          "subject": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmEmailRuleBucket": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "count": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "label": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmEmailRuleCancelAssignmentInput": {
+        "properties": {
+          "cancelReason": {
+            "description": "取消理由（必填）：为什么这条分配结果不作数",
+            "maxLength": 600,
+            "minLength": 0,
+            "type": "string"
+          }
+        },
+        "required": [
+          "cancelReason"
+        ],
+        "type": "object"
+      },
+      "CrmEmailRuleCapabilities": {
+        "properties": {
+          "actions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "assignTargetTypes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "boundaryNote": {
+            "type": "string"
+          },
+          "dimensions": {
+            "items": {
+              "$ref": "#/components/schemas/CrmEmailRuleCapabilityDimension"
+            },
+            "type": "array"
+          },
+          "effectiveActions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "highlight": {
+            "type": "string"
+          },
+          "importantLabels": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "matchModes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "CrmEmailRuleCapabilityDimension": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "description": {
+            "type": "string"
+          },
+          "dimension": {
+            "type": "string"
+          },
+          "impact": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmEmailRuleConditionDetail": {
+        "properties": {
+          "keywords": {
+            "$ref": "#/components/schemas/CrmEmailRuleKeywordCondition"
+          },
+          "sender": {
+            "$ref": "#/components/schemas/CrmEmailRuleSenderCondition"
+          },
+          "ticketTags": {
+            "$ref": "#/components/schemas/CrmEmailRuleTicketTagCondition"
+          }
+        },
+        "type": "object"
+      },
+      "CrmEmailRuleEmailView": {
+        "properties": {
+          "body": {
+            "type": "string"
+          },
+          "buyerEmail": {
+            "type": "string"
+          },
+          "buyerName": {
+            "type": "string"
+          },
+          "buyerRef": {
+            "type": "string"
+          },
+          "direction": {
+            "type": "string"
+          },
+          "emailNo": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "receivedAt": {
+            "type": "string"
+          },
+          "salesOrderNo": {
+            "type": "string"
+          },
+          "shopName": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "subject": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmEmailRuleEvaluateBatchInput": {
+        "properties": {
+          "emailIds": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "maxItems": 200,
+            "minItems": 0,
+            "type": "array"
+          }
+        },
+        "required": [
+          "emailIds"
+        ],
+        "type": "object"
+      },
+      "CrmEmailRuleEvaluateBatchResult": {
+        "properties": {
+          "boundaryNote": {
+            "type": "string"
+          },
+          "failedCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/CrmEmailRuleEvaluateResult"
+            },
+            "type": "array"
+          },
+          "matchedCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "refusedCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "requestedCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "succeededCount": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CrmEmailRuleEvaluateInput": {
+        "properties": {
+          "emailId": {
+            "description": "要评估的邮件（15.1.2.1 的 crm_buyer_email.id）",
+            "format": "uuid",
+            "type": "string"
+          },
+          "ruleId": {
+            "description": "只评估这一条规则（留空 = 按顺序评估全部启用规则）",
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "emailId"
+        ],
+        "type": "object"
+      },
+      "CrmEmailRuleEvaluateResult": {
+        "properties": {
+          "action": {
+            "nullable": true,
+            "type": "string"
+          },
+          "assignTargetCode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "assignmentId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "classificationLabel": {
+            "nullable": true,
+            "type": "string"
+          },
+          "effectiveAction": {
+            "nullable": true,
+            "type": "string"
+          },
+          "emailId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "emailNo": {
+            "type": "string"
+          },
+          "hitId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "hitNo": {
+            "nullable": true,
+            "type": "string"
+          },
+          "idempotent": {
+            "type": "boolean"
+          },
+          "important": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "importantSource": {
+            "nullable": true,
+            "type": "string"
+          },
+          "matched": {
+            "type": "boolean"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "refusalReason": {
+            "nullable": true,
+            "type": "string"
+          },
+          "ruleCode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "silenceRefused": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "success": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "CrmEmailRuleHitDetail": {
+        "properties": {
+          "assignment": {
+            "$ref": "#/components/schemas/CrmEmailRuleAssignmentRow"
+          },
+          "email": {
+            "$ref": "#/components/schemas/CrmEmailRuleEmailView"
+          },
+          "hit": {
+            "$ref": "#/components/schemas/CrmEmailRuleHitRow"
+          },
+          "ruleSnapshot": {
+            "$ref": "#/components/schemas/CrmEmailRuleSnapshot"
+          }
+        },
+        "type": "object"
+      },
+      "CrmEmailRuleHitPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/CrmEmailRuleHitRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CrmEmailRuleHitRow": {
+        "properties": {
+          "action": {
+            "type": "string"
+          },
+          "assignmentId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "buyerEmail": {
+            "type": "string"
+          },
+          "classificationId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "classificationLabel": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "deliveryStatus": {
+            "nullable": true,
+            "type": "string"
+          },
+          "effectiveAction": {
+            "type": "string"
+          },
+          "emailId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "emailNo": {
+            "type": "string"
+          },
+          "hitNo": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "important": {
+            "type": "boolean"
+          },
+          "importantSource": {
+            "type": "string"
+          },
+          "matchBasis": {
+            "$ref": "#/components/schemas/CrmEmailRuleMatchBasis"
+          },
+          "matchedAt": {
+            "type": "string"
+          },
+          "refusalReason": {
+            "type": "string"
+          },
+          "ruleCode": {
+            "type": "string"
+          },
+          "ruleId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "ruleName": {
+            "type": "string"
+          },
+          "ruleVersion": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "silenceRefused": {
+            "type": "boolean"
+          },
+          "subject": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmEmailRuleInput": {
+        "properties": {
+          "action": {
+            "description": "命中动作：自动分配 / 自动回复 / 静默",
+            "minLength": 1,
+            "pattern": "AUTO_ASSIGN|AUTO_REPLY|SILENCE",
+            "type": "string"
+          },
+          "assignTargetCode": {
+            "description": "自动分配目标（组码 / 人工号）",
+            "nullable": true,
+            "type": "string"
+          },
+          "assignTargetType": {
+            "description": "自动分配目标类型：TEAM（组）· AGENT（人）",
+            "nullable": true,
+            "type": "string"
+          },
+          "enabled": {
+            "description": "是否启用（停用而不删除：历史命中依据要查得到）",
+            "nullable": true,
+            "type": "boolean"
+          },
+          "importantMarkers": {
+            "description": "🔴 重要沟通标记：命中即视为重要沟通，不可静默",
+            "items": {
+              "description": "🔴 重要沟通标记：命中即视为重要沟通，不可静默",
+              "maxLength": 100,
+              "minLength": 0,
+              "nullable": true,
+              "type": "string"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "keywords": {
+            "description": "关键词（主题 / 正文，字面包含，忽略大小写）",
+            "items": {
+              "description": "关键词（主题 / 正文，字面包含，忽略大小写）",
+              "maxLength": 100,
+              "minLength": 0,
+              "nullable": true,
+              "type": "string"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "matchMode": {
+            "description": "同一维度内多个值的命中方式：ANY（默认）· ALL",
+            "nullable": true,
+            "type": "string"
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          },
+          "priorityOrder": {
+            "description": "显式顺序：数字小的先命中；并列时按 rule_code",
+            "format": "int32",
+            "type": "integer"
+          },
+          "replyBody": {
+            "description": "自动回复的正文",
+            "nullable": true,
+            "type": "string"
+          },
+          "replySubject": {
+            "description": "自动回复的标题",
+            "nullable": true,
+            "type": "string"
+          },
+          "replyTemplateCode": {
+            "description": "自动回复的模板码",
+            "nullable": true,
+            "type": "string"
+          },
+          "ruleCode": {
+            "description": "规则编码（同租户内唯一，建后不可改）",
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "ruleName": {
+            "description": "规则名称",
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "senderDomains": {
+            "description": "发件人域名（精确匹配，忽略大小写）",
+            "items": {
+              "description": "发件人域名（精确匹配，忽略大小写）",
+              "maxLength": 200,
+              "minLength": 0,
+              "nullable": true,
+              "type": "string"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "senderEmails": {
+            "description": "发件人邮箱（精确匹配，忽略大小写）",
+            "items": {
+              "description": "发件人邮箱（精确匹配，忽略大小写）",
+              "maxLength": 320,
+              "minLength": 0,
+              "nullable": true,
+              "type": "string"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "ticketTagCodes": {
+            "description": "工单标签码（必须是字典里真实存在的标签）",
+            "items": {
+              "description": "工单标签码（必须是字典里真实存在的标签）",
+              "maxLength": 64,
+              "minLength": 0,
+              "nullable": true,
+              "type": "string"
+            },
+            "nullable": true,
+            "type": "array"
+          }
+        },
+        "required": [
+          "action",
+          "priorityOrder",
+          "ruleCode",
+          "ruleName"
+        ],
+        "type": "object"
+      },
+      "CrmEmailRuleKeywordCondition": {
+        "properties": {
+          "keywords": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "matched": {
+            "type": "boolean"
+          },
+          "matchedKeywords": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "CrmEmailRuleMatch": {
+        "properties": {
+          "action": {
+            "type": "string"
+          },
+          "conditions": {
+            "$ref": "#/components/schemas/CrmEmailRuleConditionDetail"
+          },
+          "ruleCode": {
+            "type": "string"
+          },
+          "ruleId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "ruleName": {
+            "type": "string"
+          },
+          "ruleOrder": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "ruleVersion": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "won": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "CrmEmailRuleMatchBasis": {
+        "properties": {
+          "matches": {
+            "items": {
+              "$ref": "#/components/schemas/CrmEmailRuleMatch"
+            },
+            "type": "array"
+          },
+          "winningRuleCode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "winningRuleId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmEmailRuleOptions": {
+        "properties": {
+          "actions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "assignTargetTypes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "effectiveActions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "importantLabels": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "matchModes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "tagCodes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "CrmEmailRulePage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/CrmEmailRuleRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CrmEmailRulePreviewInput": {
+        "properties": {
+          "emailId": {
+            "description": "试算的邮件 id",
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "emailId"
+        ],
+        "type": "object"
+      },
+      "CrmEmailRulePreviewResult": {
+        "properties": {
+          "conditions": {
+            "$ref": "#/components/schemas/CrmEmailRuleConditionDetail"
+          },
+          "effectiveAction": {
+            "type": "string"
+          },
+          "emailId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "emailNo": {
+            "type": "string"
+          },
+          "important": {
+            "type": "boolean"
+          },
+          "importantSource": {
+            "type": "string"
+          },
+          "matched": {
+            "type": "boolean"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "ruleCode": {
+            "type": "string"
+          },
+          "ruleId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "silenceRefused": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "CrmEmailRuleResult": {
+        "properties": {
+          "note": {
+            "type": "string"
+          },
+          "rule": {
+            "$ref": "#/components/schemas/CrmEmailRuleRow"
+          }
+        },
+        "type": "object"
+      },
+      "CrmEmailRuleRow": {
+        "properties": {
+          "action": {
+            "type": "string"
+          },
+          "assignTargetCode": {
+            "type": "string"
+          },
+          "assignTargetType": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "importantMarkers": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "keywords": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "matchMode": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "priorityOrder": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "replyBody": {
+            "type": "string"
+          },
+          "replySubject": {
+            "type": "string"
+          },
+          "replyTemplateCode": {
+            "type": "string"
+          },
+          "ruleCode": {
+            "type": "string"
+          },
+          "ruleName": {
+            "type": "string"
+          },
+          "senderDomains": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "senderEmails": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "ticketTagCodes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "updatedAt": {
+            "type": "string"
+          },
+          "version": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CrmEmailRuleSenderCondition": {
+        "properties": {
+          "domains": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "emails": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "matched": {
+            "type": "boolean"
+          },
+          "matchedDomains": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "matchedEmails": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "CrmEmailRuleSnapshot": {
+        "properties": {
+          "action": {
+            "type": "string"
+          },
+          "assignTargetCode": {
+            "type": "string"
+          },
+          "assignTargetType": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "importantMarkers": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "keywords": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "matchMode": {
+            "type": "string"
+          },
+          "priorityOrder": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "replyBody": {
+            "type": "string"
+          },
+          "replySubject": {
+            "type": "string"
+          },
+          "replyTemplateCode": {
+            "type": "string"
+          },
+          "ruleCode": {
+            "type": "string"
+          },
+          "ruleName": {
+            "type": "string"
+          },
+          "senderDomains": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "senderEmails": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "ticketTagCodes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "version": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CrmEmailRuleStat": {
+        "properties": {
+          "action": {
+            "type": "string"
+          },
+          "assignmentCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "hitCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "priorityOrder": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "refusedCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "ruleCode": {
+            "type": "string"
+          },
+          "ruleId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "ruleName": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmEmailRuleStatistics": {
+        "properties": {
+          "byAction": {
+            "items": {
+              "$ref": "#/components/schemas/CrmEmailRuleBucket"
+            },
+            "type": "array"
+          },
+          "byEffectiveAction": {
+            "items": {
+              "$ref": "#/components/schemas/CrmEmailRuleBucket"
+            },
+            "type": "array"
+          },
+          "byRule": {
+            "items": {
+              "$ref": "#/components/schemas/CrmEmailRuleStat"
+            },
+            "type": "array"
+          },
+          "importantCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "pendingAssignmentCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "refusedCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalHitCount": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CrmEmailRuleTicketTagCondition": {
+        "properties": {
+          "codes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "matched": {
+            "type": "boolean"
+          },
+          "matchedCodes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "CrmEmailTagAssignmentInput": {
+        "properties": {
+          "source": {
+            "description": "打标来源：MANUAL（默认）· RULE",
+            "nullable": true,
+            "type": "string"
+          },
+          "tagCode": {
+            "description": "标签码（必须是字典里真实存在的标签）",
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          }
+        },
+        "required": [
+          "tagCode"
+        ],
+        "type": "object"
+      },
+      "CrmEmailTagAssignmentRow": {
+        "properties": {
+          "assignedAt": {
+            "type": "string"
+          },
+          "assignedBy": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "emailId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "tagCode": {
+            "type": "string"
+          },
+          "tagId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "tagName": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmEmailTicketTagInput": {
+        "properties": {
+          "description": {
+            "maxLength": 600,
+            "minLength": 0,
+            "type": "string"
+          },
+          "name": {
+            "description": "标签名",
+            "maxLength": 120,
+            "minLength": 0,
+            "type": "string"
+          },
+          "status": {
+            "description": "状态：ACTIVE（默认）· DISABLED",
+            "nullable": true,
+            "type": "string"
+          },
+          "tagCode": {
+            "description": "标签码（同租户内唯一，建后不可改）",
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "tagCode"
+        ],
+        "type": "object"
+      },
+      "CrmEmailTicketTagPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/CrmEmailTicketTagRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CrmEmailTicketTagResult": {
+        "properties": {
+          "note": {
+            "type": "string"
+          },
+          "tag": {
+            "$ref": "#/components/schemas/CrmEmailTicketTagRow"
+          }
+        },
+        "type": "object"
+      },
+      "CrmEmailTicketTagRow": {
+        "properties": {
+          "createdAt": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "tagCode": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          },
+          "usageCount": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
       "CrmKnowledgeCapabilities": {
         "properties": {
           "consumers": {
@@ -16056,6 +17352,1086 @@
         },
         "tags": [
           "customer-tag-controller"
+        ]
+      }
+    },
+    "/crm/email-rules/assignments": {
+      "get": {
+        "operationId": "get_crm_email_rules_assignments",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "emailId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "ruleCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "targetCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmEmailRuleAssignmentPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "email-rule-controller"
+        ]
+      }
+    },
+    "/crm/email-rules/assignments/{assignmentId}": {
+      "get": {
+        "operationId": "get_crm_email_rules_assignments_assignmentId",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "assignmentId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmEmailRuleAssignmentRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "email-rule-controller"
+        ]
+      }
+    },
+    "/crm/email-rules/assignments/{assignmentId}/cancel": {
+      "post": {
+        "operationId": "post_crm_email_rules_assignments_assignmentId_cancel",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "assignmentId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmEmailRuleCancelAssignmentInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmEmailRuleAssignmentRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "email-rule-controller"
+        ]
+      }
+    },
+    "/crm/email-rules/capabilities": {
+      "get": {
+        "operationId": "get_crm_email_rules_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmEmailRuleCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "email-rule-controller"
+        ]
+      }
+    },
+    "/crm/email-rules/emails/{emailId}/evaluate": {
+      "post": {
+        "operationId": "post_crm_email_rules_emails_emailId_evaluate",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "emailId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmEmailRuleEvaluateInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmEmailRuleEvaluateResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "email-rule-controller"
+        ]
+      }
+    },
+    "/crm/email-rules/emails/{emailId}/tags": {
+      "get": {
+        "operationId": "get_crm_email_rules_emails_emailId_tags",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "emailId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/CrmEmailTagAssignmentRow"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "email-rule-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_crm_email_rules_emails_emailId_tags",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "emailId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmEmailTagAssignmentInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmEmailTagAssignmentRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "email-rule-controller"
+        ]
+      }
+    },
+    "/crm/email-rules/evaluate-batch": {
+      "post": {
+        "operationId": "post_crm_email_rules_evaluate_batch",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmEmailRuleEvaluateBatchInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmEmailRuleEvaluateBatchResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "email-rule-controller"
+        ]
+      }
+    },
+    "/crm/email-rules/hits": {
+      "get": {
+        "operationId": "get_crm_email_rules_hits",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "emailId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "ruleCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "action",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "effectiveAction",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "silenceRefused",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "important",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmEmailRuleHitPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "email-rule-controller"
+        ]
+      }
+    },
+    "/crm/email-rules/hits/{hitId}": {
+      "get": {
+        "operationId": "get_crm_email_rules_hits_hitId",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "hitId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmEmailRuleHitDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "email-rule-controller"
+        ]
+      }
+    },
+    "/crm/email-rules/options": {
+      "get": {
+        "operationId": "get_crm_email_rules_options",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmEmailRuleOptions"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "email-rule-controller"
+        ]
+      }
+    },
+    "/crm/email-rules/rules": {
+      "get": {
+        "operationId": "get_crm_email_rules_rules",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "action",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "enabled",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmEmailRulePage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "email-rule-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_crm_email_rules_rules",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmEmailRuleInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmEmailRuleResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "email-rule-controller"
+        ]
+      }
+    },
+    "/crm/email-rules/rules/{ruleId}": {
+      "delete": {
+        "operationId": "delete_crm_email_rules_rules_ruleId",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "ruleId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmEmailRuleResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "email-rule-controller"
+        ]
+      },
+      "get": {
+        "operationId": "get_crm_email_rules_rules_ruleId",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "ruleId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmEmailRuleRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "email-rule-controller"
+        ]
+      },
+      "put": {
+        "operationId": "put_crm_email_rules_rules_ruleId",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "ruleId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmEmailRuleInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmEmailRuleResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "email-rule-controller"
+        ]
+      }
+    },
+    "/crm/email-rules/rules/{ruleId}/preview": {
+      "post": {
+        "operationId": "post_crm_email_rules_rules_ruleId_preview",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "ruleId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmEmailRulePreviewInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmEmailRulePreviewResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "email-rule-controller"
+        ]
+      }
+    },
+    "/crm/email-rules/statistics": {
+      "get": {
+        "operationId": "get_crm_email_rules_statistics",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmEmailRuleStatistics"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "email-rule-controller"
+        ]
+      }
+    },
+    "/crm/email-rules/tags": {
+      "get": {
+        "operationId": "get_crm_email_rules_tags",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmEmailTicketTagPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "email-rule-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_crm_email_rules_tags",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmEmailTicketTagInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmEmailTicketTagResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "email-rule-controller"
+        ]
+      }
+    },
+    "/crm/email-rules/tags/{tagId}": {
+      "delete": {
+        "operationId": "delete_crm_email_rules_tags_tagId",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "tagId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmEmailTicketTagResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "email-rule-controller"
+        ]
+      },
+      "put": {
+        "operationId": "put_crm_email_rules_tags_tagId",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "tagId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmEmailTicketTagInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmEmailTicketTagResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "email-rule-controller"
         ]
       }
     },
