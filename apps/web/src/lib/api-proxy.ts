@@ -8075,6 +8075,87 @@ const services: readonly {
       /^ad\-groups(?:\/(?:capabilities|options|summary|product\-candidates|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:operations|products))?))?$/,
   },
   {
+    // 16.5.2.1 登录与访问安全（channel 服务，卷 16「合规与风险」L3 16.5.2「账号与访问安全」的第一格）。
+    //
+    // 蓝图：「管理平台账号与系统的访问安全：多因子认证、登录审计、异常登录告警、IP 白名单、
+    // 会话管理；平台授权凭据的访问审计。输入：认证配置；登录事件；访问审计事件。
+    // 输出：安全配置 + 审计记录 + 告警。关系：上游 = 17 identity；下游 = 2 凭据引用。
+    // **平台凭据是最值钱的资产**，访问必须有审计且最小权限。」
+    //
+    // ---- 纯**新增一条独立的 `services[]` 元素** ----
+    //   既有条目**一字未动、也不重排、不格式化整文件**。往既有那条巨型 alternation 里并分支
+    //   会让多车道同时并入时 git 必然判冲突（结构性，retry 永远不会自愈）。
+    //
+    // ---- 插入锚点固定在 `ad-groups` 那条元素**之后**、`11.4.1.1 平台纠纷列表` 那条**之前** ----
+    //   同批其它车道的锚点分别是 `prefix: 'identity/'` 之前、`// 14.5.2.1 带货归因` 之前与数组末尾，
+    //   与本锚点相距 600 行以上 ⇒ git 能干净求并。
+    //
+    // ---- 首 token「access-security」的零命中核对结论 ----
+    //   本文件既有 services[] 正则里**没有任何一条**含 `access-security` 这个串
+    //   （既有的是 `ad-groups` / `ad-campaigns` / `buyer-risk-scores` / `ip-risk-library` 一类），
+    //   所以首 token 既是独立字面量，也不会被既有分支的前缀吃掉。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   access-security/capabilities                    能力声明（逐项 available + ownerModule + 影响面）
+    //   access-security/policy                           安全策略（GET 读 / PUT 改）
+    //   access-security/mfa/registrations               MFA 因子登记（GET 真分页 / POST 登记）
+    //   access-security/mfa/registrations/{uuid}/activate MFA 登记：绑定完成
+    //   access-security/mfa/registrations/{uuid}/disable  MFA 登记：停用
+    //   access-security/mfa/challenges                   MFA 挑战记录（GET / POST 登记下发）
+    //   access-security/mfa/challenges/{uuid}/attempts    验证尝试（append-only，新的一行）
+    //   access-security/login-audit                      登录审计（GET 真分页 / 真筛选）
+    //   access-security/login-audit/scan                 跑一次扫描（POST，真去上游读）
+    //   access-security/alerts                          告警列表（GET，真分页 + 真筛选 + 汇总）
+    //   access-security/alerts/{uuid}                    告警详情（GET，含处置留痕）
+    //   access-security/alerts/{uuid}/acknowledge        确认（新警 → 已确认）
+    //   access-security/alerts/{uuid}/ignore             忽略（新警 / 已确认 → 已忽略）
+    //   access-security/alerts/{uuid}/resolve            处置（新警 / 已确认 → 已处置）
+    //   access-security/ip-allowlist                     IP 白名单（GET / POST）
+    //   access-security/ip-allowlist/check               IP 只读判定（GET，真网段包含运算）
+    //   access-security/ip-allowlist/evaluate            IP 判定 + 留痕（POST）
+    //   access-security/ip-allowlist/{uuid}              修改 / 删除白名单条目（PUT / DELETE）
+    //   access-security/credential-access                凭据访问审计列表（GET）/ 受控访问（POST）
+    //   access-security/credential-access/credentials     按凭据汇总（GET）
+    //   access-security/credential-access/{uuid}          单条凭据访问审计（GET）
+    //   access-security/session                          当前调用方的会话现状 + 会话策略（GET）
+    //
+    // 判别顺序：**字面量子路径（capabilities / policy / scan / check / evaluate / credentials）
+    // 排在 {uuid} 段之前** —— alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //（不是 `[0-9a-f-]+`：后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行）。
+    // ⚠️ **末尾刻意不带 `?`**：带了就等于放行裸路径 `access-security` ——
+    //   后端没有「一条汇总列表接口」，放行它会让界面以为可用。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸路径 `access-security` —— 本模块没有裸集合读
+    //   * `access-security/login-audit/{uuid}` —— 登录审计**没有**按 id 取详情的端点
+    //     （列表行已经带全字段；单条详情要另开端点时再放行）
+    //   * `access-security/login-audit/delete` / `.../login-audit/{uuid}/delete` ——
+    //     登录审计是 **append-only** 的凭据，**不做删除**
+    //   * `access-security/alerts/{uuid}/delete` —— 告警的处置走状态机（确认 / 忽略 / 处置），
+    //     **不是删除**；删掉告警等于删掉处置留痕
+    //   * `access-security/alerts/{uuid}/reopen` —— 「已忽略 / 已处置」是**终态**，
+    //     要重新处置只能等下一次告警，不提供「重开」入口
+    //   * `access-security/credential-access/{uuid}/delete` —— 凭据访问审计是 **append-only**，
+    //     **刻意不给 UPDATE/DELETE**（GRANT 只给 SELECT,INSERT）
+    //   * `access-security/mfa/registrations/{uuid}/delete` —— MFA 登记的状态机是
+    //     「停用 / 撤销」，**不提供物理删除**
+    //   * `access-security/sessions` / `access-security/session/{uuid}` ——
+    //     会话实体在 17 identity，**本模块不造第二套会话系统**（只读自己的会话策略与现状）
+    //   * `access-security/blacklist` —— 16.5.1.1 黑名单**未交付**，本模块**不写黑名单**
+    //   * `access-security/related-accounts` —— 16.5.2.2 关联风险**未交付**，
+    //     本模块**不编一张「关联账号」表**
+    //   * `access-security/connections/{uuid}/credential` —— **下游 2 凭据引用（2.2.1.3）已交付**
+    //     （台账：`credential_ref` + `PUT /connections/{id}/credential`）。
+    //     本模块**不改它的表、不改它的端点、不改它的签名**，只在它旁边加一层**访问审计**；
+    //     那个写端点归 2.2.1.3，**不是本模块的形状** ⇒ 刻意不放行。
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^access\-security(?:\/(?:capabilities|policy|login\-audit(?:\/scan)?|alerts(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:acknowledge|ignore|resolve))?)?|mfa\/registrations(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/(?:activate|disable))?|mfa\/challenges(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/attempts)?|ip\-allowlist(?:\/check|\/evaluate|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|credential\-access(?:\/credentials|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|session))$/,
+  },
+  {
     // 11.4.1.1 平台纠纷列表（trade 服务，卷 11「售后与退货」L3 11.4「平台纠纷与客诉」的第一格）。
     //
     // 蓝图：「管理平台纠纷/争议（Amazon A-to-Z、eBay 争议、速卖通纠纷）：类型、金额、平台时限、
