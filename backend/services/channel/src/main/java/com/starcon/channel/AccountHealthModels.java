@@ -18,8 +18,8 @@ import java.util.Map;
  *
  * <ul>
  *   <li>{@link AccountHealthCapabilities} —— 「哪些维度量得到、哪些量不到，量不到归谁」。
- *       平台绩效适配器（归 2.4 同步运行）、16.1.1.2 指标明细、16.1.2.1 违规与处罚、
- *       16.1.2.2 申诉管理当前<b>都未交付</b>，这里如实报出，<b>不假装有</b>。</li>
+ *       平台绩效适配器（归 2.4 同步运行）<b>未交付</b>；16.1.1.2 指标明细、16.1.2.1 违规与处罚、
+ *       16.1.2.2 申诉管理<b>已交付</b>但<b>本模块未接入</b> —— 这里如实报出，<b>不假装有</b>。</li>
  *   <li>{@link AccountHealthShopCard} —— 「这一家店现在怎么样」：四项绩效指标 + 风险等级 +
  *       <b>逐条依据</b>（哪一项指标、什么值、命中哪条阈值）。</li>
  *   <li>{@link AccountHealthRankingRow} —— 「谁该先处理」：跨店铺风险排序 + 每一家
@@ -38,13 +38,13 @@ public final class AccountHealthModels {
   // ---------------------------------------------------------------- 能力声明
 
   /**
-   * 一个未交付 / 已交付的下游或维度。
+   * 一个下游（或维度）的交付状态。
    *
    * @param moduleId 模块号（如 16.1.2.1）
    * @param moduleName 模块名
    * @param ownerModule 归谁（available=false 时必填）
-   * @param available 当前是否已交付
-   * @param impact 量不到 / 未交付的影响说明（界面原样显示）
+   * @param available **本模块**当前是否真的用得上（下游未交付、或已交付但本模块未接入 ⇒ false）
+   * @param impact 量不到 / 未交付 / 未接入的影响说明（界面原样显示）
    */
   public record AccountHealthCapabilityGap(
       String moduleId, String moduleName, String ownerModule, boolean available, String impact) {}
@@ -52,7 +52,7 @@ public final class AccountHealthModels {
   /**
    * 能力声明。
    *
-   * @param gaps 未交付的下游清单
+   * @param gaps 下游清单（未交付 / 已交付但本模块未接入，均如实标 available=false）
    * @param metricCodes 四项绩效指标的编码
    * @param riskLevels 风险等级词表
    * @param metricSources 指标来源词表（PLATFORM_SYNC / MANUAL）

@@ -235,15 +235,15 @@ class AccountHealthIntegrationTest {
   // ==================================================================
 
   @Test
-  @DisplayName("16.1.1.1 能力声明：四个未交付段 available=false + ownerModule（含平台绩效适配器归 2.4）")
-  void capabilitiesDeclareUndeliveredDimensions() {
+  @DisplayName("16.1.1.1 能力声明：四段下游 available=false + ownerModule（2.4 真未交付；另三个已交付但本模块未接入）")
+  void capabilitiesDeclareDownstreamTruthfully() {
     var caps = as("channel.operation.read", () -> service.capabilities());
 
     assertThat(caps.gaps()).isNotEmpty();
     assertThat(caps.gaps())
         .allSatisfy(
             gap -> {
-              assertThat(gap.available()).as("%s 未交付必须标 available=false", gap.moduleId()).isFalse();
+              assertThat(gap.available()).as("%s 本模块未接入 ⇒ 必须标 available=false", gap.moduleId()).isFalse();
               assertThat(gap.ownerModule()).as("%s 必须写清归谁", gap.moduleId()).isNotBlank();
               assertThat(gap.impact()).as("%s 必须说清影响", gap.moduleId()).isNotBlank();
             });
@@ -258,6 +258,21 @@ class AccountHealthIntegrationTest {
             .findFirst()
             .orElseThrow();
     assertThat(adapterGap.impact()).contains("未交付").contains("MANUAL");
+
+    // 🔴 16.1.1.2 / 16.1.2.1 / 16.1.2.2 **已交付**（同服务同库），但本模块**没有接入**它们的表
+    //    ⇒ available 仍是 false，理由必须说清「已交付但本模块未接入」，不能再写「未交付」。
+    for (var moduleId : new String[] {"16.1.1.2", "16.1.2.1", "16.1.2.2"}) {
+      var gap =
+          caps.gaps().stream()
+              .filter(candidate -> candidate.moduleId().equals(moduleId))
+              .findFirst()
+              .orElseThrow();
+      assertThat(gap.available()).as("%s 本模块未接入 ⇒ available=false", moduleId).isFalse();
+      assertThat(gap.impact()).as("%s 的理由必须写「已交付」", moduleId).contains("已交付");
+      assertThat(gap.impact()).as("%s 的理由必须写「本模块未接入」", moduleId).contains("本模块未接入");
+      assertThat(gap.impact()).as("%s 不能再声称下游未交付", moduleId).doesNotContain("未交付");
+    }
+    assertThat(caps.downstreamNote()).contains("已交付").contains("本模块未接入");
 
     // 🔴 「量不到 ≠ 0、量不到 ≠ 低风险」的口径必须写在声明里（页面原样显示）。
     assertThat(caps.unknownSemantics()).contains("UNKNOWN").contains("不是 0");
@@ -701,7 +716,7 @@ class AccountHealthIntegrationTest {
               assertThat(item.targetModule()).isIn("16.1.1.1", "2.4");
               assertThat(item.description()).isNotBlank();
             });
-    // 🔴 未交付的违规 / 申诉**不许**出现在待处理项里（那两维没有数据）
+    // 🔴 本模块**未接入**的违规 / 申诉**不许**出现在待处理项里（那两维没有数据）
     assertThat(pending.items())
         .allSatisfy(item -> assertThat(item.label()).doesNotContain("违规").doesNotContain("申诉"));
     assertThat(pending.items())

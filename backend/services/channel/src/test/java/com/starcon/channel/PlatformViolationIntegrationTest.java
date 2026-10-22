@@ -348,7 +348,7 @@ class PlatformViolationIntegrationTest {
   // ==================================================================
 
   @Test
-  @DisplayName("16.1.2.1 能力声明：12 财务与 16.1.2.2 如实标未交付，4 刊登已交付")
+  @DisplayName("16.1.2.1 能力声明：12 财务如实标未交付，16.1.2.2 与 4 刊登已交付")
   void capabilitiesDeclareDownstreamTruthfully() {
     PlatformViolationCapabilities caps = as("channel.operation.read", () -> service.capabilities());
 
@@ -360,7 +360,9 @@ class PlatformViolationIntegrationTest {
 
     PlatformViolationCapabilityGap appeal =
         caps.gaps().stream().filter(g -> g.moduleId().equals("16.1.2.2")).findFirst().orElseThrow();
-    assertThat(appeal.available()).as("16.1.2.2 申诉管理未交付 ⇒ available 必须为 false").isFalse();
+    assertThat(appeal.available()).as("16.1.2.2 申诉管理已交付 ⇒ available 必须为 true").isTrue();
+    assertThat(appeal.ownerModule()).isNotBlank();
+    assertThat(appeal.impact()).contains("已交付");
 
     PlatformViolationCapabilityGap listing =
         caps.gaps().stream().filter(g -> g.moduleId().equals("04")).findFirst().orElseThrow();
