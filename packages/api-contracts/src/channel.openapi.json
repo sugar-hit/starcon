@@ -36155,6 +36155,1109 @@
         ],
         "type": "object"
       },
+      "IpDetectionAlert": {
+        "properties": {
+          "acknowledgedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "acknowledgedBy": {
+            "type": "string"
+          },
+          "alertId": {
+            "type": "string"
+          },
+          "alertLevel": {
+            "type": "string"
+          },
+          "alertLevelLabel": {
+            "type": "string"
+          },
+          "alertType": {
+            "type": "string"
+          },
+          "alertTypeLabel": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "reportId": {
+            "type": "string"
+          },
+          "resolutionNote": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IpDetectionAlertPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/IpDetectionAlert"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "IpDetectionAlertStatusInput": {
+        "properties": {
+          "resolutionNote": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IpDetectionCapabilities": {
+        "properties": {
+          "alertStatusLabels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "alertStatuses": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "alertTypeLabels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "alertTypes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "conclusionLabels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "conclusions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "downstreamNote": {
+            "type": "string"
+          },
+          "externalNote": {
+            "type": "string"
+          },
+          "featureKindLabels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "featureKinds": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "fieldLabels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "fields": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "gaps": {
+            "items": {
+              "$ref": "#/components/schemas/IpDetectionCapabilityGap"
+            },
+            "type": "array"
+          },
+          "imageNote": {
+            "type": "string"
+          },
+          "inspectionNote": {
+            "type": "string"
+          },
+          "matchNote": {
+            "type": "string"
+          },
+          "planScopeLabels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "planScopes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "queryStatusLabels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "queryStatuses": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "recommendedActionLabels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "recommendedActions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "remediationActionLabels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "remediationActions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "remediationStatusLabels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "remediationStatuses": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "reviewNote": {
+            "type": "string"
+          },
+          "reviewReasonLabels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "reviewReasons": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "reviewStatusLabels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "reviewStatuses": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "riskLevelLabels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "riskLevelNote": {
+            "type": "string"
+          },
+          "riskLevels": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "subjectTypeLabels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "subjectTypes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "upstreamNote": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IpDetectionCapabilityGap": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "impact": {
+            "type": "string"
+          },
+          "moduleId": {
+            "type": "string"
+          },
+          "moduleName": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IpDetectionExternalHit": {
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "externalHitId": {
+            "type": "string"
+          },
+          "matchedKey": {
+            "type": "string"
+          },
+          "queryId": {
+            "type": "string"
+          },
+          "registrationNo": {
+            "type": "string"
+          },
+          "rightType": {
+            "type": "string"
+          },
+          "rightsHolder": {
+            "type": "string"
+          },
+          "riskLevel": {
+            "type": "string"
+          },
+          "sourceName": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IpDetectionExternalHitInput": {
+        "properties": {
+          "matchedKey": {
+            "type": "string"
+          },
+          "queryId": {
+            "type": "string"
+          },
+          "registrationNo": {
+            "type": "string"
+          },
+          "rightType": {
+            "type": "string"
+          },
+          "rightsHolder": {
+            "type": "string"
+          },
+          "riskLevel": {
+            "type": "string"
+          },
+          "sourceName": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IpDetectionExternalQuery": {
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "errorMessage": {
+            "type": "string"
+          },
+          "keyword": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "queriedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "queryCode": {
+            "type": "string"
+          },
+          "queryId": {
+            "type": "string"
+          },
+          "queryStatus": {
+            "type": "string"
+          },
+          "queryStatusLabel": {
+            "type": "string"
+          },
+          "resultCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "rightType": {
+            "type": "string"
+          },
+          "rightTypeLabel": {
+            "type": "string"
+          },
+          "sourceName": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IpDetectionExternalQueryDetail": {
+        "properties": {
+          "hits": {
+            "items": {
+              "$ref": "#/components/schemas/IpDetectionExternalHit"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "query": {
+            "$ref": "#/components/schemas/IpDetectionExternalQuery"
+          }
+        },
+        "type": "object"
+      },
+      "IpDetectionExternalQueryInput": {
+        "properties": {
+          "keyword": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "queryCode": {
+            "type": "string"
+          },
+          "rightType": {
+            "type": "string"
+          },
+          "sourceName": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IpDetectionExternalQueryPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/IpDetectionExternalQuery"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "IpDetectionHit": {
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "entryCode": {
+            "type": "string"
+          },
+          "entryId": {
+            "type": "string"
+          },
+          "externalHitId": {
+            "type": "string"
+          },
+          "featureKind": {
+            "type": "string"
+          },
+          "featureKindLabel": {
+            "type": "string"
+          },
+          "field": {
+            "type": "string"
+          },
+          "fieldLabel": {
+            "type": "string"
+          },
+          "hitId": {
+            "type": "string"
+          },
+          "matchedFeature": {
+            "type": "string"
+          },
+          "matchedText": {
+            "type": "string"
+          },
+          "needsManualReview": {
+            "type": "boolean"
+          },
+          "reportId": {
+            "type": "string"
+          },
+          "reviewStatus": {
+            "type": "string"
+          },
+          "rightType": {
+            "type": "string"
+          },
+          "riskLevel": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IpDetectionInspectionPlan": {
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "includeImage": {
+            "type": "boolean"
+          },
+          "intervalDays": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "lastRunAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "nextRunAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "planCode": {
+            "type": "string"
+          },
+          "planId": {
+            "type": "string"
+          },
+          "scope": {
+            "type": "string"
+          },
+          "scopeLabel": {
+            "type": "string"
+          },
+          "shopId": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IpDetectionInspectionPlanInput": {
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "includeImage": {
+            "type": "boolean"
+          },
+          "intervalDays": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "planCode": {
+            "type": "string"
+          },
+          "scope": {
+            "type": "string"
+          },
+          "shopId": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IpDetectionInspectionRun": {
+        "properties": {
+          "errorMessage": {
+            "type": "string"
+          },
+          "finishedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "hitListingCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "listingScanned": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "planCode": {
+            "type": "string"
+          },
+          "planId": {
+            "type": "string"
+          },
+          "reportCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "runId": {
+            "type": "string"
+          },
+          "startedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IpDetectionInspectionRunDetail": {
+        "properties": {
+          "note": {
+            "type": "string"
+          },
+          "reports": {
+            "items": {
+              "$ref": "#/components/schemas/IpDetectionReport"
+            },
+            "type": "array"
+          },
+          "run": {
+            "$ref": "#/components/schemas/IpDetectionInspectionRun"
+          }
+        },
+        "type": "object"
+      },
+      "IpDetectionInspectionRunPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/IpDetectionInspectionRun"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "IpDetectionRemediation": {
+        "properties": {
+          "actionCode": {
+            "type": "string"
+          },
+          "actionLabel": {
+            "type": "string"
+          },
+          "assigneeId": {
+            "type": "string"
+          },
+          "completedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "dueAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "hitId": {
+            "type": "string"
+          },
+          "priority": {
+            "type": "string"
+          },
+          "remediationId": {
+            "type": "string"
+          },
+          "reportId": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "suggestion": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IpDetectionRemediationInput": {
+        "properties": {
+          "actionCode": {
+            "type": "string"
+          },
+          "assigneeId": {
+            "type": "string"
+          },
+          "dueAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "hitId": {
+            "type": "string"
+          },
+          "priority": {
+            "type": "string"
+          },
+          "reportId": {
+            "type": "string"
+          },
+          "suggestion": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IpDetectionRemediationPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/IpDetectionRemediation"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "IpDetectionRemediationStatusInput": {
+        "properties": {
+          "status": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IpDetectionReport": {
+        "properties": {
+          "conclusion": {
+            "type": "string"
+          },
+          "conclusionLabel": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "entryHitCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "imageHitCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "inspectionRunId": {
+            "type": "string"
+          },
+          "pendingReviewCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "recommendedAction": {
+            "type": "string"
+          },
+          "recommendedActionLabel": {
+            "type": "string"
+          },
+          "reportId": {
+            "type": "string"
+          },
+          "riskLevel": {
+            "type": "string"
+          },
+          "riskLevelLabel": {
+            "type": "string"
+          },
+          "scannedFieldCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "shopId": {
+            "type": "string"
+          },
+          "sourceNote": {
+            "type": "string"
+          },
+          "subjectId": {
+            "type": "string"
+          },
+          "subjectLabel": {
+            "type": "string"
+          },
+          "subjectType": {
+            "type": "string"
+          },
+          "subjectTypeLabel": {
+            "type": "string"
+          },
+          "textHitCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "triggerType": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IpDetectionReportDetail": {
+        "properties": {
+          "alerts": {
+            "items": {
+              "$ref": "#/components/schemas/IpDetectionAlert"
+            },
+            "type": "array"
+          },
+          "hits": {
+            "items": {
+              "$ref": "#/components/schemas/IpDetectionHit"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "remediations": {
+            "items": {
+              "$ref": "#/components/schemas/IpDetectionRemediation"
+            },
+            "type": "array"
+          },
+          "report": {
+            "$ref": "#/components/schemas/IpDetectionReport"
+          },
+          "reviewTasks": {
+            "items": {
+              "$ref": "#/components/schemas/IpDetectionReviewTask"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "IpDetectionReportPage": {
+        "properties": {
+          "conclusionCounts": {
+            "additionalProperties": {
+              "format": "int64",
+              "type": "integer"
+            },
+            "type": "object"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/IpDetectionReport"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "pendingReviewTotal": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "riskLevelCounts": {
+            "additionalProperties": {
+              "format": "int64",
+              "type": "integer"
+            },
+            "type": "object"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "IpDetectionReviewDecisionInput": {
+        "properties": {
+          "comment": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IpDetectionReviewInput": {
+        "properties": {
+          "comment": {
+            "type": "string"
+          },
+          "hitId": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "reportId": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IpDetectionReviewTask": {
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "hitId": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "reasonLabel": {
+            "type": "string"
+          },
+          "reportId": {
+            "type": "string"
+          },
+          "reviewComment": {
+            "type": "string"
+          },
+          "reviewTaskId": {
+            "type": "string"
+          },
+          "reviewedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "reviewerId": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IpDetectionReviewTaskPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/IpDetectionReviewTask"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "IpDetectionSubjectInput": {
+        "properties": {
+          "brandName": {
+            "description": "品牌名（subjectType=MANUAL 时由调用方声明）",
+            "type": "string"
+          },
+          "bulletPoints": {
+            "description": "卖点（subjectType=MANUAL）",
+            "items": {
+              "description": "卖点（subjectType=MANUAL）",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "description": {
+            "description": "描述（subjectType=MANUAL）",
+            "type": "string"
+          },
+          "draftId": {
+            "description": "刊登编辑器草稿 id（subjectType=DRAFT 时必填）",
+            "type": "string"
+          },
+          "imageUrls": {
+            "description": "图片（subjectType=MANUAL）",
+            "items": {
+              "description": "图片（subjectType=MANUAL）",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "includeImage": {
+            "description": "是否包含图片检测（默认含）",
+            "type": "boolean"
+          },
+          "listingId": {
+            "description": "已上架商品 id（subjectType=LISTING 时必填）",
+            "type": "string"
+          },
+          "subjectType": {
+            "description": "🔴 检测对象类型：LISTING / DRAFT / MANUAL",
+            "type": "string"
+          },
+          "title": {
+            "description": "标题（subjectType=MANUAL 时必填）",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "IpRiskLibraryBrandCandidate": {
         "properties": {
           "authorizationStatus": {
@@ -88661,6 +89764,1134 @@
         },
         "tags": [
           "influencer-controller"
+        ]
+      }
+    },
+    "/channel/ip-detections/alerts": {
+      "get": {
+        "operationId": "get_channel_ip_detections_alerts",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "alertType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IpDetectionAlertPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ip-detection-controller"
+        ]
+      }
+    },
+    "/channel/ip-detections/alerts/{id}/status": {
+      "put": {
+        "operationId": "put_channel_ip_detections_alerts_id_status",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IpDetectionAlertStatusInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IpDetectionAlert"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ip-detection-controller"
+        ]
+      }
+    },
+    "/channel/ip-detections/capabilities": {
+      "get": {
+        "operationId": "get_channel_ip_detections_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IpDetectionCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ip-detection-controller"
+        ]
+      }
+    },
+    "/channel/ip-detections/detections": {
+      "get": {
+        "operationId": "get_channel_ip_detections_detections",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "riskLevel",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "conclusion",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "subjectType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "triggerType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "pendingOnly",
+            "required": false,
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "inspectionRunId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IpDetectionReportPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ip-detection-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_channel_ip_detections_detections",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IpDetectionSubjectInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IpDetectionReportDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ip-detection-controller"
+        ]
+      }
+    },
+    "/channel/ip-detections/detections/{id}": {
+      "get": {
+        "operationId": "get_channel_ip_detections_detections_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IpDetectionReportDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ip-detection-controller"
+        ]
+      }
+    },
+    "/channel/ip-detections/external-queries": {
+      "get": {
+        "operationId": "get_channel_ip_detections_external_queries",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IpDetectionExternalQueryPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ip-detection-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_channel_ip_detections_external_queries",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IpDetectionExternalQueryInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IpDetectionExternalQuery"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ip-detection-controller"
+        ]
+      }
+    },
+    "/channel/ip-detections/external-queries/{id}": {
+      "get": {
+        "operationId": "get_channel_ip_detections_external_queries_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IpDetectionExternalQueryDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ip-detection-controller"
+        ]
+      }
+    },
+    "/channel/ip-detections/external-queries/{id}/hits": {
+      "post": {
+        "operationId": "post_channel_ip_detections_external_queries_id_hits",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "items": {
+                  "$ref": "#/components/schemas/IpDetectionExternalHitInput"
+                },
+                "type": "array"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IpDetectionExternalQueryDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ip-detection-controller"
+        ]
+      }
+    },
+    "/channel/ip-detections/external-queries/{id}/status": {
+      "put": {
+        "operationId": "put_channel_ip_detections_external_queries_id_status",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "errorMessage",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IpDetectionExternalQuery"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ip-detection-controller"
+        ]
+      }
+    },
+    "/channel/ip-detections/inspection-plans": {
+      "get": {
+        "operationId": "get_channel_ip_detections_inspection_plans",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/IpDetectionInspectionPlan"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ip-detection-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_channel_ip_detections_inspection_plans",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IpDetectionInspectionPlanInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IpDetectionInspectionPlan"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ip-detection-controller"
+        ]
+      }
+    },
+    "/channel/ip-detections/inspection-plans/{id}": {
+      "put": {
+        "operationId": "put_channel_ip_detections_inspection_plans_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IpDetectionInspectionPlanInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IpDetectionInspectionPlan"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ip-detection-controller"
+        ]
+      }
+    },
+    "/channel/ip-detections/inspection-runs": {
+      "get": {
+        "operationId": "get_channel_ip_detections_inspection_runs",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IpDetectionInspectionRunPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ip-detection-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_channel_ip_detections_inspection_runs",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "planId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IpDetectionInspectionRunDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ip-detection-controller"
+        ]
+      }
+    },
+    "/channel/ip-detections/inspection-runs/{id}": {
+      "get": {
+        "operationId": "get_channel_ip_detections_inspection_runs_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IpDetectionInspectionRunDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ip-detection-controller"
+        ]
+      }
+    },
+    "/channel/ip-detections/remediations": {
+      "get": {
+        "operationId": "get_channel_ip_detections_remediations",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "actionCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IpDetectionRemediationPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ip-detection-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_channel_ip_detections_remediations",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IpDetectionRemediationInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IpDetectionRemediation"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ip-detection-controller"
+        ]
+      }
+    },
+    "/channel/ip-detections/remediations/{id}/status": {
+      "put": {
+        "operationId": "put_channel_ip_detections_remediations_id_status",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IpDetectionRemediationStatusInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IpDetectionRemediation"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ip-detection-controller"
+        ]
+      }
+    },
+    "/channel/ip-detections/reviews": {
+      "get": {
+        "operationId": "get_channel_ip_detections_reviews",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IpDetectionReviewTaskPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ip-detection-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_channel_ip_detections_reviews",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IpDetectionReviewInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IpDetectionReviewTask"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ip-detection-controller"
+        ]
+      }
+    },
+    "/channel/ip-detections/reviews/{id}": {
+      "put": {
+        "operationId": "put_channel_ip_detections_reviews_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IpDetectionReviewDecisionInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IpDetectionReviewTask"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ip-detection-controller"
         ]
       }
     },

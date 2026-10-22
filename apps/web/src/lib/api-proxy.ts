@@ -190,6 +190,71 @@ const services: readonly {
       /^ad\-flash\-sales(?:\/(?:capabilities|options|flash\-sales(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:status|claims|redemptions|statistics))?)?))$/,
   },
   {
+    // 16.4.1.2 检测与预警（channel 服务，卷 16「合规与风险」L3 16.4「知识产权」的第二格）。
+    // 纯**新增一条独立的 `services[]` 元素**，既有的 `ip-risk-library`（16.4.1.1 上游）、
+    // `ad-coupons` / `ad-flash-sales` 等**一字未动、也不重排** ——
+    // 本文件是多车道共用的累积型白名单，每条服务规则是一段超长单行正则，往同一条 alternation 里
+    // 并分支会让多车道同时并入时 git 必然判冲突（结构性，retry 不会自愈）。
+    //
+    // ---- 插入锚点选在 `prefix: 'identity/'` 那条元素**之前**（即 `ad-flash-sales` 那条之后）----
+    //   同批其它三条车道分别锚在 `// 14.5.2.1 带货归因` 之前、`// 11.4.1.1 平台纠纷列表` 之前
+    //   与数组末尾（`buyer-risk-scores` 之后），与本处互不重叠 ⇒ git 能干净求并。
+    //
+    // ---- 首 token「ip-detections」的零命中核对结论 ----
+    //   本文件既有 services[] 正则里**没有任何一条**含 `ip-detections` 这个串
+    //   （既有的是 `ip-risk-library`（上游 16.4.1.1）/ `buyer-risk-scores` / `platform-violations` 一类），
+    //   所以首 token 既是独立字面量，也不会被既有分支的前缀吃掉。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   ip-detections/capabilities                能力声明（各条口径 + 未交付的外部边界逐条列出）
+    //   ip-detections/detections                  检测报告清单（GET，真分页 + 真筛选）/ 发起检测（POST）
+    //   ip-detections/detections/{uuid}           报告详情（GET，含命中项 / 预警 / 整改建议 / 复核任务）
+    //   ip-detections/alerts                      预警清单（GET，真分页）
+    //   ip-detections/alerts/{uuid}/status        确认 / 处置预警（PUT，终态不可回退）
+    //   ip-detections/remediations                整改建议清单（GET）/ 手工新增一条（POST）
+    //   ip-detections/remediations/{uuid}/status  推进整改建议状态（PUT，终态不可回退）
+    //   ip-detections/reviews                     人工复核队列（GET）/ 提一条复核（POST）
+    //   ip-detections/reviews/{uuid}              复核结论（PUT，CONFIRMED / DISMISSED）
+    //   ip-detections/external-queries            外部商标 / 专利查询清单（GET）/ 登记一条（POST）
+    //   ip-detections/external-queries/{uuid}     外部查询详情（GET，含登记回来的结果）
+    //   ip-detections/external-queries/{uuid}/hits   登记查回来的外部结果（POST，append-only）
+    //   ip-detections/external-queries/{uuid}/status 推进查询状态（PUT：查无结果 / 查询失败）
+    //   ip-detections/inspection-plans            巡检计划清单（GET）/ 新建计划（POST）
+    //   ip-detections/inspection-plans/{uuid}     改巡检计划（PUT）
+    //   ip-detections/inspection-runs            巡检运行清单（GET）/ 跑一轮巡检（POST）
+    //   ip-detections/inspection-runs/{uuid}     巡检运行详情（GET，这一轮产出的报告）
+    //
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //   （不是 `[0-9a-f-]+`：后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行）。
+    // ⚠️ **末尾刻意不带 `?`**：带了就等于放行裸路径 `ip-detections` ——
+    //   后端没有「一条汇总列表接口」，一切入口都带子路径。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸路径 `ip-detections` —— 本模块没有裸集合读
+    //   * `ip-detections/block` / `ip-detections/release` /
+    //     `ip-detections/detections/{uuid}/block` / `.../release` ——
+    //     **拦截权归 16.2.1.2 拦截执行（已交付）**，本模块只产出**建议**（recommended_action），
+    //     放行一个不存在的拦截入口会让界面以为「已经拦了」
+    //   * `ip-detections/image-search` / `ip-detections/detections/{uuid}/reverse-image-search` ——
+    //     **以图搜图未交付**（本仓没有图像识别引擎）；图片比对是**标识文本比对**，
+    //     命中**一律**进人工复核队列
+    //   * `ip-detections/external-queries/sync` / `ip-detections/external-trademark-search` ——
+    //     **自动外呼外部商标库未交付**（本仓没有凭据与网络出口）；外部结果靠**登记承接**
+    //   * `ip-detections/detections/{uuid}/delete` / `reviews/{uuid}/delete` /
+    //     `alerts/{uuid}/delete` —— 检测结论与命中项是**证据**，**append-only**，不做删除
+    //   * `ip-detections/alerts/{uuid}` —— 没有「按 id 取单条预警」这个端点
+    //   * `ip-detections/detections/{uuid}/status` / `.../hits` —— 报告的子动作只有这两段，
+    //     而**都不存在**（报告状态由复核结果回写，不单独开一条）
+    //   * `ip-detections/reviews/{uuid}/status` —— 复核结论走 PUT 复核任务**本身**
+    //   * `ip-detections/overview` / `ip-detections/stats` —— 汇总在 reports 清单里，不另开一条
+    //   * 非 UUID 段 —— `ip-detections/detections/not-a-uuid` 必须 404
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^ip\-detections(?:\/(?:capabilities|detections|alerts|remediations|reviews|external\-queries|inspection\-plans|inspection\-runs)|\/detections\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}|\/alerts\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/status|\/remediations\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/status|\/reviews\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}|\/external\-queries\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/hits|\/status)?|\/inspection\-plans\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}|\/inspection\-runs\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})$/,
+  },
+  {
     prefix: 'identity/',
     env: 'IDENTITY_URL',
     fallback: 'http://127.0.0.1:8081',
