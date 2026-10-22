@@ -12,10 +12,10 @@
 | 指标 | 数量 |
 | --- | --- |
 | 模块总数 | 465 |
-| 已交付 | 340 |
+| 已交付 | 341 |
 | 进行中 | 0 |
-| **未开发** | **125** |
-| 完成率 | 73.1% |
+| **未开发** | **124** |
+| 完成率 | 73.3% |
 
 ## 分阶段进度（交付顺序看这里）
 
@@ -26,7 +26,7 @@
 | **D4** | 59 | 0 | 1 | 60 |
 | **D5** | 52 | 0 | 0 | 52 |
 | **D6** | 43 | 0 | 35 | 78 |
-| **D7** | 66 | 0 | 89 | 155 |
+| **D7** | 67 | 0 | 88 | 155 |
 
 ## 分系统进度
 
@@ -48,7 +48,7 @@
 | 14 | 广告与增长系统 | D7 | 18 | 22 |
 | 15 | 客户与客服系统 | D7 | 18 | 24 |
 | 16 | 合规与风控系统 | D7 | 18 | 23 |
-| 17 | 组织权限与系统设置系统 | D1–D2 / D4 / D6 / D7 | 25 | 29 |
+| 17 | 组织权限与系统设置系统 | D1–D2 / D4 / D6 / D7 | 26 | 29 |
 | 18 | 集成开放与智能自动化系统 | D7 | 0 | 24 |
 
 ## 判定「已交付」的标准
@@ -529,7 +529,7 @@
 | 17.5.3.1 | 审计日志 | — | D1–D2 | 已交付 | 迁移 backend/services/identity/src/main/resources/db/migration/V7__audit_log.sql（补 resource_type/actor_name/authorization_context/changes 列、三组检索索引、SELECT+INSERT 授权、UPDATE/DELETE 触发器拒绝）· 端点 GET /identity/audit、/identity/audit/{id}、/identity/audit/export（AuditController.java）· 页面 apps/web/src/app/org/audit/page.tsx · 测试 AuditIntegrationTest.java（10 项：检索/详情/CSV 导出、租户隔离三断言、不可篡改、明文不入库）与 AuditRedactorTest.java（7 项脱敏） |
 | 17.5.3.2 | 操作日志 | — | D1–D2 | 已交付 | 迁移 backend/services/identity/src/main/resources/db/migration/V49__operation_log.sql（operation_log 表：request_id/trace_id 链路键、API 调用摘要、任务执行、错误堆栈上限、expires_at 留存期；五组检索索引；FORCE RLS；SELECT+INSERT+DELETE 授权，与审计日志的不可篡改策略形成对照）· 端点 GET /identity/operation-log、/{id}、/trace/{requestId} 链路聚合、/export、POST /purge（OperationLogController.java；写入侧 OperationLog.java、采集 OperationLogInterceptor.java、链路键 RequestTrace.java）· 页面 apps/web/src/app/org/operation-log/page.tsx（操作日志 + 链路关联视图）· 测试 OperationLogIntegrationTest.java（14 项：四类事件落库、链路聚合、堆栈截断与无 secret、可删对照审计不可删、租户隔离三断言、时间无漂移） |
 | 17.6.1.1 | 账簿与本位币 | — | D6 | 已交付 | **已交付**（后端 V81 + 端点 + 前端页面 + 契约重生成，四件齐）。后端：identity `V81__ledger_book_category_default_and_fact_ownership.sql`（**不重做账簿**：在 17.1.2.2 已交付的 accounting_book 上补 4 列 —— book_category 业务账/法定账（与 book_type 总账/现金/银行是两条正交轴）、base_currency_mode INHERIT/OWN、chart_of_accounts_source 科目体系来源、is_default；唯一总账口径从"一法人一本"放宽为"**一法人一个本位币**一本总账"；新表 book_fact_assignment 把"同一笔业务事实只在归属账簿记一次"落成 UNIQUE(tenant_id,fact_source,fact_ref) 的**数据库约束**，FORCE RLS）；端点新增 `GET /identity/legal-entities/{id}/ledger-books`（业务账/法定账分组）、`GET·PUT /identity/legal-entities/{id}/default-book`（**缺默认显式 409 不静默挑一本**）、`GET·POST /identity/accounting-books/{id}/fact-assignments` + `DELETE .../{assignmentId}`（混记时 409 并指明事实已在哪本账）；`LedgerBookIntegrationTest` 8 例实跑 Testcontainers PostgreSQL 16（含租户隔离三断言）。**前端（本车道补齐的三个缺口）**：① 页面 `apps/web/src/app/settings/books/page.tsx` + `components/iam/ledger-book-workspace.tsx`（照 17.1.2.2 `org/accounting-books` 的写法与命名，真实调用本模块**全部 6 个新端点**，按 LedgerBookGroups 呈现业务账/法定账两组，默认账簿 409 渲染成"去设默认"的可操作引导而非空态；加载态/错误态/空态三态齐全，禁 mock；`identity-workspace` 导航补 `/settings/books` 入口，补上本模块此前"零 UI 入口"的缺口）；② api-proxy 白名单放行三段新路径 `legal-entities/{uuid}/ledger-books`、`legal-entities/{uuid}/default-book`、`accounting-books/{uuid}/fact-assignments`（含 `/{assignmentId}` 子形状），**白名单只在浏览器端生效**，不补则页面在浏览器里 404 而 typecheck/lint/test 全绿；放行与反向各钉一层：`route.test.ts` 用**真实代理 handler 实测 HTTP 状态码**（放行=200 且 fetch 打到 `:8081/<path>`，未登记形状=404，`ledger-books/extra`、`default-books`、`fact-assignments/{id}/transfer` 仍 404），`ledger-book-api-proxy.test.ts` 再从前端源码反向抽真实调用点并**断言抽取条数 > 0** 防坏抽取器静默全绿；③ 契约用 `catalog-contracts.py --spec-dir` 重生成，新增 LedgerBookGroups / LedgerBookItem / DefaultBookView / DefaultBookInput / FactAssignmentView / FactAssignmentInput，AccountingBookView/Input 随 V81 补 4 字段（无字段删除），前端枚举一律从契约行类型派生、未手抄字符串联合。**落地前全量复验（2026-10-08，本车道自跑）**：`./mvnw verify` BUILD SUCCESS（identity 191 / catalog 1205 / channel 66 / warehouse 700 = 2162 例 0 失败，含 LedgerBookIntegrationTest 8 例实跑 Testcontainers PostgreSQL 16）；`pnpm typecheck --force`（绕过 turbo 缓存）3/3 通过；`pnpm lint` 通过（仅他车道文件 4 条既存 warning）；`pnpm test` 83 文件 1475 例全绿；`NEXT_TELEMETRY_DISABLED=1 pnpm --filter @starcon/web build` 通过且路由表出现 `/settings/books`；`sync.mjs --check` 一致。verify 结束后本车道 Testcontainers PG 容器已被 ryuk 回收。 |
-| 17.7.1.1 | 套餐与权益 | — | D7 | 未开发 | — |
+| 17.7.1.1 | 套餐与权益 | — | D7 | 已交付 | 迁移 `backend/services/identity/src/main/resources/db/migration/V323__saas_plan_entitlement.sql`（**平台级**：`saas_plan` / `saas_plan_entitlement` —— 不带 `tenant_id`、**不参与 RLS**、只 `GRANT SELECT TO identity_app`、零外键指向租户业务表、独立命名空间；出厂 4 个套餐 TRIAL/STARTER/GROWTH/ENTERPRISE 各带 6 个权益项（SHOP_COUNT/SKU_COUNT/ORDER_VOLUME/USER_COUNT/API_CALL/AI_USAGE）。**租户级**：`saas_subscription` / `saas_entitlement_usage` / `saas_subscription_event` 全部 `tenant_id NOT NULL` + `RLS FORCE isolation`；`saas_platform_role` 是平台运营角色的**只读登记**表。写入路径一律走 `SECURITY DEFINER` 专用函数（`saas_platform_create/update_plan`、`saas_platform_create/update/delete_entitlement`、`saas_platform_create/update_subscription`、`saas_platform_register_role` 等），应用侧对平台级表只有 SELECT ⇒ **租户结构上无法自升级**）· 端点 `SaasPlanController.java`（`@RequestMapping("/identity")`，20 个端点：19 个 `/identity/saas-plans/**` + 1 个 `/identity/saas-platform/roles`）· 页面 `apps/web/src/app/org/plans/page.tsx` + `apps/web/src/components/iam/saas-plan-{model,workspace}.tsx`（按仓内既有惯例放 `components/iam/` 而非新建 `components/plans/`）· 测试 `SaasPlanIntegrationTest.java` 12 例 + `saas-plan-model.test.ts` 28 例 + `saas-plan-allowlist.test.ts` 5 例。**分层口径**：套餐与权益定义是**平台级**事实（一个平台一套），订阅、用量与留痕是**租户级**事实，两层物理隔离在不同表、不同 RLS 策略、不同授权面——平台级表零 `tenant_id`、租户级表 FORCE RLS，跨租户读只有 `saas_platform_subscription_list` 一条 SECURITY DEFINER 路径。**仅平台管理员可见**用三道闸门同时把守（Java + DB 双重）：① 本租户 `saas_platform_role` 有登记；② 登记的 roleId 正是会话持有的角色且 `scope_mode='ALL'`；③ 该角色带有所需权限码（`identity.plan.{read,create,update}` / `identity.subscription.{read,create,update}`，**刻意不授 OWNER**，与 V53 先例相反）。**取舍：没给租户开任何读端点**（蓝图明写「租户不可访问」），普通租户即使经 `create_child` 拿到了 `identity.plan.*` 权限码也照样 403（集成测试实跑断言）。平台运营角色本身是**普通租户级角色**（默认码 `PLATFORM_OPS`），经 `POST /identity/saas-platform/roles`（需 `X-Internal-Key`，**刻意不进浏览器 allowlist**）在会话所在租户内建角色+授权+登记+自分配——没有另造全局超级角色，避免造出第二套身份体系。**不落任何金额**：没有发票/应收/付款/结算/收入确认，权益上限与用量都是数量（`NUMERIC(19,6)`），测试用 `information_schema` 断言 `saas_*` 表无金额语义列；时间一律 `OffsetDateTime` + `?::timestamptz` 且按值断言写回时刻，试用起止零漂移。**如实标注未接通**：用量计量未接通 ⇒ `available=false` ⇒ `usage_value` 必须为 NULL（DB CHECK 钉死，填 0 会被误读成「量过了正好是 0」）并强制带 `owner_module` + `impact`，判定结果是 `UNDETERMINED`（「判定不了」≠「没超限」），能力声明如实报 3 条 `available=false`（17.7.1.2 计量、17.7.2.1 开关执行、实体目录 §8 计费与收入确认）。租户级表**不给 DELETE**，`saas_subscription_event` 追加不可改（触发器 + REVOKE 双重）。前端 api-proxy 只**新增一条独立 `services[]` 元素**（`prefix: 'identity/'`），锚点固定在 `// 2.4.2.3 映射缺失队列（channel 服务）` 之前，既有条目一字未改；`saas-platform/roles` **刻意不放行**（浏览器打不到，只能走内部密钥）。 |
 | 17.7.1.2 | 用量统计 | — | D7 | 未开发 | — |
 | 17.7.2.1 | 平台参数与开关 | — | D7 | 未开发 | — |
 | 17.7.2.2 | 平台运维视图 | — | D7 | 未开发 | — |
