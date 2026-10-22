@@ -5229,6 +5229,484 @@
         },
         "type": "object"
       },
+      "PlatformFlagCapabilities": {
+        "properties": {
+          "dimensions": {
+            "items": {
+              "$ref": "#/components/schemas/PlatformFlagCapabilityDimension"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "PlatformFlagCapabilityDimension": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "description": {
+            "type": "string"
+          },
+          "dimension": {
+            "type": "string"
+          },
+          "impact": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PlatformFlagDefinitionView": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "defaultEnabled": {
+            "type": "boolean"
+          },
+          "defaultRolloutPercent": {
+            "type": "number"
+          },
+          "description": {
+            "type": "string"
+          },
+          "flagKind": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "sortOrder": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PlatformFlagEffectiveLayer": {
+        "properties": {
+          "announcementActive": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "announcementBody": {
+            "nullable": true,
+            "type": "string"
+          },
+          "announcementFrom": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "announcementTitle": {
+            "nullable": true,
+            "type": "string"
+          },
+          "announcementTo": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "rateLimitPerMinute": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "rolloutBasisPoints": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "rolloutBucket": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "PlatformFlagEvaluationView": {
+        "properties": {
+          "definitionId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "effectiveLayer": {
+            "$ref": "#/components/schemas/PlatformFlagEffectiveLayer"
+          },
+          "flagCode": {
+            "type": "string"
+          },
+          "flagKind": {
+            "type": "string"
+          },
+          "flagName": {
+            "type": "string"
+          },
+          "platformLayer": {
+            "$ref": "#/components/schemas/PlatformFlagPlatformLayer"
+          },
+          "tenantId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "tenantLayer": {
+            "$ref": "#/components/schemas/PlatformFlagTenantLayer"
+          }
+        },
+        "type": "object"
+      },
+      "PlatformFlagExceptionInput": {
+        "properties": {
+          "flagCode": {
+            "minLength": 1,
+            "pattern": "[A-Z][A-Z0-9_]{1,63}",
+            "type": "string"
+          },
+          "reason": {
+            "maxLength": 300,
+            "minLength": 0,
+            "type": "string"
+          },
+          "tenantId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "flagCode",
+          "reason",
+          "tenantId"
+        ],
+        "type": "object"
+      },
+      "PlatformFlagExceptionView": {
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "effect": {
+            "type": "string"
+          },
+          "flagCode": {
+            "type": "string"
+          },
+          "flagKind": {
+            "type": "string"
+          },
+          "flagName": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "tenantId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PlatformFlagHistoryView": {
+        "properties": {
+          "action": {
+            "type": "string"
+          },
+          "afterAnnouncementFrom": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "afterAnnouncementTitle": {
+            "nullable": true,
+            "type": "string"
+          },
+          "afterAnnouncementTo": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "afterEnabled": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "afterRateLimitPerMinute": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "afterRolloutPercent": {
+            "nullable": true,
+            "type": "number"
+          },
+          "beforeAnnouncementFrom": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "beforeAnnouncementTitle": {
+            "nullable": true,
+            "type": "string"
+          },
+          "beforeAnnouncementTo": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "beforeEnabled": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "beforeRateLimitPerMinute": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "beforeRolloutPercent": {
+            "nullable": true,
+            "type": "number"
+          },
+          "changedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "flagCode": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "operatorName": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PlatformFlagPlatformLayer": {
+        "properties": {
+          "announcementBody": {
+            "nullable": true,
+            "type": "string"
+          },
+          "announcementFrom": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "announcementTitle": {
+            "nullable": true,
+            "type": "string"
+          },
+          "announcementTo": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "configured": {
+            "type": "boolean"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "flagKind": {
+            "type": "string"
+          },
+          "rateLimitPerMinute": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "rolloutPercent": {
+            "type": "number"
+          },
+          "rolloutSalt": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PlatformFlagSettingInput": {
+        "properties": {
+          "announcementBody": {
+            "nullable": true,
+            "type": "string"
+          },
+          "announcementFrom": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "announcementTitle": {
+            "maxLength": 200,
+            "minLength": 0,
+            "nullable": true,
+            "type": "string"
+          },
+          "announcementTo": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "note": {
+            "maxLength": 300,
+            "minLength": 0,
+            "type": "string"
+          },
+          "rateLimitPerMinute": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "rolloutPercent": {
+            "type": "number"
+          },
+          "rolloutSalt": {
+            "maxLength": 64,
+            "minLength": 0,
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "enabled",
+          "rolloutPercent"
+        ],
+        "type": "object"
+      },
+      "PlatformFlagSettingView": {
+        "properties": {
+          "announcementBody": {
+            "nullable": true,
+            "type": "string"
+          },
+          "announcementFrom": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "announcementTitle": {
+            "nullable": true,
+            "type": "string"
+          },
+          "announcementTo": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "configured": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "definitionId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "flagCode": {
+            "type": "string"
+          },
+          "flagKind": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "rateLimitPerMinute": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "rolloutPercent": {
+            "type": "number"
+          },
+          "rolloutSalt": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "version": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "PlatformFlagTenantLayer": {
+        "properties": {
+          "applicable": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "effect": {
+            "nullable": true,
+            "type": "string"
+          },
+          "exceptionId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "present": {
+            "type": "boolean"
+          },
+          "reason": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "RoleAssignmentInactiveReason": {
         "properties": {
           "reason": {
@@ -11718,6 +12196,453 @@
         },
         "tags": [
           "administration-controller"
+        ]
+      }
+    },
+    "/identity/platform-flags/capabilities": {
+      "get": {
+        "operationId": "get_identity_platform_flags_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformFlagCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "platform-flag-controller"
+        ]
+      }
+    },
+    "/identity/platform-flags/definitions": {
+      "get": {
+        "operationId": "get_identity_platform_flags_definitions",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/PlatformFlagDefinitionView"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "platform-flag-controller"
+        ]
+      }
+    },
+    "/identity/platform-flags/evaluate": {
+      "get": {
+        "operationId": "get_identity_platform_flags_evaluate",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "tenantId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/PlatformFlagEvaluationView"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "platform-flag-controller"
+        ]
+      }
+    },
+    "/identity/platform-flags/evaluate-batch": {
+      "get": {
+        "operationId": "get_identity_platform_flags_evaluate_batch",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keys",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "tenantId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/PlatformFlagEvaluationView"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "platform-flag-controller"
+        ]
+      }
+    },
+    "/identity/platform-flags/exceptions": {
+      "get": {
+        "operationId": "get_identity_platform_flags_exceptions",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "tenantId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/PlatformFlagExceptionView"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "platform-flag-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_identity_platform_flags_exceptions",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlatformFlagExceptionInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "format": "uuid",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "platform-flag-controller"
+        ]
+      }
+    },
+    "/identity/platform-flags/exceptions/{id}": {
+      "delete": {
+        "operationId": "delete_identity_platform_flags_exceptions_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "tenantId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "platform-flag-controller"
+        ]
+      }
+    },
+    "/identity/platform-flags/history": {
+      "get": {
+        "operationId": "get_identity_platform_flags_history",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "flagCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/PlatformFlagHistoryView"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "platform-flag-controller"
+        ]
+      }
+    },
+    "/identity/platform-flags/settings": {
+      "get": {
+        "operationId": "get_identity_platform_flags_settings",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/PlatformFlagSettingView"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "platform-flag-controller"
+        ]
+      }
+    },
+    "/identity/platform-flags/settings/{code}": {
+      "get": {
+        "operationId": "get_identity_platform_flags_settings_code",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "code",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformFlagSettingView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "platform-flag-controller"
+        ]
+      },
+      "put": {
+        "operationId": "put_identity_platform_flags_settings_code",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "code",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlatformFlagSettingInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "platform-flag-controller"
         ]
       }
     },
