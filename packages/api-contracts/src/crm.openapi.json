@@ -683,6 +683,685 @@
         },
         "type": "object"
       },
+      "CrmCareReminderCapabilities": {
+        "properties": {
+          "actionPolicy": {
+            "type": "string"
+          },
+          "blockCodes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "boundaryNote": {
+            "type": "string"
+          },
+          "dimensions": {
+            "items": {
+              "$ref": "#/components/schemas/CrmCareReminderCapabilityDimension"
+            },
+            "type": "array"
+          },
+          "frequencyPolicy": {
+            "type": "string"
+          },
+          "highlight": {
+            "type": "string"
+          },
+          "marketingReminderTypes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "optOutPolicy": {
+            "type": "string"
+          },
+          "paymentDemandAllowedPlatforms": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "reminderStatuses": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "reminderTypes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "CrmCareReminderCapabilityDimension": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "description": {
+            "type": "string"
+          },
+          "dimension": {
+            "type": "string"
+          },
+          "impact": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmCareReminderDispatchInput": {
+        "properties": {
+          "failureReason": {
+            "nullable": true,
+            "type": "string"
+          },
+          "note": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "nullable": true,
+            "type": "string"
+          },
+          "outcome": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "platformReceipt": {
+            "nullable": true,
+            "type": "string"
+          },
+          "sentAt": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "outcome"
+        ],
+        "type": "object"
+      },
+      "CrmCareReminderGenerateInput": {
+        "properties": {
+          "customerRefs": {
+            "items": {
+              "nullable": true,
+              "type": "string"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "lookbackDays": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "minAmount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "orderSource": {
+            "maxLength": 32,
+            "minLength": 0,
+            "nullable": true,
+            "type": "string"
+          },
+          "plannedAt": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmCareReminderGenerateResult": {
+        "properties": {
+          "blocked": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "created": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "idempotentHits": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "matchedCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "plannedAt": {
+            "type": "string"
+          },
+          "reasons": {
+            "additionalProperties": {
+              "format": "int32",
+              "type": "integer"
+            },
+            "type": "object"
+          },
+          "ruleCode": {
+            "type": "string"
+          },
+          "ruleId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "upstreamCandidateCount": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CrmCareReminderPlatformReceiptStatus": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmCareReminderRuleInput": {
+        "properties": {
+          "body": {
+            "nullable": true,
+            "type": "string"
+          },
+          "frequencyLimit": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "frequencyWindowHours": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "note": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "nullable": true,
+            "type": "string"
+          },
+          "platformCode": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string"
+          },
+          "quietHoursEnd": {
+            "nullable": true,
+            "type": "string"
+          },
+          "quietHoursStart": {
+            "nullable": true,
+            "type": "string"
+          },
+          "reminderType": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "ruleCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "ruleName": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "sendTime": {
+            "nullable": true,
+            "type": "string"
+          },
+          "shopId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "shopName": {
+            "maxLength": 200,
+            "minLength": 0,
+            "nullable": true,
+            "type": "string"
+          },
+          "subject": {
+            "maxLength": 400,
+            "minLength": 0,
+            "nullable": true,
+            "type": "string"
+          },
+          "targetFilter": {
+            "additionalProperties": {
+              "nullable": true,
+              "type": "object"
+            },
+            "nullable": true,
+            "type": "object"
+          },
+          "templateCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "nullable": true,
+            "type": "string"
+          },
+          "timezone": {
+            "maxLength": 64,
+            "minLength": 0,
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "platformCode",
+          "reminderType",
+          "ruleCode",
+          "ruleName"
+        ],
+        "type": "object"
+      },
+      "CrmCareReminderRulePage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/CrmCareReminderRuleRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "totalElements": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalPages": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CrmCareReminderRuleRow": {
+        "properties": {
+          "body": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "createdBy": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "frequencyLimit": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "frequencyWindowHours": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "quietHoursEnd": {
+            "nullable": true,
+            "type": "string"
+          },
+          "quietHoursStart": {
+            "nullable": true,
+            "type": "string"
+          },
+          "reminderType": {
+            "type": "string"
+          },
+          "reminderTypeLabel": {
+            "type": "string"
+          },
+          "ruleCode": {
+            "type": "string"
+          },
+          "ruleName": {
+            "type": "string"
+          },
+          "sendTime": {
+            "type": "string"
+          },
+          "shopId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "shopName": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "subject": {
+            "type": "string"
+          },
+          "targetFilter": {
+            "additionalProperties": {
+              "type": "object"
+            },
+            "type": "object"
+          },
+          "templateCode": {
+            "type": "string"
+          },
+          "timezone": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmCareReminderStatEventInput": {
+        "properties": {
+          "eventType": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "occurredAt": {
+            "nullable": true,
+            "type": "string"
+          },
+          "source": {
+            "maxLength": 120,
+            "minLength": 0,
+            "nullable": true,
+            "type": "string"
+          },
+          "taskId": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "eventType",
+          "taskId"
+        ],
+        "type": "object"
+      },
+      "CrmCareReminderStatEventPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/CrmCareReminderStatEventRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "totalElements": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalPages": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CrmCareReminderStatEventRow": {
+        "properties": {
+          "createdAt": {
+            "type": "string"
+          },
+          "eventType": {
+            "type": "string"
+          },
+          "eventTypeLabel": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "occurredAt": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "taskId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "taskNo": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmCareReminderStats": {
+        "properties": {
+          "blockedTasks": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "cancelledTasks": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "clickCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "failedTasks": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "frequencyBlockedCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "openCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "optOutBlockedCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "queuedTasks": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "sentTasks": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalTasks": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CrmCareReminderTaskPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/CrmCareReminderTaskRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "totalElements": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalPages": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CrmCareReminderTaskRow": {
+        "properties": {
+          "blockCode": {
+            "type": "string"
+          },
+          "blockReason": {
+            "type": "string"
+          },
+          "body": {
+            "type": "string"
+          },
+          "clickCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "createdBy": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "customerName": {
+            "type": "string"
+          },
+          "customerRef": {
+            "type": "string"
+          },
+          "failureReason": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "openCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "orderReference": {
+            "type": "string"
+          },
+          "plannedAt": {
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "platformReceipt": {
+            "type": "string"
+          },
+          "reminderType": {
+            "type": "string"
+          },
+          "reminderTypeLabel": {
+            "type": "string"
+          },
+          "ruleCode": {
+            "type": "string"
+          },
+          "ruleId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "sentAt": {
+            "nullable": true,
+            "type": "string"
+          },
+          "shopId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "shopName": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "subject": {
+            "type": "string"
+          },
+          "taskNo": {
+            "type": "string"
+          },
+          "transport": {
+            "type": "string"
+          },
+          "transportLabel": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "CrmCartAbandonmentDetail": {
         "properties": {
           "abandonment": {
@@ -3819,6 +4498,994 @@
         },
         "type": "object"
       },
+      "CrmMessageClassificationBatchInput": {
+        "properties": {
+          "messageIds": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "maxItems": 200,
+            "minItems": 0,
+            "type": "array"
+          }
+        },
+        "required": [
+          "messageIds"
+        ],
+        "type": "object"
+      },
+      "CrmMessageClassificationBatchResult": {
+        "properties": {
+          "boundaryNote": {
+            "type": "string"
+          },
+          "failedCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/CrmMessageClassificationClassifyResult"
+            },
+            "type": "array"
+          },
+          "requestedCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "succeededCount": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CrmMessageClassificationBucket": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "count": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "label": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmMessageClassificationCapabilities": {
+        "properties": {
+          "boundaryNote": {
+            "type": "string"
+          },
+          "dimensions": {
+            "items": {
+              "$ref": "#/components/schemas/CrmMessageClassificationCapabilityDimension"
+            },
+            "type": "array"
+          },
+          "highlight": {
+            "type": "string"
+          },
+          "labels": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "matchModes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "priorities": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "ruleLabels": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "CrmMessageClassificationCapabilityDimension": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "description": {
+            "type": "string"
+          },
+          "dimension": {
+            "type": "string"
+          },
+          "impact": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmMessageClassificationClassifyInput": {
+        "properties": {
+          "messageId": {
+            "description": "要分类的消息（15.1.1.1 的 crm_message.id）",
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "messageId"
+        ],
+        "type": "object"
+      },
+      "CrmMessageClassificationClassifyResult": {
+        "properties": {
+          "autoReplyEligible": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "classificationId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "classificationNo": {
+            "nullable": true,
+            "type": "string"
+          },
+          "classifiedAt": {
+            "nullable": true,
+            "type": "string"
+          },
+          "effectivePriority": {
+            "nullable": true,
+            "type": "string"
+          },
+          "label": {
+            "nullable": true,
+            "type": "string"
+          },
+          "manualPriority": {
+            "nullable": true,
+            "type": "string"
+          },
+          "matchedRuleCode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "messageId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "messageNo": {
+            "type": "string"
+          },
+          "priorityConflict": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "success": {
+            "type": "boolean"
+          },
+          "suggestedPriority": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmMessageClassificationDetail": {
+        "properties": {
+          "classification": {
+            "$ref": "#/components/schemas/CrmMessageClassificationRow"
+          },
+          "feedback": {
+            "items": {
+              "$ref": "#/components/schemas/CrmMessageClassificationFeedbackRow"
+            },
+            "type": "array"
+          },
+          "message": {
+            "$ref": "#/components/schemas/CrmMessageClassificationMessageView"
+          }
+        },
+        "type": "object"
+      },
+      "CrmMessageClassificationFeedbackInput": {
+        "properties": {
+          "correctedAutoReplyEligible": {
+            "description": "人工判定后是否可自动回复",
+            "nullable": true,
+            "type": "boolean"
+          },
+          "correctedLabel": {
+            "description": "人工判定的标签",
+            "minLength": 1,
+            "pattern": "PRE_SALE|LOGISTICS|RETURN_REFUND|COMPLAINT|PLATFORM_COMPLIANCE|SPAM|UNCLASSIFIED",
+            "type": "string"
+          },
+          "correctedPriority": {
+            "description": "人工判定的优先级",
+            "minLength": 1,
+            "pattern": "LOW|NORMAL|HIGH|URGENT",
+            "type": "string"
+          },
+          "messageId": {
+            "description": "被纠正的消息 id",
+            "format": "uuid",
+            "type": "string"
+          },
+          "reason": {
+            "description": "纠正理由（必填）：训练样本要能复核",
+            "maxLength": 1000,
+            "minLength": 0,
+            "type": "string"
+          }
+        },
+        "required": [
+          "correctedLabel",
+          "correctedPriority",
+          "messageId",
+          "reason"
+        ],
+        "type": "object"
+      },
+      "CrmMessageClassificationFeedbackPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/CrmMessageClassificationFeedbackRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CrmMessageClassificationFeedbackResult": {
+        "properties": {
+          "feedback": {
+            "$ref": "#/components/schemas/CrmMessageClassificationFeedbackRow"
+          },
+          "note": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmMessageClassificationFeedbackRow": {
+        "properties": {
+          "classificationId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "correctedAt": {
+            "type": "string"
+          },
+          "correctedAutoReplyEligible": {
+            "type": "boolean"
+          },
+          "correctedBy": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "correctedLabel": {
+            "type": "string"
+          },
+          "correctedPriority": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "messageId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "predictedLabel": {
+            "type": "string"
+          },
+          "predictedPriority": {
+            "type": "string"
+          },
+          "predictedRuleCode": {
+            "type": "string"
+          },
+          "predictedRuleId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmMessageClassificationKeywordHit": {
+        "properties": {
+          "field": {
+            "type": "string"
+          },
+          "keyword": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmMessageClassificationMatchBasis": {
+        "properties": {
+          "matches": {
+            "items": {
+              "$ref": "#/components/schemas/CrmMessageClassificationRuleMatch"
+            },
+            "type": "array"
+          },
+          "winningRuleCode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "winningRuleId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmMessageClassificationMessageView": {
+        "properties": {
+          "body": {
+            "type": "string"
+          },
+          "buyerReference": {
+            "type": "string"
+          },
+          "direction": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "manualPriority": {
+            "type": "string"
+          },
+          "messageNo": {
+            "type": "string"
+          },
+          "messageType": {
+            "type": "string"
+          },
+          "orderReference": {
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "platformTime": {
+            "type": "string"
+          },
+          "shopName": {
+            "type": "string"
+          },
+          "subject": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmMessageClassificationOptions": {
+        "properties": {
+          "labels": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "matchModes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "messageTypes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "platformCodes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "priorities": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "ruleLabels": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "CrmMessageClassificationPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/CrmMessageClassificationRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/CrmMessageClassificationSummary"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CrmMessageClassificationRow": {
+        "properties": {
+          "autoReplyEligible": {
+            "type": "boolean"
+          },
+          "buyerReference": {
+            "type": "string"
+          },
+          "classificationNo": {
+            "type": "string"
+          },
+          "classifiedAt": {
+            "type": "string"
+          },
+          "classifierVersion": {
+            "type": "string"
+          },
+          "correctionCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "effectivePriority": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "latestCorrectedLabel": {
+            "nullable": true,
+            "type": "string"
+          },
+          "manualPriority": {
+            "type": "string"
+          },
+          "matchBasis": {
+            "$ref": "#/components/schemas/CrmMessageClassificationMatchBasis"
+          },
+          "matchedRuleCode": {
+            "type": "string"
+          },
+          "matchedRuleId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "matchedRuleName": {
+            "type": "string"
+          },
+          "messageId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "messageNo": {
+            "type": "string"
+          },
+          "orderReference": {
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "priorityConflict": {
+            "type": "boolean"
+          },
+          "subject": {
+            "type": "string"
+          },
+          "suggestedPriority": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmMessageClassificationRuleInput": {
+        "properties": {
+          "autoReplyEligible": {
+            "description": "命中后是否可自动回复（15.5.1 自动回复未交付 ⇒ 只是判定结果）",
+            "type": "boolean"
+          },
+          "enabled": {
+            "description": "是否启用（停用而不删除：历史命中依据要查得到）",
+            "nullable": true,
+            "type": "boolean"
+          },
+          "keywords": {
+            "description": "关键词（必填非空）：命中方式 ANY = 任一命中，ALL = 全部命中",
+            "items": {
+              "description": "关键词（必填非空）：命中方式 ANY = 任一命中，ALL = 全部命中",
+              "maxLength": 100,
+              "minLength": 0,
+              "type": "string"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "matchMode": {
+            "description": "命中方式：ANY（默认）· ALL",
+            "nullable": true,
+            "type": "string"
+          },
+          "messageTypes": {
+            "description": "适用消息类型（空 = 全部类型）",
+            "items": {
+              "description": "适用消息类型（空 = 全部类型）",
+              "maxLength": 24,
+              "minLength": 0,
+              "nullable": true,
+              "type": "string"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          },
+          "platformCodes": {
+            "description": "适用平台码（空 = 全部平台）",
+            "items": {
+              "description": "适用平台码（空 = 全部平台）",
+              "maxLength": 32,
+              "minLength": 0,
+              "nullable": true,
+              "type": "string"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "priorityOrder": {
+            "description": "显式顺序：数字小的先命中；并列时按 rule_code",
+            "format": "int32",
+            "type": "integer"
+          },
+          "ruleCode": {
+            "description": "规则编码（同租户内唯一，建后不可改）",
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "ruleName": {
+            "description": "规则名称",
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "suggestedPriority": {
+            "description": "命中后给出的建议优先级（建议值；不覆写人工设过的优先级）",
+            "minLength": 1,
+            "pattern": "LOW|NORMAL|HIGH|URGENT",
+            "type": "string"
+          },
+          "targetLabel": {
+            "minLength": 1,
+            "pattern": "PRE_SALE|LOGISTICS|RETURN_REFUND|COMPLAINT|PLATFORM_COMPLIANCE|SPAM",
+            "type": "string"
+          }
+        },
+        "required": [
+          "keywords",
+          "priorityOrder",
+          "ruleCode",
+          "ruleName",
+          "suggestedPriority",
+          "targetLabel"
+        ],
+        "type": "object"
+      },
+      "CrmMessageClassificationRuleMatch": {
+        "properties": {
+          "keywords": {
+            "items": {
+              "$ref": "#/components/schemas/CrmMessageClassificationKeywordHit"
+            },
+            "type": "array"
+          },
+          "ruleCode": {
+            "type": "string"
+          },
+          "ruleId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "ruleName": {
+            "type": "string"
+          },
+          "ruleOrder": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "targetLabel": {
+            "type": "string"
+          },
+          "won": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "CrmMessageClassificationRulePage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/CrmMessageClassificationRuleRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CrmMessageClassificationRuleResult": {
+        "properties": {
+          "note": {
+            "type": "string"
+          },
+          "rule": {
+            "$ref": "#/components/schemas/CrmMessageClassificationRuleRow"
+          }
+        },
+        "type": "object"
+      },
+      "CrmMessageClassificationRuleRow": {
+        "properties": {
+          "autoReplyEligible": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "keywords": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "matchMode": {
+            "type": "string"
+          },
+          "messageTypes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "platformCodes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "priorityOrder": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "ruleCode": {
+            "type": "string"
+          },
+          "ruleName": {
+            "type": "string"
+          },
+          "suggestedPriority": {
+            "type": "string"
+          },
+          "targetLabel": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmMessageClassificationRuleStat": {
+        "properties": {
+          "correctionCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "disagreementCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "hitCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "priorityOrder": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "ruleCode": {
+            "type": "string"
+          },
+          "ruleId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "ruleName": {
+            "type": "string"
+          },
+          "targetLabel": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmMessageClassificationStatistics": {
+        "properties": {
+          "autoReplyEligibleCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "byLabel": {
+            "items": {
+              "$ref": "#/components/schemas/CrmMessageClassificationBucket"
+            },
+            "type": "array"
+          },
+          "byRule": {
+            "items": {
+              "$ref": "#/components/schemas/CrmMessageClassificationRuleStat"
+            },
+            "type": "array"
+          },
+          "bySuggestedPriority": {
+            "items": {
+              "$ref": "#/components/schemas/CrmMessageClassificationBucket"
+            },
+            "type": "array"
+          },
+          "conflictCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "correctionAgreementCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "correctionAgreementRate": {
+            "type": "number"
+          },
+          "correctionCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "totalCount": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CrmMessageClassificationSummary": {
+        "properties": {
+          "autoReplyEligibleCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "byLabel": {
+            "items": {
+              "$ref": "#/components/schemas/CrmMessageClassificationBucket"
+            },
+            "type": "array"
+          },
+          "bySuggestedPriority": {
+            "items": {
+              "$ref": "#/components/schemas/CrmMessageClassificationBucket"
+            },
+            "type": "array"
+          },
+          "conflictCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "correctedCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalCount": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CrmMessageClassificationTrainingSample": {
+        "properties": {
+          "body": {
+            "type": "string"
+          },
+          "buyerReference": {
+            "type": "string"
+          },
+          "correctedAt": {
+            "type": "string"
+          },
+          "correctedAutoReplyEligible": {
+            "type": "boolean"
+          },
+          "correctedBy": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "correctedLabel": {
+            "type": "string"
+          },
+          "correctedPriority": {
+            "type": "string"
+          },
+          "feedbackId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "labelAgreed": {
+            "type": "boolean"
+          },
+          "messageId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "messageNo": {
+            "type": "string"
+          },
+          "messageType": {
+            "type": "string"
+          },
+          "orderReference": {
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "predictedLabel": {
+            "type": "string"
+          },
+          "predictedPriority": {
+            "type": "string"
+          },
+          "predictedRuleCode": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "subject": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmMessageClassificationTrainingSamplePage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/CrmMessageClassificationTrainingSample"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
       "CrmMessageCreateInput": {
         "properties": {
           "attachments": {
@@ -5237,6 +6904,1328 @@
             "type": "string"
           },
           "repliedState": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmNegativeReviewActionInput": {
+        "properties": {
+          "actionType": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "afterSalesReason": {
+            "description": "售后转交原因（AFTER_SALES_HANDOFF 必填；本模块不落下游单据 id）",
+            "nullable": true,
+            "type": "string"
+          },
+          "detail": {
+            "maxLength": 20000,
+            "minLength": 0,
+            "type": "string"
+          },
+          "occurredAt": {
+            "description": "动作发生时刻，例如 2026-10-10T08:00:00+08:00",
+            "nullable": true,
+            "type": "string"
+          },
+          "operatorName": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "outcome": {
+            "description": "SUCCEEDED / FAILED / PENDING",
+            "minLength": 1,
+            "type": "string"
+          },
+          "outcomeNote": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          },
+          "summary": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          },
+          "transport": {
+            "description": "PLATFORM_API / MANUAL_HANDOFF / INTERNAL",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "actionType",
+          "outcome"
+        ],
+        "type": "object"
+      },
+      "CrmNegativeReviewActionRow": {
+        "properties": {
+          "actionAt": {
+            "type": "string"
+          },
+          "actionNo": {
+            "type": "string"
+          },
+          "actionType": {
+            "type": "string"
+          },
+          "afterSalesReason": {
+            "nullable": true,
+            "type": "string"
+          },
+          "appealId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "appealNo": {
+            "nullable": true,
+            "type": "string"
+          },
+          "caseId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "caseNo": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "detail": {
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "operatorId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "operatorName": {
+            "nullable": true,
+            "type": "string"
+          },
+          "outcome": {
+            "type": "string"
+          },
+          "outcomeNote": {
+            "nullable": true,
+            "type": "string"
+          },
+          "summary": {
+            "nullable": true,
+            "type": "string"
+          },
+          "transport": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmNegativeReviewAppealBucket": {
+        "properties": {
+          "count": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmNegativeReviewAppealCancelInput": {
+        "properties": {
+          "reason": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          }
+        },
+        "required": [
+          "reason"
+        ],
+        "type": "object"
+      },
+      "CrmNegativeReviewAppealCreateInput": {
+        "properties": {
+          "appealType": {
+            "description": "REMOVAL（申请移除差评）/ MODIFICATION（申请修改差评内容）/ POLICY_VIOLATION",
+            "minLength": 1,
+            "type": "string"
+          },
+          "causeCode": {
+            "maxLength": 24,
+            "minLength": 0,
+            "type": "string"
+          },
+          "content": {
+            "maxLength": 20000,
+            "minLength": 0,
+            "type": "string"
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          },
+          "reason": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "type": "string"
+          }
+        },
+        "required": [
+          "appealType",
+          "reason"
+        ],
+        "type": "object"
+      },
+      "CrmNegativeReviewAppealOutcomeInput": {
+        "properties": {
+          "decidedAt": {
+            "description": "平台判定时刻，例如 2026-10-12T08:00:00+08:00",
+            "minLength": 1,
+            "nullable": true,
+            "type": "string"
+          },
+          "platformReceipt": {
+            "maxLength": 20000,
+            "minLength": 0,
+            "type": "string"
+          },
+          "reason": {
+            "maxLength": 1000,
+            "minLength": 0,
+            "type": "string"
+          },
+          "result": {
+            "description": "APPROVED（通过）/ REJECTED（驳回）",
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "decidedAt",
+          "result"
+        ],
+        "type": "object"
+      },
+      "CrmNegativeReviewAppealRow": {
+        "properties": {
+          "appealNo": {
+            "type": "string"
+          },
+          "appealStatus": {
+            "type": "string"
+          },
+          "appealType": {
+            "type": "string"
+          },
+          "cancelReason": {
+            "nullable": true,
+            "type": "string"
+          },
+          "cancelledAt": {
+            "nullable": true,
+            "type": "string"
+          },
+          "caseId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "caseNo": {
+            "type": "string"
+          },
+          "causeCode": {
+            "type": "string"
+          },
+          "content": {
+            "nullable": true,
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "createdBy": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "decidedAt": {
+            "nullable": true,
+            "type": "string"
+          },
+          "decidedReason": {
+            "nullable": true,
+            "type": "string"
+          },
+          "decidedResult": {
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "platformReceipt": {
+            "nullable": true,
+            "type": "string"
+          },
+          "platformReference": {
+            "nullable": true,
+            "type": "string"
+          },
+          "quotaIndex": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "quotaLimit": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "quotaPeriodKey": {
+            "type": "string"
+          },
+          "quotaUsedBefore": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "reviewId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "reviewNo": {
+            "type": "string"
+          },
+          "shopId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "submittedAt": {
+            "nullable": true,
+            "type": "string"
+          },
+          "transport": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmNegativeReviewAppealSubmittedInput": {
+        "properties": {
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          },
+          "platformReference": {
+            "maxLength": 128,
+            "minLength": 0,
+            "type": "string"
+          },
+          "submittedAt": {
+            "description": "平台侧实际提交时刻，例如 2026-10-10T08:00:00+08:00",
+            "minLength": 1,
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "submittedAt"
+        ],
+        "type": "object"
+      },
+      "CrmNegativeReviewCandidatePage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/CrmNegativeReviewCandidateRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "totalElements": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalPages": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CrmNegativeReviewCandidateRow": {
+        "properties": {
+          "buyerName": {
+            "nullable": true,
+            "type": "string"
+          },
+          "buyerRef": {
+            "nullable": true,
+            "type": "string"
+          },
+          "caseExists": {
+            "type": "boolean"
+          },
+          "caseId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "caseNo": {
+            "nullable": true,
+            "type": "string"
+          },
+          "content": {
+            "nullable": true,
+            "type": "string"
+          },
+          "negativeRatingThreshold": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "platformReviewedAt": {
+            "type": "string"
+          },
+          "policyConfigured": {
+            "type": "boolean"
+          },
+          "productRef": {
+            "nullable": true,
+            "type": "string"
+          },
+          "productTitle": {
+            "nullable": true,
+            "type": "string"
+          },
+          "rating": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "reviewId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "reviewNo": {
+            "type": "string"
+          },
+          "salesOrderNo": {
+            "nullable": true,
+            "type": "string"
+          },
+          "shopId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "shopName": {
+            "type": "string"
+          },
+          "title": {
+            "nullable": true,
+            "type": "string"
+          },
+          "variantRef": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmNegativeReviewCapabilities": {
+        "properties": {
+          "actionTypes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "appealStatuses": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "appealTypes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "boundaryNote": {
+            "type": "string"
+          },
+          "caseStatuses": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "causeCodes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "dimensions": {
+            "items": {
+              "$ref": "#/components/schemas/CrmNegativeReviewCapabilityDimension"
+            },
+            "type": "array"
+          },
+          "highlight": {
+            "type": "string"
+          },
+          "outcomes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "resolutionStatuses": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "ruleScopes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "transports": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "CrmNegativeReviewCapabilityDimension": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "description": {
+            "type": "string"
+          },
+          "dimension": {
+            "type": "string"
+          },
+          "impact": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmNegativeReviewCaseCreateInput": {
+        "properties": {
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          },
+          "reviewId": {
+            "description": "目标评价（15.2.1.1 的评价 id）",
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "reviewId"
+        ],
+        "type": "object"
+      },
+      "CrmNegativeReviewCasePage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/CrmNegativeReviewCaseRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "totalElements": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalPages": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CrmNegativeReviewCaseRow": {
+        "properties": {
+          "appealAssessedAt": {
+            "nullable": true,
+            "type": "string"
+          },
+          "appealBasis": {
+            "nullable": true,
+            "type": "string"
+          },
+          "appealEligible": {
+            "type": "boolean"
+          },
+          "appealQuotaLimit": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "appealSupported": {
+            "type": "boolean"
+          },
+          "appealWindowDays": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "assignedTo": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "buyerName": {
+            "nullable": true,
+            "type": "string"
+          },
+          "buyerRef": {
+            "nullable": true,
+            "type": "string"
+          },
+          "caseNo": {
+            "type": "string"
+          },
+          "caseStatus": {
+            "type": "string"
+          },
+          "causeCode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "causeLabel": {
+            "nullable": true,
+            "type": "string"
+          },
+          "causeNote": {
+            "nullable": true,
+            "type": "string"
+          },
+          "causeRuleId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "causeRuleVersion": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "contactBuyerRequired": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "createdBy": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "negativeRatingThreshold": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "note": {
+            "nullable": true,
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "policyRuleId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "policyRuleVersion": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "quotaPeriod": {
+            "type": "string"
+          },
+          "resolutionAt": {
+            "nullable": true,
+            "type": "string"
+          },
+          "resolutionNote": {
+            "nullable": true,
+            "type": "string"
+          },
+          "resolutionStatus": {
+            "type": "string"
+          },
+          "reviewContent": {
+            "nullable": true,
+            "type": "string"
+          },
+          "reviewExternalId": {
+            "nullable": true,
+            "type": "string"
+          },
+          "reviewId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "reviewNo": {
+            "type": "string"
+          },
+          "reviewRating": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "reviewTitle": {
+            "nullable": true,
+            "type": "string"
+          },
+          "salesOrderNo": {
+            "nullable": true,
+            "type": "string"
+          },
+          "shopId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "shopName": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmNegativeReviewCauseBucket": {
+        "properties": {
+          "appealEligibleCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "causeCode": {
+            "type": "string"
+          },
+          "count": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "label": {
+            "type": "string"
+          },
+          "resolvedCount": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CrmNegativeReviewClassifyInput": {
+        "properties": {
+          "causeCode": {
+            "description": "原因分类：PRODUCT / LOGISTICS / SERVICE / MISJUDGMENT",
+            "minLength": 1,
+            "type": "string"
+          },
+          "causeNote": {
+            "maxLength": 1000,
+            "minLength": 0,
+            "type": "string"
+          }
+        },
+        "required": [
+          "causeCode"
+        ],
+        "type": "object"
+      },
+      "CrmNegativeReviewDetail": {
+        "properties": {
+          "actions": {
+            "items": {
+              "$ref": "#/components/schemas/CrmNegativeReviewActionRow"
+            },
+            "type": "array"
+          },
+          "appeals": {
+            "items": {
+              "$ref": "#/components/schemas/CrmNegativeReviewAppealRow"
+            },
+            "type": "array"
+          },
+          "causeRule": {
+            "$ref": "#/components/schemas/CrmNegativeReviewRuleRow"
+          },
+          "negativeReview": {
+            "$ref": "#/components/schemas/CrmNegativeReviewCaseRow"
+          },
+          "orderContext": {
+            "$ref": "#/components/schemas/CrmNegativeReviewOrderContext"
+          },
+          "platformPolicy": {
+            "$ref": "#/components/schemas/CrmNegativeReviewRuleRow"
+          }
+        },
+        "type": "object"
+      },
+      "CrmNegativeReviewOrderContext": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "carrierCode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "caseNo": {
+            "nullable": true,
+            "type": "string"
+          },
+          "deliveredAt": {
+            "nullable": true,
+            "type": "string"
+          },
+          "deliveryState": {
+            "nullable": true,
+            "type": "string"
+          },
+          "orderNo": {
+            "nullable": true,
+            "type": "string"
+          },
+          "orderStatus": {
+            "nullable": true,
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "salesOrderNo": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmNegativeReviewQuotaBucket": {
+        "properties": {
+          "platformCode": {
+            "type": "string"
+          },
+          "quotaLimit": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "quotaPeriod": {
+            "type": "string"
+          },
+          "quotaPeriodKey": {
+            "type": "string"
+          },
+          "quotaRemaining": {
+            "format": "int64",
+            "nullable": true,
+            "type": "integer"
+          },
+          "quotaUsed": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CrmNegativeReviewRuleInput": {
+        "properties": {
+          "appealBasisTemplate": {
+            "maxLength": 1000,
+            "minLength": 0,
+            "type": "string"
+          },
+          "appealEligible": {
+            "description": "该原因默认是否可申诉（CAUSE 作用域）",
+            "nullable": true,
+            "type": "boolean"
+          },
+          "appealQuotaLimit": {
+            "description": "申诉配额（每周期），0 = 不开放申诉",
+            "format": "int32",
+            "minimum": 0,
+            "nullable": true,
+            "type": "integer"
+          },
+          "appealSupported": {
+            "description": "平台是否支持申诉（部分平台不支持）",
+            "nullable": true,
+            "type": "boolean"
+          },
+          "appealWindowDays": {
+            "description": "申诉时限（天）",
+            "format": "int32",
+            "maximum": 365,
+            "minimum": 0,
+            "nullable": true,
+            "type": "integer"
+          },
+          "causeCode": {
+            "description": "CAUSE 作用域必填；PLATFORM 作用域必须留空",
+            "nullable": true,
+            "type": "string"
+          },
+          "contactBuyerRequired": {
+            "description": "是否必须先联系买家（蓝图加粗句的落点）",
+            "nullable": true,
+            "type": "boolean"
+          },
+          "description": {
+            "maxLength": 1000,
+            "minLength": 0,
+            "type": "string"
+          },
+          "evidenceRequired": {
+            "description": "该原因是否要求留证据（CAUSE 作用域）",
+            "nullable": true,
+            "type": "boolean"
+          },
+          "label": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "negativeRatingThreshold": {
+            "description": "差评判定阈值：rating <= 该阈值即视为差评（业务口径默认 2）",
+            "format": "int32",
+            "maximum": 5,
+            "minimum": 1,
+            "nullable": true,
+            "type": "integer"
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          },
+          "platformCode": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "priority": {
+            "description": "展示优先级（数字小 = 靠前）",
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "quotaPeriod": {
+            "maxLength": 16,
+            "minLength": 0,
+            "type": "string"
+          },
+          "ruleScope": {
+            "description": "PLATFORM（逐平台的差评处理策略）或 CAUSE（逐「平台 × 原因」的规则）",
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "label",
+          "platformCode",
+          "ruleScope"
+        ],
+        "type": "object"
+      },
+      "CrmNegativeReviewRulePage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/CrmNegativeReviewRuleRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "totalElements": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalPages": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CrmNegativeReviewRuleRow": {
+        "properties": {
+          "appealBasisTemplate": {
+            "nullable": true,
+            "type": "string"
+          },
+          "appealEligible": {
+            "type": "boolean"
+          },
+          "appealQuotaLimit": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "appealSupported": {
+            "type": "boolean"
+          },
+          "appealWindowDays": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "causeCode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "contactBuyerRequired": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "createdBy": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "description": {
+            "nullable": true,
+            "type": "string"
+          },
+          "effectiveFrom": {
+            "type": "string"
+          },
+          "effectiveTo": {
+            "nullable": true,
+            "type": "string"
+          },
+          "evidenceRequired": {
+            "type": "boolean"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "negativeRatingThreshold": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "note": {
+            "nullable": true,
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "priority": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "quotaPeriod": {
+            "type": "string"
+          },
+          "ruleNo": {
+            "type": "string"
+          },
+          "ruleScope": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          },
+          "version": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CrmNegativeReviewRuleUpdateInput": {
+        "properties": {
+          "appealBasisTemplate": {
+            "maxLength": 1000,
+            "minLength": 0,
+            "type": "string"
+          },
+          "appealEligible": {
+            "type": "boolean"
+          },
+          "appealQuotaLimit": {
+            "format": "int32",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "appealSupported": {
+            "type": "boolean"
+          },
+          "appealWindowDays": {
+            "format": "int32",
+            "maximum": 365,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "contactBuyerRequired": {
+            "type": "boolean"
+          },
+          "description": {
+            "maxLength": 1000,
+            "minLength": 0,
+            "type": "string"
+          },
+          "evidenceRequired": {
+            "type": "boolean"
+          },
+          "label": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "negativeRatingThreshold": {
+            "format": "int32",
+            "maximum": 5,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          },
+          "priority": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "quotaPeriod": {
+            "maxLength": 16,
+            "minLength": 0,
+            "type": "string"
+          },
+          "status": {
+            "description": "ACTIVE / ARCHIVED",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmNegativeReviewShopView": {
+        "properties": {
+          "appealQuotaLimit": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "appealSupported": {
+            "type": "boolean"
+          },
+          "code": {
+            "type": "string"
+          },
+          "contactBuyerRequired": {
+            "type": "boolean"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "negativeRatingThreshold": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "platformName": {
+            "type": "string"
+          },
+          "policyConfigured": {
+            "type": "boolean"
+          },
+          "policyNote": {
+            "type": "string"
+          },
+          "quotaPeriod": {
+            "nullable": true,
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmNegativeReviewStats": {
+        "properties": {
+          "appealEligibleCases": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "appealIneligibleCases": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "appealedCases": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "byAppealStatus": {
+            "items": {
+              "$ref": "#/components/schemas/CrmNegativeReviewAppealBucket"
+            },
+            "type": "array"
+          },
+          "byCause": {
+            "items": {
+              "$ref": "#/components/schemas/CrmNegativeReviewCauseBucket"
+            },
+            "type": "array"
+          },
+          "byPlatformQuota": {
+            "items": {
+              "$ref": "#/components/schemas/CrmNegativeReviewQuotaBucket"
+            },
+            "type": "array"
+          },
+          "byStatus": {
+            "items": {
+              "$ref": "#/components/schemas/CrmNegativeReviewStatusBucket"
+            },
+            "type": "array"
+          },
+          "closedCases": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "contactBuyerDoneCases": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "inProgressCases": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "openCases": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "resolutionRate": {
+            "nullable": true,
+            "type": "number"
+          },
+          "resolutionRateBasis": {
+            "type": "string"
+          },
+          "resolutionRateNumerator": {
+            "type": "string"
+          },
+          "resolvedCases": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "scopeDays": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "scopeFrom": {
+            "type": "string"
+          },
+          "scopeTo": {
+            "type": "string"
+          },
+          "totalCases": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "unresolvedCases": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CrmNegativeReviewStatusBucket": {
+        "properties": {
+          "count": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "status": {
             "type": "string"
           }
         },
@@ -9471,6 +12460,754 @@
         ]
       }
     },
+    "/crm/care-reminders/capabilities": {
+      "get": {
+        "operationId": "get_crm_care_reminders_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCareReminderCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "care-reminder-controller"
+        ]
+      }
+    },
+    "/crm/care-reminders/rules": {
+      "get": {
+        "operationId": "get_crm_care_reminders_rules",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "reminderType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "platformCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCareReminderRulePage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "care-reminder-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_crm_care_reminders_rules",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmCareReminderRuleInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCareReminderRuleRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "care-reminder-controller"
+        ]
+      }
+    },
+    "/crm/care-reminders/rules/{ruleId}": {
+      "get": {
+        "operationId": "get_crm_care_reminders_rules_ruleId",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "ruleId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCareReminderRuleRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "care-reminder-controller"
+        ]
+      },
+      "put": {
+        "operationId": "put_crm_care_reminders_rules_ruleId",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "ruleId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmCareReminderRuleInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCareReminderRuleRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "care-reminder-controller"
+        ]
+      }
+    },
+    "/crm/care-reminders/rules/{ruleId}/generate": {
+      "post": {
+        "operationId": "post_crm_care_reminders_rules_ruleId_generate",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "ruleId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmCareReminderGenerateInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCareReminderGenerateResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "care-reminder-controller"
+        ]
+      }
+    },
+    "/crm/care-reminders/rules/{ruleId}/status": {
+      "post": {
+        "operationId": "post_crm_care_reminders_rules_ruleId_status",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "ruleId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCareReminderRuleRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "care-reminder-controller"
+        ]
+      }
+    },
+    "/crm/care-reminders/stats": {
+      "get": {
+        "operationId": "get_crm_care_reminders_stats",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "ruleId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "reminderType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCareReminderStats"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "care-reminder-controller"
+        ]
+      }
+    },
+    "/crm/care-reminders/stats/events": {
+      "post": {
+        "operationId": "post_crm_care_reminders_stats_events",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmCareReminderStatEventInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCareReminderStatEventRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "care-reminder-controller"
+        ]
+      }
+    },
+    "/crm/care-reminders/stats/platform-events": {
+      "get": {
+        "operationId": "get_crm_care_reminders_stats_platform_events",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCareReminderPlatformReceiptStatus"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "care-reminder-controller"
+        ]
+      }
+    },
+    "/crm/care-reminders/stats/tasks/{taskId}/events": {
+      "get": {
+        "operationId": "get_crm_care_reminders_stats_tasks_taskId_events",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "taskId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCareReminderStatEventPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "care-reminder-controller"
+        ]
+      }
+    },
+    "/crm/care-reminders/tasks": {
+      "get": {
+        "operationId": "get_crm_care_reminders_tasks",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "ruleId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "reminderType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "blockCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "customerRef",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "platformCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCareReminderTaskPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "care-reminder-controller"
+        ]
+      }
+    },
+    "/crm/care-reminders/tasks/{taskId}": {
+      "get": {
+        "operationId": "get_crm_care_reminders_tasks_taskId",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "taskId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCareReminderTaskRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "care-reminder-controller"
+        ]
+      }
+    },
+    "/crm/care-reminders/tasks/{taskId}/dispatch": {
+      "post": {
+        "operationId": "post_crm_care_reminders_tasks_taskId_dispatch",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "taskId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmCareReminderDispatchInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCareReminderTaskRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "care-reminder-controller"
+        ]
+      }
+    },
     "/crm/cart-recovery/abandonments": {
       "get": {
         "operationId": "get_crm_cart_recovery_abandonments",
@@ -12998,6 +16735,807 @@
         ]
       }
     },
+    "/crm/message-classifications/capabilities": {
+      "get": {
+        "operationId": "get_crm_message_classifications_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmMessageClassificationCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "message-classification-controller"
+        ]
+      }
+    },
+    "/crm/message-classifications/classifications": {
+      "get": {
+        "operationId": "get_crm_message_classifications_classifications",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "messageId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "label",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "suggestedPriority",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "priorityConflict",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "autoReplyEligible",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmMessageClassificationPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "message-classification-controller"
+        ]
+      }
+    },
+    "/crm/message-classifications/classifications/{classificationId}": {
+      "get": {
+        "operationId": "get_crm_message_classifications_classifications_classificationId",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "classificationId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmMessageClassificationDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "message-classification-controller"
+        ]
+      }
+    },
+    "/crm/message-classifications/classify": {
+      "post": {
+        "operationId": "post_crm_message_classifications_classify",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmMessageClassificationClassifyInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmMessageClassificationClassifyResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "message-classification-controller"
+        ]
+      }
+    },
+    "/crm/message-classifications/classify-batch": {
+      "post": {
+        "operationId": "post_crm_message_classifications_classify_batch",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmMessageClassificationBatchInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmMessageClassificationBatchResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "message-classification-controller"
+        ]
+      }
+    },
+    "/crm/message-classifications/feedback": {
+      "get": {
+        "operationId": "get_crm_message_classifications_feedback",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "messageId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "correctedLabel",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "predictedLabel",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "ruleCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmMessageClassificationFeedbackPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "message-classification-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_crm_message_classifications_feedback",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmMessageClassificationFeedbackInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmMessageClassificationFeedbackResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "message-classification-controller"
+        ]
+      }
+    },
+    "/crm/message-classifications/messages/{messageId}": {
+      "get": {
+        "operationId": "get_crm_message_classifications_messages_messageId",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "messageId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmMessageClassificationDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "message-classification-controller"
+        ]
+      }
+    },
+    "/crm/message-classifications/options": {
+      "get": {
+        "operationId": "get_crm_message_classifications_options",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmMessageClassificationOptions"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "message-classification-controller"
+        ]
+      }
+    },
+    "/crm/message-classifications/rules": {
+      "get": {
+        "operationId": "get_crm_message_classifications_rules",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "targetLabel",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "enabled",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmMessageClassificationRulePage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "message-classification-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_crm_message_classifications_rules",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmMessageClassificationRuleInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmMessageClassificationRuleResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "message-classification-controller"
+        ]
+      }
+    },
+    "/crm/message-classifications/rules/{ruleId}": {
+      "delete": {
+        "operationId": "delete_crm_message_classifications_rules_ruleId",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "ruleId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmMessageClassificationRuleResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "message-classification-controller"
+        ]
+      },
+      "get": {
+        "operationId": "get_crm_message_classifications_rules_ruleId",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "ruleId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmMessageClassificationRuleRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "message-classification-controller"
+        ]
+      },
+      "put": {
+        "operationId": "put_crm_message_classifications_rules_ruleId",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "ruleId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmMessageClassificationRuleInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmMessageClassificationRuleResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "message-classification-controller"
+        ]
+      }
+    },
+    "/crm/message-classifications/statistics": {
+      "get": {
+        "operationId": "get_crm_message_classifications_statistics",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmMessageClassificationStatistics"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "message-classification-controller"
+        ]
+      }
+    },
+    "/crm/message-classifications/training-samples": {
+      "get": {
+        "operationId": "get_crm_message_classifications_training_samples",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "correctedLabel",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "predictedLabel",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "ruleCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmMessageClassificationTrainingSamplePage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "message-classification-controller"
+        ]
+      }
+    },
     "/crm/message-inbox/batch": {
       "post": {
         "operationId": "post_crm_message_inbox_batch",
@@ -14163,6 +18701,1136 @@
         },
         "tags": [
           "message-send-controller"
+        ]
+      }
+    },
+    "/crm/negative-reviews": {
+      "get": {
+        "operationId": "get_crm_negative_reviews",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "shopId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "platformCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "causeCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "caseStatus",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "resolutionStatus",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "appealEligible",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "rating",
+            "required": false,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmNegativeReviewCasePage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "negative-review-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_crm_negative_reviews",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmNegativeReviewCaseCreateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmNegativeReviewCaseRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "negative-review-controller"
+        ]
+      }
+    },
+    "/crm/negative-reviews/candidates": {
+      "get": {
+        "operationId": "get_crm_negative_reviews_candidates",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "shopId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "platformCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "rating",
+            "required": false,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "negativeOnly",
+            "required": false,
+            "schema": {
+              "default": true,
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmNegativeReviewCandidatePage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "negative-review-controller"
+        ]
+      }
+    },
+    "/crm/negative-reviews/capabilities": {
+      "get": {
+        "operationId": "get_crm_negative_reviews_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmNegativeReviewCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "negative-review-controller"
+        ]
+      }
+    },
+    "/crm/negative-reviews/rules": {
+      "get": {
+        "operationId": "get_crm_negative_reviews_rules",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "ruleScope",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "platformCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "causeCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmNegativeReviewRulePage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "negative-review-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_crm_negative_reviews_rules",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmNegativeReviewRuleInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmNegativeReviewRuleRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "negative-review-controller"
+        ]
+      }
+    },
+    "/crm/negative-reviews/rules/{ruleId}": {
+      "get": {
+        "operationId": "get_crm_negative_reviews_rules_ruleId",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "ruleId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmNegativeReviewRuleRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "negative-review-controller"
+        ]
+      },
+      "put": {
+        "operationId": "put_crm_negative_reviews_rules_ruleId",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "ruleId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmNegativeReviewRuleUpdateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmNegativeReviewRuleRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "negative-review-controller"
+        ]
+      }
+    },
+    "/crm/negative-reviews/shops": {
+      "get": {
+        "operationId": "get_crm_negative_reviews_shops",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/CrmNegativeReviewShopView"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "negative-review-controller"
+        ]
+      }
+    },
+    "/crm/negative-reviews/stats": {
+      "get": {
+        "operationId": "get_crm_negative_reviews_stats",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "shopId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "platformCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "causeCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "caseStatus",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "resolutionStatus",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "appealEligible",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "rating",
+            "required": false,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "days",
+            "required": false,
+            "schema": {
+              "default": 30,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmNegativeReviewStats"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "negative-review-controller"
+        ]
+      }
+    },
+    "/crm/negative-reviews/{caseId}": {
+      "get": {
+        "operationId": "get_crm_negative_reviews_caseId",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "caseId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmNegativeReviewDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "negative-review-controller"
+        ]
+      }
+    },
+    "/crm/negative-reviews/{caseId}/actions": {
+      "get": {
+        "operationId": "get_crm_negative_reviews_caseId_actions",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "caseId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/CrmNegativeReviewActionRow"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "negative-review-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_crm_negative_reviews_caseId_actions",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "caseId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmNegativeReviewActionInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmNegativeReviewActionRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "negative-review-controller"
+        ]
+      }
+    },
+    "/crm/negative-reviews/{caseId}/appeals": {
+      "get": {
+        "operationId": "get_crm_negative_reviews_caseId_appeals",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "caseId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/CrmNegativeReviewAppealRow"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "negative-review-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_crm_negative_reviews_caseId_appeals",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "caseId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmNegativeReviewAppealCreateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmNegativeReviewAppealRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "negative-review-controller"
+        ]
+      }
+    },
+    "/crm/negative-reviews/{caseId}/appeals/{appealId}/cancel": {
+      "post": {
+        "operationId": "post_crm_negative_reviews_caseId_appeals_appealId_cancel",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "caseId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "appealId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmNegativeReviewAppealCancelInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmNegativeReviewAppealRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "negative-review-controller"
+        ]
+      }
+    },
+    "/crm/negative-reviews/{caseId}/appeals/{appealId}/outcome": {
+      "post": {
+        "operationId": "post_crm_negative_reviews_caseId_appeals_appealId_outcome",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "caseId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "appealId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmNegativeReviewAppealOutcomeInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmNegativeReviewAppealRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "negative-review-controller"
+        ]
+      }
+    },
+    "/crm/negative-reviews/{caseId}/appeals/{appealId}/submit": {
+      "post": {
+        "operationId": "post_crm_negative_reviews_caseId_appeals_appealId_submit",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "caseId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "appealId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmNegativeReviewAppealRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "negative-review-controller"
+        ]
+      }
+    },
+    "/crm/negative-reviews/{caseId}/appeals/{appealId}/submitted": {
+      "post": {
+        "operationId": "post_crm_negative_reviews_caseId_appeals_appealId_submitted",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "caseId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "appealId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmNegativeReviewAppealSubmittedInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmNegativeReviewAppealRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "negative-review-controller"
+        ]
+      }
+    },
+    "/crm/negative-reviews/{caseId}/classify": {
+      "post": {
+        "operationId": "post_crm_negative_reviews_caseId_classify",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "caseId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmNegativeReviewClassifyInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmNegativeReviewCaseRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "negative-review-controller"
         ]
       }
     },
