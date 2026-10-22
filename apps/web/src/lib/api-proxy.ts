@@ -5797,6 +5797,66 @@ const services: readonly {
       /^reviews(?:\/(?:capabilities|shops|stats|export|sync)|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?$/,
   },
   {
+    // 15.2.1.2 评价回复（crm 服务，卷 15 的 L3 锚点 15.2.1 下的评价子域）。
+    //
+    // 蓝图：「回复评价（公开回复 + 部分平台的卖家评论追加），支持模板、多语言、批量回复同类评价。
+    // 输入：回复内容；目标评价。输出：回复记录 + 平台回执。关系：上游 = 15.2.1.1；下游 = 平台接口。
+    // **差评回复是转化机会也是合规风险**，模板必须符合平台措辞规范。」
+    //
+    // 本条目是**新增一条 services[] 元素**，不是往既有 crm 分支的 alternation 里并 ——
+    // 既有 crm 那几条（`^buyer-emails...$` / `^knowledge\/...$` / `^review-requests...$` /
+    // `^reviews...$` / `^review-rules...$`）都是超长单行正则，并进去会让本车道与并行车道的
+    // 插入点被隔开，git 判冲突。插入锚点固定在 **crm/reviews 那条之后**（与同批另外三条车道的
+    // 锚点：crm/message-inbox 之后 · crm/customer-tags 之后 · channel/ad-rules 之后互不重叠）；
+    // 既有 crm 条目**一字未动、也不重排**。
+    //
+    // ---- 首 token「review-replies」的零命中核对结论 ----
+    // 本文件既有全部 services[] 元素的正则**没有一条**命中本模块的形状 ——
+    // 已用脚本逐条核对，**命中数为 0**（`grep -c -- "review-replies" apps/web/src/lib/api-proxy.ts`
+    // 在改之前为 0）。原因：既有 crm 分支的首 token 分别是 buyer-emails / knowledge /
+    // review-requests / reviews / review-rules，与 review-replies **首 token 即不同**；
+    // 而本文件的 resolve() 是「按顺序逐条匹配、首个命中即返回」，同前缀的第二条不会误吃前一条。
+    // 特别地，`^reviews...` **不会**匹配 `review-replies/...`：正则锚定在开头，
+    // review- 之后必须紧跟 s。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   review-replies                     回复记录集合读（GET，真分页 + 真筛选）
+    //   review-replies/capabilities        能力声明（逐维 available + ownerModule + impact）
+    //   review-replies/policies            平台措辞规范（GET 真分页 / PUT 发新版本）
+    //   review-replies/policies/{uuid}     单条措辞规范
+    //   review-replies/templates           模板列表（GET 真分页 / POST 新建草稿）
+    //   review-replies/templates/{uuid}    模板详情（GET）/ 改草稿（PUT）
+    //   review-replies/templates/{uuid}/publish   发布模板（POST）
+    //   review-replies/templates/{uuid}/archive   下架模板（POST）
+    //   review-replies/batches             批次列表（GET）/ 批量回复（POST）
+    //   review-replies/batches/{uuid}      批次详情
+    //   review-replies/{uuid}              单条回复详情（GET：回复本体 + 投递历史）
+    //   review-replies/{uuid}/deliver      投递到平台（POST，**当前恒 409**：适配器未交付）
+    //   review-replies/{uuid}/cancel       撤回待投递回复（POST）
+    //
+    // 判别顺序：**字面量子路径（capabilities / policies / templates / batches）排在 {uuid} 段之前**
+    //   —— alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    // id 段用**完整 UUID 形状** [0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}（不是 [0-9a-f-]+）：
+    //   后者会把 capabilities 这种非 UUID 形状也当成 id 放行。
+    //
+    // ⚠️ **裸路径 review-replies 是放行的**（与「刻意不放行」相反）：本模块的列表入口就是集合根路径
+    //   （GET /crm/review-replies = 回复记录列表），后端确实有这个映射 —— 不放行它，页面会 404。
+    //   注意末尾**不带 `?`**：`?` 结尾的正则会把裸路径也一起放行。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * review-replies/{uuid}/replies —— 回复的子资源，后端没有这个映射。
+    //   * review-replies/{uuid}/appeals · /tags —— 差评处理属 **15.2.1.3**（未交付）。
+    //   * review-replies/{uuid}/delete —— 回复记录是**事实**（回复正文建后不可改），不可删。
+    //   * review-replies/capabilities/{uuid} · review-replies/batches/{uuid}/deliver —— 这两段
+    //     后端**不按 id 寻址**（能力声明与批量投递），放行它们等于承诺一个不存在的映射。
+    //   * review-replies/not-a-uuid —— 非 UUID 段必须 404，不能被宽松分支吃掉。
+    prefix: 'crm/',
+    env: 'CRM_URL',
+    fallback: 'http://127.0.0.1:8086',
+    pattern:
+      /^review\-replies(?:\/capabilities|\/policies(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|\/templates(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:publish|archive))?)?|\/batches(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:deliver|cancel))?)?$/,
+  },
+  {
     // 15.2.2.2 索评规则（crm 服务，卷 15 的 L3 锚点 15.2.2 的第二个子模块）。
     //
     // 蓝图：「配置索评策略：按店铺、按物流方式（自发货/平台仓）设置不同延后时间，避开节假日，
