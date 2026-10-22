@@ -352,12 +352,33 @@ node tools/module-progress/merge-resolve.mjs --base upstream/main --head upstrea
 
 **取证配方（行级差集）**：
 
+⚠️ **必须在 `git add` 解冲突文件之前跑这套取证** ——
+`git add` 一执行，stage 2 / stage 3 就被清掉，之后再取就只剩 stage 0：
+
+```
+fatal: path '<file>' is in the index, but not at stage 2
+```
+
+⇒ 顺序是：**先取证 → 再 `git checkout --ours/--theirs` → 再 `git add`**。
+若已经 `add` 过了，改用显式 ref 取同一份数据（结果等价）：
+
 ```bash
-git show :2:<file> | sort -u > /tmp/side_main.txt   # stage 2 = main 侧
-git show :3:<file> | sort -u > /tmp/side_head.txt   # stage 3 = 集成分支侧
+git show upstream/main:<file> | sort -u > /tmp/side_main.txt        # main 侧
+git show upstream/integration/module-dev:<file> | sort -u > /tmp/side_head.txt   # 集成分支侧
 comm -23 /tmp/side_head.txt /tmp/side_main.txt      # 集成分支侧独有行
 comm -13 /tmp/side_head.txt /tmp/side_main.txt      # main 侧独有行
 ```
+
+⚠️ **两侧必须用同一条命令归一化**，否则表格列宽差异会被当成「集成侧独有内容」：
+
+```bash
+norm() { awk '{gsub(/[ \t]+/," "); sub(/^ /,""); sub(/ $/,""); print}'; }
+git show :2:<file> | norm | sort -u > /tmp/side_main.txt
+git show :3:<file> | norm | sort -u > /tmp/side_head.txt
+```
+
+（不归一化时，Markdown 表格的分隔行与列宽会被算成独有行，差集结论会失真。
+2026-10-22 12:00 那轮实测：未归一化时集成侧独有 6 行，归一化后只有 4 行。）
 
 判据：**集成分支侧独有行是否逐条都能在 main 侧找到对应的新版形态**。
 若每一行都是「旧措辞被新版替换」（而不是独有内容），则 **main 侧是更新的快照，取 main 侧零丢失**。
