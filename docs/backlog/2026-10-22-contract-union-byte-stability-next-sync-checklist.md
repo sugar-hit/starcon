@@ -3,6 +3,7 @@
 **优先级：P1 —— 不是 bug，是「修复落地那一轮同步」的验收清单。**
 
 **状态（2026-10-22 14:5x 实测）**：
+
 - ✅ 修复 `e5cb2f11`（驱动 + 生成器 `sort_keys`）与产物 `c862c529`（11 个重生成产物）
   **都已并入 `origin/integration/module-dev`**（经 `2d2f2ea3`）；
 - ⛔ **两者都还不在 `origin/main`**（main 仍是 `b49fe44c`）；
@@ -42,11 +43,11 @@ cwd                         /private/tmp/drivertest4  ← 工作树顶层
 
 ### 由此得出的**不可换序**的两 PR 拆法
 
-| 顺序 | PR 内容 | 合并时驱动 | 结果 |
-| --- | --- | --- | --- |
-| **PR#1** | 驱动修复 + 生成器 `sort_keys` + `__pycache__` gitignore —— **不含任何契约产物** | main 旧驱动，但**无契约文件参与冲突** ⇒ 不触发 | ✅ main 拿到修好的驱动 |
-| **PR#2** | 11 个重生成产物 | main **新**驱动（PR#1 已落地） | ✅ 冲突触发新驱动 ⇒ canonical 形态 |
-| ❌ | 合成一个 PR（驱动 + 产物一起） | main **旧**驱动且契约文件参与冲突 | ❌ 产物被写回 JS 形态 ⇒ main 的 CI 继续红，且现象是「修复合进去了却没生效」—— 最难查的那种 |
+| 顺序     | PR 内容                                                                         | 合并时驱动                                     | 结果                                                                                       |
+| -------- | ------------------------------------------------------------------------------- | ---------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| **PR#1** | 驱动修复 + 生成器 `sort_keys` + `__pycache__` gitignore —— **不含任何契约产物** | main 旧驱动，但**无契约文件参与冲突** ⇒ 不触发 | ✅ main 拿到修好的驱动                                                                     |
+| **PR#2** | 11 个重生成产物                                                                 | main **新**驱动（PR#1 已落地）                 | ✅ 冲突触发新驱动 ⇒ canonical 形态                                                         |
+| ❌       | 合成一个 PR（驱动 + 产物一起）                                                  | main **旧**驱动且契约文件参与冲突              | ❌ 产物被写回 JS 形态 ⇒ main 的 CI 继续红，且现象是「修复合进去了却没生效」—— 最难查的那种 |
 
 ### 机器可判的**前置断言**（PR#2 之前必跑）
 
@@ -119,14 +120,14 @@ git merge feat && cat /tmp/drivertest/log.txt
 
 ### 驱动改写造成的漂移量（canonical 生成物 vs 已提交）
 
-| 文件                        | `.ts` 差异行 | `.json` 差异行 | 漂移成因                                             |
-| --------------------------- | ------------ | -------------- | ---------------------------------------------------- |
-| `identity.ts` / `.json`     | **0**        | **0**          | **从未被驱动改写**（没撞过契约冲突）⇒ 与 canonical 逐字节相同 |
-| `catalog.ts`                | 2            | 10             | 仅横幅位置 + 浮点字面量 + 末尾换行                    |
-| `warehouse.ts`              | 2            | 2              | 仅横幅位置 + 末尾换行                                |
-| `channel.ts`                | 320          | **52 762**     | 横幅 + **类型序被打乱** + **json 键序被打乱**        |
-| `crm.ts`                    | 160          | **10 672**     | 同上                                                 |
-| `trade.ts`                  | 248          | **98 538**     | 同上                                                 |
+| 文件                    | `.ts` 差异行 | `.json` 差异行 | 漂移成因                                                      |
+| ----------------------- | ------------ | -------------- | ------------------------------------------------------------- |
+| `identity.ts` / `.json` | **0**        | **0**          | **从未被驱动改写**（没撞过契约冲突）⇒ 与 canonical 逐字节相同 |
+| `catalog.ts`            | 2            | 10             | 仅横幅位置 + 浮点字面量 + 末尾换行                            |
+| `warehouse.ts`          | 2            | 2              | 仅横幅位置 + 末尾换行                                         |
+| `channel.ts`            | 320          | **52 762**     | 横幅 + **类型序被打乱** + **json 键序被打乱**                 |
+| `crm.ts`                | 160          | **10 672**     | 同上                                                          |
+| `trade.ts`              | 248          | **98 538**     | 同上                                                          |
 
 ### 四种漂移成因（下轮逐类核对）
 
@@ -165,13 +166,13 @@ git merge feat && cat /tmp/drivertest/log.txt
 
 实测（2026-10-22 14:5x）：
 
-| 检查项                                                       | 结果                                             |
-| ------------------------------------------------------------ | ------------------------------------------------ |
-| `vitest.config` 的 include                                     | `['apps/**/*.test.ts', 'packages/**/*.test.ts']` ⇒ **不含** `tools/**` |
-| `package.json` scripts                                        | **没有任何** script 跑 `*.itest.mjs`             |
-| `.github/workflows/**`                                        | **无** `itest` 引用                              |
-| `tools/module-progress/PIPELINE.md`（L2 步骤）                 | **无** `itest` 引用                              |
-| `lane.mjs:927` 对 `merge-union.itest.mjs` 的引用               | 是**未跟踪文件清理白名单**，**不是执行点**        |
+| 检查项                                           | 结果                                                                   |
+| ------------------------------------------------ | ---------------------------------------------------------------------- |
+| `vitest.config` 的 include                       | `['apps/**/*.test.ts', 'packages/**/*.test.ts']` ⇒ **不含** `tools/**` |
+| `package.json` scripts                           | **没有任何** script 跑 `*.itest.mjs`                                   |
+| `.github/workflows/**`                           | **无** `itest` 引用                                                    |
+| `tools/module-progress/PIPELINE.md`（L2 步骤）   | **无** `itest` 引用                                                    |
+| `lane.mjs:927` 对 `merge-union.itest.mjs` 的引用 | 是**未跟踪文件清理白名单**，**不是执行点**                             |
 
 ⇒ 仓库里有 **13 个** `tools/module-progress/*.itest.mjs`（含修复车道新增的
 `merge-union.itest.mjs`，33 条断言），**CI 不跑、L2 不跑、任何脚本都不跑**，
@@ -180,12 +181,75 @@ git merge feat && cat /tmp/drivertest/log.txt
 ⇒ 本轮 14:00 tick **显式手动跑过** `merge-union.itest.mjs`（33 断言全绿），
 但这**不是**自动保障 ⇒ **下轮同步必须显式再跑一遍**（见判据 G）。
 
+### ⚠️ 已知缺口三：**turbo 缓存不覆盖 `packages/api-contracts/`** ⇒ 缓存会骗人
+
+实测（2026-10-22 15:0x）：
+
+| 检查项                                | 结果                                                                 |
+| ------------------------------------- | -------------------------------------------------------------------- |
+| `packages/api-contracts/package.json` | **不存在** ⇒ **不是 turbo 包**                                       |
+| `turbo.json` 各 task 的 `inputs`      | `["src/**", "package.json", "tsconfig.json", ...]` ⇒ **按包作用域**  |
+| `turbo.json` 的 `globalDependencies`  | 只有 `["**/.env.*local", "tsconfig.base.json"]` ⇒ 不含契约           |
+| `turbo run typecheck` 的 scope        | `@starcon/config-tailwind, @starcon/ui, @starcon/web` ⇒ **不含契约** |
+
+⇒ **改 `packages/api-contracts/**` 不会让 turbo 的任何 task 缓存失效**
+⇒ `pnpm typecheck` / `pnpm lint` / `pnpm test` 可以**整段 replay 旧缓存**。
+
+⚠️ **并且：协议里并不存在「契约类变更强制 `--force` typecheck」这条规则** ——
+实测 `PIPELINE.md` / `PIPELINE_CRON_PROMPT.md` / `.dev-agent/l2-run.sh` 里
+**`--force` 一次都没出现**；三处 `force` 字样全部在说
+**「不要为了让 tick 通过而 force 清掉别人持有的调度闸」**（与 turbo 无关）。
+
+⇒ 结论：L2 的前端三步（`pnpm typecheck && pnpm lint && pnpm test`）
+**在契约变更后可能全是缓存回放**，**不能证明**契约相关的前端类型是绿的
+⇒ 下轮同步在契约有变更时，**必须带 `--force`**（见判据 H）。
+
+### ⚠️ 已知缺口四：集成头的 L2 **从不验证契约是否 canonical**
+
+`.dev-agent/l2-run.sh` 的四步实测：
+
+```
+[1/4] backend ./mvnw verify
+[2/4] pnpm typecheck && pnpm lint && pnpm test     ← 无 --force
+[3/4] NEXT_TELEMETRY_DISABLED=1 pnpm --filter @starcon/web build
+[4/4] node tools/module-progress/sync.mjs --check
+```
+
+⇒ **四步里没有 `contracts:generate`** ⇒ **集成头的 L2 永远不跑 canonical 契约闸**。
+canonical 闸目前**只存在于 CI**（`.github/workflows/ci.yml:140-141`：
+`pnpm contracts:generate` + `git diff --exit-code -- packages/api-contracts/src`）。
+
+⇒ ⇒ **契约类变更在集成头上是「无闸区」** —— 只有 CI 会拦，流水线本地拦不住。
+⇒ 这正是判据 E 必须在同步任务里**显式**跑的原因（它补的是 L2 缺的那道闸）。
+
+### 📌 附：canonical 重生成命令**已在协议里**
+
+`PIPELINE.md` 第 6 条（车道任务书纪律）原文：
+「契约是 codegen 产物，**禁止手改**：
+`python3 tools/codegen/catalog-contracts.py --spec-dir backend/target/openapi`」
+
+⇒ 判据 E 用的正是这条协议命令，不是自创配方。
+
+### 📌 `1e-06` 的逐服务出现次数（断言口径，2026-10-22 实测）
+
+| 服务      | `1e-06` 次数 | `0.000001` 次数 |
+| --------- | ------------ | --------------- |
+| identity  | **0**        | 0               |
+| catalog   | 2            | 0               |
+| channel   | 5            | 0               |
+| warehouse | **0**        | 0               |
+| trade     | **0**        | 0               |
+| crm       | 6            | 0               |
+
+⇒ ⚠️ **断言必须写成「不得有 `0.000001`（JS 形态指纹）」**，
+写成「必须有 `1e-06`」会在 identity / warehouse / trade 上**误判 FAIL**。
+
 ## §3 本清单要区分的两类「契约文件变化」
 
-| 类别 | 含义 | 判定 | 标注写法 |
-| --- | --- | --- | --- |
-| **① 驱动改写产生的漂移** | 合并时驱动重写契约文件导致的字节漂移 | **修复后不应再发生** | 回归 ⇒ 要查 |
-| **② 修复引入的一次性排版变更** | `.ts` 类型序 + json 键序变为字典序 + 浮点字面量 + 末尾换行 | **预期**，一次性 | 非回归 ⇒ 标注「预期的一次性排版变更（类别②）」 |
+| 类别                           | 含义                                                       | 判定                 | 标注写法                                       |
+| ------------------------------ | ---------------------------------------------------------- | -------------------- | ---------------------------------------------- |
+| **① 驱动改写产生的漂移**       | 合并时驱动重写契约文件导致的字节漂移                       | **修复后不应再发生** | 回归 ⇒ 要查                                    |
+| **② 修复引入的一次性排版变更** | `.ts` 类型序 + json 键序变为字典序 + 浮点字面量 + 末尾换行 | **预期**，一次性     | 非回归 ⇒ 标注「预期的一次性排版变更（类别②）」 |
 
 ⇒ **下一轮汇报必须写明属于哪一类**，否则会被当成回归再查一遍。
 
@@ -223,11 +287,11 @@ git diff --exit-code -- packages/api-contracts/src
 
 ### 判据 C —— 逐字节三项不变量（逐个断言）
 
-| # | 不变量 | 检查方式 | 期望 |
-| --- | --- | --- | --- |
-| C1 | **横幅归首行** | `head -1 packages/api-contracts/src/contracts/*.ts` | 每个文件首行 = `// Generated by tools/codegen/catalog-contracts.py from Spring OpenAPI. DO NOT EDIT.` |
-| C2 | **类型按名排序** | 抽出 `export type/interface/const <Name>` 的 Name 列表与 `sort` 后逐字节比 | 完全相等 |
-| C3 | **json 键序字典序** | `Object.keys(paths)` 与 `[...keys].sort()` 比；`components.schemas` 同理 | 完全相等 |
+| #   | 不变量              | 检查方式                                                                   | 期望                                                                                                  |
+| --- | ------------------- | -------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| C1  | **横幅归首行**      | `head -1 packages/api-contracts/src/contracts/*.ts`                        | 每个文件首行 = `// Generated by tools/codegen/catalog-contracts.py from Spring OpenAPI. DO NOT EDIT.` |
+| C2  | **类型按名排序**    | 抽出 `export type/interface/const <Name>` 的 Name 列表与 `sort` 后逐字节比 | 完全相等                                                                                              |
+| C3  | **json 键序字典序** | `Object.keys(paths)` 与 `[...keys].sort()` 比；`components.schemas` 同理   | 完全相等                                                                                              |
 
 ### 判据 D —— 求并幂等
 
@@ -274,8 +338,6 @@ git diff --name-only <生成快照时的 commit> HEAD -- backend/services/      
 就会把「契约已经过期于当前后端」误判成「已 canonical」。
 ⇒ 判据 E 的结论**必须与 `backend/services/` 未变这一条一起报**，
 单独报「判据 E 通过」是不够的。
-
-
 
 #### 判据 E 与 CI 等价吗？—— 等价（构造性论证，下轮不必重推）
 
@@ -329,7 +391,34 @@ python3 -m unittest discover -s tools/codegen -p 'test_*.py'          # 生成�
 ⇒ 修复的正确性就架在这两组测试上；下轮若不显式执行，判据 E 即使绿，
 也只能证明「这一次的产物是 canonical 的」，证明不了「驱动不会再次写坏」。
 
+### 判据 H —— ⭐ 契约有变更时，L2 的前端三步**必须带 `--force`**
+
+```bash
+pnpm typecheck --force && pnpm lint --force && pnpm test --force
+```
+
+⚠️ **理由（见 §2 已知缺口三）**：`packages/api-contracts/` **不是 turbo 包**、
+不在任何 task 的 `inputs` 里、也不在 `globalDependencies` 里
+⇒ 改契约**不会**让 turbo 缓存失效 ⇒ 三步可以**整段 replay 旧缓存**。
+⇒ 且协议里**没有**任何 `--force` 规则（三处 `force` 字样全在说别清闸）。
+⇒ **契约有变更时，不带 `--force` 的前端三步等于没跑。**
+
+### 判据 I —— ⭐ L2 缺的那道 canonical 闸，由同步任务补上
+
+```bash
+# 等价于 CI 的 catalog-e2e 同款（ci.yml:140-141），但在集成头本地显式跑
+pnpm contracts:generate
+git diff --exit-code -- packages/api-contracts/src
+```
+
+⚠️ **理由（见 §2 已知缺口四）**：`.dev-agent/l2-run.sh` 的四步**没有** `contracts:generate`
+⇒ 集成头的 L2 **从不验证契约是否 canonical** ⇒ canonical 闸只存在于 CI。
+⇒ 下轮同步必须显式补上，否则「集成头 L2 全绿」**不包含**「契约是 canonical 的」这层保证。
+⚠️ `pnpm contracts:generate` **会写仓库里的契约产物** ⇒ 执行前先确认工作区干净，
+跑完若产生改动必须**明确归因**（是「本次生成与已提交不一致」＝问题，还是「纯排版」＝预期）。
+
 ## §5 下一轮同步的汇报义务
+
 1. 明确写出契约文件的变化属于**类别①（回归）还是类别②（预期的一次性排版变更）**。
 2. 若属类别②，列出具体变了哪几个文件、**导出声明数与 `paths` 数是否不变**。
    ⇒ **数量不变** 是「排版变更」与「内容丢失」的**分界线**：数量若变了 ⇒ 是内容丢失 ⇒ **回归**，要查。
@@ -345,6 +434,13 @@ python3 -m unittest discover -s tools/codegen -p 'test_*.py'          # 生成�
 6. ⭐ 报出 **§0 的前置断言结果**（main 是否已是修好的驱动）—— 这是 module-dev→main 能否放行的前提。
 7. ⭐ 报出 **判据 G 的两条回归结果**（驱动 itest + codegen 单测的 exit code 与断言数）——
    CI 与 L2 都不跑它们，只能靠下轮同步显式执行。
+8. ⭐ 报出 **判据 H 的执行方式**（契约有变更时前端三步是否带了 `--force`）——
+   不带 `--force` 的前端三步在契约变更后可能全是缓存回放。
+9. ⭐ 报出 **判据 I 的结果**（本地 `contracts:generate` + `git diff --exit-code` 是否为空）——
+   L2 四步里没有这道闸，只能靠同步任务补。
+10. ⭐ 核对 **`__pycache__` 是否真的进了集成头**：
+    `git show origin/integration/module-dev:.gitignore | grep __pycache__`
+    （14:00 tick 承诺本轮补一个独立 `chore(gitignore)` commit ⇒ 下轮**验证它真的进了**）。
 
 ## §6 相关链接
 
