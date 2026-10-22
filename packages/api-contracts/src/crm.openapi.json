@@ -6220,6 +6220,946 @@
         },
         "type": "object"
       },
+      "CrmReviewReplyBatchDetail": {
+        "properties": {
+          "batch": {
+            "$ref": "#/components/schemas/CrmReviewReplyBatchRow"
+          },
+          "replies": {
+            "items": {
+              "$ref": "#/components/schemas/CrmReviewReplyRow"
+            },
+            "type": "array"
+          },
+          "skipped": {
+            "items": {
+              "$ref": "#/components/schemas/CrmReviewReplySkipped"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "CrmReviewReplyBatchInput": {
+        "properties": {
+          "limit": {
+            "format": "int32",
+            "maximum": 200,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "locale": {
+            "maxLength": 16,
+            "minLength": 0,
+            "type": "string"
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          },
+          "platformCode": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string"
+          },
+          "ratingScope": {
+            "maxLength": 16,
+            "minLength": 0,
+            "type": "string"
+          },
+          "replyType": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string"
+          },
+          "shopId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "templateId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "locale",
+          "platformCode",
+          "ratingScope",
+          "replyType",
+          "templateId"
+        ],
+        "type": "object"
+      },
+      "CrmReviewReplyBatchPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/CrmReviewReplyBatchRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "totalElements": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalPages": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CrmReviewReplyBatchResult": {
+        "properties": {
+          "batch": {
+            "$ref": "#/components/schemas/CrmReviewReplyBatchRow"
+          },
+          "note": {
+            "type": "string"
+          },
+          "replies": {
+            "items": {
+              "$ref": "#/components/schemas/CrmReviewReplyRow"
+            },
+            "type": "array"
+          },
+          "skipped": {
+            "items": {
+              "$ref": "#/components/schemas/CrmReviewReplySkipped"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "CrmReviewReplyBatchRow": {
+        "properties": {
+          "batchNo": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "createdBy": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "createdCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "locale": {
+            "type": "string"
+          },
+          "note": {
+            "nullable": true,
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "ratingScope": {
+            "type": "string"
+          },
+          "replyType": {
+            "type": "string"
+          },
+          "shopId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "skippedCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "status": {
+            "type": "string"
+          },
+          "targetCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "templateId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "templateKey": {
+            "nullable": true,
+            "type": "string"
+          },
+          "templateVersion": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmReviewReplyCapabilities": {
+        "properties": {
+          "boundaryNote": {
+            "type": "string"
+          },
+          "deliveryOutcomes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "dimensions": {
+            "items": {
+              "$ref": "#/components/schemas/CrmReviewReplyCapabilityDimension"
+            },
+            "type": "array"
+          },
+          "highlight": {
+            "type": "string"
+          },
+          "ratingScopes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "replyStatuses": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "replyTypes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "templateStatuses": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "CrmReviewReplyCapabilityDimension": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "description": {
+            "type": "string"
+          },
+          "dimension": {
+            "type": "string"
+          },
+          "impact": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmReviewReplyCreateInput": {
+        "properties": {
+          "body": {
+            "maxLength": 20000,
+            "minLength": 0,
+            "type": "string"
+          },
+          "locale": {
+            "maxLength": 16,
+            "minLength": 0,
+            "type": "string"
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          },
+          "replyType": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string"
+          },
+          "reviewId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "templateId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "replyType",
+          "reviewId"
+        ],
+        "type": "object"
+      },
+      "CrmReviewReplyDeliveryResult": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "delivery": {
+            "$ref": "#/components/schemas/CrmReviewReplyDeliveryRow"
+          },
+          "note": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "replyStatus": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmReviewReplyDeliveryRow": {
+        "properties": {
+          "attemptNo": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "attemptedAt": {
+            "type": "string"
+          },
+          "deliveryNo": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "note": {
+            "nullable": true,
+            "type": "string"
+          },
+          "outcome": {
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "platformReceipt": {
+            "nullable": true,
+            "type": "string"
+          },
+          "platformReplyId": {
+            "nullable": true,
+            "type": "string"
+          },
+          "replyId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "replyNo": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmReviewReplyDetail": {
+        "properties": {
+          "deliveries": {
+            "items": {
+              "$ref": "#/components/schemas/CrmReviewReplyDeliveryRow"
+            },
+            "type": "array"
+          },
+          "reply": {
+            "$ref": "#/components/schemas/CrmReviewReplyRow"
+          }
+        },
+        "type": "object"
+      },
+      "CrmReviewReplyPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/CrmReviewReplyRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "totalElements": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalPages": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CrmReviewReplyPolicyInput": {
+        "properties": {
+          "allowContactInfo": {
+            "type": "boolean"
+          },
+          "allowExternalLink": {
+            "type": "boolean"
+          },
+          "allowPromotion": {
+            "type": "boolean"
+          },
+          "bannedTerms": {
+            "items": {
+              "maxLength": 100,
+              "minLength": 0,
+              "type": "string"
+            },
+            "maxItems": 200,
+            "minItems": 0,
+            "type": "array"
+          },
+          "effectiveFrom": {
+            "description": "生效起点，例如 2026-10-01T00:00:00+08:00",
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxExclamation": {
+            "format": "int32",
+            "maximum": 10,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "maxLength": {
+            "format": "int32",
+            "maximum": 5000,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "maxQuestionMarks": {
+            "format": "int32",
+            "maximum": 10,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "minLength": {
+            "format": "int32",
+            "maximum": 5000,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          },
+          "platformCode": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string"
+          },
+          "replyType": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string"
+          },
+          "requireApology": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "effectiveFrom",
+          "platformCode",
+          "replyType"
+        ],
+        "type": "object"
+      },
+      "CrmReviewReplyPolicyPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/CrmReviewReplyPolicyRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "totalElements": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalPages": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CrmReviewReplyPolicyRow": {
+        "properties": {
+          "allowContactInfo": {
+            "type": "boolean"
+          },
+          "allowExternalLink": {
+            "type": "boolean"
+          },
+          "allowPromotion": {
+            "type": "boolean"
+          },
+          "bannedTerms": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "effectiveFrom": {
+            "type": "string"
+          },
+          "effectiveTo": {
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "maxExclamation": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "maxLength": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "maxQuestionMarks": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "minLength": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "note": {
+            "nullable": true,
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "policyNo": {
+            "type": "string"
+          },
+          "replyType": {
+            "type": "string"
+          },
+          "requireApology": {
+            "type": "boolean"
+          },
+          "status": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          },
+          "version": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CrmReviewReplyRow": {
+        "properties": {
+          "batchId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "batchNo": {
+            "nullable": true,
+            "type": "string"
+          },
+          "body": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "createdBy": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "deliveredAt": {
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "lastDeliveryNote": {
+            "nullable": true,
+            "type": "string"
+          },
+          "locale": {
+            "type": "string"
+          },
+          "note": {
+            "nullable": true,
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "platformReceipt": {
+            "nullable": true,
+            "type": "string"
+          },
+          "platformReplyId": {
+            "nullable": true,
+            "type": "string"
+          },
+          "policyVersion": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "replyNo": {
+            "type": "string"
+          },
+          "replyType": {
+            "type": "string"
+          },
+          "reviewId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "reviewNo": {
+            "type": "string"
+          },
+          "reviewRating": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "reviewScope": {
+            "type": "string"
+          },
+          "shopId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "shopName": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "templateId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "templateKey": {
+            "nullable": true,
+            "type": "string"
+          },
+          "templateLocale": {
+            "nullable": true,
+            "type": "string"
+          },
+          "templateVersion": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmReviewReplySkipped": {
+        "properties": {
+          "reason": {
+            "type": "string"
+          },
+          "reviewId": {
+            "type": "string"
+          },
+          "reviewNo": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmReviewReplyTemplateDetail": {
+        "properties": {
+          "template": {
+            "$ref": "#/components/schemas/CrmReviewReplyTemplateRow"
+          },
+          "variants": {
+            "items": {
+              "$ref": "#/components/schemas/CrmReviewReplyTemplateVariant"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "CrmReviewReplyTemplateInput": {
+        "properties": {
+          "effectiveFrom": {
+            "description": "生效起点，例如 2026-10-01T00:00:00+08:00",
+            "minLength": 1,
+            "type": "string"
+          },
+          "effectiveTo": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          },
+          "platformCode": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string"
+          },
+          "ratingScope": {
+            "maxLength": 16,
+            "minLength": 0,
+            "type": "string"
+          },
+          "replyType": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string"
+          },
+          "templateKey": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "variants": {
+            "items": {
+              "$ref": "#/components/schemas/CrmReviewReplyTemplateVariantInput"
+            },
+            "maxItems": 20,
+            "minItems": 0,
+            "type": "array"
+          }
+        },
+        "required": [
+          "effectiveFrom",
+          "name",
+          "platformCode",
+          "replyType",
+          "templateKey",
+          "variants"
+        ],
+        "type": "object"
+      },
+      "CrmReviewReplyTemplatePage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/CrmReviewReplyTemplateRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "totalElements": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalPages": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CrmReviewReplyTemplateRow": {
+        "properties": {
+          "createdAt": {
+            "type": "string"
+          },
+          "createdBy": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "effectiveFrom": {
+            "type": "string"
+          },
+          "effectiveTo": {
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "note": {
+            "nullable": true,
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "ratingScope": {
+            "type": "string"
+          },
+          "replyType": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "templateKey": {
+            "type": "string"
+          },
+          "templateNo": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          },
+          "version": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CrmReviewReplyTemplateUpdateInput": {
+        "properties": {
+          "name": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          },
+          "variants": {
+            "items": {
+              "$ref": "#/components/schemas/CrmReviewReplyTemplateVariantInput"
+            },
+            "maxItems": 20,
+            "minItems": 0,
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "CrmReviewReplyTemplateVariant": {
+        "properties": {
+          "body": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "isDefault": {
+            "type": "boolean"
+          },
+          "locale": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmReviewReplyTemplateVariantInput": {
+        "properties": {
+          "body": {
+            "maxLength": 20000,
+            "minLength": 0,
+            "type": "string"
+          },
+          "isDefault": {
+            "type": "boolean"
+          },
+          "locale": {
+            "description": "BCP-47 语言标签，例如 en-US / zh-CN",
+            "maxLength": 16,
+            "minLength": 0,
+            "type": "string"
+          }
+        },
+        "required": [
+          "body",
+          "locale"
+        ],
+        "type": "object"
+      },
       "CrmReviewRequestDetail": {
         "properties": {
           "recoveries": {
@@ -11817,6 +12757,944 @@
         },
         "tags": [
           "message-send-controller"
+        ]
+      }
+    },
+    "/crm/review-replies": {
+      "get": {
+        "operationId": "get_crm_review_replies",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "reviewId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "shopId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "platformCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "reviewScope",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "replyType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "locale",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "templateKey",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "batchId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmReviewReplyPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "review-reply-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_crm_review_replies",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmReviewReplyCreateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmReviewReplyRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "review-reply-controller"
+        ]
+      }
+    },
+    "/crm/review-replies/batches": {
+      "get": {
+        "operationId": "get_crm_review_replies_batches",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "platformCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "replyType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmReviewReplyBatchPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "review-reply-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_crm_review_replies_batches",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmReviewReplyBatchInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmReviewReplyBatchResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "review-reply-controller"
+        ]
+      }
+    },
+    "/crm/review-replies/batches/{batchId}": {
+      "get": {
+        "operationId": "get_crm_review_replies_batches_batchId",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "batchId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmReviewReplyBatchDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "review-reply-controller"
+        ]
+      }
+    },
+    "/crm/review-replies/capabilities": {
+      "get": {
+        "operationId": "get_crm_review_replies_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmReviewReplyCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "review-reply-controller"
+        ]
+      }
+    },
+    "/crm/review-replies/policies": {
+      "get": {
+        "operationId": "get_crm_review_replies_policies",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "platformCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "replyType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmReviewReplyPolicyPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "review-reply-controller"
+        ]
+      },
+      "put": {
+        "operationId": "put_crm_review_replies_policies",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmReviewReplyPolicyInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmReviewReplyPolicyRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "review-reply-controller"
+        ]
+      }
+    },
+    "/crm/review-replies/policies/{policyId}": {
+      "get": {
+        "operationId": "get_crm_review_replies_policies_policyId",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "policyId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmReviewReplyPolicyRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "review-reply-controller"
+        ]
+      }
+    },
+    "/crm/review-replies/templates": {
+      "get": {
+        "operationId": "get_crm_review_replies_templates",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "platformCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "replyType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "ratingScope",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmReviewReplyTemplatePage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "review-reply-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_crm_review_replies_templates",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmReviewReplyTemplateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmReviewReplyTemplateDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "review-reply-controller"
+        ]
+      }
+    },
+    "/crm/review-replies/templates/{templateId}": {
+      "get": {
+        "operationId": "get_crm_review_replies_templates_templateId",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "templateId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmReviewReplyTemplateDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "review-reply-controller"
+        ]
+      },
+      "put": {
+        "operationId": "put_crm_review_replies_templates_templateId",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "templateId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmReviewReplyTemplateUpdateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmReviewReplyTemplateDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "review-reply-controller"
+        ]
+      }
+    },
+    "/crm/review-replies/templates/{templateId}/archive": {
+      "post": {
+        "operationId": "post_crm_review_replies_templates_templateId_archive",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "templateId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmReviewReplyTemplateDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "review-reply-controller"
+        ]
+      }
+    },
+    "/crm/review-replies/templates/{templateId}/publish": {
+      "post": {
+        "operationId": "post_crm_review_replies_templates_templateId_publish",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "templateId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmReviewReplyTemplateDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "review-reply-controller"
+        ]
+      }
+    },
+    "/crm/review-replies/{replyId}": {
+      "get": {
+        "operationId": "get_crm_review_replies_replyId",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "replyId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmReviewReplyDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "review-reply-controller"
+        ]
+      }
+    },
+    "/crm/review-replies/{replyId}/cancel": {
+      "post": {
+        "operationId": "post_crm_review_replies_replyId_cancel",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "replyId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "note",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmReviewReplyRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "review-reply-controller"
+        ]
+      }
+    },
+    "/crm/review-replies/{replyId}/deliver": {
+      "post": {
+        "operationId": "post_crm_review_replies_replyId_deliver",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "replyId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmReviewReplyDeliveryResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "review-reply-controller"
         ]
       }
     },

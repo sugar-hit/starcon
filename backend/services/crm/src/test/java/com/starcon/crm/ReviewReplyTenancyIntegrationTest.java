@@ -1,0 +1,429 @@
+package com.starcon.crm;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.starcon.tenancy.TenantTransactions;
+import com.sun.net.httpserver.HttpServer;
+import java.net.InetSocketAddress;
+import java.sql.DriverManager;
+import java.time.OffsetDateTime;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import org.jooq.DSLContext;
+import org.junit.jupiter.api.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.web.servlet.MockMvc;
+import org.testcontainers.containers.PostgreSQLContainer;
+
+/**
+ * 15.2.1.2 评价回复的<b>租户隔离</b>证明，跑在 AGENTS.md 明文要求的三条断言上。
+ *
+ * <p><b>真实 PostgreSQL 16 + FORCE RLS，不使用任何内存替身。</b>
+ *
+ * <ol>
+ *   <li>两租户互不可见；
+ *   <li>伪造租户上下文无效 —— 并且<b>要断言行确实落在自称的租户名下</b>，
+ *       不是只断言 A 看不见（只断言「看不见」的话，一句「写入被全表拒掉」也能骗过它）；
+ *   <li>连接池归还后不串租户。
+ * </ol>
+ *
+ * <p><b>连接池固定为 1 条连接</b>：只有复用同一条连接，才能真正证明归还后不会串租户 ——
+ * 池大于 1 时每次可能拿到不同连接，「没串」可能只是碰巧换了条干净连接。
+ *
+ * <p>刻意跑在<b>真实业务表</b>（本模块的六张表）上，不建占位探针表 ——
+ * 证明的是**真的要用的那些表**被隔离了。
+ */
+@SpringBootTest
+@AutoConfigureMockMvc
+class ReviewReplyTenancyIntegrationTest {
+  static final PostgreSQLContainer<?> pg = new PostgreSQLContainer<>("postgres:16-alpine");
+  static final UUID a = UUID.randomUUID(), b = UUID.randomUUID();
+  static final UUID userA = UUID.randomUUID();
+  static final UUID shop = UUID.randomUUID();
+  static final ObjectMapper json =
+      new ObjectMapper().registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
+  static final Map<String, AccessService.Access> actors = new ConcurrentHashMap<>();
+  static HttpServer identity;
+
+  /** 本模块的六张业务表（逐张验 RLS 是**强制**的）。 */
+  static final List<String> TABLES =
+      List.of(
+          "crm_review_reply_policy",
+          "crm_review_reply_template",
+          "crm_review_reply_template_variant",
+          "crm_review_reply_batch",
+          "crm_review_reply",
+          "crm_review_reply_delivery");
+
+  /** 参照行 ID 按租户派生：主键是**全局** uuid，两个租户不能用同一批固定 UUID。 */
+  static UUID idFor(UUID tenant, int ordinal) {
+    return UUID.nameUUIDFromBytes(("starcon-crm-review-reply-tenancy-" + tenant + "-" + ordinal).getBytes());
+  }
+
+  static AccessService.Access actor(UUID uid, UUID tenant, List<String> permissions) {
+    return new AccessService.Access(
+        uid,
+        tenant,
+        "Test",
+        UUID.randomUUID(),
+        null,
+        permissions,
+        List.of(new AccessService.Grant(UUID.randomUUID(), "TEST", "ALL", permissions)));
+  }
+
+  static {
+    pg.start();
+    try (var c = DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
+        var s = c.createStatement()) {
+      // 运行角色必须 NOBYPASSRLS，否则它会绕过策略，三条断言全部变成空断言。
+      s.execute("create role starcon_app nologin");
+      s.execute("create role crm_app login password 'test-only' nosuperuser nobypassrls");
+    } catch (Exception e) {
+      throw new ExceptionInInitializerError(e);
+    }
+    List<String> permissions = List.of("crm.review_reply.read", "crm.review_reply.update");
+    actors.put("session-a", actor(userA, a, permissions));
+    try {
+      identity = HttpServer.create(new InetSocketAddress(0), 0);
+      identity.createContext(
+          "/internal/access",
+          e -> {
+            var access = actors.get(e.getRequestHeaders().getFirst("Authorization"));
+            if (access == null) {
+              e.sendResponseHeaders(401, -1);
+              e.close();
+              return;
+            }
+            byte[] body = json.writeValueAsBytes(access);
+            e.getResponseHeaders().add("Content-Type", "application/json");
+            e.sendResponseHeaders(200, body.length);
+            e.getResponseBody().write(body);
+            e.close();
+          });
+      identity.setExecutor(Executors.newFixedThreadPool(2));
+      identity.start();
+    } catch (Exception e) {
+      throw new ExceptionInInitializerError(e);
+    }
+  }
+
+  @DynamicPropertySource
+  static void properties(DynamicPropertyRegistry r) {
+    r.add("DB_URL", pg::getJdbcUrl);
+    r.add("DB_USER", () -> "crm_app");
+    r.add("DB_PASSWORD", () -> "test-only");
+    r.add("DB_MIGRATION_USER", pg::getUsername);
+    r.add("DB_MIGRATION_PASSWORD", pg::getPassword);
+    r.add("spring.datasource.hikari.maximum-pool-size", () -> 1);
+    r.add("IDENTITY_URL", () -> "http://127.0.0.1:" + identity.getAddress().getPort());
+    r.add("INTERNAL_KEY", () -> "test-key");
+  }
+
+  @Autowired TenantTransactions tenants;
+  @Autowired DSLContext sql;
+  @Autowired MockMvc http;
+
+  // ================================================================ 夹具
+
+  /** 在可信租户事务里插入一条评价（15.2.1.1 的事实）。 */
+  UUID insertReview(UUID tenant, UUID id, String reviewNo) {
+    tenants.run(
+        tenant,
+        () -> {
+          sql.execute(
+              "insert into crm_product_review"
+                  + "(id,tenant_id,review_no,shop_id,shop_name,platform_code,source,rating,"
+                  + " product_ref,product_title,variant_ref,variant_label,image_urls,"
+                  + " has_image,has_video,replied,platform_reviewed_at,registered_at,"
+                  + " created_at,updated_at)"
+                  + " values (?,?,?,?,?,'AMAZON','MANUAL_ENTRY',5,'SPU-1','商品','SKU-1','变体',"
+                  + " '[]'::jsonb,false,false,false,?::timestamptz,?::timestamptz,"
+                  + " ?::timestamptz,?::timestamptz)",
+              id,
+              tenant,
+              reviewNo,
+              shop,
+              "测试店铺",
+              OffsetDateTime.now(),
+              OffsetDateTime.now(),
+              OffsetDateTime.now(),
+              OffsetDateTime.now());
+          return null;
+        });
+    return id;
+  }
+
+  /** 以指定租户身份读回复的 reply_no。 */
+  List<String> replyNosOf(UUID tenant) {
+    return tenants.run(
+        tenant,
+        () ->
+            sql.fetch("select reply_no from crm_review_reply order by reply_no")
+                .map(r -> r.get(0, String.class)));
+  }
+
+  /** 事务外读：没有任何租户上下文时能看见几行。 */
+  int visibleWithoutTenant() {
+    return sql.fetch("select reply_no from crm_review_reply").size();
+  }
+
+  /** RLS 策略**实际**使用的值：空串与 NULL 都归一成 null，也就是「没有租户」。 */
+  UUID effectiveTenant() {
+    var row = sql.fetchOne("select nullif(current_setting('app.current_tenant', true),'')::uuid");
+    return row == null ? null : row.get(0, UUID.class);
+  }
+
+  /**
+   * 每个用例前清空业务表，再种入两租户各一条评价。
+   *
+   * <p>用**迁移用户**（超管）连接来 TRUNCATE：RLS 对超管不生效，
+   * 所以不需要先绑租户；而 FORCE RLS 下的运行角色做不到「清掉所有租户的行」。
+   */
+  @BeforeEach
+  void resetThenSeed() throws Exception {
+    try (var c = DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
+        var s = c.createStatement()) {
+      s.execute(
+          "truncate table crm_review_reply_delivery, crm_review_reply, crm_review_reply_batch,"
+              + " crm_review_reply_template_variant, crm_review_reply_template,"
+              + " crm_review_reply_policy, crm_product_review restart identity cascade");
+    }
+    insertReview(a, idFor(a, 1), "tenant-a-review");
+    insertReview(b, idFor(b, 1), "tenant-b-review");
+  }
+
+  // ==========================================================================
+  // 迁移确实落地了，且 RLS 是**强制**的
+  // ==========================================================================
+  @Test
+  void 六张业务表都强制rls而不是只启用() {
+    for (String table : TABLES) {
+      var row =
+          sql.fetchOne(
+              "select relrowsecurity, relforcerowsecurity from pg_class where relname = ?", table);
+      assertThat(row).as("V298 必须真的建出 " + table).isNotNull();
+      assertThat(row.get(0, Boolean.class)).as(table + " 未启用 RLS").isTrue();
+      assertThat(row.get(1, Boolean.class))
+          .as(table + " 只有 FORCE 才挡得住「运行角色被误授 owner」")
+          .isTrue();
+      assertThat(
+              sql.fetchOne(
+                      "select has_table_privilege('crm_app',?,'SELECT')", table)
+                  .get(0, Boolean.class))
+          .as("crm_app 必须真的能读 " + table)
+          .isTrue();
+    }
+    // 序列单独授权：漏了会变成「第一条记录就报权限不足」。
+    for (String sequence :
+        List.of(
+            "crm_review_reply_policy_no_seq",
+            "crm_review_reply_template_no_seq",
+            "crm_review_reply_batch_no_seq",
+            "crm_review_reply_no_seq",
+            "crm_review_reply_delivery_no_seq")) {
+      assertThat(
+              sql.fetchOne(
+                      "select has_sequence_privilege('crm_app',?,'USAGE')", sequence)
+                  .get(0, Boolean.class))
+          .as("crm_app 必须真的能用序列 " + sequence)
+          .isTrue();
+    }
+  }
+
+  // ==========================================================================
+  // 断言 1
+  // ==========================================================================
+  @Test
+  void 断言1_两租户互不可见() {
+    // 先让两个租户各有一条回复（否则「看不见」是空断言）。
+    seedReply(a, "tenant-a-reply");
+    seedReply(b, "tenant-b-reply");
+
+    assertThat(replyNosOf(a)).containsExactly("tenant-a-reply");
+    assertThat(replyNosOf(b)).containsExactly("tenant-b-reply");
+    // 更强的一格：A 明确按 ID 查 B 的行也拿不到（不只是列表过滤）。
+    var byId =
+        tenants.run(
+            a,
+            () ->
+                sql.fetch(
+                        "select reply_no from crm_review_reply where id = ?", idFor(b, 10))
+                    .size());
+    assertThat(byId).as("按主键直查也必须被 RLS 挡住").isZero();
+  }
+
+  // ==========================================================================
+  // 断言 2 —— 伪造租户头无效，且**行落在会话租户名下**
+  // ==========================================================================
+  @Test
+  void 断言2_伪造租户头无效且行落在会话租户名下() throws Exception {
+    // (1) 服务在事务外没有「环境租户」：不存在一个可以被沿用的默认租户。
+    assertThat(effectiveTenant()).isNull();
+    assertThat(visibleWithoutTenant()).as("未绑定租户时不应看到任何行").isZero();
+
+    // (2) 事务内绑定的值精确等于可信参数，提交后立刻失效。
+    var bound =
+        tenants.run(
+            b,
+            () -> {
+              assertThat(effectiveTenant()).as("事务内只看得到本租户").isEqualTo(b);
+              return effectiveTenant();
+            });
+    assertThat(bound).isEqualTo(b);
+    assertThat(effectiveTenant()).as("提交后租户上下文必须已清空").isNull();
+    assertThat(visibleWithoutTenant()).isZero();
+
+    // (3) 真正的入口断言：带**合法会话**（会话租户是 a）但**伪造 X-Tenant-Id: b**
+    //     写一条回复。只断言「A 看不见 B」是不够的 —— 那一句「写入被全表拒掉」
+    //     也能让它通过。
+    configurePolicyAs("session-a");
+    UUID reviewA = insertReview(a, idFor(a, 2), "tenant-a-review-2");
+
+    String body =
+        """
+        {"reviewId":"%s","replyType":"PUBLIC_REPLY","locale":"en-US",
+         "body":"Thanks for taking the time to share this feedback with our team."}
+        """
+            .formatted(reviewA);
+
+    http.perform(
+            post("/crm/review-replies")
+                .header("Authorization", "session-a")
+                .header("X-Tenant-Id", b.toString())
+                .header("X-Internal-Key", "forged")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(body))
+        .andExpect(status().isOk());
+
+    // 行确实存在（不是被全表拒掉）。
+    // 读取**必须在某个租户事务里**做：事务外没有任何租户上下文，RLS 会诚实地把
+    // 所有行都挡掉 —— 那恰好又是一次隔离生效的证明，但会让「行到底写到哪去了」
+    // 这个问题答不了。
+    var rows =
+        tenants.run(
+            a,
+            () ->
+                sql.fetch(
+                    "select id, tenant_id from crm_review_reply where review_id = ?", reviewA));
+    assertThat(rows).as("伪造头的请求必须仍然写入成功 —— 头不是鉴权依据").hasSize(1);
+    // ...且它落在**会话租户** a 名下，**不是**调用方自称的 b。
+    assertThat(rows.get(0).get("tenant_id", UUID.class))
+        .as("伪造 X-Tenant-Id 头不得改变写入归属")
+        .isEqualTo(a)
+        .isNotEqualTo(b);
+
+    // 租户 b 看不到它（它不属于 b）。
+    var visibleToB =
+        tenants.run(
+            b,
+            () ->
+                sql.fetch(
+                        "select id from crm_review_reply where review_id = ?", reviewA)
+                    .size());
+    assertThat(visibleToB).as("这一行不属于 b，b 必须看不到").isZero();
+
+    // 租户 a 看得到（它确实属于 a）。
+    assertThat(replyNosOf(a)).as("写入必须归到会话租户 a").hasSize(1);
+
+    // 伪造的内部键同样无效：它只是被代理忽略的普通头，不是鉴权凭据。
+    assertThat(actors.get("session-a").tenantId()).isEqualTo(a);
+  }
+
+  // ==========================================================================
+  // 断言 3
+  // ==========================================================================
+  @Test
+  void 断言3_连接池归还后不串租户() {
+    seedReply(a, "tenant-a-reply");
+    seedReply(b, "tenant-b-reply");
+    // 池大小为 1：下面每次读写都复用同一条连接，只有事务局部绑定 + 提交即清空
+    // 才能保证后一次读到的仍然是 B 而不是上一轮残留的 A。
+    for (int i = 0; i < 5; i++) {
+      assertThat(replyNosOf(a)).as("第 %d 轮租户 A", i).containsExactly("tenant-a-reply");
+      assertThat(replyNosOf(b)).as("第 %d 轮租户 B", i).containsExactly("tenant-b-reply");
+      assertThat(visibleWithoutTenant()).as("第 %d 轮事务外", i).isZero();
+    }
+    // 归还后再单独借一次，仍然干净。
+    assertThat(replyNosOf(a)).containsExactly("tenant-a-reply");
+    assertThat(replyNosOf(b)).containsExactly("tenant-b-reply");
+  }
+
+  // ==========================================================================
+  // 夹具
+  // ==========================================================================
+
+  /** 给某个租户配一条措辞规范 + 建一条回复（直接落库，绕开 HTTP）。 */
+  void seedReply(UUID tenant, String replyNo) {
+    tenants.run(
+        tenant,
+        () -> {
+          sql.execute(
+              "insert into crm_review_reply_policy"
+                  + "(id,tenant_id,policy_no,platform_code,reply_type,version,effective_from,"
+                  + " min_length,max_length,allow_contact_info,allow_promotion,allow_external_link,"
+                  + " max_exclamation,max_question_marks,require_apology,banned_terms,status,"
+                  + " created_at,updated_at)"
+                  + " values (?,?,?,'AMAZON','PUBLIC_REPLY',1,?::timestamptz,10,500,false,false,"
+                  + " false,1,2,true,'[]'::jsonb,'ACTIVE',?::timestamptz,?::timestamptz)",
+              UUID.randomUUID(),
+              tenant,
+              "PL-" + replyNo,
+              OffsetDateTime.now(),
+              OffsetDateTime.now(),
+              OffsetDateTime.now());
+          sql.execute(
+              "insert into crm_review_reply"
+                  + "(id,tenant_id,reply_no,review_id,review_no,shop_id,shop_name,platform_code,"
+                  + " review_rating,review_scope,reply_type,locale,body,policy_version,status,"
+                  + " created_at,updated_at)"
+                  + " values (?,?,?,?,?,?,?,'AMAZON',5,'POSITIVE','PUBLIC_REPLY','en-US',?,1,"
+                  + " 'PENDING',?::timestamptz,?::timestamptz)",
+              idFor(tenant, 10),
+              tenant,
+              replyNo,
+              idFor(tenant, 1),
+              "tenant-" + (tenant.equals(a) ? "a" : "b") + "-review",
+              shop,
+              "测试店铺",
+              "Thanks for taking the time to share this feedback with our team.",
+              OffsetDateTime.now(),
+              OffsetDateTime.now());
+          return null;
+        });
+  }
+
+  /** 用某个会话走 HTTP 配一条措辞规范（用于伪造头的那一格）。 */
+  void configurePolicyAs(String session) throws Exception {
+    Map<String, Object> policy = new LinkedHashMap<>();
+    policy.put("platformCode", "AMAZON");
+    policy.put("replyType", "PUBLIC_REPLY");
+    policy.put("minLength", 10);
+    policy.put("maxLength", 500);
+    policy.put("allowContactInfo", false);
+    policy.put("allowPromotion", false);
+    policy.put("allowExternalLink", false);
+    policy.put("maxExclamation", 1);
+    policy.put("maxQuestionMarks", 2);
+    policy.put("requireApology", true);
+    policy.put("bannedTerms", List.of());
+    policy.put("effectiveFrom", "2026-06-01T09:30:00+08:00");
+    http.perform(
+            put("/crm/review-replies/policies")
+                .header("Authorization", session)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json.writeValueAsBytes(policy)))
+        .andExpect(status().isOk());
+  }
+}
