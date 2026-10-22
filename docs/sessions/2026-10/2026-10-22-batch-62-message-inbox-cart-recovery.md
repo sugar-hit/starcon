@@ -5,6 +5,12 @@
 > 根因与处置见文末「本批的异常与处置」与
 > [`docs/backlog/2026-10-22-in-transit-eta-test-wall-clock-dependency.md`](../../backlog/2026-10-22-in-transit-eta-test-wall-clock-dependency.md)。
 > 说明先写、commit 先做（协议要求），**push 等 L2 转绿了再一起推**。
+>
+> 🔴 **本轮（10:20–11:04）L2 重跑后状态**：warehouse 的墙钟缺陷**已修复并通过**，
+> L2 第一次**跑过了 warehouse**（trade 段红 ⇒ **crm 段第一次真的跑到了**），
+> 但**又红在 trade 的既有缺陷**上 ⇒ **仍未绿，仍不 push**。
+> 详见文末「本批的 L2 重跑（2026-10-22 10:20 起）」与
+> [`docs/backlog/2026-10-22-trade-replenishment-upstream-404-flake.md`](../../backlog/2026-10-22-trade-replenishment-upstream-404-flake.md)。
 
 ---
 
@@ -275,6 +281,75 @@
 8. **本轮未 push**：`origin/integration/module-dev` 仍停在 `da1f96f9`（batch-61，绿批次），
    上述合并、4 条模块、本说明文件与 backlog 诊断条目都留在集成头本地，
    **等修复车道落地 + 批次 L2 转绿后一起推**（协议：L2 没绿不 push，但说明照写、commit 照做）。
+   > 10:20 的 L2 重跑又红（红在 trade，见下节）⇒ **仍未 push**；本地已领先远端 **24 个 commit**。
+
+---
+
+## 本批的 L2 重跑（2026-10-22 10:20 起）
+
+### 修复车道落地（wall-clock 那条已闭环）
+
+修复车道 `10.4.1.2`（分支 `fix/10-4-1-2-eta-clock`）已落地并入集成头：
+
+- commit `a74a5817` —— **1 个测试文件 + 台账 + 车道会话日志，同一个 commit**；
+- 并入 commit `cd4e29a5`（`merge(10.4.1.2): 在途跟踪`）；
+- 改法（**只改测试，领域逻辑一行未动**）：
+  - 新 ETA 改为从跟踪行读回 `effectiveEta()` 再 + 1 天 ——
+    直接用**领域规则比较用的同一个值**当基准，构造上保证新 ETA 严格晚于当前 ETA；
+  - 注入可钉死的测试时钟（`WALL_CLOCK` / `clockSource` / `now()` + `@AfterEach` 还原），
+    沿用 trade 模块 `DropshipTrackingIntegrationTest` 的既有约定；
+  - 新增永久回归用例「改期基准_与墙钟小时数无关」：把时钟钉在 **07 / 09 / 23** 三个基准各跑一遍
+    建单→建跟踪→改期，断言新 ETA **精确等于**「当前 ETA + 1 天」；
+  - 原「节点_时间往返」的断言**一条未删、一条未放宽**；未 `@Disabled`、未 `assumeTrue`；
+  - 领域规则「新的预计到港不许早于当前 ETA」**未动**（DB 层 `CHECK eta_after >= eta_before` 钉的是同一条纪律）。
+- L1 实跑：warehouse `InTransitTrackingIntegrationTest` **19 例全绿**；
+  三个小时基准分别单跑**均 19 例全绿**；
+  **负对照**（把旧写法放回去）**三档全红**，H=9 复现原报错
+  「新的预计到港 2026-12-01T08:00+08:00 早于当前 ETA 2026-12-01T09:00+08:00」。
+
+### 并入过程把台账打乱了（已修）
+
+并入时 merge-union 走行级兜底并集，把台账各段之间的**空行**与**文件末尾换行**一并删掉了
+⇒ `sync.mjs --check` 报「台账与蓝图不一致」。
+用生成器重新生成即复原（commit `12cbd407`）：模块行 **465 / 唯一 ID 465**、
+已交付 **316** / 进行中 0 / 未开发 **149**，10.4.1.2 证据列的 **19 例**保留。
+
+### L2 重跑结果：🔴 又红，但**红点前移**了
+
+`bash .dev-agent/l2-run.sh`（10:20:43 → 11:04:09，日志 `.dev-agent/l2-run-batch-62-rerun.log`）：
+
+| 段 | 结果 |
+| --- | --- |
+| 后端 `mvnw verify` | 🔴 `MVN_EXIT=1`，**红在 trade**（`Tests run: 2380, Failures: 3`） |
+| warehouse 段 | ✅ **过**（墙钟缺陷已修；上一轮就是死在这一段） |
+| trade 段 | 🔴 3 例失败，全在 `ReplenishmentSuggestionTenancyIntegrationTest`（6.2.1.2 补货建议） |
+| crm 段 | ✅ **第一次真的跑到了**（reactor 顺序 `… → warehouse(✅) → trade(🔴) → crm(✅)`） |
+| typecheck / lint / 前端全量 / Next build / sync --check | ⏸ **未执行**（后端段失败即中止） |
+
+⇒ **本批 4 条 crm 模块的后端测试这一轮真的跑了**（上一轮被 SKIPPED），
+且 **warehouse 的墙钟缺陷确认已修复**（同一段本轮全绿）。
+但**全量仍未走完**，L2 依旧红 ⇒ **协议硬规则：不 push**。
+
+### 新的红点：trade 的既有缺陷（与本批无关）
+
+- `git log da1f96f9..HEAD -- backend/services/trade/` **为空** ⇒ trade 与上个绿批次**逐字节相同**，
+  **不是本批 4 条 crm 车道造成的**；
+- 失败是 **503「商品主数据服务返回 404」**（补货建议算建议量时读 catalog 报价的授权只读接口），
+  失败耗时 0.03–0.09 秒 ⇒ **不是超时，是上游立刻回 404**；
+- 该类**单独跑 4/4 绿**、与同门类一起跑 45 例绿、与紧邻前一个类一起跑 46 例绿
+  ⇒ **只在整模块连跑时才红**（类间/时序/机器端口状态依赖）；
+- 完整取证链与两个高危结构性事实（19 处上游端口默认值是**机器全局固定地址** `http://127.0.0.1:8082`；
+  116 个 trade 测试类的 `@DynamicPropertySource` 方法**同名 `properties`**）见
+  [`docs/backlog/2026-10-22-trade-replenishment-upstream-404-flake.md`](../../backlog/2026-10-22-trade-replenishment-upstream-404-flake.md)。
+
+### 处置：已派修复车道 `6.2.1.2`
+
+分支 `fix/6-2-1-2-trade-catalog-upstream`，worktree `.worktrees/6.2.1.2-fix`，
+任务书 `.dev-agent/taskbooks/6.2.1.2-fix.md`。修法约束：
+**先在整模块语境下复现**（单独跑绿不算数）→ 把「实际请求路径 + 实际目标端口」钉死 →
+**最小且忠实**地修（客户端拼装不对就修拼装；桩不忠实就让桩忠实；默认值指向机器全局地址就让测试永远显式给上游地址）
+→ **禁止**放宽断言 / `@Disabled` / `assumeTrue` / 减例数 / 改领域规则 / 动别人车道的文件。
+修复车道落地后，下一轮 L2 跑完整个 reactor（后端 → 前端四段）即可转绿并 push。
 
 ---
 
