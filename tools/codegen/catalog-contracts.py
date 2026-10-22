@@ -198,7 +198,11 @@ def main():
     total=0
     for service,spec in specs.items():
         snapshot=target/f'{service}.openapi.json'
-        snapshot.write_text(json.dumps(spec,ensure_ascii=False,indent=2)+'\n')
+        # sort_keys=True：快照的键序**规范化**成字典序，而不是继承输入的键序。
+        # 否则同一份契约会随「输入 spec 的键序」变化 —— CI 每次用活 spec 重新生成，
+        # 键序取决于服务返回的 JSON 顺序；并入驱动器求并后写出的键序是插入序；
+        # 两者永远对不上 ⇒ 契约闸一直红。规范化之后，生成器与驱动器的输出才可能逐字节相等。
+        snapshot.write_text(json.dumps(spec,ensure_ascii=False,indent=2,sort_keys=True)+'\n')
         written.append(snapshot)
         schemas=spec.get('components',{}).get('schemas',{})
         total+=len(schemas)
