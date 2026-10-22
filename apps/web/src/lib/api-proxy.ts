@@ -6053,6 +6053,61 @@ const services: readonly {
       /^customer\-tags(?:\/(?:capabilities|distribution|customer-candidates)|\/tags(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|\/rules(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/run)?)?|\/runs(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/evaluations)?)?|\/assignments(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/review)?)?)$/,
   },
   {
+    // 15.3.2.2 接触记录（crm 服务，卷 15 L3 锚点 15.3.2 下的接触记录子域）。
+    //
+    // ⚠️ 本条目是**新增一条独立的 `services[]` 元素**，不是往既有 crm 那几条巨型 alternation 里
+    //   并分支 —— 那些是超长单行正则，多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    //   既有条目**一字未动、也不重排**。
+    //
+    // ---- 插入锚点：紧跟 `crm/customer-tags`（15.3.2.1 客户标签）那条元素之后 ----
+    //   本批另外三条车道的锚点分别是：`crm/message-inbox` 之后（15.1.1.2）、`crm/reviews` 之后
+    //   （15.2.1.2）、channel 的 `crm/ad-rules` 之后（16.1.1.1）—— 四个锚点互不重叠，
+    //   git 能干净求并。
+    //
+    // ---- 首 token「customer-contacts」的零命中核对结论 ----
+    //   本文件既有全部 services[] 正则里**没有任何一条**含 `customer-contacts` 这个串
+    //   （既有的是 `customer-tags` / `knowledge` / `review-requests` / `review-rules` /
+    //   `buyer-emails` 一类），所以首 token 既是独立字面量，也不会被既有分支的前缀吃掉。
+    //   `customer-tags` 与 `customer-contacts` 在第 9 个字符（「t」vs「c」）就分叉，
+    //   两条正则互不吃掉对方。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   customer-contacts/capabilities              能力声明（未交付段 available=false + ownerModule）
+    //   customer-contacts/contacts                 接触记录集合读（GET，真分页 + 真筛选）
+    //   customer-contacts/contacts/{uuid}          接触记录详情（GET）
+    //   customer-contacts/timeline                 客户接触时间线（GET，带当前退订判定）
+    //   customer-contacts/ingest                   上游模块自动写入（POST，幂等）
+    //   customer-contacts/opt-outs                 退订记录集合读（GET）/ 登记退订（POST）
+    //   customer-contacts/opt-outs/{uuid}          单条退订记录（GET）
+    //   customer-contacts/opt-outs/{uuid}/revoke   显式撤销退订（POST，必须带原因）
+    //   customer-contacts/opt-outs/{uuid}/events   退订审计流水（GET，只追加）
+    //   customer-contacts/opt-out-check            可查询的豁免判定（GET，单个 / 批量）
+    //
+    // 判别顺序：字面量子路径（capabilities / opt-out-check / timeline / ingest）排在 {uuid} 段
+    // **之前** —— alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //（不是 `[0-9a-f-]+`：后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行）。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   customer-contacts                          —— 裸路径：后端没有「一条不存在的汇总列表接口」。
+    //   customer-contacts/opt-out-check/{uuid}      —— 判定按客户标识查，不按退订记录 id 查。
+    //   customer-contacts/segments                 —— **按客户主档筛人群**属 15.3.1.1（未交付）：
+    //     放行它等于让界面以为「客户档案已经筛好了」。
+    //   customer-contacts/campaigns / customer-contacts/outreach
+    //                                             —— 营销触达属 15.5.2.1（未交付）：
+    //     放行它等于让界面以为「本模块能发触达」（本模块**只**产出判定与记录）。
+    //   customer-contacts/opt-outs/{uuid}/delete   —— 退订是**凭据**，不提供删除；
+    //     要解除只能走显式的 revoke（带原因、留痕）。
+    //   任何非 UUID 段（如 `customer-contacts/not-a-uuid`）—— 必须 404，不能被宽松分支吃掉。
+    //
+    // ⚠️ 末尾**刻意不带 `?`**：带了就等于放行裸路径 `customer-contacts`。
+    prefix: 'crm/',
+    env: 'CRM_URL',
+    fallback: 'http://127.0.0.1:8086',
+    pattern:
+      /^customer\-contacts(?:\/(?:capabilities|opt-out-check|timeline|ingest)|\/contacts(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|\/opt-outs(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:revoke|events))?)?)$/,
+  },
+  {
     // 7.8.2.2 缺货与饥饿预警（warehouse 服务，7.8.2 的第二个 L3 锚点）。
     //
     // 蓝图：「识别因分摊/优先级导致的店铺"饥饿"（长期分不到货、影响绩效），以及真正的全网缺货，
