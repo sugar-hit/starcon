@@ -101,7 +101,7 @@ public class PlatformViolationService {
   private static final String UPSTREAM_NOTE =
       "上游 = **2 同步**（平台违规通知同步）。平台违规通知是**平台推送**的形态，"
           + "所以本模块的同步入口是**接收通知**（按 external_notice_id 幂等登记），"
-          + "不是拉取；每批同步都落一条**同步运行记录**（取到几条 / 写了���条 / 跳过几条 / 失败几条）。"
+          + "不是拉取；每批同步都落一条**同步运行记录**（取到几条 / 写了几条 / 跳过几条 / 失败几条）。"
           + "**人工登记**是同步入口之外的第二条正当路径，但它**恒标 MANUAL**，不冒充平台同步。";
 
   private static final String DOWNSTREAM_NOTE =
@@ -768,7 +768,7 @@ public class PlatformViolationService {
    * 每条通知按 {@code external_notice_id} <b>幂等</b>：已存在 ⇒ 跳过（不新建、不改写），
    * 不存在 ⇒ 落违规记录 + 涉及主体 + 处罚措施。
    *
-   * <p>🔴 每批同步落一条**同步运行记录**（取到几条 / 写了���条 / 跳过几条 / 失败几条）——
+   * <p>🔴 每批同步落一条**同步运行记录**（取到几条 / 写了几条 / 跳过几条 / 失败几条）——
    * 「同步跑了没有、写了多少」是可查的事实，不是口头承诺。
    */
   public PlatformViolationSyncResult sync(String shopId, PlatformViolationSyncInput input) {
