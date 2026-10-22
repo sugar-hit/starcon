@@ -14519,6 +14519,1130 @@
         },
         "type": "object"
       },
+      "CrmServiceTicketProcessAction": {
+        "nullable": true,
+        "properties": {
+          "actionType": {
+            "type": "string"
+          },
+          "actionTypeLabel": {
+            "type": "string"
+          },
+          "actorId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "detail": {
+            "nullable": true,
+            "type": "string"
+          },
+          "fromStatus": {
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "occurredAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "relatedCaseNo": {
+            "nullable": true,
+            "type": "string"
+          },
+          "relatedOrderNo": {
+            "nullable": true,
+            "type": "string"
+          },
+          "resolutionType": {
+            "nullable": true,
+            "type": "string"
+          },
+          "ticketId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "toStatus": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmServiceTicketProcessActionPage": {
+        "properties": {
+          "note": {
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/CrmServiceTicketProcessAction"
+            },
+            "type": "array"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CrmServiceTicketProcessBoundary": {
+        "properties": {
+          "ownerModule": {
+            "nullable": true,
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "rule": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmServiceTicketProcessCapabilities": {
+        "properties": {
+          "boundaries": {
+            "items": {
+              "$ref": "#/components/schemas/CrmServiceTicketProcessBoundary"
+            },
+            "type": "array"
+          },
+          "closeReasons": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "closeVersusResolutionNote": {
+            "type": "string"
+          },
+          "dimensions": {
+            "items": {
+              "$ref": "#/components/schemas/CrmServiceTicketProcessCapabilityDimension"
+            },
+            "type": "array"
+          },
+          "downstreamNote": {
+            "type": "string"
+          },
+          "escalationTypes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "linkTypes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "noteTypes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "related": {
+            "items": {
+              "$ref": "#/components/schemas/CrmServiceTicketProcessRelatedModule"
+            },
+            "type": "array"
+          },
+          "replyChannels": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "resolutionTypes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "slaBasisNote": {
+            "type": "string"
+          },
+          "slaTargets": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "sourceNote": {
+            "type": "string"
+          },
+          "targetStatuses": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "CrmServiceTicketProcessCapabilityDimension": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "basis": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "impact": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmServiceTicketProcessCloseInput": {
+        "properties": {
+          "closeNote": {
+            "nullable": true,
+            "type": "string"
+          },
+          "closeReason": {
+            "type": "string"
+          },
+          "expectedVersion": {
+            "format": "int64",
+            "nullable": true,
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CrmServiceTicketProcessEscalateInput": {
+        "properties": {
+          "disputeAmount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "disputeCurrency": {
+            "nullable": true,
+            "type": "string"
+          },
+          "disputeType": {
+            "nullable": true,
+            "type": "string"
+          },
+          "evidenceDeadline": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "expectedVersion": {
+            "format": "int64",
+            "nullable": true,
+            "type": "integer"
+          },
+          "platformCode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "platformDisputeNo": {
+            "nullable": true,
+            "type": "string"
+          },
+          "platformName": {
+            "nullable": true,
+            "type": "string"
+          },
+          "platformOrderNo": {
+            "nullable": true,
+            "type": "string"
+          },
+          "reasonNote": {
+            "type": "string"
+          },
+          "targetAmount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "targetCaseType": {
+            "nullable": true,
+            "type": "string"
+          },
+          "targetCurrency": {
+            "nullable": true,
+            "type": "string"
+          },
+          "targetQuantity": {
+            "nullable": true,
+            "type": "number"
+          },
+          "targetReasonCode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "targetType": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmServiceTicketProcessLink": {
+        "nullable": true,
+        "properties": {
+          "caseId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "caseNo": {
+            "nullable": true,
+            "type": "string"
+          },
+          "caseStatus": {
+            "nullable": true,
+            "type": "string"
+          },
+          "caseType": {
+            "nullable": true,
+            "type": "string"
+          },
+          "factsNote": {
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "lastSyncNote": {
+            "nullable": true,
+            "type": "string"
+          },
+          "lastSyncedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "linkSource": {
+            "type": "string"
+          },
+          "linkSourceLabel": {
+            "type": "string"
+          },
+          "linkType": {
+            "type": "string"
+          },
+          "linkTypeLabel": {
+            "type": "string"
+          },
+          "linkedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "linkedBy": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "orderAftersalesStatus": {
+            "nullable": true,
+            "type": "string"
+          },
+          "orderAmount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "orderCurrency": {
+            "nullable": true,
+            "type": "string"
+          },
+          "orderFulfillmentStatus": {
+            "nullable": true,
+            "type": "string"
+          },
+          "orderId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "orderNo": {
+            "nullable": true,
+            "type": "string"
+          },
+          "orderNoUpstream": {
+            "nullable": true,
+            "type": "string"
+          },
+          "orderPaymentStatus": {
+            "nullable": true,
+            "type": "string"
+          },
+          "orderStatus": {
+            "nullable": true,
+            "type": "string"
+          },
+          "ticketId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmServiceTicketProcessLinkInput": {
+        "properties": {
+          "caseNo": {
+            "nullable": true,
+            "type": "string"
+          },
+          "linkType": {
+            "type": "string"
+          },
+          "note": {
+            "nullable": true,
+            "type": "string"
+          },
+          "orderNo": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmServiceTicketProcessLinkPage": {
+        "properties": {
+          "note": {
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/CrmServiceTicketProcessLink"
+            },
+            "type": "array"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CrmServiceTicketProcessNote": {
+        "nullable": true,
+        "properties": {
+          "content": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdBy": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "noteType": {
+            "type": "string"
+          },
+          "noteTypeLabel": {
+            "type": "string"
+          },
+          "replyChannel": {
+            "nullable": true,
+            "type": "string"
+          },
+          "replyChannelLabel": {
+            "nullable": true,
+            "type": "string"
+          },
+          "ticketId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmServiceTicketProcessNoteInput": {
+        "properties": {
+          "content": {
+            "type": "string"
+          },
+          "expectedVersion": {
+            "format": "int64",
+            "nullable": true,
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CrmServiceTicketProcessNotePage": {
+        "properties": {
+          "note": {
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/CrmServiceTicketProcessNote"
+            },
+            "type": "array"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CrmServiceTicketProcessOutcome": {
+        "properties": {
+          "action": {
+            "$ref": "#/components/schemas/CrmServiceTicketProcessAction"
+          },
+          "actionType": {
+            "type": "string"
+          },
+          "actionTypeLabel": {
+            "type": "string"
+          },
+          "closed": {
+            "type": "boolean"
+          },
+          "escalatedCaseNo": {
+            "nullable": true,
+            "type": "string"
+          },
+          "escalatedDisputeNo": {
+            "nullable": true,
+            "type": "string"
+          },
+          "link": {
+            "$ref": "#/components/schemas/CrmServiceTicketProcessLink"
+          },
+          "message": {
+            "type": "string"
+          },
+          "note": {
+            "$ref": "#/components/schemas/CrmServiceTicketProcessNote"
+          },
+          "noteText": {
+            "type": "string"
+          },
+          "pause": {
+            "$ref": "#/components/schemas/CrmServiceTicketProcessPauseState"
+          },
+          "resolution": {
+            "$ref": "#/components/schemas/CrmServiceTicketProcessResolution"
+          },
+          "resolutionConfirmed": {
+            "type": "boolean"
+          },
+          "sla": {
+            "$ref": "#/components/schemas/CrmServiceTicketProcessSla"
+          },
+          "ticketStatus": {
+            "nullable": true,
+            "type": "string"
+          },
+          "ticketStatusLabel": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmServiceTicketProcessPauseState": {
+        "nullable": true,
+        "properties": {
+          "pauseCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "pauseReason": {
+            "nullable": true,
+            "type": "string"
+          },
+          "paused": {
+            "type": "boolean"
+          },
+          "pausedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "slaTarget": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmServiceTicketProcessQueuePage": {
+        "properties": {
+          "asOf": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "boundaryNote": {
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "paginationNote": {
+            "type": "string"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/CrmServiceTicketProcessQueueRow"
+            },
+            "type": "array"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "slaNote": {
+            "type": "string"
+          },
+          "sourceNote": {
+            "type": "string"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/CrmServiceTicketProcessQueueSummary"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CrmServiceTicketProcessQueueRow": {
+        "properties": {
+          "assignedToRef": {
+            "nullable": true,
+            "type": "string"
+          },
+          "caseNo": {
+            "nullable": true,
+            "type": "string"
+          },
+          "closed": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "pause": {
+            "$ref": "#/components/schemas/CrmServiceTicketProcessPauseState"
+          },
+          "priority": {
+            "type": "string"
+          },
+          "priorityLabel": {
+            "type": "string"
+          },
+          "resolutionConfirmed": {
+            "type": "boolean"
+          },
+          "sla": {
+            "$ref": "#/components/schemas/CrmServiceTicketProcessSla"
+          },
+          "subject": {
+            "nullable": true,
+            "type": "string"
+          },
+          "ticketNo": {
+            "type": "string"
+          },
+          "ticketStatus": {
+            "type": "string"
+          },
+          "ticketStatusLabel": {
+            "type": "string"
+          },
+          "ticketType": {
+            "type": "string"
+          },
+          "ticketTypeLabel": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmServiceTicketProcessQueueSummary": {
+        "properties": {
+          "closed": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "inProgress": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "open": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "overdue": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "paused": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "resolutionConfirmed": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "waitingBuyer": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CrmServiceTicketProcessRelatedModule": {
+        "properties": {
+          "delivered": {
+            "type": "boolean"
+          },
+          "endpoint": {
+            "nullable": true,
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "moduleId": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmServiceTicketProcessReplyInput": {
+        "properties": {
+          "content": {
+            "type": "string"
+          },
+          "expectedVersion": {
+            "format": "int64",
+            "nullable": true,
+            "type": "integer"
+          },
+          "replyChannel": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmServiceTicketProcessResolution": {
+        "nullable": true,
+        "properties": {
+          "active": {
+            "type": "boolean"
+          },
+          "confirmedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "confirmedBy": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "linkedCaseId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "linkedOrderNo": {
+            "nullable": true,
+            "type": "string"
+          },
+          "resolutionType": {
+            "type": "string"
+          },
+          "resolutionTypeLabel": {
+            "type": "string"
+          },
+          "resultNote": {
+            "nullable": true,
+            "type": "string"
+          },
+          "revokedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "revokedBy": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "ticketId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmServiceTicketProcessResolutionInput": {
+        "properties": {
+          "expectedVersion": {
+            "format": "int64",
+            "nullable": true,
+            "type": "integer"
+          },
+          "resolutionType": {
+            "type": "string"
+          },
+          "resultNote": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmServiceTicketProcessResolutionPage": {
+        "properties": {
+          "note": {
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/CrmServiceTicketProcessResolution"
+            },
+            "type": "array"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CrmServiceTicketProcessSatisfactionInput": {
+        "properties": {
+          "comment": {
+            "nullable": true,
+            "type": "string"
+          },
+          "score": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CrmServiceTicketProcessSla": {
+        "nullable": true,
+        "properties": {
+          "basis": {
+            "type": "string"
+          },
+          "basisLabel": {
+            "type": "string"
+          },
+          "calendarConfigured": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          },
+          "replyDueAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "replyHours": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "replyPaused": {
+            "type": "boolean"
+          },
+          "replyRemainingSeconds": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "replyState": {
+            "type": "string"
+          },
+          "replyStateLabel": {
+            "type": "string"
+          },
+          "replyWallClockSeconds": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "resolveDueAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "resolveHours": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "resolvePaused": {
+            "type": "boolean"
+          },
+          "resolveRemainingSeconds": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "resolveState": {
+            "type": "string"
+          },
+          "resolveStateLabel": {
+            "type": "string"
+          },
+          "resolveWallClockSeconds": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "scopeKey": {
+            "type": "string"
+          },
+          "timezone": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmServiceTicketProcessSlaPauseInput": {
+        "properties": {
+          "pauseReason": {
+            "type": "string"
+          },
+          "slaTarget": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmServiceTicketProcessSlaResumeInput": {
+        "properties": {
+          "resumeReason": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmServiceTicketProcessStatusInput": {
+        "properties": {
+          "expectedVersion": {
+            "format": "int64",
+            "nullable": true,
+            "type": "integer"
+          },
+          "note": {
+            "nullable": true,
+            "type": "string"
+          },
+          "targetStatus": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmServiceTicketProcessTicket": {
+        "properties": {
+          "actionCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "assignedToRef": {
+            "nullable": true,
+            "type": "string"
+          },
+          "assignedToUserId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "availableActions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "caseNo": {
+            "nullable": true,
+            "type": "string"
+          },
+          "closeNote": {
+            "nullable": true,
+            "type": "string"
+          },
+          "closeReason": {
+            "nullable": true,
+            "type": "string"
+          },
+          "closeVersusResolutionNote": {
+            "type": "string"
+          },
+          "closed": {
+            "type": "boolean"
+          },
+          "closedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "confirmedResolutionTypes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "firstReplyAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "linkCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "noteCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "pause": {
+            "$ref": "#/components/schemas/CrmServiceTicketProcessPauseState"
+          },
+          "priority": {
+            "type": "string"
+          },
+          "priorityLabel": {
+            "type": "string"
+          },
+          "reasonNote": {
+            "nullable": true,
+            "type": "string"
+          },
+          "resolutionConfirmed": {
+            "type": "boolean"
+          },
+          "resolutionCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "sla": {
+            "$ref": "#/components/schemas/CrmServiceTicketProcessSla"
+          },
+          "sourceChannel": {
+            "type": "string"
+          },
+          "sourceChannelLabel": {
+            "type": "string"
+          },
+          "subject": {
+            "nullable": true,
+            "type": "string"
+          },
+          "ticketNo": {
+            "type": "string"
+          },
+          "ticketStatus": {
+            "type": "string"
+          },
+          "ticketStatusLabel": {
+            "type": "string"
+          },
+          "ticketType": {
+            "type": "string"
+          },
+          "ticketTypeLabel": {
+            "type": "string"
+          },
+          "version": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
       "CrmServiceTicketRelatedModule": {
         "properties": {
           "delivered": {
@@ -28297,6 +29421,1024 @@
         },
         "tags": [
           "product-review-controller"
+        ]
+      }
+    },
+    "/crm/service-ticket-process/capabilities": {
+      "get": {
+        "operationId": "get_crm_service_ticket_process_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmServiceTicketProcessCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "service-ticket-process-controller"
+        ]
+      }
+    },
+    "/crm/service-ticket-process/tickets": {
+      "get": {
+        "operationId": "get_crm_service_ticket_process_tickets",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "ticketType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "priority",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sourceChannel",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "assignedToRef",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "caseId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "slaState",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "overdueOnly",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "pausedOnly",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "resolutionState",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "unassignedOnly",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "format": "date-time",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "format": "date-time",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmServiceTicketProcessQueuePage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "service-ticket-process-controller"
+        ]
+      }
+    },
+    "/crm/service-ticket-process/tickets/{id}": {
+      "get": {
+        "operationId": "get_crm_service_ticket_process_tickets_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmServiceTicketProcessTicket"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "service-ticket-process-controller"
+        ]
+      }
+    },
+    "/crm/service-ticket-process/tickets/{id}/actions": {
+      "get": {
+        "operationId": "get_crm_service_ticket_process_tickets_id_actions",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmServiceTicketProcessActionPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "service-ticket-process-controller"
+        ]
+      }
+    },
+    "/crm/service-ticket-process/tickets/{id}/close": {
+      "post": {
+        "operationId": "post_crm_service_ticket_process_tickets_id_close",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmServiceTicketProcessCloseInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmServiceTicketProcessOutcome"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "service-ticket-process-controller"
+        ]
+      }
+    },
+    "/crm/service-ticket-process/tickets/{id}/escalate": {
+      "post": {
+        "operationId": "post_crm_service_ticket_process_tickets_id_escalate",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmServiceTicketProcessEscalateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmServiceTicketProcessOutcome"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "service-ticket-process-controller"
+        ]
+      }
+    },
+    "/crm/service-ticket-process/tickets/{id}/links": {
+      "get": {
+        "operationId": "get_crm_service_ticket_process_tickets_id_links",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmServiceTicketProcessLinkPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "service-ticket-process-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_crm_service_ticket_process_tickets_id_links",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmServiceTicketProcessLinkInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmServiceTicketProcessOutcome"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "service-ticket-process-controller"
+        ]
+      }
+    },
+    "/crm/service-ticket-process/tickets/{id}/notes": {
+      "get": {
+        "operationId": "get_crm_service_ticket_process_tickets_id_notes",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmServiceTicketProcessNotePage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "service-ticket-process-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_crm_service_ticket_process_tickets_id_notes",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmServiceTicketProcessNoteInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmServiceTicketProcessOutcome"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "service-ticket-process-controller"
+        ]
+      }
+    },
+    "/crm/service-ticket-process/tickets/{id}/replies": {
+      "post": {
+        "operationId": "post_crm_service_ticket_process_tickets_id_replies",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmServiceTicketProcessReplyInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmServiceTicketProcessOutcome"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "service-ticket-process-controller"
+        ]
+      }
+    },
+    "/crm/service-ticket-process/tickets/{id}/resolutions": {
+      "get": {
+        "operationId": "get_crm_service_ticket_process_tickets_id_resolutions",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmServiceTicketProcessResolutionPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "service-ticket-process-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_crm_service_ticket_process_tickets_id_resolutions",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmServiceTicketProcessResolutionInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmServiceTicketProcessOutcome"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "service-ticket-process-controller"
+        ]
+      }
+    },
+    "/crm/service-ticket-process/tickets/{id}/resolutions/{resolutionId}/revoke": {
+      "post": {
+        "operationId": "post_crm_service_ticket_process_tickets_id_resolutions_resolutionId_revoke",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "resolutionId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmServiceTicketProcessOutcome"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "service-ticket-process-controller"
+        ]
+      }
+    },
+    "/crm/service-ticket-process/tickets/{id}/satisfaction": {
+      "post": {
+        "operationId": "post_crm_service_ticket_process_tickets_id_satisfaction",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmServiceTicketProcessSatisfactionInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmServiceTicketProcessOutcome"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "service-ticket-process-controller"
+        ]
+      }
+    },
+    "/crm/service-ticket-process/tickets/{id}/sla/pause": {
+      "post": {
+        "operationId": "post_crm_service_ticket_process_tickets_id_sla_pause",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmServiceTicketProcessSlaPauseInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmServiceTicketProcessOutcome"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "service-ticket-process-controller"
+        ]
+      }
+    },
+    "/crm/service-ticket-process/tickets/{id}/sla/resume": {
+      "post": {
+        "operationId": "post_crm_service_ticket_process_tickets_id_sla_resume",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmServiceTicketProcessSlaResumeInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmServiceTicketProcessOutcome"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "service-ticket-process-controller"
+        ]
+      }
+    },
+    "/crm/service-ticket-process/tickets/{id}/status": {
+      "post": {
+        "operationId": "post_crm_service_ticket_process_tickets_id_status",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmServiceTicketProcessStatusInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmServiceTicketProcessOutcome"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "service-ticket-process-controller"
         ]
       }
     },
