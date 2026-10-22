@@ -6230,6 +6230,1328 @@
         },
         "type": "object"
       },
+      "CrmNegativeReviewActionInput": {
+        "properties": {
+          "actionType": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "afterSalesReason": {
+            "description": "售后转交原因（AFTER_SALES_HANDOFF 必填；本模块不落下游单据 id）",
+            "nullable": true,
+            "type": "string"
+          },
+          "detail": {
+            "maxLength": 20000,
+            "minLength": 0,
+            "type": "string"
+          },
+          "occurredAt": {
+            "description": "动作发生时刻，例如 2026-10-10T08:00:00+08:00",
+            "nullable": true,
+            "type": "string"
+          },
+          "operatorName": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "outcome": {
+            "description": "SUCCEEDED / FAILED / PENDING",
+            "minLength": 1,
+            "type": "string"
+          },
+          "outcomeNote": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          },
+          "summary": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          },
+          "transport": {
+            "description": "PLATFORM_API / MANUAL_HANDOFF / INTERNAL",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "actionType",
+          "outcome"
+        ],
+        "type": "object"
+      },
+      "CrmNegativeReviewActionRow": {
+        "properties": {
+          "actionAt": {
+            "type": "string"
+          },
+          "actionNo": {
+            "type": "string"
+          },
+          "actionType": {
+            "type": "string"
+          },
+          "afterSalesReason": {
+            "nullable": true,
+            "type": "string"
+          },
+          "appealId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "appealNo": {
+            "nullable": true,
+            "type": "string"
+          },
+          "caseId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "caseNo": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "detail": {
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "operatorId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "operatorName": {
+            "nullable": true,
+            "type": "string"
+          },
+          "outcome": {
+            "type": "string"
+          },
+          "outcomeNote": {
+            "nullable": true,
+            "type": "string"
+          },
+          "summary": {
+            "nullable": true,
+            "type": "string"
+          },
+          "transport": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmNegativeReviewAppealBucket": {
+        "properties": {
+          "count": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmNegativeReviewAppealCancelInput": {
+        "properties": {
+          "reason": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          }
+        },
+        "required": [
+          "reason"
+        ],
+        "type": "object"
+      },
+      "CrmNegativeReviewAppealCreateInput": {
+        "properties": {
+          "appealType": {
+            "description": "REMOVAL（申请移除差评）/ MODIFICATION（申请修改差评内容）/ POLICY_VIOLATION",
+            "minLength": 1,
+            "type": "string"
+          },
+          "causeCode": {
+            "maxLength": 24,
+            "minLength": 0,
+            "type": "string"
+          },
+          "content": {
+            "maxLength": 20000,
+            "minLength": 0,
+            "type": "string"
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          },
+          "reason": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "type": "string"
+          }
+        },
+        "required": [
+          "appealType",
+          "reason"
+        ],
+        "type": "object"
+      },
+      "CrmNegativeReviewAppealOutcomeInput": {
+        "properties": {
+          "decidedAt": {
+            "description": "平台判定时刻，例如 2026-10-12T08:00:00+08:00",
+            "minLength": 1,
+            "nullable": true,
+            "type": "string"
+          },
+          "platformReceipt": {
+            "maxLength": 20000,
+            "minLength": 0,
+            "type": "string"
+          },
+          "reason": {
+            "maxLength": 1000,
+            "minLength": 0,
+            "type": "string"
+          },
+          "result": {
+            "description": "APPROVED（通过）/ REJECTED（驳回）",
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "decidedAt",
+          "result"
+        ],
+        "type": "object"
+      },
+      "CrmNegativeReviewAppealRow": {
+        "properties": {
+          "appealNo": {
+            "type": "string"
+          },
+          "appealStatus": {
+            "type": "string"
+          },
+          "appealType": {
+            "type": "string"
+          },
+          "cancelReason": {
+            "nullable": true,
+            "type": "string"
+          },
+          "cancelledAt": {
+            "nullable": true,
+            "type": "string"
+          },
+          "caseId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "caseNo": {
+            "type": "string"
+          },
+          "causeCode": {
+            "type": "string"
+          },
+          "content": {
+            "nullable": true,
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "createdBy": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "decidedAt": {
+            "nullable": true,
+            "type": "string"
+          },
+          "decidedReason": {
+            "nullable": true,
+            "type": "string"
+          },
+          "decidedResult": {
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "platformReceipt": {
+            "nullable": true,
+            "type": "string"
+          },
+          "platformReference": {
+            "nullable": true,
+            "type": "string"
+          },
+          "quotaIndex": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "quotaLimit": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "quotaPeriodKey": {
+            "type": "string"
+          },
+          "quotaUsedBefore": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "reviewId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "reviewNo": {
+            "type": "string"
+          },
+          "shopId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "submittedAt": {
+            "nullable": true,
+            "type": "string"
+          },
+          "transport": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmNegativeReviewAppealSubmittedInput": {
+        "properties": {
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          },
+          "platformReference": {
+            "maxLength": 128,
+            "minLength": 0,
+            "type": "string"
+          },
+          "submittedAt": {
+            "description": "平台侧实际提交时刻，例如 2026-10-10T08:00:00+08:00",
+            "minLength": 1,
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "submittedAt"
+        ],
+        "type": "object"
+      },
+      "CrmNegativeReviewCandidatePage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/CrmNegativeReviewCandidateRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "totalElements": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalPages": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CrmNegativeReviewCandidateRow": {
+        "properties": {
+          "buyerName": {
+            "nullable": true,
+            "type": "string"
+          },
+          "buyerRef": {
+            "nullable": true,
+            "type": "string"
+          },
+          "caseExists": {
+            "type": "boolean"
+          },
+          "caseId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "caseNo": {
+            "nullable": true,
+            "type": "string"
+          },
+          "content": {
+            "nullable": true,
+            "type": "string"
+          },
+          "negativeRatingThreshold": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "platformReviewedAt": {
+            "type": "string"
+          },
+          "policyConfigured": {
+            "type": "boolean"
+          },
+          "productRef": {
+            "nullable": true,
+            "type": "string"
+          },
+          "productTitle": {
+            "nullable": true,
+            "type": "string"
+          },
+          "rating": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "reviewId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "reviewNo": {
+            "type": "string"
+          },
+          "salesOrderNo": {
+            "nullable": true,
+            "type": "string"
+          },
+          "shopId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "shopName": {
+            "type": "string"
+          },
+          "title": {
+            "nullable": true,
+            "type": "string"
+          },
+          "variantRef": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmNegativeReviewCapabilities": {
+        "properties": {
+          "actionTypes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "appealStatuses": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "appealTypes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "boundaryNote": {
+            "type": "string"
+          },
+          "caseStatuses": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "causeCodes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "dimensions": {
+            "items": {
+              "$ref": "#/components/schemas/CrmNegativeReviewCapabilityDimension"
+            },
+            "type": "array"
+          },
+          "highlight": {
+            "type": "string"
+          },
+          "outcomes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "resolutionStatuses": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "ruleScopes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "transports": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "CrmNegativeReviewCapabilityDimension": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "description": {
+            "type": "string"
+          },
+          "dimension": {
+            "type": "string"
+          },
+          "impact": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmNegativeReviewCaseCreateInput": {
+        "properties": {
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          },
+          "reviewId": {
+            "description": "目标评价（15.2.1.1 的评价 id）",
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "reviewId"
+        ],
+        "type": "object"
+      },
+      "CrmNegativeReviewCasePage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/CrmNegativeReviewCaseRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "totalElements": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalPages": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CrmNegativeReviewCaseRow": {
+        "properties": {
+          "appealAssessedAt": {
+            "nullable": true,
+            "type": "string"
+          },
+          "appealBasis": {
+            "nullable": true,
+            "type": "string"
+          },
+          "appealEligible": {
+            "type": "boolean"
+          },
+          "appealQuotaLimit": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "appealSupported": {
+            "type": "boolean"
+          },
+          "appealWindowDays": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "assignedTo": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "buyerName": {
+            "nullable": true,
+            "type": "string"
+          },
+          "buyerRef": {
+            "nullable": true,
+            "type": "string"
+          },
+          "caseNo": {
+            "type": "string"
+          },
+          "caseStatus": {
+            "type": "string"
+          },
+          "causeCode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "causeLabel": {
+            "nullable": true,
+            "type": "string"
+          },
+          "causeNote": {
+            "nullable": true,
+            "type": "string"
+          },
+          "causeRuleId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "causeRuleVersion": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "contactBuyerRequired": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "createdBy": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "negativeRatingThreshold": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "note": {
+            "nullable": true,
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "policyRuleId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "policyRuleVersion": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "quotaPeriod": {
+            "type": "string"
+          },
+          "resolutionAt": {
+            "nullable": true,
+            "type": "string"
+          },
+          "resolutionNote": {
+            "nullable": true,
+            "type": "string"
+          },
+          "resolutionStatus": {
+            "type": "string"
+          },
+          "reviewContent": {
+            "nullable": true,
+            "type": "string"
+          },
+          "reviewExternalId": {
+            "nullable": true,
+            "type": "string"
+          },
+          "reviewId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "reviewNo": {
+            "type": "string"
+          },
+          "reviewRating": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "reviewTitle": {
+            "nullable": true,
+            "type": "string"
+          },
+          "salesOrderNo": {
+            "nullable": true,
+            "type": "string"
+          },
+          "shopId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "shopName": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmNegativeReviewCauseBucket": {
+        "properties": {
+          "appealEligibleCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "causeCode": {
+            "type": "string"
+          },
+          "count": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "label": {
+            "type": "string"
+          },
+          "resolvedCount": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CrmNegativeReviewClassifyInput": {
+        "properties": {
+          "causeCode": {
+            "description": "原因分类：PRODUCT / LOGISTICS / SERVICE / MISJUDGMENT",
+            "minLength": 1,
+            "type": "string"
+          },
+          "causeNote": {
+            "maxLength": 1000,
+            "minLength": 0,
+            "type": "string"
+          }
+        },
+        "required": [
+          "causeCode"
+        ],
+        "type": "object"
+      },
+      "CrmNegativeReviewDetail": {
+        "properties": {
+          "actions": {
+            "items": {
+              "$ref": "#/components/schemas/CrmNegativeReviewActionRow"
+            },
+            "type": "array"
+          },
+          "appeals": {
+            "items": {
+              "$ref": "#/components/schemas/CrmNegativeReviewAppealRow"
+            },
+            "type": "array"
+          },
+          "causeRule": {
+            "$ref": "#/components/schemas/CrmNegativeReviewRuleRow"
+          },
+          "negativeReview": {
+            "$ref": "#/components/schemas/CrmNegativeReviewCaseRow"
+          },
+          "orderContext": {
+            "$ref": "#/components/schemas/CrmNegativeReviewOrderContext"
+          },
+          "platformPolicy": {
+            "$ref": "#/components/schemas/CrmNegativeReviewRuleRow"
+          }
+        },
+        "type": "object"
+      },
+      "CrmNegativeReviewOrderContext": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "carrierCode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "caseNo": {
+            "nullable": true,
+            "type": "string"
+          },
+          "deliveredAt": {
+            "nullable": true,
+            "type": "string"
+          },
+          "deliveryState": {
+            "nullable": true,
+            "type": "string"
+          },
+          "orderNo": {
+            "nullable": true,
+            "type": "string"
+          },
+          "orderStatus": {
+            "nullable": true,
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "salesOrderNo": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmNegativeReviewQuotaBucket": {
+        "properties": {
+          "platformCode": {
+            "type": "string"
+          },
+          "quotaLimit": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "quotaPeriod": {
+            "type": "string"
+          },
+          "quotaPeriodKey": {
+            "type": "string"
+          },
+          "quotaRemaining": {
+            "format": "int64",
+            "nullable": true,
+            "type": "integer"
+          },
+          "quotaUsed": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CrmNegativeReviewRuleInput": {
+        "properties": {
+          "appealBasisTemplate": {
+            "maxLength": 1000,
+            "minLength": 0,
+            "type": "string"
+          },
+          "appealEligible": {
+            "description": "该原因默认是否可申诉（CAUSE 作用域）",
+            "nullable": true,
+            "type": "boolean"
+          },
+          "appealQuotaLimit": {
+            "description": "申诉配额（每周期），0 = 不开放申诉",
+            "format": "int32",
+            "minimum": 0,
+            "nullable": true,
+            "type": "integer"
+          },
+          "appealSupported": {
+            "description": "平台是否支持申诉（部分平台不支持）",
+            "nullable": true,
+            "type": "boolean"
+          },
+          "appealWindowDays": {
+            "description": "申诉时限（天）",
+            "format": "int32",
+            "maximum": 365,
+            "minimum": 0,
+            "nullable": true,
+            "type": "integer"
+          },
+          "causeCode": {
+            "description": "CAUSE 作用域必填；PLATFORM 作用域必须留空",
+            "nullable": true,
+            "type": "string"
+          },
+          "contactBuyerRequired": {
+            "description": "是否必须先联系买家（蓝图加粗句的落点）",
+            "nullable": true,
+            "type": "boolean"
+          },
+          "description": {
+            "maxLength": 1000,
+            "minLength": 0,
+            "type": "string"
+          },
+          "evidenceRequired": {
+            "description": "该原因是否要求留证据（CAUSE 作用域）",
+            "nullable": true,
+            "type": "boolean"
+          },
+          "label": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "negativeRatingThreshold": {
+            "description": "差评判定阈值：rating <= 该阈值即视为差评（业务口径默认 2）",
+            "format": "int32",
+            "maximum": 5,
+            "minimum": 1,
+            "nullable": true,
+            "type": "integer"
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          },
+          "platformCode": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "priority": {
+            "description": "展示优先级（数字小 = 靠前）",
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "quotaPeriod": {
+            "maxLength": 16,
+            "minLength": 0,
+            "type": "string"
+          },
+          "ruleScope": {
+            "description": "PLATFORM（逐平台的差评处理策略）或 CAUSE（逐「平台 × 原因」的规则）",
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "label",
+          "platformCode",
+          "ruleScope"
+        ],
+        "type": "object"
+      },
+      "CrmNegativeReviewRulePage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/CrmNegativeReviewRuleRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "totalElements": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalPages": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CrmNegativeReviewRuleRow": {
+        "properties": {
+          "appealBasisTemplate": {
+            "nullable": true,
+            "type": "string"
+          },
+          "appealEligible": {
+            "type": "boolean"
+          },
+          "appealQuotaLimit": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "appealSupported": {
+            "type": "boolean"
+          },
+          "appealWindowDays": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "causeCode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "contactBuyerRequired": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "createdBy": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "description": {
+            "nullable": true,
+            "type": "string"
+          },
+          "effectiveFrom": {
+            "type": "string"
+          },
+          "effectiveTo": {
+            "nullable": true,
+            "type": "string"
+          },
+          "evidenceRequired": {
+            "type": "boolean"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "negativeRatingThreshold": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "note": {
+            "nullable": true,
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "priority": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "quotaPeriod": {
+            "type": "string"
+          },
+          "ruleNo": {
+            "type": "string"
+          },
+          "ruleScope": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          },
+          "version": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CrmNegativeReviewRuleUpdateInput": {
+        "properties": {
+          "appealBasisTemplate": {
+            "maxLength": 1000,
+            "minLength": 0,
+            "type": "string"
+          },
+          "appealEligible": {
+            "type": "boolean"
+          },
+          "appealQuotaLimit": {
+            "format": "int32",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "appealSupported": {
+            "type": "boolean"
+          },
+          "appealWindowDays": {
+            "format": "int32",
+            "maximum": 365,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "contactBuyerRequired": {
+            "type": "boolean"
+          },
+          "description": {
+            "maxLength": 1000,
+            "minLength": 0,
+            "type": "string"
+          },
+          "evidenceRequired": {
+            "type": "boolean"
+          },
+          "label": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "negativeRatingThreshold": {
+            "format": "int32",
+            "maximum": 5,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          },
+          "priority": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "quotaPeriod": {
+            "maxLength": 16,
+            "minLength": 0,
+            "type": "string"
+          },
+          "status": {
+            "description": "ACTIVE / ARCHIVED",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmNegativeReviewShopView": {
+        "properties": {
+          "appealQuotaLimit": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "appealSupported": {
+            "type": "boolean"
+          },
+          "code": {
+            "type": "string"
+          },
+          "contactBuyerRequired": {
+            "type": "boolean"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "negativeRatingThreshold": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "platformName": {
+            "type": "string"
+          },
+          "policyConfigured": {
+            "type": "boolean"
+          },
+          "policyNote": {
+            "type": "string"
+          },
+          "quotaPeriod": {
+            "nullable": true,
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmNegativeReviewStats": {
+        "properties": {
+          "appealEligibleCases": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "appealIneligibleCases": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "appealedCases": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "byAppealStatus": {
+            "items": {
+              "$ref": "#/components/schemas/CrmNegativeReviewAppealBucket"
+            },
+            "type": "array"
+          },
+          "byCause": {
+            "items": {
+              "$ref": "#/components/schemas/CrmNegativeReviewCauseBucket"
+            },
+            "type": "array"
+          },
+          "byPlatformQuota": {
+            "items": {
+              "$ref": "#/components/schemas/CrmNegativeReviewQuotaBucket"
+            },
+            "type": "array"
+          },
+          "byStatus": {
+            "items": {
+              "$ref": "#/components/schemas/CrmNegativeReviewStatusBucket"
+            },
+            "type": "array"
+          },
+          "closedCases": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "contactBuyerDoneCases": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "inProgressCases": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "openCases": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "resolutionRate": {
+            "nullable": true,
+            "type": "number"
+          },
+          "resolutionRateBasis": {
+            "type": "string"
+          },
+          "resolutionRateNumerator": {
+            "type": "string"
+          },
+          "resolvedCases": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "scopeDays": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "scopeFrom": {
+            "type": "string"
+          },
+          "scopeTo": {
+            "type": "string"
+          },
+          "totalCases": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "unresolvedCases": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CrmNegativeReviewStatusBucket": {
+        "properties": {
+          "count": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "CrmProductReviewCapabilities": {
         "properties": {
           "boundaryNote": {
@@ -15952,6 +17274,1136 @@
         },
         "tags": [
           "message-send-controller"
+        ]
+      }
+    },
+    "/crm/negative-reviews": {
+      "get": {
+        "operationId": "get_crm_negative_reviews",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "shopId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "platformCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "causeCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "caseStatus",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "resolutionStatus",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "appealEligible",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "rating",
+            "required": false,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmNegativeReviewCasePage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "negative-review-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_crm_negative_reviews",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmNegativeReviewCaseCreateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmNegativeReviewCaseRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "negative-review-controller"
+        ]
+      }
+    },
+    "/crm/negative-reviews/candidates": {
+      "get": {
+        "operationId": "get_crm_negative_reviews_candidates",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "shopId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "platformCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "rating",
+            "required": false,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "negativeOnly",
+            "required": false,
+            "schema": {
+              "default": true,
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmNegativeReviewCandidatePage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "negative-review-controller"
+        ]
+      }
+    },
+    "/crm/negative-reviews/capabilities": {
+      "get": {
+        "operationId": "get_crm_negative_reviews_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmNegativeReviewCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "negative-review-controller"
+        ]
+      }
+    },
+    "/crm/negative-reviews/rules": {
+      "get": {
+        "operationId": "get_crm_negative_reviews_rules",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "ruleScope",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "platformCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "causeCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmNegativeReviewRulePage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "negative-review-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_crm_negative_reviews_rules",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmNegativeReviewRuleInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmNegativeReviewRuleRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "negative-review-controller"
+        ]
+      }
+    },
+    "/crm/negative-reviews/rules/{ruleId}": {
+      "get": {
+        "operationId": "get_crm_negative_reviews_rules_ruleId",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "ruleId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmNegativeReviewRuleRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "negative-review-controller"
+        ]
+      },
+      "put": {
+        "operationId": "put_crm_negative_reviews_rules_ruleId",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "ruleId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmNegativeReviewRuleUpdateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmNegativeReviewRuleRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "negative-review-controller"
+        ]
+      }
+    },
+    "/crm/negative-reviews/shops": {
+      "get": {
+        "operationId": "get_crm_negative_reviews_shops",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/CrmNegativeReviewShopView"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "negative-review-controller"
+        ]
+      }
+    },
+    "/crm/negative-reviews/stats": {
+      "get": {
+        "operationId": "get_crm_negative_reviews_stats",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "shopId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "platformCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "causeCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "caseStatus",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "resolutionStatus",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "appealEligible",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "rating",
+            "required": false,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "days",
+            "required": false,
+            "schema": {
+              "default": 30,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmNegativeReviewStats"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "negative-review-controller"
+        ]
+      }
+    },
+    "/crm/negative-reviews/{caseId}": {
+      "get": {
+        "operationId": "get_crm_negative_reviews_caseId",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "caseId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmNegativeReviewDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "negative-review-controller"
+        ]
+      }
+    },
+    "/crm/negative-reviews/{caseId}/actions": {
+      "get": {
+        "operationId": "get_crm_negative_reviews_caseId_actions",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "caseId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/CrmNegativeReviewActionRow"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "negative-review-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_crm_negative_reviews_caseId_actions",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "caseId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmNegativeReviewActionInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmNegativeReviewActionRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "negative-review-controller"
+        ]
+      }
+    },
+    "/crm/negative-reviews/{caseId}/appeals": {
+      "get": {
+        "operationId": "get_crm_negative_reviews_caseId_appeals",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "caseId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/CrmNegativeReviewAppealRow"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "negative-review-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_crm_negative_reviews_caseId_appeals",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "caseId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmNegativeReviewAppealCreateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmNegativeReviewAppealRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "negative-review-controller"
+        ]
+      }
+    },
+    "/crm/negative-reviews/{caseId}/appeals/{appealId}/cancel": {
+      "post": {
+        "operationId": "post_crm_negative_reviews_caseId_appeals_appealId_cancel",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "caseId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "appealId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmNegativeReviewAppealCancelInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmNegativeReviewAppealRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "negative-review-controller"
+        ]
+      }
+    },
+    "/crm/negative-reviews/{caseId}/appeals/{appealId}/outcome": {
+      "post": {
+        "operationId": "post_crm_negative_reviews_caseId_appeals_appealId_outcome",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "caseId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "appealId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmNegativeReviewAppealOutcomeInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmNegativeReviewAppealRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "negative-review-controller"
+        ]
+      }
+    },
+    "/crm/negative-reviews/{caseId}/appeals/{appealId}/submit": {
+      "post": {
+        "operationId": "post_crm_negative_reviews_caseId_appeals_appealId_submit",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "caseId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "appealId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmNegativeReviewAppealRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "negative-review-controller"
+        ]
+      }
+    },
+    "/crm/negative-reviews/{caseId}/appeals/{appealId}/submitted": {
+      "post": {
+        "operationId": "post_crm_negative_reviews_caseId_appeals_appealId_submitted",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "caseId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "appealId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmNegativeReviewAppealSubmittedInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmNegativeReviewAppealRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "negative-review-controller"
+        ]
+      }
+    },
+    "/crm/negative-reviews/{caseId}/classify": {
+      "post": {
+        "operationId": "post_crm_negative_reviews_caseId_classify",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "caseId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmNegativeReviewClassifyInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmNegativeReviewCaseRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "negative-review-controller"
         ]
       }
     },

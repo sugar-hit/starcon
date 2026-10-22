@@ -6002,6 +6002,78 @@ const services: readonly {
       /^review\-replies(?:\/capabilities|\/policies(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|\/templates(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:publish|archive))?)?|\/batches(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:deliver|cancel))?)?$/,
   },
   {
+    // 15.2.1.3 差评处理（crm 服务，卷 15 的 L3 锚点 15.2.1 的第三个子模块）。
+    //
+    // 蓝图：「差评专项处理：标记原因（产品/物流/服务/误判）、判定是否申诉（部分平台支持）、
+    // 联系买家解决后请求修改、跟踪解决率。输入：差评内容；处理动作；买家沟通记录。
+    // 输出：处理记录 + 申诉任务 + 解决状态。关系：上游 = 15.2.1.1；下游 = 15.1.1.2 联系买家、
+    // 11 售后（解决问题）。**解决差评的正确路径是先解决买家问题再请求修改，
+    // 直接申诉容易被驳回且消耗申诉配额。**」
+    //
+    // 本条目是**新增一条 services[] 元素**，不是往既有 crm 分支的 alternation 里并分支 ——
+    // 既有 crm 分支是 `^knowledge\/`、`^reviews`、`^review-requests`、`^review-rules`、
+    // `^review-replies` 这几条，首 token 都与 `negative-reviews` 不同；往同一条 alternation
+    // 里并分支会让多车道同时并入时 git 必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在 **15.2.1.2 评价回复（review-replies）那条之后**，
+    // 与本批另外三条车道的锚点（message-sends / customer-contacts / account-health）互不重叠。
+    //
+    // ---- 首 token「negative-reviews」的零命中核对结论（**逐条实测**，非眼看）----
+    //   用脚本从本文件抽出**全部 147 条** services[] 元素的 prefix + pattern，
+    //   对本模块下面列出的**每一个** path shape 逐条跑 `new RegExp(pat).test(shape)`：
+    //   **命中数 = 0**。
+    //   * 本文件既有全文里字面量 `negative-reviews` 出现次数 = **0**
+    //     （既有含 "negative" 的只有 `ad-keywords/negatives` 这类**别的命名空间**的元素，
+    //      以及 11.5.2.1 质量分析那条注释里提到的 `negative-review` 形状 ——
+    //      那是 `trade/` 前缀下的元素，注释里明写「本模块不产出」）；
+    //   * 兄弟车道那四条**首 token 都是 `review`**（`reviews` / `review-replies` /
+    //     `review-requests` / `review-rules`）的正则**都是 `^` 锚定**的，
+    //     锚点之后必须紧跟各自的字面量 ⇒ 它们**不会**吃掉 `negative-reviews/...`
+    //     （`review-` 之后必须紧跟 s / -r / -u / -r，而本模块是 `negative`）。
+    //     这一条是**实测**过的，不是推断。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   negative-reviews                       处理单集合（GET 真分页 + 真筛选 / POST 建处理单）
+    //   negative-reviews/capabilities          能力声明（逐维 available + ownerModule + impact）
+    //   negative-reviews/shops                 店铺目录（来自上游 channel 的真实清单）+ 策略状态
+    //   negative-reviews/stats                 解决率统计（分母 = 处理单数，分子 = 已解决数）
+    //   negative-reviews/candidates            候选差评清单（还没建处理单的那些）
+    //   negative-reviews/rules                 规则列表（GET 真分页 / POST 新建）
+    //   negative-reviews/rules/{uuid}          单条规则（GET 详情 / PUT 原地改）
+    //   negative-reviews/{uuid}                处理单详情（处理单 + 动作流水 + 申诉 + 订单上下文）
+    //   negative-reviews/{uuid}/classify       标记原因 + 判定可申诉（POST）
+    //   negative-reviews/{uuid}/actions        动作流水（GET 列表 / POST 记录动作）
+    //   negative-reviews/{uuid}/appeals        申诉任务（GET 列表 / POST 建任务）
+    //   negative-reviews/{uuid}/appeals/{uuid}/submit    提交到平台（POST，**当前恒 409**：适配器未交付）
+    //   negative-reviews/{uuid}/appeals/{uuid}/submitted 人工交接登记已提交（POST）
+    //   negative-reviews/{uuid}/appeals/{uuid}/outcome   登记平台判定 通过/驳回（POST）
+    //   negative-reviews/{uuid}/appeals/{uuid}/cancel    撤回申诉任务（POST）
+    //
+    // 判别顺序：**字面量子路径（capabilities / shops / stats / candidates / rules）排在
+    //   {uuid} 段之前** —— alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    // id 段用**完整 UUID 形状** [0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}（不是 [0-9a-f-]+）：
+    //   后者会把 capabilities 这种非 UUID 形状也当成 id 放行。
+    //
+    // ⚠️ **裸路径 negative-reviews 是放行的**（与「刻意不放行」相反）：本模块的列表入口
+    //   就是集合根路径（GET /crm/negative-reviews = 处理单列表，POST 同路径 = 建处理单），
+    //   后端确实有这个映射 —— 不放行它，页面会 404。
+    //   末尾**不带 `?`**：`?` 结尾的正则会把裸路径也一起放行。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * negative-reviews/{uuid}/appeals/{uuid}/retry —— 后端没有这个映射（撤回 = cancel）。
+    //   * negative-reviews/{uuid}/delete —— 处理单是**事实**，不提供删除。
+    //   * negative-reviews/export —— 本模块**没有导出**这个能力（蓝图没要求）。
+    //   * negative-reviews/{uuid}/tags —— 标签不属本模块。
+    //   * 任何「转售后单据」形状 —— **11 售后未交付**：本模块只落**转交意图**
+    //     （reason 必填），**不写下游单据 id**；放行一条售后单据路径会让界面以为
+    //     「已转售后」真的发生过。
+    //   * negative-reviews/not-a-uuid —— 非 UUID 段必须 404，不能被宽松分支吃掉。
+    prefix: 'crm/',
+    env: 'CRM_URL',
+    fallback: 'http://127.0.0.1:8086',
+    pattern:
+      /^negative\-reviews(?:\/capabilities|\/shops|\/stats|\/candidates|\/rules(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:classify|actions|appeals(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:submit|submitted|outcome|cancel))?)?))?)?$/,
+  },
+  {
     // 15.2.2.2 索评规则（crm 服务，卷 15 的 L3 锚点 15.2.2 的第二个子模块）。
     //
     // 蓝图：「配置索评策略：按店铺、按物流方式（自发货/平台仓）设置不同延后时间，避开节假日，
