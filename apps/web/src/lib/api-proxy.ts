@@ -1498,6 +1498,66 @@ const services: readonly {
     // 裸路径 logistics-channels **放行**：它就是本模块的集合读 + POST 登记入口。
   },
   {
+    // 16.5.1.1 黑名单（channel 服务，卷 16 合规与风险 / L3 16.5.1 买家风控下的第一格）。
+    //
+    // 本条目是**新增一条独立的 `services[]` 元素**，不是往既有 channel 分支的 alternation 里
+    // 并分支 —— 那一支是一段超长单行正则，多车道同时并进去 git 必然判冲突（结构性，
+    // retry 不会自愈）。既有条目**一字未动、也不重排**。
+    //
+    // ---- 插入锚点固定在 10.1.1.2 `logistics-channels` 那一条**之后**、
+    //      14.5.2.1 `attributions` 那一条**之前** ----
+    //   同批其它三条车道的锚点分别是 `prefix: 'identity/'` 之前、`// 11.4.1.1 平台纠纷列表`
+    //   之前、数组末尾（`buyer-risk-scores` 之后），**与本条互不重叠**。
+    //
+    // ---- 首 token「buyer-blacklist」的零命中核对结论 ----
+    //   本文件既有 140+ 条 services[] 正则里，**没有任何一条**含 `buyer-blacklist` 这个串
+    //   （既有的是 `buyer-risk-scores`（16.5.1.2）、`buyer-emails`（15.1.2.1，在 crm 前缀下）、
+    //   `influencers/.../blacklist`）—— 首 token 逐个核过，**命中 0**。
+    //   `buyer-blacklist` 与 `buyer-risk-scores` 只差两个字符，**互不为前缀**，不会互相吃掉。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   buyer-blacklist/capabilities                能力声明（未交付段 available=false + ownerModule）
+    //   buyer-blacklist/entries                     黑名单清单（GET，真分页 + 真筛选 + 汇总计数）
+    //   buyer-blacklist/entries                     手工录入黑名单（POST）
+    //   buyer-blacklist/entries/auto                自动录入（POST，来自风控信号）
+    //   buyer-blacklist/entries/{uuid}              登记详情（GET；头 + 状态流转留痕 + 申诉单）
+    //   buyer-blacklist/entries/{uuid}/release       解除（POST；**必须带理由**，追加一条留痕）
+    //   buyer-blacklist/entries/{uuid}/appeals      提交申诉（POST）
+    //   buyer-blacklist/appeals/{uuid}/decision     申诉裁决（POST；通过 ⇒ 解除，驳回 ⇒ 维持）
+    //   buyer-blacklist/check                       下单时检查（POST；命中就落一条订单拦截标记）
+    //   buyer-blacklist/flags                       订单拦截标记清单（GET，真分页 + 真筛选）
+    //
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //（不是 `[0-9a-f-]+`：后者会把 `auto` 这种非 UUID 形状也当成 id 放行）。
+    // ⚠️ 字面量子路径（capabilities / flags / check / entries / entries/auto）排在
+    //    uuid 段之前判别 —— alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸路径 `buyer-blacklist` —— 后端**没有**「一条汇总列表接口」，一切入口都带子路径。
+    //     末尾**刻意不带 `?`**：带了等于放行裸路径。
+    //   * `buyer-blacklist/entries/{uuid}/delete` —— 🔴 黑名单是判定凭据，**只能解除不能删除**
+    //     （删除等于把历史抹掉）；本模块的解除入口是 `/release`。
+    //   * `buyer-blacklist/entries/{uuid}/status` —— 改黑名单状态没有第二个入口，
+    //     状态只能由「登记 / 解除 / 申诉裁决」这些**留痕事件**推进。
+    //   * `buyer-blacklist/entries/{uuid}/flags` —— 拦截标记有自己的集合读 `/flags`。
+    //   * `buyer-blacklist/overview` / `/stats` —— 本模块**没有**这两个形状；
+    //     概览在 `/entries` 的 `counts` 里。
+    //   * `buyer-blacklist/appeal` —— 申诉是**挂在某条登记下的子资源**，
+    //     形状是 `/entries/{uuid}/appeals` 与 `/appeals/{uuid}/decision`，没有裸的 `/appeal`。
+    //   * `buyer-blacklist/intercept` / `/orders/{uuid}/block` —— 🔴 改订单状态、
+    //     执行拦截是 **9.2.1.3 异常拦截**（trade 服务，台账 D4 已交付）的职责；
+    //     按模块边界纪律**跨服务不写对方的表**，本模块只产出**建议动作**与订单拦截标记，
+    //     **不代劳**、也**不放行**指向它不存在的入口。
+    //   * `buyer-blacklist/aftersales` —— 🔴 开售后单是 **11.1.1.1 售后单列表**
+    //     （trade 服务，台账 D4 已交付）的职责；本模块**不代建售后单**，也不放行入口。
+    //   * `buyer-blacklist/entries/not-a-uuid` —— 非 UUID 段不应被 uuid 分支吃掉。
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^buyer\-blacklist\/(?:capabilities|flags|check|entries(?:\/auto|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:release|appeals))?)?|appeals\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/decision)$/,
+  },
+  {
     // 14.5.2.1 带货归因（channel 服务，卷 14 广告与增长 / L3 14.5.2 达人效果下的第三格）。
     //
     // 本条目是**新增一条独立的 `services[]` 元素**，不是往既有 channel 分支的 alternation 里
