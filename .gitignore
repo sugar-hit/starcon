@@ -100,6 +100,12 @@ test-results/
 # Java/Maven generated output
 backend/**/target/
 
+# Python 字节码 — codegen 的单测用 importlib 加载 tools/codegen/catalog-contracts.py，
+# 跑一次 `pnpm test:codegen` 就会生成它。不忽略的话，脏工作区会挡住 lane.mjs land，
+# 也可能被 `git add -A` 误提交进版本库。
+__pycache__/
+*.py[cod]
+
 # 定时开发任务的互斥锁与运行痕迹 — 本机状态，不进版本库
 .dev-agent/
 
