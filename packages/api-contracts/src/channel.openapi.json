@@ -33675,6 +33675,680 @@
         ],
         "type": "object"
       },
+      "IpRiskLibraryBrandCandidate": {
+        "properties": {
+          "authorizationStatus": {
+            "type": "string"
+          },
+          "brandId": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IpRiskLibraryBrandSet": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/IpRiskLibraryBrandCandidate"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IpRiskLibraryCapabilities": {
+        "properties": {
+          "downstreamNote": {
+            "type": "string"
+          },
+          "gaps": {
+            "items": {
+              "$ref": "#/components/schemas/IpRiskLibraryCapabilityGap"
+            },
+            "type": "array"
+          },
+          "importNote": {
+            "type": "string"
+          },
+          "lifecycleNote": {
+            "type": "string"
+          },
+          "matchFeatureNote": {
+            "type": "string"
+          },
+          "platformNote": {
+            "type": "string"
+          },
+          "rightTypeLabels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "rightTypeNote": {
+            "type": "string"
+          },
+          "rightTypes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "riskLevelLabels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "riskLevelNote": {
+            "type": "string"
+          },
+          "riskLevels": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "sourceLabels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "sources": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "statusLabels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "statuses": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "termKindLabels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "termKinds": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "upstreamNote": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IpRiskLibraryCapabilityGap": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "impact": {
+            "type": "string"
+          },
+          "moduleId": {
+            "type": "string"
+          },
+          "moduleName": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IpRiskLibraryEntry": {
+        "properties": {
+          "brandId": {
+            "type": "string"
+          },
+          "brandName": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "disableReason": {
+            "type": "string"
+          },
+          "disabledAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "entryCode": {
+            "type": "string"
+          },
+          "entryId": {
+            "type": "string"
+          },
+          "matchPattern": {
+            "type": "string"
+          },
+          "matchTerms": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "platformCodes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "rightType": {
+            "type": "string"
+          },
+          "rightTypeLabel": {
+            "type": "string"
+          },
+          "rightsHolder": {
+            "type": "string"
+          },
+          "riskLevel": {
+            "type": "string"
+          },
+          "riskLevelLabel": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "sourceLabel": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IpRiskLibraryEntryCreation": {
+        "properties": {
+          "created": {
+            "type": "boolean"
+          },
+          "entry": {
+            "$ref": "#/components/schemas/IpRiskLibraryEntry"
+          },
+          "note": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IpRiskLibraryEntryDetail": {
+        "properties": {
+          "entry": {
+            "$ref": "#/components/schemas/IpRiskLibraryEntry"
+          },
+          "matchTerms": {
+            "items": {
+              "$ref": "#/components/schemas/IpRiskLibraryMatchTerm"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "platforms": {
+            "items": {
+              "$ref": "#/components/schemas/IpRiskLibraryPlatformRef"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "IpRiskLibraryEntryInput": {
+        "properties": {
+          "brandId": {
+            "type": "string"
+          },
+          "brandName": {
+            "type": "string"
+          },
+          "entryCode": {
+            "type": "string"
+          },
+          "matchPattern": {
+            "type": "string"
+          },
+          "matchTerms": {
+            "items": {
+              "$ref": "#/components/schemas/IpRiskLibraryTermInput"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "platformCodes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "rightType": {
+            "type": "string"
+          },
+          "rightsHolder": {
+            "type": "string"
+          },
+          "riskLevel": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IpRiskLibraryEntryPage": {
+        "properties": {
+          "activeCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "disabledCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/IpRiskLibraryEntry"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "rightTypeCounts": {
+            "additionalProperties": {
+              "format": "int64",
+              "type": "integer"
+            },
+            "type": "object"
+          },
+          "riskLevelCounts": {
+            "additionalProperties": {
+              "format": "int64",
+              "type": "integer"
+            },
+            "type": "object"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "IpRiskLibraryImportBatch": {
+        "properties": {
+          "batchId": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "failedRows": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "insertedRows": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "skippedRows": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "sourceName": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "totalRows": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "IpRiskLibraryImportDetail": {
+        "properties": {
+          "batch": {
+            "$ref": "#/components/schemas/IpRiskLibraryImportBatch"
+          },
+          "note": {
+            "type": "string"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/IpRiskLibraryImportRowResult"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "IpRiskLibraryImportInput": {
+        "properties": {
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/IpRiskLibraryImportRowInput"
+            },
+            "type": "array"
+          },
+          "sourceName": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IpRiskLibraryImportPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/IpRiskLibraryImportBatch"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "IpRiskLibraryImportResult": {
+        "properties": {
+          "batchId": {
+            "type": "string"
+          },
+          "failedRows": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "insertedRows": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/IpRiskLibraryImportRowResult"
+            },
+            "type": "array"
+          },
+          "skippedRows": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "sourceName": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "totalRows": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "IpRiskLibraryImportRowInput": {
+        "properties": {
+          "brandId": {
+            "type": "string"
+          },
+          "brandName": {
+            "type": "string"
+          },
+          "entryCode": {
+            "type": "string"
+          },
+          "matchPattern": {
+            "type": "string"
+          },
+          "matchTerms": {
+            "items": {
+              "$ref": "#/components/schemas/IpRiskLibraryTermInput"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "platformCodes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "rightType": {
+            "type": "string"
+          },
+          "rightsHolder": {
+            "type": "string"
+          },
+          "riskLevel": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IpRiskLibraryImportRowResult": {
+        "properties": {
+          "entryCode": {
+            "type": "string"
+          },
+          "entryId": {
+            "type": "string"
+          },
+          "errorField": {
+            "type": "string"
+          },
+          "errorMessage": {
+            "type": "string"
+          },
+          "outcome": {
+            "type": "string"
+          },
+          "rowNo": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "IpRiskLibraryMatchTerm": {
+        "properties": {
+          "entryId": {
+            "type": "string"
+          },
+          "term": {
+            "type": "string"
+          },
+          "termId": {
+            "type": "string"
+          },
+          "termKind": {
+            "type": "string"
+          },
+          "termKindLabel": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IpRiskLibraryPlatform": {
+        "properties": {
+          "platformCode": {
+            "type": "string"
+          },
+          "platformName": {
+            "type": "string"
+          },
+          "supportStatus": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IpRiskLibraryPlatformRef": {
+        "properties": {
+          "platformCode": {
+            "type": "string"
+          },
+          "platformName": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IpRiskLibraryPlatformSummary": {
+        "properties": {
+          "disabled": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "high": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "low": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "medium": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "platformName": {
+            "type": "string"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "IpRiskLibraryPlatformSummaryPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/IpRiskLibraryPlatformSummary"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IpRiskLibraryStatusInput": {
+        "properties": {
+          "reason": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IpRiskLibraryTermInput": {
+        "properties": {
+          "term": {
+            "type": "string"
+          },
+          "termKind": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "IssueDispositionOrderRequest": {
         "properties": {
           "costCurrency": {
@@ -83617,6 +84291,535 @@
         },
         "tags": [
           "influencer-controller"
+        ]
+      }
+    },
+    "/channel/ip-risk-library/brands": {
+      "get": {
+        "operationId": "get_channel_ip_risk_library_brands",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IpRiskLibraryBrandSet"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ip-risk-library-controller"
+        ]
+      }
+    },
+    "/channel/ip-risk-library/capabilities": {
+      "get": {
+        "operationId": "get_channel_ip_risk_library_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IpRiskLibraryCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ip-risk-library-controller"
+        ]
+      }
+    },
+    "/channel/ip-risk-library/entries": {
+      "get": {
+        "operationId": "get_channel_ip_risk_library_entries",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "rightType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "riskLevel",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "platformCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IpRiskLibraryEntryPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ip-risk-library-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_channel_ip_risk_library_entries",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IpRiskLibraryEntryInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IpRiskLibraryEntryCreation"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ip-risk-library-controller"
+        ]
+      }
+    },
+    "/channel/ip-risk-library/entries/{id}": {
+      "get": {
+        "operationId": "get_channel_ip_risk_library_entries_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IpRiskLibraryEntryDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ip-risk-library-controller"
+        ]
+      },
+      "put": {
+        "operationId": "put_channel_ip_risk_library_entries_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IpRiskLibraryEntryInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IpRiskLibraryEntryDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ip-risk-library-controller"
+        ]
+      }
+    },
+    "/channel/ip-risk-library/entries/{id}/status": {
+      "put": {
+        "operationId": "put_channel_ip_risk_library_entries_id_status",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IpRiskLibraryStatusInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IpRiskLibraryEntryDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ip-risk-library-controller"
+        ]
+      }
+    },
+    "/channel/ip-risk-library/imports": {
+      "get": {
+        "operationId": "get_channel_ip_risk_library_imports",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IpRiskLibraryImportPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ip-risk-library-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_channel_ip_risk_library_imports",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IpRiskLibraryImportInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IpRiskLibraryImportResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ip-risk-library-controller"
+        ]
+      }
+    },
+    "/channel/ip-risk-library/imports/{id}": {
+      "get": {
+        "operationId": "get_channel_ip_risk_library_imports_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IpRiskLibraryImportDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ip-risk-library-controller"
+        ]
+      }
+    },
+    "/channel/ip-risk-library/platform-summary": {
+      "get": {
+        "operationId": "get_channel_ip_risk_library_platform_summary",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IpRiskLibraryPlatformSummaryPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ip-risk-library-controller"
+        ]
+      }
+    },
+    "/channel/ip-risk-library/platforms": {
+      "get": {
+        "operationId": "get_channel_ip_risk_library_platforms",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/IpRiskLibraryPlatform"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ip-risk-library-controller"
         ]
       }
     },

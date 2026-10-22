@@ -8444,6 +8444,46 @@ const services: readonly {
       /^cart\-recovery\/(?:capabilities|policy|recovery\-rate|sync|shops(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|messages(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:approve|enable|disable))?)?|unsubscribes(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|touches(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/result)?|abandonments(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:touches|recoveries))?)?)$/,
   },
   {
+    // 16.4.1.1 侵权库（channel 服务）。纯**新增一条独立的 `services[]` 元素**：
+    // 既有条目（`brand-authorizations` 16.4.2.1 / `brand-credentials` 16.4.2.2 /
+    // `compliance-rules` 16.2.1.1 / `cart-recovery` 15.6.2.2 …）**一字未动、也不重排** ——
+    // 本文件是多车道共用的**累积型**白名单，每条服务规则是一段超长单行正则，
+    // 往既有那条巨型 alternation 里并分支会让多车道同时并入时 git 必然判冲突
+    // （结构性，retry 永远不会自愈）。
+    //
+    // ---- 插入锚点固定在 **`cart-recovery` 那条元素之后**（15.6.2.2 弃单挽回）----
+    //   同批另外三条车道的锚点分别是「`compliance-rules` 之后」/「`platform-appeals` 之后」/
+    //   「`service-ticket-process` 之后」，与本锚点互不重叠，git 能干净求并。
+    //
+    // ---- 首 token「ip-risk-library」的零命中核对结论 ----
+    //   本文件既有全文里 `ip-risk-library` 出现次数 = **0**（已实测），
+    //   且它与既有首 token（`brand-authorizations` / `brand-credentials` /
+    //   `compliance-rules` / `cart-recovery` …）**不是前缀关系** ⇒ 双向都不会误吃。
+    //   ⚠️ **不要**用 `brand-authorizations` / `brand-credentials` 前缀扩展 ——
+    //   那是 16.4.2.1 / 16.4.2.2 的，会遮蔽它们的路由。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   ip-risk-library/capabilities      能力声明（未交付下游 available=false + ownerModule）
+    //   ip-risk-library/platforms         适用平台目录（channel 自己的 `platform` 目录）
+    //   ip-risk-library/brands            3.3.2 品牌候选（catalog，**跨服务只读**）
+    //   ip-risk-library/entries           条目清单（GET，真分页 + 真筛选）/ 登记条目（POST，**幂等**）
+    //   ip-risk-library/entries/{uuid}    条目详情（GET）/ 改条目（PUT，**整体替换**）
+    //   ip-risk-library/entries/{uuid}/status  启用 · 停用（PUT，**停用必写理由**）
+    //   ip-risk-library/imports           批量导入（POST，**行级结果 + 幂等 + 部分失败不回滚**）
+    //   ip-risk-library/imports/{uuid}    导入批次详情（逐行结果）
+    //   ip-risk-library/platform-summary  平台风险汇总（**反查**入口）
+    //
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //（不是 `[0-9a-f-]+`）：后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行。
+    // ⚠️ 末尾**刻意不带 `?`**：带了就等于放行裸路径 `ip-risk-library` ——
+    //   后端没有「一条汇总列表接口」，放行它会让界面以为可用。
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^ip\-risk\-library\/(?:capabilities|platforms|brands|platform\-summary|entries(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/status)?)?|imports(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?)$/,
+  },
+  {
     // ---------------------------------------------------------------------------
     // 15.4.1.2 工单处理（crm 服务）
     // ---------------------------------------------------------------------------
