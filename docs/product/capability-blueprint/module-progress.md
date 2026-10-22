@@ -6,9 +6,7 @@
 >
 > 状态词表只有三个值，统计逻辑依赖它，不要新增：
 > `已交付`（迁移 + API + 页面 + 测试齐全，无 TODO 残留）· `进行中`（部分交付、未收口，证据列写清缺哪一块）· `未开发`（未开工）。
-
 ## 总览
-
 | 指标 | 数量 |
 | --- | --- |
 | 模块总数 | 465 |
@@ -16,9 +14,7 @@
 | 进行中 | 0 |
 | **未开发** | **133** |
 | 完成率 | 71.4% |
-
 ## 分阶段进度（交付顺序看这里）
-
 | 阶段 | 已交付 | 进行中 | 未开发 | 合计 |
 | --- | --- | --- | --- | --- |
 | **D1–D2** | 80 | 0 | 0 | 80 |
@@ -27,11 +23,8 @@
 | **D5** | 52 | 0 | 0 | 52 |
 | **D6** | 43 | 0 | 35 | 78 |
 | **D7** | 58 | 0 | 97 | 155 |
-
 ## 分系统进度
-
 | 卷 | 系统 | 阶段 | 已交付 | 模块数 |
-| --- | --- | --- | --- | --- |
 | 01 | 工作台与门户系统 | D7 | 0 | 23 |
 | 02 | 渠道与店铺系统 | D1–D2 / D5 | 25 | 25 |
 | 03 | 商品主数据系统 | D1–D2 | 40 | 40 |
@@ -50,30 +43,22 @@
 | 16 | 合规与风控系统 | D7 | 10 | 23 |
 | 17 | 组织权限与系统设置系统 | D1–D2 / D4 / D6 / D7 | 25 | 29 |
 | 18 | 集成开放与智能自动化系统 | D7 | 0 | 24 |
-
 ## 判定「已交付」的标准
-
 一个模块标 `已交付` 当且仅当下面四件都成立，缺一件就是 `未开发` 或 `进行中`：
-
 1. **迁移** — `backend/services/<svc>/src/main/resources/db/migration/V*.sql` 里有真实表结构，
    带 `tenant_id NOT NULL` + RLS 策略，不是注释里的设计。
 2. **API** — 服务里有对应端点，走 jOOQ 显式 SQL，不是返回硬编码常量的桩。
 3. **页面** — `apps/web/src/app/**/page.tsx` 是真实工作区，不是 `DomainPlaceholder`。
 4. **测试** — `cd backend && ./mvnw verify` 绿；涉及租户隔离的必须实跑
    「两租户互不可见 / 伪造 tenant header 无效 / 连接池归还后不串租户」三条断言。
-
 **判定为 `未开发` 的典型形态**（见到就说明没做完，不许算进已交付）：
-
 - `DomainPlaceholder` 占位页
 - 硬编码数组 / 常量当数据源
 - 服务里 `TODO` + `throw new UnsupportedOperationException()`
 - 迁移文件存在但没有 RLS 策略
 - 前端有页面但后端没有对应端点（或反之）
-
 ## 跨期说明
-
 「阶段」列按**依赖就绪顺序**逐模块标注，不是卷归属。跨期卷的拆分如下：
-
 - **01 工作台与门户 → 全部 D7**：它是纯投影聚合层（蓝图原文「不写业务数据，只读投影」），
   聚合 09 订单 / 07 库存 / 02 渠道 / 12 财务 / 15 客户 / 17 审批的投影。
   这些数据源没落地之前建「我的待办」只能造假数据，所以整卷排到最后收口。
@@ -87,9 +72,7 @@
 - **11 售后与退货**：D4 交付售后单、退货授权与实收、退款换货；平台纠纷 / 客诉工单 / 分析排 D7。
 - **17 组织权限**：D1–D2 交付租户、法人、部门、成员、角色、页面权限、数据范围、审计；
   17.4 审批流随单据排 D4，17.6.1.1 账簿与本位币随财务排 D6，17.7 套餐与平台参数排 D7。
-
 ## 模块明细
-
 | 模块 ID | 模块名 | L3 锚点路由 | 阶段 | 状态 | 证据 |
 | --- | --- | --- | --- | --- | --- |
 | 1.1.1.1 | 我的待办 | /dashboard/todo | D7 | 未开发 | — |
@@ -492,7 +475,7 @@
 | 16.3.1.1 | 税号与辖区 | — | D7 | 已交付 | channel V312 `tax_registration_jurisdiction`（**全局码表**，辖区是业务事实：欧盟 27 个成员国 + 英国 + 美国（联邦与 50 州 + DC）+ 站点目录里要求 VAT 的其余国家；每行带**税制 / 是否要登记号 / 是否要 EPR / derivation_scope** 四列）+ `tax_registration_record`（tenant_id NOT NULL + ENABLE/FORCE RLS + GRANT，**零外键**，跨表引用一律走触发器）+ 10 个端点 `/channel/tax-registration/**`（jOOQ 显式 SQL）+ `/compliance/tax` 工作区（缺失项清单 + 缺失项汇总 + 辖区覆盖情况 + 税务登记档案）。**🔴 生死线「未注册辖区的销售额是合规炸弹」落成可查事实**：缺失项由「店铺启用的站点 → 站点国家 → 国家级税务辖区 → 这家店 / 它的法人在那个辖区**到底有没有在册登记**」**真算出来**，六类缺失项（未注册该辖区 / 缺 VAT 号 / 缺 EPR 注册号 / 已过有效期 / 即将到期 / 没记有效期判不了）逐条带严重度、人话说明与整改建议，列表与汇总都是真分页真筛选 —— **不是前端拼的一句提醒**。**🔴 辖区值域钉死**：登记的 `jurisdiction_code` 由 DB 触发器校验必须落在码表里，**不留自由文本**。**🔴 推导边界如实写明**：`derivation_scope` 区分 COUNTRY（国家本身就是税务辖区，能推导）/ SUBNATIONAL（美国各州登记推不出 —— 本仓**没有销售事实表**）/ NONE（不跟踪）；**推不出不等于「都齐了」**，能力声明里逐条说明。**🔴 法人主体只存逻辑 ID**：法人档案归 identity（17），经**授权只读端口**只取编码与名称，**不复制任何一列**、不建跨库 FK；读不到时 `available=false` + 原因，**不显示成空白或「未注册」**；法人登记**覆盖**其店铺（法人注册了 VAT，店就在覆盖范围内）。**🔴 本模块不含任何金额**：税额与申报底稿归 12.6 财务（该服务在本仓**尚未落地**）⇒ 不建财务表、不做浮点记账。有效期用 `timestamptz` 列 + `OffsetDateTime` 绑定 + values 位置 `?::timestamptz`，测试**断言写回的值**。测试 `TaxRegistrationIntegrationTest` **16 例**（Testcontainers 真实 PostgreSQL 16：缺失项真产出 / 登记后缺口消失 / 「未注册」与「缺号」不重复报 / 自由文本辖区码被 DB 拒 / 重复登记 409 / timestamptz 往返断言写回值 / 法人登记覆盖店铺 / 法人档案读不到报 available=false / 没记有效期判不了 / 汇总计数 / 覆盖视图 / HTTP 端点真分页真筛选）+ `TaxRegistrationTenancyIntegrationTest` **3 例**（**租户隔离三断言**：两租户互不可见 / 伪造 tenant header 无效 / 连接池归还后不串租户；直查用 **channel_app** 业务角色，超级用户绕过 RLS 会让断言永远「通过」）+ `TaxRegistrationRulesTest` **16 例**（判定规则纯函数单测）。前端 `tax-registration-model.ts` / `tax-registration-workspace.tsx` + `tax-registration-allowlist.test.ts`（真跑 proxy 断言放行 / 拒绝双向）。契约由 codegen 重生成（channel 纯新增 8 条路径与 17 个 schema，**其余 5 个服务的契约逐字节不变**）。验证 `./mvnw -q compile` 退出 0、`./mvnw -pl services/channel -am test -Dtest='TaxRegistration*'` **35 例 0 失败 0 错误**、`pnpm typecheck` 3/3 通过、`pnpm lint` 通过、`pnpm vitest run apps/web/src/app/api` **185 文件 1068 例全绿**。**下游缺口**：16.3.1.2 申报日历未交付（只存申报周期）、16.3.2.1 VAT/IOSS 未交付（不编造 IOSS 订单清单）、16.3.2.2 EPR/包装法未交付（只存 EPR 注册号，不做费用与刊登限制）、12.6 税务未交付（不建财务表）；美国各州销售税因**缺销售事实表**只登记、不自动派生要求。 |
 | 16.3.1.2 | 申报日历 | — | D7 | 未开发 | — |
 | 16.3.2.1 | VAT/IOSS | — | D7 | 未开发 | — |
-| 16.3.2.2 | EPR/包装法 | — | D7 | 未开发 | — |
+| 16.3.2.2 | EPR/包装法 | — | D7 | 已交付 | 迁移 channel `V314__channel_epr_registration.sql`（**纯新建 9 张表、零 ALTER 任何既有表**，跨车道 DDL 回归面 = 0；表前缀 `epr_*` 与 `tax_registration_*`（16.3.1.1）/ `compliance_rule_*`（16.2.1.1）/ `compliance_check_*`（16.2.2.1）/ `product_certification_*`（16.2.2.2）/ `brand_authz_*`（16.4.2.x）**彼此隔离**）：`epr_regime`（**全局码表**，制度值域由 **DB 层 CHECK 钉死**为 `LUCID` / `PACKAGING_REGISTRATION` / `BATTERY` / `WEEE` 四种，登记档案上的 `regime_code` 由**触发器**校验必须落在码表里 —— **不留自由文本**，新增制度走 DB 迁移加值域、不许运行时塞字符串）+ `epr_category`（EPR 适用品类码表，**不是**平台侧商品类目）+ `epr_country_regime` / `epr_country_regime_category`（**哪些国家要求哪些制度 + 适用哪些品类** —— 这两张表就是 **「NOT_APPLICABLE（该国不要求该制度）」与「NOT_REGISTERED（要求了但没注册）」的分界线**：不在表里 ⇒ 不适用 ⇒ **放行**；混为一谈会把不该拦的全拦了）+ `epr_registration`（**版本化**的制度级登记档案：一条 = **制度 × 适用国家 × 适用品类**；改一条 = 关掉当前版本（`effective_to`）+ 插入新版本（`effective_from` / `version_no` / `supersedes_id`），**生效时刻不许回填**（触发器钉死 + 服务层 422 人话）⇒「历史判定按当时那版算」**物理成立**；`validity_kind` 三态 FIXED / OPEN_ENDED / **UNKNOWN**（没记有效期 ⇒ 判不了 ⇒ **不许默认放行**））+ `epr_registration_country` / `epr_registration_category`（版本行的**多对多**适用范围子表）+ `epr_exemption`（租户级的「本制度在本国**不适用**我的业务」声明，**理由必填** —— 没有理由的「不适用」就是漏登记的遮羞布；撤销只关窗口不删行）+ `epr_fee`（**本服务自己的费用记录**：金额 `numeric(19,4)` + **币种必带**，汇总**按币种分组** —— **不同币种绝不直接相加**）。**零外键**（跨表引用一律走触发器，与同卷 V300 / V308 / V312 同一纪律）+ 五张租户表 tenant_id NOT NULL + ENABLE **与 FORCE** RLS isolation。🔴 **与上游 16.3.1.1 的「粗 / 细」两层**（**不是**同一份事实的两个副本）：上游 `tax_registration_record.epr_registration_no` 是**辖区级粗粒度**（一个辖区一个号）；本模块是**制度级细粒度**（一个**制度 × 国家 × 品类**一个号）⇒ 本模块**不写** `tax_registration_record`（上游写所有权不变），也**不把**上游那个号复制一份当自己的权威源；能力声明里写清这层关系。 **🔴 生死线「EPR 未注册的国家应直接限制刊登」落成三道、且共用同一个判定源**：① **参考层** `epr_country_regime` 钉死「哪些国家要求哪些制度」；② **判定层** SQL 函数 `epr_gate_findings(tenant, country, category)` 是**唯一的判定源**（reason 取值 `OK` / `NOT_APPLICABLE` / `EXEMPTED` / `NOT_REGISTERED` / `EXPIRED` / `VALIDITY_UNKNOWN` / `NOT_EFFECTIVE_YET` / `DISABLED` / `CATEGORY_NOT_COVERED`，其中**「判不了」的三种仍然阻断** —— 不许默认放行）；③ **拦截层** BEFORE 触发器挂在 **4 刊登的两个真实放行口**上 —— `listing_publish_job_target`（4.3.1.1 一键刊登 → `SUBMITTED` = 真发给平台）与 `publish_task`（4.3.1.2 批量发布 → `DISPATCHED` = 真派发），**只加函数、零 ALTER 既有表的任何列**（与 V198 的 `guard_listing_editor_submission_compliance` 同一手法）。服务层 `publish-gate` 端点与 DB 层触发器**调同一个函数** ⇒ 页面上的结论与真正拦人的那道闸门**不可能各说各话**。17 条路径 / 21 个操作 `/channel/epr-registrations/**`（jOOQ 显式 SQL）：能力声明 / 制度码表 / 适用品类码表 / 店铺目录（**读本服务自己的 `shop` / `shop_marketplace` / `marketplace`**，推导「这家店在哪些国家需要 EPR」）/ 登记档案（真分页 + 真筛选 + **版本化**改 + 版本历史）/ **覆盖情况**（**国家 × 品类** 的反查 —— 一条登记适用多个国家 + 多个品类 ⇒ 「这个国家这个品类有没有覆盖」必须查得出来）/ 按国家合规状态 / **刊登闸门**（服务端真算的结论 + 逐条原因 + **国家维度与品类维度两份口径**都给出）/ 批量刊登闸门 / 申报期（**周期 + 起止月份**算出「当前是否在申报期内」，可跨年 11..2；没记起止月份是**判不了**、**不是**「不在期内」）/ 费用（真分页 + 真筛选 + **按币种分组**的汇总）/ 不适用声明。前端 `/compliance/epr` 工作区（**独立于** `/compliance/tax`（16.3.1.1）/ `/compliance/account` / `/compliance/violations` / `/compliance/appeals` / `/compliance/rules`）：刊登闸门（排最前，**两份口径都显示**）/ 按国家合规状态 / 覆盖反查 / 登记档案 / 申报期 / 费用（**按币种分组显示，不做跨币种求和**）/ 不适用声明 —— 三态空态（「没有店铺」「筛选无结果」「一条登记都没有」）各不相同，**「不适用」与「未注册」分开显示**，「判不了」是第三态。api-proxy **纯新增一条独立的 `services[]` 元素**（首 token `epr-registrations`，锚在 `platform-appeals` 之后；既有条目**一字未动、也不重排**），**id 段用完整 UUID 形状**、**末尾刻意不带 `?`**。测试 `EprRegistrationIntegrationTest` **28 例**（Testcontainers 真实 PostgreSQL 16：未注册真阻断 / 不适用真放行 / **一个制度一个号**（注册 LUCID 不等于注册 WEEE 与电池法）/ **没记有效期 ⇒ 判不了 ⇒ 仍阻断** / 过期 / 停用 / **自由文本制度码与品类码在 DB 层被拒**（触发器）/ 改登记 = 新版本且旧版本不可回改 / **不许回填 422** / **DB 层真拦得住刊登**（DE 进 SUBMITTED 被拒、US 放行、DRAFT 草稿不拦）/ 费用**按币种分组**（EUR + USD 不相加）+ 禁浮点（负数 / 科学计数法被拒）/ **国家 × 品类反查** / 申报期算得出来 / **timestamptz 往返断言写回的值**）+ `EprRegistrationTenancyIntegrationTest` **3 例**（**租户隔离三断言**：两租户互不可见 / 伪造 tenant header 无效 / 连接池归还后不串租户；直查用 **channel_app** 业务角色，超级用户绕过 RLS 会让断言永远「通过」）+ `EprRegistrationRulesTest` **15 例**（判定规则纯函数单测：申报期窗口含跨年 11..2 / 币种与国家码形状 / **「判不了」也是阻断原因**）。契约由 codegen 重生成（channel 纯新增 17 条路径与 35 个 schema，**其余 5 个服务的契约逐字节不变**）。验证 `./mvnw -q compile` 退出 0、`./mvnw -pl services/channel -am test -Dtest='EprRegistration*'` **46 例 0 失败 0 错误**、`pnpm typecheck` 3/3 通过、`pnpm vitest run apps/web/src/app/api` **189 文件 1090 例全绿**。**下游缺口**：12 财务（finance 服务在本仓**尚未落地** ⇒ **不建财务凭证表、不声称费用已入账**，`epr_fee` 只是本服务自己的费用记录，能力声明 available=false + ownerModule）、16.3.2.1 VAT/IOSS **未交付**（不编造 IOSS 订单清单与代收代缴统计）、16.3.2.3 销售税 **未交付**（不碰销售税与 marketplace facilitator）、16.3.1.2 申报日历 **未交付**（只算申报期窗口，不做日历与截止日提醒）。 |
 | 16.3.2.3 | 销售税与 marketplace facilitator | — | D7 | 未开发 | — |
 | 16.4.1.1 | 侵权库 | — | D7 | 未开发 | — |
 | 16.4.1.2 | 检测与预警 | — | D7 | 未开发 | — |

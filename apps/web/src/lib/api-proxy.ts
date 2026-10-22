@@ -8442,6 +8442,58 @@ const services: readonly {
       /^platform\-appeals(?:\/(?:capabilities|shops|appeals|quotas|stats|priority\-queue)|\/appeals\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:text|evidence|submit|decision|withdraw|reopen))?)$/,
   },
   {
+    // 16.3.2.2 EPR / 包装法（channel 服务）。纯**新增一条独立的 `services[]` 元素**：
+    // 既有条目（`platform-violations` 16.1.2.1 / `platform-appeals` 16.1.2.2 /
+    // `account-health` 16.1.1.1 / `performance-metrics` 16.1.1.2 / `compliance-precheck` 16.2.2.1 …）
+    // **一字未动、也不重排** —— 本文件是多车道共用的**累积型**白名单，每条服务规则是一段超长单行正则，
+    // 往既有那条巨型 alternation 里并分支会让多车道同时并入时 git 必然判冲突。
+    //
+    // ---- 插入锚点固定在 **`platform-appeals` 那条元素之后**（16.1.2.2 申诉管理）----
+    //   同批同服务的兄弟模块，锚点互不重叠，git 能干净求并。
+    //
+    // ---- 首 token「epr-registrations」的零命中核对结论 ----
+    //   本文件既有 `services[]` 正则里含 `epr` 的只有 `tax-registration` 那条元素里的一句**注释**
+    //   （`tax-registration/epr` 是 16.3.1.1 白名单里被**拒**的形状），**没有任何正则**以 `epr` 开头。
+    //   实测本文件全文出现 `epr-registrations` **0** 次、出现 `epr-registration` **0** 次。
+    //   ⚠️ **不要**用 `tax-registration` 前缀扩展 —— 那是 16.3.1.1 的，会遮蔽它的路由。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   epr-registrations/capabilities          能力声明（下游 available=false + ownerModule）
+    //   epr-registrations/regimes               制度码表 + 每个制度在哪些国家适用、适用哪些品类
+    //   epr-registrations/categories            适用品类码表（受控值域）
+    //   epr-registrations/shops                 店铺目录（GET，真分页）+ 推导出的「需要 EPR 的国家」
+    //   epr-registrations/registrations         登记档案清单（GET，真分页 + 真筛选）/ 新建登记（POST）
+    //   epr-registrations/registrations/{uuid}  登记详情（GET）/ 改登记（PUT，**版本化**：关旧版 + 建新版）
+    //   epr-registrations/registrations/{uuid}/versions  生效版本历史（GET）
+    //   epr-registrations/coverage              覆盖情况（GET，真分页 + 真筛选；国家 × 品类反查）
+    //   epr-registrations/compliance-status     按国家的合规状态（GET）
+    //   epr-registrations/publish-gate          **刊登闸门**（POST，服务端真算的结论 + 逐条原因）
+    //   epr-registrations/publish-gate/batch    批量刊登闸门（POST）
+    //   epr-registrations/filings               申报期状态（GET，真分页 + 真筛选）
+    //   epr-registrations/fees                  费用清单（GET，真分页 + 真筛选）/ 记一笔（POST）
+    //   epr-registrations/fees/{uuid}           改一笔费用（PUT）
+    //   epr-registrations/fee-summary           费用汇总（GET，**按币种分组**）
+    //   epr-registrations/exemptions            不适用声明清单（GET）/ 声明不适用（POST）
+    //   epr-registrations/exemptions/{uuid}     撤销不适用声明（PUT，关窗口不删行）
+    //
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`（不是
+    //   `[0-9a-f-]+`：后者会把 `capabilities` 这种非 UUID 形状也当 id 放行）。
+    // ⚠️ 末尾**刻意不带 `?`**：带了就等于放行裸路径 `epr-registrations`
+    //   （后端没有「一条汇总列表接口」，一切入口都带子路径）。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸路径 `epr-registrations` —— 本模块没有裸集合读
+    //   * `epr-registrations/registrations/{uuid}/delete` —— 登记不做物理删除（改 = 新版本）
+    //   * `epr-registrations/finance` —— 12 财务在本仓**尚未落地**，本模块**不建**财务凭证表
+    //   * `epr-registrations/vat` / `epr-registrations/ioss` —— 16.3.2.1 VAT/IOSS **未交付**
+    //   * `epr-registrations/calendar` —— 16.3.1.2 申报日历**未交付**（本模块只算申报期窗口）
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^epr\-registrations(?:\/(?:capabilities|regimes|categories|shops|registrations|coverage|compliance\-status|publish\-gate|filings|fees|fee\-summary|exemptions)|\/publish\-gate\/batch|\/registrations\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/versions)?|\/fees\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}|\/exemptions\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})$/,
+  },
+  {
     // 15.6.2.2 购物车与弃单挽回（crm 服务）。纯**新增一条独立的 `services[]` 元素**：
     // 既有条目（`buyer-emails` 15.1.2.1 / `knowledge` 15.4.2.1 / `review-requests` 15.2.2.1 /
     // `review-rules` 15.2.2.2）**一字未动、也不重排** —— 本文件是多车道共用的**累积型**

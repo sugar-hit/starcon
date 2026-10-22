@@ -27328,6 +27328,1163 @@
         ],
         "type": "object"
       },
+      "EprCapabilities": {
+        "properties": {
+          "applicabilitySemantics": {
+            "type": "string"
+          },
+          "categories": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "conclusions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "downstreamNote": {
+            "type": "string"
+          },
+          "enforcementNote": {
+            "type": "string"
+          },
+          "feeSemantics": {
+            "type": "string"
+          },
+          "feeStatuses": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "feeTypes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "filingCycles": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "filingSemantics": {
+            "type": "string"
+          },
+          "filingStatuses": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "gaps": {
+            "items": {
+              "$ref": "#/components/schemas/EprCapabilityGap"
+            },
+            "type": "array"
+          },
+          "paidBy": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "reasons": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "regimeSemantics": {
+            "type": "string"
+          },
+          "regimeTypes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "upstreamNote": {
+            "type": "string"
+          },
+          "upstreams": {
+            "items": {
+              "$ref": "#/components/schemas/EprUpstream"
+            },
+            "type": "array"
+          },
+          "validityKinds": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "EprCapabilityGap": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "impact": {
+            "type": "string"
+          },
+          "moduleId": {
+            "type": "string"
+          },
+          "moduleName": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "EprCategoryList": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/EprCategoryView"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "total": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "EprCategoryView": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "EprComplianceStatus": {
+        "properties": {
+          "compliantCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "countries": {
+            "items": {
+              "$ref": "#/components/schemas/EprCountryStatus"
+            },
+            "type": "array"
+          },
+          "indeterminateCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "nonCompliantCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "total": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "EprCountryRegimeView": {
+        "properties": {
+          "authority": {
+            "type": "string"
+          },
+          "categoryCodes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "countryCode": {
+            "type": "string"
+          },
+          "countryName": {
+            "type": "string"
+          },
+          "regimeCode": {
+            "type": "string"
+          },
+          "regimeName": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "EprCountryStatus": {
+        "properties": {
+          "applicableRegimeCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "blockedRegimeCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "countryCode": {
+            "type": "string"
+          },
+          "countryName": {
+            "type": "string"
+          },
+          "coveredRegimeCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "reasons": {
+            "items": {
+              "$ref": "#/components/schemas/EprGateReason"
+            },
+            "type": "array"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "EprCoveragePage": {
+        "properties": {
+          "blockedCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "coveredCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/EprCoverageRow"
+            },
+            "type": "array"
+          },
+          "notApplicableCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "EprCoverageRow": {
+        "properties": {
+          "applicable": {
+            "type": "boolean"
+          },
+          "categoryCodes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "countryCode": {
+            "type": "string"
+          },
+          "countryName": {
+            "type": "string"
+          },
+          "covered": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          },
+          "reasonCode": {
+            "type": "string"
+          },
+          "reasonLabel": {
+            "type": "string"
+          },
+          "regimeCode": {
+            "type": "string"
+          },
+          "regimeName": {
+            "type": "string"
+          },
+          "registrationId": {
+            "type": "string"
+          },
+          "registrationNo": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "EprExemptionInput": {
+        "properties": {
+          "countryCode": {
+            "type": "string"
+          },
+          "effectiveFrom": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "regimeCode": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "EprExemptionPage": {
+        "properties": {
+          "activeCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/EprExemptionView"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "EprExemptionView": {
+        "properties": {
+          "countryCode": {
+            "type": "string"
+          },
+          "countryName": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "effectiveFrom": {
+            "type": "string"
+          },
+          "effectiveTo": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "regimeCode": {
+            "type": "string"
+          },
+          "regimeName": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "EprFeeInput": {
+        "properties": {
+          "amount": {
+            "type": "string"
+          },
+          "billingCycle": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "feeType": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "paidBy": {
+            "type": "string"
+          },
+          "periodEnd": {
+            "type": "string"
+          },
+          "periodStart": {
+            "type": "string"
+          },
+          "registrationKey": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "EprFeePage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/EprFeeView"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "EprFeeSummary": {
+        "properties": {
+          "currencies": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "totalRecords": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totals": {
+            "items": {
+              "$ref": "#/components/schemas/EprFeeTotal"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "EprFeeTotal": {
+        "properties": {
+          "count": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "total": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "EprFeeView": {
+        "properties": {
+          "amount": {
+            "type": "string"
+          },
+          "billingCycle": {
+            "type": "string"
+          },
+          "billingCycleLabel": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "feeType": {
+            "type": "string"
+          },
+          "feeTypeLabel": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "paidBy": {
+            "type": "string"
+          },
+          "paidByLabel": {
+            "type": "string"
+          },
+          "periodEnd": {
+            "type": "string"
+          },
+          "periodStart": {
+            "type": "string"
+          },
+          "regimeCode": {
+            "type": "string"
+          },
+          "regimeName": {
+            "type": "string"
+          },
+          "registrationKey": {
+            "type": "string"
+          },
+          "registrationNo": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "EprFilingPage": {
+        "properties": {
+          "inPeriodCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/EprFilingRow"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "EprFilingRow": {
+        "properties": {
+          "categoryCodes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "countryCodes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "daysToNextFiling": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "filingCycle": {
+            "type": "string"
+          },
+          "filingCycleLabel": {
+            "type": "string"
+          },
+          "filingEndMonth": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "filingPeriodLabel": {
+            "type": "string"
+          },
+          "filingStartMonth": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "filingStatus": {
+            "type": "string"
+          },
+          "filingStatusLabel": {
+            "type": "string"
+          },
+          "regimeCode": {
+            "type": "string"
+          },
+          "regimeName": {
+            "type": "string"
+          },
+          "registrationId": {
+            "type": "string"
+          },
+          "registrationKey": {
+            "type": "string"
+          },
+          "registrationNo": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "EprGateReason": {
+        "properties": {
+          "blocking": {
+            "type": "boolean"
+          },
+          "categoryCode": {
+            "type": "string"
+          },
+          "countryCode": {
+            "type": "string"
+          },
+          "countryName": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "reasonCode": {
+            "type": "string"
+          },
+          "reasonLabel": {
+            "type": "string"
+          },
+          "regimeCode": {
+            "type": "string"
+          },
+          "regimeName": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "EprGateScope": {
+        "properties": {
+          "allowed": {
+            "type": "boolean"
+          },
+          "conclusion": {
+            "type": "string"
+          },
+          "conclusionLabel": {
+            "type": "string"
+          },
+          "reasons": {
+            "items": {
+              "$ref": "#/components/schemas/EprGateReason"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "EprPublishGate": {
+        "properties": {
+          "allowed": {
+            "type": "boolean"
+          },
+          "categoryCode": {
+            "type": "string"
+          },
+          "conclusion": {
+            "type": "string"
+          },
+          "conclusionLabel": {
+            "type": "string"
+          },
+          "countryCode": {
+            "type": "string"
+          },
+          "countryName": {
+            "type": "string"
+          },
+          "countryScope": {
+            "$ref": "#/components/schemas/EprGateScope"
+          },
+          "evaluatedAt": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "reasons": {
+            "items": {
+              "$ref": "#/components/schemas/EprGateReason"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "EprPublishGateBatch": {
+        "properties": {
+          "allowed": {
+            "type": "boolean"
+          },
+          "blockedCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "evaluatedAt": {
+            "type": "string"
+          },
+          "gates": {
+            "items": {
+              "$ref": "#/components/schemas/EprPublishGate"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "EprPublishGateBatchRequest": {
+        "properties": {
+          "requests": {
+            "items": {
+              "$ref": "#/components/schemas/EprPublishGateRequest"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "EprPublishGateRequest": {
+        "properties": {
+          "categoryCode": {
+            "type": "string"
+          },
+          "countryCode": {
+            "type": "string"
+          },
+          "shopId": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "EprRegimeList": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/EprRegimeView"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "total": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "EprRegimeView": {
+        "properties": {
+          "authority": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "countries": {
+            "items": {
+              "$ref": "#/components/schemas/EprCountryRegimeView"
+            },
+            "type": "array"
+          },
+          "defaultFilingCycle": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "EprRegistrationInput": {
+        "properties": {
+          "categoryCodes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "countryCodes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "effectiveFrom": {
+            "type": "string"
+          },
+          "filingCycle": {
+            "type": "string"
+          },
+          "filingEndMonth": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "filingStartMonth": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "regimeCode": {
+            "type": "string"
+          },
+          "registrationNo": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "validFrom": {
+            "type": "string"
+          },
+          "validUntil": {
+            "type": "string"
+          },
+          "validityKind": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "EprRegistrationPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/EprRegistrationView"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "EprRegistrationView": {
+        "properties": {
+          "authority": {
+            "type": "string"
+          },
+          "categoryCodes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "countryCodes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "current": {
+            "type": "boolean"
+          },
+          "daysToExpiry": {
+            "description": "距有效期止还有几天；负数 = 已过期；null = 长期有效 / 没记有效期",
+            "format": "int32",
+            "type": "integer"
+          },
+          "daysToNextFiling": {
+            "description": "距下一期申报期开始还有几天；null = 没有周期 / 判不了",
+            "format": "int32",
+            "type": "integer"
+          },
+          "effectiveFrom": {
+            "type": "string"
+          },
+          "effectiveTo": {
+            "type": "string"
+          },
+          "filingCycle": {
+            "type": "string"
+          },
+          "filingCycleLabel": {
+            "type": "string"
+          },
+          "filingEndMonth": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "filingPeriodLabel": {
+            "type": "string"
+          },
+          "filingStartMonth": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "filingStatus": {
+            "type": "string"
+          },
+          "filingStatusLabel": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "regimeCode": {
+            "type": "string"
+          },
+          "regimeName": {
+            "type": "string"
+          },
+          "registrationKey": {
+            "type": "string"
+          },
+          "registrationNo": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          },
+          "validFrom": {
+            "type": "string"
+          },
+          "validUntil": {
+            "type": "string"
+          },
+          "validityKind": {
+            "type": "string"
+          },
+          "versionNo": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "EprShopList": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/EprShopView"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "total": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "EprShopView": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "eprCountryCodes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "marketplaceCodes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "name": {
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "platformName": {
+            "type": "string"
+          },
+          "shopId": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "EprUpstream": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "impact": {
+            "type": "string"
+          },
+          "moduleId": {
+            "type": "string"
+          },
+          "moduleName": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "EprVersionList": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/EprVersionView"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "registrationKey": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "EprVersionView": {
+        "properties": {
+          "categoryCodes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "countryCodes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "effectiveFrom": {
+            "type": "string"
+          },
+          "effectiveTo": {
+            "type": "string"
+          },
+          "filingCycle": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "registrationNo": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "validFrom": {
+            "type": "string"
+          },
+          "validUntil": {
+            "type": "string"
+          },
+          "validityKind": {
+            "type": "string"
+          },
+          "versionNo": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
       "ExceptionCaseDetail": {
         "properties": {
           "claims": {
@@ -82161,6 +83318,1035 @@
         },
         "tags": [
           "channel-controller"
+        ]
+      }
+    },
+    "/channel/epr-registrations/capabilities": {
+      "get": {
+        "operationId": "get_channel_epr_registrations_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/EprCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "epr-registration-controller"
+        ]
+      }
+    },
+    "/channel/epr-registrations/categories": {
+      "get": {
+        "operationId": "get_channel_epr_registrations_categories",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/EprCategoryList"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "epr-registration-controller"
+        ]
+      }
+    },
+    "/channel/epr-registrations/compliance-status": {
+      "get": {
+        "operationId": "get_channel_epr_registrations_compliance_status",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "countryCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/EprComplianceStatus"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "epr-registration-controller"
+        ]
+      }
+    },
+    "/channel/epr-registrations/coverage": {
+      "get": {
+        "operationId": "get_channel_epr_registrations_coverage",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "countryCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "regimeCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "categoryCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/EprCoveragePage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "epr-registration-controller"
+        ]
+      }
+    },
+    "/channel/epr-registrations/exemptions": {
+      "get": {
+        "operationId": "get_channel_epr_registrations_exemptions",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "countryCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "regimeCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/EprExemptionPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "epr-registration-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_channel_epr_registrations_exemptions",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EprExemptionInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/EprExemptionView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "epr-registration-controller"
+        ]
+      }
+    },
+    "/channel/epr-registrations/exemptions/{id}": {
+      "put": {
+        "operationId": "put_channel_epr_registrations_exemptions_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/EprExemptionView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "epr-registration-controller"
+        ]
+      }
+    },
+    "/channel/epr-registrations/fee-summary": {
+      "get": {
+        "operationId": "get_channel_epr_registrations_fee_summary",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "registrationKey",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "currency",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "feeType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/EprFeeSummary"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "epr-registration-controller"
+        ]
+      }
+    },
+    "/channel/epr-registrations/fees": {
+      "get": {
+        "operationId": "get_channel_epr_registrations_fees",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "registrationKey",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "currency",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "feeType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "billingCycle",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/EprFeePage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "epr-registration-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_channel_epr_registrations_fees",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EprFeeInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/EprFeeView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "epr-registration-controller"
+        ]
+      }
+    },
+    "/channel/epr-registrations/fees/{id}": {
+      "put": {
+        "operationId": "put_channel_epr_registrations_fees_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EprFeeInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/EprFeeView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "epr-registration-controller"
+        ]
+      }
+    },
+    "/channel/epr-registrations/filings": {
+      "get": {
+        "operationId": "get_channel_epr_registrations_filings",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "regimeCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "inPeriod",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/EprFilingPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "epr-registration-controller"
+        ]
+      }
+    },
+    "/channel/epr-registrations/publish-gate": {
+      "post": {
+        "operationId": "post_channel_epr_registrations_publish_gate",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EprPublishGateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/EprPublishGate"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "epr-registration-controller"
+        ]
+      }
+    },
+    "/channel/epr-registrations/publish-gate/batch": {
+      "post": {
+        "operationId": "post_channel_epr_registrations_publish_gate_batch",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EprPublishGateBatchRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/EprPublishGateBatch"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "epr-registration-controller"
+        ]
+      }
+    },
+    "/channel/epr-registrations/regimes": {
+      "get": {
+        "operationId": "get_channel_epr_registrations_regimes",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/EprRegimeList"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "epr-registration-controller"
+        ]
+      }
+    },
+    "/channel/epr-registrations/registrations": {
+      "get": {
+        "operationId": "get_channel_epr_registrations_registrations",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "regimeCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "validityKind",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "countryCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/EprRegistrationPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "epr-registration-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_channel_epr_registrations_registrations",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EprRegistrationInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/EprRegistrationView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "epr-registration-controller"
+        ]
+      }
+    },
+    "/channel/epr-registrations/registrations/{id}": {
+      "get": {
+        "operationId": "get_channel_epr_registrations_registrations_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/EprRegistrationView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "epr-registration-controller"
+        ]
+      },
+      "put": {
+        "operationId": "put_channel_epr_registrations_registrations_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EprRegistrationInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/EprRegistrationView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "epr-registration-controller"
+        ]
+      }
+    },
+    "/channel/epr-registrations/registrations/{id}/versions": {
+      "get": {
+        "operationId": "get_channel_epr_registrations_registrations_id_versions",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/EprVersionList"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "epr-registration-controller"
+        ]
+      }
+    },
+    "/channel/epr-registrations/shops": {
+      "get": {
+        "operationId": "get_channel_epr_registrations_shops",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "platformCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/EprShopList"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "epr-registration-controller"
         ]
       }
     },
