@@ -189,6 +189,19 @@ class PlatformViolationIntegrationTest {
     }
   }
 
+  /**
+   * 🔴 关掉 identity / warehouse 两台桩。
+   *
+   * <p>它们是<b>静态</b>桩：不起就停 ⇒ 端口被占住整整一轮 JVM 生命周期。
+   * 既是资源泄漏，也会抬高同模块里「桩抢同一个端口」的机率
+   * （见 {@code StockForecastAvailabilityPortTest} 的端口遮蔽假红）。
+   */
+  @AfterAll
+  static void stopStubs() {
+    if (identity != null) identity.stop(0);
+    if (warehouse != null) warehouse.stop(0);
+  }
+
   @BeforeEach
   void freshTenant() {
     tenant = UUID.randomUUID();
