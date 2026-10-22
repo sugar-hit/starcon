@@ -57476,6 +57476,867 @@
         },
         "type": "object"
       },
+      "PiiAccessAuditCounts": {
+        "properties": {
+          "denied": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "export": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "viewFull": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "viewMasked": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "PiiAccessAuditPage": {
+        "properties": {
+          "counts": {
+            "$ref": "#/components/schemas/PiiAccessAuditCounts"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/PiiAccessAuditRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "PiiAccessAuditRow": {
+        "properties": {
+          "action": {
+            "type": "string"
+          },
+          "actorId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "actorName": {
+            "type": "string"
+          },
+          "auditId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "decision": {
+            "type": "string"
+          },
+          "decisionReason": {
+            "type": "string"
+          },
+          "exportRequestId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "fieldCode": {
+            "type": "string"
+          },
+          "grantId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "grantRoleCode": {
+            "type": "string"
+          },
+          "occurredAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "subjectKind": {
+            "type": "string"
+          },
+          "subjectLabel": {
+            "type": "string"
+          },
+          "subjectRef": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PiiAccessCapabilities": {
+        "properties": {
+          "auditSemantics": {
+            "type": "string"
+          },
+          "authorizationSemantics": {
+            "type": "string"
+          },
+          "boundaryNote": {
+            "type": "string"
+          },
+          "downstreamNote": {
+            "type": "string"
+          },
+          "exportSemantics": {
+            "type": "string"
+          },
+          "fields": {
+            "items": {
+              "$ref": "#/components/schemas/PiiAccessFieldInfo"
+            },
+            "type": "array"
+          },
+          "maskingSemantics": {
+            "type": "string"
+          },
+          "sources": {
+            "items": {
+              "$ref": "#/components/schemas/PiiAccessSourceState"
+            },
+            "type": "array"
+          },
+          "storageSemantics": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PiiAccessExportCounts": {
+        "properties": {
+          "approved": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "executed": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "pending": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "rejected": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "PiiAccessExportDecisionInput": {
+        "properties": {
+          "decisionNote": {
+            "maxLength": 600,
+            "minLength": 0,
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PiiAccessExportItemView": {
+        "properties": {
+          "itemId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "subjectKind": {
+            "type": "string"
+          },
+          "subjectLabel": {
+            "type": "string"
+          },
+          "subjectRef": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PiiAccessExportPage": {
+        "properties": {
+          "counts": {
+            "$ref": "#/components/schemas/PiiAccessExportCounts"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/PiiAccessExportRequestView"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "PiiAccessExportRequestInput": {
+        "properties": {
+          "fieldCode": {
+            "minLength": 1,
+            "pattern": "NAME|PHONE|EMAIL|ADDRESS",
+            "type": "string"
+          },
+          "purpose": {
+            "maxLength": 600,
+            "minLength": 0,
+            "type": "string"
+          },
+          "recordCount": {
+            "format": "int32",
+            "minimum": 1,
+            "type": "integer"
+          },
+          "subjectKind": {
+            "minLength": 1,
+            "pattern": "CUSTOMER|ORDER",
+            "type": "string"
+          },
+          "subjectRefs": {
+            "items": {
+              "maxLength": 160,
+              "minLength": 0,
+              "type": "string"
+            },
+            "maxItems": 500,
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "required": [
+          "fieldCode",
+          "purpose",
+          "recordCount",
+          "subjectKind",
+          "subjectRefs"
+        ],
+        "type": "object"
+      },
+      "PiiAccessExportRequestView": {
+        "properties": {
+          "approvedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "approvedBy": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "approvedByName": {
+            "nullable": true,
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "decisionNote": {
+            "type": "string"
+          },
+          "executedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "executedBy": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "expiresAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "exportBatchId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "fieldCode": {
+            "type": "string"
+          },
+          "fieldLabel": {
+            "type": "string"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/PiiAccessExportItemView"
+            },
+            "type": "array"
+          },
+          "maxRecordsLimit": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "purpose": {
+            "type": "string"
+          },
+          "recordCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "requestId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "requestNo": {
+            "type": "string"
+          },
+          "requestedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "requestedBy": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "requestedByName": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "subjectKind": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PiiAccessExportResult": {
+        "properties": {
+          "batchId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "exportNo": {
+            "type": "string"
+          },
+          "exportedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "fieldCode": {
+            "type": "string"
+          },
+          "recordCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "requestId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "requestNo": {
+            "type": "string"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/PiiAccessExportedRow"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "PiiAccessExportedRow": {
+        "properties": {
+          "present": {
+            "type": "boolean"
+          },
+          "subjectKind": {
+            "type": "string"
+          },
+          "subjectLabel": {
+            "type": "string"
+          },
+          "subjectRef": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PiiAccessFieldDecision": {
+        "properties": {
+          "allowed": {
+            "type": "boolean"
+          },
+          "fieldCode": {
+            "type": "string"
+          },
+          "grantId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "roleCode": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PiiAccessFieldInfo": {
+        "properties": {
+          "availableInCrm": {
+            "type": "boolean"
+          },
+          "availableInTrade": {
+            "type": "boolean"
+          },
+          "fieldCode": {
+            "type": "string"
+          },
+          "fieldLabel": {
+            "type": "string"
+          },
+          "maskRule": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PiiAccessFieldValue": {
+        "properties": {
+          "fieldCode": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "masked": {
+            "type": "boolean"
+          },
+          "present": {
+            "type": "boolean"
+          },
+          "value": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PiiAccessGrantInput": {
+        "properties": {
+          "effectiveFrom": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "effectiveTo": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "fieldCode": {
+            "minLength": 1,
+            "pattern": "NAME|PHONE|EMAIL|ADDRESS",
+            "type": "string"
+          },
+          "note": {
+            "maxLength": 600,
+            "minLength": 0,
+            "type": "string"
+          },
+          "reasonRequired": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "roleCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "scopeMode": {
+            "minLength": 1,
+            "pattern": "ALL|DEPARTMENT|SELF",
+            "type": "string"
+          }
+        },
+        "required": [
+          "effectiveFrom",
+          "fieldCode",
+          "roleCode",
+          "scopeMode"
+        ],
+        "type": "object"
+      },
+      "PiiAccessGrantPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/PiiAccessGrantView"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "PiiAccessGrantRevokeInput": {
+        "properties": {
+          "revokeReason": {
+            "maxLength": 600,
+            "minLength": 0,
+            "type": "string"
+          }
+        },
+        "required": [
+          "revokeReason"
+        ],
+        "type": "object"
+      },
+      "PiiAccessGrantView": {
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "effectiveFrom": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "effectiveTo": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "fieldCode": {
+            "type": "string"
+          },
+          "fieldLabel": {
+            "type": "string"
+          },
+          "grantId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "grantedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "grantedBy": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "reasonRequired": {
+            "type": "boolean"
+          },
+          "revokeReason": {
+            "type": "string"
+          },
+          "revokedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "revokedBy": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "roleCode": {
+            "type": "string"
+          },
+          "scopeLabel": {
+            "type": "string"
+          },
+          "scopeMode": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "version": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "PiiAccessPolicyInput": {
+        "properties": {
+          "exportApprovalTtlHours": {
+            "format": "int32",
+            "maximum": 720,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "maxExportRecords": {
+            "format": "int32",
+            "maximum": 500,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "maxRevealPerDay": {
+            "format": "int32",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "policyName": {
+            "maxLength": 120,
+            "minLength": 0,
+            "type": "string"
+          },
+          "requireReasonOnReveal": {
+            "type": "boolean"
+          },
+          "version": {
+            "format": "int64",
+            "nullable": true,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "exportApprovalTtlHours",
+          "maxExportRecords",
+          "maxRevealPerDay",
+          "policyName",
+          "requireReasonOnReveal"
+        ],
+        "type": "object"
+      },
+      "PiiAccessPolicyView": {
+        "properties": {
+          "configured": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "exportApprovalTtlHours": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "maxExportRecords": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "maxRevealPerDay": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "policyId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "policyName": {
+            "type": "string"
+          },
+          "requireReasonOnReveal": {
+            "type": "boolean"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "version": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "PiiAccessSourceState": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          },
+          "sourceCode": {
+            "type": "string"
+          },
+          "sourceLabel": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PiiAccessSubjectDetail": {
+        "properties": {
+          "decisions": {
+            "items": {
+              "$ref": "#/components/schemas/PiiAccessFieldDecision"
+            },
+            "type": "array"
+          },
+          "fields": {
+            "items": {
+              "$ref": "#/components/schemas/PiiAccessFieldValue"
+            },
+            "type": "array"
+          },
+          "known": {
+            "type": "boolean"
+          },
+          "revealNote": {
+            "type": "string"
+          },
+          "revealed": {
+            "type": "boolean"
+          },
+          "subjectKind": {
+            "type": "string"
+          },
+          "subjectLabel": {
+            "type": "string"
+          },
+          "subjectRef": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PiiAccessSubjectField": {
+        "properties": {
+          "fieldCode": {
+            "type": "string"
+          },
+          "fieldLabel": {
+            "type": "string"
+          },
+          "maskedValue": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PiiAccessSubjectPage": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/PiiAccessSubjectView"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "sources": {
+            "items": {
+              "$ref": "#/components/schemas/PiiAccessSourceState"
+            },
+            "type": "array"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "PiiAccessSubjectView": {
+        "properties": {
+          "availableFields": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "fields": {
+            "items": {
+              "$ref": "#/components/schemas/PiiAccessSubjectField"
+            },
+            "type": "array"
+          },
+          "known": {
+            "type": "boolean"
+          },
+          "missingFields": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "sourceLabel": {
+            "type": "string"
+          },
+          "subjectKind": {
+            "type": "string"
+          },
+          "subjectLabel": {
+            "type": "string"
+          },
+          "subjectRef": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "PlatformOperationInput": {
         "properties": {
           "idempotencyKey": {
@@ -114420,6 +115281,775 @@
         },
         "tags": [
           "performance-metric-controller"
+        ]
+      }
+    },
+    "/channel/pii-access/audit": {
+      "get": {
+        "operationId": "get_channel_pii_access_audit",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "kind",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "subjectRef",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "action",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "decision",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "actorId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PiiAccessAuditPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "pii-access-controller"
+        ]
+      }
+    },
+    "/channel/pii-access/capabilities": {
+      "get": {
+        "operationId": "get_channel_pii_access_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PiiAccessCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "pii-access-controller"
+        ]
+      }
+    },
+    "/channel/pii-access/exports": {
+      "get": {
+        "operationId": "get_channel_pii_access_exports",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "kind",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PiiAccessExportPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "pii-access-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_channel_pii_access_exports",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PiiAccessExportRequestInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PiiAccessExportRequestView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "pii-access-controller"
+        ]
+      }
+    },
+    "/channel/pii-access/exports/{requestId}": {
+      "get": {
+        "operationId": "get_channel_pii_access_exports_requestId",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "requestId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PiiAccessExportRequestView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "pii-access-controller"
+        ]
+      }
+    },
+    "/channel/pii-access/exports/{requestId}/approve": {
+      "post": {
+        "operationId": "post_channel_pii_access_exports_requestId_approve",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "requestId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PiiAccessExportDecisionInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PiiAccessExportRequestView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "pii-access-controller"
+        ]
+      }
+    },
+    "/channel/pii-access/exports/{requestId}/execute": {
+      "post": {
+        "operationId": "post_channel_pii_access_exports_requestId_execute",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "requestId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PiiAccessExportResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "pii-access-controller"
+        ]
+      }
+    },
+    "/channel/pii-access/exports/{requestId}/reject": {
+      "post": {
+        "operationId": "post_channel_pii_access_exports_requestId_reject",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "requestId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PiiAccessExportDecisionInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PiiAccessExportRequestView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "pii-access-controller"
+        ]
+      }
+    },
+    "/channel/pii-access/grants": {
+      "get": {
+        "operationId": "get_channel_pii_access_grants",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "roleCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PiiAccessGrantPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "pii-access-controller"
+        ]
+      },
+      "put": {
+        "operationId": "put_channel_pii_access_grants",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PiiAccessGrantInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PiiAccessGrantView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "pii-access-controller"
+        ]
+      }
+    },
+    "/channel/pii-access/grants/{grantId}/revoke": {
+      "post": {
+        "operationId": "post_channel_pii_access_grants_grantId_revoke",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "grantId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PiiAccessGrantRevokeInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PiiAccessGrantView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "pii-access-controller"
+        ]
+      }
+    },
+    "/channel/pii-access/policy": {
+      "get": {
+        "operationId": "get_channel_pii_access_policy",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PiiAccessPolicyView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "pii-access-controller"
+        ]
+      },
+      "put": {
+        "operationId": "put_channel_pii_access_policy",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PiiAccessPolicyInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PiiAccessPolicyView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "pii-access-controller"
+        ]
+      }
+    },
+    "/channel/pii-access/subjects": {
+      "get": {
+        "operationId": "get_channel_pii_access_subjects",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "kind",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PiiAccessSubjectPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "pii-access-controller"
+        ]
+      }
+    },
+    "/channel/pii-access/subjects/{kind}/{ref}": {
+      "get": {
+        "operationId": "get_channel_pii_access_subjects_kind_ref",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "kind",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "ref",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "reveal",
+            "required": false,
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "in": "query",
+            "name": "reason",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PiiAccessSubjectDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "pii-access-controller"
         ]
       }
     },

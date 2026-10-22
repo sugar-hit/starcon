@@ -8892,6 +8892,67 @@ const services: readonly {
     pattern:
       /^buyer\-risk\-scores\/(?:capabilities|rule|buyers|evaluate|scores(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?)$/,
   },
+  {
+    // ---------------------------------------------------------------------------
+    // 16.6.1.1 PII 管理（channel 服务）
+    // ---------------------------------------------------------------------------
+    //
+    // ---- 插入锚点固定在 **services[] 数组的末尾**（`buyer-risk-scores` 那条之后、数组结尾的 `];` 之前）----
+    //   同批另外三条车道的锚点分别是「`prefix: 'identity/'` 之前」「`// 14.5.2.1 带货归因` 之前」
+    //   「`// 11.4.1.1 平台纠纷列表` 之前」，与本锚点互不重叠，git 能干净求并。
+    //
+    // ---- 纯**新增一条独立的 `services[]` 元素** ----
+    //   既有条目**一字未动、也不重排、不格式化整文件**。往既有那条巨型 alternation 里并分支
+    //   会让多车道同时并入时 git 必然判冲突（结构性，retry 永远不会自愈）。
+    //
+    // ---- 首 token「pii-access」的零命中核对结论 ----
+    //   本文件既有 services[] 正则里**没有任何一条**含 `pii-access` 这个串
+    //   （本仓既有全文里 `pii` 单独出现次数也是 0）。
+    //   ⚠️ `pii-access` 与既有的 `buyer-risk-scores` / `ip-risk-library` / `epr-registrations`
+    //   **都不是前缀关系**（首 token 就分叉），所以既有分支**不会**吃掉本模块的任何路径，
+    //   本模块的分支也**不会**吃掉别人的任何路径（双向都实测过）。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   pii-access/capabilities                     能力声明（脱敏规则 / 授权模型 / 留痕与导出规则）
+    //   pii-access/policy                          策略（GET 读 / PUT 改：导出限量 / 审批有效期）
+    //   pii-access/grants                          授权配置（GET 列表 / PUT 登记）
+    //   pii-access/grants/{uuid}/revoke            撤销授权（POST，理由必填）
+    //   pii-access/subjects                        PII 主体列表（GET，真分页 + 真搜索，**默认脱敏**）
+    //   pii-access/subjects/{kind}/{ref}           单个主体（GET，默认脱敏；reveal=true 走授权判定）
+    //   pii-access/exports                         导出申请列表（GET）/ 提交申请（POST）
+    //   pii-access/exports/{uuid}                  导出申请详情（GET，含逐条清单）
+    //   pii-access/exports/{uuid}/approve          批准（POST）
+    //   pii-access/exports/{uuid}/reject           驳回（POST）
+    //   pii-access/exports/{uuid}/execute          执行导出（POST，**必须已审批**）
+    //   pii-access/audit                           访问审计（GET，真分页 + 真筛选）
+    //
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //   （不是 `[0-9a-f-]+`）：后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行。
+    // ⚠️ `{kind}` 段**只放行受控值域** `CUSTOMER|ORDER`：主体类型不是自由文本，
+    //   放行任意一段等于把「拼错的类型」也送到后端。
+    // ⚠️ `{ref}` 段允许 buyer_ref 这种**非 UUID** 标识（15 客户的 buyer_ref 是逻辑引用），
+    //   但**不允许 `/`**：段里带斜杠就意味着多了一层路径，那些形状后端没有。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸路径 `pii-access` —— 本模块没有裸集合读
+    //   * `pii-access/exports/{uuid}/delete` —— 导出申请是审批凭据，不做删除
+    //   * `pii-access/exports` 之外的**批量全量导出**形状（如 `pii-access/exports/all`）——
+    //     🔴 **批量导出 PII 必须走审批**，且导出对象必须逐条列明；
+    //     放行一个「一把全导」的入口，等于给数据泄露事件留一个后门。
+    //   * `pii-access/subjects/{kind}/{ref}/delete` —— 审计是 append-only，没有删除
+    //   * `pii-access/purge`、`pii-access/mask-off` —— **没有**「关闭脱敏」的形状：
+    //     脱敏是硬默认，不是可选开关。
+    //   * `pii-access/exports/{uuid}/approve-all` —— 审批必须逐张做
+    //   * `pii-access/audit/{uuid}/delete` —— 访问审计只增不改
+    //
+    // 🔴 本模块**不写**下游客服与运营页面的专属形状：它们不是本模块的端点，
+    //   放行一个本模块不实现的路径只会让界面以为「已经可用」。
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^pii\-access\/(?:capabilities|policy|grants(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/revoke)?|subjects(?:\/(?:CUSTOMER|ORDER)\/[0-9a-zA-Z][0-9a-zA-Z._:@-]*)?|exports(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:approve|reject|execute))?)?|audit)$/,
+  },
 ];
 
 function resolve(path: string) {
