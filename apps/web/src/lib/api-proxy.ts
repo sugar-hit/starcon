@@ -5695,6 +5695,80 @@ const services: readonly {
       /^message\-sends(?:\/(?:capabilities|knowledge\-templates|targets|batch)|\/templates(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|\/sends(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:result|retry))?)?)$/,
   },
   {
+    // 15.1.1.3 消息分类（crm 服务，卷 15 的 L3 锚点 15.1.1）。
+    //
+    // 蓝图：「对消息自动分类（售前咨询、物流查询、退货退款、投诉、平台合规、垃圾信息），
+    //   驱动自动回复与优先级，支持人工纠正以改进分类。
+    //   输入：消息内容；分类规则（关键词 + 平台类型 + 历史纠正数据）。
+    //   输出：分类标签 + 优先级 + 是否可自动回复。
+    //   关系：上游 = 15.1.1.1；下游 = 15.5.1 自动回复、1.3 预警。
+    //   **人工纠正要回流为训练样本**，否则分类准确率永远上不去。」
+    //
+    // 本条目是**新增一条 services[] 元素**，不是往既有 crm 分支的 alternation 里并 ——
+    // 既有 crm 分支分别是 `^knowledge\/...$`（15.4.2.1 客服知识库）、
+    // `^message\-inbox...$`（15.1.1.1 消息收件箱）、`^message\-sends...$`（15.1.1.2 消息发送）、
+    // `^buyer-emails...$`（15.1.2.1 邮件收发）、`^review-requests...$`（15.2.2.1 索评）、
+    // `^review-rules...$`（15.2.2.2 索评规则）、`^cart-recovery...$`（15.6.2.2 弃单挽回），
+    // 首 token 都与 `message-classifications` 不同，互不吃掉。
+    //
+    // ---- 插入锚点 ----
+    //   固定在 **`prefix: 'crm/'` 的 `^message\-sends...$`（15.1.1.2 消息发送）那条元素之后**。
+    //   本批另三条车道的锚点分别是：`review-replies`（15.2.1.2）之后、`customer-contacts`
+    //   （15.3.2.2）之后、`account-health`（16.1.1.1）之后 —— **四个锚点互不重叠**，
+    //   并入时 git 能干净求并；既有元素**一字未动、也不重排**。
+    //
+    // ---- 首 token「message-classifications」的零命中核对结论（实测，非目测）----
+    //   脚本 `.tmp/api-proxy-zero-hit.mjs` 从本文件里抽出**插入前**的既有全部 **149 条**
+    //   services[] 正则，用 `new RegExp(pat).test(shape)` 逐条实测本模块 12 个 path shape：
+    //   **命中数 = 0 / 12 全部零命中**。
+    //   另外 grep 口径：**插入前**既有全文里 `message-classifications` 这个串出现次数 = **0**
+    //   （插入后这个数只统计到本条注释与本条正则自己，不影响「既有分支吃不掉本车道」的结论）。
+    //   且既有正则都是**锚定**的（`^token(...)?$`），而 `resolve()` 先按
+    //   `path.startsWith(service.prefix)` 收窄服务、再判别正则 ⇒ 只有 prefix='crm/' 的
+    //   元素才有机会吃到 `crm/message-classifications/...`，而本文件里 prefix='crm/' 的
+    //   另外几条正则**不可能**匹配 `message-classifications/...` ⇒ 首 token 不同即可，互不遮蔽。
+    //
+    // 形状逐条列出（**只放行本模块真实实现的路径**）：
+    //   message-classifications/capabilities        能力声明（逐维 available + ownerModule + impact）
+    //   message-classifications/options             筛选词表（标签/优先级/命中方式 + 真实平台与类型）
+    //   message-classifications/rules               分类规则集合（GET 真分页真筛选 / POST 新建）
+    //   message-classifications/rules/{uuid}        单条规则（GET 详情 / PUT 修改 / DELETE 删除）
+    //   message-classifications/classifications     分类结论集合（GET，真分页 + 真筛选）
+    //   message-classifications/classifications/{uuid}  单条结论详情（GET）
+    //   message-classifications/messages/{uuid}     某条消息的结论 + 命中依据 + 纠正历史（GET）
+    //   message-classifications/classify            分类一条消息（POST）
+    //   message-classifications/classify-batch      批量分类（POST，逐条给出结论与原因）
+    //   message-classifications/feedback            人工纠正（POST，只追加）/ 纠正记录列表（GET）
+    //   message-classifications/training-samples    训练样本（GET，正文 + 预测 + 纠正）
+    //   message-classifications/statistics          规则命中统计 + 标签分布 + 冲突与纠正（GET）
+    //
+    // 判别顺序：**字面量子路径（capabilities / options / statistics / training-samples /
+    // classify-batch / classify / feedback）排在 {uuid} 段之前** —— alternation 是首个命中即返回，
+    // 顺序反了会被通配支吃掉半截。`classify-batch` 排在 `classify` **之前**
+    // （虽然回溯能救，但显式在前更不容易被人改错）。
+    // id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    // （不是 `[0-9a-f-]+`）：后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行。
+    // `/messages/{uuid}` 的 uuid 段是**必需**的（后端没有 `messages` 集合这个映射）。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸路径 `message-classifications` —— 后端**没有**这个映射，所以末尾**刻意不带 `?`**：
+    //     带了就把裸路径一起放行，而那是一个不存在的端点。
+    //   * `message-classifications/messages`（无 id）—— 后端只按消息 id 寻址。
+    //   * `message-classifications/messages/{uuid}/auto-reply` —— 15.5.1 自动回复**未交付**。
+    //   * `message-classifications/messages/{uuid}/alerts` —— 1.3 预警**未交付**。
+    //   * `message-classifications/messages/{uuid}/classify` —— 分类走**自己的**前缀
+    //     （`POST /classify`），不在消息下再开一条路径。
+    //   * `message-classifications/rules/{uuid}/delete` / `/classifications/{uuid}/delete` ——
+    //     删除走同一路径的 DELETE 方法，白名单按路径登记、不区分方法。
+    //   * `message-classifications/capabilities/{uuid}` —— 能力声明**不按 id 寻址**。
+    //   * 非 UUID 段 —— `message-classifications/rules/not-a-uuid` 必须 404。
+    prefix: 'crm/',
+    env: 'CRM_URL',
+    fallback: 'http://127.0.0.1:8086',
+    pattern:
+      /^message\-classifications(?:\/(?:capabilities|options|statistics|training-samples|classify\-batch|classify|feedback)|\/rules(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|\/classifications(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|\/messages\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})$/,
+  },
+  {
     // 16.4.2.1 品牌授权（channel 服务，卷 16 的 L3 锚点 16.4.2）。
     //
     // 蓝图：「管理品牌授权：授权方、授权范围（店铺/国家/类目/期限）、授权文件、被授权主体，
