@@ -69,18 +69,20 @@
 ## 涉及文件
 
 - `apps/web/src/lib/api-proxy.ts` — 接口放行名单按工具证据取集成分支侧（条目 125 → 139）
-- `tools/module-progress/MAIN_MERGE_CRON_PROMPT.md` — 协议文件按行级证据取 main 侧
+- `tools/module-progress/MAIN_MERGE_CRON_PROMPT.md` — 协议文件按行级证据取 main 侧；
+  本轮另把本轮验证出的判定依据补进该文件（并发合并的识别、静态预检读成相对基线的增量、
+  白名单真实测试面的路径与跑法、判定工具保守警报的裁决配方、基线未跑完导致的假阻塞）
 - `packages/api-contracts/src/contracts/*.ts` 与 `packages/api-contracts/src/*.openapi.json` — 契约求并后语义等价
 - `docs/product/capability-blueprint/module-progress.md` — 台账 465 行、模块编号无重复
 - `docs/sessions/2026-10/2026-10-22-0905-main-sync-merge-landed-review.md` — 本记录
 
 ## 后续待办
 
-- 合并后 `main` 的 CI 基线 run 当时仍在跑，本轮只观察到
-  `Java 21 & PostgreSQL Integration` 与 `Lint` 失败（与合并前基线同集合），
-  `Catalog Browser & Contract Tests` 与 `Security Scan` 尚未出结论。
-  下一轮做基线比对时，**先确认基线 run 已经 completed** ——
+- 合并后 `main` 的 CI 基线 run（`39703470948`）本轮观察时仍在跑，
+  随后已跑完，结论为失败（失败作业集合与合并前基线一致）。
+  下一轮做基线比对时仍要先确认基线 run 已经 completed ——
   还在跑的基线会被闸工具读成「无失败」，从而把同样的失败误判成「新增失败」。
+  这条陷阱已写进协议第 7.3 节。
 - 集成分支若继续前进，下一轮照常走「落地树判据 → 有增量才开同步 PR」。
 
 ## 关联
