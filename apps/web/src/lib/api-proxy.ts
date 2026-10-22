@@ -190,6 +190,71 @@ const services: readonly {
       /^ad\-flash\-sales(?:\/(?:capabilities|options|flash\-sales(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:status|claims|redemptions|statistics))?)?))$/,
   },
   {
+    // 16.4.1.2 检测与预警（channel 服务，卷 16「合规与风险」L3 16.4「知识产权」的第二格）。
+    // 纯**新增一条独立的 `services[]` 元素**，既有的 `ip-risk-library`（16.4.1.1 上游）、
+    // `ad-coupons` / `ad-flash-sales` 等**一字未动、也不重排** ——
+    // 本文件是多车道共用的累积型白名单，每条服务规则是一段超长单行正则，往同一条 alternation 里
+    // 并分支会让多车道同时并入时 git 必然判冲突（结构性，retry 不会自愈）。
+    //
+    // ---- 插入锚点选在 `prefix: 'identity/'` 那条元素**之前**（即 `ad-flash-sales` 那条之后）----
+    //   同批其它三条车道分别锚在 `// 14.5.2.1 带货归因` 之前、`// 11.4.1.1 平台纠纷列表` 之前
+    //   与数组末尾（`buyer-risk-scores` 之后），与本处互不重叠 ⇒ git 能干净求并。
+    //
+    // ---- 首 token「ip-detections」的零命中核对结论 ----
+    //   本文件既有 services[] 正则里**没有任何一条**含 `ip-detections` 这个串
+    //   （既有的是 `ip-risk-library`（上游 16.4.1.1）/ `buyer-risk-scores` / `platform-violations` 一类），
+    //   所以首 token 既是独立字面量，也不会被既有分支的前缀吃掉。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   ip-detections/capabilities                能力声明（各条口径 + 未交付的外部边界逐条列出）
+    //   ip-detections/detections                  检测报告清单（GET，真分页 + 真筛选）/ 发起检测（POST）
+    //   ip-detections/detections/{uuid}           报告详情（GET，含命中项 / 预警 / 整改建议 / 复核任务）
+    //   ip-detections/alerts                      预警清单（GET，真分页）
+    //   ip-detections/alerts/{uuid}/status        确认 / 处置预警（PUT，终态不可回退）
+    //   ip-detections/remediations                整改建议清单（GET）/ 手工新增一条（POST）
+    //   ip-detections/remediations/{uuid}/status  推进整改建议状态（PUT，终态不可回退）
+    //   ip-detections/reviews                     人工复核队列（GET）/ 提一条复核（POST）
+    //   ip-detections/reviews/{uuid}              复核结论（PUT，CONFIRMED / DISMISSED）
+    //   ip-detections/external-queries            外部商标 / 专利查询清单（GET）/ 登记一条（POST）
+    //   ip-detections/external-queries/{uuid}     外部查询详情（GET，含登记回来的结果）
+    //   ip-detections/external-queries/{uuid}/hits   登记查回来的外部结果（POST，append-only）
+    //   ip-detections/external-queries/{uuid}/status 推进查询状态（PUT：查无结果 / 查询失败）
+    //   ip-detections/inspection-plans            巡检计划清单（GET）/ 新建计划（POST）
+    //   ip-detections/inspection-plans/{uuid}     改巡检计划（PUT）
+    //   ip-detections/inspection-runs            巡检运行清单（GET）/ 跑一轮巡检（POST）
+    //   ip-detections/inspection-runs/{uuid}     巡检运行详情（GET，这一轮产出的报告）
+    //
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //   （不是 `[0-9a-f-]+`：后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行）。
+    // ⚠️ **末尾刻意不带 `?`**：带了就等于放行裸路径 `ip-detections` ——
+    //   后端没有「一条汇总列表接口」，一切入口都带子路径。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸路径 `ip-detections` —— 本模块没有裸集合读
+    //   * `ip-detections/block` / `ip-detections/release` /
+    //     `ip-detections/detections/{uuid}/block` / `.../release` ——
+    //     **拦截权归 16.2.1.2 拦截执行（已交付）**，本模块只产出**建议**（recommended_action），
+    //     放行一个不存在的拦截入口会让界面以为「已经拦了」
+    //   * `ip-detections/image-search` / `ip-detections/detections/{uuid}/reverse-image-search` ——
+    //     **以图搜图未交付**（本仓没有图像识别引擎）；图片比对是**标识文本比对**，
+    //     命中**一律**进人工复核队列
+    //   * `ip-detections/external-queries/sync` / `ip-detections/external-trademark-search` ——
+    //     **自动外呼外部商标库未交付**（本仓没有凭据与网络出口）；外部结果靠**登记承接**
+    //   * `ip-detections/detections/{uuid}/delete` / `reviews/{uuid}/delete` /
+    //     `alerts/{uuid}/delete` —— 检测结论与命中项是**证据**，**append-only**，不做删除
+    //   * `ip-detections/alerts/{uuid}` —— 没有「按 id 取单条预警」这个端点
+    //   * `ip-detections/detections/{uuid}/status` / `.../hits` —— 报告的子动作只有这两段，
+    //     而**都不存在**（报告状态由复核结果回写，不单独开一条）
+    //   * `ip-detections/reviews/{uuid}/status` —— 复核结论走 PUT 复核任务**本身**
+    //   * `ip-detections/overview` / `ip-detections/stats` —— 汇总在 reports 清单里，不另开一条
+    //   * 非 UUID 段 —— `ip-detections/detections/not-a-uuid` 必须 404
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^ip\-detections(?:\/(?:capabilities|detections|alerts|remediations|reviews|external\-queries|inspection\-plans|inspection\-runs)|\/detections\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}|\/alerts\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/status|\/remediations\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/status|\/reviews\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}|\/external\-queries\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/hits|\/status)?|\/inspection\-plans\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}|\/inspection\-runs\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})$/,
+  },
+  {
     prefix: 'identity/',
     env: 'IDENTITY_URL',
     fallback: 'http://127.0.0.1:8081',
@@ -1431,6 +1496,66 @@ const services: readonly {
     pattern:
       /^logistics\-channels(?:\/(?:capabilities|overview|eligibility|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}))?$/,
     // 裸路径 logistics-channels **放行**：它就是本模块的集合读 + POST 登记入口。
+  },
+  {
+    // 16.5.1.1 黑名单（channel 服务，卷 16 合规与风险 / L3 16.5.1 买家风控下的第一格）。
+    //
+    // 本条目是**新增一条独立的 `services[]` 元素**，不是往既有 channel 分支的 alternation 里
+    // 并分支 —— 那一支是一段超长单行正则，多车道同时并进去 git 必然判冲突（结构性，
+    // retry 不会自愈）。既有条目**一字未动、也不重排**。
+    //
+    // ---- 插入锚点固定在 10.1.1.2 `logistics-channels` 那一条**之后**、
+    //      14.5.2.1 `attributions` 那一条**之前** ----
+    //   同批其它三条车道的锚点分别是 `prefix: 'identity/'` 之前、`// 11.4.1.1 平台纠纷列表`
+    //   之前、数组末尾（`buyer-risk-scores` 之后），**与本条互不重叠**。
+    //
+    // ---- 首 token「buyer-blacklist」的零命中核对结论 ----
+    //   本文件既有 140+ 条 services[] 正则里，**没有任何一条**含 `buyer-blacklist` 这个串
+    //   （既有的是 `buyer-risk-scores`（16.5.1.2）、`buyer-emails`（15.1.2.1，在 crm 前缀下）、
+    //   `influencers/.../blacklist`）—— 首 token 逐个核过，**命中 0**。
+    //   `buyer-blacklist` 与 `buyer-risk-scores` 只差两个字符，**互不为前缀**，不会互相吃掉。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   buyer-blacklist/capabilities                能力声明（未交付段 available=false + ownerModule）
+    //   buyer-blacklist/entries                     黑名单清单（GET，真分页 + 真筛选 + 汇总计数）
+    //   buyer-blacklist/entries                     手工录入黑名单（POST）
+    //   buyer-blacklist/entries/auto                自动录入（POST，来自风控信号）
+    //   buyer-blacklist/entries/{uuid}              登记详情（GET；头 + 状态流转留痕 + 申诉单）
+    //   buyer-blacklist/entries/{uuid}/release       解除（POST；**必须带理由**，追加一条留痕）
+    //   buyer-blacklist/entries/{uuid}/appeals      提交申诉（POST）
+    //   buyer-blacklist/appeals/{uuid}/decision     申诉裁决（POST；通过 ⇒ 解除，驳回 ⇒ 维持）
+    //   buyer-blacklist/check                       下单时检查（POST；命中就落一条订单拦截标记）
+    //   buyer-blacklist/flags                       订单拦截标记清单（GET，真分页 + 真筛选）
+    //
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //（不是 `[0-9a-f-]+`：后者会把 `auto` 这种非 UUID 形状也当成 id 放行）。
+    // ⚠️ 字面量子路径（capabilities / flags / check / entries / entries/auto）排在
+    //    uuid 段之前判别 —— alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸路径 `buyer-blacklist` —— 后端**没有**「一条汇总列表接口」，一切入口都带子路径。
+    //     末尾**刻意不带 `?`**：带了等于放行裸路径。
+    //   * `buyer-blacklist/entries/{uuid}/delete` —— 🔴 黑名单是判定凭据，**只能解除不能删除**
+    //     （删除等于把历史抹掉）；本模块的解除入口是 `/release`。
+    //   * `buyer-blacklist/entries/{uuid}/status` —— 改黑名单状态没有第二个入口，
+    //     状态只能由「登记 / 解除 / 申诉裁决」这些**留痕事件**推进。
+    //   * `buyer-blacklist/entries/{uuid}/flags` —— 拦截标记有自己的集合读 `/flags`。
+    //   * `buyer-blacklist/overview` / `/stats` —— 本模块**没有**这两个形状；
+    //     概览在 `/entries` 的 `counts` 里。
+    //   * `buyer-blacklist/appeal` —— 申诉是**挂在某条登记下的子资源**，
+    //     形状是 `/entries/{uuid}/appeals` 与 `/appeals/{uuid}/decision`，没有裸的 `/appeal`。
+    //   * `buyer-blacklist/intercept` / `/orders/{uuid}/block` —— 🔴 改订单状态、
+    //     执行拦截是 **9.2.1.3 异常拦截**（trade 服务，台账 D4 已交付）的职责；
+    //     按模块边界纪律**跨服务不写对方的表**，本模块只产出**建议动作**与订单拦截标记，
+    //     **不代劳**、也**不放行**指向它不存在的入口。
+    //   * `buyer-blacklist/aftersales` —— 🔴 开售后单是 **11.1.1.1 售后单列表**
+    //     （trade 服务，台账 D4 已交付）的职责；本模块**不代建售后单**，也不放行入口。
+    //   * `buyer-blacklist/entries/not-a-uuid` —— 非 UUID 段不应被 uuid 分支吃掉。
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^buyer\-blacklist\/(?:capabilities|flags|check|entries(?:\/auto|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:release|appeals))?)?|appeals\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/decision)$/,
   },
   {
     // 14.5.2.1 带货归因（channel 服务，卷 14 广告与增长 / L3 14.5.2 达人效果下的第三格）。
@@ -7950,6 +8075,87 @@ const services: readonly {
       /^ad\-groups(?:\/(?:capabilities|options|summary|product\-candidates|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:operations|products))?))?$/,
   },
   {
+    // 16.5.2.1 登录与访问安全（channel 服务，卷 16「合规与风险」L3 16.5.2「账号与访问安全」的第一格）。
+    //
+    // 蓝图：「管理平台账号与系统的访问安全：多因子认证、登录审计、异常登录告警、IP 白名单、
+    // 会话管理；平台授权凭据的访问审计。输入：认证配置；登录事件；访问审计事件。
+    // 输出：安全配置 + 审计记录 + 告警。关系：上游 = 17 identity；下游 = 2 凭据引用。
+    // **平台凭据是最值钱的资产**，访问必须有审计且最小权限。」
+    //
+    // ---- 纯**新增一条独立的 `services[]` 元素** ----
+    //   既有条目**一字未动、也不重排、不格式化整文件**。往既有那条巨型 alternation 里并分支
+    //   会让多车道同时并入时 git 必然判冲突（结构性，retry 永远不会自愈）。
+    //
+    // ---- 插入锚点固定在 `ad-groups` 那条元素**之后**、`11.4.1.1 平台纠纷列表` 那条**之前** ----
+    //   同批其它车道的锚点分别是 `prefix: 'identity/'` 之前、`// 14.5.2.1 带货归因` 之前与数组末尾，
+    //   与本锚点相距 600 行以上 ⇒ git 能干净求并。
+    //
+    // ---- 首 token「access-security」的零命中核对结论 ----
+    //   本文件既有 services[] 正则里**没有任何一条**含 `access-security` 这个串
+    //   （既有的是 `ad-groups` / `ad-campaigns` / `buyer-risk-scores` / `ip-risk-library` 一类），
+    //   所以首 token 既是独立字面量，也不会被既有分支的前缀吃掉。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   access-security/capabilities                    能力声明（逐项 available + ownerModule + 影响面）
+    //   access-security/policy                           安全策略（GET 读 / PUT 改）
+    //   access-security/mfa/registrations               MFA 因子登记（GET 真分页 / POST 登记）
+    //   access-security/mfa/registrations/{uuid}/activate MFA 登记：绑定完成
+    //   access-security/mfa/registrations/{uuid}/disable  MFA 登记：停用
+    //   access-security/mfa/challenges                   MFA 挑战记录（GET / POST 登记下发）
+    //   access-security/mfa/challenges/{uuid}/attempts    验证尝试（append-only，新的一行）
+    //   access-security/login-audit                      登录审计（GET 真分页 / 真筛选）
+    //   access-security/login-audit/scan                 跑一次扫描（POST，真去上游读）
+    //   access-security/alerts                          告警列表（GET，真分页 + 真筛选 + 汇总）
+    //   access-security/alerts/{uuid}                    告警详情（GET，含处置留痕）
+    //   access-security/alerts/{uuid}/acknowledge        确认（新警 → 已确认）
+    //   access-security/alerts/{uuid}/ignore             忽略（新警 / 已确认 → 已忽略）
+    //   access-security/alerts/{uuid}/resolve            处置（新警 / 已确认 → 已处置）
+    //   access-security/ip-allowlist                     IP 白名单（GET / POST）
+    //   access-security/ip-allowlist/check               IP 只读判定（GET，真网段包含运算）
+    //   access-security/ip-allowlist/evaluate            IP 判定 + 留痕（POST）
+    //   access-security/ip-allowlist/{uuid}              修改 / 删除白名单条目（PUT / DELETE）
+    //   access-security/credential-access                凭据访问审计列表（GET）/ 受控访问（POST）
+    //   access-security/credential-access/credentials     按凭据汇总（GET）
+    //   access-security/credential-access/{uuid}          单条凭据访问审计（GET）
+    //   access-security/session                          当前调用方的会话现状 + 会话策略（GET）
+    //
+    // 判别顺序：**字面量子路径（capabilities / policy / scan / check / evaluate / credentials）
+    // 排在 {uuid} 段之前** —— alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //（不是 `[0-9a-f-]+`：后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行）。
+    // ⚠️ **末尾刻意不带 `?`**：带了就等于放行裸路径 `access-security` ——
+    //   后端没有「一条汇总列表接口」，放行它会让界面以为可用。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸路径 `access-security` —— 本模块没有裸集合读
+    //   * `access-security/login-audit/{uuid}` —— 登录审计**没有**按 id 取详情的端点
+    //     （列表行已经带全字段；单条详情要另开端点时再放行）
+    //   * `access-security/login-audit/delete` / `.../login-audit/{uuid}/delete` ——
+    //     登录审计是 **append-only** 的凭据，**不做删除**
+    //   * `access-security/alerts/{uuid}/delete` —— 告警的处置走状态机（确认 / 忽略 / 处置），
+    //     **不是删除**；删掉告警等于删掉处置留痕
+    //   * `access-security/alerts/{uuid}/reopen` —— 「已忽略 / 已处置」是**终态**，
+    //     要重新处置只能等下一次告警，不提供「重开」入口
+    //   * `access-security/credential-access/{uuid}/delete` —— 凭据访问审计是 **append-only**，
+    //     **刻意不给 UPDATE/DELETE**（GRANT 只给 SELECT,INSERT）
+    //   * `access-security/mfa/registrations/{uuid}/delete` —— MFA 登记的状态机是
+    //     「停用 / 撤销」，**不提供物理删除**
+    //   * `access-security/sessions` / `access-security/session/{uuid}` ——
+    //     会话实体在 17 identity，**本模块不造第二套会话系统**（只读自己的会话策略与现状）
+    //   * `access-security/blacklist` —— 16.5.1.1 黑名单**未交付**，本模块**不写黑名单**
+    //   * `access-security/related-accounts` —— 16.5.2.2 关联风险**未交付**，
+    //     本模块**不编一张「关联账号」表**
+    //   * `access-security/connections/{uuid}/credential` —— **下游 2 凭据引用（2.2.1.3）已交付**
+    //     （台账：`credential_ref` + `PUT /connections/{id}/credential`）。
+    //     本模块**不改它的表、不改它的端点、不改它的签名**，只在它旁边加一层**访问审计**；
+    //     那个写端点归 2.2.1.3，**不是本模块的形状** ⇒ 刻意不放行。
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^access\-security(?:\/(?:capabilities|policy|login\-audit(?:\/scan)?|alerts(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:acknowledge|ignore|resolve))?)?|mfa\/registrations(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/(?:activate|disable))?|mfa\/challenges(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/attempts)?|ip\-allowlist(?:\/check|\/evaluate|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|credential\-access(?:\/credentials|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|session))$/,
+  },
+  {
     // 11.4.1.1 平台纠纷列表（trade 服务，卷 11「售后与退货」L3 11.4「平台纠纷与客诉」的第一格）。
     //
     // 蓝图：「管理平台纠纷/争议（Amazon A-to-Z、eBay 争议、速卖通纠纷）：类型、金额、平台时限、
@@ -8685,6 +8891,67 @@ const services: readonly {
     fallback: 'http://127.0.0.1:8083',
     pattern:
       /^buyer\-risk\-scores\/(?:capabilities|rule|buyers|evaluate|scores(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?)$/,
+  },
+  {
+    // ---------------------------------------------------------------------------
+    // 16.6.1.1 PII 管理（channel 服务）
+    // ---------------------------------------------------------------------------
+    //
+    // ---- 插入锚点固定在 **services[] 数组的末尾**（`buyer-risk-scores` 那条之后、数组结尾的 `];` 之前）----
+    //   同批另外三条车道的锚点分别是「`prefix: 'identity/'` 之前」「`// 14.5.2.1 带货归因` 之前」
+    //   「`// 11.4.1.1 平台纠纷列表` 之前」，与本锚点互不重叠，git 能干净求并。
+    //
+    // ---- 纯**新增一条独立的 `services[]` 元素** ----
+    //   既有条目**一字未动、也不重排、不格式化整文件**。往既有那条巨型 alternation 里并分支
+    //   会让多车道同时并入时 git 必然判冲突（结构性，retry 永远不会自愈）。
+    //
+    // ---- 首 token「pii-access」的零命中核对结论 ----
+    //   本文件既有 services[] 正则里**没有任何一条**含 `pii-access` 这个串
+    //   （本仓既有全文里 `pii` 单独出现次数也是 0）。
+    //   ⚠️ `pii-access` 与既有的 `buyer-risk-scores` / `ip-risk-library` / `epr-registrations`
+    //   **都不是前缀关系**（首 token 就分叉），所以既有分支**不会**吃掉本模块的任何路径，
+    //   本模块的分支也**不会**吃掉别人的任何路径（双向都实测过）。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   pii-access/capabilities                     能力声明（脱敏规则 / 授权模型 / 留痕与导出规则）
+    //   pii-access/policy                          策略（GET 读 / PUT 改：导出限量 / 审批有效期）
+    //   pii-access/grants                          授权配置（GET 列表 / PUT 登记）
+    //   pii-access/grants/{uuid}/revoke            撤销授权（POST，理由必填）
+    //   pii-access/subjects                        PII 主体列表（GET，真分页 + 真搜索，**默认脱敏**）
+    //   pii-access/subjects/{kind}/{ref}           单个主体（GET，默认脱敏；reveal=true 走授权判定）
+    //   pii-access/exports                         导出申请列表（GET）/ 提交申请（POST）
+    //   pii-access/exports/{uuid}                  导出申请详情（GET，含逐条清单）
+    //   pii-access/exports/{uuid}/approve          批准（POST）
+    //   pii-access/exports/{uuid}/reject           驳回（POST）
+    //   pii-access/exports/{uuid}/execute          执行导出（POST，**必须已审批**）
+    //   pii-access/audit                           访问审计（GET，真分页 + 真筛选）
+    //
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //   （不是 `[0-9a-f-]+`）：后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行。
+    // ⚠️ `{kind}` 段**只放行受控值域** `CUSTOMER|ORDER`：主体类型不是自由文本，
+    //   放行任意一段等于把「拼错的类型」也送到后端。
+    // ⚠️ `{ref}` 段允许 buyer_ref 这种**非 UUID** 标识（15 客户的 buyer_ref 是逻辑引用），
+    //   但**不允许 `/`**：段里带斜杠就意味着多了一层路径，那些形状后端没有。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸路径 `pii-access` —— 本模块没有裸集合读
+    //   * `pii-access/exports/{uuid}/delete` —— 导出申请是审批凭据，不做删除
+    //   * `pii-access/exports` 之外的**批量全量导出**形状（如 `pii-access/exports/all`）——
+    //     🔴 **批量导出 PII 必须走审批**，且导出对象必须逐条列明；
+    //     放行一个「一把全导」的入口，等于给数据泄露事件留一个后门。
+    //   * `pii-access/subjects/{kind}/{ref}/delete` —— 审计是 append-only，没有删除
+    //   * `pii-access/purge`、`pii-access/mask-off` —— **没有**「关闭脱敏」的形状：
+    //     脱敏是硬默认，不是可选开关。
+    //   * `pii-access/exports/{uuid}/approve-all` —— 审批必须逐张做
+    //   * `pii-access/audit/{uuid}/delete` —— 访问审计只增不改
+    //
+    // 🔴 本模块**不写**下游客服与运营页面的专属形状：它们不是本模块的端点，
+    //   放行一个本模块不实现的路径只会让界面以为「已经可用」。
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^pii\-access\/(?:capabilities|policy|grants(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/revoke)?|subjects(?:\/(?:CUSTOMER|ORDER)\/[0-9a-zA-Z][0-9a-zA-Z._:@-]*)?|exports(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:approve|reject|execute))?)?|audit)$/,
   },
 ];
 

@@ -1,6 +1,1186 @@
 {
   "components": {
     "schemas": {
+      "AccessSecurityAlertActionInput": {
+        "properties": {
+          "reason": {
+            "maxLength": 600,
+            "minLength": 0,
+            "type": "string"
+          }
+        },
+        "required": [
+          "reason"
+        ],
+        "type": "object"
+      },
+      "AccessSecurityAlertActionView": {
+        "properties": {
+          "action": {
+            "type": "string"
+          },
+          "actionId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "actorId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "actorName": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "fromStatus": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "toStatus": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AccessSecurityAlertPage": {
+        "properties": {
+          "acknowledgedCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "criticalCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "highCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "ignoredCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AccessSecurityAlertView"
+            },
+            "type": "array"
+          },
+          "newCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "resolvedCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AccessSecurityAlertView": {
+        "properties": {
+          "acknowledgedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "acknowledgedBy": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "actions": {
+            "items": {
+              "$ref": "#/components/schemas/AccessSecurityAlertActionView"
+            },
+            "type": "array"
+          },
+          "alertId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "alertType": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "detectedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "eventCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "ignoreReason": {
+            "type": "string"
+          },
+          "ignoredAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "ignoredBy": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "resolutionNote": {
+            "type": "string"
+          },
+          "resolvedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "resolvedBy": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "severity": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "subjectKind": {
+            "type": "string"
+          },
+          "subjectValue": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "version": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "windowEnd": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "windowStart": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AccessSecurityCapabilities": {
+        "properties": {
+          "alertNote": {
+            "type": "string"
+          },
+          "boundaryNote": {
+            "type": "string"
+          },
+          "capabilities": {
+            "items": {
+              "$ref": "#/components/schemas/AccessSecurityCapability"
+            },
+            "type": "array"
+          },
+          "credentialNote": {
+            "type": "string"
+          },
+          "downstreamNote": {
+            "type": "string"
+          },
+          "ipAllowlistNote": {
+            "type": "string"
+          },
+          "loginAuditNote": {
+            "type": "string"
+          },
+          "mfaNote": {
+            "type": "string"
+          },
+          "sessionNote": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AccessSecurityCapability": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "code": {
+            "type": "string"
+          },
+          "impact": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AccessSecurityControlledAccessResult": {
+        "properties": {
+          "audit": {
+            "$ref": "#/components/schemas/AccessSecurityCredentialAccessView"
+          },
+          "credential": {
+            "$ref": "#/components/schemas/AccessSecurityCredentialView"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AccessSecurityCredentialAccessInput": {
+        "properties": {
+          "accessPurpose": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "credentialId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "accessPurpose",
+          "credentialId"
+        ],
+        "type": "object"
+      },
+      "AccessSecurityCredentialAccessPage": {
+        "properties": {
+          "deniedCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "failedCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AccessSecurityCredentialAccessView"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "successCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AccessSecurityCredentialAccessView": {
+        "properties": {
+          "accessId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "accessKind": {
+            "type": "string"
+          },
+          "accessPurpose": {
+            "type": "string"
+          },
+          "actorId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "actorName": {
+            "type": "string"
+          },
+          "actorSource": {
+            "type": "string"
+          },
+          "credentialId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "externalRef": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "occurredAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "outcome": {
+            "type": "string"
+          },
+          "provider": {
+            "type": "string"
+          },
+          "requestId": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AccessSecurityCredentialPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AccessSecurityCredentialView"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AccessSecurityCredentialView": {
+        "properties": {
+          "accessCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "authorizedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "credentialId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "expiresAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "externalRef": {
+            "type": "string"
+          },
+          "grantedScopes": {
+            "type": "string"
+          },
+          "lastAccessedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "lastAccessedBy": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "provider": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "tokenType": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AccessSecurityIpAllowlistInput": {
+        "properties": {
+          "cidrRange": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "effectiveFrom": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "effectiveTo": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "label": {
+            "maxLength": 120,
+            "minLength": 0,
+            "type": "string"
+          },
+          "scopeId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "scopeKind": {
+            "pattern": "TENANT|CONNECTION",
+            "type": "string"
+          },
+          "status": {
+            "pattern": "ACTIVE|DISABLED",
+            "type": "string"
+          }
+        },
+        "required": [
+          "cidrRange",
+          "scopeKind",
+          "status"
+        ],
+        "type": "object"
+      },
+      "AccessSecurityIpAllowlistPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AccessSecurityIpAllowlistView"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AccessSecurityIpAllowlistView": {
+        "properties": {
+          "cidrRange": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdBy": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "createdByName": {
+            "type": "string"
+          },
+          "effectiveFrom": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "effectiveTo": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "entryId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "scopeId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "scopeKind": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "version": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AccessSecurityIpCheckResult": {
+        "properties": {
+          "allowed": {
+            "type": "boolean"
+          },
+          "enforce": {
+            "type": "boolean"
+          },
+          "inAllowlist": {
+            "type": "boolean"
+          },
+          "ip": {
+            "type": "string"
+          },
+          "matchedCidr": {
+            "nullable": true,
+            "type": "string"
+          },
+          "matchedEntryId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "mode": {
+            "type": "string"
+          },
+          "modeLabel": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "valid": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "AccessSecurityLoginAuditPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AccessSecurityLoginAuditView"
+            },
+            "type": "array"
+          },
+          "known": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AccessSecurityLoginAuditView": {
+        "nullable": true,
+        "properties": {
+          "actorId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "actorName": {
+            "type": "string"
+          },
+          "anomaly": {
+            "type": "boolean"
+          },
+          "anomalyCode": {
+            "type": "string"
+          },
+          "auditId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "eventType": {
+            "type": "string"
+          },
+          "level": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "occurredAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "outcome": {
+            "type": "string"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "sourceEventId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "sourceIp": {
+            "type": "string"
+          },
+          "sourceIpAvailable": {
+            "type": "boolean"
+          },
+          "summary": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AccessSecurityMfaChallengeAttemptInput": {
+        "properties": {
+          "failureReason": {
+            "maxLength": 400,
+            "minLength": 0,
+            "type": "string"
+          },
+          "outcome": {
+            "pattern": "VERIFIED|FAILED|EXPIRED",
+            "type": "string"
+          }
+        },
+        "required": [
+          "outcome"
+        ],
+        "type": "object"
+      },
+      "AccessSecurityMfaChallengeInput": {
+        "properties": {
+          "deliveryChannel": {
+            "pattern": "AUTHENTICATOR_APP|SMS|EMAIL|MANUAL",
+            "type": "string"
+          },
+          "deliveryRef": {
+            "maxLength": 400,
+            "minLength": 0,
+            "type": "string"
+          },
+          "expiresInSeconds": {
+            "format": "int32",
+            "maximum": 1800,
+            "minimum": 30,
+            "type": "integer"
+          },
+          "factorType": {
+            "pattern": "TOTP|SMS|EMAIL",
+            "type": "string"
+          },
+          "registrationId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "deliveryChannel",
+          "expiresInSeconds",
+          "factorType",
+          "registrationId"
+        ],
+        "type": "object"
+      },
+      "AccessSecurityMfaChallengePage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AccessSecurityMfaChallengeView"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AccessSecurityMfaChallengeView": {
+        "properties": {
+          "attemptNo": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "challengeId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "deliveryChannel": {
+            "type": "string"
+          },
+          "deliveryRef": {
+            "type": "string"
+          },
+          "expiresAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "factorType": {
+            "type": "string"
+          },
+          "failureReason": {
+            "type": "string"
+          },
+          "occurredAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "outcome": {
+            "type": "string"
+          },
+          "recordId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "registrationId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AccessSecurityMfaRegistrationInput": {
+        "properties": {
+          "factorLabel": {
+            "maxLength": 120,
+            "minLength": 0,
+            "type": "string"
+          },
+          "factorType": {
+            "pattern": "TOTP|SMS|EMAIL",
+            "type": "string"
+          },
+          "membershipId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "secretRef": {
+            "maxLength": 400,
+            "minLength": 0,
+            "type": "string"
+          },
+          "userId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "factorType",
+          "userId"
+        ],
+        "type": "object"
+      },
+      "AccessSecurityMfaRegistrationPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AccessSecurityMfaRegistrationView"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AccessSecurityMfaRegistrationView": {
+        "properties": {
+          "boundAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "factorLabel": {
+            "type": "string"
+          },
+          "factorType": {
+            "type": "string"
+          },
+          "lastVerifiedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "membershipId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "registrationId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "revokedReason": {
+            "type": "string"
+          },
+          "secretRefPresent": {
+            "type": "boolean"
+          },
+          "status": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "userId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "version": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AccessSecurityPolicyInput": {
+        "properties": {
+          "anomalyFailedLoginThreshold": {
+            "format": "int32",
+            "maximum": 1000,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "anomalySuccessLoginThreshold": {
+            "format": "int32",
+            "maximum": 1000,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "anomalyWindowMinutes": {
+            "format": "int32",
+            "maximum": 1440,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "ipAllowlistMode": {
+            "pattern": "DISABLED|REPORT_ONLY|ENFORCE",
+            "type": "string"
+          },
+          "mfaEnforcementFrom": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "mfaGracePeriodMinutes": {
+            "format": "int32",
+            "maximum": 43200,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "mfaPrimaryFactor": {
+            "pattern": "TOTP|SMS|EMAIL",
+            "type": "string"
+          },
+          "mfaRequired": {
+            "type": "boolean"
+          },
+          "policyName": {
+            "maxLength": 120,
+            "minLength": 0,
+            "type": "string"
+          },
+          "sessionAbsoluteTimeoutMinutes": {
+            "format": "int32",
+            "maximum": 43200,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "sessionIdleTimeoutMinutes": {
+            "format": "int32",
+            "maximum": 10080,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "sessionMaxConcurrent": {
+            "format": "int32",
+            "maximum": 100,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "sessionRevokeOnMfaChange": {
+            "type": "boolean"
+          },
+          "sessionRevokeOnPasswordChange": {
+            "type": "boolean"
+          },
+          "version": {
+            "format": "int64",
+            "nullable": true,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "anomalyFailedLoginThreshold",
+          "anomalySuccessLoginThreshold",
+          "anomalyWindowMinutes",
+          "ipAllowlistMode",
+          "mfaGracePeriodMinutes",
+          "mfaPrimaryFactor",
+          "policyName",
+          "sessionAbsoluteTimeoutMinutes",
+          "sessionIdleTimeoutMinutes",
+          "sessionMaxConcurrent"
+        ],
+        "type": "object"
+      },
+      "AccessSecurityPolicyView": {
+        "properties": {
+          "anomalyFailedLoginThreshold": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "anomalySuccessLoginThreshold": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "anomalyWindowMinutes": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "configured": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "ipAllowlistMode": {
+            "type": "string"
+          },
+          "mfaEnforcementFrom": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "mfaGracePeriodMinutes": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "mfaPrimaryFactor": {
+            "type": "string"
+          },
+          "mfaRequired": {
+            "type": "boolean"
+          },
+          "policyId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "policyName": {
+            "type": "string"
+          },
+          "sessionAbsoluteTimeoutMinutes": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "sessionIdleTimeoutMinutes": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "sessionMaxConcurrent": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "sessionRevokeOnMfaChange": {
+            "type": "boolean"
+          },
+          "sessionRevokeOnPasswordChange": {
+            "type": "boolean"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "version": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AccessSecurityScanInput": {
+        "properties": {
+          "from": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "to": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AccessSecurityScanResult": {
+        "properties": {
+          "alerts": {
+            "items": {
+              "$ref": "#/components/schemas/AccessSecurityAlertView"
+            },
+            "type": "array"
+          },
+          "alertsCreated": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "alertsUpdated": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "events": {
+            "items": {
+              "$ref": "#/components/schemas/AccessSecurityLoginAuditView"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "eventsRecorded": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "eventsScanned": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "known": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          },
+          "windowEnd": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "windowStart": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AccessSecuritySessionDimension": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "code": {
+            "type": "string"
+          },
+          "impact": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AccessSecuritySessionView": {
+        "properties": {
+          "dimensions": {
+            "items": {
+              "$ref": "#/components/schemas/AccessSecuritySessionDimension"
+            },
+            "type": "array"
+          },
+          "known": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          },
+          "policy": {
+            "$ref": "#/components/schemas/AccessSecurityPolicyView"
+          },
+          "sessionState": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "AccountHealthAssessmentPage": {
         "properties": {
           "items": {
@@ -18595,6 +19775,689 @@
         },
         "type": "object"
       },
+      "BuyerBlacklistAppealDecisionInput": {
+        "properties": {
+          "decision": {
+            "minLength": 1,
+            "pattern": "APPROVED|REJECTED",
+            "type": "string"
+          },
+          "decisionReason": {
+            "maxLength": 800,
+            "minLength": 0,
+            "type": "string"
+          }
+        },
+        "required": [
+          "decision",
+          "decisionReason"
+        ],
+        "type": "object"
+      },
+      "BuyerBlacklistAppealInput": {
+        "properties": {
+          "appealReason": {
+            "maxLength": 800,
+            "minLength": 0,
+            "type": "string"
+          }
+        },
+        "required": [
+          "appealReason"
+        ],
+        "type": "object"
+      },
+      "BuyerBlacklistAppealView": {
+        "properties": {
+          "appealId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "appealReason": {
+            "type": "string"
+          },
+          "decidedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "decidedBy": {
+            "type": "string"
+          },
+          "decision": {
+            "type": "string"
+          },
+          "decisionReason": {
+            "type": "string"
+          },
+          "entryId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "submittedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "submittedBy": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "BuyerBlacklistAutoInput": {
+        "properties": {
+          "buyerKey": {
+            "minLength": 1,
+            "pattern": "^[0-9a-f]{32}$",
+            "type": "string"
+          },
+          "note": {
+            "maxLength": 600,
+            "minLength": 0,
+            "nullable": true,
+            "type": "string"
+          },
+          "reason": {
+            "maxLength": 600,
+            "minLength": 0,
+            "type": "string"
+          },
+          "riskLevel": {
+            "minLength": 1,
+            "pattern": "LOW|MEDIUM|HIGH|CRITICAL",
+            "type": "string"
+          },
+          "scope": {
+            "minLength": 1,
+            "pattern": "SHOP_ONLY|ALL_SHOPS",
+            "type": "string"
+          },
+          "shopCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "nullable": true,
+            "type": "string"
+          },
+          "signalRef": {
+            "maxLength": 160,
+            "minLength": 0,
+            "type": "string"
+          }
+        },
+        "required": [
+          "buyerKey",
+          "reason",
+          "riskLevel",
+          "scope",
+          "signalRef"
+        ],
+        "type": "object"
+      },
+      "BuyerBlacklistCapabilities": {
+        "properties": {
+          "appealSemantics": {
+            "type": "string"
+          },
+          "boundaryNote": {
+            "type": "string"
+          },
+          "capabilities": {
+            "items": {
+              "$ref": "#/components/schemas/BuyerBlacklistCapability"
+            },
+            "type": "array"
+          },
+          "downstreamNote": {
+            "type": "string"
+          },
+          "flagSemantics": {
+            "type": "string"
+          },
+          "releaseSemantics": {
+            "type": "string"
+          },
+          "scopeSemantics": {
+            "type": "string"
+          },
+          "sources": {
+            "items": {
+              "$ref": "#/components/schemas/BuyerBlacklistSourceState"
+            },
+            "type": "array"
+          },
+          "subjectKeySemantics": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "BuyerBlacklistCapability": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "capabilityCode": {
+            "type": "string"
+          },
+          "capabilityLabel": {
+            "type": "string"
+          },
+          "impact": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "BuyerBlacklistCheckInput": {
+        "properties": {
+          "buyerEmail": {
+            "maxLength": 254,
+            "minLength": 0,
+            "type": "string"
+          },
+          "buyerName": {
+            "maxLength": 120,
+            "minLength": 0,
+            "type": "string"
+          },
+          "buyerPhone": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "orderRef": {
+            "maxLength": 160,
+            "minLength": 0,
+            "nullable": true,
+            "type": "string"
+          },
+          "shopCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "buyerEmail",
+          "buyerName",
+          "buyerPhone"
+        ],
+        "type": "object"
+      },
+      "BuyerBlacklistCheckResult": {
+        "properties": {
+          "blacklisted": {
+            "type": "boolean"
+          },
+          "buyerKey": {
+            "type": "string"
+          },
+          "buyerKnown": {
+            "type": "boolean"
+          },
+          "buyerName": {
+            "type": "string"
+          },
+          "entryId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "flagId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "flagWritten": {
+            "type": "boolean"
+          },
+          "latestEvaluationStatus": {
+            "nullable": true,
+            "type": "string"
+          },
+          "latestRecommendedAction": {
+            "nullable": true,
+            "type": "string"
+          },
+          "latestRiskScore": {
+            "nullable": true,
+            "type": "number"
+          },
+          "latestScoreId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "matchedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "matchedScope": {
+            "type": "string"
+          },
+          "matchedScopeLabel": {
+            "type": "string"
+          },
+          "matchedShopCode": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "recommendedAction": {
+            "type": "string"
+          },
+          "recommendedActionLabel": {
+            "type": "string"
+          },
+          "riskLevel": {
+            "type": "string"
+          },
+          "riskLevelLabel": {
+            "type": "string"
+          },
+          "shopCode": {
+            "type": "string"
+          },
+          "upstreamAvailable": {
+            "type": "boolean"
+          },
+          "upstreamNote": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "BuyerBlacklistCounts": {
+        "properties": {
+          "active": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "allShops": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "critical": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "high": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "released": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "shopOnly": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "BuyerBlacklistEntryDetail": {
+        "properties": {
+          "appeals": {
+            "items": {
+              "$ref": "#/components/schemas/BuyerBlacklistAppealView"
+            },
+            "type": "array"
+          },
+          "entry": {
+            "$ref": "#/components/schemas/BuyerBlacklistEntryView"
+          },
+          "events": {
+            "items": {
+              "$ref": "#/components/schemas/BuyerBlacklistStatusEventView"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "BuyerBlacklistEntryPage": {
+        "properties": {
+          "counts": {
+            "$ref": "#/components/schemas/BuyerBlacklistCounts"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/BuyerBlacklistEntryView"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "BuyerBlacklistEntryView": {
+        "properties": {
+          "appealCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "buyerEmail": {
+            "type": "string"
+          },
+          "buyerKey": {
+            "type": "string"
+          },
+          "buyerName": {
+            "type": "string"
+          },
+          "buyerPhone": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "entryId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "flagCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "openAppealCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "registeredAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "registeredBy": {
+            "type": "string"
+          },
+          "riskLevel": {
+            "type": "string"
+          },
+          "riskLevelLabel": {
+            "type": "string"
+          },
+          "scope": {
+            "type": "string"
+          },
+          "scopeLabel": {
+            "type": "string"
+          },
+          "shopCode": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "sourceLabel": {
+            "type": "string"
+          },
+          "sourceRef": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusActor": {
+            "type": "string"
+          },
+          "statusAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "statusEventLabel": {
+            "type": "string"
+          },
+          "statusEventType": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "statusReason": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "BuyerBlacklistFlagCounts": {
+        "properties": {
+          "block": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "review": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "watch": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "BuyerBlacklistFlagPage": {
+        "properties": {
+          "counts": {
+            "$ref": "#/components/schemas/BuyerBlacklistFlagCounts"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/BuyerBlacklistOrderFlagView"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "BuyerBlacklistOrderFlagView": {
+        "properties": {
+          "buyerKey": {
+            "type": "string"
+          },
+          "buyerName": {
+            "type": "string"
+          },
+          "entryId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "flagId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "flaggedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "matchedScope": {
+            "type": "string"
+          },
+          "orderRef": {
+            "type": "string"
+          },
+          "recommendedAction": {
+            "type": "string"
+          },
+          "recommendedActionLabel": {
+            "type": "string"
+          },
+          "riskLevel": {
+            "type": "string"
+          },
+          "shopCode": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "BuyerBlacklistRegisterInput": {
+        "properties": {
+          "buyerEmail": {
+            "maxLength": 254,
+            "minLength": 0,
+            "type": "string"
+          },
+          "buyerName": {
+            "maxLength": 120,
+            "minLength": 0,
+            "type": "string"
+          },
+          "buyerPhone": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "note": {
+            "maxLength": 600,
+            "minLength": 0,
+            "nullable": true,
+            "type": "string"
+          },
+          "reason": {
+            "maxLength": 600,
+            "minLength": 0,
+            "type": "string"
+          },
+          "riskLevel": {
+            "minLength": 1,
+            "pattern": "LOW|MEDIUM|HIGH|CRITICAL",
+            "type": "string"
+          },
+          "scope": {
+            "minLength": 1,
+            "pattern": "SHOP_ONLY|ALL_SHOPS",
+            "type": "string"
+          },
+          "shopCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "buyerEmail",
+          "buyerName",
+          "buyerPhone",
+          "reason",
+          "riskLevel",
+          "scope"
+        ],
+        "type": "object"
+      },
+      "BuyerBlacklistReleaseInput": {
+        "properties": {
+          "reason": {
+            "maxLength": 600,
+            "minLength": 0,
+            "type": "string"
+          }
+        },
+        "required": [
+          "reason"
+        ],
+        "type": "object"
+      },
+      "BuyerBlacklistSourceState": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          },
+          "sourceCode": {
+            "type": "string"
+          },
+          "sourceLabel": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "BuyerBlacklistStatusEventView": {
+        "properties": {
+          "actor": {
+            "type": "string"
+          },
+          "appealId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "eventId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "eventLabel": {
+            "type": "string"
+          },
+          "eventSeq": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "eventType": {
+            "type": "string"
+          },
+          "fromStatus": {
+            "type": "string"
+          },
+          "occurredAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "riskLevel": {
+            "type": "string"
+          },
+          "toStatus": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "BuyerRiskBuyerPage": {
         "properties": {
           "available": {
@@ -36153,6 +38016,1109 @@
           "eventType",
           "platformStatus"
         ],
+        "type": "object"
+      },
+      "IpDetectionAlert": {
+        "properties": {
+          "acknowledgedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "acknowledgedBy": {
+            "type": "string"
+          },
+          "alertId": {
+            "type": "string"
+          },
+          "alertLevel": {
+            "type": "string"
+          },
+          "alertLevelLabel": {
+            "type": "string"
+          },
+          "alertType": {
+            "type": "string"
+          },
+          "alertTypeLabel": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "reportId": {
+            "type": "string"
+          },
+          "resolutionNote": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IpDetectionAlertPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/IpDetectionAlert"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "IpDetectionAlertStatusInput": {
+        "properties": {
+          "resolutionNote": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IpDetectionCapabilities": {
+        "properties": {
+          "alertStatusLabels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "alertStatuses": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "alertTypeLabels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "alertTypes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "conclusionLabels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "conclusions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "downstreamNote": {
+            "type": "string"
+          },
+          "externalNote": {
+            "type": "string"
+          },
+          "featureKindLabels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "featureKinds": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "fieldLabels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "fields": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "gaps": {
+            "items": {
+              "$ref": "#/components/schemas/IpDetectionCapabilityGap"
+            },
+            "type": "array"
+          },
+          "imageNote": {
+            "type": "string"
+          },
+          "inspectionNote": {
+            "type": "string"
+          },
+          "matchNote": {
+            "type": "string"
+          },
+          "planScopeLabels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "planScopes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "queryStatusLabels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "queryStatuses": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "recommendedActionLabels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "recommendedActions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "remediationActionLabels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "remediationActions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "remediationStatusLabels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "remediationStatuses": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "reviewNote": {
+            "type": "string"
+          },
+          "reviewReasonLabels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "reviewReasons": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "reviewStatusLabels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "reviewStatuses": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "riskLevelLabels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "riskLevelNote": {
+            "type": "string"
+          },
+          "riskLevels": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "subjectTypeLabels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "subjectTypes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "upstreamNote": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IpDetectionCapabilityGap": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "impact": {
+            "type": "string"
+          },
+          "moduleId": {
+            "type": "string"
+          },
+          "moduleName": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IpDetectionExternalHit": {
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "externalHitId": {
+            "type": "string"
+          },
+          "matchedKey": {
+            "type": "string"
+          },
+          "queryId": {
+            "type": "string"
+          },
+          "registrationNo": {
+            "type": "string"
+          },
+          "rightType": {
+            "type": "string"
+          },
+          "rightsHolder": {
+            "type": "string"
+          },
+          "riskLevel": {
+            "type": "string"
+          },
+          "sourceName": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IpDetectionExternalHitInput": {
+        "properties": {
+          "matchedKey": {
+            "type": "string"
+          },
+          "queryId": {
+            "type": "string"
+          },
+          "registrationNo": {
+            "type": "string"
+          },
+          "rightType": {
+            "type": "string"
+          },
+          "rightsHolder": {
+            "type": "string"
+          },
+          "riskLevel": {
+            "type": "string"
+          },
+          "sourceName": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IpDetectionExternalQuery": {
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "errorMessage": {
+            "type": "string"
+          },
+          "keyword": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "queriedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "queryCode": {
+            "type": "string"
+          },
+          "queryId": {
+            "type": "string"
+          },
+          "queryStatus": {
+            "type": "string"
+          },
+          "queryStatusLabel": {
+            "type": "string"
+          },
+          "resultCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "rightType": {
+            "type": "string"
+          },
+          "rightTypeLabel": {
+            "type": "string"
+          },
+          "sourceName": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IpDetectionExternalQueryDetail": {
+        "properties": {
+          "hits": {
+            "items": {
+              "$ref": "#/components/schemas/IpDetectionExternalHit"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "query": {
+            "$ref": "#/components/schemas/IpDetectionExternalQuery"
+          }
+        },
+        "type": "object"
+      },
+      "IpDetectionExternalQueryInput": {
+        "properties": {
+          "keyword": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "queryCode": {
+            "type": "string"
+          },
+          "rightType": {
+            "type": "string"
+          },
+          "sourceName": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IpDetectionExternalQueryPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/IpDetectionExternalQuery"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "IpDetectionHit": {
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "entryCode": {
+            "type": "string"
+          },
+          "entryId": {
+            "type": "string"
+          },
+          "externalHitId": {
+            "type": "string"
+          },
+          "featureKind": {
+            "type": "string"
+          },
+          "featureKindLabel": {
+            "type": "string"
+          },
+          "field": {
+            "type": "string"
+          },
+          "fieldLabel": {
+            "type": "string"
+          },
+          "hitId": {
+            "type": "string"
+          },
+          "matchedFeature": {
+            "type": "string"
+          },
+          "matchedText": {
+            "type": "string"
+          },
+          "needsManualReview": {
+            "type": "boolean"
+          },
+          "reportId": {
+            "type": "string"
+          },
+          "reviewStatus": {
+            "type": "string"
+          },
+          "rightType": {
+            "type": "string"
+          },
+          "riskLevel": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IpDetectionInspectionPlan": {
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "includeImage": {
+            "type": "boolean"
+          },
+          "intervalDays": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "lastRunAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "nextRunAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "planCode": {
+            "type": "string"
+          },
+          "planId": {
+            "type": "string"
+          },
+          "scope": {
+            "type": "string"
+          },
+          "scopeLabel": {
+            "type": "string"
+          },
+          "shopId": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IpDetectionInspectionPlanInput": {
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "includeImage": {
+            "type": "boolean"
+          },
+          "intervalDays": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "planCode": {
+            "type": "string"
+          },
+          "scope": {
+            "type": "string"
+          },
+          "shopId": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IpDetectionInspectionRun": {
+        "properties": {
+          "errorMessage": {
+            "type": "string"
+          },
+          "finishedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "hitListingCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "listingScanned": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "planCode": {
+            "type": "string"
+          },
+          "planId": {
+            "type": "string"
+          },
+          "reportCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "runId": {
+            "type": "string"
+          },
+          "startedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IpDetectionInspectionRunDetail": {
+        "properties": {
+          "note": {
+            "type": "string"
+          },
+          "reports": {
+            "items": {
+              "$ref": "#/components/schemas/IpDetectionReport"
+            },
+            "type": "array"
+          },
+          "run": {
+            "$ref": "#/components/schemas/IpDetectionInspectionRun"
+          }
+        },
+        "type": "object"
+      },
+      "IpDetectionInspectionRunPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/IpDetectionInspectionRun"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "IpDetectionRemediation": {
+        "properties": {
+          "actionCode": {
+            "type": "string"
+          },
+          "actionLabel": {
+            "type": "string"
+          },
+          "assigneeId": {
+            "type": "string"
+          },
+          "completedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "dueAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "hitId": {
+            "type": "string"
+          },
+          "priority": {
+            "type": "string"
+          },
+          "remediationId": {
+            "type": "string"
+          },
+          "reportId": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "suggestion": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IpDetectionRemediationInput": {
+        "properties": {
+          "actionCode": {
+            "type": "string"
+          },
+          "assigneeId": {
+            "type": "string"
+          },
+          "dueAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "hitId": {
+            "type": "string"
+          },
+          "priority": {
+            "type": "string"
+          },
+          "reportId": {
+            "type": "string"
+          },
+          "suggestion": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IpDetectionRemediationPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/IpDetectionRemediation"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "IpDetectionRemediationStatusInput": {
+        "properties": {
+          "status": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IpDetectionReport": {
+        "properties": {
+          "conclusion": {
+            "type": "string"
+          },
+          "conclusionLabel": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "entryHitCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "imageHitCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "inspectionRunId": {
+            "type": "string"
+          },
+          "pendingReviewCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "recommendedAction": {
+            "type": "string"
+          },
+          "recommendedActionLabel": {
+            "type": "string"
+          },
+          "reportId": {
+            "type": "string"
+          },
+          "riskLevel": {
+            "type": "string"
+          },
+          "riskLevelLabel": {
+            "type": "string"
+          },
+          "scannedFieldCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "shopId": {
+            "type": "string"
+          },
+          "sourceNote": {
+            "type": "string"
+          },
+          "subjectId": {
+            "type": "string"
+          },
+          "subjectLabel": {
+            "type": "string"
+          },
+          "subjectType": {
+            "type": "string"
+          },
+          "subjectTypeLabel": {
+            "type": "string"
+          },
+          "textHitCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "triggerType": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IpDetectionReportDetail": {
+        "properties": {
+          "alerts": {
+            "items": {
+              "$ref": "#/components/schemas/IpDetectionAlert"
+            },
+            "type": "array"
+          },
+          "hits": {
+            "items": {
+              "$ref": "#/components/schemas/IpDetectionHit"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "remediations": {
+            "items": {
+              "$ref": "#/components/schemas/IpDetectionRemediation"
+            },
+            "type": "array"
+          },
+          "report": {
+            "$ref": "#/components/schemas/IpDetectionReport"
+          },
+          "reviewTasks": {
+            "items": {
+              "$ref": "#/components/schemas/IpDetectionReviewTask"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "IpDetectionReportPage": {
+        "properties": {
+          "conclusionCounts": {
+            "additionalProperties": {
+              "format": "int64",
+              "type": "integer"
+            },
+            "type": "object"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/IpDetectionReport"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "pendingReviewTotal": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "riskLevelCounts": {
+            "additionalProperties": {
+              "format": "int64",
+              "type": "integer"
+            },
+            "type": "object"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "IpDetectionReviewDecisionInput": {
+        "properties": {
+          "comment": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IpDetectionReviewInput": {
+        "properties": {
+          "comment": {
+            "type": "string"
+          },
+          "hitId": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "reportId": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IpDetectionReviewTask": {
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "hitId": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "reasonLabel": {
+            "type": "string"
+          },
+          "reportId": {
+            "type": "string"
+          },
+          "reviewComment": {
+            "type": "string"
+          },
+          "reviewTaskId": {
+            "type": "string"
+          },
+          "reviewedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "reviewerId": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IpDetectionReviewTaskPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/IpDetectionReviewTask"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "IpDetectionSubjectInput": {
+        "properties": {
+          "brandName": {
+            "description": "品牌名（subjectType=MANUAL 时由调用方声明）",
+            "type": "string"
+          },
+          "bulletPoints": {
+            "description": "卖点（subjectType=MANUAL）",
+            "items": {
+              "description": "卖点（subjectType=MANUAL）",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "description": {
+            "description": "描述（subjectType=MANUAL）",
+            "type": "string"
+          },
+          "draftId": {
+            "description": "刊登编辑器草稿 id（subjectType=DRAFT 时必填）",
+            "type": "string"
+          },
+          "imageUrls": {
+            "description": "图片（subjectType=MANUAL）",
+            "items": {
+              "description": "图片（subjectType=MANUAL）",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "includeImage": {
+            "description": "是否包含图片检测（默认含）",
+            "type": "boolean"
+          },
+          "listingId": {
+            "description": "已上架商品 id（subjectType=LISTING 时必填）",
+            "type": "string"
+          },
+          "subjectType": {
+            "description": "🔴 检测对象类型：LISTING / DRAFT / MANUAL",
+            "type": "string"
+          },
+          "title": {
+            "description": "标题（subjectType=MANUAL 时必填）",
+            "type": "string"
+          }
+        },
         "type": "object"
       },
       "IpRiskLibraryBrandCandidate": {
@@ -54510,6 +57476,867 @@
         },
         "type": "object"
       },
+      "PiiAccessAuditCounts": {
+        "properties": {
+          "denied": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "export": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "viewFull": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "viewMasked": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "PiiAccessAuditPage": {
+        "properties": {
+          "counts": {
+            "$ref": "#/components/schemas/PiiAccessAuditCounts"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/PiiAccessAuditRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "PiiAccessAuditRow": {
+        "properties": {
+          "action": {
+            "type": "string"
+          },
+          "actorId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "actorName": {
+            "type": "string"
+          },
+          "auditId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "decision": {
+            "type": "string"
+          },
+          "decisionReason": {
+            "type": "string"
+          },
+          "exportRequestId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "fieldCode": {
+            "type": "string"
+          },
+          "grantId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "grantRoleCode": {
+            "type": "string"
+          },
+          "occurredAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "subjectKind": {
+            "type": "string"
+          },
+          "subjectLabel": {
+            "type": "string"
+          },
+          "subjectRef": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PiiAccessCapabilities": {
+        "properties": {
+          "auditSemantics": {
+            "type": "string"
+          },
+          "authorizationSemantics": {
+            "type": "string"
+          },
+          "boundaryNote": {
+            "type": "string"
+          },
+          "downstreamNote": {
+            "type": "string"
+          },
+          "exportSemantics": {
+            "type": "string"
+          },
+          "fields": {
+            "items": {
+              "$ref": "#/components/schemas/PiiAccessFieldInfo"
+            },
+            "type": "array"
+          },
+          "maskingSemantics": {
+            "type": "string"
+          },
+          "sources": {
+            "items": {
+              "$ref": "#/components/schemas/PiiAccessSourceState"
+            },
+            "type": "array"
+          },
+          "storageSemantics": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PiiAccessExportCounts": {
+        "properties": {
+          "approved": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "executed": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "pending": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "rejected": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "PiiAccessExportDecisionInput": {
+        "properties": {
+          "decisionNote": {
+            "maxLength": 600,
+            "minLength": 0,
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PiiAccessExportItemView": {
+        "properties": {
+          "itemId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "subjectKind": {
+            "type": "string"
+          },
+          "subjectLabel": {
+            "type": "string"
+          },
+          "subjectRef": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PiiAccessExportPage": {
+        "properties": {
+          "counts": {
+            "$ref": "#/components/schemas/PiiAccessExportCounts"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/PiiAccessExportRequestView"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "PiiAccessExportRequestInput": {
+        "properties": {
+          "fieldCode": {
+            "minLength": 1,
+            "pattern": "NAME|PHONE|EMAIL|ADDRESS",
+            "type": "string"
+          },
+          "purpose": {
+            "maxLength": 600,
+            "minLength": 0,
+            "type": "string"
+          },
+          "recordCount": {
+            "format": "int32",
+            "minimum": 1,
+            "type": "integer"
+          },
+          "subjectKind": {
+            "minLength": 1,
+            "pattern": "CUSTOMER|ORDER",
+            "type": "string"
+          },
+          "subjectRefs": {
+            "items": {
+              "maxLength": 160,
+              "minLength": 0,
+              "type": "string"
+            },
+            "maxItems": 500,
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "required": [
+          "fieldCode",
+          "purpose",
+          "recordCount",
+          "subjectKind",
+          "subjectRefs"
+        ],
+        "type": "object"
+      },
+      "PiiAccessExportRequestView": {
+        "properties": {
+          "approvedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "approvedBy": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "approvedByName": {
+            "nullable": true,
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "decisionNote": {
+            "type": "string"
+          },
+          "executedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "executedBy": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "expiresAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "exportBatchId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "fieldCode": {
+            "type": "string"
+          },
+          "fieldLabel": {
+            "type": "string"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/PiiAccessExportItemView"
+            },
+            "type": "array"
+          },
+          "maxRecordsLimit": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "purpose": {
+            "type": "string"
+          },
+          "recordCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "requestId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "requestNo": {
+            "type": "string"
+          },
+          "requestedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "requestedBy": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "requestedByName": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "subjectKind": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PiiAccessExportResult": {
+        "properties": {
+          "batchId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "exportNo": {
+            "type": "string"
+          },
+          "exportedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "fieldCode": {
+            "type": "string"
+          },
+          "recordCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "requestId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "requestNo": {
+            "type": "string"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/PiiAccessExportedRow"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "PiiAccessExportedRow": {
+        "properties": {
+          "present": {
+            "type": "boolean"
+          },
+          "subjectKind": {
+            "type": "string"
+          },
+          "subjectLabel": {
+            "type": "string"
+          },
+          "subjectRef": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PiiAccessFieldDecision": {
+        "properties": {
+          "allowed": {
+            "type": "boolean"
+          },
+          "fieldCode": {
+            "type": "string"
+          },
+          "grantId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "roleCode": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PiiAccessFieldInfo": {
+        "properties": {
+          "availableInCrm": {
+            "type": "boolean"
+          },
+          "availableInTrade": {
+            "type": "boolean"
+          },
+          "fieldCode": {
+            "type": "string"
+          },
+          "fieldLabel": {
+            "type": "string"
+          },
+          "maskRule": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PiiAccessFieldValue": {
+        "properties": {
+          "fieldCode": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "masked": {
+            "type": "boolean"
+          },
+          "present": {
+            "type": "boolean"
+          },
+          "value": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PiiAccessGrantInput": {
+        "properties": {
+          "effectiveFrom": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "effectiveTo": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "fieldCode": {
+            "minLength": 1,
+            "pattern": "NAME|PHONE|EMAIL|ADDRESS",
+            "type": "string"
+          },
+          "note": {
+            "maxLength": 600,
+            "minLength": 0,
+            "type": "string"
+          },
+          "reasonRequired": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "roleCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "scopeMode": {
+            "minLength": 1,
+            "pattern": "ALL|DEPARTMENT|SELF",
+            "type": "string"
+          }
+        },
+        "required": [
+          "effectiveFrom",
+          "fieldCode",
+          "roleCode",
+          "scopeMode"
+        ],
+        "type": "object"
+      },
+      "PiiAccessGrantPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/PiiAccessGrantView"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "PiiAccessGrantRevokeInput": {
+        "properties": {
+          "revokeReason": {
+            "maxLength": 600,
+            "minLength": 0,
+            "type": "string"
+          }
+        },
+        "required": [
+          "revokeReason"
+        ],
+        "type": "object"
+      },
+      "PiiAccessGrantView": {
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "effectiveFrom": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "effectiveTo": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "fieldCode": {
+            "type": "string"
+          },
+          "fieldLabel": {
+            "type": "string"
+          },
+          "grantId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "grantedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "grantedBy": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "reasonRequired": {
+            "type": "boolean"
+          },
+          "revokeReason": {
+            "type": "string"
+          },
+          "revokedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "revokedBy": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "roleCode": {
+            "type": "string"
+          },
+          "scopeLabel": {
+            "type": "string"
+          },
+          "scopeMode": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "version": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "PiiAccessPolicyInput": {
+        "properties": {
+          "exportApprovalTtlHours": {
+            "format": "int32",
+            "maximum": 720,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "maxExportRecords": {
+            "format": "int32",
+            "maximum": 500,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "maxRevealPerDay": {
+            "format": "int32",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "policyName": {
+            "maxLength": 120,
+            "minLength": 0,
+            "type": "string"
+          },
+          "requireReasonOnReveal": {
+            "type": "boolean"
+          },
+          "version": {
+            "format": "int64",
+            "nullable": true,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "exportApprovalTtlHours",
+          "maxExportRecords",
+          "maxRevealPerDay",
+          "policyName",
+          "requireReasonOnReveal"
+        ],
+        "type": "object"
+      },
+      "PiiAccessPolicyView": {
+        "properties": {
+          "configured": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "exportApprovalTtlHours": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "maxExportRecords": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "maxRevealPerDay": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "policyId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "policyName": {
+            "type": "string"
+          },
+          "requireReasonOnReveal": {
+            "type": "boolean"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "version": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "PiiAccessSourceState": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          },
+          "sourceCode": {
+            "type": "string"
+          },
+          "sourceLabel": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PiiAccessSubjectDetail": {
+        "properties": {
+          "decisions": {
+            "items": {
+              "$ref": "#/components/schemas/PiiAccessFieldDecision"
+            },
+            "type": "array"
+          },
+          "fields": {
+            "items": {
+              "$ref": "#/components/schemas/PiiAccessFieldValue"
+            },
+            "type": "array"
+          },
+          "known": {
+            "type": "boolean"
+          },
+          "revealNote": {
+            "type": "string"
+          },
+          "revealed": {
+            "type": "boolean"
+          },
+          "subjectKind": {
+            "type": "string"
+          },
+          "subjectLabel": {
+            "type": "string"
+          },
+          "subjectRef": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PiiAccessSubjectField": {
+        "properties": {
+          "fieldCode": {
+            "type": "string"
+          },
+          "fieldLabel": {
+            "type": "string"
+          },
+          "maskedValue": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PiiAccessSubjectPage": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/PiiAccessSubjectView"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "sources": {
+            "items": {
+              "$ref": "#/components/schemas/PiiAccessSourceState"
+            },
+            "type": "array"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "PiiAccessSubjectView": {
+        "properties": {
+          "availableFields": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "fields": {
+            "items": {
+              "$ref": "#/components/schemas/PiiAccessSubjectField"
+            },
+            "type": "array"
+          },
+          "known": {
+            "type": "boolean"
+          },
+          "missingFields": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "sourceLabel": {
+            "type": "string"
+          },
+          "subjectKind": {
+            "type": "string"
+          },
+          "subjectLabel": {
+            "type": "string"
+          },
+          "subjectRef": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "PlatformOperationInput": {
         "properties": {
           "idempotencyKey": {
@@ -68808,6 +72635,1296 @@
   },
   "openapi": "3.0.1",
   "paths": {
+    "/channel/access-security/alerts": {
+      "get": {
+        "operationId": "get_channel_access_security_alerts",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "type",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "severity",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessSecurityAlertPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "access-security-controller"
+        ]
+      }
+    },
+    "/channel/access-security/alerts/{id}": {
+      "get": {
+        "operationId": "get_channel_access_security_alerts_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessSecurityAlertView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "access-security-controller"
+        ]
+      }
+    },
+    "/channel/access-security/alerts/{id}/acknowledge": {
+      "post": {
+        "operationId": "post_channel_access_security_alerts_id_acknowledge",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AccessSecurityAlertActionInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessSecurityAlertView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "access-security-controller"
+        ]
+      }
+    },
+    "/channel/access-security/alerts/{id}/ignore": {
+      "post": {
+        "operationId": "post_channel_access_security_alerts_id_ignore",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AccessSecurityAlertActionInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessSecurityAlertView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "access-security-controller"
+        ]
+      }
+    },
+    "/channel/access-security/alerts/{id}/resolve": {
+      "post": {
+        "operationId": "post_channel_access_security_alerts_id_resolve",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AccessSecurityAlertActionInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessSecurityAlertView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "access-security-controller"
+        ]
+      }
+    },
+    "/channel/access-security/capabilities": {
+      "get": {
+        "operationId": "get_channel_access_security_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessSecurityCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "access-security-controller"
+        ]
+      }
+    },
+    "/channel/access-security/credential-access": {
+      "get": {
+        "operationId": "get_channel_access_security_credential_access",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "credentialId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "outcome",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessSecurityCredentialAccessPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "access-security-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_channel_access_security_credential_access",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AccessSecurityCredentialAccessInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessSecurityControlledAccessResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "access-security-controller"
+        ]
+      }
+    },
+    "/channel/access-security/credential-access/credentials": {
+      "get": {
+        "operationId": "get_channel_access_security_credential_access_credentials",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessSecurityCredentialPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "access-security-controller"
+        ]
+      }
+    },
+    "/channel/access-security/credential-access/{id}": {
+      "get": {
+        "operationId": "get_channel_access_security_credential_access_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessSecurityCredentialAccessView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "access-security-controller"
+        ]
+      }
+    },
+    "/channel/access-security/ip-allowlist": {
+      "get": {
+        "operationId": "get_channel_access_security_ip_allowlist",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessSecurityIpAllowlistPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "access-security-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_channel_access_security_ip_allowlist",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AccessSecurityIpAllowlistInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessSecurityIpAllowlistView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "access-security-controller"
+        ]
+      }
+    },
+    "/channel/access-security/ip-allowlist/check": {
+      "get": {
+        "operationId": "get_channel_access_security_ip_allowlist_check",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "ip",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessSecurityIpCheckResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "access-security-controller"
+        ]
+      }
+    },
+    "/channel/access-security/ip-allowlist/evaluate": {
+      "post": {
+        "operationId": "post_channel_access_security_ip_allowlist_evaluate",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "ip",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "purpose",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessSecurityIpCheckResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "access-security-controller"
+        ]
+      }
+    },
+    "/channel/access-security/ip-allowlist/{id}": {
+      "delete": {
+        "operationId": "delete_channel_access_security_ip_allowlist_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "access-security-controller"
+        ]
+      },
+      "put": {
+        "operationId": "put_channel_access_security_ip_allowlist_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AccessSecurityIpAllowlistInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessSecurityIpAllowlistView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "access-security-controller"
+        ]
+      }
+    },
+    "/channel/access-security/login-audit": {
+      "get": {
+        "operationId": "get_channel_access_security_login_audit",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "actorName",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "outcome",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessSecurityLoginAuditPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "access-security-controller"
+        ]
+      }
+    },
+    "/channel/access-security/login-audit/scan": {
+      "post": {
+        "operationId": "post_channel_access_security_login_audit_scan",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AccessSecurityScanInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessSecurityScanResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "access-security-controller"
+        ]
+      }
+    },
+    "/channel/access-security/mfa/challenges": {
+      "get": {
+        "operationId": "get_channel_access_security_mfa_challenges",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "registrationId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessSecurityMfaChallengePage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "access-security-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_channel_access_security_mfa_challenges",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AccessSecurityMfaChallengeInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessSecurityMfaChallengeView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "access-security-controller"
+        ]
+      }
+    },
+    "/channel/access-security/mfa/challenges/{challengeId}/attempts": {
+      "post": {
+        "operationId": "post_channel_access_security_mfa_challenges_challengeId_attempts",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "challengeId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AccessSecurityMfaChallengeAttemptInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessSecurityMfaChallengeView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "access-security-controller"
+        ]
+      }
+    },
+    "/channel/access-security/mfa/registrations": {
+      "get": {
+        "operationId": "get_channel_access_security_mfa_registrations",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "userId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessSecurityMfaRegistrationPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "access-security-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_channel_access_security_mfa_registrations",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AccessSecurityMfaRegistrationInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessSecurityMfaRegistrationView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "access-security-controller"
+        ]
+      }
+    },
+    "/channel/access-security/mfa/registrations/{id}/activate": {
+      "post": {
+        "operationId": "post_channel_access_security_mfa_registrations_id_activate",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessSecurityMfaRegistrationView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "access-security-controller"
+        ]
+      }
+    },
+    "/channel/access-security/mfa/registrations/{id}/disable": {
+      "post": {
+        "operationId": "post_channel_access_security_mfa_registrations_id_disable",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessSecurityMfaRegistrationView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "access-security-controller"
+        ]
+      }
+    },
+    "/channel/access-security/policy": {
+      "get": {
+        "operationId": "get_channel_access_security_policy",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessSecurityPolicyView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "access-security-controller"
+        ]
+      },
+      "put": {
+        "operationId": "put_channel_access_security_policy",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AccessSecurityPolicyInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessSecurityPolicyView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "access-security-controller"
+        ]
+      }
+    },
+    "/channel/access-security/session": {
+      "get": {
+        "operationId": "get_channel_access_security_session",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessSecuritySessionView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "access-security-controller"
+        ]
+      }
+    },
     "/channel/account-health/assessments": {
       "get": {
         "operationId": "get_channel_account_health_assessments",
@@ -82433,6 +87550,510 @@
         ]
       }
     },
+    "/channel/buyer-blacklist/appeals/{id}/decision": {
+      "post": {
+        "operationId": "post_channel_buyer_blacklist_appeals_id_decision",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BuyerBlacklistAppealDecisionInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BuyerBlacklistAppealView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "buyer-blacklist-controller"
+        ]
+      }
+    },
+    "/channel/buyer-blacklist/capabilities": {
+      "get": {
+        "operationId": "get_channel_buyer_blacklist_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BuyerBlacklistCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "buyer-blacklist-controller"
+        ]
+      }
+    },
+    "/channel/buyer-blacklist/check": {
+      "post": {
+        "operationId": "post_channel_buyer_blacklist_check",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BuyerBlacklistCheckInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BuyerBlacklistCheckResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "buyer-blacklist-controller"
+        ]
+      }
+    },
+    "/channel/buyer-blacklist/entries": {
+      "get": {
+        "operationId": "get_channel_buyer_blacklist_entries",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "scope",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "riskLevel",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "shopCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "source",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BuyerBlacklistEntryPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "buyer-blacklist-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_channel_buyer_blacklist_entries",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BuyerBlacklistRegisterInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BuyerBlacklistEntryView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "buyer-blacklist-controller"
+        ]
+      }
+    },
+    "/channel/buyer-blacklist/entries/auto": {
+      "post": {
+        "operationId": "post_channel_buyer_blacklist_entries_auto",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BuyerBlacklistAutoInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BuyerBlacklistEntryView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "buyer-blacklist-controller"
+        ]
+      }
+    },
+    "/channel/buyer-blacklist/entries/{id}": {
+      "get": {
+        "operationId": "get_channel_buyer_blacklist_entries_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BuyerBlacklistEntryDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "buyer-blacklist-controller"
+        ]
+      }
+    },
+    "/channel/buyer-blacklist/entries/{id}/appeals": {
+      "post": {
+        "operationId": "post_channel_buyer_blacklist_entries_id_appeals",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BuyerBlacklistAppealInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BuyerBlacklistAppealView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "buyer-blacklist-controller"
+        ]
+      }
+    },
+    "/channel/buyer-blacklist/entries/{id}/release": {
+      "post": {
+        "operationId": "post_channel_buyer_blacklist_entries_id_release",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BuyerBlacklistReleaseInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BuyerBlacklistEntryView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "buyer-blacklist-controller"
+        ]
+      }
+    },
+    "/channel/buyer-blacklist/flags": {
+      "get": {
+        "operationId": "get_channel_buyer_blacklist_flags",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "buyerKey",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "action",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BuyerBlacklistFlagPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "buyer-blacklist-controller"
+        ]
+      }
+    },
     "/channel/buyer-risk-scores/buyers": {
       "get": {
         "operationId": "get_channel_buyer_risk_scores_buyers",
@@ -88661,6 +94282,1134 @@
         },
         "tags": [
           "influencer-controller"
+        ]
+      }
+    },
+    "/channel/ip-detections/alerts": {
+      "get": {
+        "operationId": "get_channel_ip_detections_alerts",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "alertType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IpDetectionAlertPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ip-detection-controller"
+        ]
+      }
+    },
+    "/channel/ip-detections/alerts/{id}/status": {
+      "put": {
+        "operationId": "put_channel_ip_detections_alerts_id_status",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IpDetectionAlertStatusInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IpDetectionAlert"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ip-detection-controller"
+        ]
+      }
+    },
+    "/channel/ip-detections/capabilities": {
+      "get": {
+        "operationId": "get_channel_ip_detections_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IpDetectionCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ip-detection-controller"
+        ]
+      }
+    },
+    "/channel/ip-detections/detections": {
+      "get": {
+        "operationId": "get_channel_ip_detections_detections",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "riskLevel",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "conclusion",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "subjectType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "triggerType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "pendingOnly",
+            "required": false,
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "inspectionRunId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IpDetectionReportPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ip-detection-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_channel_ip_detections_detections",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IpDetectionSubjectInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IpDetectionReportDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ip-detection-controller"
+        ]
+      }
+    },
+    "/channel/ip-detections/detections/{id}": {
+      "get": {
+        "operationId": "get_channel_ip_detections_detections_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IpDetectionReportDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ip-detection-controller"
+        ]
+      }
+    },
+    "/channel/ip-detections/external-queries": {
+      "get": {
+        "operationId": "get_channel_ip_detections_external_queries",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IpDetectionExternalQueryPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ip-detection-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_channel_ip_detections_external_queries",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IpDetectionExternalQueryInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IpDetectionExternalQuery"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ip-detection-controller"
+        ]
+      }
+    },
+    "/channel/ip-detections/external-queries/{id}": {
+      "get": {
+        "operationId": "get_channel_ip_detections_external_queries_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IpDetectionExternalQueryDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ip-detection-controller"
+        ]
+      }
+    },
+    "/channel/ip-detections/external-queries/{id}/hits": {
+      "post": {
+        "operationId": "post_channel_ip_detections_external_queries_id_hits",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "items": {
+                  "$ref": "#/components/schemas/IpDetectionExternalHitInput"
+                },
+                "type": "array"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IpDetectionExternalQueryDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ip-detection-controller"
+        ]
+      }
+    },
+    "/channel/ip-detections/external-queries/{id}/status": {
+      "put": {
+        "operationId": "put_channel_ip_detections_external_queries_id_status",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "errorMessage",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IpDetectionExternalQuery"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ip-detection-controller"
+        ]
+      }
+    },
+    "/channel/ip-detections/inspection-plans": {
+      "get": {
+        "operationId": "get_channel_ip_detections_inspection_plans",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/IpDetectionInspectionPlan"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ip-detection-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_channel_ip_detections_inspection_plans",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IpDetectionInspectionPlanInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IpDetectionInspectionPlan"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ip-detection-controller"
+        ]
+      }
+    },
+    "/channel/ip-detections/inspection-plans/{id}": {
+      "put": {
+        "operationId": "put_channel_ip_detections_inspection_plans_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IpDetectionInspectionPlanInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IpDetectionInspectionPlan"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ip-detection-controller"
+        ]
+      }
+    },
+    "/channel/ip-detections/inspection-runs": {
+      "get": {
+        "operationId": "get_channel_ip_detections_inspection_runs",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IpDetectionInspectionRunPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ip-detection-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_channel_ip_detections_inspection_runs",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "planId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IpDetectionInspectionRunDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ip-detection-controller"
+        ]
+      }
+    },
+    "/channel/ip-detections/inspection-runs/{id}": {
+      "get": {
+        "operationId": "get_channel_ip_detections_inspection_runs_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IpDetectionInspectionRunDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ip-detection-controller"
+        ]
+      }
+    },
+    "/channel/ip-detections/remediations": {
+      "get": {
+        "operationId": "get_channel_ip_detections_remediations",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "actionCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IpDetectionRemediationPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ip-detection-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_channel_ip_detections_remediations",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IpDetectionRemediationInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IpDetectionRemediation"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ip-detection-controller"
+        ]
+      }
+    },
+    "/channel/ip-detections/remediations/{id}/status": {
+      "put": {
+        "operationId": "put_channel_ip_detections_remediations_id_status",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IpDetectionRemediationStatusInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IpDetectionRemediation"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ip-detection-controller"
+        ]
+      }
+    },
+    "/channel/ip-detections/reviews": {
+      "get": {
+        "operationId": "get_channel_ip_detections_reviews",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IpDetectionReviewTaskPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ip-detection-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_channel_ip_detections_reviews",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IpDetectionReviewInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IpDetectionReviewTask"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ip-detection-controller"
+        ]
+      }
+    },
+    "/channel/ip-detections/reviews/{id}": {
+      "put": {
+        "operationId": "put_channel_ip_detections_reviews_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IpDetectionReviewDecisionInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IpDetectionReviewTask"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ip-detection-controller"
         ]
       }
     },
@@ -108532,6 +115281,775 @@
         },
         "tags": [
           "performance-metric-controller"
+        ]
+      }
+    },
+    "/channel/pii-access/audit": {
+      "get": {
+        "operationId": "get_channel_pii_access_audit",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "kind",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "subjectRef",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "action",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "decision",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "actorId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PiiAccessAuditPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "pii-access-controller"
+        ]
+      }
+    },
+    "/channel/pii-access/capabilities": {
+      "get": {
+        "operationId": "get_channel_pii_access_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PiiAccessCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "pii-access-controller"
+        ]
+      }
+    },
+    "/channel/pii-access/exports": {
+      "get": {
+        "operationId": "get_channel_pii_access_exports",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "kind",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PiiAccessExportPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "pii-access-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_channel_pii_access_exports",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PiiAccessExportRequestInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PiiAccessExportRequestView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "pii-access-controller"
+        ]
+      }
+    },
+    "/channel/pii-access/exports/{requestId}": {
+      "get": {
+        "operationId": "get_channel_pii_access_exports_requestId",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "requestId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PiiAccessExportRequestView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "pii-access-controller"
+        ]
+      }
+    },
+    "/channel/pii-access/exports/{requestId}/approve": {
+      "post": {
+        "operationId": "post_channel_pii_access_exports_requestId_approve",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "requestId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PiiAccessExportDecisionInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PiiAccessExportRequestView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "pii-access-controller"
+        ]
+      }
+    },
+    "/channel/pii-access/exports/{requestId}/execute": {
+      "post": {
+        "operationId": "post_channel_pii_access_exports_requestId_execute",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "requestId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PiiAccessExportResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "pii-access-controller"
+        ]
+      }
+    },
+    "/channel/pii-access/exports/{requestId}/reject": {
+      "post": {
+        "operationId": "post_channel_pii_access_exports_requestId_reject",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "requestId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PiiAccessExportDecisionInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PiiAccessExportRequestView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "pii-access-controller"
+        ]
+      }
+    },
+    "/channel/pii-access/grants": {
+      "get": {
+        "operationId": "get_channel_pii_access_grants",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "roleCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PiiAccessGrantPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "pii-access-controller"
+        ]
+      },
+      "put": {
+        "operationId": "put_channel_pii_access_grants",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PiiAccessGrantInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PiiAccessGrantView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "pii-access-controller"
+        ]
+      }
+    },
+    "/channel/pii-access/grants/{grantId}/revoke": {
+      "post": {
+        "operationId": "post_channel_pii_access_grants_grantId_revoke",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "grantId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PiiAccessGrantRevokeInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PiiAccessGrantView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "pii-access-controller"
+        ]
+      }
+    },
+    "/channel/pii-access/policy": {
+      "get": {
+        "operationId": "get_channel_pii_access_policy",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PiiAccessPolicyView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "pii-access-controller"
+        ]
+      },
+      "put": {
+        "operationId": "put_channel_pii_access_policy",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PiiAccessPolicyInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PiiAccessPolicyView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "pii-access-controller"
+        ]
+      }
+    },
+    "/channel/pii-access/subjects": {
+      "get": {
+        "operationId": "get_channel_pii_access_subjects",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "kind",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PiiAccessSubjectPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "pii-access-controller"
+        ]
+      }
+    },
+    "/channel/pii-access/subjects/{kind}/{ref}": {
+      "get": {
+        "operationId": "get_channel_pii_access_subjects_kind_ref",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "kind",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "ref",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "reveal",
+            "required": false,
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "in": "query",
+            "name": "reason",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PiiAccessSubjectDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "pii-access-controller"
         ]
       }
     },
