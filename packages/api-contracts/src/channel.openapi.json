@@ -1,6 +1,1186 @@
 {
   "components": {
     "schemas": {
+      "AccessSecurityAlertActionInput": {
+        "properties": {
+          "reason": {
+            "maxLength": 600,
+            "minLength": 0,
+            "type": "string"
+          }
+        },
+        "required": [
+          "reason"
+        ],
+        "type": "object"
+      },
+      "AccessSecurityAlertActionView": {
+        "properties": {
+          "action": {
+            "type": "string"
+          },
+          "actionId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "actorId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "actorName": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "fromStatus": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "toStatus": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AccessSecurityAlertPage": {
+        "properties": {
+          "acknowledgedCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "criticalCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "highCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "ignoredCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AccessSecurityAlertView"
+            },
+            "type": "array"
+          },
+          "newCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "resolvedCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AccessSecurityAlertView": {
+        "properties": {
+          "acknowledgedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "acknowledgedBy": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "actions": {
+            "items": {
+              "$ref": "#/components/schemas/AccessSecurityAlertActionView"
+            },
+            "type": "array"
+          },
+          "alertId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "alertType": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "detectedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "eventCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "ignoreReason": {
+            "type": "string"
+          },
+          "ignoredAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "ignoredBy": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "resolutionNote": {
+            "type": "string"
+          },
+          "resolvedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "resolvedBy": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "severity": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "subjectKind": {
+            "type": "string"
+          },
+          "subjectValue": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "version": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "windowEnd": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "windowStart": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AccessSecurityCapabilities": {
+        "properties": {
+          "alertNote": {
+            "type": "string"
+          },
+          "boundaryNote": {
+            "type": "string"
+          },
+          "capabilities": {
+            "items": {
+              "$ref": "#/components/schemas/AccessSecurityCapability"
+            },
+            "type": "array"
+          },
+          "credentialNote": {
+            "type": "string"
+          },
+          "downstreamNote": {
+            "type": "string"
+          },
+          "ipAllowlistNote": {
+            "type": "string"
+          },
+          "loginAuditNote": {
+            "type": "string"
+          },
+          "mfaNote": {
+            "type": "string"
+          },
+          "sessionNote": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AccessSecurityCapability": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "code": {
+            "type": "string"
+          },
+          "impact": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AccessSecurityControlledAccessResult": {
+        "properties": {
+          "audit": {
+            "$ref": "#/components/schemas/AccessSecurityCredentialAccessView"
+          },
+          "credential": {
+            "$ref": "#/components/schemas/AccessSecurityCredentialView"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AccessSecurityCredentialAccessInput": {
+        "properties": {
+          "accessPurpose": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "credentialId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "accessPurpose",
+          "credentialId"
+        ],
+        "type": "object"
+      },
+      "AccessSecurityCredentialAccessPage": {
+        "properties": {
+          "deniedCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "failedCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AccessSecurityCredentialAccessView"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "successCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AccessSecurityCredentialAccessView": {
+        "properties": {
+          "accessId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "accessKind": {
+            "type": "string"
+          },
+          "accessPurpose": {
+            "type": "string"
+          },
+          "actorId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "actorName": {
+            "type": "string"
+          },
+          "actorSource": {
+            "type": "string"
+          },
+          "credentialId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "externalRef": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "occurredAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "outcome": {
+            "type": "string"
+          },
+          "provider": {
+            "type": "string"
+          },
+          "requestId": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AccessSecurityCredentialPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AccessSecurityCredentialView"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AccessSecurityCredentialView": {
+        "properties": {
+          "accessCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "authorizedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "credentialId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "expiresAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "externalRef": {
+            "type": "string"
+          },
+          "grantedScopes": {
+            "type": "string"
+          },
+          "lastAccessedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "lastAccessedBy": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "provider": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "tokenType": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AccessSecurityIpAllowlistInput": {
+        "properties": {
+          "cidrRange": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "effectiveFrom": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "effectiveTo": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "label": {
+            "maxLength": 120,
+            "minLength": 0,
+            "type": "string"
+          },
+          "scopeId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "scopeKind": {
+            "pattern": "TENANT|CONNECTION",
+            "type": "string"
+          },
+          "status": {
+            "pattern": "ACTIVE|DISABLED",
+            "type": "string"
+          }
+        },
+        "required": [
+          "cidrRange",
+          "scopeKind",
+          "status"
+        ],
+        "type": "object"
+      },
+      "AccessSecurityIpAllowlistPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AccessSecurityIpAllowlistView"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AccessSecurityIpAllowlistView": {
+        "properties": {
+          "cidrRange": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdBy": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "createdByName": {
+            "type": "string"
+          },
+          "effectiveFrom": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "effectiveTo": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "entryId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "scopeId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "scopeKind": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "version": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AccessSecurityIpCheckResult": {
+        "properties": {
+          "allowed": {
+            "type": "boolean"
+          },
+          "enforce": {
+            "type": "boolean"
+          },
+          "inAllowlist": {
+            "type": "boolean"
+          },
+          "ip": {
+            "type": "string"
+          },
+          "matchedCidr": {
+            "nullable": true,
+            "type": "string"
+          },
+          "matchedEntryId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "mode": {
+            "type": "string"
+          },
+          "modeLabel": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "valid": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "AccessSecurityLoginAuditPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AccessSecurityLoginAuditView"
+            },
+            "type": "array"
+          },
+          "known": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AccessSecurityLoginAuditView": {
+        "nullable": true,
+        "properties": {
+          "actorId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "actorName": {
+            "type": "string"
+          },
+          "anomaly": {
+            "type": "boolean"
+          },
+          "anomalyCode": {
+            "type": "string"
+          },
+          "auditId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "eventType": {
+            "type": "string"
+          },
+          "level": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "occurredAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "outcome": {
+            "type": "string"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "sourceEventId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "sourceIp": {
+            "type": "string"
+          },
+          "sourceIpAvailable": {
+            "type": "boolean"
+          },
+          "summary": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AccessSecurityMfaChallengeAttemptInput": {
+        "properties": {
+          "failureReason": {
+            "maxLength": 400,
+            "minLength": 0,
+            "type": "string"
+          },
+          "outcome": {
+            "pattern": "VERIFIED|FAILED|EXPIRED",
+            "type": "string"
+          }
+        },
+        "required": [
+          "outcome"
+        ],
+        "type": "object"
+      },
+      "AccessSecurityMfaChallengeInput": {
+        "properties": {
+          "deliveryChannel": {
+            "pattern": "AUTHENTICATOR_APP|SMS|EMAIL|MANUAL",
+            "type": "string"
+          },
+          "deliveryRef": {
+            "maxLength": 400,
+            "minLength": 0,
+            "type": "string"
+          },
+          "expiresInSeconds": {
+            "format": "int32",
+            "maximum": 1800,
+            "minimum": 30,
+            "type": "integer"
+          },
+          "factorType": {
+            "pattern": "TOTP|SMS|EMAIL",
+            "type": "string"
+          },
+          "registrationId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "deliveryChannel",
+          "expiresInSeconds",
+          "factorType",
+          "registrationId"
+        ],
+        "type": "object"
+      },
+      "AccessSecurityMfaChallengePage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AccessSecurityMfaChallengeView"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AccessSecurityMfaChallengeView": {
+        "properties": {
+          "attemptNo": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "challengeId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "deliveryChannel": {
+            "type": "string"
+          },
+          "deliveryRef": {
+            "type": "string"
+          },
+          "expiresAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "factorType": {
+            "type": "string"
+          },
+          "failureReason": {
+            "type": "string"
+          },
+          "occurredAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "outcome": {
+            "type": "string"
+          },
+          "recordId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "registrationId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AccessSecurityMfaRegistrationInput": {
+        "properties": {
+          "factorLabel": {
+            "maxLength": 120,
+            "minLength": 0,
+            "type": "string"
+          },
+          "factorType": {
+            "pattern": "TOTP|SMS|EMAIL",
+            "type": "string"
+          },
+          "membershipId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "secretRef": {
+            "maxLength": 400,
+            "minLength": 0,
+            "type": "string"
+          },
+          "userId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "factorType",
+          "userId"
+        ],
+        "type": "object"
+      },
+      "AccessSecurityMfaRegistrationPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AccessSecurityMfaRegistrationView"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AccessSecurityMfaRegistrationView": {
+        "properties": {
+          "boundAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "factorLabel": {
+            "type": "string"
+          },
+          "factorType": {
+            "type": "string"
+          },
+          "lastVerifiedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "membershipId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "registrationId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "revokedReason": {
+            "type": "string"
+          },
+          "secretRefPresent": {
+            "type": "boolean"
+          },
+          "status": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "userId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "version": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AccessSecurityPolicyInput": {
+        "properties": {
+          "anomalyFailedLoginThreshold": {
+            "format": "int32",
+            "maximum": 1000,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "anomalySuccessLoginThreshold": {
+            "format": "int32",
+            "maximum": 1000,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "anomalyWindowMinutes": {
+            "format": "int32",
+            "maximum": 1440,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "ipAllowlistMode": {
+            "pattern": "DISABLED|REPORT_ONLY|ENFORCE",
+            "type": "string"
+          },
+          "mfaEnforcementFrom": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "mfaGracePeriodMinutes": {
+            "format": "int32",
+            "maximum": 43200,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "mfaPrimaryFactor": {
+            "pattern": "TOTP|SMS|EMAIL",
+            "type": "string"
+          },
+          "mfaRequired": {
+            "type": "boolean"
+          },
+          "policyName": {
+            "maxLength": 120,
+            "minLength": 0,
+            "type": "string"
+          },
+          "sessionAbsoluteTimeoutMinutes": {
+            "format": "int32",
+            "maximum": 43200,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "sessionIdleTimeoutMinutes": {
+            "format": "int32",
+            "maximum": 10080,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "sessionMaxConcurrent": {
+            "format": "int32",
+            "maximum": 100,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "sessionRevokeOnMfaChange": {
+            "type": "boolean"
+          },
+          "sessionRevokeOnPasswordChange": {
+            "type": "boolean"
+          },
+          "version": {
+            "format": "int64",
+            "nullable": true,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "anomalyFailedLoginThreshold",
+          "anomalySuccessLoginThreshold",
+          "anomalyWindowMinutes",
+          "ipAllowlistMode",
+          "mfaGracePeriodMinutes",
+          "mfaPrimaryFactor",
+          "policyName",
+          "sessionAbsoluteTimeoutMinutes",
+          "sessionIdleTimeoutMinutes",
+          "sessionMaxConcurrent"
+        ],
+        "type": "object"
+      },
+      "AccessSecurityPolicyView": {
+        "properties": {
+          "anomalyFailedLoginThreshold": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "anomalySuccessLoginThreshold": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "anomalyWindowMinutes": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "configured": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "ipAllowlistMode": {
+            "type": "string"
+          },
+          "mfaEnforcementFrom": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "mfaGracePeriodMinutes": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "mfaPrimaryFactor": {
+            "type": "string"
+          },
+          "mfaRequired": {
+            "type": "boolean"
+          },
+          "policyId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "policyName": {
+            "type": "string"
+          },
+          "sessionAbsoluteTimeoutMinutes": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "sessionIdleTimeoutMinutes": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "sessionMaxConcurrent": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "sessionRevokeOnMfaChange": {
+            "type": "boolean"
+          },
+          "sessionRevokeOnPasswordChange": {
+            "type": "boolean"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "version": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AccessSecurityScanInput": {
+        "properties": {
+          "from": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "to": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AccessSecurityScanResult": {
+        "properties": {
+          "alerts": {
+            "items": {
+              "$ref": "#/components/schemas/AccessSecurityAlertView"
+            },
+            "type": "array"
+          },
+          "alertsCreated": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "alertsUpdated": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "events": {
+            "items": {
+              "$ref": "#/components/schemas/AccessSecurityLoginAuditView"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "eventsRecorded": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "eventsScanned": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "known": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          },
+          "windowEnd": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "windowStart": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AccessSecuritySessionDimension": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "code": {
+            "type": "string"
+          },
+          "impact": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AccessSecuritySessionView": {
+        "properties": {
+          "dimensions": {
+            "items": {
+              "$ref": "#/components/schemas/AccessSecuritySessionDimension"
+            },
+            "type": "array"
+          },
+          "known": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          },
+          "policy": {
+            "$ref": "#/components/schemas/AccessSecurityPolicyView"
+          },
+          "sessionState": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "AccountHealthAssessmentPage": {
         "properties": {
           "items": {
@@ -68808,6 +69988,1296 @@
   },
   "openapi": "3.0.1",
   "paths": {
+    "/channel/access-security/alerts": {
+      "get": {
+        "operationId": "get_channel_access_security_alerts",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "type",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "severity",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessSecurityAlertPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "access-security-controller"
+        ]
+      }
+    },
+    "/channel/access-security/alerts/{id}": {
+      "get": {
+        "operationId": "get_channel_access_security_alerts_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessSecurityAlertView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "access-security-controller"
+        ]
+      }
+    },
+    "/channel/access-security/alerts/{id}/acknowledge": {
+      "post": {
+        "operationId": "post_channel_access_security_alerts_id_acknowledge",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AccessSecurityAlertActionInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessSecurityAlertView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "access-security-controller"
+        ]
+      }
+    },
+    "/channel/access-security/alerts/{id}/ignore": {
+      "post": {
+        "operationId": "post_channel_access_security_alerts_id_ignore",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AccessSecurityAlertActionInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessSecurityAlertView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "access-security-controller"
+        ]
+      }
+    },
+    "/channel/access-security/alerts/{id}/resolve": {
+      "post": {
+        "operationId": "post_channel_access_security_alerts_id_resolve",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AccessSecurityAlertActionInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessSecurityAlertView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "access-security-controller"
+        ]
+      }
+    },
+    "/channel/access-security/capabilities": {
+      "get": {
+        "operationId": "get_channel_access_security_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessSecurityCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "access-security-controller"
+        ]
+      }
+    },
+    "/channel/access-security/credential-access": {
+      "get": {
+        "operationId": "get_channel_access_security_credential_access",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "credentialId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "outcome",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessSecurityCredentialAccessPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "access-security-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_channel_access_security_credential_access",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AccessSecurityCredentialAccessInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessSecurityControlledAccessResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "access-security-controller"
+        ]
+      }
+    },
+    "/channel/access-security/credential-access/credentials": {
+      "get": {
+        "operationId": "get_channel_access_security_credential_access_credentials",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessSecurityCredentialPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "access-security-controller"
+        ]
+      }
+    },
+    "/channel/access-security/credential-access/{id}": {
+      "get": {
+        "operationId": "get_channel_access_security_credential_access_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessSecurityCredentialAccessView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "access-security-controller"
+        ]
+      }
+    },
+    "/channel/access-security/ip-allowlist": {
+      "get": {
+        "operationId": "get_channel_access_security_ip_allowlist",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessSecurityIpAllowlistPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "access-security-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_channel_access_security_ip_allowlist",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AccessSecurityIpAllowlistInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessSecurityIpAllowlistView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "access-security-controller"
+        ]
+      }
+    },
+    "/channel/access-security/ip-allowlist/check": {
+      "get": {
+        "operationId": "get_channel_access_security_ip_allowlist_check",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "ip",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessSecurityIpCheckResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "access-security-controller"
+        ]
+      }
+    },
+    "/channel/access-security/ip-allowlist/evaluate": {
+      "post": {
+        "operationId": "post_channel_access_security_ip_allowlist_evaluate",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "ip",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "purpose",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessSecurityIpCheckResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "access-security-controller"
+        ]
+      }
+    },
+    "/channel/access-security/ip-allowlist/{id}": {
+      "delete": {
+        "operationId": "delete_channel_access_security_ip_allowlist_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "access-security-controller"
+        ]
+      },
+      "put": {
+        "operationId": "put_channel_access_security_ip_allowlist_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AccessSecurityIpAllowlistInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessSecurityIpAllowlistView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "access-security-controller"
+        ]
+      }
+    },
+    "/channel/access-security/login-audit": {
+      "get": {
+        "operationId": "get_channel_access_security_login_audit",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "actorName",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "outcome",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessSecurityLoginAuditPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "access-security-controller"
+        ]
+      }
+    },
+    "/channel/access-security/login-audit/scan": {
+      "post": {
+        "operationId": "post_channel_access_security_login_audit_scan",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AccessSecurityScanInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessSecurityScanResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "access-security-controller"
+        ]
+      }
+    },
+    "/channel/access-security/mfa/challenges": {
+      "get": {
+        "operationId": "get_channel_access_security_mfa_challenges",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "registrationId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessSecurityMfaChallengePage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "access-security-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_channel_access_security_mfa_challenges",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AccessSecurityMfaChallengeInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessSecurityMfaChallengeView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "access-security-controller"
+        ]
+      }
+    },
+    "/channel/access-security/mfa/challenges/{challengeId}/attempts": {
+      "post": {
+        "operationId": "post_channel_access_security_mfa_challenges_challengeId_attempts",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "challengeId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AccessSecurityMfaChallengeAttemptInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessSecurityMfaChallengeView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "access-security-controller"
+        ]
+      }
+    },
+    "/channel/access-security/mfa/registrations": {
+      "get": {
+        "operationId": "get_channel_access_security_mfa_registrations",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "userId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessSecurityMfaRegistrationPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "access-security-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_channel_access_security_mfa_registrations",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AccessSecurityMfaRegistrationInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessSecurityMfaRegistrationView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "access-security-controller"
+        ]
+      }
+    },
+    "/channel/access-security/mfa/registrations/{id}/activate": {
+      "post": {
+        "operationId": "post_channel_access_security_mfa_registrations_id_activate",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessSecurityMfaRegistrationView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "access-security-controller"
+        ]
+      }
+    },
+    "/channel/access-security/mfa/registrations/{id}/disable": {
+      "post": {
+        "operationId": "post_channel_access_security_mfa_registrations_id_disable",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessSecurityMfaRegistrationView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "access-security-controller"
+        ]
+      }
+    },
+    "/channel/access-security/policy": {
+      "get": {
+        "operationId": "get_channel_access_security_policy",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessSecurityPolicyView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "access-security-controller"
+        ]
+      },
+      "put": {
+        "operationId": "put_channel_access_security_policy",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AccessSecurityPolicyInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessSecurityPolicyView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "access-security-controller"
+        ]
+      }
+    },
+    "/channel/access-security/session": {
+      "get": {
+        "operationId": "get_channel_access_security_session",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessSecuritySessionView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "access-security-controller"
+        ]
+      }
+    },
     "/channel/account-health/assessments": {
       "get": {
         "operationId": "get_channel_account_health_assessments",
