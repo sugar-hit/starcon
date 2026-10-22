@@ -696,7 +696,7 @@ const services: readonly {
     env: 'CHANNEL_URL',
     fallback: 'http://127.0.0.1:8083',
     pattern:
-            /^ad\-budgets(?:\/(?:capabilities|options|rebalances|plans(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|pools(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|rules(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|tasks(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/apply)?)?))$/,
+      /^ad\-budgets(?:\/(?:capabilities|options|rebalances|plans(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|pools(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|rules(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|tasks(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/apply)?)?))$/,
   },
   {
     // 5.2.1.1 成本构成：SKU 的单位成本构成（分项 + 合计 + 生效时间）与成本变动历史。
@@ -4171,7 +4171,8 @@ const services: readonly {
     prefix: 'channel/',
     env: 'CHANNEL_URL',
     fallback: 'http://127.0.0.1:8083',
-    pattern: /^ad-promotion-analysis\/(?:capabilities|options|report|runs|exports(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/csv)?|cost-snapshots)$/,
+    pattern:
+      /^ad-promotion-analysis\/(?:capabilities|options|report|runs|exports(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/csv)?|cost-snapshots)$/,
   },
   {
     // 11.1.1.3 售后受理（trade 服务）。本条目是**新增一条 services[] 元素**，
@@ -5554,6 +5555,75 @@ const services: readonly {
     // 放行它会让界面以为「一条不存在的列表接口」可用。
   },
   {
+    // 15.1.1.1 消息收件箱（crm 服务，卷 15 的 L3 锚点 15.1.1）。
+    //
+    // 蓝图：「集中展示各店铺的平台站内信与买家消息：店铺、买家、主题、正文、附件、平台时间、
+    //   收发方向、已读状态、关联订单，支持按店铺/类型/优先级/未读筛选与批量处理。
+    //   输出：消息列表 + 详情视图 + 关联订单上下文。
+    //   **消息必须关联到买家与订单**，否则客服看到消息还要去猜是哪一单。」
+    //
+    // 本条目是**新增一条 services[] 元素**，不是往既有 crm 分支的 alternation 里并 ——
+    // 既有 crm 分支分别是 `^knowledge\/...$`（15.4.2.1 客服知识库）、
+    // `^buyer-emails...$`（15.1.2.1 邮件收发）、`^review-requests...$`（15.2.2.1 索评）、
+    // `^review-rules...$`（15.2.2.2 索评规则），首 token 都与 `message-inbox` 不同，互不吃掉。
+    //
+    // ---- 插入锚点 ----
+    //   固定在 **`prefix: 'crm/'` 的 `^knowledge\/...$`（15.4.2.1 客服知识库）那条元素之后**。
+    //   ⚠️ 上一版锚在「`identity/` 那条之后」—— 与同批 14.5.1.2 建联与样品（首 token `outreach`）
+    //   选了**同一个锚点**，两条车道在同一位置插入元素 ⇒ git 必然判冲突（结构性，retry 不会自愈）。
+    //   本轮改锚到 `crm/knowledge` 之后：这条锚点本批**只有本车道**用，
+    //   与另外三条车道的锚点互不重叠，并入时 git 能干净求并 —— 既有条目**一字未动、也不重排**。
+    //
+    // ---- 首 token「message-inbox」的零命中核对结论 ----
+    //   本文件既有 140+ 条 services[] 正则里**没有任何一条**含 `message-inbox` 这个串。
+    //   含 `message` 的只有两处，且都**不可能**吃掉本条目：
+    //   ① `aftersales/cases/{uuid}/messages`（11.1.1.2 售后单详情，**活着的正则**）——
+    //      首 token 是 `aftersales`，挂在 `prefix: 'trade/'` 下；
+    //   ② `service-tickets/{uuid}/messages` —— 只出现在 15.4 工单那条的**注释**里，
+    //      且是**刻意不放行**的形状（工单那条正则里根本没有 `messages` 分支）。
+    //   且既有正则都是**锚定**的（`^token(...)?$`），而 `resolve()` 先按
+    //   `path.startsWith(service.prefix)` 收窄服务、再判别正则 ⇒ 只有 prefix='crm/' 的
+    //   元素才有机会吃到 `crm/message-inbox/...`，而本文件里 prefix='crm/' 的另外几条
+    //   正则**不可能**匹配 `message-inbox/...` ⇒ 首 token 不同即可，互不遮蔽。
+    //
+    // 形状逐条列出（**只放行本模块真实实现的路径**）：
+    //   message-inbox/messages            消息集合读（GET，真分页 + 真筛选）/ 登记（POST）
+    //   message-inbox/messages/{uuid}     单条消息详情（GET）
+    //   message-inbox/capabilities        能力声明（逐维 available + ownerModule + impact）
+    //   message-inbox/shops               店铺目录（来自上游 channel 的真实清单）
+    //   message-inbox/options             筛选词表（平台与店铺来自本租户真实数据）
+    //   message-inbox/platforms           逐平台的站内信接入状态（平台清单来自真实店铺目录）
+    //   message-inbox/batch               批量处理（POST，逐条给出结论与原因）
+    //   message-inbox/sync                平台消息同步（POST；当前逐平台未接入 ⇒ 后端 409）
+    //
+    // 判别顺序：**字面量子路径（capabilities / shops / options / platforms / batch / sync）
+    // 排在 {uuid} 段之前** —— alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    // id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    // （不是 `[0-9a-f-]+`）：后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸路径 `message-inbox` —— 后端**没有**这个映射（消息集合在 `messages` 上），
+    //     所以末尾**刻意不带 `?`**：带了就把裸路径一起放行，而那是一个不存在的端点。
+    //   * `message-inbox/messages/{uuid}/replies` —— 15.1.1.2 消息发送**未交付**，
+    //     放行它会让界面以为能回复买家。
+    //   * `message-inbox/messages/{uuid}/classify` —— 15.1.1.3 消息分类**未交付**，
+    //     本模块的优先级由**人工**设置。
+    //   * `message-inbox/messages/{uuid}/after-sales` 与 `/tickets` ——
+    //     11 售后与 15.4 工单**未交付**，本模块只落**处置意图**，不写下游单据。
+    //   * `message-inbox/messages/{uuid}/delete` —— 消息是纠纷举证材料，不提供删除。
+    //   * `message-inbox/messages/{uuid}/attachments/{attachmentId}` ——
+    //     附件按消息整体读，不按单条附件寻址（后端没有这个映射）。
+    //   * `message-inbox/capabilities/{uuid}` / `/shops/{uuid}` / `/options/{uuid}` /
+    //     `/platforms/{uuid}` —— 这四个是能力声明与目录，**不按 id 寻址**，
+    //     所以那段后缀是**必需**的（写成可选会让裸的 `capabilities/{uuid}` 一起通过）。
+    //   * 非 UUID 段 —— `message-inbox/messages/not-a-uuid` 必须 404。
+    prefix: 'crm/',
+    env: 'CRM_URL',
+    fallback: 'http://127.0.0.1:8086',
+    pattern:
+      /^message\-inbox(?:\/(?:capabilities|shops|options|platforms|batch|sync)|\/messages(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?)$/,
+  },
+  {
     // 16.4.2.1 品牌授权（channel 服务，卷 16 的 L3 锚点 16.4.2）。
     //
     // 蓝图：「管理品牌授权：授权方、授权范围（店铺/国家/类目/期限）、授权文件、被授权主体，
@@ -5668,6 +5738,65 @@ const services: readonly {
       /^review-requests(?:\/(?:capabilities|frequency-policy|shops|candidates|recovery-stats|batch)|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:send-records|recoveries))?)?$/,
   },
   {
+    // 15.2.1.1 评价列表（crm 服务，卷 15 的 L3 锚点 15.2.1 下的评价子域）。
+    //
+    // 蓝图：「汇总各店铺评价：星级、内容、变体、图片、平台时间、关联订单、是否已回复、
+    // 店铺评分汇总，支持筛选（星级、含图/含视频、未回复、时间范围）与导出。
+    // 输出：评价列表 + 评分统计。关系：上游 = 2 同步；下游 = 15.2.1.2 回复、15.2.2.1 索评。
+    // **评分趋势比单条评价更重要**：连续下滑要先查是产品问题还是履约问题。」
+    //
+    // 本条目是**新增一条 services[] 元素**，不是往既有 crm 分支的 alternation 里并 ——
+    // 既有 crm 那几条（`^buyer-emails...$` / `^knowledge\/...$` / `^review-requests...$` /
+    // `^review-rules...$`）都是超长单行正则，并进去会让本车道与并行车道的插入点被隔开，
+    // git 判冲突。
+    // 插入锚点固定在 **crm/review-requests 那条之后、crm/review-rules 那条之前**，
+    // 与同批另外三条车道的锚点（crm/knowledge 之后 · crm/review-rules 之后 · services[] 末尾）
+    // 互不重叠；既有 crm 条目**一字未动、也不重排**。
+    //
+    // ---- 首 token「reviews」的零命中核对结论 ----
+    // 本文件既有全部 144 条 services[] 元素的正则**没有一条**命中本模块的 7 个形状
+    // （reviews / reviews/capabilities / reviews/shops / reviews/stats / reviews/export /
+    //   reviews/sync / reviews/{uuid}）—— 已用脚本逐条核对，**命中数为 0**。
+    // 原因：既有 crm 分支的首 token 分别是 buyer-emails / knowledge / review-requests /
+    //   review-rules，与 reviews **首 token 即不同**；而本文件的 resolve() 是
+    //   「按顺序逐条匹配、首个命中即返回」，同前缀的第二条不会误吃前一条的路径。
+    //   特别地，^reviews... **不会**匹配 review-requests/... 或 review-rules/...：
+    //   正则锚定在开头，review- 之后必须紧跟 s。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   reviews               评价列表集合读（GET，真分页 + 真筛选：星级 / 含图 / 含视频 /
+    //                         未回复 / 时间范围 / 店铺 / 商品 / 变体 / 订单号 / 关键字）
+    //   reviews/capabilities  能力声明（逐维 available + ownerModule + impact）
+    //   reviews/shops         店铺目录（来自上游 channel 的真实清单）
+    //   reviews/stats         评分统计（趋势 + 星级分布 + 店铺/商品/变体三个维度的下滑定位）
+    //   reviews/export        导出 CSV（GET + query；text/csv 由代理原样透传）
+    //   reviews/sync          平台评价同步（POST，**当前恒 409**：适配器未交付，不写任何数据）
+    //   reviews/{uuid}        单条评价详情（GET：评价本体 + 关联订单上下文）
+    //
+    // 判别顺序：**字面量子路径（capabilities / shops / stats / export / sync）排在 {uuid} 段之前**
+    //   —— alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    // id 段用**完整 UUID 形状** [0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}（不是 [0-9a-f-]+）：
+    //   后者会把 capabilities 这种非 UUID 形状也当成 id 放行。
+    //
+    // ⚠️ **裸路径 reviews 是放行的**（与「刻意不放行」相反）：本模块的列表入口就是集合根路径
+    //   （GET /crm/reviews = 评价列表），后端确实有这个映射 —— 不放行它，页面会 404。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * reviews/{uuid}/replies —— 评价回复属 **15.2.1.2**（未交付），
+    //     本模块只提供「是否已回复」这一个只读属性；放行回复形状会让界面以为能回复买家。
+    //   * reviews/{uuid}/appeals · /tags —— 差评处理属 **15.2.1.3**（未交付）。
+    //   * reviews/{uuid}/delete —— 评价是评分统计的事实，不可删。
+    //   * reviews/capabilities/{uuid} · reviews/shops/{uuid} · reviews/stats/{uuid} ·
+    //     reviews/export/{uuid} · reviews/sync/{uuid} —— 这五个是能力声明、目录与聚合查询，
+    //     **不按 id 寻址**，所以那段后缀是**必需**的（写成可选会让裸的 capabilities/{uuid} 一起通过）。
+    //   * reviews/not-a-uuid —— 非 UUID 段必须 404，不能被宽松分支吃掉。
+    prefix: 'crm/',
+    env: 'CRM_URL',
+    fallback: 'http://127.0.0.1:8086',
+    pattern:
+      /^reviews(?:\/(?:capabilities|shops|stats|export|sync)|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?$/,
+  },
+  {
     // 15.2.2.2 索评规则（crm 服务，卷 15 的 L3 锚点 15.2.2 的第二个子模块）。
     //
     // 蓝图：「配置索评策略：按店铺、按物流方式（自发货/平台仓）设置不同延后时间，避开节假日，
@@ -5730,6 +5859,67 @@ const services: readonly {
     fallback: 'http://127.0.0.1:8086',
     pattern:
       /^review-rules(?:\/(?:capabilities|shops|effective|effect-comparison|candidates)|\/(?:templates|holidays|assignments)(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?$/,
+  },
+  {
+    // 15.3.2.1 客户标签（crm 服务，卷 15 L3 锚点 15.3.2 下的客户标签子域）。
+    //
+    // ⚠️ 本条目是**新增一条独立的 `services[]` 元素**，不是往既有 crm 那几条巨型 alternation 里
+    //   并分支 —— 那些是超长单行正则，多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    //   既有条目**一字未动、也不重排**。
+    //
+    // ---- 插入锚点：紧跟 `crm/review-rules`（15.2.2.2 索评规则）那条元素之后 ----
+    //   同批另外三条车道的锚点分别是：`crm/knowledge` 之后（15.1.1.1 重派）、
+    //   `crm/review-requests` 之后（15.2.1.1）、services[] 数组末尾（15.6.2.2）——
+    //   都与本处相距足够远，git 能干净求并。
+    //
+    // ---- 首 token「customer-tags」的零命中核对结论 ----
+    //   本文件既有全部 services[] 正则里**没有任何一条**含 `customer-tags` 这个串
+    //   （既有的是 `knowledge` / `review-requests` / `review-rules` / `buyer-emails` 一类），
+    //   所以首 token 既是独立字面量，也不会被既有分支的前缀吃掉。
+    //   既有 crm 四条的正则都是**锚定**的（`^knowledge/…`、`^review-requests/…`、
+    //   `^review-rules/…`、`^buyer-emails/…`），逐条实测对 `customer-tags/…` **全部零命中**。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   customer-tags/capabilities                   能力声明（未交付段 available=false + ownerModule）
+    //   customer-tags/tags                           标签定义集合读（GET，真分页 + 真筛选）
+    //   customer-tags/tags/{uuid}                    标签定义详情（GET）/ 改（PUT）/ 删（DELETE）
+    //   customer-tags/rules                          规则集合读（GET）/ 登记规则（POST）
+    //   customer-tags/rules/{uuid}                   规则详情（GET）/ 改（PUT）/ 删（DELETE）
+    //   customer-tags/rules/{uuid}/run               执行一次规则评估（POST，写动作）
+    //   customer-tags/runs                           运行记录集合读（GET，真分页 + 真筛选）
+    //   customer-tags/runs/{uuid}                    单次运行详情（GET，含事实汇总）
+    //   customer-tags/runs/{uuid}/evaluations        逐客户判定结论（GET，真分页 + 真筛选）
+    //   customer-tags/assignments                    标签记录集合读（GET）/ 手工打标（POST）
+    //   customer-tags/assignments/{uuid}             标签记录详情（GET，含判定依据快照）
+    //   customer-tags/assignments/{uuid}/review      人工复核（POST：确认 / 撤销）
+    //   customer-tags/distribution                   标签分布统计（GET）
+    //   customer-tags/customer-candidates            候选客户（GET，来自上游订单事实的真实聚合）
+    //
+    // 判别顺序：字面量子路径（capabilities / distribution / customer-candidates）排在 {uuid} 段之前 ——
+    // alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //（不是 `[0-9a-f-]+`：后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行）。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   customer-tags                                  —— 裸路径：后端没有「一条不存在的汇总列表接口」，
+    //     一律走 `customer-tags/tags` / `customer-tags/assignments` 等带子路径的入口。
+    //   customer-tags/tags/{uuid}/delete               —— 删除走 `DELETE customer-tags/tags/{uuid}`。
+    //   customer-tags/rules/{uuid}/recompute          —— 重算走 `POST customer-tags/rules/{uuid}/run`。
+    //   customer-tags/segments                        —— **按标签筛出人群**属 15.3.1.1（未交付）：
+    //     放行它等于让界面以为「人群已经筛好了」。
+    //   customer-tags/promotions / customer-tags/campaigns —— 促销定向属 14.4（未交付）。
+    //   customer-tags/care-emails                     —— 关怀邮件属 15.5.2.1（未交付）。
+    //   customer-tags/assignments/{uuid}/delete       —— 标签记录是**凭据**（判定依据的载体），
+    //     不提供删除；要撤销走 `POST …/review`。
+    //   customer-tags/runs/{uuid}/replay              —— 历史运行不可重放，重跑走 `rules/{uuid}/run`。
+    //   任何非 UUID 段（如 `customer-tags/not-a-uuid`）—— 必须 404，不能被宽松分支吃掉。
+    //
+    // ⚠️ 末尾**刻意不带 `?`**：带了就等于放行裸路径 `customer-tags`。
+    prefix: 'crm/',
+    env: 'CRM_URL',
+    fallback: 'http://127.0.0.1:8086',
+    pattern:
+      /^customer\-tags(?:\/(?:capabilities|distribution|customer-candidates)|\/tags(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|\/rules(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/run)?)?|\/runs(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/evaluations)?)?|\/assignments(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/review)?)?)$/,
   },
   {
     // 7.8.2.2 缺货与饥饿预警（warehouse 服务，7.8.2 的第二个 L3 锚点）。
@@ -7315,6 +7505,57 @@ const services: readonly {
     fallback: 'http://127.0.0.1:8083',
     pattern:
       /^ad\-rules(?:\/(?:capabilities|rules|metrics|runs|hits|executions|dispatches|effects(?:\/evaluate)?)|\/rules\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:status|conditions))?|\/metrics\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}|\/runs\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}|\/executions\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}|\/dispatches\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/cancel)$/,
+  },
+  {
+    // 15.6.2.2 购物车与弃单挽回（crm 服务）。纯**新增一条独立的 `services[]` 元素**：
+    // 既有条目（`buyer-emails` 15.1.2.1 / `knowledge` 15.4.2.1 / `review-requests` 15.2.2.1 /
+    // `review-rules` 15.2.2.2）**一字未动、也不重排** —— 本文件是多车道共用的**累积型**
+    // 白名单，每条服务规则是一段超长单行正则，往既有那条 alternation 里并分支会让多车道
+    // 同时并入时 git 必然判冲突（结构性，retry 永远不会自愈）。
+    //
+    // ---- 插入锚点固定在 **services[] 数组的末尾**（最后一条元素之后、数组结尾的 `];` 之前）----
+    //   同批另外三条车道的锚点分别是「`crm/knowledge` 之后」「`crm/review-requests` 之后」
+    //   「`crm/review-rules` 之后」，与本锚点互不重叠，git 能干净求并。
+    //
+    // ---- 首 token「cart-recovery」的零命中核对结论 ----
+    //   本文件既有 141 条 services[] 正则里**没有任何一条**含 `cart` 字样
+    //   （既有的是 `buyer-emails` / `knowledge` / `review-requests` / `review-rules` 一类），
+    //   并用 `new RegExp(pat).test('…')` 逐条实测过：既有全部正则对本模块的 18 个 shape
+    //   **零命中**（0/141×18）⇒ 首 token 既是独立字面量，也不会被既有分支的前缀吃掉。
+    //   追加本条后 services[] 共 **142** 条（净 +1，既有条目一字未动）。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   cart-recovery/capabilities                能力声明（未交付段 available=false + ownerModule）
+    //   cart-recovery/policy                     触达频次上限 + 弃单超时（GET 读 / PUT 改）
+    //   cart-recovery/shops                      店铺目录（上游 channel 的真实清单 + 平台类型）
+    //   cart-recovery/shops/{uuid}               声明店铺平台类型（PUT）
+    //   cart-recovery/abandonments               弃单清单（GET，真分页 + 真筛选）/ 登记弃单（POST）
+    //   cart-recovery/abandonments/{uuid}        单条弃单详情（GET）
+    //   cart-recovery/abandonments/{uuid}/touches   触达记录（GET）/ 登记触达（POST）
+    //   cart-recovery/abandonments/{uuid}/recoveries 登记挽回成交（POST）
+    //   cart-recovery/touches/{uuid}/result      回填触达结果（POST）
+    //   cart-recovery/messages                   挽回话术清单（GET）/ 新建草稿（POST）
+    //   cart-recovery/messages/{uuid}            话术详情（GET）/ 改内容（PUT）
+    //   cart-recovery/messages/{uuid}/approve    审核话术（POST）
+    //   cart-recovery/messages/{uuid}/enable     启用话术（POST）
+    //   cart-recovery/messages/{uuid}/disable    停用话术（POST）
+    //   cart-recovery/unsubscribes               退订名单（GET）/ 登记退订（POST）
+    //   cart-recovery/unsubscribes/{uuid}        取消退订（DELETE）
+    //   cart-recovery/recovery-rate              挽回率报表（GET，服务端真算）
+    //   cart-recovery/sync                       平台购物车事件同步（POST，**恒 409**）
+    //
+    // 判别顺序：**字面量子路径（capabilities / policy / recovery-rate / sync / shops /
+    // messages / unsubscribes / touches / abandonments）排在 {uuid} 段之前** ——
+    // alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //（不是 `[0-9a-f-]+`）：后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行。
+    // ⚠️ 末尾**刻意不带 `?`**：带了就等于放行裸路径 `cart-recovery` ——
+    //   后端没有「一条不存在的汇总列表接口」，放行它会让界面以为可用。
+    prefix: 'crm/',
+    env: 'CRM_URL',
+    fallback: 'http://127.0.0.1:8086',
+    pattern:
+      /^cart\-recovery\/(?:capabilities|policy|recovery\-rate|sync|shops(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|messages(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:approve|enable|disable))?)?|unsubscribes(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|touches(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/result)?|abandonments(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:touches|recoveries))?)?)$/,
   },
 ];
 
