@@ -8235,6 +8235,58 @@ const services: readonly {
       /^platform\-violations(?:\/(?:capabilities|shops|violations|remediations|penalties|sync\-runs)|\/shops\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/sync|\/violations\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:status|penalties|subjects|affected|delist|remediations))?|\/remediations\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/evidence)?)$/,
   },
   {
+    // 16.1.2.2 申诉管理（channel 服务）。纯**新增一条独立的 `services[]` 元素**：
+    // 既有条目（`platform-violations` 16.1.2.1 / `account-health` 16.1.1.1 /
+    // `performance-metrics` 16.1.1.2 / `compliance-precheck` 16.2.2.1 …）**一字未动、也不重排**
+    // —— 本文件是多车道共用的**累积型**白名单，每条服务规则是一段超长单行正则，
+    // 往既有那条巨型 alternation 里并分支会让多车道同时并入时 git 必然判冲突。
+    //
+    // ---- 插入锚点固定在 **`platform-violations` 那条元素之后**（16.1.2.1 违规与处罚）----
+    //   同卷同服务的兄弟模块，锚点互不重叠，git 能干净求并。
+    //
+    // ---- 首 token「platform-appeals」的零命中核对结论 ----
+    //   本文件既有 161 条 services[] 正则里含 `platform` 的只有五条：
+    //   `platforms`（02 渠道，锚在 `^platforms`）/ `platform-orders`（09）/ `platform-fees`（12）/
+    //   `platform-dispute-appeals`（11.4.1.1 trade）/ `platform-disputes`（11.4.1）/
+    //   `platform-violations`（16.1.2.1）。
+    //   它们**全部**锚在各自不同的字面词上（`^platforms` / `^platform\-orders` / …），
+    //   逐条实测：本条正则的 14 个 shape 对这 161 条既有正则 ⇒ **命中 0 处**；
+    //   反向也测了：`platform-violations` / `platform-dispute-appeals` 的入口被本条正则
+    //   **零命中** ⇒ 互不遮蔽。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   platform-appeals/capabilities              能力声明（下游平台申诉接口 available=false + ownerModule）
+    //   platform-appeals/shops                     店铺范围清单（GET，真分页）
+    //   platform-appeals/appeals                   申诉单清单（GET，真分页 + 真筛选）/ 新建申诉单（POST）
+    //   platform-appeals/appeals/{uuid}            申诉单详情（GET）
+    //   platform-appeals/appeals/{uuid}/text       改申诉文本（PUT，**只有草稿态能改**）
+    //   platform-appeals/appeals/{uuid}/evidence   追加举证材料（POST，**append-only**）
+    //   platform-appeals/appeals/{uuid}/submit     提交申诉（POST，**消耗一次申诉配额**）
+    //   platform-appeals/appeals/{uuid}/decision   记录平台裁定（POST，通过 / 驳回）
+    //   platform-appeals/appeals/{uuid}/withdraw   撤回申诉（POST，终态）
+    //   platform-appeals/appeals/{uuid}/reopen     驳回后回到草稿（POST，补充材料再提）
+    //   platform-appeals/quotas                    申诉配额清单（GET）/ 配置配额（PUT）
+    //   platform-appeals/stats                     申诉次数统计（GET）
+    //   platform-appeals/priority-queue            **优先申诉队列**（GET，按影响档位从高到低）
+    //
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`（不是
+    //   `[0-9a-f-]+`：后者会把 `capabilities` 这种非 UUID 形状也当 id 放行）。
+    // ⚠️ 末尾**刻意不带 `?`**：带了就等于放行裸路径 `platform-appeals`
+    //   （后端没有「一条汇总列表接口」，一切入口都带子路径）。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸路径 `platform-appeals` —— 本模块没有裸集合读
+    //   * `platform-appeals/appeals/{uuid}/delete` —— 申诉单不做物理删除
+    //   * `platform-appeals/appeals/{uuid}/platform-submit` —— 平台申诉接口**本仓不存在**，
+    //     「提交」只落**提交记录**，**不编造**一个真的把申诉送到平台的入口
+    //   * `platform-appeals/platform` —— 同上，平台侧适配器尚未接入
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^platform\-appeals(?:\/(?:capabilities|shops|appeals|quotas|stats|priority\-queue)|\/appeals\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:text|evidence|submit|decision|withdraw|reopen))?)$/,
+  },
+  {
     // 15.6.2.2 购物车与弃单挽回（crm 服务）。纯**新增一条独立的 `services[]` 元素**：
     // 既有条目（`buyer-emails` 15.1.2.1 / `knowledge` 15.4.2.1 / `review-requests` 15.2.2.1 /
     // `review-rules` 15.2.2.2）**一字未动、也不重排** —— 本文件是多车道共用的**累积型**
