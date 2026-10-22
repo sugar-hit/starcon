@@ -61466,6 +61466,589 @@
         },
         "type": "object"
       },
+      "TaxCoverageItem": {
+        "properties": {
+          "covered": {
+            "type": "boolean"
+          },
+          "jurisdictionCode": {
+            "type": "string"
+          },
+          "jurisdictionName": {
+            "type": "string"
+          },
+          "registrationId": {
+            "type": "string"
+          },
+          "registrationState": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "TaxCoverageList": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/TaxCoverageRow"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "total": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "TaxCoverageRow": {
+        "properties": {
+          "coverageStatus": {
+            "type": "string"
+          },
+          "coverageStatusLabel": {
+            "type": "string"
+          },
+          "coveredJurisdictionCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "gapCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "jurisdictions": {
+            "items": {
+              "$ref": "#/components/schemas/TaxCoverageItem"
+            },
+            "type": "array"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "requiredJurisdictionCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "shopCode": {
+            "type": "string"
+          },
+          "shopId": {
+            "type": "string"
+          },
+          "shopName": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "TaxGapItem": {
+        "properties": {
+          "gapType": {
+            "type": "string"
+          },
+          "gapTypeLabel": {
+            "type": "string"
+          },
+          "jurisdictionCode": {
+            "type": "string"
+          },
+          "jurisdictionName": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "remediation": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string"
+          },
+          "shopCode": {
+            "type": "string"
+          },
+          "shopId": {
+            "type": "string"
+          },
+          "shopName": {
+            "type": "string"
+          },
+          "subjectCode": {
+            "type": "string"
+          },
+          "subjectId": {
+            "type": "string"
+          },
+          "subjectName": {
+            "type": "string"
+          },
+          "subjectType": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "TaxGapPage": {
+        "properties": {
+          "affectedShopCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "highCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/TaxGapItem"
+            },
+            "type": "array"
+          },
+          "mediumCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "TaxGapSummary": {
+        "properties": {
+          "affectedShopCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "affectedSubjectCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "byGapType": {
+            "additionalProperties": {
+              "format": "int64",
+              "type": "integer"
+            },
+            "type": "object"
+          },
+          "gapTypeCounts": {
+            "items": {
+              "$ref": "#/components/schemas/TaxGapTypeCount"
+            },
+            "type": "array"
+          },
+          "highCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "mediumCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "TaxGapTypeCount": {
+        "properties": {
+          "count": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "gapType": {
+            "type": "string"
+          },
+          "gapTypeLabel": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "TaxJurisdictionList": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/TaxJurisdictionView"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "total": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "TaxJurisdictionView": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "countryCode": {
+            "type": "string"
+          },
+          "defaultFilingCycle": {
+            "type": "string"
+          },
+          "derivationScope": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "region": {
+            "type": "string"
+          },
+          "requiresEpr": {
+            "type": "boolean"
+          },
+          "subdivisionCode": {
+            "type": "string"
+          },
+          "taxRegime": {
+            "type": "string"
+          },
+          "vatRequired": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "TaxRegistrationCapabilities": {
+        "properties": {
+          "downstreamNote": {
+            "type": "string"
+          },
+          "filingCycles": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "gapSemantics": {
+            "type": "string"
+          },
+          "gapSeverities": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "gapTypes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "gaps": {
+            "items": {
+              "$ref": "#/components/schemas/TaxRegistrationCapabilityGap"
+            },
+            "type": "array"
+          },
+          "jurisdictionSemantics": {
+            "type": "string"
+          },
+          "reportingScopeNote": {
+            "type": "string"
+          },
+          "subjectSemantics": {
+            "type": "string"
+          },
+          "subjectTypes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "upstreamNote": {
+            "type": "string"
+          },
+          "upstreams": {
+            "items": {
+              "$ref": "#/components/schemas/TaxRegistrationUpstream"
+            },
+            "type": "array"
+          },
+          "vatStatuses": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "TaxRegistrationCapabilityGap": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "impact": {
+            "type": "string"
+          },
+          "moduleId": {
+            "type": "string"
+          },
+          "moduleName": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "TaxRegistrationInput": {
+        "properties": {
+          "eprRegistrationNo": {
+            "type": "string"
+          },
+          "filingCycle": {
+            "type": "string"
+          },
+          "isRegistered": {
+            "type": "boolean"
+          },
+          "jurisdictionCode": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "registrationValidFrom": {
+            "type": "string"
+          },
+          "registrationValidUntil": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "subjectId": {
+            "type": "string"
+          },
+          "subjectType": {
+            "type": "string"
+          },
+          "taxNumber": {
+            "type": "string"
+          },
+          "vatNumber": {
+            "type": "string"
+          },
+          "vatStatus": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "TaxRegistrationPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/TaxRegistrationView"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "TaxRegistrationUpstream": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "impact": {
+            "type": "string"
+          },
+          "moduleId": {
+            "type": "string"
+          },
+          "moduleName": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "TaxRegistrationView": {
+        "properties": {
+          "createdAt": {
+            "type": "string"
+          },
+          "daysToExpiry": {
+            "description": "距失效还有几天；负数 = 已过期；null = 没记有效期",
+            "format": "int32",
+            "type": "integer"
+          },
+          "effectiveStatus": {
+            "type": "string"
+          },
+          "eprRegistrationNo": {
+            "type": "string"
+          },
+          "filingCycle": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "isRegistered": {
+            "type": "boolean"
+          },
+          "jurisdictionCode": {
+            "type": "string"
+          },
+          "jurisdictionName": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "registrationValidFrom": {
+            "type": "string"
+          },
+          "registrationValidUntil": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "subjectAvailable": {
+            "type": "boolean"
+          },
+          "subjectCode": {
+            "type": "string"
+          },
+          "subjectId": {
+            "type": "string"
+          },
+          "subjectName": {
+            "type": "string"
+          },
+          "subjectNote": {
+            "type": "string"
+          },
+          "subjectType": {
+            "type": "string"
+          },
+          "taxNumber": {
+            "type": "string"
+          },
+          "taxRegime": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          },
+          "vatNumber": {
+            "type": "string"
+          },
+          "vatStatus": {
+            "type": "string"
+          },
+          "vatStatusLabel": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "TaxShopList": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/TaxShopView"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "total": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "TaxShopView": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "legalEntityId": {
+            "type": "string"
+          },
+          "marketplaceCodes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "name": {
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "platformName": {
+            "type": "string"
+          },
+          "requiredJurisdictionCodes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "shopId": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "TimelinessAnomalyCell": {
         "properties": {
           "avgDeviationHours": {
@@ -110683,6 +111266,532 @@
         },
         "tags": [
           "sync-controller"
+        ]
+      }
+    },
+    "/channel/tax-registration/capabilities": {
+      "get": {
+        "operationId": "get_channel_tax_registration_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaxRegistrationCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "tax-registration-controller"
+        ]
+      }
+    },
+    "/channel/tax-registration/coverage": {
+      "get": {
+        "operationId": "get_channel_tax_registration_coverage",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaxCoverageList"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "tax-registration-controller"
+        ]
+      }
+    },
+    "/channel/tax-registration/gap-summary": {
+      "get": {
+        "operationId": "get_channel_tax_registration_gap_summary",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "gapType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "severity",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "subjectType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "shopId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "jurisdictionCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaxGapSummary"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "tax-registration-controller"
+        ]
+      }
+    },
+    "/channel/tax-registration/gaps": {
+      "get": {
+        "operationId": "get_channel_tax_registration_gaps",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "gapType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "severity",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "subjectType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "shopId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "jurisdictionCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaxGapPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "tax-registration-controller"
+        ]
+      }
+    },
+    "/channel/tax-registration/jurisdictions": {
+      "get": {
+        "operationId": "get_channel_tax_registration_jurisdictions",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaxJurisdictionList"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "tax-registration-controller"
+        ]
+      }
+    },
+    "/channel/tax-registration/registrations": {
+      "get": {
+        "operationId": "get_channel_tax_registration_registrations",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "subjectType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "subjectId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "jurisdictionCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "vatStatus",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "registered",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaxRegistrationPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "tax-registration-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_channel_tax_registration_registrations",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TaxRegistrationInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaxRegistrationView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "tax-registration-controller"
+        ]
+      }
+    },
+    "/channel/tax-registration/registrations/{id}": {
+      "get": {
+        "operationId": "get_channel_tax_registration_registrations_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaxRegistrationView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "tax-registration-controller"
+        ]
+      },
+      "put": {
+        "operationId": "put_channel_tax_registration_registrations_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TaxRegistrationInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaxRegistrationView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "tax-registration-controller"
+        ]
+      }
+    },
+    "/channel/tax-registration/shops": {
+      "get": {
+        "operationId": "get_channel_tax_registration_shops",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "platformCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaxShopList"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "tax-registration-controller"
         ]
       }
     },
