@@ -458,6 +458,67 @@ const services: readonly {
       /^price-anomaly-alerts(?:\/capabilities|\/observations|\/events(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:acknowledge|resolve))?)?|\/rules|\/notifications|\/detect)$/,
   },
   {
+    // 16.6.2.1 数据出境与留存（**本条目是新增一条独立的 services[] 元素**，
+    // 不是往既有 channel 巨型 alternation 里并分支 —— 同批多车道共享这一个文件，
+    // 往同一段超长单行正则里并分支会让 git 必然判冲突，retry 不会自愈）。
+    //
+    // 插入锚点固定在 `// 5.5.1.1 价格历史` 那条元素**之前**（与本批其它三条车道的
+    // 插入点彼此不重叠，git 能干净求并）。
+    //
+    // 🔴 ---- 首 token「data-governance」的零命中核对结论 ----
+    //   本文件既有 100+ 条 services[] 正则里**没有任何一条**以 `data` 开头
+    //   （既有的是 `defective` / `demand` / `development` / `discount` 一类，
+    //   全部以 `^` 锚定），也没有任何一条含 `data-governance` 这个串。
+    //   既有正则都是**锚定**的（`/^token(...)?$/`），所以首 token 既是独立字面量，
+    //   也不会被既有分支的前缀吃掉。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   data-governance/capabilities            能力声明（上游可用性 / 五套口径 / 边界）
+    //   data-governance/domains                 数据域登记表（GET 列表 / PUT 登记修改）
+    //   data-governance/transfers               跨境传输登记（GET 列表 / POST 登记）
+    //   data-governance/transfers/{uuid}        单条传输登记（GET）
+    //   data-governance/transfers/{uuid}/suspend 暂停传输（POST，理由必填）
+    //   data-governance/transfers/{uuid}/end    终止传输（POST，理由必填；终态）
+    //   data-governance/retention-policies      留存策略（GET 列表 / POST 登记新版本）
+    //   data-governance/retention-conflicts     留存期裁决清单（GET；实时算出来的）
+    //   data-governance/deletion-requests       删除请求（GET 列表 / POST 提交）
+    //   data-governance/deletion-requests/{uuid}     单条删除请求（GET）
+    //   data-governance/deletion-requests/{uuid}/approve 审批（POST）
+    //   data-governance/deletion-requests/{uuid}/reject  驳回（POST，理由必填）
+    //   data-governance/deletion-requests/{uuid}/execute 执行（POST；派发清理工单）
+    //   data-governance/cleanup-orders          清理工单（GET 列表 / POST 登记）
+    //   data-governance/cleanup-orders/{uuid}   单张清理工单（GET）
+    //   data-governance/cleanup-orders/{uuid}/execute 回报执行结果（POST）
+    //   data-governance/cleanup-records         清理执行记录（GET；append-only）
+    //
+    // 🔴 ---- 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟）----
+    //   data-governance/deletion-requests/{uuid}/delete
+    //     —— 删除请求**没有直接删除端点**：物理删除跨服务做不了，
+    //        本模块产出的是**清理工单 + 执行记录**，直接删数据的入口不存在。
+    //   data-governance/retention-policies/{uuid} / …/{uuid}/update
+    //     —— 留存策略**不可原地改写**（改策略 = 登记新版本，旧条自动作废），
+    //        没有「改一条已有策略」的端点。
+    //   data-governance/cleanup-records/{uuid} / …/{uuid}/delete
+    //     —— 清理执行记录是 **append-only** 凭据，没有单条读取与删除端点。
+    //   data-governance/domains/{code}
+    //     —— 数据域按**查询参数** `?domainCode=` 寻址，不接路径段
+    //        （路径段留给真正的 UUID 实体 id，避免把业务编码混进 id 位）。
+    //   data-governance/transfers/{非 uuid 段}
+    //     —— id 段必须走 UUID 分支，字面量子路径一律 404。
+    //
+    // 🔴 ---- id 段用**完整 UUID 形状** ----
+    //   `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //   （不是 `[0-9a-f-]+`）：后者会把 `batch` 这种非 UUID 形状也当成 id 放行。
+    //   字面量子路径（capabilities / domains / transfers / retention-policies /
+    //   retention-conflicts / deletion-requests / cleanup-orders / cleanup-records）
+    //   排在 {uuid} 段之前判别 —— alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^data-governance(?:\/capabilities|\/domains|\/transfers(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:suspend|end))?)?|\/retention-policies|\/retention-conflicts|\/deletion-requests(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:approve|reject|execute))?)?|\/cleanup-orders(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/execute)?)?|\/cleanup-records)$/,
+  },
+  {
     // 5.5.1.1 价格历史（**本条目是新增一条 services[] 元素**，不是往既有 catalog 分支的
     // alternation 里并**）。同批多车道共享这一个文件，而每个服务在 services[] 里
     // 是**一段超长单行正则**：只要两条车道都往同一服务的 alternation 里并分支，git 必然判冲突

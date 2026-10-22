@@ -28679,6 +28679,585 @@
         ],
         "type": "object"
       },
+      "DataGovernanceCapabilities": {
+        "properties": {
+          "auditSemantics": {
+            "type": "string"
+          },
+          "boundaryNote": {
+            "type": "string"
+          },
+          "cleanupSemantics": {
+            "type": "string"
+          },
+          "conflictSemantics": {
+            "type": "string"
+          },
+          "deletionSemantics": {
+            "type": "string"
+          },
+          "downstreamNote": {
+            "type": "string"
+          },
+          "retentionSemantics": {
+            "type": "string"
+          },
+          "transferSemantics": {
+            "type": "string"
+          },
+          "upstreams": {
+            "items": {
+              "$ref": "#/components/schemas/DataGovernanceUpstreamState"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "DataGovernanceDecisionInput": {
+        "properties": {
+          "decisionNote": {
+            "maxLength": 600,
+            "minLength": 0,
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "DataGovernanceDeletionCounts": {
+        "properties": {
+          "approved": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "deferred": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "executed": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "pending": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "rejected": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "DataGovernanceDeletionPage": {
+        "properties": {
+          "counts": {
+            "$ref": "#/components/schemas/DataGovernanceDeletionCounts"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/DataGovernanceDeletionRequestView"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "DataGovernanceDeletionRequestInput": {
+        "properties": {
+          "domainCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "reason": {
+            "maxLength": 600,
+            "minLength": 0,
+            "type": "string"
+          },
+          "requestType": {
+            "minLength": 1,
+            "pattern": "FORGETTING_RIGHT|CLEANUP",
+            "type": "string"
+          },
+          "subjectKind": {
+            "maxLength": 24,
+            "minLength": 0,
+            "type": "string"
+          },
+          "subjectRef": {
+            "maxLength": 160,
+            "minLength": 0,
+            "type": "string"
+          }
+        },
+        "required": [
+          "domainCode",
+          "reason",
+          "requestType",
+          "subjectKind",
+          "subjectRef"
+        ],
+        "type": "object"
+      },
+      "DataGovernanceDeletionRequestView": {
+        "properties": {
+          "approvedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "approvedBy": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "approvedByName": {
+            "nullable": true,
+            "type": "string"
+          },
+          "cleanupOrderNo": {
+            "nullable": true,
+            "type": "string"
+          },
+          "cleanupWorkOrderId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "decisionNote": {
+            "type": "string"
+          },
+          "deferReason": {
+            "type": "string"
+          },
+          "deferUntil": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "domainCode": {
+            "type": "string"
+          },
+          "domainName": {
+            "type": "string"
+          },
+          "executedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "executedBy": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "executedByName": {
+            "nullable": true,
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "requestId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "requestNo": {
+            "type": "string"
+          },
+          "requestType": {
+            "type": "string"
+          },
+          "requestTypeLabel": {
+            "type": "string"
+          },
+          "requestedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "requestedBy": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "requestedByName": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "subjectKind": {
+            "type": "string"
+          },
+          "subjectRef": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "DataGovernanceDomainInput": {
+        "properties": {
+          "containsPii": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "dataClass": {
+            "minLength": 1,
+            "pattern": "PII|FINANCIAL|OPERATIONAL|MARKETING",
+            "type": "string"
+          },
+          "domainCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "domainName": {
+            "maxLength": 120,
+            "minLength": 0,
+            "type": "string"
+          },
+          "note": {
+            "maxLength": 600,
+            "minLength": 0,
+            "type": "string"
+          },
+          "ownerModule": {
+            "maxLength": 120,
+            "minLength": 0,
+            "type": "string"
+          },
+          "statutoryFinancial": {
+            "nullable": true,
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "dataClass",
+          "domainCode",
+          "domainName",
+          "ownerModule"
+        ],
+        "type": "object"
+      },
+      "DataGovernanceDomainPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/DataGovernanceDomainView"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "DataGovernanceDomainView": {
+        "properties": {
+          "containsPii": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "dataClass": {
+            "type": "string"
+          },
+          "dataClassLabel": {
+            "type": "string"
+          },
+          "domainCode": {
+            "type": "string"
+          },
+          "domainId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "domainName": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "statutoryFinancial": {
+            "type": "boolean"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "version": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "DataGovernanceRejectInput": {
+        "properties": {
+          "decisionNote": {
+            "maxLength": 600,
+            "minLength": 0,
+            "type": "string"
+          }
+        },
+        "required": [
+          "decisionNote"
+        ],
+        "type": "object"
+      },
+      "DataGovernanceTransferCounts": {
+        "properties": {
+          "active": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "ended": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "suspended": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "DataGovernanceTransferInput": {
+        "properties": {
+          "effectiveFrom": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "legalBasis": {
+            "minLength": 1,
+            "pattern": "CONSENT|CONTRACT|LEGAL_OBLIGATION|LEGITIMATE_INTEREST",
+            "type": "string"
+          },
+          "note": {
+            "maxLength": 600,
+            "minLength": 0,
+            "type": "string"
+          },
+          "recipient": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "safeguards": {
+            "maxLength": 600,
+            "minLength": 0,
+            "type": "string"
+          },
+          "sourceDomainCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "targetRegion": {
+            "minLength": 1,
+            "pattern": "[A-Z]{2}",
+            "type": "string"
+          },
+          "tiaRef": {
+            "maxLength": 120,
+            "minLength": 0,
+            "type": "string"
+          }
+        },
+        "required": [
+          "effectiveFrom",
+          "legalBasis",
+          "recipient",
+          "sourceDomainCode",
+          "targetRegion"
+        ],
+        "type": "object"
+      },
+      "DataGovernanceTransferPage": {
+        "properties": {
+          "counts": {
+            "$ref": "#/components/schemas/DataGovernanceTransferCounts"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/DataGovernanceTransferView"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "DataGovernanceTransferStatusInput": {
+        "properties": {
+          "reason": {
+            "maxLength": 600,
+            "minLength": 0,
+            "type": "string"
+          }
+        },
+        "required": [
+          "reason"
+        ],
+        "type": "object"
+      },
+      "DataGovernanceTransferView": {
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "effectiveFrom": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "effectiveTo": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "endReason": {
+            "type": "string"
+          },
+          "legalBasis": {
+            "type": "string"
+          },
+          "legalBasisLabel": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "recipient": {
+            "type": "string"
+          },
+          "registeredAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "registeredBy": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "registeredByName": {
+            "type": "string"
+          },
+          "safeguards": {
+            "type": "string"
+          },
+          "sourceDomainCode": {
+            "type": "string"
+          },
+          "sourceDomainName": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "suspendReason": {
+            "type": "string"
+          },
+          "targetRegion": {
+            "type": "string"
+          },
+          "tiaRef": {
+            "type": "string"
+          },
+          "transferId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "transferNo": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "version": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "DataGovernanceUpstreamState": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "sourceCode": {
+            "type": "string"
+          },
+          "sourceLabel": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "DecideDispositionRequest": {
         "properties": {
           "decidedAt": {
@@ -61225,6 +61804,510 @@
         },
         "type": "object"
       },
+      "RetentionCleanupCounts": {
+        "properties": {
+          "completed": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "failed": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "inProgress": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "partial": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "pending": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "RetentionCleanupExecuteInput": {
+        "properties": {
+          "message": {
+            "maxLength": 600,
+            "minLength": 0,
+            "type": "string"
+          },
+          "recordCount": {
+            "exclusiveMinimum": false,
+            "minimum": 0,
+            "type": "number"
+          },
+          "result": {
+            "minLength": 1,
+            "pattern": "SUCCESS|PARTIAL|FAILED",
+            "type": "string"
+          }
+        },
+        "required": [
+          "recordCount",
+          "result"
+        ],
+        "type": "object"
+      },
+      "RetentionCleanupOrderInput": {
+        "properties": {
+          "affectedRecordCount": {
+            "exclusiveMinimum": false,
+            "minimum": 0,
+            "nullable": true,
+            "type": "number"
+          },
+          "domainCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "dueAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "subjectRef": {
+            "maxLength": 160,
+            "minLength": 0,
+            "type": "string"
+          },
+          "triggerKind": {
+            "minLength": 1,
+            "pattern": "RETENTION_EXPIRY|DELETION_REQUEST|MANUAL",
+            "type": "string"
+          }
+        },
+        "required": [
+          "domainCode",
+          "triggerKind"
+        ],
+        "type": "object"
+      },
+      "RetentionCleanupOrderView": {
+        "properties": {
+          "affectedRecordCount": {
+            "type": "number"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "domainCode": {
+            "type": "string"
+          },
+          "domainName": {
+            "type": "string"
+          },
+          "dueAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "eligibleAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "orderId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "orderNo": {
+            "type": "string"
+          },
+          "requestedBy": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "requestedByName": {
+            "type": "string"
+          },
+          "retentionClass": {
+            "type": "string"
+          },
+          "retentionClassLabel": {
+            "type": "string"
+          },
+          "retentionDays": {
+            "type": "number"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "subjectRef": {
+            "type": "string"
+          },
+          "triggerKind": {
+            "type": "string"
+          },
+          "triggerKindLabel": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "RetentionCleanupPage": {
+        "properties": {
+          "counts": {
+            "$ref": "#/components/schemas/RetentionCleanupCounts"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/RetentionCleanupOrderView"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "RetentionCleanupRecordPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/RetentionCleanupRecordView"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "RetentionCleanupRecordView": {
+        "properties": {
+          "action": {
+            "type": "string"
+          },
+          "actionLabel": {
+            "type": "string"
+          },
+          "domainCode": {
+            "type": "string"
+          },
+          "domainName": {
+            "type": "string"
+          },
+          "executedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "executedBy": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "executedByName": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "orderId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "orderNo": {
+            "type": "string"
+          },
+          "recordCount": {
+            "type": "number"
+          },
+          "recordId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "result": {
+            "type": "string"
+          },
+          "resultLabel": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "RetentionConflictCounts": {
+        "properties": {
+          "conflicting": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "deletionBlocked": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "RetentionConflictPage": {
+        "properties": {
+          "counts": {
+            "$ref": "#/components/schemas/RetentionConflictCounts"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/RetentionConflictView"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "RetentionConflictView": {
+        "properties": {
+          "conflictKind": {
+            "type": "string"
+          },
+          "conflictKindLabel": {
+            "type": "string"
+          },
+          "deletionBlocked": {
+            "type": "boolean"
+          },
+          "deletionBlockedUntil": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "domainCode": {
+            "type": "string"
+          },
+          "domainName": {
+            "type": "string"
+          },
+          "effectiveRetentionDays": {
+            "nullable": true,
+            "type": "number"
+          },
+          "financialLegalBasis": {
+            "type": "string"
+          },
+          "financialPolicyId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "financialRetentionDays": {
+            "nullable": true,
+            "type": "number"
+          },
+          "lastAdjudicatedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "rationale": {
+            "type": "string"
+          },
+          "resolution": {
+            "type": "string"
+          },
+          "resolutionLabel": {
+            "type": "string"
+          },
+          "standardLegalBasis": {
+            "type": "string"
+          },
+          "standardPolicyId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "standardRetentionDays": {
+            "nullable": true,
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "RetentionPolicyInput": {
+        "properties": {
+          "domainCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "effectiveFrom": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "legalBasis": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "policyName": {
+            "maxLength": 120,
+            "minLength": 0,
+            "type": "string"
+          },
+          "retentionClass": {
+            "minLength": 1,
+            "pattern": "STANDARD|FINANCIAL",
+            "type": "string"
+          },
+          "retentionDays": {
+            "exclusiveMinimum": false,
+            "minimum": 0,
+            "type": "number"
+          },
+          "retentionTrigger": {
+            "minLength": 1,
+            "pattern": "CREATION|CLOSURE",
+            "type": "string"
+          }
+        },
+        "required": [
+          "domainCode",
+          "effectiveFrom",
+          "policyName",
+          "retentionClass",
+          "retentionDays",
+          "retentionTrigger"
+        ],
+        "type": "object"
+      },
+      "RetentionPolicyPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/RetentionPolicyView"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "RetentionPolicyView": {
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdBy": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "domainCode": {
+            "type": "string"
+          },
+          "domainName": {
+            "type": "string"
+          },
+          "effectiveFrom": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "effectiveTo": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "legalBasis": {
+            "type": "string"
+          },
+          "policyId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "policyName": {
+            "type": "string"
+          },
+          "retentionClass": {
+            "type": "string"
+          },
+          "retentionClassLabel": {
+            "type": "string"
+          },
+          "retentionDays": {
+            "type": "number"
+          },
+          "retentionTrigger": {
+            "type": "string"
+          },
+          "retentionTriggerLabel": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "supersedesId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "versionNo": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
       "RetryContentWritebackRequest": {
         "properties": {
           "note": {
@@ -90659,6 +91742,1077 @@
         },
         "tags": [
           "channel-controller"
+        ]
+      }
+    },
+    "/channel/data-governance/capabilities": {
+      "get": {
+        "operationId": "get_channel_data_governance_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataGovernanceCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "data-governance-controller"
+        ]
+      }
+    },
+    "/channel/data-governance/cleanup-orders": {
+      "get": {
+        "operationId": "get_channel_data_governance_cleanup_orders",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "domainCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetentionCleanupPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "data-governance-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_channel_data_governance_cleanup_orders",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RetentionCleanupOrderInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetentionCleanupOrderView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "data-governance-controller"
+        ]
+      }
+    },
+    "/channel/data-governance/cleanup-orders/{orderId}": {
+      "get": {
+        "operationId": "get_channel_data_governance_cleanup_orders_orderId",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "orderId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetentionCleanupOrderView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "data-governance-controller"
+        ]
+      }
+    },
+    "/channel/data-governance/cleanup-orders/{orderId}/execute": {
+      "post": {
+        "operationId": "post_channel_data_governance_cleanup_orders_orderId_execute",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "orderId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RetentionCleanupExecuteInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetentionCleanupOrderView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "data-governance-controller"
+        ]
+      }
+    },
+    "/channel/data-governance/cleanup-records": {
+      "get": {
+        "operationId": "get_channel_data_governance_cleanup_records",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "orderId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "domainCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetentionCleanupRecordPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "data-governance-controller"
+        ]
+      }
+    },
+    "/channel/data-governance/deletion-requests": {
+      "get": {
+        "operationId": "get_channel_data_governance_deletion_requests",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "domainCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataGovernanceDeletionPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "data-governance-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_channel_data_governance_deletion_requests",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DataGovernanceDeletionRequestInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataGovernanceDeletionRequestView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "data-governance-controller"
+        ]
+      }
+    },
+    "/channel/data-governance/deletion-requests/{requestId}": {
+      "get": {
+        "operationId": "get_channel_data_governance_deletion_requests_requestId",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "requestId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataGovernanceDeletionRequestView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "data-governance-controller"
+        ]
+      }
+    },
+    "/channel/data-governance/deletion-requests/{requestId}/approve": {
+      "post": {
+        "operationId": "post_channel_data_governance_deletion_requests_requestId_approve",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "requestId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DataGovernanceDecisionInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataGovernanceDeletionRequestView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "data-governance-controller"
+        ]
+      }
+    },
+    "/channel/data-governance/deletion-requests/{requestId}/execute": {
+      "post": {
+        "operationId": "post_channel_data_governance_deletion_requests_requestId_execute",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "requestId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataGovernanceDeletionRequestView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "data-governance-controller"
+        ]
+      }
+    },
+    "/channel/data-governance/deletion-requests/{requestId}/reject": {
+      "post": {
+        "operationId": "post_channel_data_governance_deletion_requests_requestId_reject",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "requestId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DataGovernanceRejectInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataGovernanceDeletionRequestView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "data-governance-controller"
+        ]
+      }
+    },
+    "/channel/data-governance/domains": {
+      "get": {
+        "operationId": "get_channel_data_governance_domains",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "domainCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataGovernanceDomainPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "data-governance-controller"
+        ]
+      },
+      "put": {
+        "operationId": "put_channel_data_governance_domains",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DataGovernanceDomainInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataGovernanceDomainView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "data-governance-controller"
+        ]
+      }
+    },
+    "/channel/data-governance/retention-conflicts": {
+      "get": {
+        "operationId": "get_channel_data_governance_retention_conflicts",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "domainCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetentionConflictPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "data-governance-controller"
+        ]
+      }
+    },
+    "/channel/data-governance/retention-policies": {
+      "get": {
+        "operationId": "get_channel_data_governance_retention_policies",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "domainCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetentionPolicyPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "data-governance-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_channel_data_governance_retention_policies",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RetentionPolicyInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetentionPolicyView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "data-governance-controller"
+        ]
+      }
+    },
+    "/channel/data-governance/transfers": {
+      "get": {
+        "operationId": "get_channel_data_governance_transfers",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "domainCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataGovernanceTransferPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "data-governance-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_channel_data_governance_transfers",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DataGovernanceTransferInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataGovernanceTransferView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "data-governance-controller"
+        ]
+      }
+    },
+    "/channel/data-governance/transfers/{transferId}": {
+      "get": {
+        "operationId": "get_channel_data_governance_transfers_transferId",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "transferId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataGovernanceTransferView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "data-governance-controller"
+        ]
+      }
+    },
+    "/channel/data-governance/transfers/{transferId}/end": {
+      "post": {
+        "operationId": "post_channel_data_governance_transfers_transferId_end",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "transferId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DataGovernanceTransferStatusInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataGovernanceTransferView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "data-governance-controller"
+        ]
+      }
+    },
+    "/channel/data-governance/transfers/{transferId}/suspend": {
+      "post": {
+        "operationId": "post_channel_data_governance_transfers_transferId_suspend",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "transferId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DataGovernanceTransferStatusInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataGovernanceTransferView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "data-governance-controller"
         ]
       }
     },
