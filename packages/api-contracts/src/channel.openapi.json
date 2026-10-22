@@ -1,6 +1,592 @@
 {
   "components": {
     "schemas": {
+      "AccountHealthAssessmentPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AccountHealthAssessmentSummary"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AccountHealthAssessmentResult": {
+        "properties": {
+          "assessedAt": {
+            "type": "string"
+          },
+          "assessmentId": {
+            "type": "string"
+          },
+          "breachCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "knownMetricCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "periodEnd": {
+            "type": "string"
+          },
+          "periodStart": {
+            "type": "string"
+          },
+          "reasons": {
+            "items": {
+              "$ref": "#/components/schemas/AccountHealthReason"
+            },
+            "type": "array"
+          },
+          "riskLevel": {
+            "type": "string"
+          },
+          "riskLevelLabel": {
+            "type": "string"
+          },
+          "ruleSource": {
+            "type": "string"
+          },
+          "ruleVersion": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "shopId": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "thresholds": {
+            "additionalProperties": {
+              "type": "object"
+            },
+            "type": "object"
+          }
+        },
+        "type": "object"
+      },
+      "AccountHealthAssessmentSummary": {
+        "properties": {
+          "assessedAt": {
+            "type": "string"
+          },
+          "assessmentId": {
+            "type": "string"
+          },
+          "breachCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "knownMetricCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "periodEnd": {
+            "type": "string"
+          },
+          "periodStart": {
+            "type": "string"
+          },
+          "reasonCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "riskLevel": {
+            "type": "string"
+          },
+          "riskLevelLabel": {
+            "type": "string"
+          },
+          "ruleSource": {
+            "type": "string"
+          },
+          "ruleVersion": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "shopId": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AccountHealthCapabilities": {
+        "properties": {
+          "downstreamNote": {
+            "type": "string"
+          },
+          "gaps": {
+            "items": {
+              "$ref": "#/components/schemas/AccountHealthCapabilityGap"
+            },
+            "type": "array"
+          },
+          "metricCodes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "metricSources": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "metricValueSemantics": {
+            "type": "string"
+          },
+          "platformSyncNote": {
+            "type": "string"
+          },
+          "rankingSemantics": {
+            "type": "string"
+          },
+          "riskLevels": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "thresholdSemantics": {
+            "type": "string"
+          },
+          "unknownSemantics": {
+            "type": "string"
+          },
+          "upstreamNote": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AccountHealthCapabilityGap": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "impact": {
+            "type": "string"
+          },
+          "moduleId": {
+            "type": "string"
+          },
+          "moduleName": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AccountHealthMetricCard": {
+        "properties": {
+          "capturedAt": {
+            "type": "string"
+          },
+          "metricCode": {
+            "type": "string"
+          },
+          "metricLabel": {
+            "type": "string"
+          },
+          "metricValue": {
+            "description": "0..1 比值；null = 该指标量不到（不是 0）",
+            "type": "number"
+          },
+          "note": {
+            "type": "string"
+          },
+          "periodEnd": {
+            "type": "string"
+          },
+          "periodStart": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "sourceLabel": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AccountHealthMetricInput": {
+        "properties": {
+          "metricCode": {
+            "type": "string"
+          },
+          "metricValue": {
+            "type": "number"
+          },
+          "note": {
+            "type": "string"
+          },
+          "periodEnd": {
+            "type": "string"
+          },
+          "periodStart": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AccountHealthPendingItem": {
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "shopCode": {
+            "type": "string"
+          },
+          "shopId": {
+            "type": "string"
+          },
+          "shopName": {
+            "type": "string"
+          },
+          "targetLabel": {
+            "type": "string"
+          },
+          "targetModule": {
+            "type": "string"
+          },
+          "targetPath": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AccountHealthPendingList": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AccountHealthPendingItem"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AccountHealthRankingPage": {
+        "properties": {
+          "criticalCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "healthyCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AccountHealthRankingRow"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "unknownCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "warningCount": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AccountHealthRankingRow": {
+        "properties": {
+          "breachCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "knownMetricCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "partial": {
+            "type": "boolean"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "rank": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "rankReason": {
+            "type": "string"
+          },
+          "riskLevel": {
+            "type": "string"
+          },
+          "riskLevelLabel": {
+            "type": "string"
+          },
+          "shopCode": {
+            "type": "string"
+          },
+          "shopId": {
+            "type": "string"
+          },
+          "shopName": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AccountHealthReason": {
+        "properties": {
+          "direction": {
+            "type": "string"
+          },
+          "level": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "metricCode": {
+            "type": "string"
+          },
+          "metricLabel": {
+            "type": "string"
+          },
+          "metricValue": {
+            "type": "number"
+          },
+          "thresholdKind": {
+            "type": "string"
+          },
+          "thresholdValue": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "AccountHealthShopCard": {
+        "properties": {
+          "breachCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "knownMetricCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "metrics": {
+            "items": {
+              "$ref": "#/components/schemas/AccountHealthMetricCard"
+            },
+            "type": "array"
+          },
+          "partial": {
+            "type": "boolean"
+          },
+          "periodEnd": {
+            "type": "string"
+          },
+          "periodStart": {
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "platformName": {
+            "type": "string"
+          },
+          "platformSyncAvailable": {
+            "type": "boolean"
+          },
+          "rank": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "rankReason": {
+            "type": "string"
+          },
+          "reasons": {
+            "items": {
+              "$ref": "#/components/schemas/AccountHealthReason"
+            },
+            "type": "array"
+          },
+          "riskLevel": {
+            "type": "string"
+          },
+          "riskLevelLabel": {
+            "type": "string"
+          },
+          "ruleSource": {
+            "type": "string"
+          },
+          "ruleVersion": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "shopCode": {
+            "type": "string"
+          },
+          "shopId": {
+            "type": "string"
+          },
+          "shopName": {
+            "type": "string"
+          },
+          "unknownMetricCodes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "AccountHealthShopPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AccountHealthShopCard"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AccountHealthThresholdInput": {
+        "properties": {
+          "criticalValue": {
+            "type": "number"
+          },
+          "direction": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "warnValue": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "AccountHealthThresholdList": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AccountHealthThresholdView"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AccountHealthThresholdView": {
+        "properties": {
+          "builtin": {
+            "type": "boolean"
+          },
+          "criticalValue": {
+            "type": "number"
+          },
+          "direction": {
+            "type": "string"
+          },
+          "editable": {
+            "type": "boolean"
+          },
+          "effectiveFrom": {
+            "type": "string"
+          },
+          "metricCode": {
+            "type": "string"
+          },
+          "metricLabel": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "ruleSource": {
+            "type": "string"
+          },
+          "ruleSourceLabel": {
+            "type": "string"
+          },
+          "ruleVersion": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "warnValue": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
       "AcknowledgeHijackerAlertRequest": {
         "properties": {
           "note": {
@@ -61041,6 +61627,563 @@
   },
   "openapi": "3.0.1",
   "paths": {
+    "/channel/account-health/assessments": {
+      "get": {
+        "operationId": "get_channel_account_health_assessments",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "shopId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccountHealthAssessmentPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "account-health-controller"
+        ]
+      }
+    },
+    "/channel/account-health/capabilities": {
+      "get": {
+        "operationId": "get_channel_account_health_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccountHealthCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "account-health-controller"
+        ]
+      }
+    },
+    "/channel/account-health/pending-items": {
+      "get": {
+        "operationId": "get_channel_account_health_pending_items",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "platformCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccountHealthPendingList"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "account-health-controller"
+        ]
+      }
+    },
+    "/channel/account-health/ranking": {
+      "get": {
+        "operationId": "get_channel_account_health_ranking",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "platformCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "riskLevel",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "shopId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 10,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccountHealthRankingPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "account-health-controller"
+        ]
+      }
+    },
+    "/channel/account-health/shops": {
+      "get": {
+        "operationId": "get_channel_account_health_shops",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "platformCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "riskLevel",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dataState",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "shopId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 10,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccountHealthShopPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "account-health-controller"
+        ]
+      }
+    },
+    "/channel/account-health/shops/{id}": {
+      "get": {
+        "operationId": "get_channel_account_health_shops_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccountHealthShopCard"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "account-health-controller"
+        ]
+      }
+    },
+    "/channel/account-health/shops/{id}/assess": {
+      "post": {
+        "operationId": "post_channel_account_health_shops_id_assess",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccountHealthAssessmentResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "account-health-controller"
+        ]
+      }
+    },
+    "/channel/account-health/shops/{id}/metrics": {
+      "post": {
+        "operationId": "post_channel_account_health_shops_id_metrics",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AccountHealthMetricInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccountHealthShopCard"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "account-health-controller"
+        ]
+      }
+    },
+    "/channel/account-health/shops/{id}/sync": {
+      "post": {
+        "operationId": "post_channel_account_health_shops_id_sync",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccountHealthShopCard"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "account-health-controller"
+        ]
+      }
+    },
+    "/channel/account-health/thresholds": {
+      "get": {
+        "operationId": "get_channel_account_health_thresholds",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccountHealthThresholdList"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "account-health-controller"
+        ]
+      }
+    },
+    "/channel/account-health/thresholds/{metricCode}": {
+      "put": {
+        "operationId": "put_channel_account_health_thresholds_metricCode",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "metricCode",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AccountHealthThresholdInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccountHealthThresholdView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "account-health-controller"
+        ]
+      }
+    },
     "/channel/ad-budgets/capabilities": {
       "get": {
         "operationId": "get_channel_ad_budgets_capabilities",
