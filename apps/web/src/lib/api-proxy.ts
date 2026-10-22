@@ -7316,6 +7316,57 @@ const services: readonly {
     pattern:
       /^ad\-rules(?:\/(?:capabilities|rules|metrics|runs|hits|executions|dispatches|effects(?:\/evaluate)?)|\/rules\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:status|conditions))?|\/metrics\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}|\/runs\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}|\/executions\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}|\/dispatches\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/cancel)$/,
   },
+  {
+    // 15.6.2.2 购物车与弃单挽回（crm 服务）。纯**新增一条独立的 `services[]` 元素**：
+    // 既有条目（`buyer-emails` 15.1.2.1 / `knowledge` 15.4.2.1 / `review-requests` 15.2.2.1 /
+    // `review-rules` 15.2.2.2）**一字未动、也不重排** —— 本文件是多车道共用的**累积型**
+    // 白名单，每条服务规则是一段超长单行正则，往既有那条 alternation 里并分支会让多车道
+    // 同时并入时 git 必然判冲突（结构性，retry 永远不会自愈）。
+    //
+    // ---- 插入锚点固定在 **services[] 数组的末尾**（最后一条元素之后、数组结尾的 `];` 之前）----
+    //   同批另外三条车道的锚点分别是「`crm/knowledge` 之后」「`crm/review-requests` 之后」
+    //   「`crm/review-rules` 之后」，与本锚点互不重叠，git 能干净求并。
+    //
+    // ---- 首 token「cart-recovery」的零命中核对结论 ----
+    //   本文件既有 141 条 services[] 正则里**没有任何一条**含 `cart` 字样
+    //   （既有的是 `buyer-emails` / `knowledge` / `review-requests` / `review-rules` 一类），
+    //   并用 `new RegExp(pat).test('…')` 逐条实测过：既有全部正则对本模块的 18 个 shape
+    //   **零命中**（0/141×18）⇒ 首 token 既是独立字面量，也不会被既有分支的前缀吃掉。
+    //   追加本条后 services[] 共 **142** 条（净 +1，既有条目一字未动）。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   cart-recovery/capabilities                能力声明（未交付段 available=false + ownerModule）
+    //   cart-recovery/policy                     触达频次上限 + 弃单超时（GET 读 / PUT 改）
+    //   cart-recovery/shops                      店铺目录（上游 channel 的真实清单 + 平台类型）
+    //   cart-recovery/shops/{uuid}               声明店铺平台类型（PUT）
+    //   cart-recovery/abandonments               弃单清单（GET，真分页 + 真筛选）/ 登记弃单（POST）
+    //   cart-recovery/abandonments/{uuid}        单条弃单详情（GET）
+    //   cart-recovery/abandonments/{uuid}/touches   触达记录（GET）/ 登记触达（POST）
+    //   cart-recovery/abandonments/{uuid}/recoveries 登记挽回成交（POST）
+    //   cart-recovery/touches/{uuid}/result      回填触达结果（POST）
+    //   cart-recovery/messages                   挽回话术清单（GET）/ 新建草稿（POST）
+    //   cart-recovery/messages/{uuid}            话术详情（GET）/ 改内容（PUT）
+    //   cart-recovery/messages/{uuid}/approve    审核话术（POST）
+    //   cart-recovery/messages/{uuid}/enable     启用话术（POST）
+    //   cart-recovery/messages/{uuid}/disable    停用话术（POST）
+    //   cart-recovery/unsubscribes               退订名单（GET）/ 登记退订（POST）
+    //   cart-recovery/unsubscribes/{uuid}        取消退订（DELETE）
+    //   cart-recovery/recovery-rate              挽回率报表（GET，服务端真算）
+    //   cart-recovery/sync                       平台购物车事件同步（POST，**恒 409**）
+    //
+    // 判别顺序：**字面量子路径（capabilities / policy / recovery-rate / sync / shops /
+    // messages / unsubscribes / touches / abandonments）排在 {uuid} 段之前** ——
+    // alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //（不是 `[0-9a-f-]+`）：后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行。
+    // ⚠️ 末尾**刻意不带 `?`**：带了就等于放行裸路径 `cart-recovery` ——
+    //   后端没有「一条不存在的汇总列表接口」，放行它会让界面以为可用。
+    prefix: 'crm/',
+    env: 'CRM_URL',
+    fallback: 'http://127.0.0.1:8086',
+    pattern:
+      /^cart\-recovery\/(?:capabilities|policy|recovery\-rate|sync|shops(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|messages(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:approve|enable|disable))?)?|unsubscribes(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|touches(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/result)?|abandonments(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:touches|recoveries))?)?)$/,
+  },
 ];
 
 function resolve(path: string) {
