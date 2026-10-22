@@ -3753,6 +3753,67 @@ const services: readonly {
       /^buyer-emails(?:\/(?:capabilities|shops|sync)|\/templates(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:attachments|conversation|send-records))?)?$/,
   },
   {
+    // 15.1.2.2 邮件规则（crm 服务）。纯**新增一条独立的 `services[]` 元素**，
+    // 既有的 `buyer-emails`（15.1.2.1 邮件收发）等**一字未动、也不重排** ——
+    // 本文件是多车道共用的累积型白名单，每条服务规则是一段超长单行正则，往同一条 alternation 里
+    // 并分支会让多车道同时并入时 git 必然判冲突（结构性，retry 不会自愈）。
+    //
+    // ---- 插入锚点固定在 `^buyer-emails...$`（15.1.2.1 邮件收发）那条元素之后** ----
+    //   本车道与 15.1.2.1 是同卷兄弟（15.1.2 邮件），锚在它后面语义上最自然；
+    //   同批另三条车道（15.4.1.1 / 15.5.1.1 / 16.1.2.1）的锚点不在这里 ⇒ git 能干净求并。
+    //
+    // ---- 首 token「email-rules」的零命中核对结论 ----
+    //   本文件既有 150+ 条 services[] 正则里**没有任何一条**含 `email-rules` 这个串
+    //   （既有的是 `buyer-emails` / `customer-tags` / `message-classifications` 一类），
+    //   所以首 token 既是独立字面量，也不会被既有分支的前缀吃掉。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   email-rules/capabilities                  能力声明（逐维 available + ownerModule + impact）
+    //   email-rules/options                       词表（动作 / 命中方式 / 重要类别 / 工单标签码）
+    //   email-rules/rules                         规则集合读（GET，真分页 + 真筛选）/ 新建（POST）
+    //   email-rules/rules/{uuid}                  单条规则（GET / PUT 修改 / DELETE 删除）
+    //   email-rules/rules/{uuid}/preview          试算（POST，**不写命中记录**）
+    //   email-rules/tags                          工单标签字典（GET 真分页 / POST 新建）
+    //   email-rules/tags/{uuid}                   单个标签（GET / PUT / DELETE）
+    //   email-rules/emails/{uuid}/tags            某封邮件挂的工单标签（GET / POST 打标）
+    //   email-rules/emails/{uuid}/evaluate        评估一封邮件（POST，写命中记录）
+    //   email-rules/evaluate-batch                批量评估（POST，逐条给出结论与原因）
+    //   email-rules/hits                          命中记录集合读（GET，真分页 + 真筛选）
+    //   email-rules/hits/{uuid}                   单条命中详情（GET，含命中依据与规则快照）
+    //   email-rules/assignments                   自动分配结果集合读（GET，真分页 + 真筛选）
+    //   email-rules/assignments/{uuid}            单条分配结果（GET）
+    //   email-rules/assignments/{uuid}/cancel     取消分配结果（POST，理由必填）
+    //   email-rules/statistics                    规则命中统计 + 动作分布 + 静默被拒数（GET）
+    //
+    // 判别顺序：字面量子路径（capabilities / options / statistics / evaluate-batch /
+    // rules / tags / emails / hits / assignments）排在 {uuid} 段之前 ——
+    // alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸路径 `email-rules` —— 本模块的集合读都在子路径上
+    //     （`rules` / `tags` / `hits` / `assignments`），裸路径没有后端映射；
+    //   * `email-rules/rules/{uuid}/disable` —— 启用/停用走同一个 PUT 字段，
+    //     不另开一条动作路径；
+    //   * `email-rules/hits/{uuid}/delete` —— 命中记录**只追加**，DB 层拒绝改删；
+    //   * `email-rules/hits/{uuid}/edit` —— 同上；
+    //   * `email-rules/assignments/{uuid}/dispatch` —— **15.4.1.1 工单分配未交付**，
+    //     放行它等于让界面以为「已经转工单了」；
+    //   * `email-rules/emails/{uuid}/auto-reply` —— **15.5.1 自动回复未交付**，
+    //     本模块只留痕意图，不真的发出；
+    //   * `email-rules/tickets` / `email-rules/sync` —— 工单与平台同步都不在本模块；
+    //   * 任何 `capabilities/{uuid}` —— 能力声明**不按 id 寻址**；
+    //   * 非 UUID 段（如 `email-rules/rules/not-a-uuid`）必须 404，不能被宽松分支吃掉。
+    //
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    // （不是 `[0-9a-f-]+`）：后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行。
+    // 末尾**刻意不带 `?`**：带了就等于放行裸路径 `email-rules`。
+    prefix: 'crm/',
+    env: 'CRM_URL',
+    fallback: 'http://127.0.0.1:8086',
+    pattern:
+      /^email\-rules(?:\/(?:capabilities|options|statistics|evaluate\-batch|rules(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/preview)?)?|tags(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|emails\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/(?:tags|evaluate)|hits(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|assignments(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/cancel)?)?))$/,
+  },
+  {
     // 11.2.2.2 实收分配（trade 服务）。本条目是**新增一条 services[] 元素**，
     // 11.2.3.1 质检与判定（trade 服务）。本条目是**新增一条 services[] 元素**，
     // 不是往既有 trade 分支的超长单行 alternation 里并分支 —— 那一支多车道同时并进去
