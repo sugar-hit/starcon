@@ -9138,6 +9138,70 @@ const services: readonly {
     pattern:
       /^pii\-access\/(?:capabilities|policy|grants(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/revoke)?|subjects(?:\/(?:CUSTOMER|ORDER)\/[0-9a-zA-Z][0-9a-zA-Z._:@-]*)?|exports(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:approve|reject|execute))?)?|audit)$/,
   },
+  {
+    // ---------------------------------------------------------------------------
+    // 17.7.2.1 平台参数与开关（identity 服务）
+    // ---------------------------------------------------------------------------
+    //
+    // ---- 插入锚点固定在 **services[] 数组的末尾**（`pii-access` 那条之后、数组结尾的 `];` 之前）----
+    //   同批另外三条车道的锚点分别是「`prefix: 'identity/'` 之前」「`// 14.5.2.1 带货归因` 之前」
+    //   「`// 2.4.2.3 映射缺失队列` 之前」，与本锚点互不重叠，git 能干净求并。
+    //
+    // ---- 纯**新增一条独立的 `services[]` 元素** ----
+    //   既有条目**一字未动、也不重排、不格式化整文件**。往既有那条 `identity/` 巨型 alternation 里
+    //   并分支会让多车道同时并入时 git 必然判冲突（结构性，retry 永远不会自愈）。
+    //
+    // ---- 首 token「platform-flags」的零命中核对结论 ----
+    //   本文件既有 services[] 正则里**没有任何一条**含 `platform-flags` 这个串
+    //   （全文出现次数 = 0，用 `grep -c 'platform-flags'` 实测过）。
+    //   ⚠️ 逐条核对了既有 `prefix: 'identity/'` 元素（**本文件里 `identity/` 前缀的元素只有一条**，
+    //   它的 pattern 是 `^(permissions|owner-transfer|legal-entities|...)$` 那一长串）：
+    //   把本模块的全部路径形状（`identity/platform-flags` 及其各子路径）喂进那条正则，
+    //   **没有任何一条命中** —— 它的 alternation 里既没有 `platform-flags`，
+    //   也没有任何通配段（`[0-9a-f-]+` 之类）能顺带吃掉这个首 token。
+    //   ⇒ 既有的 `identity/` 元素**不会**静默吞掉本模块的任何路径，
+    //      本模块的元素也**不会**吃掉别人的任何路径（双向都实测过）。
+    //   ⇒ resolve() 是「首个命中即返回」，所以本元素放在数组末尾也能命中：
+    //      前面的 `identity/` 元素对 `platform-flags/...` 一条都不匹配，会继续往下 fallthrough。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   platform-flags/capabilities                     能力声明（逐维 available + ownerModule）
+    //   platform-flags/definitions                     出厂码表（平台全局层，不带租户上下文）
+    //   platform-flags/settings                         平台全局层当前值列表
+    //   platform-flags/settings/{code}                  单个开关的当前值（PUT 改也在这一支）
+    //   platform-flags/exceptions                       按租户禁用例外列表
+    //   platform-flags/exceptions/{uuid}                单条例外（DELETE 撤销也在这一支）
+    //   platform-flags/evaluate                         单个开关的可用性判定（三层裁决）
+    //   platform-flags/evaluate-batch                   一组开关的可用性判定（下游门控一次问多个）
+    //   platform-flags/history                          平台全局层变更历史
+    //
+    // ⚠️ `{code}` 段用**受控值域** `[A-Z][A-Z0-9_]{1,63}`（大写字母开头的标识符），
+    //   不是自由文本 —— 开关码在库里有同样的 CHECK 约束，放行任意一段等于把
+    //   「拼错的码」也送到后端。段里**不允许 `/`**：带斜杠就意味着多了一层路径。
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //   （不是 `[0-9a-f-]+`）：后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行。
+    // ⚠️ `evaluate` 与 `evaluate-batch` 写成 `evaluate(?:-batch)?`：
+    //   字面量子路径排在 id 段之前判别，alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸路径 `platform-flags` —— 本模块没有裸集合读，页面一律从 `/settings` 起步
+    //   * `platform-flags/settings/{code}/...` 的任何子动作 —— 改配置就是 PUT 本身，
+    //     没有「启用 / 停用 / 重置」这类子端点
+    //   * `platform-flags/exceptions/{uuid}/...` 的任何子动作 —— 例外只有「新增」与「撤销」两种
+    //   * `platform-flags/tenant-switch` —— 「租户覆盖平台开关」是蓝图**明令禁止**的能力，
+    //     放行一个这样的形状等于把一条不存在的后门登记成公开接口
+    //   * `platform-flags/{任意其他首段}` —— 本模块的路径根只有 `platform-flags` 一个，
+    //     其它首段一律 404
+    //
+    // 🔴 本模块**不写**其它服务的专属形状：下游各服务的功能门控接入是后续待办
+    //   （仓内目前没有统一的 feature-flag 客户端 / SDK），放行一个本模块不实现的路径
+    //   只会让界面以为「已经可用」。
+    prefix: 'identity/',
+    env: 'IDENTITY_URL',
+    fallback: 'http://127.0.0.1:8081',
+    pattern:
+      /^platform\-flags\/(?:capabilities|definitions|settings(?:\/[A-Z][A-Z0-9_]{1,63})?|exceptions(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|evaluate(?:-batch)?|history)$/,
+  },
 ];
 
 function resolve(path: string) {
