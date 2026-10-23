@@ -5966,6 +5966,439 @@
         },
         "type": "object"
       },
+      "PlatformOpsAlertPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/PlatformOpsAlertView"
+            },
+            "type": "array"
+          },
+          "limit": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "offset": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "PlatformOpsAlertView": {
+        "properties": {
+          "acknowledgedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "alertCode": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "metricCode": {
+            "type": "string"
+          },
+          "observedValue": {
+            "type": "number"
+          },
+          "raisedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "resolvedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "serviceCode": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "tenantId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "thresholdValue": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "PlatformOpsCapabilities": {
+        "properties": {
+          "dimensions": {
+            "items": {
+              "$ref": "#/components/schemas/PlatformOpsCapabilityDimension"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "PlatformOpsCapabilityDimension": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "description": {
+            "type": "string"
+          },
+          "dimension": {
+            "type": "string"
+          },
+          "impact": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PlatformOpsIngestResult": {
+        "properties": {
+          "alertCode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "alertId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "alertStatus": {
+            "nullable": true,
+            "type": "string"
+          },
+          "metricId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "severity": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PlatformOpsMetricInput": {
+        "properties": {
+          "metricCode": {
+            "maxLength": 40,
+            "minLength": 0,
+            "type": "string"
+          },
+          "sampleValue": {
+            "exclusiveMinimum": false,
+            "minimum": 0,
+            "type": "number"
+          },
+          "serviceCode": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string"
+          },
+          "source": {
+            "maxLength": 16,
+            "minLength": 0,
+            "nullable": true,
+            "type": "string"
+          },
+          "tenantId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "unit": {
+            "maxLength": 16,
+            "minLength": 0,
+            "type": "string"
+          },
+          "windowEnd": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "windowStart": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "metricCode",
+          "sampleValue",
+          "serviceCode",
+          "tenantId",
+          "unit",
+          "windowEnd",
+          "windowStart"
+        ],
+        "type": "object"
+      },
+      "PlatformOpsMetricPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/PlatformOpsMetricView"
+            },
+            "type": "array"
+          },
+          "limit": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "offset": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "PlatformOpsMetricView": {
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "metricCode": {
+            "type": "string"
+          },
+          "sampleValue": {
+            "type": "number"
+          },
+          "serviceCode": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "tenantId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "unit": {
+            "type": "string"
+          },
+          "windowEnd": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "windowStart": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PlatformOpsOverviewView": {
+        "properties": {
+          "avgAvailability": {
+            "nullable": true,
+            "type": "number"
+          },
+          "avgErrorRate": {
+            "nullable": true,
+            "type": "number"
+          },
+          "avgLatencyMs": {
+            "nullable": true,
+            "type": "number"
+          },
+          "avgStorageUtilization": {
+            "nullable": true,
+            "type": "number"
+          },
+          "criticalAlertCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "generatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "maxErrorRate": {
+            "nullable": true,
+            "type": "number"
+          },
+          "offlineTenantCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "onlineTenantCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "openAlertCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "tenantCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "tenantWithSamples": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalCostEstimate": {
+            "nullable": true,
+            "type": "number"
+          },
+          "totalQueueDepth": {
+            "nullable": true,
+            "type": "number"
+          },
+          "totalTaskBacklog": {
+            "nullable": true,
+            "type": "number"
+          },
+          "unknownTenantCount": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "PlatformOpsTenantHealthView": {
+        "properties": {
+          "availability": {
+            "nullable": true,
+            "type": "number"
+          },
+          "costEstimate": {
+            "nullable": true,
+            "type": "number"
+          },
+          "criticalAlertCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "errorRate": {
+            "nullable": true,
+            "type": "number"
+          },
+          "lastSampleAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "latencyMs": {
+            "nullable": true,
+            "type": "number"
+          },
+          "online": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "openAlertCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "queueDepth": {
+            "nullable": true,
+            "type": "number"
+          },
+          "storageUtilization": {
+            "nullable": true,
+            "type": "number"
+          },
+          "taskBacklog": {
+            "nullable": true,
+            "type": "number"
+          },
+          "tenantCode": {
+            "type": "string"
+          },
+          "tenantId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "tenantName": {
+            "type": "string"
+          },
+          "tenantStatus": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PlatformOpsThresholdInput": {
+        "properties": {
+          "comparison": {
+            "minLength": 1,
+            "pattern": "GT|LT",
+            "type": "string"
+          },
+          "criticalThreshold": {
+            "exclusiveMinimum": false,
+            "minimum": 0,
+            "type": "number"
+          },
+          "enabled": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "warnThreshold": {
+            "exclusiveMinimum": false,
+            "minimum": 0,
+            "type": "number"
+          }
+        },
+        "required": [
+          "comparison",
+          "criticalThreshold",
+          "warnThreshold"
+        ],
+        "type": "object"
+      },
+      "PlatformOpsThresholdView": {
+        "properties": {
+          "comparison": {
+            "type": "string"
+          },
+          "criticalThreshold": {
+            "type": "number"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "metricCode": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "warnThreshold": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
       "RoleAssignmentInactiveReason": {
         "properties": {
           "reason": {
@@ -13426,6 +13859,549 @@
         },
         "tags": [
           "platform-flag-controller"
+        ]
+      }
+    },
+    "/identity/platform-ops/alerts": {
+      "get": {
+        "operationId": "get_identity_platform_ops_alerts",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "severity",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "tenantId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformOpsAlertPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "platform-ops-controller"
+        ]
+      }
+    },
+    "/identity/platform-ops/alerts/{alertId}/acknowledge": {
+      "post": {
+        "operationId": "post_identity_platform_ops_alerts_alertId_acknowledge",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "alertId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformOpsAlertView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "platform-ops-controller"
+        ]
+      }
+    },
+    "/identity/platform-ops/alerts/{alertId}/resolve": {
+      "post": {
+        "operationId": "post_identity_platform_ops_alerts_alertId_resolve",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "alertId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformOpsAlertView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "platform-ops-controller"
+        ]
+      }
+    },
+    "/identity/platform-ops/capabilities": {
+      "get": {
+        "operationId": "get_identity_platform_ops_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformOpsCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "platform-ops-controller"
+        ]
+      }
+    },
+    "/identity/platform-ops/ingest/metrics": {
+      "post": {
+        "operationId": "post_identity_platform_ops_ingest_metrics",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Internal-Key",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "items": {
+                  "$ref": "#/components/schemas/PlatformOpsMetricInput"
+                },
+                "type": "array"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/PlatformOpsIngestResult"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "platform-ops-controller"
+        ]
+      }
+    },
+    "/identity/platform-ops/metrics": {
+      "get": {
+        "operationId": "get_identity_platform_ops_metrics",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "tenantId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "serviceCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "metricCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformOpsMetricPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "platform-ops-controller"
+        ]
+      }
+    },
+    "/identity/platform-ops/overview": {
+      "get": {
+        "operationId": "get_identity_platform_ops_overview",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformOpsOverviewView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "platform-ops-controller"
+        ]
+      }
+    },
+    "/identity/platform-ops/roles": {
+      "post": {
+        "operationId": "post_identity_platform_ops_roles",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Internal-Key",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "roleCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "object"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "platform-ops-controller"
+        ]
+      }
+    },
+    "/identity/platform-ops/self/metrics": {
+      "get": {
+        "operationId": "get_identity_platform_ops_self_metrics",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/PlatformOpsMetricView"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "platform-ops-controller"
+        ]
+      }
+    },
+    "/identity/platform-ops/tenants": {
+      "get": {
+        "operationId": "get_identity_platform_ops_tenants",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/PlatformOpsTenantHealthView"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "platform-ops-controller"
+        ]
+      }
+    },
+    "/identity/platform-ops/thresholds": {
+      "get": {
+        "operationId": "get_identity_platform_ops_thresholds",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/PlatformOpsThresholdView"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "platform-ops-controller"
+        ]
+      }
+    },
+    "/identity/platform-ops/thresholds/{metricCode}": {
+      "put": {
+        "operationId": "put_identity_platform_ops_thresholds_metricCode",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "metricCode",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlatformOpsThresholdInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformOpsThresholdView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "platform-ops-controller"
         ]
       }
     },
