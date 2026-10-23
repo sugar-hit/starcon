@@ -1018,6 +1018,78 @@ const services: readonly {
       /^(platforms(?:\/[A-Za-z0-9_]+\/enums(?:\/[0-9a-f-]+)?)?|connections(?:\/(?:reminders|[0-9a-f-]+(?:\/(?:credential|health|revoke))?))?|shops(?:\/[0-9a-f-]+(?:\/(?:marketplaces(?:\/[0-9a-f-]+)?|transfer))?)?|sync-cursors(?:\/[0-9a-f-]+(?:\/(?:pause|resume|rewind|trigger))?)?|sync-runs(?:\/[0-9a-f-]+(?:\/(?:complete|resolve))?)?|sync-failures(?:\/summary|[0-9a-f-]+\/replay)?|platform-operations(?:\/[0-9a-f-]+(?:\/(?:start|succeed|fail|unknown|verify))?)?|oauth\/(?:callback|sessions(?:\/[0-9a-f-]+(?:\/(?:shops|confirm|cancel))?)?)|warehouse-providers(?:\/(?:connections(?:\/[0-9a-f-]+(?:\/(?:sync-paused|accounts))?)?|sync-runs|accounts(?:\/[0-9a-f-]+(?:\/(?:inbound-stock-lines|sync|observations(?:\/latest)?))?)?))?|handover-batches(?:\/(?:capabilities|group-preview|candidates(?:\/sync)?|[0-9a-f-]+(?:\/(?:manifest|timeline|dispatch|receipt|cancel))?))?|carriers(?:\/(?:capabilities|overview|sync|[0-9a-f-]+))?|webhook-dedup(?:\/summary|\/[0-9a-f-]+(?:\/claim)?)?|webhook-endpoints(?:\/[0-9a-f-]+\/disable)?|webhook-receipts(?:\/summary|\/[0-9a-f-]+(?:\/(?:claim|complete))?)?|webhooks\/[A-Za-z0-9_-]+)?$/,
   },
   {
+    // 16.5.2.2 关联风险（channel 服务，卷 16「合规与风控系统」L3 16.5.2 账号安全下的第二格）。
+    //
+    // 蓝图：「识别账号关联风险：同一支付方式/收款账户/设备/IP/地址/法人关联的店铺，
+    // 输出关联图谱与风险提示，提示避免触发平台关联处罚。输入：店铺与支付/设备/地址/法人关系数据；
+    // 平台政策要求。输出：关联图谱 + 风险提示 + 整改建议。关系：上游 = 2 店铺、12.7.1 资金账户；
+    // 下游 = 1 工作台预警。**关联封号是跨境多店经营的头号风险**：官方 API 授权是规避关联的关键，
+    // 本系统只做官方 API，绝不提供任何模拟登录/指纹浏览器能力。」
+    //
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 channel 分支的 alternation 里并分支 ——
+    //   那一支是单行超长正则，多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    //   插入锚点固定在 `// 07 库存：库存总览（7.1.1.1）` 那条**之前**，
+    //   与同批其它车道（5.5.1.1 价格历史 / 2.4.2.3 映射缺失队列 / 数组末尾）互不重叠。
+    //
+    // ---- 首 token「linkage-risk」的零命中核对结论 ----
+    //   本文件既有 services[] 正则里**没有任何一条**含 `linkage` 这个串
+    //   （`grep -c linkage api-proxy.ts` = 0；既有首 token 是 `access-security` /
+    //   `buyer-risk-scores` / `ip-risk-library` / `pii-access` 一类），
+    //   所以首 token 既是独立字面量，也不会被既有分支的前缀吃掉。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   linkage-risk/capabilities                     能力声明（逐维度 available + autoDiscoverable + ownerModule）
+    //   linkage-risk/policy                          关联风险策略（GET 读 / PUT 改；阈值不给默认值）
+    //   linkage-risk/shops                           图谱节点来源（真实店铺 + 法人绑定）
+    //   linkage-risk/identifiers                     关联事实登记（GET 真分页 / POST 登记）
+    //   linkage-risk/identifiers/{uuid}              修改 / 删除一条登记（PUT / DELETE）
+    //   linkage-risk/identifiers/{uuid}/shops        把店铺挂到共享因子上（POST）
+    //   linkage-risk/identifiers/{uuid}/shops/{uuid} 解除一条共享事实（DELETE）
+    //   linkage-risk/graph                           关联图谱（GET：节点 + 边 + 关联组）
+    //   linkage-risk/scan                            跑一次扫描（POST，真去读事实真落库）
+    //   linkage-risk/alerts                          风险提示列表（GET，真分页 + 真筛选 + 汇总）
+    //   linkage-risk/alerts/{uuid}                   风险提示详情（GET，含处置留痕与整改建议）
+    //   linkage-risk/alerts/{uuid}/acknowledge       确认（待处置 → 已确认）
+    //   linkage-risk/alerts/{uuid}/resolve           整改完成（待处置 / 已确认 → 已整改）
+    //   linkage-risk/alerts/{uuid}/dismiss           忽略（待处置 / 已确认 → 已忽略）
+    //   linkage-risk/remediations                    整改建议列表（GET）
+    //   linkage-risk/remediations/{uuid}/status      处置一条整改建议（PUT）
+    //
+    // 判别顺序：**字面量子路径（capabilities / policy / shops / graph / scan / alerts / identifiers /
+    // remediations）排在各自的 {uuid} 段之前** —— alternation 是首个命中即返回，
+    // 顺序反了会被通配支吃掉半截。
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //（不是 `[0-9a-f-]+`：后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行）。
+    // ⚠️ **末尾刻意不带 `?`**：带了就等于放行裸路径 `linkage-risk` ——
+    //   后端没有「一条汇总列表接口」，放行它会让界面以为可用。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸路径 `linkage-risk` —— 本模块没有裸集合读
+    //   * `linkage-risk/payment-methods` / `linkage-risk/payout-accounts` /
+    //     `linkage-risk/fund-accounts` —— **12.7.1 资金账户（12.7.1.1 账户管理）未交付**，
+    //     支付方式 / 收款账户维度的真相归它；本模块**不建它们的影子数据**
+    //   * `linkage-risk/browser-fingerprint` / `linkage-risk/device-fingerprint` /
+    //     `linkage-risk/simulate-login` / `linkage-risk/proxy` ——
+    //     **蓝图明令禁止的能力**（模拟登录 / 指纹浏览器 / 绕关联），本仓一个都不提供，
+    //     代理层更不能放行（放行 = 告诉界面「这个入口存在」）
+    //   * `linkage-risk/graph/{uuid}` —— 图谱是**整体读**（节点 + 边 + 关联组一起给），
+    //     没有按 id 取的端点
+    //   * `linkage-risk/clusters` —— 关联组在图谱与提示详情里，没有独立的集合端点
+    //   * `linkage-risk/alerts/{uuid}/delete` —— 处置走状态机（确认 / 整改 / 忽略），**不是删除**；
+    //     删掉提示等于删掉处置留痕
+    //   * `linkage-risk/alerts/{uuid}/reopen` —— 「已整改 / 已忽略」是**终态**，
+    //     要重新处置只能等下一次扫描，不提供「重开」入口
+    //   * `linkage-risk/workbench-alerts` / `linkage-risk/push-to-workbench` ——
+    //     **下游 1 工作台预警未交付**，本模块只产出提示与建议，**不代**下游推送
+    //   * `linkage-risk/access-security/**` —— 16.5.2.1 登录与访问安全**已交付**
+    //     （`access-security` 是**另一条**独立的 services[] 元素），路径不同、互不影响
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^linkage\-risk(?:\/(?:capabilities|policy|shops|graph|scan|alerts(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:acknowledge|resolve|dismiss))?)?|identifiers(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/shops(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?)?)?|remediations(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/status)?))$/,
+  },
+  {
     // 07 库存：库存总览（7.1.1.1）、库存明细 bucket（7.1.1.2）、筛选下拉参照数据与超储阈值。
     // overview/capabilities/policies 是总览本身；warehouses/legal-entities/skus/quality-statuses
     // 是筛选下拉项。policies/{id} 后面接一段 id（更新与删除）。
