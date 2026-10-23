@@ -743,13 +743,14 @@ class PaymentOrderIntegrationTest {
     assertThat(installments.get(0).amount()).isEqualByComparingTo("40.0000");
     assertThat(installments.get(1).seq()).isEqualTo(2);
     assertThat(installments.get(1).plannedPaidDate()).isEqualTo(today.plusDays(20));
-    // 分批的执行态同样归 12.2.2.2。
-    assertThat(installments.get(0).executionAvailable()).isFalse();
+    // 分批的执行态归 12.2.2.2：12.2.2.2 已交付 ⇒ execution_available 由表级 CHECK
+    // 钉死为 true（V350 把 CHECK 与默认值从 false 翻成 true 并做了存量回填）。
+    assertThat(installments.get(0).executionAvailable()).isTrue();
     assertThat(installments.get(0).executionOwnerModule()).isEqualTo("12.2.2.2");
   }
 
   // ================================================================
-  // 四、已付写不出来（12.2.2.2 未交付）
+  // 四、执行态本模块写不出来（写路径归 12.2.2.2「付款执行」）
   // ================================================================
 
   @Test
@@ -765,7 +766,9 @@ class PaymentOrderIntegrationTest {
                               target,
                               order.id())))
           .as("付款单的状态写不进 " + target)
-          .hasStackTraceContaining("写入权属 12.2.2.2");
+          // 12.2.2.2 已交付 ⇒ 写路径由状态机守卫接管：只允许沿
+          // 草稿→待审→已批→执行中→已付/失败 单向流转，DRAFT → EXECUTING 一律拒绝。
+          .hasStackTraceContaining("状态只能沿");
     }
     // 状态原样。
     assertThat(one("select status from finance_payment_order").get(0, String.class))
@@ -804,7 +807,8 @@ class PaymentOrderIntegrationTest {
                         sql.execute(
                             "update finance_payment_order_installment set status = 'PAID' where id = ?",
                             installmentId)))
-        .hasStackTraceContaining("写入权属 12.2.2.2");
+        // 分批同样由 12.2.2.2 的状态机守卫接管：只允许 已排期→执行中→已付/失败。
+        .hasStackTraceContaining("状态只能沿");
   }
 
   @Test
@@ -909,6 +913,68 @@ class PaymentOrderIntegrationTest {
   }
 
   @Test
+  void 提交之后分批的金额币种计划日冻结但执行态放行() {
+    var today = LocalDate.now(ZoneOffset.UTC);
+    var good =
+        new FinancePaymentOrderInput(
+            PaymentCounterpartyType.SUPPLIER,
+            supplier,
+            "测试供应商",
+            "USD",
+            new BigDecimal("100.00"),
+            null,
+            null,
+            PaymentMethod.BANK_TRANSFER,
+            null,
+            null,
+            null,
+            null,
+            "一批",
+            List.of(
+                new FinancePaymentOrderLineInput(payableLine1(), "明细", "USD", new BigDecimal("100"))),
+            List.of(
+                new FinancePaymentOrderInstallmentInput(
+                    1, today.plusDays(10), "USD", new BigDecimal("100"))));
+    var order = as(() -> orders.create(good, actor()));
+    as(() -> orders.submit(order.id(), actor(), "session"));
+    var installmentId = as(() -> orders.detail(order.id())).installments().get(0).id();
+
+    // ⚠️ **分批的「钱的那些事实」在提交之后仍然冻结**：金额 / 币种 / 计划付款日一变就拒绝。
+    for (String sqlText :
+        List.of(
+            "update finance_payment_order_installment set amount = 90.0000 where id = ?",
+            "update finance_payment_order_installment set currency = 'EUR' where id = ?",
+            "update finance_payment_order_installment set planned_paid_date = planned_paid_date + 1 where id = ?")) {
+      assertThatThrownBy(() -> as(() -> sql.execute(sqlText, installmentId)))
+          .as("提交之后改分批的钱的事实必须被挡：" + sqlText)
+          .hasStackTraceContaining("明细与分批不可再改");
+    }
+
+    // ⚠️ **分批的执行态要放行**（12.2.2.2 推进它）：冻结守卫不挡，
+    //    由更强的状态机守卫接管 —— 这里没有对应的付款执行记录 ⇒ 被它挡下。
+    //    断言报的是状态守卫那句：若冻结守卫先挡下来，报的会是「明细与分批不可再改」，
+    //    状态守卫根本不会被触发 ⇒ 这条断言同时证明了「冻结守卫放行了执行态」。
+    assertThatThrownBy(
+            () ->
+                as(
+                    () ->
+                        sql.execute(
+                            "update finance_payment_order_installment set status = 'EXECUTING' where id = ?",
+                            installmentId)))
+        .as("执行态推进不该被冻结守卫挡下")
+        .hasStackTraceContaining("进入执行中前必须先有对应的付款执行记录");
+
+    // ⚠️ **明细的占用可以释放与重新占用**（只动 active 一列）：
+    //    付款单转终态时释放占用（true → false）、失败后重发时重新锁回（false → true）。
+    as(() -> sql.execute("update finance_payment_order_line set active = false where order_id = ?", order.id()));
+    as(() -> sql.execute("update finance_payment_order_line set active = true where order_id = ?", order.id()));
+    assertThat(
+            one("select active from finance_payment_order_line where order_id = ?", order.id())
+                .get("active", Boolean.class))
+        .isTrue();
+  }
+
+  @Test
   void 提交时刻写回逐位相等不偏八小时() {
     var order = as(() -> orders.create(input(new BigDecimal("100.00"), payableLine1()), actor()));
     as(() -> orders.submit(order.id(), actor(), "session"));
@@ -949,16 +1015,19 @@ class PaymentOrderIntegrationTest {
   }
 
   @Test
-  void 能力声明如实报出付款执行与资金账户未交付() {
+  void 能力声明如实报出付款执行已交付与资金账户未交付() {
     var caps = as(() -> orders.capabilities());
     var execution =
         caps.capabilities().stream()
             .filter(c -> "12.2.2.2".equals(c.ownerModule()))
             .findFirst()
             .orElseThrow();
-    assertThat(execution.available()).isFalse();
+    // 12.2.2.2「付款执行」已交付 ⇒ 能力声明如实报 available=true。
+    assertThat(execution.available()).isTrue();
     assertThat(execution.ownerModule()).isEqualTo("12.2.2.2");
-    assertThat(caps.downstreamGaps()).anyMatch(g -> "12.2.2.2".equals(g.module()) && !g.available());
+    // 已交付 ⇒ 它不再是「下游缺口」。
+    assertThat(caps.downstreamGaps()).noneMatch(g -> "12.2.2.2".equals(g.module()));
+    // 12.7.1.1 资金账户仍未交付 ⇒ 仍然要如实报出缺口。
     assertThat(caps.downstreamGaps()).anyMatch(g -> "12.7.1.1".equals(g.module()) && !g.available());
     // 审批那一条必须是「已接通」。
     var approval =
