@@ -928,6 +928,759 @@
         },
         "type": "object"
       },
+      "FinanceFundAnalysisCapabilities": {
+        "properties": {
+          "capabilities": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceFundAnalysisCapability"
+            },
+            "type": "array"
+          },
+          "downstreamGaps": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceFundAnalysisDownstreamGap"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceFundAnalysisCapability": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "basis": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "module": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceFundAnalysisDownstreamGap": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "group": {
+            "type": "string"
+          },
+          "module": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "ownerService": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceFundAnalysisOptions": {
+        "properties": {
+          "asOfDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "baseCurrencyCandidates": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "currencies": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "defaultRange": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceFundConcentrationBucket": {
+        "properties": {
+          "amount": {
+            "type": "number"
+          },
+          "periodStart": {
+            "format": "date",
+            "type": "string"
+          },
+          "share": {
+            "nullable": true,
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceFundCounterpartyShare": {
+        "properties": {
+          "amount": {
+            "type": "number"
+          },
+          "counterpartyName": {
+            "type": "string"
+          },
+          "share": {
+            "nullable": true,
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceFundCurrencyDistribution": {
+        "properties": {
+          "accountLevelAvailable": {
+            "type": "boolean"
+          },
+          "accountOwnerModule": {
+            "type": "string"
+          },
+          "asOfDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "cashBasisNote": {
+            "type": "string"
+          },
+          "notes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "positions": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceFundCurrencyPosition"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceFundCurrencyPosition": {
+        "properties": {
+          "advanceAmount": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "netSettlementAmount": {
+            "type": "number"
+          },
+          "paidOutAmount": {
+            "type": "number"
+          },
+          "payableCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "payableUnpaidAmount": {
+            "type": "number"
+          },
+          "plannedOutflowAmount": {
+            "type": "number"
+          },
+          "receivableCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "receivableOpenAmount": {
+            "type": "number"
+          },
+          "receivedCashAmount": {
+            "type": "number"
+          },
+          "unsettledReceivedAmount": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceFundExposureMeasureResult": {
+        "properties": {
+          "report": {
+            "$ref": "#/components/schemas/FinanceFundExposureReport"
+          },
+          "snapshots": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceFundExposureSnapshotRow"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceFundExposureReport": {
+        "properties": {
+          "asOfDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "baseCurrency": {
+            "type": "string"
+          },
+          "baseCurrencyBasis": {
+            "type": "string"
+          },
+          "inventoryNote": {
+            "type": "string"
+          },
+          "inventoryOwnerModule": {
+            "type": "string"
+          },
+          "rateSource": {
+            "type": "string"
+          },
+          "rateSourceModule": {
+            "type": "string"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceFundExposureRow"
+            },
+            "type": "array"
+          },
+          "totalBaseExposureAmount": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceFundExposureRow": {
+        "properties": {
+          "baseCurrency": {
+            "type": "string"
+          },
+          "baseExposureAmount": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "direction": {
+            "type": "string"
+          },
+          "directionLabel": {
+            "type": "string"
+          },
+          "exchangeRate": {
+            "type": "number"
+          },
+          "exposureShare": {
+            "nullable": true,
+            "type": "number"
+          },
+          "netExposureAmount": {
+            "type": "number"
+          },
+          "payableOpenAmount": {
+            "type": "number"
+          },
+          "rateDisplay": {
+            "type": "string"
+          },
+          "rateEffectiveDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "receivableOpenAmount": {
+            "type": "number"
+          },
+          "sensitivityPer1Pct": {
+            "type": "number"
+          },
+          "sensitivityPer5Pct": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceFundExposureSnapshotPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceFundExposureSnapshotRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceFundExposureSnapshotRow": {
+        "properties": {
+          "asOfDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "baseCurrency": {
+            "type": "string"
+          },
+          "baseExposureAmount": {
+            "type": "number"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "direction": {
+            "type": "string"
+          },
+          "exchangeRate": {
+            "type": "number"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "netExposureAmount": {
+            "type": "number"
+          },
+          "payableOpenAmount": {
+            "type": "number"
+          },
+          "rateEffectiveDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "receivableOpenAmount": {
+            "type": "number"
+          },
+          "sensitivityPer1Pct": {
+            "type": "number"
+          },
+          "sensitivityPer5Pct": {
+            "type": "number"
+          },
+          "snapshotNo": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceFundFlowBucket": {
+        "properties": {
+          "actualInflowAmount": {
+            "type": "number"
+          },
+          "actualInflowCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "expectedInflowAmount": {
+            "type": "number"
+          },
+          "expectedInflowCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "netExpectedAmount": {
+            "type": "number"
+          },
+          "periodStart": {
+            "format": "date",
+            "type": "string"
+          },
+          "plannedOutflowAmount": {
+            "type": "number"
+          },
+          "plannedOutflowCount": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceFundFlowCurrencyTotal": {
+        "properties": {
+          "actualInflowAmount": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "expectedInflowAmount": {
+            "type": "number"
+          },
+          "netExpectedAmount": {
+            "type": "number"
+          },
+          "plannedOutflowAmount": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceFundFlowTrend": {
+        "properties": {
+          "actualOutflowBasis": {
+            "type": "string"
+          },
+          "actualOutflowOwnerModule": {
+            "type": "string"
+          },
+          "asOfDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "buckets": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceFundFlowBucket"
+            },
+            "type": "array"
+          },
+          "fromDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "granularity": {
+            "type": "string"
+          },
+          "toDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "totals": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceFundFlowCurrencyTotal"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceFundLiquidityAlert": {
+        "properties": {
+          "basis": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "observedValue": {
+            "type": "number"
+          },
+          "rule": {
+            "type": "string"
+          },
+          "ruleLabel": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string"
+          },
+          "thresholdValue": {
+            "type": "number"
+          },
+          "title": {
+            "type": "string"
+          },
+          "windowEnd": {
+            "format": "date",
+            "type": "string"
+          },
+          "windowStart": {
+            "format": "date",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceFundLiquidityAlertReport": {
+        "properties": {
+          "actualOutflowBasis": {
+            "type": "string"
+          },
+          "actualOutflowOwnerModule": {
+            "type": "string"
+          },
+          "alertCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "alerts": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceFundLiquidityAlert"
+            },
+            "type": "array"
+          },
+          "fromDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "thresholdSource": {
+            "type": "string"
+          },
+          "thresholds": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceFundLiquidityThreshold"
+            },
+            "type": "array"
+          },
+          "toDate": {
+            "format": "date",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceFundLiquidityThreshold": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "label": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "thresholdValue": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceFundLiquidityThresholdConfig": {
+        "properties": {
+          "configured": {
+            "type": "boolean"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "thresholds": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceFundLiquidityThreshold"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceFundLiquidityThresholdConfigInput": {
+        "properties": {
+          "thresholds": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceFundLiquidityThresholdInput"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceFundLiquidityThresholdInput": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "label": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "thresholdValue": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceFundPaymentConcentration": {
+        "properties": {
+          "buckets": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceFundConcentrationBucket"
+            },
+            "type": "array"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "planCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "topBucketPeriod": {
+            "format": "date",
+            "nullable": true,
+            "type": "string"
+          },
+          "topBucketShare": {
+            "nullable": true,
+            "type": "number"
+          },
+          "topCounterparties": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceFundCounterpartyShare"
+            },
+            "type": "array"
+          },
+          "topCounterpartyShare": {
+            "nullable": true,
+            "type": "number"
+          },
+          "totalPlannedAmount": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceFundPaymentConcentrationReport": {
+        "properties": {
+          "basis": {
+            "type": "string"
+          },
+          "fromDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "granularity": {
+            "type": "string"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceFundPaymentConcentration"
+            },
+            "type": "array"
+          },
+          "toDate": {
+            "format": "date",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceFundTurnoverReport": {
+        "properties": {
+          "actualOutflowBasis": {
+            "type": "string"
+          },
+          "actualOutflowOwnerModule": {
+            "type": "string"
+          },
+          "fromDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "periodDays": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceFundTurnoverRow"
+            },
+            "type": "array"
+          },
+          "toDate": {
+            "format": "date",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceFundTurnoverRow": {
+        "properties": {
+          "actualInflowInPeriod": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "dioDays": {
+            "nullable": true,
+            "type": "number"
+          },
+          "dpoDays": {
+            "nullable": true,
+            "type": "number"
+          },
+          "dsoDays": {
+            "nullable": true,
+            "type": "number"
+          },
+          "fundTurnoverDays": {
+            "nullable": true,
+            "type": "number"
+          },
+          "inventoryBasisAvailable": {
+            "type": "boolean"
+          },
+          "inventoryOwnerModule": {
+            "type": "string"
+          },
+          "payableOccurrenceBasis": {
+            "type": "string"
+          },
+          "payableOccurrenceInPeriod": {
+            "type": "number"
+          },
+          "payableUnpaidAmount": {
+            "type": "number"
+          },
+          "periodDays": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "receivableOpenAmount": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
       "FinancePayableCapabilities": {
         "properties": {
           "capabilities": {
@@ -7365,6 +8118,568 @@
         },
         "tags": [
           "bad-debt-controller"
+        ]
+      }
+    },
+    "/finance/fund-analysis/capabilities": {
+      "get": {
+        "operationId": "get_finance_fund_analysis_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceFundAnalysisCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "fund-analysis-controller"
+        ]
+      }
+    },
+    "/finance/fund-analysis/cash-flow-trend": {
+      "get": {
+        "operationId": "get_finance_fund_analysis_cash_flow_trend",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "currency",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "granularity",
+            "required": false,
+            "schema": {
+              "enum": [
+                "DAY",
+                "WEEK",
+                "MONTH"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceFundFlowTrend"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "fund-analysis-controller"
+        ]
+      }
+    },
+    "/finance/fund-analysis/currency-distribution": {
+      "get": {
+        "operationId": "get_finance_fund_analysis_currency_distribution",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "currency",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceFundCurrencyDistribution"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "fund-analysis-controller"
+        ]
+      }
+    },
+    "/finance/fund-analysis/exposure": {
+      "get": {
+        "operationId": "get_finance_fund_analysis_exposure",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "baseCurrency",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "currency",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceFundExposureReport"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "fund-analysis-controller"
+        ]
+      }
+    },
+    "/finance/fund-analysis/exposure/measure": {
+      "post": {
+        "operationId": "post_finance_fund_analysis_exposure_measure",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "baseCurrency",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "currency",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceFundExposureMeasureResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "fund-analysis-controller"
+        ]
+      }
+    },
+    "/finance/fund-analysis/exposure/snapshots": {
+      "get": {
+        "operationId": "get_finance_fund_analysis_exposure_snapshots",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceFundExposureSnapshotPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "fund-analysis-controller"
+        ]
+      }
+    },
+    "/finance/fund-analysis/liquidity-alerts": {
+      "get": {
+        "operationId": "get_finance_fund_analysis_liquidity_alerts",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceFundLiquidityAlertReport"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "fund-analysis-controller"
+        ]
+      }
+    },
+    "/finance/fund-analysis/options": {
+      "get": {
+        "operationId": "get_finance_fund_analysis_options",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceFundAnalysisOptions"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "fund-analysis-controller"
+        ]
+      }
+    },
+    "/finance/fund-analysis/payment-concentration": {
+      "get": {
+        "operationId": "get_finance_fund_analysis_payment_concentration",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "currency",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "granularity",
+            "required": false,
+            "schema": {
+              "enum": [
+                "DAY",
+                "WEEK",
+                "MONTH"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceFundPaymentConcentrationReport"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "fund-analysis-controller"
+        ]
+      }
+    },
+    "/finance/fund-analysis/thresholds": {
+      "get": {
+        "operationId": "get_finance_fund_analysis_thresholds",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceFundLiquidityThresholdConfig"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "fund-analysis-controller"
+        ]
+      },
+      "put": {
+        "operationId": "put_finance_fund_analysis_thresholds",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinanceFundLiquidityThresholdConfigInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceFundLiquidityThresholdConfig"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "fund-analysis-controller"
+        ]
+      }
+    },
+    "/finance/fund-analysis/turnover-days": {
+      "get": {
+        "operationId": "get_finance_fund_analysis_turnover_days",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "currency",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceFundTurnoverReport"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "fund-analysis-controller"
         ]
       }
     },

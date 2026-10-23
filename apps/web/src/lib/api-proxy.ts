@@ -274,6 +274,65 @@ const services: readonly {
       /^ad\-campaigns(?:\/(?:capabilities|options|by\-external|imports|bulk\-operations|sync\-runs|campaigns(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?))$/,
   },
   {
+    // 12.7.2.1 资金分析（finance 服务，卷 12「财务核算」L3 12.7.2 资金下的唯一一格）。
+    //
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 finance 那几条巨型 alternation 里并分支 ——
+    //   既有条目是单行超长正则，多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    //   既有条目**一字未改、也不重排**（本文件的 diff 应当只有纯追加）。
+    //
+    // ---- 插入锚点选在 `prefix: 'auth/'`（login/logout/session/memberships/switch）那条**之前** ----
+    //   同批其它三条车道各自锚在别的行上，彼此相距很远 ⇒ git 能干净求并。
+    //
+    // ---- 首 token「fund-analysis」的零命中核对结论 ----
+    //   本文件既有 **206** 条 services[] 元素（每条一个 `fallback:`）里**没有任何一条**含
+    //   `fund-analysis`（既有的 finance 首 token 是 `bad-debt` / `receivable-aging` /
+    //   `payment-plans` / `payables` / `prepayments` / `write-off` / `receivables` /
+    //   `receipts` / `settlement`，其余服务的前缀是 identity / catalog / channel /
+    //   warehouse / trade / crm / auth …），
+    //   且逐条用 `new RegExp(pat).test('…')` 实测过：既有 206 条正则（含注释里被顺手抽出来的
+    //   3 条样例正则，共 209 条 —— 是真实元素集合的**超集**，所以这个结论更强而不是更弱）
+    //   对本模块的 11 个 shape **全部零命中**；本模块的 11 个 shape 对既有正则也**全部零命中**
+    //   ⇒ 首 token 既是独立字面量，也不会被既有分支的前缀吃掉。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   fund-analysis/capabilities         能力声明（12.7.1.1 / 12.7.1.2 两个口径 available=false + ownerModule）
+    //   fund-analysis/options              筛选项下拉（币种 + 本位币候选，全部来自真实数据）
+    //   fund-analysis/cash-flow-trend      现金流入流出趋势（实际 / 预期 / 计划三个口径并列）
+    //   fund-analysis/currency-distribution 各币种资金分布（四路真实聚合，按币种分开）
+    //   fund-analysis/exposure             汇率敞口测算（实时；汇率取不到上游 503，不返回空集合）
+    //   fund-analysis/exposure/measure     汇率敞口测算并落成快照（POST）
+    //   fund-analysis/exposure/snapshots   敞口快照历史（真分页）
+    //   fund-analysis/turnover-days        资金周转天数（DSO / DPO；存货段恒 null，不用 0 冒充）
+    //   fund-analysis/payment-concentration 付款集中度（时间维度 + 付款对象维度）
+    //   fund-analysis/liquidity-alerts     流动性预警（四条规则跑在真实聚合上）
+    //   fund-analysis/thresholds           流动性预警阈值配置（GET 读 / PUT 整体替换）
+    //
+    // ⚠️ **字面量子路径的顺序**：更长的形状（exposure/measure、exposure/snapshots）
+    //   排在 `exposure` **之前**判别 —— alternation 是首个命中即返回，顺序反了会被短支吃掉半截。
+    //
+    // ⚠️ **本模块没有 id 段**：12 个端点全是**固定形状**，没有「按 id 取详情」这种资源。
+    //   所以本条正则里**没有** {uuid} 段（也就不存在「非 UUID 段被 uuid 分支吃掉」的风险）。
+    //   若将来加了 id 段，id 段必须用**完整 UUID 形状**
+    //   `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`（不是 `[0-9a-f-]+`：
+    //   后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行）。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸路径 `fund-analysis` —— 本模块没有「一条不存在的汇总列表接口」
+    //   * `fund-analysis/not-a-shape` —— 不是本模块的任何形状
+    //   * `fund-analysis/accounts` —— 🔴 资金账户（12.7.1.1）**未交付**
+    //   * `fund-analysis/bank-statements` —— 🔴 银行对账（12.7.1.2）**未交付**
+    //   * `fund-analysis/bank-reconciliation` —— 🔴 银行对账（12.7.1.2）**未交付**
+    //   * `fund-analysis/profit` —— 🔴 利润与经营分析（13）**未交付**
+    //   * `fund-analysis/dashboard-cards` —— 🔴 工作台卡片（卷 01）**未交付**
+    //   * `fund-analysis/exposure/not-a-uuid` —— 非 UUID 段不应被放行
+    //   * `fund-analysis/thresholds/PAYMENT_CONCENTRATION` —— 没有逐档端点（配置是整体替换）
+    prefix: 'finance/',
+    env: 'FINANCE_URL',
+    fallback: 'http://127.0.0.1:8087',
+    pattern:
+      /^fund\-analysis\/(?:exposure\/measure|exposure\/snapshots|exposure|capabilities|options|cash\-flow\-trend|currency\-distribution|turnover\-days|payment\-concentration|liquidity\-alerts|thresholds)$/,
+  },
+  {
     prefix: 'auth/',
     env: 'IDENTITY_URL',
     fallback: 'http://127.0.0.1:8081',
