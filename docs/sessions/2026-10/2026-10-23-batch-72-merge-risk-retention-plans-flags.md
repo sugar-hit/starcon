@@ -476,5 +476,43 @@ const [, id, name, route, phase, status, evidence] = m;   // ← 证据格用 [^
    两条都**已按调度者的追加要求**改掉测试隔离（专属子租户平台运营身份 + `@AfterEach` 共享 owner 哨兵），
    并且都**主动并入了集成头 `df6d340b`**（含 17.7.1.1 的测试隔离修复）才跑的验收 ——
    这说明它们自己也撞上了同一个「窄 L1 看不见」的坑。
-   ⚠️ 下一轮 `merge-ready` 时注意：这两条车道都**已经把集成头合进了自己的分支**，
-   合入时不会冲突，但合并后要重跑一次全量 L2（它们的代码从未经过 L2）。
+
+   ✅ **并入预检（调度者用 `git merge-tree` 做的只读预演，不落任何改动）**：
+   `HEAD` × `feat/17-7-1-2` → exit 0、零冲突；
+   `HEAD` × `feat/17-7-2-2` → exit 0、零冲突。
+   ⇒ 两条车道并入集成头**不会产生冲突**，下轮 `merge-ready` 可直接并入；
+   但并入后**必须重跑一次全量 L2**（它们的代码从未经过 L2）。
+
+10. **🔴 `origin/main` 与集成头已双向分叉，main→集成头 的同步任务持续失败（本轮实测）**
+
+    本轮 09:15 那轮同步任务（`starcon main → module-dev 集成头同步`，每小时 :15）实测结果：
+    **`origin/main` 有 20 个新提交，并入时产生 58 个冲突文件**（57 个 add/add + 1 个 content），
+    已 `git merge --abort` 回退、**未推送任何内容**、集成头仍停在 `bfc7f208`。
+
+    **冲突文件分布**：
+    - `apps/web/src/lib/api-proxy.ts`（**唯一的 content 冲突** —— 白名单条目两侧都改）
+    - `apps/web/src/components/`：`access-security/`、`account-health/`、`buyer-blacklist/`、`buyer-risk/`、
+      `epr-registration/`、`ip-detection/`、`pii-access/`、`crm/`（care-reminder / customer-contact /
+      message-send / negative-review / review-reply 共 9 组 model+workspace+test）
+    - `apps/web/src/app/api/`：`channel/access-security-allowlist.test.ts`、`channel/buyer-blacklist-allowlist.test.ts`、
+      `crm/review-replies-allowlist.test.ts`
+    - `apps/web/src/app/crm/`：`care-reminders/page.tsx`、`review-replies/page.tsx`
+    - `docs/sessions/2026-10/` 25 个会话记录文档
+
+    **根因（不是普通分叉，是「同一批模块被两条独立交付路径各写了一遍」）**：
+    `origin/main` 独有的 20 个提交里，有 **6 个 `feat:` 交付**（`检测与预警、黑名单等 4 项能力交付`、
+    `拦截执行、EPR/包装法等 4 项能力交付`、`工单处理、申诉管理等 4 项能力交付`、`邮件规则、工单列表等 4 项能力交付`、
+    `消息分类、差评处理等 4 项能力交付`、`消息发送、评价回复等 4 项能力交付`），
+    它们**独立创建了与集成头同路径的同名文件**（例如 `buyer-blacklist-model.ts`：
+    集成头 425 行 / main 426 行，差异 4+ / 3-）⇒ 两侧都是「新增」⇒ **add/add 冲突**。
+
+    ⇒ **这不是 merge-union 能机械自愈的**（`merge-union` 只覆盖契约与台账；
+    同路径的新增组件与白名单测试不在其范围内），
+    同步任务自己的结论是「**单靠本同步任务无法自愈**」。
+    **这一条需要人工裁决：同一批模块到底以哪条交付路径为准。**
+    供参考事实：**集成头这一侧的版本经过了流水线的 L1 + 全量 L2**（本轮 8944 后端例 + 7386 前端例全绿），
+    `main` 那一侧的版本**没有经过本流水线的任何一层验证**。
+
+    ⚠️ **对下轮流水线的直接影响**：若 main 侧哪天被并入集成头，那 33 个 `apps/web` 代码文件
+    （含 `api-proxy.ts` 白名单）会**替换掉经过 L2 验证的版本** ⇒ 下轮 L2 极可能因此变红。
+    所以 main 侧的冲突**先别急着「合掉」，它现在反而在替集成头挡着一次未验证的覆盖**。
