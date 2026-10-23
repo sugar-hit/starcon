@@ -928,6 +928,1072 @@
         },
         "type": "object"
       },
+      "FinanceCostCollectionBasis": {
+        "nullable": true,
+        "properties": {
+          "basisAmount": {
+            "description": "上游事实的原始金额（与条目金额不一致时说明口径有调整）",
+            "type": "number"
+          },
+          "basisCode": {
+            "type": "string"
+          },
+          "basisCurrency": {
+            "type": "string"
+          },
+          "basisDate": {
+            "format": "date",
+            "nullable": true,
+            "type": "string"
+          },
+          "basisType": {
+            "enum": [
+              "SETTLEMENT_LINE",
+              "AD_REPORT_ROW",
+              "WAYBILL_FREIGHT",
+              "FIRST_MILE_SHIPMENT",
+              "MANUAL_DOCUMENT"
+            ],
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "detail": {
+            "$ref": "#/components/schemas/FinanceCostCollectionBasisDetail"
+          },
+          "entryId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "evidenceRef": {
+            "description": "凭据引用（发票号 / 合同号 / 对账单号）",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceCostCollectionBasisDetail": {
+        "nullable": true,
+        "properties": {
+          "campaignId": {
+            "description": "活动 id（来源 = 广告花费）",
+            "nullable": true,
+            "type": "string"
+          },
+          "campaignName": {
+            "description": "活动名（来源 = 广告花费）",
+            "nullable": true,
+            "type": "string"
+          },
+          "carrierCode": {
+            "description": "承运商（来源 = 运单运费 / 头程发运单）",
+            "nullable": true,
+            "type": "string"
+          },
+          "documentNo": {
+            "description": "费用单据号（来源 = 人工录入）",
+            "nullable": true,
+            "type": "string"
+          },
+          "feeSubType": {
+            "description": "费用子类（平台结算单里是交易类型：佣金 / FBA 费用 / 仓储费 / 配送费）",
+            "nullable": true,
+            "type": "string"
+          },
+          "freightAmount": {
+            "description": "头程运费分项（来源 = 头程发运单）",
+            "nullable": true,
+            "type": "number"
+          },
+          "handlingAmount": {
+            "description": "头程处理费分项（来源 = 头程发运单）",
+            "nullable": true,
+            "type": "number"
+          },
+          "insuranceAmount": {
+            "description": "头程保险费分项（来源 = 头程发运单）",
+            "nullable": true,
+            "type": "number"
+          },
+          "orderReference": {
+            "description": "订单号（来源 = 运单运费）",
+            "nullable": true,
+            "type": "string"
+          },
+          "platformCode": {
+            "description": "平台代码（来源 = 平台结算单）",
+            "nullable": true,
+            "type": "string"
+          },
+          "platformName": {
+            "description": "平台名（来源 = 广告花费）",
+            "nullable": true,
+            "type": "string"
+          },
+          "settlementLineNo": {
+            "description": "结算单行号（来源 = 平台结算单）",
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "settlementNo": {
+            "description": "结算单号（来源 = 平台结算单）",
+            "nullable": true,
+            "type": "string"
+          },
+          "shipmentCode": {
+            "description": "发运单号（来源 = 头程发运单）",
+            "nullable": true,
+            "type": "string"
+          },
+          "subject": {
+            "description": "费用归属说明（来源 = 人工录入）",
+            "nullable": true,
+            "type": "string"
+          },
+          "upstreamSource": {
+            "description": "上游登记来源（如 MANUAL_REGISTERED / CHANNEL_FEE_STATEMENT）",
+            "nullable": true,
+            "type": "string"
+          },
+          "waybillNo": {
+            "description": "运单号（来源 = 运单运费）",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceCostCollectionCapabilities": {
+        "properties": {
+          "capabilities": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceCostCollectionCapability"
+            },
+            "type": "array"
+          },
+          "gaps": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceCostCollectionDownstreamGap"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceCostCollectionCapability": {
+        "properties": {
+          "available": {
+            "description": "本模块真接通了没有",
+            "type": "boolean"
+          },
+          "dimension": {
+            "description": "这一维是什么",
+            "type": "string"
+          },
+          "evidence": {
+            "description": "依据（表 / 端点 / 上游模块）",
+            "type": "string"
+          },
+          "moduleId": {
+            "description": "模块 ID",
+            "type": "string"
+          },
+          "note": {
+            "description": "说明",
+            "type": "string"
+          },
+          "ownerModule": {
+            "description": "不归本模块时归谁",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceCostCollectionDownstreamGap": {
+        "properties": {
+          "available": {
+            "description": "已交付没有",
+            "type": "boolean"
+          },
+          "moduleId": {
+            "description": "模块 ID",
+            "type": "string"
+          },
+          "name": {
+            "description": "模块名",
+            "type": "string"
+          },
+          "note": {
+            "description": "说明",
+            "type": "string"
+          },
+          "ownerVolume": {
+            "description": "归属卷",
+            "type": "string"
+          },
+          "service": {
+            "description": "归属服务",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceCostCollectionEntry": {
+        "description": "归集出来的条目",
+        "properties": {
+          "allocatedAmount": {
+            "description": "🔴 恒为 0：本模块不做分摊",
+            "type": "number"
+          },
+          "allocationOwnerModule": {
+            "description": "分摊归谁",
+            "type": "string"
+          },
+          "allocationStatus": {
+            "description": "🔴 恒为 UNALLOCATED：本模块不做分摊",
+            "type": "string"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "baseDate": {
+            "description": "分摊基准日期",
+            "format": "date",
+            "type": "string"
+          },
+          "basis": {
+            "$ref": "#/components/schemas/FinanceCostCollectionBasis"
+          },
+          "collectedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "feeCategory": {
+            "enum": [
+              "PLATFORM_FEE",
+              "AD_FEE",
+              "SUBSCRIPTION_FEE",
+              "LOGISTICS_FEE",
+              "HEAD_MILE_FEE",
+              "PERSONNEL_COST",
+              "OFFICE_COST"
+            ],
+            "type": "string"
+          },
+          "feeSource": {
+            "enum": [
+              "PLATFORM_SETTLEMENT",
+              "AD_SPEND",
+              "SUBSCRIPTION",
+              "LOGISTICS_WAYBILL",
+              "HEAD_MILE_SHIPMENT",
+              "PERSONNEL",
+              "OFFICE"
+            ],
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "periodEnd": {
+            "description": "归属期间止（来自费用池）",
+            "format": "date",
+            "type": "string"
+          },
+          "periodStart": {
+            "description": "归属期间起（来自费用池）",
+            "format": "date",
+            "type": "string"
+          },
+          "poolId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "poolKey": {
+            "type": "string"
+          },
+          "poolName": {
+            "type": "string"
+          },
+          "quantity": {
+            "nullable": true,
+            "type": "number"
+          },
+          "ruleCode": {
+            "type": "string"
+          },
+          "ruleId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "ruleName": {
+            "type": "string"
+          },
+          "sourceRefAmount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "sourceRefCode": {
+            "type": "string"
+          },
+          "sourceRefKey": {
+            "type": "string"
+          },
+          "sourceRefType": {
+            "type": "string"
+          },
+          "targetDimension": {
+            "description": "规则声明的分摊目标维度（不是分摊结果）",
+            "enum": [
+              "MONTH",
+              "ORDER",
+              "SKU",
+              "PERIOD"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceCostCollectionEntryCurrencyTotal": {
+        "properties": {
+          "allocatedAmount": {
+            "type": "number"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "count": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "currency": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceCostCollectionEntryDimensionTotal": {
+        "properties": {
+          "amount": {
+            "type": "number"
+          },
+          "count": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "dimension": {
+            "enum": [
+              "MONTH",
+              "ORDER",
+              "SKU",
+              "PERIOD"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceCostCollectionEntryPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceCostCollectionEntry"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalsByCurrency": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceCostCollectionEntryCurrencyTotal"
+            },
+            "type": "array"
+          },
+          "totalsByDimension": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceCostCollectionEntryDimensionTotal"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceCostCollectionManualInput": {
+        "properties": {
+          "amount": {
+            "type": "number"
+          },
+          "baseDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "currency": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "evidenceRef": {
+            "nullable": true,
+            "type": "string"
+          },
+          "note": {
+            "nullable": true,
+            "type": "string"
+          },
+          "periodEnd": {
+            "description": "归属期间截止日（规则是「会计期间」时必填；「自然月」时由基准日期推出）",
+            "format": "date",
+            "nullable": true,
+            "type": "string"
+          },
+          "periodStart": {
+            "description": "归属期间起始日（规则是「会计期间」时必填；「自然月」时由基准日期推出）",
+            "format": "date",
+            "nullable": true,
+            "type": "string"
+          },
+          "quantity": {
+            "nullable": true,
+            "type": "number"
+          },
+          "ruleId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "sourceRefCode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "sourceRefKey": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "subject": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "amount",
+          "baseDate",
+          "currency",
+          "ruleId",
+          "sourceRefKey",
+          "subject"
+        ],
+        "type": "object"
+      },
+      "FinanceCostCollectionOptions": {
+        "properties": {
+          "currencies": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "dimensions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "feeCategories": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "feeSources": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "periodBases": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "poolKeys": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "pools": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceCostCollectionPoolOption"
+            },
+            "type": "array"
+          },
+          "rules": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceCostCollectionRuleOption"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceCostCollectionPool": {
+        "description": "收进的费用池（跨期间 / 币种时会有多个）",
+        "properties": {
+          "allocationAvailable": {
+            "description": "🔴 本模块恒为 false：归集 ≠ 分摊",
+            "type": "boolean"
+          },
+          "allocationNote": {
+            "description": "分摊边界说明",
+            "type": "string"
+          },
+          "allocationOwnerModule": {
+            "description": "分摊归谁",
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "dimension": {
+            "enum": [
+              "MONTH",
+              "ORDER",
+              "SKU",
+              "PERIOD"
+            ],
+            "type": "string"
+          },
+          "entryCount": {
+            "description": "条目笔数",
+            "format": "int32",
+            "type": "integer"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "periodEnd": {
+            "format": "date",
+            "type": "string"
+          },
+          "periodStart": {
+            "format": "date",
+            "type": "string"
+          },
+          "poolKey": {
+            "type": "string"
+          },
+          "poolName": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "OPEN",
+              "CLOSED"
+            ],
+            "type": "string"
+          },
+          "totalAmount": {
+            "description": "池合计（由条目派生，恒等于 Σ条目金额）",
+            "type": "number"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceCostCollectionPoolCurrencyTotal": {
+        "properties": {
+          "currency": {
+            "type": "string"
+          },
+          "entryCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "poolCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "totalAmount": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceCostCollectionPoolDetail": {
+        "properties": {
+          "entries": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceCostCollectionEntry"
+            },
+            "type": "array"
+          },
+          "pool": {
+            "$ref": "#/components/schemas/FinanceCostCollectionPool"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceCostCollectionPoolOption": {
+        "properties": {
+          "currency": {
+            "type": "string"
+          },
+          "dimension": {
+            "enum": [
+              "MONTH",
+              "ORDER",
+              "SKU",
+              "PERIOD"
+            ],
+            "type": "string"
+          },
+          "entryCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "periodEnd": {
+            "format": "date",
+            "type": "string"
+          },
+          "periodStart": {
+            "format": "date",
+            "type": "string"
+          },
+          "poolKey": {
+            "type": "string"
+          },
+          "poolName": {
+            "type": "string"
+          },
+          "totalAmount": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceCostCollectionPoolPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceCostCollectionPool"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalsByCurrency": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceCostCollectionPoolCurrencyTotal"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceCostCollectionResult": {
+        "properties": {
+          "collected": {
+            "description": "实际归集的条目数",
+            "format": "int32",
+            "type": "integer"
+          },
+          "entries": {
+            "description": "归集出来的条目",
+            "items": {
+              "$ref": "#/components/schemas/FinanceCostCollectionEntry"
+            },
+            "type": "array"
+          },
+          "notes": {
+            "description": "跳过的明细原因（逐条说明）",
+            "items": {
+              "description": "跳过的明细原因（逐条说明）",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "pools": {
+            "description": "收进的费用池（跨期间 / 币种时会有多个）",
+            "items": {
+              "$ref": "#/components/schemas/FinanceCostCollectionPool"
+            },
+            "type": "array"
+          },
+          "rule": {
+            "$ref": "#/components/schemas/FinanceCostCollectionRule"
+          },
+          "skippedDuplicated": {
+            "description": "因重复已存在而跳过的条数",
+            "format": "int32",
+            "type": "integer"
+          },
+          "skippedNoFact": {
+            "description": "因上游没有可归集的事实而跳过的条数",
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceCostCollectionRule": {
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "effectiveFrom": {
+            "format": "date",
+            "type": "string"
+          },
+          "effectiveTo": {
+            "format": "date",
+            "nullable": true,
+            "type": "string"
+          },
+          "feeCategory": {
+            "enum": [
+              "PLATFORM_FEE",
+              "AD_FEE",
+              "SUBSCRIPTION_FEE",
+              "LOGISTICS_FEE",
+              "HEAD_MILE_FEE",
+              "PERSONNEL_COST",
+              "OFFICE_COST"
+            ],
+            "type": "string"
+          },
+          "feeSource": {
+            "enum": [
+              "PLATFORM_SETTLEMENT",
+              "AD_SPEND",
+              "SUBSCRIPTION",
+              "LOGISTICS_WAYBILL",
+              "HEAD_MILE_SHIPMENT",
+              "PERSONNEL",
+              "OFFICE"
+            ],
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "periodBasis": {
+            "enum": [
+              "CALENDAR_MONTH",
+              "ACCOUNTING_PERIOD"
+            ],
+            "type": "string"
+          },
+          "poolKey": {
+            "type": "string"
+          },
+          "poolName": {
+            "type": "string"
+          },
+          "ruleCode": {
+            "type": "string"
+          },
+          "ruleName": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "ACTIVE",
+              "INACTIVE"
+            ],
+            "type": "string"
+          },
+          "targetDimension": {
+            "enum": [
+              "MONTH",
+              "ORDER",
+              "SKU",
+              "PERIOD"
+            ],
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceCostCollectionRuleInput": {
+        "properties": {
+          "effectiveFrom": {
+            "format": "date",
+            "type": "string"
+          },
+          "effectiveTo": {
+            "format": "date",
+            "nullable": true,
+            "type": "string"
+          },
+          "feeCategory": {
+            "enum": [
+              "PLATFORM_FEE",
+              "AD_FEE",
+              "SUBSCRIPTION_FEE",
+              "LOGISTICS_FEE",
+              "HEAD_MILE_FEE",
+              "PERSONNEL_COST",
+              "OFFICE_COST"
+            ],
+            "type": "string"
+          },
+          "feeSource": {
+            "enum": [
+              "PLATFORM_SETTLEMENT",
+              "AD_SPEND",
+              "SUBSCRIPTION",
+              "LOGISTICS_WAYBILL",
+              "HEAD_MILE_SHIPMENT",
+              "PERSONNEL",
+              "OFFICE"
+            ],
+            "type": "string"
+          },
+          "note": {
+            "nullable": true,
+            "type": "string"
+          },
+          "periodBasis": {
+            "enum": [
+              "CALENDAR_MONTH",
+              "ACCOUNTING_PERIOD"
+            ],
+            "type": "string"
+          },
+          "poolKey": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "poolName": {
+            "nullable": true,
+            "type": "string"
+          },
+          "ruleCode": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "ruleName": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "ACTIVE",
+              "INACTIVE"
+            ],
+            "nullable": true,
+            "type": "string"
+          },
+          "targetDimension": {
+            "enum": [
+              "MONTH",
+              "ORDER",
+              "SKU",
+              "PERIOD"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "effectiveFrom",
+          "feeCategory",
+          "feeSource",
+          "periodBasis",
+          "poolKey",
+          "ruleCode",
+          "ruleName",
+          "targetDimension"
+        ],
+        "type": "object"
+      },
+      "FinanceCostCollectionRuleOption": {
+        "properties": {
+          "feeCategory": {
+            "enum": [
+              "PLATFORM_FEE",
+              "AD_FEE",
+              "SUBSCRIPTION_FEE",
+              "LOGISTICS_FEE",
+              "HEAD_MILE_FEE",
+              "PERSONNEL_COST",
+              "OFFICE_COST"
+            ],
+            "type": "string"
+          },
+          "feeSource": {
+            "enum": [
+              "PLATFORM_SETTLEMENT",
+              "AD_SPEND",
+              "SUBSCRIPTION",
+              "LOGISTICS_WAYBILL",
+              "HEAD_MILE_SHIPMENT",
+              "PERSONNEL",
+              "OFFICE"
+            ],
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "periodBasis": {
+            "enum": [
+              "CALENDAR_MONTH",
+              "ACCOUNTING_PERIOD"
+            ],
+            "type": "string"
+          },
+          "poolKey": {
+            "type": "string"
+          },
+          "ruleCode": {
+            "type": "string"
+          },
+          "ruleName": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "ACTIVE",
+              "INACTIVE"
+            ],
+            "type": "string"
+          },
+          "targetDimension": {
+            "enum": [
+              "MONTH",
+              "ORDER",
+              "SKU",
+              "PERIOD"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceCostCollectionRuleTemplate": {
+        "properties": {
+          "configured": {
+            "description": "本租户是否已经配了这条来源的规则",
+            "type": "boolean"
+          },
+          "feeCategory": {
+            "enum": [
+              "PLATFORM_FEE",
+              "AD_FEE",
+              "SUBSCRIPTION_FEE",
+              "LOGISTICS_FEE",
+              "HEAD_MILE_FEE",
+              "PERSONNEL_COST",
+              "OFFICE_COST"
+            ],
+            "type": "string"
+          },
+          "feeSource": {
+            "enum": [
+              "PLATFORM_SETTLEMENT",
+              "AD_SPEND",
+              "SUBSCRIPTION",
+              "LOGISTICS_WAYBILL",
+              "HEAD_MILE_SHIPMENT",
+              "PERSONNEL",
+              "OFFICE"
+            ],
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "periodBasis": {
+            "enum": [
+              "CALENDAR_MONTH",
+              "ACCOUNTING_PERIOD"
+            ],
+            "type": "string"
+          },
+          "poolKey": {
+            "type": "string"
+          },
+          "poolName": {
+            "type": "string"
+          },
+          "targetDimension": {
+            "enum": [
+              "MONTH",
+              "ORDER",
+              "SKU",
+              "PERIOD"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "FinanceFundAnalysisCapabilities": {
         "properties": {
           "capabilities": {
@@ -10522,6 +11588,790 @@
         },
         "tags": [
           "bad-debt-controller"
+        ]
+      }
+    },
+    "/finance/cost-collections/capabilities": {
+      "get": {
+        "operationId": "get_finance_cost_collections_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceCostCollectionCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "cost-collection-controller"
+        ]
+      }
+    },
+    "/finance/cost-collections/collect/ad-spend": {
+      "post": {
+        "operationId": "post_finance_cost_collections_collect_ad_spend",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "ruleId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "baseDate",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceCostCollectionResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "cost-collection-controller"
+        ]
+      }
+    },
+    "/finance/cost-collections/collect/head-mile": {
+      "post": {
+        "operationId": "post_finance_cost_collections_collect_head_mile",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "ruleId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceCostCollectionResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "cost-collection-controller"
+        ]
+      }
+    },
+    "/finance/cost-collections/collect/logistics": {
+      "post": {
+        "operationId": "post_finance_cost_collections_collect_logistics",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "ruleId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceCostCollectionResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "cost-collection-controller"
+        ]
+      }
+    },
+    "/finance/cost-collections/collect/manual": {
+      "post": {
+        "operationId": "post_finance_cost_collections_collect_manual",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinanceCostCollectionManualInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceCostCollectionResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "cost-collection-controller"
+        ]
+      }
+    },
+    "/finance/cost-collections/collect/platform-settlement": {
+      "post": {
+        "operationId": "post_finance_cost_collections_collect_platform_settlement",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "ruleId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceCostCollectionResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "cost-collection-controller"
+        ]
+      }
+    },
+    "/finance/cost-collections/entries": {
+      "get": {
+        "operationId": "get_finance_cost_collections_entries",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "poolId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "ruleId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "feeSource",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "feeCategory",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "targetDimension",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "currency",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "poolKey",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "baseDateFrom",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "baseDateTo",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "periodStart",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "periodEnd",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceCostCollectionEntryPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "cost-collection-controller"
+        ]
+      }
+    },
+    "/finance/cost-collections/entries/{id}": {
+      "get": {
+        "operationId": "get_finance_cost_collections_entries_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceCostCollectionEntry"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "cost-collection-controller"
+        ]
+      }
+    },
+    "/finance/cost-collections/entries/{id}/remove": {
+      "post": {
+        "operationId": "post_finance_cost_collections_entries_id_remove",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "cost-collection-controller"
+        ]
+      }
+    },
+    "/finance/cost-collections/options": {
+      "get": {
+        "operationId": "get_finance_cost_collections_options",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceCostCollectionOptions"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "cost-collection-controller"
+        ]
+      }
+    },
+    "/finance/cost-collections/pools": {
+      "get": {
+        "operationId": "get_finance_cost_collections_pools",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "poolKey",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dimension",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "currency",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "periodFrom",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "periodTo",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceCostCollectionPoolPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "cost-collection-controller"
+        ]
+      }
+    },
+    "/finance/cost-collections/pools/{id}": {
+      "get": {
+        "operationId": "get_finance_cost_collections_pools_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceCostCollectionPoolDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "cost-collection-controller"
+        ]
+      }
+    },
+    "/finance/cost-collections/rule-templates": {
+      "get": {
+        "operationId": "get_finance_cost_collections_rule_templates",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/FinanceCostCollectionRuleTemplate"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "cost-collection-controller"
+        ]
+      }
+    },
+    "/finance/cost-collections/rules": {
+      "get": {
+        "operationId": "get_finance_cost_collections_rules",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/FinanceCostCollectionRule"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "cost-collection-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_finance_cost_collections_rules",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinanceCostCollectionRuleInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceCostCollectionRule"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "cost-collection-controller"
+        ]
+      }
+    },
+    "/finance/cost-collections/rules/{id}": {
+      "put": {
+        "operationId": "put_finance_cost_collections_rules_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinanceCostCollectionRuleInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceCostCollectionRule"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "cost-collection-controller"
         ]
       }
     },
