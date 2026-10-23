@@ -92,6 +92,68 @@ grep 到的实际状态与之不同：**6.5.1.1 采购对账已交付**（trade 
 
 **关税 estimate 不进应付**：`duty_estimate` 是估算（估算 != 账单），真关税属 10.5.1.3 税则口径。
 
+## 调度者复核后的两处调整（2026-10-23 追加）
+
+调度者复核在途改动后要求两处调整，其余（迁移、端点、`/finance/payables` 页面、测试）全部保留。
+
+### 调整一：撤回 `apps/web/src/app/finance/page.tsx` 的改动
+
+我在 `/finance` 页面加了 `import Link`、重写了 javadoc（改成「卷 12 入口」+ `<ul>` 列表），
+并把 `return <ReceivableWorkspace />` 包进 `<div>` 加了一行「应收单管理 / 应付单管理」导航。
+**已整份恢复成基线原样**（`git checkout 8a5b91be -- apps/web/src/app/finance/page.tsx`）。
+
+理由（调度者裁决，本车道认可并照办）：
+
+1. **本仓惯例**：同服务多模块各走各的路由，**没有中心索引页** ——
+   `apps/web/src/app/warehouse/` 下 12+ 个模块页面（`receipts` / `pick-tasks` / `outbound` /
+   `parcels` …）全部只靠 URL 直接可达，`warehouse/page.tsx` 只是个 `DomainPlaceholder`。
+   「模块页面靠 URL 可达」是既定形态，不是缺陷。
+2. **同批反例**：11.2.3.2 交付 `/aftersales/return-dispositions` 时**没有**改
+   `aftersales/page.tsx`。
+3. **纪律**：`不要动别的模块的前端页面` —— `/finance` 是 12.1.1.1 的页面。
+4. **必然冲突**：`finance/page.tsx` **不在** merge-union 驱动器覆盖范围内
+   （`.gitattributes` 只给 `packages/api-contracts/src/**` 与 `module-progress.md` 配了驱动），
+   走普通 git merge；而同批 12.2.1.1（收款单）车道也在改同一文件的同一两段，
+   两边改法不同 ⇒ 下一轮并入必然冲突。
+
+⇒ `/finance/payables` 页面本身（路由页 / workspace / model / allowlist 测试）**一个都不动**，
+只是不再从 `/finance` 挂链接 —— 与 warehouse 那 12 个页面一样，URL 直接访问。
+
+### 调整二：`api-proxy.ts` 的 `payables` 条目移到分锚点位置
+
+原先我按 12.1.1.1 的做法把 `payables` 条目插在**数组末尾**。已把**整块（含注释块）**
+搬到**第一个 `prefix: 'warehouse/'` 那条元素之前**（基线 ~1379 行，现在条目在 1344–1404 行），
+**既有条目一字未改、也不重排**。
+
+理由：`api-proxy.ts` **也不在** merge-union 驱动器覆盖范围内 ⇒ 普通 git merge。
+同批三条 finance 车道若都插在「数组末尾」同一个位置，三边插入不同内容 ⇒ **必然冲突**。
+本文件里**已有明文约定**（1.1.1.2 那条车道的注释）：同批车道的插入点分别是
+「数组最开头」「`prefix: 'identity/'` 之前」「`prefix: 'warehouse/'` 之前」「数组末尾」，
+彼此相距 600 行以上，git 能干净求并。本批分工：
+
+| 车道 | 首 token | 锚点 |
+| --- | --- | --- |
+| 12.1.1.2 应收账龄 | `receivable-aging` | 第一个 `prefix: 'identity/'` 之前 |
+| **本车道 12.1.2.1** | `payables` | **第一个 `prefix: 'warehouse/'` 之前** |
+| 12.2.1.1 收款单 | `receipts` | 数组末尾 |
+
+### 移动后重跑的核对（顺序变了，必须重验）
+
+在**移动后**的文件上，用真实 `new RegExp(pattern).test(...)` 逐条实测（脚本见本车道 `.tmp/`
+口径，解析到 services[] 条目 175 条）：
+
+1. **既有条目对本车道首 token 零命中** ⇒ 174 条既有条目 × 15 个本车道形状，**命中 0**。
+2. **本车道正则不命中任何既有条目该放行的形状** ⇒ 命中 0；
+   反向也测：既有 `finance/receivables` 正则不命中本车道形状，本车道正则也不命中
+   `receivables*` 形状 ⇒ **两两不相交**。
+3. **顺序无关性**：`resolve()` 对同一个 prefix 只返回 `{base: FINANCE_URL}`（同一个后端），
+   而同服务多条 finance 条目的首 token 互不相同、正则两两不相交 ⇒
+   **正序 / 逆序遍历的 resolve 结果逐条完全一致**（实测 true），
+   所以本条目插在数组中间不会抢掉同服务其它模块的路由。
+4. **全量 allowlist 回归**（改了共享白名单必须跑全量）：
+   `pnpm vitest run apps/web/src/app/api` ⇒ **211 文件 / 1202 例全过**；
+   本车道两个测试文件 ⇒ **23 例全绿**；`pnpm typecheck` / `pnpm lint` ⇒ 3/3 successful。
+
 ## 涉及文件
 
 **新增**：
@@ -112,8 +174,8 @@ grep 到的实际状态与之不同：**6.5.1.1 采购对账已交付**（trade 
 
 **修改**：
 
-- `apps/web/src/lib/api-proxy.ts`（**新增一条独立 `services[]` 元素**，既有条目一字未改、也不重排）
-- `apps/web/src/app/finance/page.tsx`（加一行「应收单管理 / 应付单管理」并列入口）
+- `apps/web/src/lib/api-proxy.ts`（**新增一条独立 `services[]` 元素**，锚在第一个
+  `prefix: 'warehouse/'` 之前，既有条目一字未改、也不重排）
 - `packages/api-contracts/src/contracts/finance.ts` + `packages/api-contracts/src/finance.openapi.json`（codegen 重生成）
 - `docs/product/capability-blueprint/module-progress.md`（**只改 12.1.2.1 一行的「状态」「证据」两格**；
   其余变化是 `sync.mjs` 刷新出来的计数器与清掉的 47 行历史残留汇总块）
