@@ -1994,6 +1994,535 @@
         },
         "type": "object"
       },
+      "FinanceDeferredSettlementBasisNote": {
+        "properties": {
+          "basisDifference": {
+            "type": "string"
+          },
+          "currencyPolicy": {
+            "type": "string"
+          },
+          "inTransitBasis": {
+            "type": "string"
+          },
+          "orderBasis": {
+            "type": "string"
+          },
+          "settledBasis": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceDeferredSettlementCapabilities": {
+        "properties": {
+          "capabilities": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceDeferredSettlementCapability"
+            },
+            "type": "array"
+          },
+          "downstreamGaps": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceDeferredSettlementDownstreamGap"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceDeferredSettlementCapability": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "basis": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "module": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceDeferredSettlementCurrencySummary": {
+        "properties": {
+          "basisGapAmount": {
+            "type": "number"
+          },
+          "count": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "inTransitAmount": {
+            "type": "number"
+          },
+          "orderBasisAmount": {
+            "type": "number"
+          },
+          "overdueCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "pendingCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "settledBasisAmount": {
+            "type": "number"
+          },
+          "settledCount": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceDeferredSettlementDetail": {
+        "properties": {
+          "deferredSettlement": {
+            "$ref": "#/components/schemas/FinanceDeferredSettlementRow"
+          },
+          "events": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceDeferredSettlementEventRow"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceDeferredSettlementDownstreamGap": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "group": {
+            "type": "string"
+          },
+          "module": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "ownerService": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceDeferredSettlementEventRow": {
+        "properties": {
+          "actorId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "eventType": {
+            "type": "string"
+          },
+          "fromStatus": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "occurredAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "toStatus": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceDeferredSettlementOptions": {
+        "properties": {
+          "currencies": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "modes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "platforms": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "shops": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "statuses": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceDeferredSettlementPage": {
+        "properties": {
+          "basis": {
+            "$ref": "#/components/schemas/FinanceDeferredSettlementBasisNote"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceDeferredSettlementRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "summaryByCurrency": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceDeferredSettlementCurrencySummary"
+            },
+            "type": "array"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceDeferredSettlementRow": {
+        "properties": {
+          "conditionNote": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "cycleDays": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "expectedArrivedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "externalOrderNo": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "orderAmount": {
+            "type": "number"
+          },
+          "orderNo": {
+            "type": "string"
+          },
+          "payoutLagDays": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "platformOrderId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "ruleId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "salesOrderId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "scannedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "settledAmount": {
+            "type": "number"
+          },
+          "settledSettlementCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "settlementCycleEnd": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "settlementCycleStart": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "settlementId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "settlementMode": {
+            "enum": [
+              "PERIODIC",
+              "ROLLING"
+            ],
+            "type": "string"
+          },
+          "settlementModeLabel": {
+            "type": "string"
+          },
+          "settlementNo": {
+            "nullable": true,
+            "type": "string"
+          },
+          "shipmentStatus": {
+            "type": "string"
+          },
+          "shippedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "shopCode": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "PENDING",
+              "SETTLED",
+              "VOID"
+            ],
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "unsettledAmount": {
+            "type": "number"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceDeferredSettlementRuleInput": {
+        "properties": {
+          "conditionNote": {
+            "nullable": true,
+            "type": "string"
+          },
+          "currency": {
+            "nullable": true,
+            "type": "string"
+          },
+          "cycleDays": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "payoutLagDays": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "settlementMode": {
+            "enum": [
+              "PERIODIC",
+              "ROLLING"
+            ],
+            "type": "string"
+          },
+          "shopCode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "shopId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "status": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceDeferredSettlementRuleRow": {
+        "properties": {
+          "conditionNote": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "currency": {
+            "nullable": true,
+            "type": "string"
+          },
+          "cycleDays": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "payoutLagDays": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "settlementMode": {
+            "enum": [
+              "PERIODIC",
+              "ROLLING"
+            ],
+            "type": "string"
+          },
+          "settlementModeLabel": {
+            "type": "string"
+          },
+          "shopCode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "shopId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceDeferredSettlementScanResult": {
+        "properties": {
+          "created": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "fetchedOrders": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "fetchedShipments": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "matched": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "skipped": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "truncated": {
+            "type": "boolean"
+          },
+          "updated": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceDeferredSettlementSummary": {
+        "properties": {
+          "basis": {
+            "$ref": "#/components/schemas/FinanceDeferredSettlementBasisNote"
+          },
+          "computedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "daysToEarliestExpectedArrival": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "earliestExpectedArrival": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "summaryByCurrency": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceDeferredSettlementCurrencySummary"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceDeferredSettlementVoidInput": {
+        "properties": {
+          "reason": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "FinanceFundAnalysisCapabilities": {
         "properties": {
           "capabilities": {
@@ -12372,6 +12901,476 @@
         },
         "tags": [
           "cost-collection-controller"
+        ]
+      }
+    },
+    "/finance/deferred-settlement": {
+      "get": {
+        "operationId": "get_finance_deferred_settlement",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "platformCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "shopCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "currency",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "shippedFrom",
+            "required": false,
+            "schema": {
+              "format": "date-time",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "shippedTo",
+            "required": false,
+            "schema": {
+              "format": "date-time",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "overdueOnly",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceDeferredSettlementPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "deferred-settlement-controller"
+        ]
+      }
+    },
+    "/finance/deferred-settlement/capabilities": {
+      "get": {
+        "operationId": "get_finance_deferred_settlement_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceDeferredSettlementCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "deferred-settlement-controller"
+        ]
+      }
+    },
+    "/finance/deferred-settlement/options": {
+      "get": {
+        "operationId": "get_finance_deferred_settlement_options",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceDeferredSettlementOptions"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "deferred-settlement-controller"
+        ]
+      }
+    },
+    "/finance/deferred-settlement/rules": {
+      "get": {
+        "operationId": "get_finance_deferred_settlement_rules",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/FinanceDeferredSettlementRuleRow"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "deferred-settlement-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_finance_deferred_settlement_rules",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinanceDeferredSettlementRuleInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceDeferredSettlementRuleRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "deferred-settlement-controller"
+        ]
+      }
+    },
+    "/finance/deferred-settlement/scan": {
+      "post": {
+        "operationId": "post_finance_deferred_settlement_scan",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceDeferredSettlementScanResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "deferred-settlement-controller"
+        ]
+      }
+    },
+    "/finance/deferred-settlement/summary": {
+      "get": {
+        "operationId": "get_finance_deferred_settlement_summary",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "platformCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "shopCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "currency",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "shippedFrom",
+            "required": false,
+            "schema": {
+              "format": "date-time",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "shippedTo",
+            "required": false,
+            "schema": {
+              "format": "date-time",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "overdueOnly",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceDeferredSettlementSummary"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "deferred-settlement-controller"
+        ]
+      }
+    },
+    "/finance/deferred-settlement/{id}": {
+      "get": {
+        "operationId": "get_finance_deferred_settlement_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceDeferredSettlementDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "deferred-settlement-controller"
+        ]
+      }
+    },
+    "/finance/deferred-settlement/{id}/void": {
+      "post": {
+        "operationId": "post_finance_deferred_settlement_id_void",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinanceDeferredSettlementVoidInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceDeferredSettlementRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "deferred-settlement-controller"
         ]
       }
     },
