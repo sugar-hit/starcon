@@ -2554,6 +2554,58 @@ const services: readonly {
       /^mapping\-versions(?:\/(?:capabilities|filter\-options|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:product\-scope|affected\-orders))?))?$/,
   },
   {
+    // 17.7.1.1 套餐与权益（identity 服务，卷 17「组织权限与设置」L3 17.7.1 下的第一格）。
+    //
+    // 本条目是**新增一条独立的 `services[]` 元素**，既有的 `identity/` 巨型 alternation
+    // **一字未动、也不重排** —— 那一支是单行超长正则，往里并分支会让多车道同时并入时
+    // git 必然判冲突（结构性，retry 不会自愈）。
+    //
+    // ---- 插入锚点固定在 `// 2.4.2.3 映射缺失队列（channel 服务）` 那条元素**之前** ----
+    //   本批另外三条车道的锚点分别是「`// 5.5.1.1 价格历史` 之前」「`// 07 库存：库存总览
+    //   （7.1.1.1）` 之前」与「数组末尾」，与本处互不重叠 ⇒ git 能干净求并。
+    //
+    // ---- 首 token「saas-plans」的零命中核对结论 ----
+    //   本文件既有 173 条 services[] 正则里**没有任何一条**含 `saas-plans` 这个串
+    //   （既有的是 `business-parameters` / `numbering` / `approval-flows` / `my-approvals`
+    //   一类），所以首 token 既是独立字面量，也不会被既有分支的前缀吃掉。
+    //   逐条用 `new RegExp(pat).test('…')` 实测过：既有 173 条对本模块的 13 个 shape
+    //   **全部零命中** ⇒ resolve() 的「首个命中即返回」不会让本模块的路径落到别的分支上。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   saas-plans/capabilities            能力声明（哪些已交付、哪些未交付 + 归属模块 + 影响面）
+    //   saas-plans/options                 下拉选项与词表（套餐、权益维度、超限策略、周期）
+    //   saas-plans/plans                   套餐列表（GET）/ 新建套餐（POST）
+    //   saas-plans/plans/{code}            套餐详情（GET）/ 改套餐（PUT）
+    //   saas-plans/plans/{code}/entitlements        新增权益项（POST）
+    //   saas-plans/plans/{code}/entitlements/{code} 改权益项（PUT）/ 删权益项（DELETE）
+    //   saas-plans/subscriptions           跨租户订阅看板（GET）/ 开通订阅（POST）
+    //   saas-plans/subscriptions/expire-due          批量处理到期订阅（POST）
+    //   saas-plans/subscriptions/{uuid}    订阅详情（GET，含权益用量与变更留痕）
+    //   saas-plans/subscriptions/{uuid}/status       状态流转（POST）
+    //   saas-plans/subscriptions/{uuid}/events       变更留痕（GET）
+    //   saas-plans/usage                   权益用量视图（GET，?tenantId=）/ 登记用量（POST）
+    //   saas-plans/entitlement-check       超限判定（GET，?tenantId=&entitlementCode=）
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸路径 `saas-plans` —— 本模块没有裸集合读，一切入口都带子路径
+    //   * `saas-plans/plans/{code}/entitlements/{code}/extra` —— 权益项下面没有更深的一层
+    //   * `saas-plans/subscriptions/{uuid}/delete` —— 订阅是事实，不提供物理删除
+    //   * `saas-plans/not-a-shape` —— 非 UUID / 非大写标识符的段不应被放行
+    //   * `saas-plans/plans/starter` —— 套餐编码是大写标识符，小写编码后端会拒（400）
+    //   * `saas-platform/roles` —— **平台运营角色登记是服务端到服务端的专用路径**
+    //     （要 X-Internal-Key），浏览器打不到它；放行它等于让任意租户把自己升级成平台运营方
+    //
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //（不是 `[0-9a-f-]+`）：后者会把 `expire-due` 这种非 UUID 形状也当成 id 放行。
+    // 字面量子路径（capabilities / options / plans / subscriptions / usage / entitlement-check）
+    // 排在 {uuid} 段之前判别 —— alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    prefix: 'identity/',
+    env: 'IDENTITY_URL',
+    fallback: 'http://127.0.0.1:8081',
+    pattern:
+      /^saas\-plans\/(?:capabilities|options|plans(?:\/[A-Z][A-Z0-9_]{1,63}(?:\/entitlements(?:\/[A-Z][A-Z0-9_]{1,63})?)?)?|subscriptions(?:\/expire\-due|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:status|events))?)?|usage|entitlement\-check)$/,
+  },
+  {
     // 2.4.2.3 映射缺失队列（channel 服务）。本条目是**新增一条独立的 `channel/` 元素**，
     // 不是往既有 channel 分支的超长 alternation 里并分支 —— 那一支是单行超长正则，
     // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
