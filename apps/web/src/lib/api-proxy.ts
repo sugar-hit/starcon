@@ -10058,6 +10058,54 @@ const services: readonly {
     pattern:
       /^receivables(?:\/(?:capabilities|options|aging|import\-b2b|policies(?:\/[A-Z_]+)?|collection\-tasks(?:\/(?:generate|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/close))?|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:void|dispute|collection\-tasks))?))?$/,
   },
+  {
+    // 12.1.2.1 应付单管理（finance 服务，卷 12「财务核算」L3 12.1.2 应付下的第一格）。
+    //
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往上一条 finance/ 的
+    //   alternation 里并分支 —— 那一支是单行超长正则，多车道同时并进去 git 必然判冲突
+    //   （结构性，retry 不会自愈）。既有条目**一字未改、也不重排**。
+    //
+    // ---- 插入锚点选在**数组末尾**（`default-context` 与 12.1.1.1 那条 finance/ 之后）----
+    //   本文件既有 100+ 条 services[] 正则里**没有任何一条**的首 token 是 `payables`
+    //   或 `prepayments`（`payables` 只作为 `trade/purchase-order-approvals` 的**子分支**
+    //   出现过一次，首 token 全不相同；`prepayments` 全文件零命中），
+    //   所以两个首 token 既是独立字面量，也不会被既有分支的前缀吃掉。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   payables                              应付单集合（GET 真分页 + 真筛选 + 汇总；POST 人工录入）
+    //   payables/capabilities                 能力声明（哪些上游真接通 + 缺口归谁）
+    //   payables/options                      筛选项（来源 / 状态 / 币种 / 应付对象）
+    //   payables/unpaid                       未付清单（12.1.2.1 的输出之一）
+    //   payables/policies                     应付确认政策（每个来源 × 义务类型全列）
+    //   payables/policies/{source}            配置一个（来源 × 义务类型）的确认政策（PUT）
+    //   payables/import-purchase-arrivals     从 6.3.2.2 到货应付部分确认导入（幂等）
+    //   payables/import-first-mile            从 10.4.1.1 头程发运单导入物流费用（幂等）
+    //   payables/import-ad-spend              从 14.3.1.1 活动花费导入广告费（幂等）
+    //   payables/{uuid}                       应付单详情（单头 + 明细行 + 事件流）
+    //   payables/{uuid}/void                  作废（红冲的等价物）
+    //   prepayments                            预付款集合（**独立聚合**，不是应付单的子资源）
+    //   prepayments/{uuid}                    预付款详情（单头 + 抵扣明细）
+    //   prepayments/{uuid}/allocations        登记一笔预付款抵扣
+    //   prepayments/{uuid}/void               作废预付款
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   payables/{uuid}/settle                —— 🔴 付款（12.2.2.1）**未交付**，
+    //                                             本模块**不提供**任何「标记已付」的写入口
+    //   payables/{uuid}/write-off             —— 🔴 坏账核销（12.1.1.3）**未交付**
+    //   payables/{uuid}/invoice               —— 🔴 发票（12.6.2.1）**未交付**
+    //   payables/{uuid}/confirm               —— 🔴 供应商对账的财务侧确认（12.1.2.3）**未交付**
+    //   payables/payments                     —— 🔴 收付款（12.2.x）**未交付**
+    //   payables/settlements                  —— 🔴 平台结算（12.3.1）**未交付**
+    //   payables/not-a-uuid                   —— 非 UUID 段不应被 uuid 分支吃掉
+    //   payables/{uuid}/not-a-shape           —— 本模块的动作只有 void
+    //   prepayments/{uuid}/delete             —— 事实不可删：作废走 status='VOID'
+    //   prepayments/{uuid}/revoke-allocation  —— 🔴 撤销抵扣属 12.2.2.1 域（**未交付**）
+    prefix: 'finance/',
+    env: 'FINANCE_URL',
+    fallback: 'http://127.0.0.1:8087',
+    pattern:
+      /^(?:payables(?:\/(?:capabilities|options|unpaid|policies(?:\/[A-Z_]+)?|import\-purchase\-arrivals|import\-first\-mile|import\-ad\-spend|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/void)?))?|prepayments(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:allocations|void))?)?)$/,
+  },
 ];
 
 function resolve(path: string) {
