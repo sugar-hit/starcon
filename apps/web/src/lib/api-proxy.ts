@@ -2813,6 +2813,70 @@ const services: readonly {
       /^mapping\-versions(?:\/(?:capabilities|filter\-options|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:product\-scope|affected\-orders))?))?$/,
   },
   {
+    // ---------------------------------------------------------------------------
+    // 1.2.2.2 快捷入口配置（identity 服务，卷 01「工作台与门户」L3 1.2.2 下的第二格）。
+    // ---------------------------------------------------------------------------
+    //
+    // ---- 插入锚点固定在 `prefix: 'identity/'` 那条元素**之前**（即 `saas-plans` 那条之前）----
+    //   同批另外三条车道的锚点分别是「`prefix: 'catalog/'` 之前」「`prefix: 'warehouse/'` 之前」
+    //   与「数组末尾」；本锚点离最近的 `catalog/` 元素 600 行以上、离 `warehouse/` 1300 行以上、
+    //   离数组末尾 6700 行以上 ⇒ 与三条车道的插入点互不重叠，git 能干净求并。
+    //
+    // ---- 纯**新增一条独立的 `services[]` 元素** ----
+    //   既有条目**一字未动、也不重排、不格式化整文件**。往既有那条 `identity/` 巨型 alternation
+    //   里并分支会让多车道同时并入时 git 必然判冲突（结构性，retry 永远不会自愈）。
+    //
+    // ---- 首 token「shortcut-templates」的零命中核对结论 ----
+    //   本文件既有 248 条 services[] 正则里**没有任何一条**含 `shortcut-templates` 或 `shortcut`
+    //   这个串（`grep -c` 实测两者都是 0）⇒ 既有的 `identity/` 元素**不会**静默吞掉本模块的路径，
+    //   本模块的元素也**不会**吃掉别人的任何路径（双向都实测过）。
+    //
+    //   逐条核对过本模块的**全部**形状（放行的 6 个 + 刻意不放行的 6 个），
+    //   既有的 `identity/` 巨型 alternation 与其它前缀的 alternation 里都没有 `shortcut` 这个串，
+    //   也没有任何通配段能顺带吃掉这个首 token。
+    //
+    // ---- 路径根只有一个：shortcut-templates ----
+    //   模板 CRUD、个人覆盖项、最终生效集合是同一件事（岗位模板 → 覆盖 → 生效）的三个面，
+    //   所以放在同一棵路径树下，而不是拆成两个首 token（拆开会让白名单多一条元素，
+    //   多车道并入时就多一个冲突面）。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   shortcut-templates                        模板列表（GET，真分页 + 真筛选）/ 新建模板（POST）
+    //   shortcut-templates/capabilities           能力声明（合并规则 / 权限闸 / 下游未交付归属）
+    //   shortcut-templates/effective              **当前用户最终生效的快捷入口集合**（GET）
+    //   shortcut-templates/overrides              个人覆盖项列表（GET）/ 写覆盖项（POST）
+    //   shortcut-templates/overrides/{uuid}       删掉自己的覆盖项（DELETE）
+    //   shortcut-templates/{uuid}                 模板详情（GET）/ 改模板（PUT）/ 删模板（DELETE）
+    //
+    // ⚠️ 末尾**刻意不带 `?`**：末尾挂一个 `?` 就是「放行裸路径」。
+    //   本模块的裸路径 `shortcut-templates` **是真的有端点的**（列表 + 新建），
+    //   所以这里用**显式的 alternation** 把裸路径列出来，而不是靠一个可选组顺带放行 ——
+    //   形态与既有的 `identity/roles` / `identity/members`（裸集合读）一致，
+    //   但与「本来没有裸集合端点、却顺手用 `?` 放行了裸路径」是两回事。
+    //
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //   （不是 `[0-9a-f-]+`）：后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行。
+    // ⚠️ 字面量子路径（`capabilities` / `effective` / `overrides`）排在 id 段之前判别 ——
+    //   alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `shortcut-templates/{uuid}/entries` —— 入口清单整体写在模板上，没有独立的子资源
+    //   * `shortcut-templates/effective/...` —— 「最终生效集合」只有列表，没有按 id 取单条
+    //   * `shortcut-templates/overrides/all` —— 覆盖项没有「一把全清」的动作
+    //   * `shortcut-templates/overrides/bulk` —— 覆盖项只能逐条写（批量写会让「这次覆盖了哪个入口」
+    //     在审计里说不清）
+    //   * `shortcut-templates/not-a-uuid` —— 非 UUID 形状的 id 一律 404
+    //   * `shortcut-templates/{uuid}/copy` —— 复制模板没有端点
+    //
+    // 🔴 本模块**不写**收藏相关的形状（1.2.2.1 常用页面收藏未交付）：
+    //   放行一个本模块不实现的路径只会让界面以为「已经可用」。
+    prefix: 'identity/',
+    env: 'IDENTITY_URL',
+    fallback: 'http://127.0.0.1:8081',
+    pattern:
+      /^(?:shortcut\-templates|shortcut\-templates\/(?:capabilities|effective|overrides(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}))$/,
+  },
+  {
     // 17.7.1.1 套餐与权益（identity 服务，卷 17「组织权限与设置」L3 17.7.1 下的第一格）。
     //
     // 本条目是**新增一条独立的 `services[]` 元素**，既有的 `identity/` 巨型 alternation
