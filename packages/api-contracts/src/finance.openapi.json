@@ -971,6 +971,1068 @@
         },
         "type": "object"
       },
+      "FinancePaymentBatchPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/FinancePaymentBatchRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinancePaymentBatchRow": {
+        "properties": {
+          "batchNo": {
+            "type": "string"
+          },
+          "counterpartyName": {
+            "type": "string"
+          },
+          "counterpartyRef": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "counterpartyType": {
+            "enum": [
+              "SUPPLIER",
+              "CARRIER",
+              "PLATFORM",
+              "OTHER"
+            ],
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "dueWindowEnd": {
+            "format": "date",
+            "type": "string"
+          },
+          "dueWindowStart": {
+            "format": "date",
+            "type": "string"
+          },
+          "executionAvailable": {
+            "type": "boolean"
+          },
+          "executionOwnerModule": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "paymentWindowEnd": {
+            "format": "date",
+            "type": "string"
+          },
+          "paymentWindowStart": {
+            "format": "date",
+            "type": "string"
+          },
+          "planCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "plannedAmount": {
+            "type": "number"
+          },
+          "status": {
+            "enum": [
+              "SCHEDULED",
+              "CANCELLED"
+            ],
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinancePaymentForecast": {
+        "properties": {
+          "asOfDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "fromDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "planCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "toDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "totalsByCurrency": {
+            "items": {
+              "$ref": "#/components/schemas/FinancePaymentForecastCurrencyTotal"
+            },
+            "type": "array"
+          },
+          "windowDays": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "windows": {
+            "items": {
+              "$ref": "#/components/schemas/FinancePaymentForecastWindow"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "FinancePaymentForecastCurrencyTotal": {
+        "properties": {
+          "currency": {
+            "type": "string"
+          },
+          "gapWindowCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "inflowAmount": {
+            "type": "number"
+          },
+          "netAmount": {
+            "type": "number"
+          },
+          "outflowAmount": {
+            "type": "number"
+          },
+          "windowCount": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinancePaymentForecastWindow": {
+        "properties": {
+          "currency": {
+            "type": "string"
+          },
+          "gapFlag": {
+            "type": "boolean"
+          },
+          "inflowAmount": {
+            "type": "number"
+          },
+          "netAmount": {
+            "type": "number"
+          },
+          "outflowAmount": {
+            "type": "number"
+          },
+          "planCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "windowEnd": {
+            "format": "date",
+            "type": "string"
+          },
+          "windowStart": {
+            "format": "date",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinancePaymentMilestoneInput": {
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "offsetDays": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "ratio": {
+            "type": "number"
+          },
+          "seq": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "triggerDate": {
+            "format": "date",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinancePaymentMilestoneRow": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "offsetDays": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "ratio": {
+            "type": "number"
+          },
+          "seq": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "triggerDate": {
+            "format": "date",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinancePaymentMilestoneRuleInput": {
+        "properties": {
+          "counterpartyRef": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "currency": {
+            "nullable": true,
+            "type": "string"
+          },
+          "enabled": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "milestones": {
+            "items": {
+              "$ref": "#/components/schemas/FinancePaymentMilestoneInput"
+            },
+            "type": "array"
+          },
+          "name": {
+            "type": "string"
+          },
+          "note": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinancePaymentMilestoneRuleRow": {
+        "properties": {
+          "counterpartyRef": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "currency": {
+            "nullable": true,
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "milestones": {
+            "items": {
+              "$ref": "#/components/schemas/FinancePaymentMilestoneRow"
+            },
+            "type": "array"
+          },
+          "name": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinancePaymentPlanCancelInput": {
+        "properties": {
+          "reason": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinancePaymentPlanCapabilities": {
+        "properties": {
+          "capabilities": {
+            "items": {
+              "$ref": "#/components/schemas/FinancePaymentPlanCapability"
+            },
+            "type": "array"
+          },
+          "downstreamGaps": {
+            "items": {
+              "$ref": "#/components/schemas/FinancePaymentPlanDownstreamGap"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "FinancePaymentPlanCapability": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "basis": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "module": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinancePaymentPlanCurrencySummary": {
+        "properties": {
+          "count": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "overdueCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "plannedAmount": {
+            "type": "number"
+          },
+          "scheduledCount": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinancePaymentPlanDetail": {
+        "properties": {
+          "events": {
+            "items": {
+              "$ref": "#/components/schemas/FinancePaymentPlanEventRow"
+            },
+            "type": "array"
+          },
+          "plan": {
+            "$ref": "#/components/schemas/FinancePaymentPlanRow"
+          },
+          "reminder": {
+            "$ref": "#/components/schemas/FinancePaymentReminderRow"
+          }
+        },
+        "type": "object"
+      },
+      "FinancePaymentPlanDownstreamGap": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "group": {
+            "type": "string"
+          },
+          "module": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "ownerService": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinancePaymentPlanEventRow": {
+        "properties": {
+          "actorId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "eventType": {
+            "type": "string"
+          },
+          "fromStatus": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "occurredAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "toStatus": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinancePaymentPlanGenerateInput": {
+        "properties": {
+          "counterpartyRef": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "dueFrom": {
+            "format": "date",
+            "nullable": true,
+            "type": "string"
+          },
+          "dueTo": {
+            "format": "date",
+            "nullable": true,
+            "type": "string"
+          },
+          "milestoneRuleId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "note": {
+            "nullable": true,
+            "type": "string"
+          },
+          "paymentCondition": {
+            "enum": [
+              "TERM",
+              "MILESTONE",
+              "DUE_DATE"
+            ],
+            "type": "string"
+          },
+          "termRuleId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinancePaymentPlanOptionRef": {
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinancePaymentPlanOptions": {
+        "properties": {
+          "conditions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "counterparties": {
+            "items": {
+              "$ref": "#/components/schemas/FinancePaymentPlanOptionRef"
+            },
+            "type": "array"
+          },
+          "currencies": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "milestoneRules": {
+            "items": {
+              "$ref": "#/components/schemas/FinancePaymentPlanOptionRef"
+            },
+            "type": "array"
+          },
+          "statuses": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "termRules": {
+            "items": {
+              "$ref": "#/components/schemas/FinancePaymentPlanOptionRef"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "FinancePaymentPlanPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/FinancePaymentPlanRow"
+            },
+            "type": "array"
+          },
+          "overdueCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "summaryByCurrency": {
+            "items": {
+              "$ref": "#/components/schemas/FinancePaymentPlanCurrencySummary"
+            },
+            "type": "array"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinancePaymentPlanRow": {
+        "properties": {
+          "batchId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "batchNo": {
+            "nullable": true,
+            "type": "string"
+          },
+          "clamped": {
+            "type": "boolean"
+          },
+          "conditionDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "currentUnpaid": {
+            "type": "number"
+          },
+          "executionAvailable": {
+            "type": "boolean"
+          },
+          "executionOwnerModule": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "milestoneId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "milestoneName": {
+            "nullable": true,
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "payableId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "payableNo": {
+            "type": "string"
+          },
+          "paymentCondition": {
+            "enum": [
+              "TERM",
+              "MILESTONE",
+              "DUE_DATE"
+            ],
+            "type": "string"
+          },
+          "planNo": {
+            "type": "string"
+          },
+          "plannedAmount": {
+            "type": "number"
+          },
+          "plannedPaidDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "PLANNED",
+              "SCHEDULED",
+              "CANCELLED"
+            ],
+            "type": "string"
+          },
+          "termRuleId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "unpaidSnapshot": {
+            "type": "number"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinancePaymentPlanScheduleInput": {
+        "properties": {
+          "counterpartyRef": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "dueFrom": {
+            "format": "date",
+            "type": "string"
+          },
+          "dueTo": {
+            "format": "date",
+            "type": "string"
+          },
+          "milestoneRuleId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "note": {
+            "nullable": true,
+            "type": "string"
+          },
+          "paymentCondition": {
+            "enum": [
+              "TERM",
+              "MILESTONE",
+              "DUE_DATE"
+            ],
+            "type": "string"
+          },
+          "paymentWindowEnd": {
+            "format": "date",
+            "type": "string"
+          },
+          "paymentWindowStart": {
+            "format": "date",
+            "type": "string"
+          },
+          "termRuleId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinancePaymentPlanScheduleResult": {
+        "properties": {
+          "batchCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "batches": {
+            "items": {
+              "$ref": "#/components/schemas/FinancePaymentBatchRow"
+            },
+            "type": "array"
+          },
+          "planned": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "plans": {
+            "items": {
+              "$ref": "#/components/schemas/FinancePaymentPlanRow"
+            },
+            "type": "array"
+          },
+          "rearranged": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "scanned": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "skipped": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "FinancePaymentReminderAcknowledgeInput": {
+        "properties": {
+          "reason": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinancePaymentReminderCurrencySummary": {
+        "properties": {
+          "amount": {
+            "type": "number"
+          },
+          "count": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "overdueCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "pendingCount": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinancePaymentReminderDismissInput": {
+        "properties": {
+          "reason": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinancePaymentReminderPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/FinancePaymentReminderRow"
+            },
+            "type": "array"
+          },
+          "overdueCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "pendingCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "summaryByCurrency": {
+            "items": {
+              "$ref": "#/components/schemas/FinancePaymentReminderCurrencySummary"
+            },
+            "type": "array"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinancePaymentReminderRow": {
+        "properties": {
+          "acknowledgedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "acknowledgedBy": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "counterpartyName": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "dismissReason": {
+            "type": "string"
+          },
+          "dueDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "payableId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "payableNo": {
+            "type": "string"
+          },
+          "planId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "planNo": {
+            "type": "string"
+          },
+          "pushOwnerModule": {
+            "type": "string"
+          },
+          "pushStatus": {
+            "type": "string"
+          },
+          "remindDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "reminderType": {
+            "enum": [
+              "UPCOMING",
+              "DUE",
+              "OVERDUE"
+            ],
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "PENDING",
+              "ACKNOWLEDGED",
+              "DISMISSED"
+            ],
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinancePaymentReminderScanResult": {
+        "properties": {
+          "asOfDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "created": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "dismissed": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "horizonDays": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "scanned": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "unchanged": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "updated": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "FinancePaymentTermRuleInput": {
+        "properties": {
+          "baseKind": {
+            "enum": [
+              "CONFIRMED_DATE",
+              "DUE_DATE"
+            ],
+            "nullable": true,
+            "type": "string"
+          },
+          "counterpartyRef": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "currency": {
+            "nullable": true,
+            "type": "string"
+          },
+          "enabled": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string"
+          },
+          "note": {
+            "nullable": true,
+            "type": "string"
+          },
+          "termDays": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinancePaymentTermRuleRow": {
+        "properties": {
+          "baseKind": {
+            "enum": [
+              "CONFIRMED_DATE",
+              "DUE_DATE"
+            ],
+            "type": "string"
+          },
+          "counterpartyRef": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "currency": {
+            "nullable": true,
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "termDays": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "FinancePrepaymentAllocationInput": {
         "properties": {
           "amount": {
@@ -3254,6 +4316,987 @@
         },
         "tags": [
           "payable-controller"
+        ]
+      }
+    },
+    "/finance/payment-plans": {
+      "get": {
+        "operationId": "get_finance_payment_plans",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "paymentCondition",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "currency",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "counterpartyRef",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "batchId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "overdueOnly",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "paidFrom",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "paidTo",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinancePaymentPlanPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "payment-plan-controller"
+        ]
+      }
+    },
+    "/finance/payment-plans/batches": {
+      "get": {
+        "operationId": "get_finance_payment_plans_batches",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "counterpartyRef",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "currency",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinancePaymentBatchPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "payment-plan-controller"
+        ]
+      }
+    },
+    "/finance/payment-plans/capabilities": {
+      "get": {
+        "operationId": "get_finance_payment_plans_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinancePaymentPlanCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "payment-plan-controller"
+        ]
+      }
+    },
+    "/finance/payment-plans/forecast": {
+      "get": {
+        "operationId": "get_finance_payment_plans_forecast",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "windowDays",
+            "required": false,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinancePaymentForecast"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "payment-plan-controller"
+        ]
+      }
+    },
+    "/finance/payment-plans/generate": {
+      "post": {
+        "operationId": "post_finance_payment_plans_generate",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinancePaymentPlanGenerateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinancePaymentPlanScheduleResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "payment-plan-controller"
+        ]
+      }
+    },
+    "/finance/payment-plans/milestone-rules": {
+      "get": {
+        "operationId": "get_finance_payment_plans_milestone_rules",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/FinancePaymentMilestoneRuleRow"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "payment-plan-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_finance_payment_plans_milestone_rules",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinancePaymentMilestoneRuleInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinancePaymentMilestoneRuleRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "payment-plan-controller"
+        ]
+      }
+    },
+    "/finance/payment-plans/milestone-rules/{id}": {
+      "put": {
+        "operationId": "put_finance_payment_plans_milestone_rules_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinancePaymentMilestoneRuleInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinancePaymentMilestoneRuleRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "payment-plan-controller"
+        ]
+      }
+    },
+    "/finance/payment-plans/options": {
+      "get": {
+        "operationId": "get_finance_payment_plans_options",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinancePaymentPlanOptions"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "payment-plan-controller"
+        ]
+      }
+    },
+    "/finance/payment-plans/reminders": {
+      "get": {
+        "operationId": "get_finance_payment_plans_reminders",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "reminderType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "currency",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "counterpartyRef",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinancePaymentReminderPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "payment-plan-controller"
+        ]
+      }
+    },
+    "/finance/payment-plans/reminders/scan": {
+      "post": {
+        "operationId": "post_finance_payment_plans_reminders_scan",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "asOf",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "horizonDays",
+            "required": false,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinancePaymentReminderScanResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "payment-plan-controller"
+        ]
+      }
+    },
+    "/finance/payment-plans/reminders/{id}/acknowledge": {
+      "post": {
+        "operationId": "post_finance_payment_plans_reminders_id_acknowledge",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinancePaymentReminderAcknowledgeInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinancePaymentReminderRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "payment-plan-controller"
+        ]
+      }
+    },
+    "/finance/payment-plans/reminders/{id}/dismiss": {
+      "post": {
+        "operationId": "post_finance_payment_plans_reminders_id_dismiss",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinancePaymentReminderDismissInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinancePaymentReminderRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "payment-plan-controller"
+        ]
+      }
+    },
+    "/finance/payment-plans/schedule": {
+      "post": {
+        "operationId": "post_finance_payment_plans_schedule",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinancePaymentPlanScheduleInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinancePaymentPlanScheduleResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "payment-plan-controller"
+        ]
+      }
+    },
+    "/finance/payment-plans/term-rules": {
+      "get": {
+        "operationId": "get_finance_payment_plans_term_rules",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/FinancePaymentTermRuleRow"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "payment-plan-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_finance_payment_plans_term_rules",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinancePaymentTermRuleInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinancePaymentTermRuleRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "payment-plan-controller"
+        ]
+      }
+    },
+    "/finance/payment-plans/term-rules/{id}": {
+      "put": {
+        "operationId": "put_finance_payment_plans_term_rules_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinancePaymentTermRuleInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinancePaymentTermRuleRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "payment-plan-controller"
+        ]
+      }
+    },
+    "/finance/payment-plans/{id}": {
+      "get": {
+        "operationId": "get_finance_payment_plans_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinancePaymentPlanDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "payment-plan-controller"
+        ]
+      }
+    },
+    "/finance/payment-plans/{id}/cancel": {
+      "post": {
+        "operationId": "post_finance_payment_plans_id_cancel",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinancePaymentPlanCancelInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinancePaymentPlanRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "payment-plan-controller"
         ]
       }
     },
