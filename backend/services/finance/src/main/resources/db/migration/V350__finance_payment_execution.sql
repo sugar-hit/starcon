@@ -519,7 +519,7 @@ BEGIN
   RETURN NEW;
 END $$ LANGUAGE plpgsql;
 
--- (d) 明细 / 分批冻结守卫 —— **换掉** V346 的版本。
+-- (d) 明细 / 分批冻结守卫 —— **换掉** V346 的版本，并**拆成两个表专属的函数**。
 --
 --     ⚠️ **V346 的这一段有个只在执行态才会暴露的问题**（12.2.2.1 写不出 PAID/FAILED，
 --        所以它一直没被触发过）：V346 的 `guard_finance_payment_order_release_lines`
@@ -533,23 +533,54 @@ END $$ LANGUAGE plpgsql;
 --     另外：**分批的执行态由 12.2.2.2 推进**，所以分批的 UPDATE 要放行
 --     —— 但**钱的那些事实（金额 / 币种 / 计划付款日）仍然冻结**：
 --     「执行态可以推进，钱的那些事实不能动」。
-CREATE OR REPLACE FUNCTION guard_finance_payment_order_child_frozen() RETURNS trigger AS $$
+--
+--     ⚠️ **为什么必须拆成两个函数（而不是继续共用一个）**：
+--        V346 的 `guard_finance_payment_order_child_frozen()` 是**表无关**的 ——
+--        它只碰 `tenant_id` / `id` / `order_id`（两张子表都有）⇒ 所以同一个函数
+--        可以同时挂在 `finance_payment_order_line` 与 `finance_payment_order_installment`
+--        两个触发器上。而本迁移要按表比对**各自的专属字段**
+--        （明细行有 line_no / amount / active，分批有 seq / planned_paid_date），
+--        一旦继续共用同一个函数体，**两个触发器都会炸** —— 报哪条错取决于
+--        该表上**第一个被规划**的 IF 分支引用了哪个字段：
+--            · 挂在明细行上 ⇒ 分批分支先被规划 ⇒ `record "new" has no field "seq"`
+--              （明细行表没有 seq 列）；
+--            · 挂在分批上   ⇒ 明细分支先被规划 ⇒ `record "new" has no field "active"`
+--              （分批表没有 active 列）。
+--        PL/pgSQL 的语句是**首次执行到那一支时**才规划，所以错报时机还取决于
+--        「哪条放行路径先被命中」⇒ 现象飘忽、极难查。
+--        后果是「付款单提交后修改子表任何非放行字段」，抛出来的是一条看不懂的错，
+--        而不是预期的「明细与分批不可再改」。
+--        ⇒ 正解是**拆成两个表专属函数**，各自只引用自己表上真实存在的字段。
+--
+--     ⚠️ **不用 `to_jsonb(NEW)->>'seq'` 这种绕过方案**：那会把金额 / 日期的比较
+--        退化成**文本比较**（'100.0000' vs '100.0000'、日期格式差异）⇒
+--        「金额到底变没变」的语义坏掉。拆函数才是正解。
+--
+-- (d-1) 明细行冻结守卫 —— 只碰 finance_payment_order_line 上真实存在的字段。
+CREATE OR REPLACE FUNCTION guard_finance_payment_order_line_frozen() RETURNS trigger AS $$
 DECLARE
   parent_status text;
 BEGIN
   SELECT status INTO parent_status FROM finance_payment_order
    WHERE tenant_id = OLD.tenant_id AND id = OLD.order_id;
-  -- 父单已被删除（级联中）⇒ 无事可做。
+  -- 父单已被删除（级联中）⇒ 放行。
+  --   ⚠️ UPDATE 必须返回 NEW（BEFORE 触发器返回 OLD 等于「把这一行改回旧值」=
+  --     静默失效，比报错更难查）；DELETE 才返回 OLD。
   IF parent_status IS NULL THEN
-    RETURN OLD;
+    IF TG_OP = 'DELETE' THEN
+      RETURN OLD;
+    END IF;
+    RETURN NEW;
   END IF;
   IF parent_status <> 'DRAFT' THEN
     -- 放行一：明细占用的**释放 / 重新占用**。
     --   · 释放（true → false）：V346 的 release_lines 触发器在付款单转终态时要改这一列；
     --   · 重新占用（false → true）：失败后显式重发时要把明细行**重新锁回**本付款单
     --     （否则明细会被别的付款单抢走，重发就变成第二笔付款）。
-    --   ⚠️ 这两种更新都**只动 active 一列**，其余字段一律逐字比对 ⇒ 钱的那些事实改不了。
-    IF TG_OP = 'UPDATE' AND TG_TABLE_NAME = 'finance_payment_order_line'
+    --   ⚠️ 这两种更新都**只动 active 一列**（外加 updated_at），
+    --     其余字段一律逐字比对 ⇒ 钱的那些事实改不了。
+    --     （updated_at / created_at **不参与**比对：release_lines 与重发路径都会改它。）
+    IF TG_OP = 'UPDATE'
        AND NEW.active IS DISTINCT FROM OLD.active
        AND NEW.id = OLD.id
        AND NEW.order_id = OLD.order_id
@@ -563,8 +594,38 @@ BEGIN
        AND NEW.payable_paid_snapshot = OLD.payable_paid_snapshot THEN
       RETURN NEW;
     END IF;
-    -- 放行二：分批的**执行态**推进（金额 / 币种 / 计划付款日仍然冻结）。
-    IF TG_OP = 'UPDATE' AND TG_TABLE_NAME = 'finance_payment_order_installment'
+    RAISE EXCEPTION '付款单已提交（%），明细与分批不可再改：需要改请被驳回后退回草稿再改', parent_status
+      USING ERRCODE = 'check_violation';
+  END IF;
+  -- ⚠️ **UPDATE 必须返回 NEW**：BEFORE 触发器返回 OLD 等于「把这一行改回旧值」——
+  --    那会让每一次更新都静默失效（语句成功、行没变），比报错更难查。
+  --    DELETE 才返回 OLD（DELETE 的返回值语义是 NEW 为 NULL，返回 OLD 才是对的）。
+  IF TG_OP = 'DELETE' THEN
+    RETURN OLD;
+  END IF;
+  RETURN NEW;
+END $$ LANGUAGE plpgsql;
+
+-- (d-2) 分批冻结守卫 —— 只碰 finance_payment_order_installment 上真实存在的字段。
+--
+--     放行二：分批的**执行态**推进（`status` / `execution_available` /
+--     `failure_reason` / `updated_at` 可以变）—— 但**金额 / 币种 / 计划付款日
+--     必须仍然冻结**（这三个一变就拒绝）。
+CREATE OR REPLACE FUNCTION guard_finance_payment_order_installment_frozen() RETURNS trigger AS $$
+DECLARE
+  parent_status text;
+BEGIN
+  SELECT status INTO parent_status FROM finance_payment_order
+   WHERE tenant_id = OLD.tenant_id AND id = OLD.order_id;
+  -- 父单已被删除（级联中）⇒ 放行（UPDATE 返回 NEW / DELETE 返回 OLD）。
+  IF parent_status IS NULL THEN
+    IF TG_OP = 'DELETE' THEN
+      RETURN OLD;
+    END IF;
+    RETURN NEW;
+  END IF;
+  IF parent_status <> 'DRAFT' THEN
+    IF TG_OP = 'UPDATE'
        AND NEW.id = OLD.id
        AND NEW.order_id = OLD.order_id
        AND NEW.tenant_id = OLD.tenant_id
@@ -577,14 +638,32 @@ BEGIN
     RAISE EXCEPTION '付款单已提交（%），明细与分批不可再改：需要改请被驳回后退回草稿再改', parent_status
       USING ERRCODE = 'check_violation';
   END IF;
-  -- ⚠️ **UPDATE 必须返回 NEW**：BEFORE 触发器返回 OLD 等于「把这一行改回旧值」——
-  --    那会让每一次更新都静默失效（语句成功、行没变），比报错更难查。
-  --    DELETE 才返回 OLD（DELETE 的返回值语义是 NEW 为 NULL，返回 OLD 才是对的）。
+  -- ⚠️ **UPDATE 必须返回 NEW**（理由同上）；DELETE 才返回 OLD。
   IF TG_OP = 'DELETE' THEN
     RETURN OLD;
   END IF;
   RETURN NEW;
 END $$ LANGUAGE plpgsql;
+
+-- (d-3) **重建两个触发器并指向各自的专属函数**。
+--
+--     ⚠️ V346 建的这两个触发器仍然指向那个**表无关**的共享函数 ⇒
+--        只换函数体而不重建触发器，明细行上就会炸 `record "new" has no field "seq"`。
+--        ⇒ 这里显式 DROP + CREATE，让触发器与函数**一一对应**。
+DROP TRIGGER IF EXISTS finance_payment_order_line_frozen ON finance_payment_order_line;
+DROP TRIGGER IF EXISTS finance_payment_order_installment_frozen ON finance_payment_order_installment;
+
+CREATE TRIGGER finance_payment_order_line_frozen
+  BEFORE UPDATE OR DELETE ON finance_payment_order_line
+  FOR EACH ROW EXECUTE FUNCTION guard_finance_payment_order_line_frozen();
+
+CREATE TRIGGER finance_payment_order_installment_frozen
+  BEFORE UPDATE OR DELETE ON finance_payment_order_installment
+  FOR EACH ROW EXECUTE FUNCTION guard_finance_payment_order_installment_frozen();
+
+-- 旧的**表无关**共享函数已无人引用 ⇒ 删掉，避免下一个人再把它挂到某一张表上
+-- 然后重蹈「明细行表没有 seq 列」的覆辙。
+DROP FUNCTION IF EXISTS guard_finance_payment_order_child_frozen();
 
 -- (e) **执行单自己的状态机**。
 --
