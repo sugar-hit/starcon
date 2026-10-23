@@ -502,7 +502,7 @@ export const TASK_PAGES: TaskPage[] = [
   },
   {
     href: '/finance/payables',
-    implemented: false,
+    implemented: true,
     domain: 'finance',
     label: '应付与付款',
     description: '跟进采购、物流和服务商费用的审批与付款。',
