@@ -453,10 +453,10 @@ public class PlatformFlagController {
                     new PlatformFlagCapabilityDimension(
                         "PLATFORM_OPS_VIEW",
                         "平台跨租户运维视图",
-                        false,
-                        "无",
-                        "17.7.2.2",
-                        "本模块只出判定，不出跨租户运维看板"))));
+                        true,
+                        "platform_ops_metric / platform_ops_alert + /identity/platform-ops/*",
+                        "",
+                        "看板只出技术指标（在线状态、错误率、任务积压、队列深度、容量占用、响应延迟、可用性），不含任何租户业务数据；成本是容量 / 调用量口径的估算数量，不是金额"))));
   }
 
   /** 出厂码表：平台定义了哪些开关与参数。全租户共用一份，不带租户上下文。 */
