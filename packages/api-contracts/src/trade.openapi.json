@@ -4208,6 +4208,511 @@
         },
         "type": "object"
       },
+      "AnomalyOrderAction": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "code": {
+            "type": "string"
+          },
+          "impact": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AnomalyOrderCapabilities": {
+        "properties": {
+          "actions": {
+            "items": {
+              "$ref": "#/components/schemas/AnomalyOrderAction"
+            },
+            "type": "array"
+          },
+          "buyerMessageTimeoutHours": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "crossServiceSources": {
+            "items": {
+              "$ref": "#/components/schemas/AnomalyOrderCrossSource"
+            },
+            "type": "array"
+          },
+          "dataAsOf": {
+            "type": "string"
+          },
+          "dimensions": {
+            "items": {
+              "$ref": "#/components/schemas/AnomalyOrderCapability"
+            },
+            "type": "array"
+          },
+          "notConnected": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "platformWritebackTimeoutHours": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AnomalyOrderCapability": {
+        "properties": {
+          "aggregation": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "dimension": {
+            "type": "string"
+          },
+          "impact": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AnomalyOrderCharge": {
+        "properties": {
+          "amount": {
+            "type": "number"
+          },
+          "chargeKind": {
+            "type": "string"
+          },
+          "chargeType": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AnomalyOrderCrossSource": {
+        "properties": {
+          "dimension": {
+            "type": "string"
+          },
+          "endpoint": {
+            "type": "string"
+          },
+          "joinKey": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AnomalyOrderDetail": {
+        "properties": {
+          "actions": {
+            "items": {
+              "$ref": "#/components/schemas/AnomalyOrderAction"
+            },
+            "type": "array"
+          },
+          "buyerEmail": {
+            "type": "string"
+          },
+          "buyerName": {
+            "type": "string"
+          },
+          "buyerPhone": {
+            "type": "string"
+          },
+          "charges": {
+            "items": {
+              "$ref": "#/components/schemas/AnomalyOrderCharge"
+            },
+            "type": "array"
+          },
+          "dataAsOf": {
+            "type": "string"
+          },
+          "evidence": {
+            "items": {
+              "$ref": "#/components/schemas/AnomalyOrderEvidence"
+            },
+            "type": "array"
+          },
+          "lines": {
+            "items": {
+              "$ref": "#/components/schemas/AnomalyOrderLine"
+            },
+            "type": "array"
+          },
+          "order": {
+            "$ref": "#/components/schemas/AnomalyOrderListRow"
+          },
+          "shippingAddress": {
+            "type": "string"
+          },
+          "shippingCountry": {
+            "type": "string"
+          },
+          "statusHistory": {
+            "items": {
+              "$ref": "#/components/schemas/AnomalyOrderStatusEvent"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "AnomalyOrderDwellPreset": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "minHours": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AnomalyOrderEvidence": {
+        "properties": {
+          "dimension": {
+            "type": "string"
+          },
+          "dwellSeconds": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "facts": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "label": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string"
+          },
+          "since": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AnomalyOrderLine": {
+        "properties": {
+          "lineAmount": {
+            "type": "number"
+          },
+          "lineNo": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "specSnapshot": {
+            "type": "string"
+          },
+          "unitPrice": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "AnomalyOrderListRow": {
+        "properties": {
+          "anomalyLabels": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "anomalyTypes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "buyerKey": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "dwellSeconds": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "dwellSince": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "grandTotalAmount": {
+            "type": "number"
+          },
+          "lineCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "orderId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "orderNo": {
+            "type": "string"
+          },
+          "orderSource": {
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "recommendedActions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "severity": {
+            "type": "string"
+          },
+          "shopCode": {
+            "type": "string"
+          },
+          "skuNeeds": {
+            "items": {
+              "$ref": "#/components/schemas/AnomalyOrderSkuNeed"
+            },
+            "type": "array"
+          },
+          "status": {
+            "type": "string"
+          },
+          "submittedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "totalQuantity": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "AnomalyOrderOptions": {
+        "properties": {
+          "anomalyTypes": {
+            "items": {
+              "$ref": "#/components/schemas/AnomalyOrderTypeOption"
+            },
+            "type": "array"
+          },
+          "dataAsOf": {
+            "type": "string"
+          },
+          "defaultMinDwellHours": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "dwellPresets": {
+            "items": {
+              "$ref": "#/components/schemas/AnomalyOrderDwellPreset"
+            },
+            "type": "array"
+          },
+          "orderSources": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "shops": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "AnomalyOrderPage": {
+        "properties": {
+          "dataAsOf": {
+            "type": "string"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AnomalyOrderListRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/AnomalyOrderSummary"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalPages": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AnomalyOrderSkuNeed": {
+        "properties": {
+          "quantity": {
+            "type": "number"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AnomalyOrderStatusEvent": {
+        "properties": {
+          "eventType": {
+            "type": "string"
+          },
+          "fromStatus": {
+            "type": "string"
+          },
+          "occurredAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "toStatus": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AnomalyOrderSummary": {
+        "properties": {
+          "addressFraudSuspected": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "addressUndeliverable": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "blacklistBuyer": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "buyerMessagePending": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "byShop": {
+            "additionalProperties": {
+              "format": "int64",
+              "type": "integer"
+            },
+            "type": "object"
+          },
+          "duplicateOrder": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "insufficientStock": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "oldestDwellSeconds": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "platformShipmentTimeout": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AnomalyOrderTypeOption": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "ownerService": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "ApprovableRule": {
         "description": "可作为批量通过依据的规则",
         "properties": {
@@ -73171,6 +73676,208 @@
         },
         "tags": [
           "aftersales-reason-controller"
+        ]
+      }
+    },
+    "/trade/anomaly-orders": {
+      "get": {
+        "operationId": "get_trade_anomaly_orders",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "anomalyType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "shopCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "orderSource",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "minDwellHours",
+            "required": false,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnomalyOrderPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "anomaly-order-controller"
+        ]
+      }
+    },
+    "/trade/anomaly-orders/capabilities": {
+      "get": {
+        "operationId": "get_trade_anomaly_orders_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnomalyOrderCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "anomaly-order-controller"
+        ]
+      }
+    },
+    "/trade/anomaly-orders/options": {
+      "get": {
+        "operationId": "get_trade_anomaly_orders_options",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnomalyOrderOptions"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "anomaly-order-controller"
+        ]
+      }
+    },
+    "/trade/anomaly-orders/{orderId}": {
+      "get": {
+        "operationId": "get_trade_anomaly_orders_orderId",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "orderId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnomalyOrderDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "anomaly-order-controller"
         ]
       }
     },
