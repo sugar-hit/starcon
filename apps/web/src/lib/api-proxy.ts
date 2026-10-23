@@ -10594,6 +10594,47 @@ const services: readonly {
       /^cost\-collections\/(?:(?:capabilities|options|rule\-templates|rules|pools|entries)(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/remove)?)?|collect\/(?:platform\-settlement|ad\-spend|logistics|head\-mile|manual))$/,
   },
   {
+    // 12.4.1.1 计价方法配置（finance 服务，卷 12「财务核算」L3 12.4.1 成本计算下的第一格）。
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 finance 那几条巨型 alternation 里并分支 ——
+    //   既有 finance 支部的首 token 是 `receivables` / `receivable-aging` / `payables` / `receipts` /
+    //   `bad-debt` / `payment-plans` / `payment-orders` / `payment-executions` / `write-offs` /
+    //   `settlement` / `transactions` / `fund-analysis` / `cost-collections` / `deferred-settlement`，
+    //   本模块占的是**首 token `cost-valuation`** —— 与 `cost-collections` 也刻意不同
+    //   （`cost-valuation` ≠ `cost-collections`），两个正则两两不相交 ⇒ 不会互相吃掉对方的路径。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   cost-valuation/capabilities            能力声明（上游真接通 / 下游缺口归谁）
+    //   cost-valuation/options                 筛选项 + 四个计价方法选项（系统提供选项，不替用户决定政策）
+    //   cost-valuation/scopes                  可用计价范围（法人 / 品类，实时读 identity / catalog）
+    //   cost-valuation/methods                 方法配置列表（GET）/ 登记或切换方法（POST）
+    //   cost-valuation/methods/versions        版本历史（新到旧）
+    //   cost-valuation/methods/compare         版本对比（切换前 / 切换后）
+    //   cost-valuation/specified-costs         指定成本单价列表（GET）/ 维护指定单价（POST）
+    //   cost-valuation/trials                  试算列表（GET）/ 发起试算（POST）
+    //   cost-valuation/trials/{uuid}           试算明细（GET：表头 + 四个方法的结果）
+    //
+    // ⚠️ **刻意不放行**：
+    //   cost-valuation                          —— 裸路径：后端**没有**「一条不存在的汇总列表接口」。
+    //   cost-valuation/recalculate|recompute   —— 🔴 重算属 12.4.1.2，**未交付**：
+    //                                               放行会让界面以为「已经能重算」，
+    //                                               而本模块只产出**配置面**（方法 / 生效区间 / 版本链 / 试算）。
+    //   cost-valuation/cost-layers|cost-results —— 🔴 成本层与结转金额属 12.4.1.2，**未交付**。
+    //   cost-valuation/variance                —— 🔴 成本差异分析属 12.4.1.3，**未交付**。
+    //   cost-valuation/{uuid}                   —— 顶层没有 id 段（方法按范围 + 版本定位）。
+    //   cost-valuation/trials/not-a-uuid        —— 非 UUID 段不应被 uuid 分支吃掉。
+    //
+    // id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`（不是 `[0-9a-f-]+`）：
+    // 后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行。
+    // 字面量子路径（capabilities / options / scopes / methods / methods\/versions / methods\/compare /
+    // specified-costs / trials）排在 {uuid} 段**之前**判别 —— alternation 是首个命中即返回，
+    // 顺序反了会被通配支吃掉半截。
+    prefix: 'finance/',
+    env: 'FINANCE_URL',
+    fallback: 'http://127.0.0.1:8087',
+    pattern:
+      /^cost\-valuation\/(?:capabilities|options|scopes|methods(?:\/(?:versions|compare))?|specified\-costs|trials(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?)$/,
+  },
+  {
     prefix: 'catalog/',
     env: 'CATALOG_URL',
     fallback: 'http://127.0.0.1:8082',
