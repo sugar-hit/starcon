@@ -10633,6 +10633,62 @@ const services: readonly {
     pattern:
       /^settlement(?:\/(?:capabilities|options|shops|cycles|import|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:arrival|void|difference))?))?$/,
   },
+  {
+    // 12.1.2.3 供应商对账（finance 服务，卷 12「财务核算」L3 12.1.2 应付下的第三格）。
+    //
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 `receivables` / `receipts` /
+    //   `settlement` 那几条巨型 alternation 里并分支 —— 那一支是单行超长正则，
+    //   多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。既有条目**一字未改、也不重排**。
+    //
+    // ---- 插入锚点选在**数组末尾**（`settlement` 那条之后）----
+    //   与本批其它车道（`payment-orders` / `fund-analysis` / `transactions`）的插入点
+    //   相距足够远 ⇒ 并入时 git 能干净求并。
+    //
+    // ---- 首 token「supplier-reconciliation」的零命中核对结论（本车道实测）----
+    //   本仓既有 **204** 条 services[] 正则里，与 `supplier` 有关的只有两条：
+    //     · `/^supplier(?:\/...)?$/`（供应商索赔 11.2.3.3 一族）
+    //     · `/^supplier\-claims...$/`（供应商索赔单据）
+    //   两条都要求「supplier 后面紧跟 `/` 或字符串结束」⇒ 首 token 为 `supplier-reconciliation`
+    //   的路径在第 9 个字符处是 `-`，**两条都匹配不上** ⇒ 零命中。
+    //   逐条用 `new RegExp(pat).test('supplier-reconciliation/...')` 实测过：
+    //   既有全部正则对本模块的 12 个正向 shape **零命中**；
+    //   本模块的正则对本仓其它车道已放行的前缀（`receivables` / `receipts` / `settlement` …）
+    //   也**零命中**（首 token 完全不同）。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   supplier-reconciliation/capabilities   能力声明（上游接线 / 职责分离 / 缺口归谁）
+    //   supplier-reconciliation/options        筛选项（状态 / 上游状态 / 币种 / 供应商）
+    //   supplier-reconciliation                列表（GET，真分页 + 真筛选 + 按币种汇总）
+    //   supplier-reconciliation/import         导入采购侧对账单（POST，幂等）
+    //   supplier-reconciliation/{uuid}         单条详情（GET：头 + 明细 + 质检证据 + 差异 + 说明 + 事件 + 应付依据）
+    //   supplier-reconciliation/{uuid}/lines   明细行列表（GET，真分页）
+    //   supplier-reconciliation/{uuid}/differences  差异清单（GET，真分页）
+    //   supplier-reconciliation/{uuid}/match   核对收货与质检（POST）
+    //   supplier-reconciliation/{uuid}/confirm 财务确认并生成应付（POST）
+    //   supplier-reconciliation/{uuid}/reject  财务驳回（POST）
+    //   supplier-reconciliation/{uuid}/differences/{uuid}/explanations 登记差异说明（POST）
+    //   supplier-reconciliation/{uuid}/differences/{uuid}/resolve     裁决差异（POST）
+    //
+    // 判别顺序：字面量子路径（capabilities / options / import）排在 {uuid} 段之前 ——
+    // alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   supplier-reconciliation/{uuid}/settle       —— 🔴 付款（12.2.2.1）**未交付**
+    //   supplier-reconciliation/{uuid}/write-off    —— 🔴 坏账核销（12.1.1.3）**未交付**
+    //   supplier-reconciliation/{uuid}/pay          —— 🔴 付款执行（12.2.2.2）**未交付**
+    //   supplier-reconciliation/{uuid}/not-a-shape  —— 本模块的动作只有 match / confirm / reject
+    //   supplier-reconciliation/not-a-uuid          —— 非 UUID 段不应被 uuid 分支吃掉
+    //   supplier-reconciliation/{uuid}/differences/not-a-uuid —— 同上（差异 id 段）
+    //   supplier-reconciliation/reconciliations    —— 交替写错就会互相吃掉，必须反向钉住
+    //
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //   （不是 `[0-9a-f-]+`）：后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行。
+    prefix: 'finance/',
+    env: 'FINANCE_URL',
+    fallback: 'http://127.0.0.1:8087',
+    pattern:
+      /^supplier-reconciliation(?:\/(?:capabilities|options|import|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:lines|differences\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/(?:explanations|resolve)|differences|match|confirm|reject))?))?$/,
+  },
 ];
 
 function resolve(path: string) {
