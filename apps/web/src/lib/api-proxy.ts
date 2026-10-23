@@ -10020,6 +10020,62 @@ const services: readonly {
       /^epr\-registrations(?:\/(?:capabilities|regimes|categories|shops|registrations|coverage|compliance\-status|publish\-gate|filings|fees|fee\-summary|exemptions)|\/publish\-gate\/batch|\/registrations\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/versions)?|\/fees\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}|\/exemptions\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})$/,
   },
   {
+    // 16.3.2.3 销售税与 Marketplace Facilitator（channel 服务）。纯**新增一条独立的 `services[]` 元素**：
+    // 既有条目（`epr-registrations` 16.3.2.2 / `platform-violations` 16.1.2.1 /
+    // `platform-appeals` 16.1.2.2 / `account-health` 16.1.1.1 / `performance-metrics` 16.1.1.2 /
+    // `compliance-precheck` 16.2.2.1 …）**一字未动、也不重排** —— 本文件是多车道共用的
+    // **累积型**白名单，每条服务规则是一段超长单行正则，往既有那条巨型 alternation 里并分支
+    // 会让多车道同时并入时 git 必然判冲突（结构性，retry 永远不会自愈）。
+    //
+    // ---- 插入锚点固定在 **`epr-registrations` 那条元素之后**（16.3.2.2 EPR/包装法）----
+    //   同 L3 的兄弟模块挨着放，语义上最贴切；与同批其它车道的插入点相距数百行，
+    //   并入时 git 能干净求并。
+    //
+    // ---- 首 token「sales-tax」的零命中核对结论 ----
+    //   本文件既有 `services[]` 正则里**没有任何一条**以 `sales-tax` 开头；
+    //   既有 channel 元素的首 token 是 `epr-registrations` / `platform-appeals` /
+    //   `platform-violations` / `account-health` / `performance-metrics` /
+    //   `compliance-precheck` / `listing-compliance-precheck` / `brand-authorizations` …
+    //   **全不相同** ⇒ 首 token 既是独立字面量，也不会被既有分支的前缀吃掉。
+    //   ⚠️ **不要**用 `tax-registration` 前缀扩展 —— 那是 16.3.1.1 的，会遮蔽它的路由。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   sales-tax/capabilities          能力声明（下游 available=false + ownerModule + 判定口径）
+    //   sales-tax/states                **各州税务状态**（GET，真分页 + 真筛选）
+    //   sales-tax/shops                 店铺目录（GET，真分页）+ 推导出的销售税州
+    //   sales-tax/rate-rules            税率规则清单（GET，真分页 + 真筛选）/ 录入一版（POST）
+    //   sales-tax/rate-rules/effective  某一刻生效的是哪一版（GET，**可解释性**）
+    //   sales-tax/rate-rules/{uuid}     规则详情（GET）/ **发新版本**（PUT，封旧版 + 建新版）
+    //   sales-tax/rate-rules/{uuid}/archive  撤下一版（PUT，**不物理删除**：规则是审计凭据）
+    //   sales-tax/shop-states           店铺所在州清单（GET，真分页）/ 登记（POST）
+    //   sales-tax/shop-states/{uuid}    改一条所在州（PUT）
+    //   sales-tax/facilitator-scopes    **按平台的代扣代缴说明**（GET，真分页）/ 登记（POST）
+    //   sales-tax/facilitator-scopes/{uuid}  改一条说明（PUT）
+    //   sales-tax/facilitator-reports   代扣代缴报表清单（GET，真分页 + 真筛选）
+    //   sales-tax/facilitator-reports/import  **上传 + 真解析 + 真落库**（POST）
+    //   sales-tax/facilitator-reports/{uuid}   报表详情 + 逐行解析结果（GET）
+    //   sales-tax/reconciliations       对账结果清单（GET，真分页 + 真筛选）/ **真算一次对账**（POST）
+    //   sales-tax/obligations           申报义务视图（GET，真分页 + 真筛选；下游 12.6 接手用）
+    //
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //   （不是 `[0-9a-f-]+`：后者会把 `capabilities` / `effective` / `import` 这种非 UUID 形状
+    //   也当 id 放行）。
+    // ⚠️ 末尾**刻意不带 `?`**：带了就等于放行裸路径 `sales-tax`
+    //   （后端没有「一条汇总列表接口」，一切入口都带子路径）。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸路径 `sales-tax` —— 本模块没有裸集合读
+    //   * `sales-tax/filings` / `sales-tax/calendar` —— 16.3.1.2 申报日历与 12.6 申报**未交付**
+    //   * `sales-tax/vat` / `sales-tax/ioss` —— 16.3.2.1 VAT/IOSS **未交付**
+    //   * `sales-tax/rate-rules/{uuid}/delete` —— 规则不做物理删除（改 = 发新版本）
+    //   * `sales-tax/reports` —— 本模块的报表在 `facilitator-reports` 下面，不另开一条
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^sales\-tax(?:\/(?:capabilities|states|shops|rate-rules|rate\-rules\/effective|shop\-states|facilitator\-scopes|facilitator\-reports|facilitator\-reports\/import|reconciliations|obligations)|\/rate\-rules\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/archive)?|\/shop\-states\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}|\/facilitator\-scopes\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}|\/facilitator\-reports\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})$/,
+  },
+  {
     // 15.6.2.2 购物车与弃单挽回（crm 服务）。纯**新增一条独立的 `services[]` 元素**：
     // 既有条目（`buyer-emails` 15.1.2.1 / `knowledge` 15.4.2.1 / `review-requests` 15.2.2.1 /
     // `review-rules` 15.2.2.2）**一字未动、也不重排** —— 本文件是多车道共用的**累积型**
