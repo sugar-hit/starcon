@@ -86,6 +86,66 @@ const services: readonly {
       /^payment\-orders(?:\/(?:capabilities|options|exchange\-rate|payable\-lines\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:submit|sync\-approval))?))?$/,
   },
   {
+    // 12.2.2.2 付款执行（finance 服务，卷 12「财务核算」L3 12.2.2 付款下的第二格）。
+    //
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 finance 那几条巨型 alternation 里并分支 ——
+    //   既有条目是单行超长正则，多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    //   既有条目**一字未改、也不重排**。
+    //
+    // ---- 插入锚点选在 **12.2.2.1 付款单那条之后**（数组前段，finance 簇里）----
+    //   同批其它车道插的是别的锚点（数组最开头 / 某个 identity|warehouse 之前 / 数组末尾），
+    //   本车道落在这里，与它们的插入点相距足够远，并入时 git 能干净求并。
+    //
+    // ---- 首 token「payment-executions」的零命中核对结论 ----
+    //   本文件既有 **209 条** services[] 正则（按 `pattern:` 逐条抽出实测）里，
+    //   **没有任何一条**含 `payment-executions` 这个串；本模块 **10 个形状**对既有正则
+    //   逐一实测**零命中**，本模块 13 个负向形状对既有正则也**零命中**。
+    //   既有 finance 那几条的首 token 是 `receivables` / `receivable-aging` / `payables` /
+    //   `prepayments` / `payment-plans` / `write-off` / `settlement` / `bad-debt` /
+    //   `receipts` / `payment-orders` / `transactions` / `fund-analysis` 等，
+    //   **全不相同**；特别是既有的 `^payment\-orders…` 与 `^payment\-plans…` 都不匹配
+    //   `payment-executions`（首 token 就不同）⇒ 首 token 既是独立字面量，
+    //   也不会被既有分支的前缀吃掉。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   payment-executions                     列表（GET，真分页 + 真筛选 + 按币种分开汇总）
+    //   payment-executions                     发起付款执行（POST）
+    //   payment-executions/{uuid}              执行单详情（GET：执行单 + 尝试 + 事件 + 分摊 + 锁汇）
+    //   payment-executions/{uuid}/verify       状态查证（POST，**不重发**）
+    //   payment-executions/{uuid}/retry        查证后重发（POST，**服务端先查证再重发**）
+    //   payment-executions/capabilities        能力声明（资金账户 / 凭证未交付 + 归属模块）
+    //   payment-executions/options             筛选项（状态 / 失败分类 / 币种 / 渠道 / 付款单）
+    //   payment-executions/pending-orders      可发起付款执行的付款单（已批 / 执行中，逐批列出）
+    //   payment-executions/market-rate         当前市场汇率（GET，读 catalog 5.2.2.1）
+    //   payment-executions/channels            支付渠道列表（GET，凭据只存**引用**）
+    //   payment-executions/channels            登记支付渠道（POST）
+    //   payment-executions/channels/{uuid}     改支付渠道配置（PUT）
+    //
+    // id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`（不是 `[0-9a-f-]+`）：
+    // 后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行。
+    // 字面量子路径（capabilities / options / pending-orders / market-rate / channels）
+    // 排在 {uuid} 段**之前**判别 —— alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   payment-executions/{uuid}/execute       —— 发起执行是**集合**上的 POST，不是子路径
+    //   payment-executions/{uuid}/pay            —— 同上（后端没有这两个别名）
+    //   payment-executions/{uuid}/mark-paid      —— 同上
+    //   payment-executions/{uuid}/settle         —— 同上（结算 / 核销属 12.3 / 12.2.1.2）
+    //   payment-executions/{uuid}/approve        —— 🔴 审批属 17 审批（identity），本模块**不提供**本地审批端点
+    //   payment-executions/{uuid}/reject         —— 同上
+    //   payment-executions/{uuid}/ledger         —— 🔴 凭证属 12.5.2.1，未交付
+    //   payment-executions/batch                 —— 本模块**没有**批量执行端点
+    //   payment-executions/not-a-uuid            —— 非 UUID 段不应被 uuid 分支吃掉
+    //   payment-executions/{uuid}/not-a-shape    —— 多一层仍然 404
+    //   payment-executions/capabilities/{uuid}   —— 字面量段刻意不接 id 段
+    //   payment-executions/payment-executions    —— 交替写错就会互相吃掉，必须反向钉住
+    prefix: 'finance/',
+    env: 'FINANCE_URL',
+    fallback: 'http://127.0.0.1:8087',
+    pattern:
+      /^payment\-executions(?:\/(?:capabilities|options|pending\-orders|market\-rate|channels(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:verify|retry))?))?$/,
+  },
+  {
     // 12.1.1.3 坏账与核销（finance 服务，卷 12「财务核算」L3 12.1.1 应收与资金下的第三格）。
     //
     // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 finance 那条巨型 alternation 里并分支 ——
