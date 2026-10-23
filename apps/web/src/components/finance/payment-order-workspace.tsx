@@ -70,7 +70,8 @@ import {
  * <p><b>页面刻意没有的两个东西</b>：
  *
  * <ol>
- *   <li><b>任何「执行付款」「标记已付」的按钮</b>：付款属 12.2.2.2（未交付）。
+ *   <li><b>任何「执行付款」「标记已付」的按钮</b>：付款属 12.2.2.2「付款执行」
+ *       （已交付，端点在 {@code /finance/payment-executions}）。
  *       页面里的「已批」只表示<b>审批通过了</b>，<b>不是</b>钱已经付出去了。</li>
  *   <li><b>任何「审批通过 / 审批驳回」的按钮</b>：审批属 17 审批（identity）。
  *       审批动作要去 identity 的待我审批里做；这里只提交、只读回。</li>
@@ -287,7 +288,7 @@ export function PaymentOrderWorkspace() {
     <div className="space-y-6 p-6">
       <PageHeader
         title="付款单与审批"
-        description="发起付款申请：选择应付明细、付款账户、币种与汇率、付款方式、分批安排，走分级审批。审批通过不等于钱已付出 —— 付款执行属 12.2.2.2（未交付）。"
+        description="发起付款申请：选择应付明细、付款账户、币种与汇率、付款方式、分批安排，走分级审批。审批通过不等于钱已付出 —— 付款执行属 12.2.2.2「付款执行」。"
         actions={
           <Button variant="secondary" onClick={() => void load()} disabled={loading}>
             <RefreshCw className="mr-2 h-4 w-4" />
@@ -347,7 +348,7 @@ export function PaymentOrderWorkspace() {
                 page?.summaryByCurrency.reduce((sum, s) => sum + s.approvedCount, 0) ?? 0
               }
               unit="张"
-              comparisonLabel="已批 ≠ 已付（12.2.2.2 未交付）"
+              comparisonLabel="已批 ≠ 已付（付款执行属 12.2.2.2）"
             />
           </div>
 

@@ -32,7 +32,8 @@ import org.springframework.web.server.ResponseStatusException;
  * <p>权限码 {@code finance.paymentorder.read / .create / .update}：
  * 建单、改单、提交审批都不是读权限能带过去的动作。
  *
- * <p>⚠️ <b>本前缀下没有任何「执行付款」「标记已付」的端点</b>：付款属 12.2.2.2（未交付）。
+ * <p>⚠️ <b>本前缀下没有任何「执行付款」「标记已付」的端点</b>：付款属 12.2.2.2（已交付，
+ * 端点在它自己的前缀 {@code /finance/payment-executions} 下）。
  * 这里是「发起付款申请 + 提交审批 + 读回审批结果」——
  * <b>审批通过 ≠ 钱已付出</b>。
  *

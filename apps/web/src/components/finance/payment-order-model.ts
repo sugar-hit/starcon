@@ -34,7 +34,8 @@ import { api } from '../../lib/api';
  *       页面**不做任何前端算术**（USD 与 EUR 加起来不是任何一个金额）。</li>
  *   <li><b>币种分开</b>：汇总金额一律按币种分组渲染，
  *       **绝不**把不同币种摆进同一列相加。</li>
- *   <li><b>「已批」不等于「已付」</b>：付款属 12.2.2.2（未交付），
+ *   <li><b>「已批」不等于「已付」</b>：付款属 12.2.2.2「付款执行」（已交付，
+ *       端点在 {@code /finance/payment-executions}），
  *       页面**不提供**任何「执行付款」「标记已付」的按钮 —— 那会是一条假的付款路径。</li>
  *   <li><b>审批在 17 审批里做</b>：本模块**不提供**本地的「审批通过 / 驳回」按钮；
  *       页面提供的是「提交审批」与「同步审批结果」两个动作，
@@ -356,7 +357,12 @@ export function paymentExchangeRateHint(rate: FinancePaymentExchangeRateView): s
 /**
  * 付款执行的可读形态。
  *
- * <p>⚠️ 付款属 12.2.2.2（未交付）⇒ 这个值**恒为**「不可用」。
+ * <p>⚠️ 付款属 12.2.2.2「付款执行」⇒ 付款单上的这个值**恒为 true**
+ * （V350 把表级 CHECK 与默认值都钉成了 true）。
+ *
+ * <p>⚠️ <b>false 分支必须保留</b>：它是别的表（V343 的 finance_payment_plan /
+ * finance_payment_batch，那两个模块未交付）execution_available 恒为 false 时的读法 ——
+ * 一个把「不可用」硬说成「可用」的标签比报错更坏。
  */
 export function paymentExecutionLabel(executionAvailable: boolean, ownerModule: string): string {
   if (executionAvailable) return `可执行（归属 ${ownerModule}）`;
