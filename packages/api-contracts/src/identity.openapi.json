@@ -2910,6 +2910,235 @@
         },
         "type": "object"
       },
+      "DefaultContextCapabilities": {
+        "properties": {
+          "boundaries": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "rules": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "sources": {
+            "items": {
+              "$ref": "#/components/schemas/DefaultContextSourceStatus"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "DefaultContextInput": {
+        "properties": {
+          "legalEntityId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "shopId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "warehouseId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "DefaultContextLegalEntityOption": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "DefaultContextOptions": {
+        "properties": {
+          "legalEntities": {
+            "items": {
+              "$ref": "#/components/schemas/DefaultContextLegalEntityOption"
+            },
+            "type": "array"
+          },
+          "shops": {
+            "items": {
+              "$ref": "#/components/schemas/DefaultContextShopOption"
+            },
+            "type": "array"
+          },
+          "sources": {
+            "items": {
+              "$ref": "#/components/schemas/DefaultContextSourceStatus"
+            },
+            "type": "array"
+          },
+          "warehouses": {
+            "items": {
+              "$ref": "#/components/schemas/DefaultContextWarehouseOption"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "DefaultContextSelection": {
+        "nullable": true,
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "DefaultContextShopOption": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "platformName": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "DefaultContextSourceStatus": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "dimension": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "nullable": true,
+            "type": "string"
+          },
+          "reason": {
+            "nullable": true,
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "DefaultContextStaleSelection": {
+        "properties": {
+          "dimension": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "DefaultContextView": {
+        "properties": {
+          "legalEntity": {
+            "$ref": "#/components/schemas/DefaultContextSelection"
+          },
+          "note": {
+            "nullable": true,
+            "type": "string"
+          },
+          "shop": {
+            "$ref": "#/components/schemas/DefaultContextSelection"
+          },
+          "sources": {
+            "items": {
+              "$ref": "#/components/schemas/DefaultContextSourceStatus"
+            },
+            "type": "array"
+          },
+          "stale": {
+            "items": {
+              "$ref": "#/components/schemas/DefaultContextStaleSelection"
+            },
+            "type": "array"
+          },
+          "stored": {
+            "type": "boolean"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "warehouse": {
+            "$ref": "#/components/schemas/DefaultContextSelection"
+          }
+        },
+        "type": "object"
+      },
+      "DefaultContextWarehouseOption": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "defaultWarehouse": {
+            "type": "boolean"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "DepartmentInput": {
         "properties": {
           "code": {
@@ -10853,6 +11082,160 @@
         },
         "tags": [
           "administration-controller"
+        ]
+      }
+    },
+    "/identity/default-context": {
+      "delete": {
+        "operationId": "delete_identity_default_context",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "default-context-controller"
+        ]
+      },
+      "get": {
+        "operationId": "get_identity_default_context",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultContextView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "default-context-controller"
+        ]
+      },
+      "put": {
+        "operationId": "put_identity_default_context",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DefaultContextInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultContextView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "default-context-controller"
+        ]
+      }
+    },
+    "/identity/default-context/capabilities": {
+      "get": {
+        "operationId": "get_identity_default_context_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultContextCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "default-context-controller"
+        ]
+      }
+    },
+    "/identity/default-context/options": {
+      "get": {
+        "operationId": "get_identity_default_context_options",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultContextOptions"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "default-context-controller"
         ]
       }
     },
