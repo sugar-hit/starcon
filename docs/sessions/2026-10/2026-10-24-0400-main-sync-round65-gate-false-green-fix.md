@@ -146,10 +146,24 @@
 
 ## 本轮改动文件清单
 
-- `tools/module-progress/ci-gate.mjs` —— 修假绿灯（6 处）
-- `tools/module-progress/ci-gate.itest.mjs` —— 回归断言（+8 条）
+- `tools/module-progress/ci-gate.mjs` —— 修两处假绿灯
+- `tools/module-progress/ci-gate.itest.mjs` —— 回归断言（31 条，全绿）
+- `backend/libraries/tenancy/.../GrantPermissions.java` —— 修 CI 判定点的 spotless 违规
+- `apps/web/src/components/catalog/catalog-workspace.tsx` 等 5 个前端文件 —— 修既有文件排版退化
 - `docs/backlog/2026-10/2026-10-24-ci-gate-in-progress-run-false-green.md` —— 补修复记录
+- `docs/backlog/2026-10/2026-10-24-spotless-debt-latent-reactor-early-stop.md` —— 排版债潜伏期
+- `docs/backlog/2026-10/2026-10-24-existing-file-format-regression-check.md` —— 退化核对口径
 - `docs/sessions/2026-10/2026-10-24-0400-main-sync-round65-gate-false-green-fix.md` —— 本纪要
+
+## 本轮实际合入的内容
+
+集成分支在轮中推进了 12 个提交（4 项财务能力），本轮**刷了同步分支**：
+
+- 合并形态 **B（真合并、零冲突）** —— `merge-tree` 退出码 0，判定工具报「冲突文件 0 个」，
+  **本轮没有任何冲突要解**，没有发生「取一边」的判断。
+- 新交付 32 项（上一轮 28 项），PR 标题与正文按摘要工具的清单更新。
+- 合并分支从 `main` 出发，把上一轮已推的 4 个文档提交 `cherry-pick -n` 带进来保住取证记录；
+  cherry-pick 后台账与集成侧**逐字节相同** ⇒ 没覆盖集成侧新交付的登记。
 
 ## 后续待办
 
