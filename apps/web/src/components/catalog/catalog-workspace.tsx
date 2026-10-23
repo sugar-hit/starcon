@@ -24,6 +24,22 @@ import { ProductRecords } from './product-records';
 import { SpuLifecycle } from './spu-lifecycle';
 import { canAccessRecord } from '../iam/administration-model';
 import { useIdentity } from '../iam/identity-shell';
+import { ListPreferenceBar } from '../common/list-preference-bar';
+import { useListPreferences } from '../../lib/use-list-preferences';
+import type { ListColumn } from '../../lib/list-preferences-model';
+
+/**
+ * 1.4.1.2 列表与表格偏好 —— 商品列表的**列定义**。
+ *
+ * <p>key 必须稳定（它就是存进偏好里的东西），label 只是界面上的标题。
+ * 「操作」列不在这里：它是每张表都必须有的出口，不该被用户关掉。
+ */
+const CATALOG_COLUMNS: ListColumn[] = [
+  { key: 'spu', label: '商品 / SPU 编码' },
+  { key: 'brand', label: '品牌 / 分类' },
+  { key: 'skuCount', label: 'SKU 数' },
+  { key: 'status', label: '状态' },
+];
 
 type Editing =
   | { kind: 'spu'; product?: Product }
@@ -43,6 +59,16 @@ export function CatalogWorkspace({ kind = 'products' }: { kind?: WorkspaceKind }
   const [editing, setEditing] = useState<Editing>(null);
   const [section, setSection] = useState<'attributes' | 'skus' | 'lifecycle'>('attributes');
   const [notice, setNotice] = useState('');
+  // 1.4.1.2 列表与表格偏好：这一页只记「列显示」。
+  // 搜索框是自由文本，可能含 PII，所以刻意**不**进持久化白名单（白名单为空）。
+  const prefs = useListPreferences({
+    pageKey: 'catalog.products',
+    columns: CATALOG_COLUMNS,
+    pageSize: 50,
+    pageSizeOptions: [],
+  });
+  const columnVisible = (key: string) => prefs.state.columns.includes(key);
+  const visibleColumnCount = CATALOG_COLUMNS.filter((c) => columnVisible(c.key)).length;
   const can = (permission: string, record = detail?.product) =>
     session !== null && canAccessRecord(session, `catalog.${permission}`, record);
   const handleError = useCallback((e: unknown) => {
@@ -426,34 +452,55 @@ export function CatalogWorkspace({ kind = 'products' }: { kind?: WorkspaceKind }
               )}
             </div>
           </div>
+          <ListPreferenceBar
+            columns={CATALOG_COLUMNS}
+            pageSizeOptions={[]}
+            prefs={prefs}
+          />
           <div className="bg-card overflow-x-auto rounded-lg border">
             <table className="w-full text-left text-sm">
               <thead className="bg-muted/50">
                 <tr>
-                  {['商品 / SPU 编码', '品牌 / 分类', 'SKU 数', '状态', '操作'].map((h) => (
-                    <th className="whitespace-nowrap px-4 py-3 font-medium" key={h}>
-                      {h}
-                    </th>
-                  ))}
+                  {columnVisible('spu') && (
+                    <th className="whitespace-nowrap px-4 py-3 font-medium">商品 / SPU 编码</th>
+                  )}
+                  {columnVisible('brand') && (
+                    <th className="whitespace-nowrap px-4 py-3 font-medium">品牌 / 分类</th>
+                  )}
+                  {columnVisible('skuCount') && (
+                    <th className="whitespace-nowrap px-4 py-3 font-medium">SKU 数</th>
+                  )}
+                  {columnVisible('status') && (
+                    <th className="whitespace-nowrap px-4 py-3 font-medium">状态</th>
+                  )}
+                  <th className="whitespace-nowrap px-4 py-3 font-medium">操作</th>
                 </tr>
               </thead>
               <tbody>
                 {filtered.map((p) => (
                   <tr key={p.id} className="hover:bg-muted/30 border-t">
-                    <td className="px-4 py-4">
-                      <button
-                        className="text-brand font-medium hover:underline"
-                        onClick={() => void open(p.id)}
-                      >
-                        {p.name}
-                      </button>
-                      <p className="text-muted-foreground mt-1 text-xs">{p.code}</p>
-                    </td>
-                    <td className="px-4 py-4">
-                      {p.brand || '—'} / {p.category || '—'}
-                    </td>
-                    <td className="px-4 py-4 tabular-nums">{p.skuCount}</td>
-                    <td className="px-4 py-4">{statuses[p.status]}</td>
+                    {columnVisible('spu') && (
+                      <td className="px-4 py-4">
+                        <button
+                          className="text-brand font-medium hover:underline"
+                          onClick={() => void open(p.id)}
+                        >
+                          {p.name}
+                        </button>
+                        <p className="text-muted-foreground mt-1 text-xs">{p.code}</p>
+                      </td>
+                    )}
+                    {columnVisible('brand') && (
+                      <td className="px-4 py-4">
+                        {p.brand || '—'} / {p.category || '—'}
+                      </td>
+                    )}
+                    {columnVisible('skuCount') && (
+                      <td className="px-4 py-4 tabular-nums">{p.skuCount}</td>
+                    )}
+                    {columnVisible('status') && (
+                      <td className="px-4 py-4">{statuses[p.status]}</td>
+                    )}
                     <td className="whitespace-nowrap px-4 py-4">
                       <Button variant="ghost" size="sm" onClick={() => void open(p.id)}>
                         管理商品
@@ -478,7 +525,7 @@ export function CatalogWorkspace({ kind = 'products' }: { kind?: WorkspaceKind }
                 ))}
                 {filtered.length === 0 && (
                   <tr>
-                    <td colSpan={5} className="p-12 text-center">
+                    <td colSpan={visibleColumnCount + 1} className="p-12 text-center">
                       <Package className="text-muted-foreground mx-auto mb-3 h-7 w-7" />
                       <p className="font-medium">
                         {products.length ? '没有匹配的商品' : '创建你的第一款商品'}

@@ -1,9 +1,12 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Badge, Button, EmptyState, StatCard } from '@starcon/ui';
 import { RefreshCw, TriangleAlert } from 'lucide-react';
 import { api, ApiError } from '@/lib/api';
+import { ListPreferenceBar } from '../common/list-preference-bar';
+import { useListPreferences } from '@/lib/use-list-preferences';
+import type { ListColumn } from '@/lib/list-preferences-model';
 import {
   RISK_TYPES,
   RISK_TYPE_LABELS,
@@ -20,6 +23,30 @@ import {
   type VelocityPage,
   type VelocityRow,
 } from './inventory-risk-model';
+
+/**
+ * 1.4.1.2 列表与表格偏好 —— 风险清单的**列定义**。
+ *
+ * <p>key 必须稳定（它就是存进偏好里的东西），label 只是界面上的标题。
+ */
+const RISK_COLUMNS: ListColumn[] = [
+  { key: 'sku', label: 'SKU' },
+  { key: 'warehouse', label: '仓库' },
+  { key: 'riskType', label: '风险类型' },
+  { key: 'available', label: '可用量' },
+  { key: 'dailySales', label: '日均销' },
+  { key: 'coverageDays', label: '可用天数' },
+  { key: 'threshold', label: '阈值档位' },
+  { key: 'action', label: '建议动作' },
+];
+
+/**
+ * 可以被记住的筛选条件：**只有枚举与编号**。
+ *
+ * <p>「SKU」是自由文本（编码或名称，可能含 PII），刻意**不**进白名单 ——
+ * 宁可下次重打一次，也不把它写进个人偏好表。
+ */
+const PERSISTABLE_FILTERS = ['warehouseKind', 'warehouseId', 'riskFilter'] as const;
 
 /**
  * 1.1.3.1 库存风险工作区（卷 01 工作台与门户）。
@@ -59,6 +86,27 @@ export function InventoryRiskWorkspace() {
   const [keyword, setKeyword] = useState('');
   const [riskFilter, setRiskFilter] = useState<'' | RiskType>('');
   const [selectedKey, setSelectedKey] = useState('');
+
+  // 1.4.1.2 列表与表格偏好：这一页记「列显示 + 仓库类型/仓库/风险类型」。
+  // 这一页的清单**不分页**（后端一次给全量投影），所以没有「每页条数」这一项。
+  const prefs = useListPreferences({
+    pageKey: 'inventory.risk',
+    columns: RISK_COLUMNS,
+    pageSize: 500,
+    pageSizeOptions: [],
+    persistableFilterKeys: PERSISTABLE_FILTERS,
+  });
+  const columnVisible = (key: string) => prefs.state.columns.includes(key);
+  /** 恢复出来的视图状态只在「恢复完成」那一刻应用一次，之后由用户自己的操作驱动。 */
+  const restored = useRef(false);
+  useEffect(() => {
+    if (!prefs.ready || restored.current) return;
+    restored.current = true;
+    const restoredFilters = prefs.state.filters;
+    setWarehouseKind(restoredFilters.warehouseKind ?? '');
+    setWarehouseId(restoredFilters.warehouseId ?? '');
+    setRiskFilter((restoredFilters.riskFilter ?? '') as '' | RiskType);
+  }, [prefs.ready, prefs.state.filters]);
 
   const query = useMemo(() => {
     const parts = new URLSearchParams();
@@ -298,7 +346,10 @@ export function InventoryRiskWorkspace() {
           <select
             className="border rounded px-2 py-1 text-copy-12"
             value={warehouseKind}
-            onChange={(e) => setWarehouseKind(e.target.value)}
+            onChange={(e) => {
+              setWarehouseKind(e.target.value);
+              prefs.setFilter('warehouseKind', e.target.value);
+            }}
           >
             <option value="">全部类型</option>
             {(projectionMeta?.warehouseKindOptions ?? []).map((option) => (
@@ -313,7 +364,10 @@ export function InventoryRiskWorkspace() {
           <select
             className="border rounded px-2 py-1 text-copy-12"
             value={warehouseId}
-            onChange={(e) => setWarehouseId(e.target.value)}
+            onChange={(e) => {
+              setWarehouseId(e.target.value);
+              prefs.setFilter('warehouseId', e.target.value);
+            }}
           >
             <option value="">全部仓库</option>
             {(projectionMeta?.warehouseOptions ?? []).map((option) => (
@@ -337,7 +391,11 @@ export function InventoryRiskWorkspace() {
           <select
             className="border rounded px-2 py-1 text-copy-12"
             value={riskFilter}
-            onChange={(e) => setRiskFilter(e.target.value as '' | RiskType)}
+            onChange={(e) => {
+              const next = e.target.value as '' | RiskType;
+              setRiskFilter(next);
+              prefs.setFilter('riskFilter', next);
+            }}
           >
             <option value="">全部风险</option>
             {RISK_TYPES.map((risk) => (
@@ -352,6 +410,7 @@ export function InventoryRiskWorkspace() {
       {/* ---------------- 风险清单 ---------------- */}
       <section className="space-y-2">
         <h2 className="text-copy-15 font-medium">风险清单</h2>
+        <ListPreferenceBar columns={RISK_COLUMNS} pageSizeOptions={[]} prefs={prefs} />
         {visibleRows.length === 0 ? (
           <EmptyState
             icon={<TriangleAlert className="h-6 w-6" />}
@@ -367,14 +426,28 @@ export function InventoryRiskWorkspace() {
             <table className="w-full text-left text-copy-12">
               <thead className="text-muted-foreground border-b">
                 <tr>
-                  <th className="px-3 py-2 font-medium">SKU</th>
-                  <th className="px-3 py-2 font-medium">仓库</th>
-                  <th className="px-3 py-2 font-medium">风险类型</th>
-                  <th className="px-3 py-2 text-right font-medium">可用量</th>
-                  <th className="px-3 py-2 text-right font-medium">日均销</th>
-                  <th className="px-3 py-2 text-right font-medium">可用天数</th>
-                  <th className="px-3 py-2 font-medium">阈值档位</th>
-                  <th className="px-3 py-2 font-medium">建议动作</th>
+                  {columnVisible('sku') && <th className="px-3 py-2 font-medium">SKU</th>}
+                  {columnVisible('warehouse') && (
+                    <th className="px-3 py-2 font-medium">仓库</th>
+                  )}
+                  {columnVisible('riskType') && (
+                    <th className="px-3 py-2 font-medium">风险类型</th>
+                  )}
+                  {columnVisible('available') && (
+                    <th className="px-3 py-2 text-right font-medium">可用量</th>
+                  )}
+                  {columnVisible('dailySales') && (
+                    <th className="px-3 py-2 text-right font-medium">日均销</th>
+                  )}
+                  {columnVisible('coverageDays') && (
+                    <th className="px-3 py-2 text-right font-medium">可用天数</th>
+                  )}
+                  {columnVisible('threshold') && (
+                    <th className="px-3 py-2 font-medium">阈值档位</th>
+                  )}
+                  {columnVisible('action') && (
+                    <th className="px-3 py-2 font-medium">建议动作</th>
+                  )}
                 </tr>
               </thead>
               <tbody>
@@ -386,42 +459,56 @@ export function InventoryRiskWorkspace() {
                       row.key === selectedKey ? 'bg-muted/50' : ''
                     }`}
                   >
-                    <td className="px-3 py-2">
-                      <span className="font-mono">{row.skuCode}</span>
-                      <span className="text-muted-foreground ml-1">{row.skuName}</span>
-                    </td>
-                    <td className="px-3 py-2">
-                      {row.warehouseCode}
-                      <span className="text-muted-foreground ml-1">{row.warehouseKindLabel}</span>
-                    </td>
-                    <td className="px-3 py-2">
-                      {row.risks.length === 0 ? (
-                        <span className="text-muted-foreground">—</span>
-                      ) : (
-                        <span className="flex flex-wrap gap-1">
-                          {row.risks.map((risk) => (
-                            <Badge key={risk} tone="warning">
-                              {RISK_TYPE_LABELS[risk]}
-                            </Badge>
-                          ))}
-                        </span>
-                      )}
-                    </td>
-                    <td className="px-3 py-2 text-right font-mono">
-                      {formatQuantity(row.available)}
-                    </td>
-                    <td className="px-3 py-2 text-right font-mono">
-                      {row.coverageStatus === 'NO_VELOCITY'
-                        ? '未登记'
-                        : formatQuantity(row.dailySales)}
-                    </td>
-                    <td className="px-3 py-2 text-right font-mono">
-                      {row.coverageStatus === 'OK' ? `${row.coverageDays ?? '—'} 天` : '不可判定'}
-                    </td>
-                    <td className="px-3 py-2">
-                      {thresholdScopeLabel(row.thresholdScopeType)}
-                    </td>
-                    <td className="px-3 py-2">{row.suggestedAction}</td>
+                    {columnVisible('sku') && (
+                      <td className="px-3 py-2">
+                        <span className="font-mono">{row.skuCode}</span>
+                        <span className="text-muted-foreground ml-1">{row.skuName}</span>
+                      </td>
+                    )}
+                    {columnVisible('warehouse') && (
+                      <td className="px-3 py-2">
+                        {row.warehouseCode}
+                        <span className="text-muted-foreground ml-1">{row.warehouseKindLabel}</span>
+                      </td>
+                    )}
+                    {columnVisible('riskType') && (
+                      <td className="px-3 py-2">
+                        {row.risks.length === 0 ? (
+                          <span className="text-muted-foreground">—</span>
+                        ) : (
+                          <span className="flex flex-wrap gap-1">
+                            {row.risks.map((risk) => (
+                              <Badge key={risk} tone="warning">
+                                {RISK_TYPE_LABELS[risk]}
+                              </Badge>
+                            ))}
+                          </span>
+                        )}
+                      </td>
+                    )}
+                    {columnVisible('available') && (
+                      <td className="px-3 py-2 text-right font-mono">
+                        {formatQuantity(row.available)}
+                      </td>
+                    )}
+                    {columnVisible('dailySales') && (
+                      <td className="px-3 py-2 text-right font-mono">
+                        {row.coverageStatus === 'NO_VELOCITY'
+                          ? '未登记'
+                          : formatQuantity(row.dailySales)}
+                      </td>
+                    )}
+                    {columnVisible('coverageDays') && (
+                      <td className="px-3 py-2 text-right font-mono">
+                        {row.coverageStatus === 'OK' ? `${row.coverageDays ?? '—'} 天` : '不可判定'}
+                      </td>
+                    )}
+                    {columnVisible('threshold') && (
+                      <td className="px-3 py-2">{thresholdScopeLabel(row.thresholdScopeType)}</td>
+                    )}
+                    {columnVisible('action') && (
+                      <td className="px-3 py-2">{row.suggestedAction}</td>
+                    )}
                   </tr>
                 ))}
               </tbody>

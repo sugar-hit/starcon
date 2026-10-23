@@ -8266,6 +8266,55 @@
           }
         },
         "type": "object"
+      },
+      "UserPreferenceInput": {
+        "properties": {
+          "preference": {
+            "additionalProperties": {
+              "type": "object"
+            },
+            "type": "object"
+          }
+        },
+        "type": "object"
+      },
+      "UserPreferenceList": {
+        "properties": {
+          "entries": {
+            "items": {
+              "$ref": "#/components/schemas/UserPreferenceView"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "UserPreferenceView": {
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "pageKey": {
+            "type": "string"
+          },
+          "preference": {
+            "additionalProperties": {
+              "type": "object"
+            },
+            "type": "object"
+          },
+          "stored": {
+            "type": "boolean"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
       }
     }
   },
@@ -17346,6 +17395,175 @@
         },
         "tags": [
           "administration-controller"
+        ]
+      }
+    },
+    "/identity/user-preferences": {
+      "delete": {
+        "operationId": "delete_identity_user_preferences",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "user-preference-controller"
+        ]
+      },
+      "get": {
+        "operationId": "get_identity_user_preferences",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserPreferenceList"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "user-preference-controller"
+        ]
+      }
+    },
+    "/identity/user-preferences/{pageKey}": {
+      "delete": {
+        "operationId": "delete_identity_user_preferences_pageKey",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "pageKey",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "user-preference-controller"
+        ]
+      },
+      "get": {
+        "operationId": "get_identity_user_preferences_pageKey",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "pageKey",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserPreferenceView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "user-preference-controller"
+        ]
+      },
+      "put": {
+        "operationId": "put_identity_user_preferences_pageKey",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "pageKey",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserPreferenceInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserPreferenceView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "user-preference-controller"
         ]
       }
     },
