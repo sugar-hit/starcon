@@ -5427,6 +5427,76 @@
         ],
         "type": "object"
       },
+      "PageFavoriteInput": {
+        "properties": {
+          "href": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "pageCode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "system": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PageFavoriteItem": {
+        "properties": {
+          "href": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "order": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "pageCode": {
+            "type": "string"
+          },
+          "system": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PageFavoriteMove": {
+        "properties": {
+          "href": {
+            "type": "string"
+          },
+          "toIndex": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "PageFavoriteSet": {
+        "properties": {
+          "hiddenByPermission": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/PageFavoriteItem"
+            },
+            "type": "array"
+          },
+          "total": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
       "PermissionView": {
         "properties": {
           "action": {
@@ -14449,6 +14519,185 @@
         },
         "tags": [
           "administration-controller"
+        ]
+      }
+    },
+    "/identity/page-favorites": {
+      "delete": {
+        "operationId": "delete_identity_page_favorites",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "href",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageFavoriteSet"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "page-favorite-controller"
+        ]
+      },
+      "get": {
+        "operationId": "get_identity_page_favorites",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageFavoriteSet"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "page-favorite-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_identity_page_favorites",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PageFavoriteInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageFavoriteSet"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "page-favorite-controller"
+        ]
+      }
+    },
+    "/identity/page-favorites/hidden": {
+      "delete": {
+        "operationId": "delete_identity_page_favorites_hidden",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageFavoriteSet"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "page-favorite-controller"
+        ]
+      }
+    },
+    "/identity/page-favorites/order": {
+      "put": {
+        "operationId": "put_identity_page_favorites_order",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PageFavoriteMove"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageFavoriteSet"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "page-favorite-controller"
         ]
       }
     },
