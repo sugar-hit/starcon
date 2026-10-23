@@ -290,7 +290,59 @@ class ReceivableIntegrationTest {
     assertThat(receivable.settledAmount()).isEqualByComparingTo("0.0000");
     assertThat(receivable.source()).isEqualTo(ReceivableSource.MANUAL);
     // 到期日 = 确认日 + 政策账期 30 天。
-    assertThat(receivable.dueDate()).isEqualTo(receivable.confirmedAt().toLocalDate().plusDays(30));
+    // ⚠️ 必须用 withOffsetSameInstant(UTC) 比对：服务端的到期日按 **UTC 日历日** 计算
+    //    （ReceivableService 的 TODAY_UTC，刻意为之 —— 用会话时区会凭空多出空桶），
+    //    而 confirmedAt() 从 timestamptz 读回来带的是 JVM 本地时区偏移；本地 00:00-08:00 窗口内两者差一天。
+    assertThat(receivable.dueDate()).isEqualTo(utcCalendarDate(receivable.confirmedAt()).plusDays(30));
+  }
+
+  /**
+   * 服务端口径的日历日：把确认时刻折算到 **UTC 日历日** 再取日期。
+   *
+   * <p>⚠️ 服务端的到期日按 UTC 日历日推导（{@code ReceivableService.TODAY_UTC}，刻意为之 —— 用会话时区会凭空多出空桶）；
+   * 而 {@code confirmed_at} 是 timestamptz，从库里读回来时 JDBC 按 **JVM 本地时区** 给偏移，
+   * 直接 {@code .toLocalDate()} 拿到的是**本地日历日** —— 本地 00:00-08:00 窗口内与 UTC 日历日差一天。
+   */
+  private static LocalDate utcCalendarDate(OffsetDateTime instant) {
+    return instant.withOffsetSameInstant(ZoneOffset.UTC).toLocalDate();
+  }
+
+  @Test
+  void 到期日按UTC日历日推导而不是跟着JVM本地时区走() {
+    enablePolicy("MANUAL", 30);
+    var receivable = createManual(null);
+    var confirmedAt = receivable.confirmedAt();
+    var utcDay = utcCalendarDate(confirmedAt);
+
+    // ① 契约：到期日 = confirmedAt 的 **UTC 日历日** + 账期。
+    assertThat(receivable.dueDate()).isEqualTo(utcDay.plusDays(30));
+
+    // ② 落库口径（由 DB 独立算一遍，不受「读回时带本地偏移」的影响）：
+    //    due_date 必须等于 (confirmed_at at time zone 'UTC')::date + 账期 —— 服务端写进去的就是 UTC 日历日。
+    var row =
+        one(
+            "select due_date, (confirmed_at at time zone 'UTC')::date as utc_day"
+                + " from finance_receivable where id = ?",
+            receivable.id());
+    assertThat(row.get("due_date", LocalDate.class))
+        .isEqualTo(row.get("utc_day", LocalDate.class).plusDays(30));
+
+    // ③ 本地日历日与 UTC 日历日**不同**时（本地 00:00-08:00 窗口），到期日必须落在 UTC 那一天，
+    //    绝不能跟着本地日历日走 —— 这条正是「差一天」那个坑的直接反证。
+    if (!utcDay.equals(confirmedAt.toLocalDate())) {
+      assertThat(receivable.dueDate()).isNotEqualTo(confirmedAt.toLocalDate().plusDays(30));
+    }
+
+    // ④ 跨日边界夹具（对任何 JVM 时区都成立，不依赖运行时刻）：
+    //    2026-10-01T16:30:00Z 在 UTC 下是 10-01，在 +08:00 下是 10-02 —— 正好差一天。
+    //    口径必须落在 UTC 那一天推出来的到期日（10-31），而不是本地那天（11-01）。
+    var crossing = OffsetDateTime.parse("2026-10-01T16:30:00Z");
+    assertThat(utcCalendarDate(crossing)).isEqualTo(LocalDate.of(2026, 10, 1));
+    assertThat(crossing.withOffsetSameInstant(ZoneOffset.ofHours(8)).toLocalDate())
+        .isEqualTo(LocalDate.of(2026, 10, 2));
+    assertThat(utcCalendarDate(crossing).plusDays(30)).isEqualTo(LocalDate.of(2026, 10, 31));
+    assertThat(utcCalendarDate(crossing).plusDays(30))
+        .isNotEqualTo(crossing.withOffsetSameInstant(ZoneOffset.ofHours(8)).toLocalDate().plusDays(30));
   }
 
   @Test
