@@ -20,6 +20,59 @@ const services: readonly {
   fallback: string;
 }[] = [
   {
+    // 12.1.1.3 坏账与核销（finance 服务，卷 12「财务核算」L3 12.1.1 应收与资金下的第三格）。
+    //
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 finance 那条巨型 alternation 里并分支 ——
+    //   既有条目是单行超长正则，多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    //   既有条目**一字未改、也不重排**。
+    //
+    // ---- 插入锚点选在**数组最开头**（本文件第一个元素之前）----
+    //   同批其它车道的插入点是「第一个 `prefix: 'identity/'` 之前」「第一个 `prefix: 'warehouse/'` 之前」
+    //   与「数组末尾」；本车道落在这里，与它们的插入点相距 600 行以上，并入时 git 能干净求并。
+    //
+    // ---- 首 token「bad-debt」的零命中核对结论 ----
+    //   本文件既有 100+ 条 services[] 正则里**没有任何一条**含 `bad-debt` 这个串
+    //   （既有 finance 条目的首 token 是 `receivables` / `receivable-aging` / `payables` / `receipts`，
+    //   全不相同），所以首 token 既是独立字面量，也不会被既有分支的前缀吃掉。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   bad-debt                                  列表（GET，真分页 + 真筛选 + 真排序 + 汇总）/ 建单（POST）
+    //   bad-debt/capabilities                     能力声明（上游真接通 / 下游缺口归谁 / 会计处理不可用）
+    //   bad-debt/options                          筛选项（状态 / 事由 / 币种 / 店铺 / 依据类型）
+    //   bad-debt/summary                          坏账汇总（按状态 / 事由 / 币种）
+    //   bad-debt/{uuid}                           单张申请详情（GET：单头 + 依据材料 + 审计留痕 + 可执行动作）
+    //   bad-debt/{uuid}/evidence                  加依据材料（POST）
+    //   bad-debt/{uuid}/evidence/{uuid}/remove    移除依据材料（POST · 软移除）
+    //   bad-debt/{uuid}/submit                    提交审批（POST）
+    //   bad-debt/{uuid}/approve                   审批通过（POST）
+    //   bad-debt/{uuid}/reject                    审批驳回（POST）
+    //   bad-debt/{uuid}/write-off                 执行核销（POST）
+    //   bad-debt/{uuid}/void                      作废申请（POST）
+    //
+    // ⚠️ **刻意没有 `bad-debt/batch-write-off` 之类的批量形状** ——
+    //   蓝图 12-finance.md 加粗句：「不允许批量一键核销无审批」⇒ 后端不提供批量端点，
+    //   放行一个不存在的写入口比 404 更糟（界面会以为功能已交付）。
+    //
+    // id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`（不是 `[0-9a-f-]+`）：
+    // 后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行。
+    // 字面量子路径（capabilities / options / summary）排在 {uuid} 段之前判别 —— alternation 是首个命中即返回，
+    // 顺序反了会被通配支吃掉半截。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   bad-debt/batch-write-off     —— 🔴 批量一键核销：蓝图明令禁止
+    //   bad-debt/{uuid}/settle       —— 🔴 核销金额的写者恒为 12.2.1.2，本模块不提供
+    //   bad-debt/{uuid}/evidence/{uuid}/upload —— 本模块不提供材料上传（材料以引用登记）
+    //   bad-debt/{uuid}/evidence/{uuid}           —— 刻意不放行裸 DELETE 形状：
+    //                                                 finance 的 API 出口不导出 DELETE
+    //   bad-debt/not-a-uuid          —— 非 UUID 段不应被 uuid 分支吃掉
+    //   bad-debt/{uuid}/ledger       —— 🔴 凭证属 12.5.2.1，未交付
+    prefix: 'finance/',
+    env: 'FINANCE_URL',
+    fallback: 'http://127.0.0.1:8087',
+    pattern:
+      /^bad-debt(?:\/(?:capabilities|options|summary|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:evidence|submit|approve|reject|write\-off|void))?(?:\/evidence\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/remove)?)?)?)?$/,
+  },
+  {
     // 1.1.1.2 异常订单队列（trade 服务，卷 01「工作台与门户」L3 1.1.1 待办与待决策的第三格）。
     //
     // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 trade 那条巨型 alternation 里并分支 ——

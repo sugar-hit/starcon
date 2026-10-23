@@ -159,6 +159,659 @@
         },
         "type": "object"
       },
+      "FinanceBadDebtAction": {
+        "properties": {
+          "allowed": {
+            "type": "boolean"
+          },
+          "blockedReason": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "method": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceBadDebtCapabilities": {
+        "properties": {
+          "capabilities": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceBadDebtCapability"
+            },
+            "type": "array"
+          },
+          "gaps": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceBadDebtGap"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceBadDebtCapability": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "basis": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "module": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceBadDebtCurrencyTotal": {
+        "properties": {
+          "count": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "writeOffAmount": {
+            "type": "number"
+          },
+          "writtenOffCount": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceBadDebtDecisionInput": {
+        "properties": {
+          "comment": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceBadDebtDetail": {
+        "properties": {
+          "actions": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceBadDebtAction"
+            },
+            "type": "array"
+          },
+          "events": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceBadDebtEventRow"
+            },
+            "type": "array"
+          },
+          "evidence": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceBadDebtEvidenceRow"
+            },
+            "type": "array"
+          },
+          "row": {
+            "$ref": "#/components/schemas/FinanceBadDebtRow"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceBadDebtEventRow": {
+        "properties": {
+          "actorId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "caseId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "eventType": {
+            "type": "string"
+          },
+          "fromStatus": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "occurredAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "toStatus": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceBadDebtEvidenceInput": {
+        "properties": {
+          "attachmentRef": {
+            "nullable": true,
+            "type": "string"
+          },
+          "content": {
+            "type": "string"
+          },
+          "evidenceType": {
+            "enum": [
+              "PLATFORM_DISPUTE_DECISION",
+              "PLATFORM_FROZEN_NOTICE",
+              "BUYER_REFUSAL",
+              "CHARGEBACK",
+              "INTERNAL_REVIEW",
+              "OTHER"
+            ],
+            "type": "string"
+          },
+          "occurredOn": {
+            "format": "date",
+            "nullable": true,
+            "type": "string"
+          },
+          "referenceNo": {
+            "nullable": true,
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceBadDebtEvidenceRow": {
+        "properties": {
+          "attachmentRef": {
+            "type": "string"
+          },
+          "caseId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "content": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdBy": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "evidenceNo": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "evidenceType": {
+            "enum": [
+              "PLATFORM_DISPUTE_DECISION",
+              "PLATFORM_FROZEN_NOTICE",
+              "BUYER_REFUSAL",
+              "CHARGEBACK",
+              "INTERNAL_REVIEW",
+              "OTHER"
+            ],
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "occurredOn": {
+            "format": "date",
+            "nullable": true,
+            "type": "string"
+          },
+          "referenceNo": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceBadDebtEvidenceTypeOption": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceBadDebtGap": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "group": {
+            "type": "string"
+          },
+          "module": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "ownerService": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceBadDebtInput": {
+        "properties": {
+          "disputeId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "note": {
+            "nullable": true,
+            "type": "string"
+          },
+          "reasonDetail": {
+            "type": "string"
+          },
+          "reasonType": {
+            "enum": [
+              "DISPUTE_LOSS",
+              "BUYER_REFUSAL",
+              "PLATFORM_FROZEN",
+              "OTHER"
+            ],
+            "type": "string"
+          },
+          "receivableId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "writeOffAmount": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceBadDebtOptions": {
+        "properties": {
+          "currencies": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "evidenceTypeOptions": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceBadDebtEvidenceTypeOption"
+            },
+            "type": "array"
+          },
+          "reasonTypeOptions": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceBadDebtReasonTypeOption"
+            },
+            "type": "array"
+          },
+          "reasonTypes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "shops": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceBadDebtShopOption"
+            },
+            "type": "array"
+          },
+          "statusOptions": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceBadDebtStatusOption"
+            },
+            "type": "array"
+          },
+          "statuses": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceBadDebtPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceBadDebtRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totals": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceBadDebtCurrencyTotal"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceBadDebtReasonTotal": {
+        "properties": {
+          "count": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "label": {
+            "type": "string"
+          },
+          "reasonType": {
+            "enum": [
+              "DISPUTE_LOSS",
+              "BUYER_REFUSAL",
+              "PLATFORM_FROZEN",
+              "OTHER"
+            ],
+            "type": "string"
+          },
+          "writeOffAmount": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceBadDebtReasonTypeOption": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceBadDebtRow": {
+        "properties": {
+          "accountingOwnerModule": {
+            "type": "string"
+          },
+          "accountingRef": {
+            "type": "string"
+          },
+          "accountingStatus": {
+            "type": "string"
+          },
+          "caseNo": {
+            "type": "string"
+          },
+          "counterpartyName": {
+            "type": "string"
+          },
+          "counterpartyRef": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "decidedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "decidedBy": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "decisionComment": {
+            "type": "string"
+          },
+          "disputeAmount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "disputeCurrency": {
+            "nullable": true,
+            "type": "string"
+          },
+          "disputeId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "disputeNo": {
+            "type": "string"
+          },
+          "disputeStatus": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "openBalance": {
+            "type": "number"
+          },
+          "reasonDetail": {
+            "type": "string"
+          },
+          "reasonType": {
+            "enum": [
+              "DISPUTE_LOSS",
+              "BUYER_REFUSAL",
+              "PLATFORM_FROZEN",
+              "OTHER"
+            ],
+            "type": "string"
+          },
+          "receivableAmount": {
+            "type": "number"
+          },
+          "receivableId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "receivableNo": {
+            "type": "string"
+          },
+          "receivableSettled": {
+            "type": "number"
+          },
+          "replacementDueDateAdjusted": {
+            "type": "boolean"
+          },
+          "replacementReceivableId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "replacementReceivableNo": {
+            "type": "string"
+          },
+          "shopId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "shopName": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "DRAFT",
+              "PENDING_APPROVAL",
+              "APPROVED",
+              "REJECTED",
+              "WRITTEN_OFF",
+              "VOID"
+            ],
+            "type": "string"
+          },
+          "submittedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "submittedBy": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "voidedReceivableNo": {
+            "type": "string"
+          },
+          "writeOffAmount": {
+            "type": "number"
+          },
+          "writeOffAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "writeOffMethod": {
+            "enum": [
+              "VOID_AND_REPLACE"
+            ],
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceBadDebtShopOption": {
+        "properties": {
+          "caseCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "shopId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "shopName": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceBadDebtStatusOption": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceBadDebtSummary": {
+        "properties": {
+          "approvedCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "currencyTotals": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceBadDebtCurrencyTotal"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "pendingApprovalCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "reasonTotals": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceBadDebtReasonTotal"
+            },
+            "type": "array"
+          },
+          "rejectedCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "writtenOffCount": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceBadDebtVoidInput": {
+        "properties": {
+          "reason": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "FinanceCollectionTaskCloseInput": {
         "properties": {
           "reason": {
@@ -2733,6 +3386,617 @@
   },
   "openapi": "3.0.1",
   "paths": {
+    "/finance/bad-debt": {
+      "get": {
+        "operationId": "get_finance_bad_debt",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "reasonType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "currency",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "receivableId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "disputeId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "shopId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceBadDebtPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "bad-debt-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_finance_bad_debt",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinanceBadDebtInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceBadDebtRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "bad-debt-controller"
+        ]
+      }
+    },
+    "/finance/bad-debt/capabilities": {
+      "get": {
+        "operationId": "get_finance_bad_debt_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceBadDebtCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "bad-debt-controller"
+        ]
+      }
+    },
+    "/finance/bad-debt/options": {
+      "get": {
+        "operationId": "get_finance_bad_debt_options",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceBadDebtOptions"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "bad-debt-controller"
+        ]
+      }
+    },
+    "/finance/bad-debt/summary": {
+      "get": {
+        "operationId": "get_finance_bad_debt_summary",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceBadDebtSummary"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "bad-debt-controller"
+        ]
+      }
+    },
+    "/finance/bad-debt/{id}": {
+      "get": {
+        "operationId": "get_finance_bad_debt_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceBadDebtDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "bad-debt-controller"
+        ]
+      }
+    },
+    "/finance/bad-debt/{id}/approve": {
+      "post": {
+        "operationId": "post_finance_bad_debt_id_approve",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinanceBadDebtDecisionInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceBadDebtRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "bad-debt-controller"
+        ]
+      }
+    },
+    "/finance/bad-debt/{id}/evidence": {
+      "post": {
+        "operationId": "post_finance_bad_debt_id_evidence",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinanceBadDebtEvidenceInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceBadDebtDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "bad-debt-controller"
+        ]
+      }
+    },
+    "/finance/bad-debt/{id}/evidence/{evidenceId}/remove": {
+      "post": {
+        "operationId": "post_finance_bad_debt_id_evidence_evidenceId_remove",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "evidenceId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceBadDebtDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "bad-debt-controller"
+        ]
+      }
+    },
+    "/finance/bad-debt/{id}/reject": {
+      "post": {
+        "operationId": "post_finance_bad_debt_id_reject",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinanceBadDebtDecisionInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceBadDebtRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "bad-debt-controller"
+        ]
+      }
+    },
+    "/finance/bad-debt/{id}/submit": {
+      "post": {
+        "operationId": "post_finance_bad_debt_id_submit",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceBadDebtRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "bad-debt-controller"
+        ]
+      }
+    },
+    "/finance/bad-debt/{id}/void": {
+      "post": {
+        "operationId": "post_finance_bad_debt_id_void",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinanceBadDebtVoidInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceBadDebtRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "bad-debt-controller"
+        ]
+      }
+    },
+    "/finance/bad-debt/{id}/write-off": {
+      "post": {
+        "operationId": "post_finance_bad_debt_id_write_off",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceBadDebtRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "bad-debt-controller"
+        ]
+      }
+    },
     "/finance/payables": {
       "get": {
         "operationId": "get_finance_payables",
