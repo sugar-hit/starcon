@@ -32,6 +32,12 @@ export class ApiError extends Error {
  * 15.4.2.1 知识库是它的第一条业务端点，模型在调 `crm/knowledge/...`。
  * 它与 catalog 的 `catalog/kb`（11.4.2.2 客服话术，按平台规则版本组织）是
  * **两个不同的模块**，前缀不同、命名空间不同，不要互相调用。
+ *
+ * <p>`finance` 是 **12 财务核算**的服务（端口 8087，数据库 starcon_finance）。
+ * 12.1.1.1 应收单管理是它的第一条业务端点，模型在调 `finance/receivables/...`。
+ * 它与 trade 的 `/trade/b2b-orders/receivables`（9.7.1.1 批发订单的**交易侧**账期应收）
+ * 是**两处不同的事实**：trade 那张是订单侧记的应收，finance 这张是财务侧确认的应收
+ * （从发货确认导入而来，带汇率快照与核销状态）。两者命名空间不同，不要互相调用。
  */
 const backends: readonly { prefix: string; route: string }[] = [
   { prefix: 'auth/', route: 'iam' },
@@ -41,6 +47,7 @@ const backends: readonly { prefix: string; route: string }[] = [
   { prefix: 'warehouse/', route: 'warehouse' },
   { prefix: 'trade/', route: 'trade' },
   { prefix: 'crm/', route: 'crm' },
+  { prefix: 'finance/', route: 'finance' },
 ];
 
 let workspaceBlocked = false;

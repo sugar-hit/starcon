@@ -1,0 +1,26 @@
+server:
+  port: 8087
+  error:
+    include-message: always
+spring:
+  application:
+    name: finance
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+    hikari:
+      maximum-pool-size: 5
+  flyway:
+    url: ${DB_URL}
+    user: ${DB_MIGRATION_USER}
+    password: ${DB_MIGRATION_PASSWORD}
+  jooq:
+    sql-dialect: POSTGRES
+  jackson:
+    deserialization:
+      fail-on-unknown-properties: true
+springdoc:
+  api-docs:
+    version: OPENAPI_3_0
+    enabled: true

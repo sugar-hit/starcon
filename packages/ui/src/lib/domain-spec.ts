@@ -276,8 +276,17 @@ const finance: DomainSpec = {
   purpose: '对账、结算、多币种核算、税务合规',
   upstream: ['订单中心', '物流中心', '售后中心'],
   downstream: ['利润中心', '数据中心'],
-  pageStatus: 'scaffold',
+  // 12.1.1.1 应收单管理已交付（真实工作区：应收确认政策 + 按币种汇总 + 账龄分布 +
+  // 应收单列表/详情 + 催收任务 + 人工录入）。
+  // ⚠️ 是 **partial** 不是 complete：卷 12 的 32 个模块里目前只交付了 12.1.1.1，
+  //   结算 / 应付 / 收付款 / 总账 / 税务 / 资金都还没落地。
+  pageStatus: 'partial',
   features: [
+    {
+      name: '应收单管理',
+      description: '来源 / 应收对象 / 金额与币种 / 到期日 / 账龄 / 明细核销状态（12.1.1.1 已交付）',
+      status: SHIPPED,
+    },
     {
       name: '平台结算单抓取',
       description: 'Amazon Payout / Shopify Payments / eBay Payout',
