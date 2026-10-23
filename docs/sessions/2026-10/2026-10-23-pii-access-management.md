@@ -76,9 +76,11 @@ crm 的接触记录带 `operator_id`，能判「本人是否经手」；但 trad
 ## 文件清单
 
 **迁移**
+
 - `backend/services/channel/src/main/resources/db/migration/V320__channel_pii_access.sql`
 
 **后端（`com.starcon.channel`，扁平包）**
+
 - `PiiAccessModels.java` — 传输模型
 - `PiiAccessRules.java` — 脱敏与授权判定的纯函数
 - `PiiAccessSourcePort.java` — 跨服务只读端口（trade + crm）
@@ -86,12 +88,14 @@ crm 的接触记录带 `operator_id`，能判「本人是否经手」；但 trad
 - `PiiAccessController.java` — 16 个操作
 
 **测试**
+
 - `PiiAccessRulesTest.java`（18 例）
 - `PiiAccessIntegrationTest.java`（25 例）
 - `PiiAccessTenancyIntegrationTest.java`（4 例）
 - `PiiAccessUpstreamStub.java`（本地 trade + crm 真实 HTTP 服务器）
 
 **前端**
+
 - `apps/web/src/components/pii-access/pii-access-model.ts`
 - `apps/web/src/components/pii-access/pii-access-workspace.tsx`
 - `apps/web/src/components/pii-access/pii-access-model.test.ts`
@@ -100,10 +104,12 @@ crm 的接触记录带 `operator_id`，能判「本人是否经手」；但 trad
 - `apps/web/src/lib/api-proxy.ts`（**纯新增一条独立的 `services[]` 元素**，锚在数组末尾）
 
 **契约（codegen 产物）**
+
 - `packages/api-contracts/src/contracts/channel.ts`
 - `packages/api-contracts/src/channel.openapi.json`
 
 **台账**
+
 - `docs/product/capability-blueprint/module-progress.md`（只改 `| 16.6.1.1 |` 那一行）
 
 ## 踩到并修掉的真问题

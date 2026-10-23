@@ -586,7 +586,9 @@ export function auditDecisionTone(decision: string): 'success' | 'danger' | 'neu
 /** 主体列表行的一行摘要（脱敏值拼起来）。 */
 export function subjectSummary(view: PiiAccessSubjectView): string {
   if (!view.known) return '上游查无这个主体';
-  const parts = view.fields.filter((f) => f.maskedValue).map((f) => `${f.fieldLabel} ${f.maskedValue}`);
+  const parts = view.fields
+    .filter((f) => f.maskedValue)
+    .map((f) => `${f.fieldLabel} ${f.maskedValue}`);
   return parts.length ? parts.join(' · ') : '上游没给任何一栏';
 }
 

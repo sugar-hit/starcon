@@ -312,7 +312,9 @@ export function MessageSendWorkspace() {
         };
         if (existing) {
           await updateMessageSendTemplate(existing.id, input);
-          setNotice(`模板 ${templateCode} 已更新（历史发送记录不受影响 —— 它们快照了当时的话术）。`);
+          setNotice(
+            `模板 ${templateCode} 已更新（历史发送记录不受影响 —— 它们快照了当时的话术）。`,
+          );
         } else {
           await createMessageSendTemplate(input);
           setNotice(`模板 ${templateCode} 已创建。`);
@@ -365,27 +367,28 @@ export function MessageSendWorkspace() {
   const filtered = hasActiveSendFilter(params);
   const templateItems = templates?.items ?? [];
   const platformConnected =
-    capabilities?.dimensions.find((d) => d.dimension === 'platform_message_api')?.available ?? false;
+    capabilities?.dimensions.find((d) => d.dimension === 'platform_message_api')?.available ??
+    false;
 
   return (
     <div className="space-y-4">
       {error && (
-        <div className="border-destructive/40 bg-destructive/10 text-destructive rounded-md px-3 py-2 text-copy-13">
+        <div className="border-destructive/40 bg-destructive/10 text-destructive text-copy-13 rounded-md px-3 py-2">
           {error}
         </div>
       )}
       {actionError && (
-        <div className="border-destructive/40 bg-destructive/10 text-destructive rounded-md px-3 py-2 text-copy-13">
+        <div className="border-destructive/40 bg-destructive/10 text-destructive text-copy-13 rounded-md px-3 py-2">
           {actionError}
         </div>
       )}
       {notice && (
-        <div className="border-border bg-muted/40 rounded-md px-3 py-2 text-copy-13">{notice}</div>
+        <div className="border-border bg-muted/40 text-copy-13 rounded-md px-3 py-2">{notice}</div>
       )}
 
       {/* ---------------------------------------------------------- 能力声明 */}
       <SectionCard title="能力声明">
-        <ul className="space-y-2 text-copy-13">
+        <ul className="text-copy-13 space-y-2">
           {(capabilities?.dimensions ?? []).map((dimension) => (
             <li key={dimension.dimension} className="flex flex-wrap items-start gap-2">
               <Badge tone={dimension.available ? 'success' : 'warning'}>
@@ -401,10 +404,10 @@ export function MessageSendWorkspace() {
           ))}
         </ul>
         {capabilities?.highlight && (
-          <p className="text-muted-foreground mt-3 text-copy-12">{capabilities.highlight}</p>
+          <p className="text-muted-foreground text-copy-12 mt-3">{capabilities.highlight}</p>
         )}
         {capabilities?.boundaryNote && (
-          <p className="text-muted-foreground mt-2 text-copy-12">{capabilities.boundaryNote}</p>
+          <p className="text-muted-foreground text-copy-12 mt-2">{capabilities.boundaryNote}</p>
         )}
       </SectionCard>
 
@@ -415,8 +418,8 @@ export function MessageSendWorkspace() {
             {platformConnected ? '已接入' : '未接入'}
           </Badge>{' '}
           平台侧站内信<b>发送</b>接口未接入（归属模块 2）⇒ 投递只允许
-          <strong>人工交接</strong>：在平台侧实际发出后回登记结果与平台回执。
-          本页<strong>不提供</strong>「发到平台」按钮 —— 一个点了就成功的假按钮会让运营以为
+          <strong>人工交接</strong>：在平台侧实际发出后回登记结果与平台回执。 本页
+          <strong>不提供</strong>「发到平台」按钮 —— 一个点了就成功的假按钮会让运营以为
           买家已经收到回复了，而现场一条都没发出去。
         </p>
       </SectionCard>
@@ -434,7 +437,7 @@ export function MessageSendWorkspace() {
               />
             </Field>
           </div>
-          <label className="flex items-center gap-2 text-copy-13">
+          <label className="text-copy-13 flex items-center gap-2">
             <input
               type="checkbox"
               checked={onlyUnreplied}
@@ -451,7 +454,9 @@ export function MessageSendWorkspace() {
         {targetItems.length === 0 ? (
           <EmptyState
             icon={<Inbox className="h-7 w-7" />}
-            title={targetKeyword || onlyUnreplied ? '当前条件下没有可回复的消息' : '还没有可回复的消息'}
+            title={
+              targetKeyword || onlyUnreplied ? '当前条件下没有可回复的消息' : '还没有可回复的消息'
+            }
             description={
               targetKeyword || onlyUnreplied
                 ? '把筛选条件放宽一点再试 —— 这不代表收件箱里没有消息。' +
@@ -460,7 +465,7 @@ export function MessageSendWorkspace() {
             }
           />
         ) : (
-          <ul className="space-y-2 text-copy-13">
+          <ul className="text-copy-13 space-y-2">
             {targetItems.map((target) => (
               <li
                 key={target.messageId}
@@ -495,7 +500,7 @@ export function MessageSendWorkspace() {
             ))}
           </ul>
         )}
-        <p className="text-muted-foreground mt-3 text-copy-12">
+        <p className="text-muted-foreground text-copy-12 mt-3">
           未回复数 {targets?.unrepliedCount ?? 0} 条。已回复状态是<b>推导</b>出来的
           （存在一条「已发出」的发送记录）—— 发送失败<b>不会</b>把它变成已回复。
         </p>
@@ -650,7 +655,7 @@ export function MessageSendWorkspace() {
           </Button>
 
           {batch && (
-            <div className="space-y-2 text-copy-13">
+            <div className="text-copy-13 space-y-2">
               <p>
                 批次 {batch.batchId}：共 {batch.requestedCount} 条，成功 {batch.succeededCount} 条，
                 失败 {batch.failedCount} 条。
@@ -708,7 +713,7 @@ export function MessageSendWorkspace() {
           </div>
         </div>
 
-        <p className="text-muted-foreground mb-2 text-copy-12">{sendSummaryText(page?.summary)}</p>
+        <p className="text-muted-foreground text-copy-12 mb-2">{sendSummaryText(page?.summary)}</p>
 
         {sendItems.length === 0 ? (
           <EmptyState
@@ -721,13 +726,21 @@ export function MessageSendWorkspace() {
             }
           />
         ) : (
-          <ul className="space-y-2 text-copy-13">
+          <ul className="text-copy-13 space-y-2">
             {sendItems.map((send) => (
               <li
                 key={send.id}
                 className="border-border flex flex-wrap items-start gap-2 rounded-md border px-3 py-2"
               >
-                <Badge tone={send.status === 'SENT' ? 'success' : send.status === 'FAILED' ? 'warning' : 'neutral'}>
+                <Badge
+                  tone={
+                    send.status === 'SENT'
+                      ? 'success'
+                      : send.status === 'FAILED'
+                        ? 'warning'
+                        : 'neutral'
+                  }
+                >
                   {sendStatusLabel(send.status)}
                 </Badge>
                 <span className="font-medium">{send.sendNo}</span>
@@ -779,7 +792,7 @@ export function MessageSendWorkspace() {
           </ul>
         )}
 
-        <div className="mt-3 flex items-center gap-2 text-copy-13">
+        <div className="text-copy-13 mt-3 flex items-center gap-2">
           <Button
             type="button"
             variant="secondary"
@@ -805,7 +818,7 @@ export function MessageSendWorkspace() {
       {/* ---------------------------------------------------------- 发送记录详情 */}
       {detail && (
         <SectionCard title={`发送记录 ${detail.send.sendNo}`}>
-          <div className="space-y-3 text-copy-13">
+          <div className="text-copy-13 space-y-3">
             <p>
               <Badge
                 tone={
@@ -826,7 +839,8 @@ export function MessageSendWorkspace() {
             </p>
             {detail.send.platformReceipt && (
               <p>
-                平台回执：<span className="text-muted-foreground">{detail.send.platformReceipt}</span>
+                平台回执：
+                <span className="text-muted-foreground">{detail.send.platformReceipt}</span>
               </p>
             )}
             {detail.send.failureReason && (
@@ -873,8 +887,8 @@ export function MessageSendWorkspace() {
             </div>
             <p className="text-muted-foreground text-copy-12">
               <TriangleAlert className="mr-1 inline h-3 w-3" />
-              发送记录里的「已回复」是由「存在一条已发出的发送记录」推导的；
-              本模块<b>从不改写源消息</b> —— 发送失败时那条消息仍然是「未回复」。
+              发送记录里的「已回复」是由「存在一条已发出的发送记录」推导的； 本模块
+              <b>从不改写源消息</b> —— 发送失败时那条消息仍然是「未回复」。
             </p>
           </div>
         </SectionCard>
@@ -920,7 +934,10 @@ export function MessageSendWorkspace() {
               />
             </Field>
           </div>
-          <Field label="模板正文" hint="可以用 {{buyer_name}} {{order_no}} 这类变量；未定义的变量会让发送失败。">
+          <Field
+            label="模板正文"
+            hint="可以用 {{buyer_name}} {{order_no}} 这类变量；未定义的变量会让发送失败。"
+          >
             <textarea
               className={`${control} min-h-24`}
               value={templateBody}
@@ -939,7 +956,7 @@ export function MessageSendWorkspace() {
           {templateItems.length === 0 ? (
             <p className="text-muted-foreground text-copy-13">还没有模板 —— 可以先手工写回复。</p>
           ) : (
-            <ul className="space-y-2 text-copy-13">
+            <ul className="text-copy-13 space-y-2">
               {templateItems.map((row) => (
                 <li
                   key={row.id}

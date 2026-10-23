@@ -16,10 +16,10 @@
 
 所以：
 
-| 表 | 角色 | 写入语义 |
-| --- | --- | --- |
-| `crm_message_classification` | **机器的结论** | 可被重新分类覆盖（一条消息一条，`UNIQUE (tenant_id, message_id)`） |
-| `crm_message_classification_feedback` | **人的纠正** | **只追加**（DB 触发器拒绝 UPDATE/DELETE） |
+| 表                                    | 角色           | 写入语义                                                           |
+| ------------------------------------- | -------------- | ------------------------------------------------------------------ |
+| `crm_message_classification`          | **机器的结论** | 可被重新分类覆盖（一条消息一条，`UNIQUE (tenant_id, message_id)`） |
+| `crm_message_classification_feedback` | **人的纠正**   | **只追加**（DB 触发器拒绝 UPDATE/DELETE）                          |
 
 关键取舍：
 
@@ -87,35 +87,40 @@
 
 ## 关键 trade-off
 
-| 取舍 | 选择 | 放弃了什么 | 为什么 |
-| --- | --- | --- | --- |
-| 纠正写在哪 | **独立表 + 只追加** | 「一条记录走到底」的简单 | 改得掉的训练样本 = 随时能改漂亮的准确率；不改写结论才留得住「机器当时说了什么」 |
-| 机器预测快照 | **纠正行自带** | 纠正行变大 | 只有正确答案的样本学不出「错在哪」 |
-| 优先级 | **只读 + 三值并列** | 「一键采用建议值」的省事 | 偷偷用建议值盖掉人工值 = 客服设的优先级无声消失 |
-| 规则顺序 | **显式 priority_order** | 插入即生效的省事 | 顺序不定 ⇒ 改一条规则让历史结论集体漂移 |
-| 命中依据 | **jsonb 一列存全量** | 关系表的 join | 多规则多关键词；`jsonb_array_elements` 展开统计，显式可审阅 |
-| 未分类兜底 | **UNCLASSIFIED 且不可自动回复** | 强制每条消息都有标签 | 说不清是什么的消息自动回，风险由买家承担 |
-| 训练调度器 | **不实现** | 「自动学出新规则」 | 不在本模块职责内；编一个「已训练」的假状态比没有更糟 |
+| 取舍         | 选择                            | 放弃了什么               | 为什么                                                                          |
+| ------------ | ------------------------------- | ------------------------ | ------------------------------------------------------------------------------- |
+| 纠正写在哪   | **独立表 + 只追加**             | 「一条记录走到底」的简单 | 改得掉的训练样本 = 随时能改漂亮的准确率；不改写结论才留得住「机器当时说了什么」 |
+| 机器预测快照 | **纠正行自带**                  | 纠正行变大               | 只有正确答案的样本学不出「错在哪」                                              |
+| 优先级       | **只读 + 三值并列**             | 「一键采用建议值」的省事 | 偷偷用建议值盖掉人工值 = 客服设的优先级无声消失                                 |
+| 规则顺序     | **显式 priority_order**         | 插入即生效的省事         | 顺序不定 ⇒ 改一条规则让历史结论集体漂移                                         |
+| 命中依据     | **jsonb 一列存全量**            | 关系表的 join            | 多规则多关键词；`jsonb_array_elements` 展开统计，显式可审阅                     |
+| 未分类兜底   | **UNCLASSIFIED 且不可自动回复** | 强制每条消息都有标签     | 说不清是什么的消息自动回，风险由买家承担                                        |
+| 训练调度器   | **不实现**                      | 「自动学出新规则」       | 不在本模块职责内；编一个「已训练」的假状态比没有更糟                            |
 
 ## 文件清单
 
 **迁移（crm 服务）**
+
 - `backend/services/crm/src/main/resources/db/migration/V301__crm_message_classification.sql` —— 三张新表 + RLS（ENABLE **与** FORCE，policy 名 isolation）+ 序列单独授权 + 零外键 + 4 个触发器 + **零 ALTER / 零 DROP 既有表**。
 
 **后端**
+
 - `backend/services/crm/src/main/java/com/starcon/crm/MessageClassificationModels.java`
 - `backend/services/crm/src/main/java/com/starcon/crm/MessageClassificationService.java`
 - `backend/services/crm/src/main/java/com/starcon/crm/MessageClassificationController.java`
 
 **测试**
+
 - `backend/services/crm/src/test/java/com/starcon/crm/MessageClassificationIntegrationTest.java`（25 例）
 - `backend/services/crm/src/test/java/com/starcon/crm/MessageClassificationTenancyIntegrationTest.java`（4 例，租户隔离三断言）
 
 **契约（codegen 产物，只改 crm 一份）**
+
 - `packages/api-contracts/src/contracts/crm.ts`（+28 行：28 个新类型）
 - `packages/api-contracts/src/crm.openapi.json`（+12 条路径 / +28 个 schema，**纯增量，零删除**）
 
 **前端**
+
 - `apps/web/src/components/crm/message-classification-model.ts`
 - `apps/web/src/components/crm/message-classification-model.test.ts`（20 例）
 - `apps/web/src/components/crm/message-classification-workspace.tsx`
@@ -124,6 +129,7 @@
 - `apps/web/src/lib/api-proxy.ts`（**新增一条独立 `services[]` 元素**，锚点在 `^message\-sends...$` 之后；既有 149 条元素一字未动、不重排）
 
 **台账**
+
 - `docs/product/capability-blueprint/module-progress.md` —— 只改 `15.1.1.3` 一行的「状态」「证据」两格。
 
 ## 验证

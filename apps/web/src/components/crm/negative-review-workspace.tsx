@@ -152,13 +152,13 @@ export function NegativeReviewWorkspace() {
     () =>
       Boolean(
         shopId ||
-          platformCode ||
-          causeCode ||
-          caseStatus ||
-          resolutionStatus ||
-          appealEligible ||
-          rating ||
-          keyword,
+        platformCode ||
+        causeCode ||
+        caseStatus ||
+        resolutionStatus ||
+        appealEligible ||
+        rating ||
+        keyword,
       ),
     [
       shopId,
@@ -421,7 +421,9 @@ export function NegativeReviewWorkspace() {
           platformReceipt: '',
           reason: result === 'APPROVED' ? '平台认定评价与事实不符' : '平台维持原评价',
         });
-        setNotice(`已登记 ${appeal.appealNo} 的平台判定（${result === 'APPROVED' ? '通过' : '驳回'}）。`);
+        setNotice(
+          `已登记 ${appeal.appealNo} 的平台判定（${result === 'APPROVED' ? '通过' : '驳回'}）。`,
+        );
         setAppealSubmittedAt('');
         await load();
         await openDetail(detail.negativeReview.id);
@@ -465,7 +467,8 @@ export function NegativeReviewWorkspace() {
         ruleScope,
         platformCode: rulePlatform,
         causeCode: ruleScope === 'CAUSE' ? ruleCause : '',
-        label: ruleLabel || (ruleScope === 'PLATFORM' ? `${rulePlatform} 策略` : `${ruleCause} 规则`),
+        label:
+          ruleLabel || (ruleScope === 'PLATFORM' ? `${rulePlatform} 策略` : `${ruleCause} 规则`),
         description: '',
         negativeRatingThreshold: Number(ruleThreshold),
         appealSupported: ruleScope === 'PLATFORM' ? ruleAppealSupported : false,
@@ -558,22 +561,22 @@ export function NegativeReviewWorkspace() {
   return (
     <div className="space-y-4">
       {error && (
-        <div className="border-destructive/40 bg-destructive/10 text-destructive rounded-md px-3 py-2 text-copy-13">
+        <div className="border-destructive/40 bg-destructive/10 text-destructive text-copy-13 rounded-md px-3 py-2">
           {error}
         </div>
       )}
       {actionError && (
-        <div className="border-destructive/40 bg-destructive/10 text-destructive rounded-md px-3 py-2 text-copy-13">
+        <div className="border-destructive/40 bg-destructive/10 text-destructive text-copy-13 rounded-md px-3 py-2">
           {actionError}
         </div>
       )}
       {notice && (
-        <div className="border-border bg-muted/40 rounded-md px-3 py-2 text-copy-13">{notice}</div>
+        <div className="border-border bg-muted/40 text-copy-13 rounded-md px-3 py-2">{notice}</div>
       )}
 
       {/* ---------------------------------------------------------- 能力边界 */}
       <SectionCard title="能力边界">
-        <ul className="space-y-2 text-copy-13">
+        <ul className="text-copy-13 space-y-2">
           {(capabilities?.dimensions ?? []).map((dimension) => (
             <li key={dimension.dimension} className="flex flex-wrap items-start gap-2">
               <Badge tone={dimension.available ? 'success' : 'warning'}>
@@ -589,7 +592,7 @@ export function NegativeReviewWorkspace() {
           ))}
         </ul>
         {capabilities?.highlight && (
-          <p className="text-muted-foreground mt-3 text-copy-12">{capabilities.highlight}</p>
+          <p className="text-muted-foreground text-copy-12 mt-3">{capabilities.highlight}</p>
         )}
       </SectionCard>
 
@@ -598,7 +601,7 @@ export function NegativeReviewWorkspace() {
         {!stats ? (
           <p className="text-muted-foreground text-copy-13">暂无统计数据。</p>
         ) : (
-          <div className="space-y-4 text-copy-13">
+          <div className="text-copy-13 space-y-4">
             <div className="flex flex-wrap items-center gap-2">
               <span className="text-muted-foreground">作用域</span>
               <select
@@ -620,7 +623,7 @@ export function NegativeReviewWorkspace() {
             <p className="text-muted-foreground text-copy-12">
               {stats.resolutionRateBasis}；{stats.resolutionRateNumerator}。
             </p>
-            <div className="flex flex-wrap gap-3 text-copy-12">
+            <div className="text-copy-12 flex flex-wrap gap-3">
               <span>
                 待处理 <strong>{stats.openCases}</strong>
               </span>
@@ -647,11 +650,11 @@ export function NegativeReviewWorkspace() {
             <div>
               <h3 className="font-medium">按原因分类</h3>
               {stats.byCause.length === 0 ? (
-                <p className="text-muted-foreground mt-1 text-copy-12">
+                <p className="text-muted-foreground text-copy-12 mt-1">
                   当前作用域内还没有处理单。
                 </p>
               ) : (
-                <ul className="mt-1 space-y-1 text-copy-12">
+                <ul className="text-copy-12 mt-1 space-y-1">
                   {stats.byCause.map((bucket) => (
                     <li key={bucket.causeCode ?? 'UNCLASSIFIED'}>
                       {causeLabel(bucket.causeCode ?? '')}：<strong>{bucket.count}</strong> 单 ·
@@ -665,7 +668,7 @@ export function NegativeReviewWorkspace() {
 
             <div>
               <h3 className="font-medium">按处理状态</h3>
-              <ul className="mt-1 flex flex-wrap gap-3 text-copy-12">
+              <ul className="text-copy-12 mt-1 flex flex-wrap gap-3">
                 {stats.byStatus.map((bucket) => (
                   <li key={bucket.status}>
                     {caseStatusLabel(bucket.status)}：<strong>{bucket.count}</strong>
@@ -677,9 +680,11 @@ export function NegativeReviewWorkspace() {
             <div>
               <h3 className="font-medium">按申诉状态</h3>
               {stats.byAppealStatus.length === 0 ? (
-                <p className="text-muted-foreground mt-1 text-copy-12">当前作用域内没有申诉任务。</p>
+                <p className="text-muted-foreground text-copy-12 mt-1">
+                  当前作用域内没有申诉任务。
+                </p>
               ) : (
-                <ul className="mt-1 flex flex-wrap gap-3 text-copy-12">
+                <ul className="text-copy-12 mt-1 flex flex-wrap gap-3">
                   {stats.byAppealStatus.map((bucket) => (
                     <li key={bucket.status}>
                       {appealStatusLabel(bucket.status)}：<strong>{bucket.count}</strong>
@@ -695,15 +700,15 @@ export function NegativeReviewWorkspace() {
                 申诉配额（当前周期）
               </h3>
               {stats.byPlatformQuota.length === 0 ? (
-                <p className="text-muted-foreground mt-1 text-copy-12">
+                <p className="text-muted-foreground text-copy-12 mt-1">
                   还没有配置任何平台策略 —— 没有策略就没有「差评」这个口径。
                 </p>
               ) : (
-                <ul className="mt-1 space-y-1 text-copy-12">
+                <ul className="text-copy-12 mt-1 space-y-1">
                   {stats.byPlatformQuota.map((bucket) => (
                     <li key={bucket.platformCode}>
-                      {bucket.platformCode}：{bucket.quotaPeriod}（{bucket.quotaPeriodKey}）·
-                      配额 <strong>{bucket.quotaLimit}</strong> · 已用{' '}
+                      {bucket.platformCode}：{bucket.quotaPeriod}（{bucket.quotaPeriodKey}）· 配额{' '}
+                      <strong>{bucket.quotaLimit}</strong> · 已用{' '}
                       <strong>{bucket.quotaUsed}</strong> · 剩余{' '}
                       <strong>{bucket.quotaRemaining ?? '—'}</strong>
                     </li>
@@ -721,7 +726,7 @@ export function NegativeReviewWorkspace() {
         title="处理规则（原因分类与申诉判定真的可配）"
         description="差评阈值、平台是否支持申诉、申诉配额都在规则里；没有平台策略就建不了处理单。"
       >
-        <div className="space-y-4 text-copy-13">
+        <div className="text-copy-13 space-y-4">
           {!rules || rules.items.length === 0 ? (
             <EmptyState
               title="还没有配置差评处理规则"
@@ -919,7 +924,7 @@ export function NegativeReviewWorkspace() {
             description="当前筛选条件下没有低于平台阈值的评价（或都已经被建过处理单了）。"
           />
         ) : (
-          <ul className="space-y-2 text-copy-13">
+          <ul className="text-copy-13 space-y-2">
             {candidates.items.map((row) => (
               <li key={row.reviewId} className="flex flex-wrap items-center gap-2">
                 <Badge tone={row.rating <= 2 ? 'danger' : 'neutral'}>{row.rating} 星</Badge>
@@ -951,7 +956,7 @@ export function NegativeReviewWorkspace() {
 
       {/* ---------------------------------------------------------- 处理单清单 */}
       <SectionCard title="处理单清单">
-        <div className="space-y-4 text-copy-13">
+        <div className="text-copy-13 space-y-4">
           <div className="grid gap-3 md:grid-cols-4">
             <Field label="店铺">
               <select
@@ -1071,7 +1076,8 @@ export function NegativeReviewWorkspace() {
                   <span className="font-medium">{row.caseNo}</span>
                   <span className="text-muted-foreground">
                     {row.shopName} · {row.platformCode} · {row.reviewRating} 星 · 原因{' '}
-                    {causeLabel(row.causeCode ?? '')} · {resolutionStatusLabel(row.resolutionStatus)}
+                    {causeLabel(row.causeCode ?? '')} ·{' '}
+                    {resolutionStatusLabel(row.resolutionStatus)}
                     {row.appealEligible ? ' · 可申诉' : ' · 不可申诉'}
                   </span>
                   <Button size="sm" variant="outline" onClick={() => void openDetail(row.id)}>
@@ -1114,7 +1120,7 @@ export function NegativeReviewWorkspace() {
           title={`处理单 ${selected.caseNo}`}
           description={`差评 ${selected.reviewNo}（${selected.reviewRating} 星）· ${selected.shopName} · ${selected.platformCode}`}
         >
-          <div className="space-y-4 text-copy-13">
+          <div className="text-copy-13 space-y-4">
             <div className="flex flex-wrap items-center gap-2">
               <Badge tone={selected.caseStatus === 'RESOLVED' ? 'success' : 'neutral'}>
                 {caseStatusLabel(selected.caseStatus)}
@@ -1133,7 +1139,7 @@ export function NegativeReviewWorkspace() {
             </div>
 
             {selected.reviewContent && (
-              <blockquote className="border-border text-muted-foreground border-l-2 pl-3 text-copy-12">
+              <blockquote className="border-border text-muted-foreground text-copy-12 border-l-2 pl-3">
                 {selected.reviewContent}
               </blockquote>
             )}
@@ -1193,7 +1199,7 @@ export function NegativeReviewWorkspace() {
               {detail.actions.length === 0 ? (
                 <p className="text-muted-foreground">还没有任何动作。</p>
               ) : (
-                <ul className="space-y-1 text-copy-12">
+                <ul className="text-copy-12 space-y-1">
                   {detail.actions.map((a: CrmNegativeReviewActionRow) => (
                     <li key={a.id} className="flex flex-wrap items-center gap-2">
                       <Badge tone={a.outcome === 'SUCCEEDED' ? 'success' : 'warning'}>
@@ -1298,7 +1304,7 @@ export function NegativeReviewWorkspace() {
               {detail.appeals.length === 0 ? (
                 <p className="text-muted-foreground">还没有申诉任务。</p>
               ) : (
-                <ul className="space-y-2 text-copy-12">
+                <ul className="text-copy-12 space-y-2">
                   {detail.appeals.map((appeal: CrmNegativeReviewAppealRow) => (
                     <li key={appeal.id} className="flex flex-wrap items-center gap-2">
                       <Badge
@@ -1314,8 +1320,8 @@ export function NegativeReviewWorkspace() {
                       </Badge>
                       <span className="font-medium">{appeal.appealNo}</span>
                       <span className="text-muted-foreground">
-                        {appealTypeLabel(appeal.appealType)} · {causeLabel(appeal.causeCode)} ·
-                        配额 {appeal.quotaIndex}/{appeal.quotaLimit}（{appeal.quotaPeriodKey}）
+                        {appealTypeLabel(appeal.appealType)} · {causeLabel(appeal.causeCode)} · 配额{' '}
+                        {appeal.quotaIndex}/{appeal.quotaLimit}（{appeal.quotaPeriodKey}）
                       </span>
                       <span>{appeal.reason}</span>
                       {appeal.appealStatus === 'DRAFT' && writable && (

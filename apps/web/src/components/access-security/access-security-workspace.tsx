@@ -1,7 +1,16 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Badge, Button, EmptyState, FormField, Input, PageHeader, SectionCard, StatCard } from '@starcon/ui';
+import {
+  Badge,
+  Button,
+  EmptyState,
+  FormField,
+  Input,
+  PageHeader,
+  SectionCard,
+  StatCard,
+} from '@starcon/ui';
 import {
   CircleHelp,
   Fingerprint,
@@ -95,7 +104,8 @@ export function AccessSecurityWorkspace() {
   const [checkTarget, setCheckTarget] = useState('');
   const [checkResult, setCheckResult] = useState<AccessSecurityIpCheck | null>(null);
 
-  const [credentialAccess, setCredentialAccess] = useState<AccessSecurityCredentialAccessPage | null>(null);
+  const [credentialAccess, setCredentialAccess] =
+    useState<AccessSecurityCredentialAccessPage | null>(null);
   const [credentials, setCredentials] = useState<AccessSecurityCredentialPage | null>(null);
   const [probeId, setProbeId] = useState('');
   const [probePurpose, setProbePurpose] = useState('');
@@ -194,9 +204,7 @@ export function AccessSecurityWorkspace() {
     try {
       const result = await runScan();
       if (!result.known) {
-        setNotice(
-          `🔴 ${result.note}（扫描窗口 ${result.windowStart} ~ ${result.windowEnd}）`,
-        );
+        setNotice(`🔴 ${result.note}（扫描窗口 ${result.windowStart} ~ ${result.windowEnd}）`);
       } else {
         setNotice(
           `扫描完成：读到 ${result.eventsScanned} 条登录 / 登出事件，新落 ${result.eventsRecorded} 条审计；` +
@@ -343,8 +351,16 @@ export function AccessSecurityWorkspace() {
 
       {/* ---------------- 概览 ---------------- */}
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard label="未关闭告警" value={(alerts?.newCount ?? 0) + (alerts?.acknowledgedCount ?? 0)} polarity="negative" />
-        <StatCard label="严重 / 高危告警" value={(alerts?.criticalCount ?? 0) + (alerts?.highCount ?? 0)} polarity="negative" />
+        <StatCard
+          label="未关闭告警"
+          value={(alerts?.newCount ?? 0) + (alerts?.acknowledgedCount ?? 0)}
+          polarity="negative"
+        />
+        <StatCard
+          label="严重 / 高危告警"
+          value={(alerts?.criticalCount ?? 0) + (alerts?.highCount ?? 0)}
+          polarity="negative"
+        />
         <StatCard label="本地登录审计" value={audit?.total ?? 0} polarity="neutral" />
         <StatCard label="凭据访问记录" value={credentialAccess?.total ?? 0} polarity="neutral" />
       </div>
@@ -385,7 +401,9 @@ export function AccessSecurityWorkspace() {
               </div>
             )}
             <details className="text-copy-12 text-muted-foreground">
-              <summary className="cursor-pointer">口径说明（MFA / 登录审计 / 告警 / IP / 会话 / 凭据 / 下游 / 边界）</summary>
+              <summary className="cursor-pointer">
+                口径说明（MFA / 登录审计 / 告警 / IP / 会话 / 凭据 / 下游 / 边界）
+              </summary>
               <div className="mt-2 space-y-2">
                 <p>{caps.mfaNote}</p>
                 <p>{caps.loginAuditNote}</p>
@@ -446,7 +464,11 @@ export function AccessSecurityWorkspace() {
                   <option value="EMAIL">邮件验证码</option>
                 </select>
               </FormField>
-              <FormField id="ip-mode" label="IP 白名单口径" hint={ipModeHint(draft.ipAllowlistMode)}>
+              <FormField
+                id="ip-mode"
+                label="IP 白名单口径"
+                hint={ipModeHint(draft.ipAllowlistMode)}
+              >
                 <select
                   id="ip-mode"
                   className="border-control-border bg-card text-copy-14 text-foreground h-9 w-full rounded-md border px-3"
@@ -513,7 +535,10 @@ export function AccessSecurityWorkspace() {
                   min={1}
                   value={draft.anomalySuccessLoginThreshold}
                   onChange={(e) =>
-                    setDraft({ ...draft, anomalySuccessLoginThreshold: Number(e.target.value) || 1 })
+                    setDraft({
+                      ...draft,
+                      anomalySuccessLoginThreshold: Number(e.target.value) || 1,
+                    })
                   }
                 />
               </label>
@@ -537,7 +562,10 @@ export function AccessSecurityWorkspace() {
                   min={1}
                   value={draft.sessionAbsoluteTimeoutMinutes}
                   onChange={(e) =>
-                    setDraft({ ...draft, sessionAbsoluteTimeoutMinutes: Number(e.target.value) || 1 })
+                    setDraft({
+                      ...draft,
+                      sessionAbsoluteTimeoutMinutes: Number(e.target.value) || 1,
+                    })
                   }
                 />
               </label>
@@ -581,7 +609,10 @@ export function AccessSecurityWorkspace() {
               <span className="text-copy-14 text-foreground font-medium">{policy.policyName}</span>
               <Badge tone="neutral">版本 {policy.version}</Badge>
               <Badge tone={policy.mfaRequired ? 'success' : 'neutral'}>
-                MFA：{policy.mfaRequired ? `强制（${mfaFactorLabel(policy.mfaPrimaryFactor)}）` : '不强制'}
+                MFA：
+                {policy.mfaRequired
+                  ? `强制（${mfaFactorLabel(policy.mfaPrimaryFactor)}）`
+                  : '不强制'}
               </Badge>
               <Badge tone={policy.ipAllowlistMode === 'ENFORCE' ? 'danger' : 'info'}>
                 IP 口径：{ipModeLabel(policy.ipAllowlistMode)}
@@ -589,8 +620,9 @@ export function AccessSecurityWorkspace() {
             </div>
             <div className="text-copy-13 text-muted-foreground grid gap-1 md:grid-cols-2">
               <span>
-                异常检测窗口：{policy.anomalyWindowMinutes} 分钟 · 失败阈值 {policy.anomalyFailedLoginThreshold} 次 ·
-                成功阈值 {policy.anomalySuccessLoginThreshold} 次
+                异常检测窗口：{policy.anomalyWindowMinutes} 分钟 · 失败阈值{' '}
+                {policy.anomalyFailedLoginThreshold} 次 · 成功阈值{' '}
+                {policy.anomalySuccessLoginThreshold} 次
               </span>
               <span>
                 会话：空闲 {policy.sessionIdleTimeoutMinutes} 分钟 / 绝对{' '}
@@ -694,7 +726,8 @@ export function AccessSecurityWorkspace() {
                   </div>
                 ) : (
                   <p className="text-copy-12 text-muted-foreground mt-2">
-                    🔴 「{alertStatusLabel(selectedAlert.status)}」是终态 —— 要重新处置只能等下一次告警。
+                    🔴 「{alertStatusLabel(selectedAlert.status)}」是终态 ——
+                    要重新处置只能等下一次告警。
                   </p>
                 )}
               </div>
@@ -740,7 +773,9 @@ export function AccessSecurityWorkspace() {
                 <p className="text-copy-12 text-muted-foreground mt-1">{item.summary}</p>
                 <p className="text-copy-12 text-muted-foreground mt-1">
                   {item.occurredAt} · 来源 IP：
-                  {item.sourceIpAvailable ? item.sourceIp : '🔴 量不到（身份服务的登录事件不带来源 IP）'}
+                  {item.sourceIpAvailable
+                    ? item.sourceIp
+                    : '🔴 量不到（身份服务的登录事件不带来源 IP）'}
                 </p>
               </div>
             ))}
@@ -793,8 +828,16 @@ export function AccessSecurityWorkspace() {
           {checkResult && (
             <div className="border-border rounded-md border px-3 py-2">
               <div className="flex flex-wrap items-center gap-2">
-                <Badge tone={checkResult.inAllowlist ? 'success' : checkResult.enforce ? 'danger' : 'warning'}>
-                  {checkResult.inAllowlist ? '在白名单内' : checkResult.enforce ? '不能进' : '不在白名单'}
+                <Badge
+                  tone={
+                    checkResult.inAllowlist ? 'success' : checkResult.enforce ? 'danger' : 'warning'
+                  }
+                >
+                  {checkResult.inAllowlist
+                    ? '在白名单内'
+                    : checkResult.enforce
+                      ? '不能进'
+                      : '不在白名单'}
                 </Badge>
                 <span className="text-copy-13 text-foreground">{ipCheckText(checkResult)}</span>
               </div>
@@ -821,7 +864,8 @@ export function AccessSecurityWorkspace() {
                     {entry.status === 'ACTIVE' ? '生效中' : '已停用'}
                   </Badge>
                   <span className="text-copy-12 text-muted-foreground">
-                    {entry.scopeKind === 'TENANT' ? '租户口径' : '连接口径'} · 生效 {entry.effectiveFrom}
+                    {entry.scopeKind === 'TENANT' ? '租户口径' : '连接口径'} · 生效{' '}
+                    {entry.effectiveFrom}
                   </span>
                 </div>
               ))}
@@ -862,19 +906,24 @@ export function AccessSecurityWorkspace() {
 
           {credentials && credentials.items.length > 0 && (
             <div className="space-y-2">
-              <p className="text-copy-12 text-muted-foreground">按凭据汇总（哪些凭据从没人碰过）：</p>
+              <p className="text-copy-12 text-muted-foreground">
+                按凭据汇总（哪些凭据从没人碰过）：
+              </p>
               {credentials.items.map((credential) => (
                 <div
                   key={credential.credentialId}
                   className="border-border flex flex-wrap items-center gap-2 rounded-md border px-3 py-2"
                 >
                   <KeyRound className="text-copy-12 text-muted-foreground h-4 w-4" />
-                  <span className="text-copy-13 text-foreground font-mono">{credential.externalRef}</span>
+                  <span className="text-copy-13 text-foreground font-mono">
+                    {credential.externalRef}
+                  </span>
                   <Badge tone={credential.status === 'ACTIVE' ? 'success' : 'neutral'}>
                     {credential.status}
                   </Badge>
                   <span className="text-copy-12 text-muted-foreground">
-                    授权范围 {credential.grantedScopes || '（未记录）'} · {accessCountText(credential)}
+                    授权范围 {credential.grantedScopes || '（未记录）'} ·{' '}
+                    {accessCountText(credential)}
                   </span>
                   {neverAccessed(credential) && <Badge tone="warning">从未被访问</Badge>}
                 </div>
@@ -902,7 +951,8 @@ export function AccessSecurityWorkspace() {
                     <span className="text-copy-12 text-muted-foreground">{item.accessPurpose}</span>
                   </div>
                   <p className="text-copy-12 text-muted-foreground mt-1">
-                    凭据 {item.credentialId} · {item.occurredAt} · 操作人 {item.actorId ?? '（系统）'}
+                    凭据 {item.credentialId} · {item.occurredAt} · 操作人{' '}
+                    {item.actorId ?? '（系统）'}
                   </p>
                 </div>
               ))}
@@ -932,7 +982,9 @@ export function AccessSecurityWorkspace() {
                     归属模块：{dimension.ownerModule}
                   </span>
                 ) : null}
-                <span className="text-copy-12 text-muted-foreground w-full">{dimension.impact}</span>
+                <span className="text-copy-12 text-muted-foreground w-full">
+                  {dimension.impact}
+                </span>
               </div>
             ))}
           </div>

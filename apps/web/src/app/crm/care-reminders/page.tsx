@@ -27,8 +27,7 @@ export default function CrmCareRemindersPage() {
       <header className="space-y-1">
         <h1 className="text-copy-20 font-semibold">关怀与催办</h1>
         <p className="text-muted-foreground text-copy-13">
-          主动触达买家：发货通知、物流提醒、催付、催评、售后进度通知、关怀邮件，
-          按规则定时发送。
+          主动触达买家：发货通知、物流提醒、催付、催评、售后进度通知、关怀邮件， 按规则定时发送。
           <strong>遵守频次上限与退订要求</strong>
           —— 退订名单的唯一事实源是接触记录模块的退订记录，本模块只读不写；
           被挡下的触达会逐条写明原因，不会静默跳过。

@@ -81,7 +81,14 @@ export function ReviewReplyWorkspace() {
 
   // 目标评价候选（上游 15.2.1.1 的真实评价列表）
   const [candidates, setCandidates] = useState<
-    { id: string; reviewNo: string; rating: number; content: string | null; platformCode: string; shopName: string }[]
+    {
+      id: string;
+      reviewNo: string;
+      rating: number;
+      content: string | null;
+      platformCode: string;
+      shopName: string;
+    }[]
   >([]);
   const [candidateError, setCandidateError] = useState<string | null>(null);
 
@@ -199,9 +206,7 @@ export function ReviewReplyWorkspace() {
         })),
       );
     } catch (e) {
-      setCandidateError(
-        errorText(e, '读不到上游的评价列表（15.2.1.1）—— 没有它就没法挑目标评价'),
-      );
+      setCandidateError(errorText(e, '读不到上游的评价列表（15.2.1.1）—— 没有它就没法挑目标评价'));
       setCandidates([]);
     }
   }, [platformCode]);
@@ -239,7 +244,14 @@ export function ReviewReplyWorkspace() {
     } finally {
       setBusy(false);
     }
-  }, [policyPlatform, policyReplyType, policyMinLength, policyMaxLength, policyEffectiveFrom, load]);
+  }, [
+    policyPlatform,
+    policyReplyType,
+    policyMinLength,
+    policyMaxLength,
+    policyEffectiveFrom,
+    load,
+  ]);
 
   const submitTemplate = useCallback(async () => {
     setBusy(true);
@@ -288,7 +300,9 @@ export function ReviewReplyWorkspace() {
       setNotice('');
       try {
         const published = await publishReviewReplyTemplate(id);
-        setNotice(`模板 ${published.template.templateKey} 第 ${published.template.version} 版已生效。`);
+        setNotice(
+          `模板 ${published.template.templateKey} 第 ${published.template.version} 版已生效。`,
+        );
         await load();
       } catch (e) {
         setActionError(errorText(e, '发布模板失败'));
@@ -453,22 +467,22 @@ export function ReviewReplyWorkspace() {
   return (
     <div className="space-y-4">
       {error && (
-        <div className="border-destructive/40 bg-destructive/10 text-destructive rounded-md px-3 py-2 text-copy-13">
+        <div className="border-destructive/40 bg-destructive/10 text-destructive text-copy-13 rounded-md px-3 py-2">
           {error}
         </div>
       )}
       {actionError && (
-        <div className="border-destructive/40 bg-destructive/10 text-destructive rounded-md px-3 py-2 text-copy-13">
+        <div className="border-destructive/40 bg-destructive/10 text-destructive text-copy-13 rounded-md px-3 py-2">
           {actionError}
         </div>
       )}
       {notice && (
-        <div className="border-border bg-muted/40 rounded-md px-3 py-2 text-copy-13">{notice}</div>
+        <div className="border-border bg-muted/40 text-copy-13 rounded-md px-3 py-2">{notice}</div>
       )}
 
       {/* ---------------------------------------------------------- 能力边界 */}
       <SectionCard title="能力边界">
-        <ul className="space-y-2 text-copy-13">
+        <ul className="text-copy-13 space-y-2">
           {(capabilities?.dimensions ?? []).map((dimension) => (
             <li key={dimension.dimension} className="flex flex-wrap items-start gap-2">
               <Badge tone={dimension.available ? 'success' : 'warning'}>
@@ -484,10 +498,10 @@ export function ReviewReplyWorkspace() {
           ))}
         </ul>
         {capabilities?.boundaryNote && (
-          <p className="text-muted-foreground mt-3 text-copy-12">{capabilities.boundaryNote}</p>
+          <p className="text-muted-foreground text-copy-12 mt-3">{capabilities.boundaryNote}</p>
         )}
         {capabilities?.highlight && (
-          <p className="text-muted-foreground mt-1 text-copy-12">{capabilities.highlight}</p>
+          <p className="text-muted-foreground text-copy-12 mt-1">{capabilities.highlight}</p>
         )}
       </SectionCard>
 
@@ -499,7 +513,7 @@ export function ReviewReplyWorkspace() {
             description="规范没配的平台**写不出回复**（后端 409）—— 未配置既意味着没开通，也意味着没法校验合规。先在下面配一版。"
           />
         ) : (
-          <ul className="space-y-2 text-copy-13">
+          <ul className="text-copy-13 space-y-2">
             {policies.items.map((policy: CrmReviewReplyPolicyRow) => (
               <li key={policy.id} className="flex flex-wrap items-center gap-2">
                 <Badge tone={policy.status === 'ACTIVE' ? 'success' : 'neutral'}>
@@ -586,7 +600,7 @@ export function ReviewReplyWorkspace() {
             description="模板是「回复评价」这件事的**可复用资产**：一个模板 = 一个版本，带生效时间；改内容要发新版本，旧版本留在历史里。"
           />
         ) : (
-          <ul className="space-y-2 text-copy-13">
+          <ul className="text-copy-13 space-y-2">
             {templates.items.map((template) => (
               <li key={template.id} className="flex flex-wrap items-center gap-2">
                 <Badge tone={template.status === 'ACTIVE' ? 'success' : 'neutral'}>
@@ -628,12 +642,12 @@ export function ReviewReplyWorkspace() {
         )}
 
         {templateDetail && (
-          <div className="mt-3 space-y-2 text-copy-13">
+          <div className="text-copy-13 mt-3 space-y-2">
             <p className="font-medium">
               {templateDetail.template.templateKey} 第 {templateDetail.template.version} 版 ·{' '}
               {templateDetail.variants.length} 种语言
             </p>
-            <ul className="space-y-1 text-copy-12">
+            <ul className="text-copy-12 space-y-1">
               {templateDetail.variants.map((variant) => (
                 <li key={variant.id}>
                   <Globe className="mr-1 inline h-3 w-3" />
@@ -695,7 +709,10 @@ export function ReviewReplyWorkspace() {
                   onChange={(e) => setPolicyEffectiveFrom(e.target.value)}
                 />
               </Field>
-              <Field label="正文" hint="不合规的正文存不进来（促销 / 导流 / 质疑买家 / 差评不致歉）。">
+              <Field
+                label="正文"
+                hint="不合规的正文存不进来（促销 / 导流 / 质疑买家 / 差评不致歉）。"
+              >
                 <textarea
                   className={`${control} min-h-24`}
                   value={templateBody}
@@ -703,7 +720,12 @@ export function ReviewReplyWorkspace() {
                 />
               </Field>
             </div>
-            <Button onClick={() => void submitTemplate()} size="sm" variant="secondary" disabled={busy}>
+            <Button
+              onClick={() => void submitTemplate()}
+              size="sm"
+              variant="secondary"
+              disabled={busy}
+            >
               <Layers className="mr-1 h-4 w-4" />
               新建模板草稿
             </Button>
@@ -713,13 +735,13 @@ export function ReviewReplyWorkspace() {
 
       {/* ---------------------------------------------------------- 写回复 */}
       <SectionCard title="写一条回复">
-        <p className="text-muted-foreground mb-3 text-copy-12">
+        <p className="text-muted-foreground text-copy-12 mb-3">
           目标评价来自上游 <strong>15.2.1.1 评价列表</strong>（本模块只读引用）。
           正文可套模板（按语言自动匹配；找不到就用模板的兜底语言），也可手写 ——
           <strong>两种都要过措辞校验</strong>。
         </p>
         {candidateError && (
-          <div className="border-destructive/40 bg-destructive/10 text-destructive mb-3 rounded-md px-3 py-2 text-copy-13">
+          <div className="border-destructive/40 bg-destructive/10 text-destructive text-copy-13 mb-3 rounded-md px-3 py-2">
             {candidateError}
           </div>
         )}
@@ -729,7 +751,7 @@ export function ReviewReplyWorkspace() {
             description="上游还没有评价（或当前筛选下没有）。评价是回复的对象 —— 没有它就没有可回的东西。"
           />
         ) : (
-          <ul className="mb-3 max-h-56 space-y-1 overflow-y-auto text-copy-13">
+          <ul className="text-copy-13 mb-3 max-h-56 space-y-1 overflow-y-auto">
             {candidates.map((candidate) => (
               <li key={candidate.id} className="flex flex-wrap items-center gap-2">
                 <span className="text-muted-foreground">{candidate.reviewNo}</span>
@@ -789,7 +811,8 @@ export function ReviewReplyWorkspace() {
                     .map((template) => (
                       <option key={template.id} value={template.id}>
                         {template.templateKey} 第 {template.version} 版 ·{' '}
-                        {replyTypeLabel(template.replyType)} · {reviewScopeLabel(template.ratingScope)}
+                        {replyTypeLabel(template.replyType)} ·{' '}
+                        {reviewScopeLabel(template.ratingScope)}
                       </option>
                     ))}
                 </select>
@@ -862,12 +885,7 @@ export function ReviewReplyWorkspace() {
             />
           </Field>
         </div>
-        <Button
-          className="mt-3"
-          onClick={() => setPageIndex(0)}
-          size="sm"
-          variant="secondary"
-        >
+        <Button className="mt-3" onClick={() => setPageIndex(0)} size="sm" variant="secondary">
           <RefreshCw className="mr-1 h-4 w-4" />
           刷新
         </Button>
@@ -885,9 +903,9 @@ export function ReviewReplyWorkspace() {
             }
           />
         ) : (
-          <ul className="space-y-2 text-copy-13">
+          <ul className="text-copy-13 space-y-2">
             {replies.items.map((reply: CrmReviewReplyRow) => (
-              <li key={reply.id} className="space-y-1 border-b border-border/60 pb-2">
+              <li key={reply.id} className="border-border/60 space-y-1 border-b pb-2">
                 <div className="flex flex-wrap items-center gap-2">
                   <Badge tone={reply.status === 'DELIVERED' ? 'success' : 'warning'}>
                     {replyStatusLabel(reply.status)}
@@ -906,7 +924,8 @@ export function ReviewReplyWorkspace() {
                 <p className="text-muted-foreground">{reply.body}</p>
                 {reply.lastDeliveryNote && (
                   <p className="text-muted-foreground text-copy-12">
-                    最近一次投递：{deliveryOutcomeLabel('NOT_INTEGRATED')} —— {reply.lastDeliveryNote}
+                    最近一次投递：{deliveryOutcomeLabel('NOT_INTEGRATED')} ——{' '}
+                    {reply.lastDeliveryNote}
                   </p>
                 )}
                 <div className="flex flex-wrap gap-2">
@@ -950,7 +969,7 @@ export function ReviewReplyWorkspace() {
             >
               上一页
             </Button>
-            <span className="text-muted-foreground self-center text-copy-12">
+            <span className="text-muted-foreground text-copy-12 self-center">
               第 {replies.page + 1} / {replies.totalPages} 页 · 共 {replies.totalElements} 条
             </span>
             <Button
@@ -965,14 +984,14 @@ export function ReviewReplyWorkspace() {
         )}
 
         {detail && (
-          <div className="mt-3 space-y-2 text-copy-13">
+          <div className="text-copy-13 mt-3 space-y-2">
             <p className="font-medium">
               投递历史 · {detail.reply.replyNo}（{replyStatusLabel(detail.reply.status)}）
             </p>
             {detail.deliveries.length === 0 ? (
               <p className="text-muted-foreground text-copy-12">还没有投递尝试记录。</p>
             ) : (
-              <ul className="space-y-1 text-copy-12">
+              <ul className="text-copy-12 space-y-1">
                 {detail.deliveries.map((delivery) => (
                   <li key={delivery.id} className="flex flex-wrap items-center gap-2">
                     <Badge tone={delivery.outcome === 'DELIVERED' ? 'success' : 'warning'}>
@@ -981,7 +1000,9 @@ export function ReviewReplyWorkspace() {
                     <span className="text-muted-foreground">
                       第 {delivery.attemptNo} 次 · {delivery.attemptedAt}
                     </span>
-                    {delivery.note && <span className="text-muted-foreground">{delivery.note}</span>}
+                    {delivery.note && (
+                      <span className="text-muted-foreground">{delivery.note}</span>
+                    )}
                   </li>
                 ))}
               </ul>
@@ -992,7 +1013,7 @@ export function ReviewReplyWorkspace() {
 
       {/* ---------------------------------------------------------- 批量回复 */}
       <SectionCard title="批量回复同类评价">
-        <p className="text-muted-foreground mb-3 text-copy-12">
+        <p className="text-muted-foreground text-copy-12 mb-3">
           「同类」的判定口径：<strong>同平台 × 同店铺 × 同档位 × 同形态 × 同语言</strong>。
           已经回过的评价会自动跳过；<strong>被跳过的每一条都带原因</strong> ——
           只报成功数会让人以为「这一批全都回上了」。
@@ -1073,16 +1094,16 @@ export function ReviewReplyWorkspace() {
         )}
 
         {batches && (
-          <div className="mt-3 space-y-2 text-copy-13">
+          <div className="text-copy-13 mt-3 space-y-2">
             <p className="font-medium">
               批次 {batches.batch.batchNo} · {batches.batch.platformCode} ·{' '}
-              {replyTypeLabel(batches.batch.replyType)} · {reviewScopeLabel(batches.batch.ratingScope)}{' '}
-              · 目标 {batches.batch.targetCount} 条 / 写成 {batches.batch.createdCount} 条 / 跳过{' '}
-              {batches.batch.skippedCount} 条
+              {replyTypeLabel(batches.batch.replyType)} ·{' '}
+              {reviewScopeLabel(batches.batch.ratingScope)} · 目标 {batches.batch.targetCount} 条 /
+              写成 {batches.batch.createdCount} 条 / 跳过 {batches.batch.skippedCount} 条
             </p>
             {batches.note && <p className="text-muted-foreground">{batches.note}</p>}
             {batches.skipped.length > 0 && (
-              <ul className="space-y-1 text-copy-12">
+              <ul className="text-copy-12 space-y-1">
                 {batches.skipped.map((skipped) => (
                   <li key={skipped.reviewId}>
                     <span className="font-medium">{skipped.reviewNo}</span> —— {skipped.reason}

@@ -85,7 +85,8 @@ export function messageSendQuery(params: MessageSendParams = {}): string {
   if (params.shopId) parts.push(`shopId=${encodeURIComponent(params.shopId)}`);
   if (params.platformCode) parts.push(`platformCode=${encodeURIComponent(params.platformCode)}`);
   if (params.status) parts.push(`status=${encodeURIComponent(params.status)}`);
-  if (params.targetMessageId) parts.push(`targetMessageId=${encodeURIComponent(params.targetMessageId)}`);
+  if (params.targetMessageId)
+    parts.push(`targetMessageId=${encodeURIComponent(params.targetMessageId)}`);
   if (params.batchId) parts.push(`batchId=${encodeURIComponent(params.batchId)}`);
   if (params.keyword) parts.push(`keyword=${encodeURIComponent(params.keyword)}`);
   if (params.page !== undefined) parts.push(`page=${params.page}`);
@@ -98,8 +99,10 @@ export function messageSendTargetQuery(params: MessageSendTargetParams = {}): st
   const parts: string[] = [];
   if (params.shopId) parts.push(`shopId=${encodeURIComponent(params.shopId)}`);
   if (params.keyword) parts.push(`keyword=${encodeURIComponent(params.keyword)}`);
-  if (params.buyerReference) parts.push(`buyerReference=${encodeURIComponent(params.buyerReference)}`);
-  if (params.orderReference) parts.push(`orderReference=${encodeURIComponent(params.orderReference)}`);
+  if (params.buyerReference)
+    parts.push(`buyerReference=${encodeURIComponent(params.buyerReference)}`);
+  if (params.orderReference)
+    parts.push(`orderReference=${encodeURIComponent(params.orderReference)}`);
   if (params.onlyUnreplied) parts.push('onlyUnreplied=true');
   if (params.page !== undefined) parts.push(`page=${params.page}`);
   if (params.size !== undefined) parts.push(`size=${params.size}`);
@@ -358,11 +361,11 @@ export function sendSummaryText(summary: CrmMessageSendPage['summary'] | null | 
 export function hasActiveSendFilter(params: MessageSendParams = {}): boolean {
   return Boolean(
     params.shopId ||
-      params.platformCode ||
-      params.status ||
-      params.targetMessageId ||
-      params.batchId ||
-      params.keyword,
+    params.platformCode ||
+    params.status ||
+    params.targetMessageId ||
+    params.batchId ||
+    params.keyword,
   );
 }
 

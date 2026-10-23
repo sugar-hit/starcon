@@ -393,9 +393,10 @@ export function scopeCovers(scope: string, entryShopCode: string, orderShopCode:
 }
 
 /** 三态文案各不相同（不是同一个空态换个图标）。 */
-export function emptyState(
-  kind: 'NO_ENTRY' | 'NO_FLAG' | 'NOT_HIT' | 'UPSTREAM_UNKNOWN',
-): { title: string; description: string } {
+export function emptyState(kind: 'NO_ENTRY' | 'NO_FLAG' | 'NOT_HIT' | 'UPSTREAM_UNKNOWN'): {
+  title: string;
+  description: string;
+} {
   if (kind === 'NO_ENTRY') {
     return {
       title: '还没有黑名单记录',

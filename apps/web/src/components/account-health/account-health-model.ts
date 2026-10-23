@@ -487,9 +487,10 @@ export function pendingKindLabel(kind: string): string {
  *             'NO_FILTER_MATCH' 当前筛选条件下没有匹配 /
  *             'NO_METRIC' 有店铺但**还没有采集到任何店铺指标**
  */
-export function emptyState(
-  kind: 'NO_SHOP' | 'NO_FILTER_MATCH' | 'NO_METRIC',
-): { title: string; description: string } {
+export function emptyState(kind: 'NO_SHOP' | 'NO_FILTER_MATCH' | 'NO_METRIC'): {
+  title: string;
+  description: string;
+} {
   switch (kind) {
     case 'NO_SHOP':
       return {
@@ -507,9 +508,9 @@ export function emptyState(
       return {
         title: '还没有采集到任何店铺指标',
         description:
-          '平台账号绩效同步**未接入**（归卷 02 同步运行），所以现在一个真实指标都没有。'
-          + '可以先手工录入你从平台后台看到的 ODR / 迟发率 / 取消率 / 有效追踪率 —— '
-          + '录入的条目会标成「人工录入」，不会冒充平台同步。',
+          '平台账号绩效同步**未接入**（归卷 02 同步运行），所以现在一个真实指标都没有。' +
+          '可以先手工录入你从平台后台看到的 ODR / 迟发率 / 取消率 / 有效追踪率 —— ' +
+          '录入的条目会标成「人工录入」，不会冒充平台同步。',
       };
     default:
       return { title: '', description: '' };

@@ -547,7 +547,9 @@ export async function fetchVersions(id: string): Promise<EprVersionList> {
   return api<EprVersionList>(`${BASE}/registrations/${id}/versions`);
 }
 
-export async function createRegistration(input: EprRegistrationInput): Promise<EprRegistrationView> {
+export async function createRegistration(
+  input: EprRegistrationInput,
+): Promise<EprRegistrationView> {
   return api<EprRegistrationView>(`${BASE}/registrations`, 'POST', input);
 }
 
@@ -580,12 +582,12 @@ export async function fetchComplianceStatus(countryCode?: string): Promise<EprCo
   const query = new URLSearchParams();
   if (countryCode) query.set('countryCode', countryCode);
   const suffix = query.toString();
-  return api<EprComplianceStatus>(suffix ? `${BASE}/compliance-status?${suffix}` : `${BASE}/compliance-status`);
+  return api<EprComplianceStatus>(
+    suffix ? `${BASE}/compliance-status?${suffix}` : `${BASE}/compliance-status`,
+  );
 }
 
-export async function publishGate(
-  request: EprPublishGateRequest,
-): Promise<EprPublishGate> {
+export async function publishGate(request: EprPublishGateRequest): Promise<EprPublishGate> {
   return api<EprPublishGate>(`${BASE}/publish-gate`, 'POST', request);
 }
 
@@ -840,7 +842,9 @@ export function countryStatusLabel(status: string): string {
  *
  * <p>返回的是「一组一组的合计」，不是一个总数 —— EUR + USD 不是钱。
  */
-export function groupTotalsByCurrency(totals: EprFeeTotal[]): { currency: string; total: string }[] {
+export function groupTotalsByCurrency(
+  totals: EprFeeTotal[],
+): { currency: string; total: string }[] {
   return totals.map((item) => ({ currency: item.currency, total: item.total }));
 }
 
@@ -851,9 +855,10 @@ export function groupTotalsByCurrency(totals: EprFeeTotal[]): { currency: string
  *             'NO_FILTER_MATCH' 当前筛选条件下没有匹配 /
  *             'NO_REGISTRATION' 有店铺但**一条登记都没有**
  */
-export function emptyState(
-  kind: 'NO_SHOP' | 'NO_FILTER_MATCH' | 'NO_REGISTRATION',
-): { title: string; description: string } {
+export function emptyState(kind: 'NO_SHOP' | 'NO_FILTER_MATCH' | 'NO_REGISTRATION'): {
+  title: string;
+  description: string;
+} {
   switch (kind) {
     case 'NO_SHOP':
       return {
@@ -871,8 +876,8 @@ export function emptyState(
       return {
         title: '还没有任何 EPR 登记',
         description:
-          '在这个租户下还没有录过一条 EPR 登记。选一个制度，把注册号、适用国家与适用品类录进来 —— '
-          + '录进来的登记才能算出「哪些国家能不能刊登」。',
+          '在这个租户下还没有录过一条 EPR 登记。选一个制度，把注册号、适用国家与适用品类录进来 —— ' +
+          '录进来的登记才能算出「哪些国家能不能刊登」。',
       };
     default:
       return { title: '', description: '' };

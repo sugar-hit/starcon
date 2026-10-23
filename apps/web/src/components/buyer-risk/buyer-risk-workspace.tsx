@@ -157,7 +157,9 @@ export function BuyerRiskWorkspace() {
       const saved = await saveRule(draft);
       setRule(saved);
       setEditing(false);
-      setNotice('规则已保存。🔴 权重改了**不追溯**改变历史评分 —— 旧评分原样留着，新评分按新权重另起一条。');
+      setNotice(
+        '规则已保存。🔴 权重改了**不追溯**改变历史评分 —— 旧评分原样留着，新评分按新权重另起一条。',
+      );
     } catch (e) {
       setError(e instanceof Error ? e.message : '保存失败，请重试');
     } finally {
@@ -265,7 +267,9 @@ export function BuyerRiskWorkspace() {
               {caps.dimensions.map((d) => (
                 <div key={d.dimensionCode} className="border-border rounded-md border px-3 py-2">
                   <div className="flex items-center justify-between gap-2">
-                    <span className="text-copy-13 text-foreground font-medium">{d.dimensionLabel}</span>
+                    <span className="text-copy-13 text-foreground font-medium">
+                      {d.dimensionLabel}
+                    </span>
                     <Badge tone={d.available ? 'success' : 'warning'}>
                       {d.available ? '量得到' : '量不到'}
                     </Badge>
@@ -279,7 +283,9 @@ export function BuyerRiskWorkspace() {
               ))}
             </div>
             <details className="text-copy-12 text-muted-foreground">
-              <summary className="cursor-pointer">口径说明（主体键 / 缺特征 / 可解释性 / 回写 / 边界）</summary>
+              <summary className="cursor-pointer">
+                口径说明（主体键 / 缺特征 / 可解释性 / 回写 / 边界）
+              </summary>
               <div className="mt-2 space-y-2">
                 <p>{caps.subjectKeySemantics}</p>
                 <p>{caps.identityChoiceNote}</p>
@@ -373,9 +379,7 @@ export function BuyerRiskWorkspace() {
                     min="0"
                     max="1"
                     value={draft[key]}
-                    onChange={(e) =>
-                      setDraft({ ...draft, [key]: Number(e.target.value) || 0 })
-                    }
+                    onChange={(e) => setDraft({ ...draft, [key]: Number(e.target.value) || 0 })}
                   />
                 </label>
               ))}
@@ -448,9 +452,7 @@ export function BuyerRiskWorkspace() {
                       type="number"
                       step="0.0001"
                       value={draft[key]}
-                      onChange={(e) =>
-                        setDraft({ ...draft, [key]: Number(e.target.value) || 0 })
-                      }
+                      onChange={(e) => setDraft({ ...draft, [key]: Number(e.target.value) || 0 })}
                     />
                   </label>
                 ))}
@@ -540,7 +542,7 @@ export function BuyerRiskWorkspace() {
           />
         ) : (
           <div className="space-y-3">
-            <table className="w-full text-copy-13">
+            <table className="text-copy-13 w-full">
               <thead>
                 <tr className="text-copy-12 text-muted-foreground border-border border-b text-left">
                   <th className="py-2 pr-3">买家</th>
@@ -650,7 +652,8 @@ export function BuyerRiskWorkspace() {
                 {statusLabel(selected.evaluationStatus)}
               </Badge>
               <span className="text-copy-12 text-muted-foreground">
-                {selected.scoredDimensionCount} 个维度参与计分 · {selected.missingDimensionCount} 个量不到未计入
+                {selected.scoredDimensionCount} 个维度参与计分 · {selected.missingDimensionCount}{' '}
+                个量不到未计入
               </span>
             </div>
             <p className="text-copy-13 text-foreground">{selected.conclusion}</p>
@@ -685,8 +688,8 @@ export function BuyerRiskWorkspace() {
 
             {unknownFeatures(selected).length > 0 && (
               <p className="text-copy-12 text-muted-foreground">
-                🔴 量到的 {unknownFeatures(selected).length} 个维度**没有**被当成 0 分：它们不进分母，
-                贡献分是「—」，总分是按剩下的维度归一化算出来的。
+                🔴 量到的 {unknownFeatures(selected).length} 个维度**没有**被当成 0
+                分：它们不进分母， 贡献分是「—」，总分是按剩下的维度归一化算出来的。
               </p>
             )}
 
@@ -694,7 +697,10 @@ export function BuyerRiskWorkspace() {
               <div className="space-y-1">
                 <h4 className="text-copy-13 text-foreground font-medium">回写 9.2.2.2 风控信号</h4>
                 {selected.writebacks.map((w) => (
-                  <div key={w.signalCode} className="text-copy-12 text-muted-foreground flex flex-wrap gap-2">
+                  <div
+                    key={w.signalCode}
+                    className="text-copy-12 text-muted-foreground flex flex-wrap gap-2"
+                  >
                     <Badge
                       tone={
                         w.writebackStatus === 'SUCCEEDED'
@@ -734,7 +740,7 @@ export function BuyerRiskWorkspace() {
           />
         ) : (
           <div className="space-y-3">
-            <table className="w-full text-copy-13">
+            <table className="text-copy-13 w-full">
               <thead>
                 <tr className="text-copy-12 text-muted-foreground border-border border-b text-left">
                   <th className="py-2 pr-3">买家</th>

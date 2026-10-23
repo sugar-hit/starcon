@@ -53,7 +53,11 @@ export const ALERT_TYPES = [
 export const IP_MODES = [
   { value: 'DISABLED', label: '不限制', hint: '租户显式选的「不限制」，不是默认值' },
   { value: 'REPORT_ONLY', label: '只告警不拦截', hint: '不在白名单的 IP 仍然放行，但会留一条告警' },
-  { value: 'ENFORCE', label: '强制拒绝', hint: '不在白名单的 IP 一律拒绝（白名单为空 ⇒ 全部拒绝）' },
+  {
+    value: 'ENFORCE',
+    label: '强制拒绝',
+    hint: '不在白名单的 IP 一律拒绝（白名单为空 ⇒ 全部拒绝）',
+  },
 ];
 
 /** MFA 因子类型。 */
@@ -486,7 +490,10 @@ export async function fetchAlert(alertId: string): Promise<AccessSecurityAlert> 
   return api<AccessSecurityAlert>(`${BASE}/alerts/${alertId}`);
 }
 
-export async function acknowledgeAlert(alertId: string, reason: string): Promise<AccessSecurityAlert> {
+export async function acknowledgeAlert(
+  alertId: string,
+  reason: string,
+): Promise<AccessSecurityAlert> {
   return api<AccessSecurityAlert>(`${BASE}/alerts/${alertId}/acknowledge`, 'POST', { reason });
 }
 
@@ -529,7 +536,9 @@ export async function fetchCredentials(page = 0, size = 20): Promise<AccessSecur
   return api<AccessSecurityCredentialPage>(`${BASE}/credential-access/credentials?${query}`);
 }
 
-export async function fetchCredentialAccessRow(accessId: string): Promise<AccessSecurityCredentialAccess> {
+export async function fetchCredentialAccessRow(
+  accessId: string,
+): Promise<AccessSecurityCredentialAccess> {
   return api<AccessSecurityCredentialAccess>(`${BASE}/credential-access/${accessId}`);
 }
 
@@ -605,7 +614,8 @@ export function ipCheckText(check: AccessSecurityIpCheck | null): string {
   if (!check.valid) return `IP 格式不合法：${check.ip}`;
   if (check.inAllowlist) return `在白名单网段内（${check.matchedCidr ?? ''}）`;
   if (check.enforce) return '不在白名单内，当前口径是「强制拒绝」⇒ 不能进';
-  if (check.mode === 'REPORT_ONLY') return '不在白名单内，当前口径是「只告警不拦截」⇒ 仍能进，但会留一条告警';
+  if (check.mode === 'REPORT_ONLY')
+    return '不在白名单内，当前口径是「只告警不拦截」⇒ 仍能进，但会留一条告警';
   return '当前口径是「不限制」⇒ 能进';
 }
 
@@ -716,7 +726,8 @@ export function emptyState(
   if (kind === 'NO_ALERT') {
     return {
       title: '当前没有告警',
-      description: '告警由登录审计扫描按策略阈值判定。窗口内没有异常就不会有告警 —— 但这不等于「查过了」。',
+      description:
+        '告警由登录审计扫描按策略阈值判定。窗口内没有异常就不会有告警 —— 但这不等于「查过了」。',
     };
   }
   if (kind === 'NO_ALLOWLIST') {

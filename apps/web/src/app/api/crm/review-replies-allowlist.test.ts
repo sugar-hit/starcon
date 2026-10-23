@@ -126,7 +126,11 @@ it('写动作的 POST / PUT 形状被放行，且真的转发到 8086', async ()
   const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('{}')));
   vi.stubGlobal('fetch', fetcher);
 
-  for (const path of ['crm/review-replies', 'crm/review-replies/templates', 'crm/review-replies/batches']) {
+  for (const path of [
+    'crm/review-replies',
+    'crm/review-replies/templates',
+    'crm/review-replies/batches',
+  ]) {
     const response = await POST(request(path, 'POST'), {
       params: Promise.resolve({ path: path.split('/') }),
     });

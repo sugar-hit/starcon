@@ -154,7 +154,12 @@ export function AccountHealthWorkspace({ focus }: Props) {
 
   const loadRanking = useCallback(
     async (target: number) => {
-      const result = await fetchRanking(target, PAGE_SIZE, { keyword, platformCode, riskLevel, shopId });
+      const result = await fetchRanking(target, PAGE_SIZE, {
+        keyword,
+        platformCode,
+        riskLevel,
+        shopId,
+      });
       setRanking(result);
       return result;
     },
@@ -200,7 +205,14 @@ export function AccountHealthWorkspace({ focus }: Props) {
   }, []);
 
   const applyFilters = useCallback(
-    (next: Partial<{ keyword: string; platformCode: string; riskLevel: string; dataState: string }>) => {
+    (
+      next: Partial<{
+        keyword: string;
+        platformCode: string;
+        riskLevel: string;
+        dataState: string;
+      }>,
+    ) => {
       setKeyword(next.keyword ?? keyword);
       setPlatformCode(next.platformCode ?? platformCode);
       setRiskLevel(next.riskLevel ?? riskLevel);
@@ -288,15 +300,18 @@ export function AccountHealthWorkspace({ focus }: Props) {
 
   /** 🔴 空态三态：有店铺但一个指标都没量到 ≠ 筛选无结果 ≠ 没有店铺。 */
   const emptyKind = useMemo(() => {
-    const totalShops = (ranking?.criticalCount ?? 0) + (ranking?.warningCount ?? 0) +
-      (ranking?.unknownCount ?? 0) + (ranking?.healthyCount ?? 0);
+    const totalShops =
+      (ranking?.criticalCount ?? 0) +
+      (ranking?.warningCount ?? 0) +
+      (ranking?.unknownCount ?? 0) +
+      (ranking?.healthyCount ?? 0);
     const anyMetricKnown = shopItems.some((item) => item.knownMetricCount > 0);
     return emptyStateKind(totalShops, shops?.total ?? 0, anyMetricKnown);
   }, [ranking, shops, shopItems]);
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center gap-2 py-16 text-muted-foreground">
+      <div className="text-muted-foreground flex items-center justify-center gap-2 py-16">
         <Loader2 className="size-4 animate-spin" />
         <span className="text-label-13">正在加载账号健康…</span>
       </div>
@@ -307,7 +322,7 @@ export function AccountHealthWorkspace({ focus }: Props) {
     return (
       <SectionCard title="账号健康总览">
         <EmptyState
-          icon={<TriangleAlert className="size-8 text-destructive" />}
+          icon={<TriangleAlert className="text-destructive size-8" />}
           title="账号健康总览加载失败"
           description={error}
           action={
@@ -336,7 +351,7 @@ export function AccountHealthWorkspace({ focus }: Props) {
 
       {error && (
         <SectionCard>
-          <div className="text-destructive flex items-center gap-2 text-copy-13">
+          <div className="text-destructive text-copy-13 flex items-center gap-2">
             <TriangleAlert className="size-4" />
             {error}
           </div>
@@ -384,7 +399,7 @@ export function AccountHealthWorkspace({ focus }: Props) {
               </li>
             ))}
           </ul>
-          <p className="text-muted-foreground mt-3 text-copy-12">{caps.platformSyncNote}</p>
+          <p className="text-muted-foreground text-copy-12 mt-3">{caps.platformSyncNote}</p>
         </SectionCard>
       )}
 
@@ -558,7 +573,8 @@ export function AccountHealthWorkspace({ focus }: Props) {
               <div className="min-w-0">
                 <div className="text-copy-13 text-foreground">{view.metricLabel}</div>
                 <div className="text-copy-12 text-muted-foreground">
-                  警告 {metricValueText(view.warnValue)} · 严重 {metricValueText(view.criticalValue)} ·{' '}
+                  警告 {metricValueText(view.warnValue)} · 严重{' '}
+                  {metricValueText(view.criticalValue)} ·{' '}
                   {view.direction === 'BELOW_IS_BAD' ? '低于阈值即危险' : '高于阈值即危险'} ·{' '}
                   {ruleSourceLabel(view.ruleSource)} · 第 {view.ruleVersion} 版
                 </div>
@@ -589,7 +605,9 @@ export function AccountHealthWorkspace({ focus }: Props) {
           <ModalHeader>
             <ModalTitle>{detail ? `${detail.shopName} · 账号健康` : ''}</ModalTitle>
             <ModalDescription>
-              {detail ? `${detail.shopCode} · ${detail.platformName} · 风险排序第 ${detail.rank} 位` : ''}
+              {detail
+                ? `${detail.shopCode} · ${detail.platformName} · 风险排序第 ${detail.rank} 位`
+                : ''}
             </ModalDescription>
           </ModalHeader>
           {detail && (
@@ -675,8 +693,8 @@ export function AccountHealthWorkspace({ focus }: Props) {
                   <div className="text-copy-13 text-foreground">判定历史</div>
                   {assessmentItems.map((row: AccountHealthAssessmentSummary) => (
                     <div key={row.assessmentId} className="text-copy-12 text-muted-foreground">
-                      {row.assessedAt.slice(0, 10)} · {row.riskLevelLabel} · 第 {row.ruleVersion} 版 ·{' '}
-                      {row.summary}
+                      {row.assessedAt.slice(0, 10)} · {row.riskLevelLabel} · 第 {row.ruleVersion} 版
+                      · {row.summary}
                     </div>
                   ))}
                 </div>
@@ -697,7 +715,8 @@ export function AccountHealthWorkspace({ focus }: Props) {
           <ModalHeader>
             <ModalTitle>手工录入绩效指标</ModalTitle>
             <ModalDescription>
-              平台账号绩效同步**未接入**（归卷 02 同步运行），所以这里只能录入你从平台后台看到的数字。
+              平台账号绩效同步**未接入**（归卷 02
+              同步运行），所以这里只能录入你从平台后台看到的数字。
               录入的条目一律标「人工录入」，**不会冒充平台同步**。
             </ModalDescription>
           </ModalHeader>
@@ -779,7 +798,9 @@ export function AccountHealthWorkspace({ focus }: Props) {
                 <select
                   className="border-control-border bg-card text-copy-13 h-9 w-full rounded-md border px-2"
                   value={thresholdForm.direction}
-                  onChange={(e) => setThresholdForm({ ...thresholdForm, direction: e.target.value })}
+                  onChange={(e) =>
+                    setThresholdForm({ ...thresholdForm, direction: e.target.value })
+                  }
                 >
                   <option value="ABOVE_IS_BAD">高于阈值即危险</option>
                   <option value="BELOW_IS_BAD">低于阈值即危险</option>
@@ -790,7 +811,9 @@ export function AccountHealthWorkspace({ focus }: Props) {
                   <span className="text-copy-13 text-muted-foreground">警告阈值（0..1）</span>
                   <Input
                     value={thresholdForm.warnValue}
-                    onChange={(e) => setThresholdForm({ ...thresholdForm, warnValue: e.target.value })}
+                    onChange={(e) =>
+                      setThresholdForm({ ...thresholdForm, warnValue: e.target.value })
+                    }
                   />
                 </label>
                 <label className="block space-y-1">
@@ -832,13 +855,7 @@ export function AccountHealthWorkspace({ focus }: Props) {
   );
 }
 
-function ShopCard({
-  card,
-  onOpen,
-}: {
-  card: AccountHealthShopCard;
-  onOpen: () => void;
-}) {
+function ShopCard({ card, onOpen }: { card: AccountHealthShopCard; onOpen: () => void }) {
   return (
     <div className="border-border rounded-md border px-3 py-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
@@ -863,7 +880,9 @@ function ShopCard({
           <div key={metric.metricCode} className="bg-muted/40 rounded-md px-2 py-1.5">
             <div className="text-copy-12 text-muted-foreground">{metric.metricLabel}</div>
             <div className="flex items-center gap-2">
-              <span className="text-copy-14 text-foreground">{metricValueText(metric.metricValue)}</span>
+              <span className="text-copy-14 text-foreground">
+                {metricValueText(metric.metricValue)}
+              </span>
               {metric.source === 'MANUAL' && <Badge tone="info">人工录入</Badge>}
               {metric.source === 'PLATFORM_SYNC' && <Badge tone="success">平台同步</Badge>}
             </div>

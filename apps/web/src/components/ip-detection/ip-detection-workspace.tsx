@@ -292,7 +292,10 @@ export function IpDetectionWorkspace() {
     [refresh, detail, openReport],
   );
 
-  const pendingReviews = useMemo(() => reviews.filter((task) => task.status === 'PENDING'), [reviews]);
+  const pendingReviews = useMemo(
+    () => reviews.filter((task) => task.status === 'PENDING'),
+    [reviews],
+  );
 
   if (loading && !caps) {
     return (
@@ -548,7 +551,7 @@ export function IpDetectionWorkspace() {
           />
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-copy-13">
+            <table className="text-copy-13 w-full text-left">
               <thead className="text-muted-foreground border-border border-b">
                 <tr>
                   <th className="py-2 pr-3 font-medium">检测对象</th>
@@ -564,26 +567,37 @@ export function IpDetectionWorkspace() {
                 {(reports?.items ?? []).map((report: IpDetectionReport) => (
                   <tr key={report.reportId} className="border-border border-b">
                     <td className="py-2 pr-3">
-                      <div className="text-foreground font-medium">{report.subjectLabel || '（未命名）'}</div>
+                      <div className="text-foreground font-medium">
+                        {report.subjectLabel || '（未命名）'}
+                      </div>
                       <div className="text-copy-12 text-muted-foreground">
-                        {report.subjectTypeLabel} · {report.triggerType === 'INSPECTION' ? '巡检产生' : '人工发起'}
+                        {report.subjectTypeLabel} ·{' '}
+                        {report.triggerType === 'INSPECTION' ? '巡检产生' : '人工发起'}
                       </div>
                     </td>
                     <td className="py-2 pr-3">
-                      <Badge tone={riskLevelTone(report.riskLevel)}>{riskLevelLabel(report.riskLevel)}</Badge>
+                      <Badge tone={riskLevelTone(report.riskLevel)}>
+                        {riskLevelLabel(report.riskLevel)}
+                      </Badge>
                     </td>
                     <td className="py-2 pr-3">
-                      <Badge tone={conclusionTone(report.conclusion)}>{conclusionLabel(report.conclusion)}</Badge>
+                      <Badge tone={conclusionTone(report.conclusion)}>
+                        {conclusionLabel(report.conclusion)}
+                      </Badge>
                     </td>
                     <td className="py-2 pr-3">
-                      <div>文本 {report.textHitCount} · 图片 {report.imageHitCount}</div>
+                      <div>
+                        文本 {report.textHitCount} · 图片 {report.imageHitCount}
+                      </div>
                       {report.pendingReviewCount > 0 && (
                         <div className="text-copy-12 text-muted-foreground">
                           待复核 {report.pendingReviewCount}
                         </div>
                       )}
                     </td>
-                    <td className="py-2 pr-3">{recommendedActionLabel(report.recommendedAction)}</td>
+                    <td className="py-2 pr-3">
+                      {recommendedActionLabel(report.recommendedAction)}
+                    </td>
                     <td className="text-muted-foreground py-2 pr-3">
                       {report.createdAt ? new Date(report.createdAt).toLocaleString('zh-CN') : '—'}
                     </td>
@@ -652,7 +666,8 @@ export function IpDetectionWorkspace() {
                   <div className="text-copy-13 text-foreground font-medium">{alert.title}</div>
                   <div className="text-copy-12 text-muted-foreground">{alert.detail}</div>
                   <div className="text-copy-12 text-muted-foreground mt-1">
-                    {alert.alertLevelLabel} · {alert.alertTypeLabel} · {alertStatusLabel(alert.status)}
+                    {alert.alertLevelLabel} · {alert.alertTypeLabel} ·{' '}
+                    {alertStatusLabel(alert.status)}
                   </div>
                 </div>
                 <div className="flex shrink-0 gap-2">
@@ -725,8 +740,10 @@ export function IpDetectionWorkspace() {
                     </div>
                     <div className="text-copy-12 text-muted-foreground">
                       每 {plan.intervalDays} 天 ·{' '}
-                      {plan.includeImage ? '含图片检测（图片命中一律进人工复核）' : '🔴 不含图片检测'} ·{' '}
-                      {plan.enabled ? '已启用' : '已停用'}
+                      {plan.includeImage
+                        ? '含图片检测（图片命中一律进人工复核）'
+                        : '🔴 不含图片检测'}{' '}
+                      · {plan.enabled ? '已启用' : '已停用'}
                     </div>
                   </div>
                   <Badge tone={plan.enabled ? 'success' : 'neutral'}>
@@ -739,7 +756,7 @@ export function IpDetectionWorkspace() {
 
           {runs.length > 0 && (
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-copy-13">
+              <table className="text-copy-13 w-full text-left">
                 <thead className="text-muted-foreground border-border border-b">
                   <tr>
                     <th className="py-2 pr-3 font-medium">运行</th>
@@ -860,7 +877,9 @@ export function IpDetectionWorkspace() {
               取消
             </Button>
             <Button
-              disabled={busy || (detectType === 'MANUAL' ? !detectTitle.trim() : !detectTarget.trim())}
+              disabled={
+                busy || (detectType === 'MANUAL' ? !detectTitle.trim() : !detectTarget.trim())
+              }
               onClick={() => void runDetect()}
             >
               {busy ? <Loader2 className="mr-2 size-4 animate-spin" /> : null}
@@ -896,7 +915,9 @@ export function IpDetectionWorkspace() {
                   {(detail?.hits ?? []).map((hit) => (
                     <li key={hit.hitId} className="border-border rounded-md border px-3 py-2">
                       <div className="flex flex-wrap items-center gap-2">
-                        <Badge tone={riskLevelTone(hit.riskLevel)}>{riskLevelLabel(hit.riskLevel)}</Badge>
+                        <Badge tone={riskLevelTone(hit.riskLevel)}>
+                          {riskLevelLabel(hit.riskLevel)}
+                        </Badge>
                         <Badge tone="neutral">{fieldLabel(hit.field)}</Badge>
                         {hit.needsManualReview ? (
                           <Badge tone="warning">待人工复核</Badge>
@@ -944,10 +965,14 @@ export function IpDetectionWorkspace() {
                 <div className="text-copy-13 text-foreground mb-2 font-medium">整改建议</div>
                 <ul className="space-y-2">
                   {detail.remediations.map((item) => (
-                    <li key={item.remediationId} className="border-border rounded-md border px-3 py-2">
+                    <li
+                      key={item.remediationId}
+                      className="border-border rounded-md border px-3 py-2"
+                    >
                       <div className="flex flex-wrap items-center justify-between gap-2">
                         <div className="text-copy-13 text-foreground">
-                          {remediationActionLabel(item.actionCode)} · {remediationStatusLabel(item.status)}
+                          {remediationActionLabel(item.actionCode)} ·{' '}
+                          {remediationStatusLabel(item.status)}
                         </div>
                         {item.status === 'OPEN' || item.status === 'IN_PROGRESS' ? (
                           <Button
@@ -959,7 +984,9 @@ export function IpDetectionWorkspace() {
                           </Button>
                         ) : null}
                       </div>
-                      <div className="text-copy-12 text-muted-foreground mt-1">{item.suggestion}</div>
+                      <div className="text-copy-12 text-muted-foreground mt-1">
+                        {item.suggestion}
+                      </div>
                     </li>
                   ))}
                 </ul>
@@ -972,16 +999,15 @@ export function IpDetectionWorkspace() {
                 <ul className="space-y-1">
                   {detail.alerts.map((alert) => (
                     <li key={alert.alertId} className="text-copy-12 text-muted-foreground">
-                      {alert.alertLevelLabel} · {alert.alertTypeLabel} · {alertStatusLabel(alert.status)}
+                      {alert.alertLevelLabel} · {alert.alertTypeLabel} ·{' '}
+                      {alertStatusLabel(alert.status)}
                     </li>
                   ))}
                 </ul>
               </div>
             )}
 
-            {detail && (
-              <p className="text-copy-12 text-muted-foreground">{detail.note}</p>
-            )}
+            {detail && <p className="text-copy-12 text-muted-foreground">{detail.note}</p>}
           </div>
           <ModalFooter>
             <Button variant="secondary" onClick={() => setDetail(null)}>

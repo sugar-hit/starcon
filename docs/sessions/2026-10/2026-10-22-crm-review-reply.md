@@ -12,13 +12,13 @@
 
 **四条能力全部真做，只有「平台投递」如实答未接入**：
 
-| 蓝图要求 | 落地 |
-| --- | --- |
-| 公开回复 + 卖家评论追加 | `reply_type ∈ {PUBLIC_REPLY, SELLER_COMMENT_APPEND}`，两个形态各自要配各自的措辞规范 |
-| 模板 | `crm_review_reply_template`：**一行 = 一个版本**（同 `template_key` 下 `version` 递增），带 `effective_from/effective_to`；已生效的模板内容由触发器冻结，改内容要发新版本 |
-| 多语言 | `crm_review_reply_template_variant` 逐 locale 落库；请求语言缺失时用模板的兜底语言，回复记录记**实际**用掉的语言 |
-| 批量回复同类评价 | `crm_review_reply_batch`：「同类」= 同平台 × 同店铺 × 同档位 × 同形态 × 同语言，从 `crm_product_review` 真筛、逐条落库、跳过条数与**每条原因**都落库 |
-| 平台回执 | `PlatformReviewReplyPort` + `UnavailablePlatformReviewReplyPort`：投递端点**恒 409**、状态停在 `PENDING`、**回执恒为空**；但每次尝试记进 `crm_review_reply_delivery`（`outcome=NOT_INTEGRATED`） |
+| 蓝图要求                | 落地                                                                                                                                                                                             |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 公开回复 + 卖家评论追加 | `reply_type ∈ {PUBLIC_REPLY, SELLER_COMMENT_APPEND}`，两个形态各自要配各自的措辞规范                                                                                                             |
+| 模板                    | `crm_review_reply_template`：**一行 = 一个版本**（同 `template_key` 下 `version` 递增），带 `effective_from/effective_to`；已生效的模板内容由触发器冻结，改内容要发新版本                        |
+| 多语言                  | `crm_review_reply_template_variant` 逐 locale 落库；请求语言缺失时用模板的兜底语言，回复记录记**实际**用掉的语言                                                                                 |
+| 批量回复同类评价        | `crm_review_reply_batch`：「同类」= 同平台 × 同店铺 × 同档位 × 同形态 × 同语言，从 `crm_product_review` 真筛、逐条落库、跳过条数与**每条原因**都落库                                             |
+| 平台回执                | `PlatformReviewReplyPort` + `UnavailablePlatformReviewReplyPort`：投递端点**恒 409**、状态停在 `PENDING`、**回执恒为空**；但每次尝试记进 `crm_review_reply_delivery`（`outcome=NOT_INTEGRATED`） |
 
 **加粗句的四处物理落点**（这是本模块的判据所在）：
 
@@ -56,10 +56,12 @@
 ## 文件清单
 
 **迁移（crm 服务）**
+
 - `backend/services/crm/src/main/resources/db/migration/V298__crm_review_reply.sql` —— 六张新表 +
   五个序列 + 九条触发器 + 六组 RLS/授权；零 ALTER / 零 DROP / 零 FOREIGN KEY。
 
 **后端（crm 服务）**
+
 - `.../crm/ReviewReplyModels.java` —— 传输模型（输入 / 输出 / 词表）。
 - `.../crm/ReplyWordingChecker.java` —— 措辞校验器（加粗句的执行者）。
 - `.../crm/PlatformReviewReplyPort.java` + `.../crm/UnavailablePlatformReviewReplyPort.java` —— 投递接缝与「未接入」实现。
@@ -67,15 +69,18 @@
 - `.../crm/ReviewReplyController.java` —— 端点（命名空间 `/crm/review-replies`）。
 
 **后端测试**
+
 - `.../crm/ReviewReplyIntegrationTest.java`（15 例）
 - `.../crm/ReviewReplyTenancyIntegrationTest.java`（4 例：租户隔离三条断言 + 六张表逐张验 RLS）
 
 **契约（codegen 产物）**
+
 - `packages/api-contracts/src/contracts/crm.ts`、`packages/api-contracts/src/crm.openapi.json`
   —— 由 `python3 tools/codegen/catalog-contracts.py --spec-dir backend/target/openapi` 生成，
   **只保留 crm 这一个服务的改动**（其余 5 个服务与 openapi.json 逐字未变）。
 
 **前端**
+
 - `apps/web/src/components/crm/review-reply-model.ts` —— 前端模型 + 可读名。
 - `apps/web/src/components/crm/review-reply-workspace.tsx` —— 工作区（六个区块）。
 - `apps/web/src/components/crm/review-reply-model.test.ts` —— 纯规则测试。
@@ -84,6 +89,7 @@
 - `apps/web/src/lib/api-proxy.ts` —— **新增一条** `services[]` 元素（锚点 = `crm/reviews` 那条之后）。
 
 **台账**
+
 - `docs/product/capability-blueprint/module-progress.md` —— **只改 15.2.1.2 那一行**（状态 + 证据两格）。
 
 ## 验证
@@ -93,7 +99,7 @@
   （`ReviewReplyIntegrationTest` 15 + `ReviewReplyTenancyIntegrationTest` 4）。
 - 契约：6 个服务的 `OpenApiContractTest` 全过（导出 6 份 spec），codegen 只改 crm。
 - 前端：`pnpm vitest run apps/web/src/components/crm/review-reply-model.test.ts
-  apps/web/src/app/api/crm/review-replies-allowlist.test.ts` ⇒ 21 / 21 通过。
+apps/web/src/app/api/crm/review-replies-allowlist.test.ts` ⇒ 21 / 21 通过。
 - **api-proxy 全量 allowlist 回归**（改了共享白名单 ⇒ 必跑）：
   `pnpm vitest run apps/web/src/app/api` ⇒ **173 个文件 / 1000 个用例全过**。
 

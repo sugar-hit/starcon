@@ -336,8 +336,10 @@ export function careReminderPaymentDemandAllowed(
 
 /** 催付平台白名单的人话提示（页面据此提示运营为什么这个平台配不了催付）。 */
 export function careReminderPaymentDemandHint(allowedPlatforms: readonly string[]): string {
-  return `只有 ${allowedPlatforms.join(' / ')} 允许主动催付：部分平台限制催付话术与频次，`
-    + `催付规则必须按平台配置。其余平台请用平台自己的催款工具。`;
+  return (
+    `只有 ${allowedPlatforms.join(' / ')} 允许主动催付：部分平台限制催付话术与频次，` +
+    `催付规则必须按平台配置。其余平台请用平台自己的催款工具。`
+  );
 }
 
 /**
@@ -348,7 +350,10 @@ export function careReminderPaymentDemandHint(allowedPlatforms: readonly string[
  */
 export function careReminderMomentText(value: string | null | undefined): string {
   if (!value) return '—';
-  return value.replace('T', ' ').replace(/\..*$/, '').replace(/([+-]\d{2}:\d{2}|Z)$/, '');
+  return value
+    .replace('T', ' ')
+    .replace(/\..*$/, '')
+    .replace(/([+-]\d{2}:\d{2}|Z)$/, '');
 }
 
 /**

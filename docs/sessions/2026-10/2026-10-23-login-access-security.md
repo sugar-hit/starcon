@@ -10,6 +10,7 @@
 蓝图原文（`docs/product/capability-blueprint/16-compliance-and-risk.md` 第 217-222 行）：
 
 > ### 16.5.2.1 登录与访问安全
+>
 > - **职责**：管理平台账号与系统的访问安全：多因子认证、登录审计、异常登录告警、IP 白名单、会话管理；平台授权凭据的访问审计。
 > - **输入**：认证配置；登录事件；访问审计事件。
 > - **输出**：安全配置 + 审计记录 + 告警。
@@ -57,22 +58,22 @@
 
 ## 关键 trade-off
 
-| 决策点 | 取舍 | 理由 |
-| --- | --- | --- |
-| 登录事件读面：`identity_audit` vs **`operation_log`** | **`operation_log`** | 本仓实查：`AuditLog.record` 只记业务变更；登录 / 登出由 `OperationLog.login` 写进 `operation_log`。任务书里的括号写成了 `identity_audit / auth_session`，实查后按 `operation_log` 落地 |
-| IP 白名单列类型：`cidr` vs **`inet`** | **`inet`** | `cidr` 类型**拒绝带主机位的写法**（`192.168.1.5/24::cidr` 直接报错），而用户填网段时十有八九带主机位。`inet` 两种都收下且 `<<=` 语义一致 |
-| 同一网段唯一性：`CREATE UNIQUE INDEX ... NULLS NOT DISTINCT` vs **表约束** | **表约束 `UNIQUE NULLS NOT DISTINCT`** | 🔴 `CREATE INDEX` 的索引元素**只认** `NULLS FIRST\|LAST` —— 写成索引会直接语法错误（本次迁移首次跑就踩到了，Flyway 42601）。`NULLS NOT DISTINCT` 是 PG15+ 的**表约束**语法 |
-| 异常检测阈值：给默认值 vs **必须租户显式选** | **必须显式选** | 「系统给个默认阈值」等于「系统替租户决定了什么算异常」。没登记策略时扫描直接 422 拒绝 |
-| 白名单为空 + ENFORCE：**放行所有** vs **拒绝所有** | **拒绝所有（fail-closed）** | 蓝图口径「白名单为空 ≠ 放行所有」。守卫触发器覆盖三个入口（切口径 / 停用 / 删除），「先清空再切 ENFORCE」这条路也走不通 |
-| 告警去重：每次扫描新开一条 vs **同一 (类型,主体) 只留一条未关闭** | **只留一条未关闭**（部分唯一索引） | 否则每扫一次就多一条一模一样的告警，运营的注意力会被淹掉。命中已有告警时**更新**它（事件数 / 窗口 / 严重度只升不降） |
-| 告警终态：可回退 vs **终态** | **已忽略 / 已处置是终态** | 事后要重新处置就**再开一条告警**，不改旧的那条 —— 处置留痕是取证材料，不能被改写 |
-| 凭据不存在时：抛 404 vs **先留痕再由控制器抛 404** | **服务层不抛，控制器在事务提交后抛** | 🔴 在事务里抛 404 会把刚写下的那条审计**一起回滚掉**。留痕必须活得比请求长 |
-| MFA 挑战：UPDATE 状态 vs **append-only 新行** | **每次尝试新起一行**（`attempt_no` 串联） | 验证尝试是**发生过的动作**，事后改写它等于伪造「验证了几次」 |
-| MFA 挑战实现：**写打真实域名的假 HTTP 客户端** vs **只登记记录** | **只登记记录** | 本仓**没有**真实 MFA 服务商凭据。假客户端是最典型的假实现；能力声明标 `available=false` + `ownerModule=17` |
-| 会话管理：另起一套会话表 vs **只管策略 + 审计** | **只管策略 + 审计** | 会话实体在 identity 的 `auth_session`。另起一套就是第二个登录系统 |
-| `credential_ref` 的读权限码：`identity.audit.read` vs **`channel.connection.read`** | **`channel.connection.read`** | 🔴 `credential_ref` 上有一条 **RESTRICTIVE** 策略（channel V1 的 `credential_scope`），要求 `app.permission` 本身就是 `channel.connection.*` 权限 —— 用别的权限码读它会**静默读到零行**（不是报错） |
-| 权限码：新增 vs **复用** | **复用** `identity.audit.read` / `channel.operation.*` / `channel.connection.read` | 新增权限码要动 identity 的权限真相源，是别的车道的事 |
-| 登录审计要不要在本地留一份 | **留** | identity 的 `operation_log` 只有 **90 天留存期**（V49 的 `expires_at` + purge 端点），而登录审计是**合规证据**，不能跟着排障日志一起过期 |
+| 决策点                                                                              | 取舍                                                                               | 理由                                                                                                                                                                                                |
+| ----------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 登录事件读面：`identity_audit` vs **`operation_log`**                               | **`operation_log`**                                                                | 本仓实查：`AuditLog.record` 只记业务变更；登录 / 登出由 `OperationLog.login` 写进 `operation_log`。任务书里的括号写成了 `identity_audit / auth_session`，实查后按 `operation_log` 落地              |
+| IP 白名单列类型：`cidr` vs **`inet`**                                               | **`inet`**                                                                         | `cidr` 类型**拒绝带主机位的写法**（`192.168.1.5/24::cidr` 直接报错），而用户填网段时十有八九带主机位。`inet` 两种都收下且 `<<=` 语义一致                                                            |
+| 同一网段唯一性：`CREATE UNIQUE INDEX ... NULLS NOT DISTINCT` vs **表约束**          | **表约束 `UNIQUE NULLS NOT DISTINCT`**                                             | 🔴 `CREATE INDEX` 的索引元素**只认** `NULLS FIRST\|LAST` —— 写成索引会直接语法错误（本次迁移首次跑就踩到了，Flyway 42601）。`NULLS NOT DISTINCT` 是 PG15+ 的**表约束**语法                          |
+| 异常检测阈值：给默认值 vs **必须租户显式选**                                        | **必须显式选**                                                                     | 「系统给个默认阈值」等于「系统替租户决定了什么算异常」。没登记策略时扫描直接 422 拒绝                                                                                                               |
+| 白名单为空 + ENFORCE：**放行所有** vs **拒绝所有**                                  | **拒绝所有（fail-closed）**                                                        | 蓝图口径「白名单为空 ≠ 放行所有」。守卫触发器覆盖三个入口（切口径 / 停用 / 删除），「先清空再切 ENFORCE」这条路也走不通                                                                             |
+| 告警去重：每次扫描新开一条 vs **同一 (类型,主体) 只留一条未关闭**                   | **只留一条未关闭**（部分唯一索引）                                                 | 否则每扫一次就多一条一模一样的告警，运营的注意力会被淹掉。命中已有告警时**更新**它（事件数 / 窗口 / 严重度只升不降）                                                                                |
+| 告警终态：可回退 vs **终态**                                                        | **已忽略 / 已处置是终态**                                                          | 事后要重新处置就**再开一条告警**，不改旧的那条 —— 处置留痕是取证材料，不能被改写                                                                                                                    |
+| 凭据不存在时：抛 404 vs **先留痕再由控制器抛 404**                                  | **服务层不抛，控制器在事务提交后抛**                                               | 🔴 在事务里抛 404 会把刚写下的那条审计**一起回滚掉**。留痕必须活得比请求长                                                                                                                          |
+| MFA 挑战：UPDATE 状态 vs **append-only 新行**                                       | **每次尝试新起一行**（`attempt_no` 串联）                                          | 验证尝试是**发生过的动作**，事后改写它等于伪造「验证了几次」                                                                                                                                        |
+| MFA 挑战实现：**写打真实域名的假 HTTP 客户端** vs **只登记记录**                    | **只登记记录**                                                                     | 本仓**没有**真实 MFA 服务商凭据。假客户端是最典型的假实现；能力声明标 `available=false` + `ownerModule=17`                                                                                          |
+| 会话管理：另起一套会话表 vs **只管策略 + 审计**                                     | **只管策略 + 审计**                                                                | 会话实体在 identity 的 `auth_session`。另起一套就是第二个登录系统                                                                                                                                   |
+| `credential_ref` 的读权限码：`identity.audit.read` vs **`channel.connection.read`** | **`channel.connection.read`**                                                      | 🔴 `credential_ref` 上有一条 **RESTRICTIVE** 策略（channel V1 的 `credential_scope`），要求 `app.permission` 本身就是 `channel.connection.*` 权限 —— 用别的权限码读它会**静默读到零行**（不是报错） |
+| 权限码：新增 vs **复用**                                                            | **复用** `identity.audit.read` / `channel.operation.*` / `channel.connection.read` | 新增权限码要动 identity 的权限真相源，是别的车道的事                                                                                                                                                |
+| 登录审计要不要在本地留一份                                                          | **留**                                                                             | identity 的 `operation_log` 只有 **90 天留存期**（V49 的 `expires_at` + purge 端点），而登录审计是**合规证据**，不能跟着排障日志一起过期                                                            |
 
 ## 文件清单
 

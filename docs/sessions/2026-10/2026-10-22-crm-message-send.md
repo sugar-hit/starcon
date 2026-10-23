@@ -61,20 +61,22 @@
 
 ## 关键 trade-off
 
-| 取舍 | 选择 | 放弃了什么 | 为什么 |
-| --- | --- | --- | --- |
-| 「已回复」存在哪 | **推导**（SENT 的发送记录） | 列表页多一次 join | 失败路径上源消息状态**根本没有能力改变**；写回方案里「忘了不改」是客服被骗的唯一成因 |
-| 平台投递 | 拒写 + 人工交接 | 「一键发出」的体验 | 平台适配器不存在；假回执比没有更糟 |
-| 模板变量填不上 | **让发送失败** | 部分模板可用性 | 半截模板发给买家 = 真实投诉 |
-| 批量隔离 | 保存点（NESTED） | 独立事务的自由度 | `REQUIRES_NEW` 会丢 `app.current_tenant` 绑定，池大小 1 时自锁 |
-| 知识引用登记失败 | **不阻断发送**，如实回报在结果里 | 引用一定齐全 | 「发出去了」这个事实比「引用查得到」更不能丢 |
+| 取舍             | 选择                             | 放弃了什么         | 为什么                                                                               |
+| ---------------- | -------------------------------- | ------------------ | ------------------------------------------------------------------------------------ |
+| 「已回复」存在哪 | **推导**（SENT 的发送记录）      | 列表页多一次 join  | 失败路径上源消息状态**根本没有能力改变**；写回方案里「忘了不改」是客服被骗的唯一成因 |
+| 平台投递         | 拒写 + 人工交接                  | 「一键发出」的体验 | 平台适配器不存在；假回执比没有更糟                                                   |
+| 模板变量填不上   | **让发送失败**                   | 部分模板可用性     | 半截模板发给买家 = 真实投诉                                                          |
+| 批量隔离         | 保存点（NESTED）                 | 独立事务的自由度   | `REQUIRES_NEW` 会丢 `app.current_tenant` 绑定，池大小 1 时自锁                       |
+| 知识引用登记失败 | **不阻断发送**，如实回报在结果里 | 引用一定齐全       | 「发出去了」这个事实比「引用查得到」更不能丢                                         |
 
 ## 文件清单
 
 **迁移（crm 服务）**
+
 - `backend/services/crm/src/main/resources/db/migration/V297__crm_message_send.sql` —— 四张新表 + RLS（ENABLE **与** FORCE，policy 名 isolation）+ 序列单独授权 + 零外键 + 7 个触发器。
 
 **后端**
+
 - `backend/services/crm/src/main/java/com/starcon/crm/PlatformMessageSendPort.java`
 - `backend/services/crm/src/main/java/com/starcon/crm/UnavailablePlatformMessageSendPort.java`
 - `backend/services/crm/src/main/java/com/starcon/crm/MessageSendModels.java`
@@ -82,14 +84,17 @@
 - `backend/services/crm/src/main/java/com/starcon/crm/MessageSendController.java`
 
 **测试**
+
 - `backend/services/crm/src/test/java/com/starcon/crm/MessageSendIntegrationTest.java`（26 例）
 - `backend/services/crm/src/test/java/com/starcon/crm/MessageSendTenancyIntegrationTest.java`（4 例，租户隔离三断言）
 
 **契约（codegen 产物，只改 crm 一份）**
+
 - `packages/api-contracts/src/contracts/crm.ts`（+24 行：24 个新类型）
 - `packages/api-contracts/src/crm.openapi.json`（+10 条路径 / +24 个 schema，**纯增量，零删除**）
 
 **前端**
+
 - `apps/web/src/components/crm/message-send-model.ts`
 - `apps/web/src/components/crm/message-send-model.test.ts`（20 例）
 - `apps/web/src/components/crm/message-send-workspace.tsx`
@@ -98,6 +103,7 @@
 - `apps/web/src/lib/api-proxy.ts`（**新增一条独立 `services[]` 元素**，锚点在 `^message\-inbox...` 之后；既有条目一字未动、不重排）
 
 **台账**
+
 - `docs/product/capability-blueprint/module-progress.md` —— 只改 `15.1.1.2` 一行的「状态」「证据」两格。
 
 ## 验证

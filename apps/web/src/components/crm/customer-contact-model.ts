@@ -186,10 +186,7 @@ export function grantCustomerContactOptOut(input: CrmCustomerOptOutInput) {
  * <p>⚠️ 必须写明撤销原因（{@code reason}），否则后端 400。
  * 撤销会留痕：追加一条只追加的审计事件，并在时间线上补一条记录。
  */
-export function revokeCustomerContactOptOut(
-  optOutId: string,
-  input: CrmCustomerOptOutRevokeInput,
-) {
+export function revokeCustomerContactOptOut(optOutId: string, input: CrmCustomerOptOutRevokeInput) {
   return api<CrmCustomerOptOutRow>(
     `${base}/opt-outs/${encodeURIComponent(optOutId)}/revoke`,
     'POST',

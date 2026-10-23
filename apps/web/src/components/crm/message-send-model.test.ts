@@ -186,7 +186,9 @@ describe('15.1.1.2 消息发送前端模型', () => {
     });
 
     it('带查询串的值要转义', () => {
-      expect(messageSendQuery({ keyword: '退款 100%' })).toBe('?keyword=%E9%80%80%E6%AC%BE%20100%25');
+      expect(messageSendQuery({ keyword: '退款 100%' })).toBe(
+        '?keyword=%E9%80%80%E6%AC%BE%20100%25',
+      );
     });
 
     it('「只看未回复」是一个显式开关', () => {

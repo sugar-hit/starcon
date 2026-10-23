@@ -97,9 +97,11 @@ api-proxy 新增一条独立白名单元素。
 ## 文件清单
 
 **迁移**
+
 - `backend/services/channel/src/main/resources/db/migration/V313__channel_compliance_intercept.sql`
 
 **后端**
+
 - `backend/services/channel/src/main/java/com/starcon/channel/ComplianceInterceptRules.java`（值域 + 纯判定逻辑）
 - `backend/services/channel/src/main/java/com/starcon/channel/ComplianceInterceptModels.java`
 - `backend/services/channel/src/main/java/com/starcon/channel/ComplianceInterceptService.java`
@@ -107,11 +109,13 @@ api-proxy 新增一条独立白名单元素。
 - `backend/services/channel/src/main/java/com/starcon/channel/ListingPublishJobService.java`（**跨模块接入点**：派发 / 重试路径加服务端闸门）
 
 **测试**
+
 - `backend/services/channel/src/test/java/com/starcon/channel/ComplianceInterceptRulesTest.java`（14 例）
 - `backend/services/channel/src/test/java/com/starcon/channel/ComplianceInterceptIntegrationTest.java`（21 例）
 - `backend/services/channel/src/test/java/com/starcon/channel/ComplianceInterceptTenancyIntegrationTest.java`（3 例）
 
 **前端**
+
 - `apps/web/src/app/compliance/intercept/page.tsx`
 - `apps/web/src/components/compliance-intercept/compliance-intercept-model.ts`
 - `apps/web/src/components/compliance-intercept/compliance-intercept-model.test.ts`（12 例）
@@ -120,6 +124,7 @@ api-proxy 新增一条独立白名单元素。
 - `apps/web/src/lib/api-proxy.ts`（**纯增量**新增一条 `compliance-intercepts` 元素）
 
 **契约 / 台账**
+
 - `packages/api-contracts/src/contracts/channel.ts`（codegen 产物，禁手改）
 - `packages/api-contracts/src/channel.openapi.json`（codegen 产物）
 - `docs/product/capability-blueprint/module-progress.md`（**只改 16.2.1.2 那一行**）

@@ -179,7 +179,9 @@ export function PiiAccessWorkspace() {
         version: policy.version,
       });
       setPolicy(saved);
-      setNotice('策略已保存。🔴 脱敏与导出审批是**硬规则**，不在这张表里 —— 任何配置都关不掉它们。');
+      setNotice(
+        '策略已保存。🔴 脱敏与导出审批是**硬规则**，不在这张表里 —— 任何配置都关不掉它们。',
+      );
     } catch (e) {
       setError(e instanceof Error ? e.message : '保存策略失败，请重试');
     } finally {
@@ -189,18 +191,15 @@ export function PiiAccessWorkspace() {
 
   // ---------------- 主体 ----------------
 
-  const openSubject = useCallback(
-    async (subjectKind: string, ref: string) => {
-      setError(null);
-      try {
-        setDetail(await fetchSubject(subjectKind, ref));
-        setRevealReason('');
-      } catch (e) {
-        setError(e instanceof Error ? e.message : '加载主体失败，请重试');
-      }
-    },
-    [],
-  );
+  const openSubject = useCallback(async (subjectKind: string, ref: string) => {
+    setError(null);
+    try {
+      setDetail(await fetchSubject(subjectKind, ref));
+      setRevealReason('');
+    } catch (e) {
+      setError(e instanceof Error ? e.message : '加载主体失败，请重试');
+    }
+  }, []);
 
   const reveal = useCallback(
     async (fieldCode: string) => {
@@ -210,9 +209,17 @@ export function PiiAccessWorkspace() {
       setNotice(null);
       try {
         setDetail(
-          await fetchSubject(detail.subjectKind, detail.subjectRef, true, [fieldCode], revealReason),
+          await fetchSubject(
+            detail.subjectKind,
+            detail.subjectRef,
+            true,
+            [fieldCode],
+            revealReason,
+          ),
         );
-        setNotice(`已按授权返回「${fieldLabelOf(fieldCode)}」的完整值。🔴 这次查看已留痕（谁、何时、哪一栏）。`);
+        setNotice(
+          `已按授权返回「${fieldLabelOf(fieldCode)}」的完整值。🔴 这次查看已留痕（谁、何时、哪一栏）。`,
+        );
       } catch (e) {
         setError(e instanceof Error ? e.message : '查看完整值失败，请重试');
       } finally {
@@ -354,7 +361,9 @@ export function PiiAccessWorkspace() {
   );
 
   const toggleRef = useCallback((ref: string) => {
-    setSelectedRefs((prev) => (prev.includes(ref) ? prev.filter((r) => r !== ref) : [...prev, ref]));
+    setSelectedRefs((prev) =>
+      prev.includes(ref) ? prev.filter((r) => r !== ref) : [...prev, ref],
+    );
   }, []);
 
   const policyLimit = useMemo(() => {
@@ -395,11 +404,7 @@ export function PiiAccessWorkspace() {
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard label="访问留痕" value={audit?.counts.total ?? 0} polarity="neutral" />
         <StatCard label="完整值查看" value={audit?.counts.viewFull ?? 0} polarity="neutral" />
-        <StatCard
-          label="越权 / 被拒尝试"
-          value={audit?.counts.denied ?? 0}
-          polarity="negative"
-        />
+        <StatCard label="越权 / 被拒尝试" value={audit?.counts.denied ?? 0} polarity="negative" />
         <StatCard label="待审批导出" value={exports?.counts.pending ?? 0} polarity="neutral" />
       </div>
 
@@ -422,7 +427,9 @@ export function PiiAccessWorkspace() {
               ))}
             </div>
             <details className="text-copy-12 text-muted-foreground">
-              <summary className="cursor-pointer">口径说明（脱敏 / 授权 / 留痕 / 导出 / 存储 / 边界）</summary>
+              <summary className="cursor-pointer">
+                口径说明（脱敏 / 授权 / 留痕 / 导出 / 存储 / 边界）
+              </summary>
               <div className="mt-2 space-y-2">
                 <p>{caps.maskingSemantics}</p>
                 <p>{caps.authorizationSemantics}</p>
@@ -504,7 +511,7 @@ export function PiiAccessWorkspace() {
                 }
               />
             </label>
-            <label className="text-copy-13 text-foreground md:col-span-4 space-y-1">
+            <label className="text-copy-13 text-foreground space-y-1 md:col-span-4">
               <span>查看完整值是否必须写理由</span>
               <select
                 className="border-control-border bg-card text-copy-14 text-foreground h-9 w-full rounded-md border px-3"
@@ -758,12 +765,19 @@ export function PiiAccessWorkspace() {
                   </div>
                   <div className="flex items-center gap-2">
                     {g.status === 'ACTIVE' && (
-                      <Button size="sm" variant="outline" disabled={busy} onClick={() => void doRevokeGrant(g)}>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        disabled={busy}
+                        onClick={() => void doRevokeGrant(g)}
+                      >
                         撤销
                       </Button>
                     )}
                     {g.revokeReason && (
-                      <span className="text-copy-12 text-muted-foreground">撤销理由：{g.revokeReason}</span>
+                      <span className="text-copy-12 text-muted-foreground">
+                        撤销理由：{g.revokeReason}
+                      </span>
                     )}
                   </div>
                 </div>
@@ -847,7 +861,7 @@ export function PiiAccessWorkspace() {
                     key={view.subjectRef}
                     type="button"
                     onClick={() => toggleRef(view.subjectRef)}
-                    className={`border-border rounded-md border px-2 py-1 text-copy-12 ${
+                    className={`border-border text-copy-12 rounded-md border px-2 py-1 ${
                       selectedRefs.includes(view.subjectRef)
                         ? 'bg-brand-soft text-brand'
                         : 'text-muted-foreground'
@@ -880,8 +894,8 @@ export function PiiAccessWorkspace() {
               </select>
             </label>
             <div className="text-copy-13 text-muted-foreground flex items-end">
-              待审批 {exports?.counts.pending ?? 0} · 已批准 {exports?.counts.approved ?? 0} · 已导出{' '}
-              {exports?.counts.executed ?? 0}
+              待审批 {exports?.counts.pending ?? 0} · 已批准 {exports?.counts.approved ?? 0} ·
+              已导出 {exports?.counts.executed ?? 0}
             </div>
           </div>
 
@@ -900,7 +914,9 @@ export function PiiAccessWorkspace() {
                 >
                   <div className="min-w-0 space-y-1">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="text-copy-13 text-foreground font-medium">{r.requestNo}</span>
+                      <span className="text-copy-13 text-foreground font-medium">
+                        {r.requestNo}
+                      </span>
                       <Badge tone={exportStatusTone(r.status)}>{exportStatusLabel(r.status)}</Badge>
                       <Badge tone="info">{r.fieldLabel}</Badge>
                       <Badge tone="neutral">{r.recordCount} 条</Badge>
@@ -914,10 +930,19 @@ export function PiiAccessWorkspace() {
                   <div className="flex items-center gap-2">
                     {r.status === 'PENDING' && (
                       <>
-                        <Button size="sm" variant="outline" disabled={busy} onClick={() => void doReject(r.requestId)}>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          disabled={busy}
+                          onClick={() => void doReject(r.requestId)}
+                        >
                           驳回
                         </Button>
-                        <Button size="sm" disabled={busy} onClick={() => void doApprove(r.requestId)}>
+                        <Button
+                          size="sm"
+                          disabled={busy}
+                          onClick={() => void doApprove(r.requestId)}
+                        >
                           批准
                         </Button>
                       </>

@@ -74,7 +74,8 @@ describe('15.5.2.1 关怀与催办前端模型', () => {
     });
 
     it('频次超限的原因里要能看到「上限」这个数字', () => {
-      const reason = '近 24 小时内该买家在【催评】下已触达 2 次（已发 1 次 / 已排期 1 次），上限 2 次。';
+      const reason =
+        '近 24 小时内该买家在【催评】下已触达 2 次（已发 1 次 / 已排期 1 次），上限 2 次。';
       const text = careReminderBlockText('FREQUENCY_LIMIT', reason);
       expect(text).toContain('频次超限');
       expect(text).toContain('上限 2 次');
@@ -113,7 +114,8 @@ describe('15.5.2.1 关怀与催办前端模型', () => {
 
   describe('统计（口径服务端算）', () => {
     it('统计摘要**原样**展示，不重算', () => {
-      const note = '触达总数 2（已发 1 / 失败 0 / 被拦截 1 / 待发 0 / 已作废 0）；打开 2 次、点击 1 次。';
+      const note =
+        '触达总数 2（已发 1 / 失败 0 / 被拦截 1 / 待发 0 / 已作废 0）；打开 2 次、点击 1 次。';
       expect(careReminderStatsText(note)).toBe(note);
     });
   });

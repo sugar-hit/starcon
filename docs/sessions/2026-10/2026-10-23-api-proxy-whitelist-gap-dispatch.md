@@ -18,7 +18,7 @@ function resolve(path) {
     if (service.pattern.test(path.slice(service.prefix.length)))
       return { base: process.env[service.env] ?? service.fallback };
   }
-  return null;   // ← 没命中 ⇒ 直接 404「接口不存在」
+  return null; // ← 没命中 ⇒ 直接 404「接口不存在」
 }
 ```
 
@@ -48,24 +48,25 @@ function resolve(path) {
 
 ### 4 组缺口 —— ⚠️ **其中 2 组经修复车道独立复核后被证伪（见下方「勘误」）**
 
-| # | 模块 | 服务 | 前端调用点 | 缺失形状 | 后端端点（**真实存在**） |
-| --- | --- | --- | --- | --- | --- |
-| ① | **17.5.2.1 数据字典** | identity | `components/iam/dictionary-workspace.tsx` | `dict-catalog` / `dict-items` / `dict-history` / `dict-items/{id}` / `dict-items/{id}/usage` / `dict-items/{id}/deactivate` / `dict-items/{id}/reactivate`（+ `options/{dictCode}`） | `DictionaryController`（类级 `/identity`）11 个 mapping |
-| ② | catalog 生命周期 | catalog | `components/catalog/spu-lifecycle.tsx` | `lifecycle/rules/{id}` 等 | `LifecycleController`（类级 `/catalog`）8 个 mapping |
-| ③ | catalog 商品档案 | catalog | `components/catalog/product-records.tsx` | ~~`records/{kind}` / `records/{kind}/{id}`~~ | **❌ 证伪：基线已放行** |
-| ④ | trade 采购来源 | trade | `components/supply/sources-model.ts` | ~~`sources/collector-endpoint/{platform}`~~ | **❌ 证伪：基线已放行** |
+| #   | 模块                  | 服务     | 前端调用点                                | 缺失形状                                                                                                                                                                             | 后端端点（**真实存在**）                                |
+| --- | --------------------- | -------- | ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------- |
+| ①   | **17.5.2.1 数据字典** | identity | `components/iam/dictionary-workspace.tsx` | `dict-catalog` / `dict-items` / `dict-history` / `dict-items/{id}` / `dict-items/{id}/usage` / `dict-items/{id}/deactivate` / `dict-items/{id}/reactivate`（+ `options/{dictCode}`） | `DictionaryController`（类级 `/identity`）11 个 mapping |
+| ②   | catalog 生命周期      | catalog  | `components/catalog/spu-lifecycle.tsx`    | `lifecycle/rules/{id}` 等                                                                                                                                                            | `LifecycleController`（类级 `/catalog`）8 个 mapping    |
+| ③   | catalog 商品档案      | catalog  | `components/catalog/product-records.tsx`  | ~~`records/{kind}` / `records/{kind}/{id}`~~                                                                                                                                         | **❌ 证伪：基线已放行**                                 |
+| ④   | trade 采购来源        | trade    | `components/supply/sources-model.ts`      | ~~`sources/collector-endpoint/{platform}`~~                                                                                                                                          | **❌ 证伪：基线已放行**                                 |
 
 #### ⚠️ 勘误（2026-10-23 07:5x，修复车道复核后）
 
 **调度者的 ③ ④ 两组结论是错的，实际只有 2 组缺口（① ②）。**
 修复车道 worker 没有照抄任务书，而是逐条对着源码核对，**证伪了 ③ ④**：
 
-| 组 | 调度者结论 | 实测结论 | 根因 |
-| --- | --- | --- | --- |
-| ③ catalog 商品档案 | 全 404 | **不属实** | 基线 `catalog/` 那条巨型 alternation 里**早就有** `records\/(research\|compliance\|assets)(?:\/[0-9a-f-]+)?` |
-| ④ trade 采集接入 | 端点 404 | **不属实** | 基线 6.1.2.1 那条**早就有** `collector\-endpoint\/[A-Z0-9_]+` |
+| 组                 | 调度者结论 | 实测结论   | 根因                                                                                                         |
+| ------------------ | ---------- | ---------- | ------------------------------------------------------------------------------------------------------------ |
+| ③ catalog 商品档案 | 全 404     | **不属实** | 基线 `catalog/` 那条巨型 alternation 里**早就有** `records\/(research\|compliance\|assets)(?:\/[0-9a-f-]+)?` |
+| ④ trade 采集接入   | 端点 404   | **不属实** | 基线 6.1.2.1 那条**早就有** `collector\-endpoint\/[A-Z0-9_]+`                                                |
 
 **调度者为什么会错**（两个不同的坑，都值得记住）：
+
 - **③ 是扫描截断造成的假阳性**：扫描脚本把 `catalog/records/${kind}` 截断成裸 `catalog/records`，
   而裸路径本来就不该放行（后端只有 `/records/{kind}`）⇒ 误判成「整组缺失」。
 - **④ 是测试路径取值错误**：调度者测的是 `collector-endpoint/amazon`（小写），
@@ -82,6 +83,7 @@ FAIL  catalog/lifecycle/metrics 未被放行（白名单漏登记 = 浏览器里
 FAIL  POST identity/dict-items 未被放行: expected 404 to be 200
 Tests  2 failed | 4 passed (6)
 ```
+
 ⇒ **恰好 2 组缺口（① ②），③ ④ 的「不回归」断言在基线上就是通过的**。
 ⇒ 修复车道因此**没有**新增 ③ ④ 两条元素（新增了也是死代码：新分支永远不会被既有条目命中之前抢到）。
 
@@ -98,6 +100,7 @@ Tests  2 failed | 4 passed (6)
 
 第一轮扫描还报了 `catalog/lifecycle/rules`、`trade/sources/items/...` 等，
 逐条复核后确认：
+
 - `trade/sources/items/...` —— 扫描时把 `${itemId}` 截断导致，**实测能匹配** ⇒ 假阳性；
 - `catalog/lifecycle/rules` —— 扫描时把 `?version=3` 混进了路径，**去掉查询串即匹配** ⇒ 假阳性；
 - `catalog/records` —— **当时判为真缺口，这个判断是错的**，见上方「勘误」（实为真缺口的是 ① ②，不是 ③ ④）。
@@ -126,13 +129,13 @@ Tests  2 failed | 4 passed (6)
 
 ### 车道信息
 
-| 项 | 值 |
-| --- | --- |
-| 模块 ID | `17.5.2.1`（数据字典，**本仓无该模块的车道记录 ⇒ `adopt` 不会覆盖任何历史**） |
-| 分支 | `fix/17-5-2-1-api-proxy-whitelist` |
-| worktree | `.worktrees/17.5.2.1`（符合 `laneWorktree(id)` 约定，`gc` 能正确回收） |
-| 迁移版本 | **无**（`migrationVersion = null`）—— 后端零改动 |
-| 注册方式 | `lane.mjs adopt --lane 17.5.2.1 --branch … --worktree … --session …` |
+| 项       | 值                                                                            |
+| -------- | ----------------------------------------------------------------------------- |
+| 模块 ID  | `17.5.2.1`（数据字典，**本仓无该模块的车道记录 ⇒ `adopt` 不会覆盖任何历史**） |
+| 分支     | `fix/17-5-2-1-api-proxy-whitelist`                                            |
+| worktree | `.worktrees/17.5.2.1`（符合 `laneWorktree(id)` 约定，`gc` 能正确回收）        |
+| 迁移版本 | **无**（`migrationVersion = null`）—— 后端零改动                              |
+| 注册方式 | `lane.mjs adopt --lane 17.5.2.1 --branch … --worktree … --session …`          |
 
 > `adopt` 是本仓既有的**收编车道**机制（`lane.mjs` 第 771 行起），
 > 用途是「把已经在别处跑着的任务收编成一条车道，让它落地后走同一条并入路径」。
@@ -144,15 +147,15 @@ Tests  2 failed | 4 passed (6)
 **本批 4 条车道 + 1 条修复车道 = 6 处实际插入点，全部互不重叠**
 （修复车道原被指派 3 处，实际只用了前 2 处 —— 第 3 处对应被证伪的 ④，未使用）：
 
-| 车道 | 插入锚点 | 行号 | 实际是否使用 |
-| --- | --- | --- | --- |
-| 16.6.2.1 数据出境与留存 | `// 5.5.1.1 价格历史` 之前 | ~460 | ✅ |
-| **17.5.2.1 修复车道** | `// 14.2.2.1 预算分配（channel 服务）` 之前 | ~715 | ✅（identity/dict） |
-| 16.5.2.2 关联风险 | `// 07 库存：库存总览（7.1.1.1）` 之前 | ~1020 | ✅ |
-| **17.5.2.1 修复车道** | `// 10.7.1.1 退货接收与处置决策` 之前 | ~1794 | ✅（catalog/lifecycle） |
-| 17.7.1.1 套餐与权益 | `// 2.4.2.3 映射缺失队列（channel 服务）` 之前 | ~2423 | ✅ |
-| **17.5.2.1 修复车道** | `// 4.2.3.2 合规预检（违禁词/侵权）（channel 服务）` 之前 | ~2637 | ❌ **未使用**（④ 被证伪） |
-| 17.7.2.1 平台参数与开关 | `services[]` 数组末尾 | ~8956 | ✅ |
+| 车道                    | 插入锚点                                                  | 行号  | 实际是否使用              |
+| ----------------------- | --------------------------------------------------------- | ----- | ------------------------- |
+| 16.6.2.1 数据出境与留存 | `// 5.5.1.1 价格历史` 之前                                | ~460  | ✅                        |
+| **17.5.2.1 修复车道**   | `// 14.2.2.1 预算分配（channel 服务）` 之前               | ~715  | ✅（identity/dict）       |
+| 16.5.2.2 关联风险       | `// 07 库存：库存总览（7.1.1.1）` 之前                    | ~1020 | ✅                        |
+| **17.5.2.1 修复车道**   | `// 10.7.1.1 退货接收与处置决策` 之前                     | ~1794 | ✅（catalog/lifecycle）   |
+| 17.7.1.1 套餐与权益     | `// 2.4.2.3 映射缺失队列（channel 服务）` 之前            | ~2423 | ✅                        |
+| **17.5.2.1 修复车道**   | `// 4.2.3.2 合规预检（违禁词/侵权）（channel 服务）` 之前 | ~2637 | ❌ **未使用**（④ 被证伪） |
+| 17.7.2.1 平台参数与开关 | `services[]` 数组末尾                                     | ~8956 | ✅                        |
 
 最小间距 **200+ 行** ⇒ git 逐行合并能干净求并（**已并入预演证实：五步全 exit 0**）。
 
@@ -165,11 +168,11 @@ Tests  2 failed | 4 passed (6)
    **绝不**用 `[^/]+` 这种能吞掉任意路径的通配。
    ⇒ 实际落地：`{dictCode}` 用 `[A-Z][A-Z0-9_]{0,63}`（对齐 V53 `dict_catalog.code varchar(64)` 出厂码表）。
 3. **必须加 allowlist 回归测试**：正向（从模型源码反向抽取真实调用点逐条断言放行）
-   + 反向（未交付形状仍然 404）。
-   ⇒ 实际落地：`apps/web/src/lib/data-dictionary-lifecycle-api-proxy.test.ts`，
-   **6 个 `it()` / 17 个正向形状 / 21 个反向形状 / 26 条既有模块不误伤**，
-   判据是**跑真实 Next 路由处理器、断言真实 HTTP 状态码**（404 vs 转发）——
-   **不是自己再写一份正则去比**（这正是调度者两次自研脚本翻车的地方）。
+   - 反向（未交付形状仍然 404）。
+     ⇒ 实际落地：`apps/web/src/lib/data-dictionary-lifecycle-api-proxy.test.ts`，
+     **6 个 `it()` / 17 个正向形状 / 21 个反向形状 / 26 条既有模块不误伤**，
+     判据是**跑真实 Next 路由处理器、断言真实 HTTP 状态码**（404 vs 转发）——
+     **不是自己再写一份正则去比**（这正是调度者两次自研脚本翻车的地方）。
 
 ---
 
@@ -217,16 +220,16 @@ Tests  2 failed | 4 passed (6)
 （base → 16.5.2.2 → 16.6.2.1 → 17.7.1.1 → 17.7.2.1 → **17.5.2.1 修复车道**）。
 中间树用 `git commit-tree` 串成链（`merge-tree --write-tree` 产出的是 tree，不是 commit，不能直接当下一轮的 ours）。
 
-| 检查项 | 结果 |
-| --- | --- |
-| 合并是否报冲突 | **否**，**五步全 exit 0** |
-| `CONFLICT_KEYS` | **五步均未出现** ⇒ 契约按「导出类型名 / paths / schemas 名」求并成功 |
-| `services[]` 元素数 | base **173** → 合并后 **179**（4 条车道各 +1 ＋ 修复车道 +2，精确相等） |
-| **从 base 掉落的元素** | **0 个** —— api-proxy 差异 **389 行新增 / 0 行删除**（纯插入） |
-| **重名 `export type`** | `channel.ts` **0 个**、`identity.ts` **0 个** ⇒ batch-56 抓过的「契约静默串味」形态**未复现** |
-| 迁移文件 | `V321` / `V322` / `V323` / `V324` **各 1 份，无重复无缺失**（修复车道无迁移） |
-| 台账行 | **465 行**、**重复 ID 0 个**；16.5.2.2 / 16.6.2.1 / 17.7.1.1 / 17.7.2.1 / 17.5.2.1 **均为「已交付」** |
-| 契约 type 数 | `channel.ts` **1682 → 1738**（+56）；`identity.ts` **158 → 189**（+31） |
+| 检查项                 | 结果                                                                                                  |
+| ---------------------- | ----------------------------------------------------------------------------------------------------- |
+| 合并是否报冲突         | **否**，**五步全 exit 0**                                                                             |
+| `CONFLICT_KEYS`        | **五步均未出现** ⇒ 契约按「导出类型名 / paths / schemas 名」求并成功                                  |
+| `services[]` 元素数    | base **173** → 合并后 **179**（4 条车道各 +1 ＋ 修复车道 +2，精确相等）                               |
+| **从 base 掉落的元素** | **0 个** —— api-proxy 差异 **389 行新增 / 0 行删除**（纯插入）                                        |
+| **重名 `export type`** | `channel.ts` **0 个**、`identity.ts` **0 个** ⇒ batch-56 抓过的「契约静默串味」形态**未复现**         |
+| 迁移文件               | `V321` / `V322` / `V323` / `V324` **各 1 份，无重复无缺失**（修复车道无迁移）                         |
+| 台账行                 | **465 行**、**重复 ID 0 个**；16.5.2.2 / 16.6.2.1 / 17.7.1.1 / 17.7.2.1 / 17.5.2.1 **均为「已交付」** |
+| 契约 type 数           | `channel.ts` **1682 → 1738**（+56）；`identity.ts` **158 → 189**（+31）                               |
 
 ⇒ **下一轮 tick 可以直接走 `merge-ready`，不必再做并入预演。**
 唯一要补的是：并入后**实跑**修复车道那个 allowlist 回归测试（它在预演阶段已单独验过 6/6 通过）。
@@ -244,9 +247,11 @@ Tests  2 failed | 4 passed (6)
 而 `sync.mjs` **仍然报「同步成功」、`sync.mjs --check` 仍然通过**。
 
 **判据**：`--check` 通过 ≠ 证据完整。写完证据后**必须另看行尾**：
+
 ```bash
 grep -E '^\| 17\.7\.1\.1 ' docs/product/capability-blueprint/module-progress.md | tail -c 200
 ```
+
 确认证据没有被截断，且**证据格内不含任何竖线**。
 
 ⇒ 这条陷阱对本流水线是**系统性**的：任何车道只要在证据里写了 `a|b` 形式的枚举（例如权限码列表），

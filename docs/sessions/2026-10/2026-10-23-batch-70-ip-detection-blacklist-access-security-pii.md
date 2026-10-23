@@ -8,12 +8,12 @@
 
 ## 批次构成
 
-| 车道     | 模块         | 服务    | 迁移 | 分支            | commit    |
-| -------- | ------------ | ------- | ---- | --------------- | --------- |
-| 16.4.1.2 | 检测与预警   | channel | V317 | `feat/16-4-1-2` | `2c2dd8fb` |
-| 16.5.1.1 | 黑名单       | channel | V318 | `feat/16-5-1-1` | `86510c91` |
+| 车道     | 模块           | 服务    | 迁移 | 分支            | commit     |
+| -------- | -------------- | ------- | ---- | --------------- | ---------- |
+| 16.4.1.2 | 检测与预警     | channel | V317 | `feat/16-4-1-2` | `2c2dd8fb` |
+| 16.5.1.1 | 黑名单         | channel | V318 | `feat/16-5-1-1` | `86510c91` |
 | 16.5.2.1 | 登录与访问安全 | channel | V319 | `feat/16-5-2-1` | `46969aaa` |
-| 16.6.1.1 | PII 管理     | channel | V320 | `feat/16-6-1-1` | `2b52cf23` |
+| 16.6.1.1 | PII 管理       | channel | V320 | `feat/16-6-1-1` | `2b52cf23` |
 
 **api-proxy 锚点互不重叠**（本批 4 条车道都改 `apps/web/src/lib/api-proxy.ts`）：
 16.4.1.2 → `prefix: 'identity/'` 之前（`@@ +192`）／
@@ -43,9 +43,9 @@
   `ip_detection_external_hit`（外部查询结果，**append-only**）/
   `ip_detection_inspection_plan`（巡检计划）/ `ip_detection_inspection_run`（巡检运行，**append-only**）。
   全部 `tenant_id uuid NOT NULL` + ENABLE **与 FORCE** ROW LEVEL SECURITY + POLICY isolation
-  + `GRANT channel_app` / `REVOKE starcon_app`。
-  上游 `ip_risk_entry` / `ip_risk_match_term` / `ip_risk_entry_platform` **只读**，
-  命中项只存**逻辑 id + 快照**（条目后来被停用或改写，历史报告仍解释得清）。
+  - `GRANT channel_app` / `REVOKE starcon_app`。
+    上游 `ip_risk_entry` / `ip_risk_match_term` / `ip_risk_entry_platform` **只读**，
+    命中项只存**逻辑 id + 快照**（条目后来被停用或改写，历史报告仍解释得清）。
 - 端点：`/channel/ip-detections/**` —— **17 条路径 / 23 个操作**：
   `IpDetectionController` / `IpDetectionService` / `IpDetectionModels` / `IpDetectionRules` / `IpDetectionSourcePort`（包 `com.starcon.channel` 扁平包）。
   覆盖检测（`detections` 列表真分页 + 真筛选 / 详情）、命中项、预警与状态流转（`alerts` + `alerts/{id}/status`）、
@@ -89,8 +89,8 @@
   —— **纯新建 4 张表、零 ALTER 任何既有表**：`buyer_blacklist_entry`（黑名单登记）/
   `buyer_blacklist_status_event`（状态流转，**append-only**，解除留痕）/
   `buyer_blacklist_appeal`（申诉）/ `buyer_blacklist_order_flag`（下单拦截标记）+ **7 个 DB 守卫触发器**
-  + FORCE RLS + `GRANT channel_app` / `REVOKE starcon_app`。
-  买家标识沿用上游口径 `buyer_key`（32 位小写 hex）。
+  - FORCE RLS + `GRANT channel_app` / `REVOKE starcon_app`。
+    买家标识沿用上游口径 `buyer_key`（32 位小写 hex）。
 - 端点：`/channel/buyer-blacklist/**` —— **9 条路径 / 10 个操作**：
   `BuyerBlacklistController` / `BuyerBlacklistService` / `BuyerBlacklistModels` / `BuyerBlacklistRules` / `BuyerBlacklistSourcePort`。
   `capabilities`（能力声明）/ `entries`（GET 列表真分页 + POST 手工登记）/`entries/auto`（来自风控信号的自动登记）/
@@ -212,13 +212,13 @@ IP 白名单管谁能进、会话怎么管、还有**平台授权凭据有没有
 
 **结果：🟢 全绿。** `L2 START 05:33:51` → `L2 GREEN 06:22:04`（整组 4 条车道一次跑完，**全量、全绿**）。
 
-| 步骤                                | 命令                                          | 结果                                                                  |
-| ----------------------------------- | --------------------------------------------- | --------------------------------------------------------------------- |
-| 1/5 后端全量                       | `cd backend && ./mvnw verify`                 | ✅ **8864 例，0 failures / 0 errors / 0 skipped**（05:33:51 → 06:20:11）|
-| 2/5 类型检查                       | `pnpm typecheck`                              | ✅ 3 包全绿                                                          |
-| 3/5 Lint                           | `pnpm lint`                                   | ✅ 3 包全绿（本批文件零告警）                                         |
-| 4/5 前端全量                       | `pnpm test`                                   | ✅ **510 文件 / 7281 例全过**                                        |
-| 5/5 Next production build + 台账校验 | `NEXT_TELEMETRY_DISABLED=1 pnpm --filter @starcon/web build` + `sync.mjs --check` | ✅ 306/306 静态页生成完毕，路由表完整输出；**✓ 台账与蓝图一致**（exit 0）|
+| 步骤                                 | 命令                                                                              | 结果                                                                      |
+| ------------------------------------ | --------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| 1/5 后端全量                         | `cd backend && ./mvnw verify`                                                     | ✅ **8864 例，0 failures / 0 errors / 0 skipped**（05:33:51 → 06:20:11）  |
+| 2/5 类型检查                         | `pnpm typecheck`                                                                  | ✅ 3 包全绿                                                               |
+| 3/5 Lint                             | `pnpm lint`                                                                       | ✅ 3 包全绿（本批文件零告警）                                             |
+| 4/5 前端全量                         | `pnpm test`                                                                       | ✅ **510 文件 / 7281 例全过**                                             |
+| 5/5 Next production build + 台账校验 | `NEXT_TELEMETRY_DISABLED=1 pnpm --filter @starcon/web build` + `sync.mjs --check` | ✅ 306/306 静态页生成完毕，路由表完整输出；**✓ 台账与蓝图一致**（exit 0） |
 
 后端分模块明细（全部 `Failures: 0, Errors: 0, Skipped: 0`）：
 identity **270** / catalog **1981** / channel **2099** / warehouse **1640** / trade **2383** / crm **491**。

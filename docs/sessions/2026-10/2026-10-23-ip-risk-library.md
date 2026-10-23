@@ -106,13 +106,13 @@ api-proxy 新增一条独立白名单元素（首 token `ip-risk-library`）。
 
 - `./mvnw -q compile` —— 退出 0。
 - `./mvnw -pl services/channel -am test -Dtest='IpRiskLibrary*' -Dsurefire.failIfNoSpecifiedTests=false
-  -DfailIfNoSpecifiedTests=false` —— **22 例 0 失败 0 错误**
+-DfailIfNoSpecifiedTests=false` —— **22 例 0 失败 0 错误**
   （`IpRiskLibraryIntegrationTest` 13 / `IpRiskLibraryTenancyIntegrationTest` 3 /
   `IpRiskLibraryRulesTest` 6）。
 - `pnpm typecheck` —— 3/3 通过。
 - `pnpm lint` —— 通过（本车道零告警）。
 - `pnpm vitest run apps/web/src/components/ip-risk-library/ip-risk-library-model.test.ts
-  apps/web/src/app/api/channel/ip-risk-library-allowlist.test.ts` —— **16 例全绿**。
+apps/web/src/app/api/channel/ip-risk-library-allowlist.test.ts` —— **16 例全绿**。
 - **全量 allowlist 回归** `pnpm vitest run apps/web/src/app/api` —— **189 文件 1089 例全绿**
   （确认白名单没挤掉兄弟车道路径）。
 

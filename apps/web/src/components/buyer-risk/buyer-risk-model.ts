@@ -285,21 +285,13 @@ export async function saveRule(input: BuyerRiskRuleInput): Promise<BuyerRiskRule
   return api<BuyerRiskRule>(`${BASE}/rule`, 'PUT', input);
 }
 
-export async function fetchBuyers(
-  keyword = '',
-  page = 0,
-  size = 20,
-): Promise<BuyerRiskBuyerPage> {
+export async function fetchBuyers(keyword = '', page = 0, size = 20): Promise<BuyerRiskBuyerPage> {
   const query = new URLSearchParams({ page: String(page), size: String(size) });
   if (keyword.trim()) query.set('keyword', keyword.trim());
   return api<BuyerRiskBuyerPage>(`${BASE}/buyers?${query}`);
 }
 
-export async function fetchScores(
-  page = 0,
-  size = 20,
-  buyerKey = '',
-): Promise<BuyerRiskScorePage> {
+export async function fetchScores(page = 0, size = 20, buyerKey = ''): Promise<BuyerRiskScorePage> {
   const query = new URLSearchParams({ page: String(page), size: String(size) });
   if (buyerKey.trim()) query.set('buyerKey', buyerKey.trim());
   return api<BuyerRiskScorePage>(`${BASE}/scores?${query}`);
@@ -388,14 +380,14 @@ export function writebackLabel(status: string): string {
 }
 
 /** 三态文案各不相同（不是同一个空态换个图标）。 */
-export function emptyState(
-  kind: 'NO_RULE' | 'NO_BUYER' | 'NO_SCORE' | 'ALL_UNKNOWN',
-): { title: string; description: string } {
+export function emptyState(kind: 'NO_RULE' | 'NO_BUYER' | 'NO_SCORE' | 'ALL_UNKNOWN'): {
+  title: string;
+  description: string;
+} {
   if (kind === 'NO_RULE') {
     return {
       title: '还没有登记评分规则',
-      description:
-        '权重与缺信号口径必须由租户显式选 —— 系统不给默认值。登记之后才能跑评分。',
+      description: '权重与缺信号口径必须由租户显式选 —— 系统不给默认值。登记之后才能跑评分。',
     };
   }
   if (kind === 'NO_BUYER') {

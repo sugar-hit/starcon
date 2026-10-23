@@ -13,16 +13,16 @@
 
 ## 本轮闸门判定（全部现取，未引用历史文档数字）
 
-| 闸 | 取值 | 判定 |
-| --- | --- | --- |
-| 静默窗口闸 | `SILENT_WINDOW=0` → 全天运行，不设时段闸 | 放行 |
-| 强度档位 | 当前 `2026-10-22 16:00 +0800` < `TOKEN_HORIZON=2026-10-25T00:00:00+0800` → **full 模式**（LANES=4 / THROTTLE=50） | 满档 |
-| 批次节流闸 | `last-batch-at=1792649646` → 距上批 **106 分钟** ≥ 阈值 50 分钟 | 放行 |
-| 温度闸 | `pmset -g therm` → `Note: No thermal warning level has been recorded`（另两项亦无记录） | 正常 |
-| 配额闸 | 开工时 running = **0** 条 < `RUNNING_QUOTA=6` | 放行 |
-| PG 闸 | 带 `org.testcontainers.sessionId` 标签的容器 = **0** < 6；**无标签孤儿容器 0 个** | 放行 |
-| load 闸 | 三点采样 `1.27 / 1.31 / 1.68`（1min < 5min < 15min，**连续下降**，远低于 `LOAD_LIMIT=12`） | 放行 |
-| 调度闸 | `gate status` → `free / stale=false` → `gate acquire` **第 1 次即命中** | 取得 |
+| 闸         | 取值                                                                                                              | 判定 |
+| ---------- | ----------------------------------------------------------------------------------------------------------------- | ---- |
+| 静默窗口闸 | `SILENT_WINDOW=0` → 全天运行，不设时段闸                                                                          | 放行 |
+| 强度档位   | 当前 `2026-10-22 16:00 +0800` < `TOKEN_HORIZON=2026-10-25T00:00:00+0800` → **full 模式**（LANES=4 / THROTTLE=50） | 满档 |
+| 批次节流闸 | `last-batch-at=1792649646` → 距上批 **106 分钟** ≥ 阈值 50 分钟                                                   | 放行 |
+| 温度闸     | `pmset -g therm` → `Note: No thermal warning level has been recorded`（另两项亦无记录）                           | 正常 |
+| 配额闸     | 开工时 running = **0** 条 < `RUNNING_QUOTA=6`                                                                     | 放行 |
+| PG 闸      | 带 `org.testcontainers.sessionId` 标签的容器 = **0** < 6；**无标签孤儿容器 0 个**                                 | 放行 |
+| load 闸    | 三点采样 `1.27 / 1.31 / 1.68`（1min < 5min < 15min，**连续下降**，远低于 `LOAD_LIMIT=12`）                        | 放行 |
+| 调度闸     | `gate status` → `free / stale=false` → `gate acquire` **第 1 次即命中**                                           | 取得 |
 
 ⇒ **容量闸 GO**。节流闸通过**之后**才写 `last-batch-at`（协议硬规定：提前写会把节奏无限后推）。
 
@@ -54,12 +54,12 @@ node tools/module-progress/lane.mjs gc
 
 `node tools/module-progress/lane.mjs plan --lanes 4` 的 `newlyPlanned`：
 
-| 模块 | 名称 | 阶段 | L3 锚点 | 迁移 | 服务 | 分支 | worktree |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| 15.1.1.2 | 消息发送 | D7 | 15.1.1 | `V297` | crm | `feat/15-1-1-2` | `.worktrees/15.1.1.2` |
-| 15.2.1.2 | 评价回复 | D7 | 15.2.1 | `V298` | crm | `feat/15-2-1-2` | `.worktrees/15.2.1.2` |
-| 15.3.2.2 | 接触记录 | D7 | 15.3.2 | `V299` | crm | `feat/15-3-2-2` | `.worktrees/15.3.2.2` |
-| 16.1.1.1 | 账号健康总览 | D7 | 16.1.1 | `V300` | channel | `feat/16-1-1-1` | `.worktrees/16.1.1.1` |
+| 模块     | 名称         | 阶段 | L3 锚点 | 迁移   | 服务    | 分支            | worktree              |
+| -------- | ------------ | ---- | ------- | ------ | ------- | --------------- | --------------------- |
+| 15.1.1.2 | 消息发送     | D7   | 15.1.1  | `V297` | crm     | `feat/15-1-1-2` | `.worktrees/15.1.1.2` |
+| 15.2.1.2 | 评价回复     | D7   | 15.2.1  | `V298` | crm     | `feat/15-2-1-2` | `.worktrees/15.2.1.2` |
+| 15.3.2.2 | 接触记录     | D7   | 15.3.2  | `V299` | crm     | `feat/15-3-2-2` | `.worktrees/15.3.2.2` |
+| 16.1.1.1 | 账号健康总览 | D7   | 16.1.1  | `V300` | channel | `feat/16-1-1-1` | `.worktrees/16.1.1.1` |
 
 4 条车道的 **L3 锚点互不相同**（15.1.1 / 15.2.1 / 15.3.2 / 16.1.1），上游均已交付，
 `V297`–`V300` 四个迁移版本号**本批互不重叠**且**基线上均未被占用**（已逐个 `ls` 确认 free）。
@@ -68,11 +68,11 @@ node tools/module-progress/lane.mjs gc
 
 ### 🚧 服务缺口（`plan` 的 `serviceBlocked` 字段原样带出）
 
-| 卷 | 原因 | 影响 |
-| --- | --- | --- |
-| 12 | 主责服务 `finance` 不在集成头 | 12 个模块排不出车道 |
-| 13 | 主责服务 `reporting` 不在集成头 | 14 个模块排不出车道 |
-| 1 | 主责服务「前端聚合」不在集成头 | 20 个模块排不出车道 |
+| 卷  | 原因                            | 影响                |
+| --- | ------------------------------- | ------------------- |
+| 12  | 主责服务 `finance` 不在集成头   | 12 个模块排不出车道 |
+| 13  | 主责服务 `reporting` 不在集成头 | 14 个模块排不出车道 |
+| 1   | 主责服务「前端聚合」不在集成头  | 20 个模块排不出车道 |
 
 ⇒ 这三卷合计 **46 个模块**在本仓**永远排不出车道**，只能等人工决策是否并入对应服务 / 调整锚点。
 **调度者不改锚点绕开**，如实留档。
@@ -81,12 +81,12 @@ node tools/module-progress/lane.mjs gc
 
 4 条车道都要改 `apps/web/src/lib/api-proxy.ts`（共享白名单累积正则），**四个锚点已互不重叠地指派**：
 
-| 车道 | 首 token | 插入锚点（dispatch 时行号） |
-| --- | --- | --- |
-| 15.1.1.2 | `message-sends` | `^message\-inbox...` 那条**之后**（约 5620 行） |
-| 15.2.1.2 | `review-replies` | `^reviews(?:...)/` 那条**之后**（约 5793 行） |
-| 15.3.2.2 | `customer-contacts` | `^customer\-tags...` 那条**之后**（约 5918 行） |
-| 16.1.1.1 | `account-health` | channel 的 `^ad\-rules...` 那条**之后**（约 7503 行） |
+| 车道     | 首 token            | 插入锚点（dispatch 时行号）                           |
+| -------- | ------------------- | ----------------------------------------------------- |
+| 15.1.1.2 | `message-sends`     | `^message\-inbox...` 那条**之后**（约 5620 行）       |
+| 15.2.1.2 | `review-replies`    | `^reviews(?:...)/` 那条**之后**（约 5793 行）         |
+| 15.3.2.2 | `customer-contacts` | `^customer\-tags...` 那条**之后**（约 5918 行）       |
+| 16.1.1.1 | `account-health`    | channel 的 `^ad\-rules...` 那条**之后**（约 7503 行） |
 
 四个首 token 在基线全文 192 条正则里出现次数**均为 0**（已逐个 `grep -c` 核实），
 前三个落在 `prefix: 'crm/'` 的元素群里，第四个落在 `prefix: 'channel/'` 的元素群里。
@@ -94,12 +94,12 @@ node tools/module-progress/lane.mjs gc
 
 ### 📌 权限码与表名前缀的分配（避免下一轮发现撞车）
 
-| 车道 | 权限码 | 表名前缀 |
-| --- | --- | --- |
-| 15.1.1.2 | `crm.message.send`（同族 `.read` 已在既有 grant 里） | `crm_message_send_*`（**不**复用 `crm_buyer_email_send_record`） |
-| 15.2.1.2 | `crm.product_review.reply` | `crm_review_reply_*`（**不**复用索评的 `crm_review_send_record` / `crm_review_message_template`） |
-| 15.3.2.2 | `crm.contact.read` / `crm.contact.update` | `crm_customer_contact_*` |
-| 16.1.1.1 | `channel.account.read` / `channel.account.update` | `account_health_*`（channel 服务内，卷 16 同族均为 `compliance_check_*` / `brand_authz_*` / `brand_cred_*` 风格） |
+| 车道     | 权限码                                               | 表名前缀                                                                                                          |
+| -------- | ---------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| 15.1.1.2 | `crm.message.send`（同族 `.read` 已在既有 grant 里） | `crm_message_send_*`（**不**复用 `crm_buyer_email_send_record`）                                                  |
+| 15.2.1.2 | `crm.product_review.reply`                           | `crm_review_reply_*`（**不**复用索评的 `crm_review_send_record` / `crm_review_message_template`）                 |
+| 15.3.2.2 | `crm.contact.read` / `crm.contact.update`            | `crm_customer_contact_*`                                                                                          |
+| 16.1.1.1 | `channel.account.read` / `channel.account.update`    | `account_health_*`（channel 服务内，卷 16 同族均为 `compliance_check_*` / `brand_authz_*` / `brand_cred_*` 风格） |
 
 ---
 
@@ -107,11 +107,11 @@ node tools/module-progress/lane.mjs gc
 
 扫描范围：`backend/services/*/src/main/resources/db/migration/` 全部迁移。
 
-| 检查 | 命中 | 判定 |
-| --- | --- | --- |
-| ① `ADD COLUMN` 无 `DEFAULT` | catalog `V14` / `V41` / `V15` | **基线存量**，非本批 |
-| ② `SET NOT NULL` | catalog `V14` / `V15`、identity `V7`、channel `V194` / `V196` / `V197` / `V199`（后四者命中的是注释行） | **基线存量**，非本批 |
-| ③ `ADD CONSTRAINT ... CHECK` | catalog `V35` / `V41`、channel `V199` | **基线存量**，非本批 |
+| 检查                         | 命中                                                                                                    | 判定                 |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------- | -------------------- |
+| ① `ADD COLUMN` 无 `DEFAULT`  | catalog `V14` / `V41` / `V15`                                                                           | **基线存量**，非本批 |
+| ② `SET NOT NULL`             | catalog `V14` / `V15`、identity `V7`、channel `V194` / `V196` / `V197` / `V199`（后四者命中的是注释行） | **基线存量**，非本批 |
+| ③ `ADD CONSTRAINT ... CHECK` | catalog `V35` / `V41`、channel `V199`                                                                   | **基线存量**，非本批 |
 
 ⇒ **本批三条扫描零命中**：本批 4 个新迁移（V297 / V298 / V299 / V300）**尚未落地**，本轮没有新迁移可扫。
 上述命中项全部来自**早于本批、已通过历次 L2 的基线迁移**，不在本轮处置范围。
@@ -136,12 +136,12 @@ node tools/module-progress/lane.mjs gc
 
 ## 本批车道健康快照（16:00 派发后约 4 分钟）
 
-| 车道 | 状态 | worktree 改动 | commits ahead | 备注 |
-| --- | --- | --- | --- | --- |
-| 15.1.1.2 | `running`，心跳 `08:00:45Z` | 1 个新文件（`V297__crm_message_send.sql`，**473 行**） | 0 | 已在写迁移 |
-| 15.2.1.2 | `running`，心跳 `08:00:50Z` | 0 | 0 | 仍在读蓝图与相邻代码 |
-| 15.3.2.2 | `running`，心跳 `08:00:54Z` | 0 | 0 | 同上 |
-| 16.1.1.1 | `running`，心跳 `08:00:59Z` | 0 | 0 | 同上 |
+| 车道     | 状态                        | worktree 改动                                          | commits ahead | 备注                 |
+| -------- | --------------------------- | ------------------------------------------------------ | ------------- | -------------------- |
+| 15.1.1.2 | `running`，心跳 `08:00:45Z` | 1 个新文件（`V297__crm_message_send.sql`，**473 行**） | 0             | 已在写迁移           |
+| 15.2.1.2 | `running`，心跳 `08:00:50Z` | 0                                                      | 0             | 仍在读蓝图与相邻代码 |
+| 15.3.2.2 | `running`，心跳 `08:00:54Z` | 0                                                      | 0             | 同上                 |
+| 16.1.1.1 | `running`，心跳 `08:00:59Z` | 0                                                      | 0             | 同上                 |
 
 ⚠️ **心跳已确认写在集成头**（`/Users/guan/Projects/starcon-worktrees/integration/.dev-agent/lanes.json`，
 不是各车道 worktree 自己的那份）—— 这是「占位符没替换会让车道被误判崩掉重派」那个坑的**正面证据**：
@@ -158,11 +158,11 @@ node tools/module-progress/lane.mjs gc
 
 ## 收尾三件套（本轮 = 派发轮，无代码变更批次）
 
-| 件 | 结果 |
-| --- | --- |
+| 件       | 结果                                                                                      |
+| -------- | ----------------------------------------------------------------------------------------- |
 | ① 写说明 | ✅ 本文件（`docs/sessions/2026-10/2026-10-22-batch-64-dispatch-crm-compliance-lanes.md`） |
-| ② commit | ✅ 与台账同一 commit（台账本轮无变更，`git add` 覆盖之） |
-| ③ push | ✅ 推 `origin integration/module-dev` |
+| ② commit | ✅ 与台账同一 commit（台账本轮无变更，`git add` 覆盖之）                                  |
+| ③ push   | ✅ 推 `origin integration/module-dev`                                                     |
 
 ⚠️ **本轮没有 L2，因此没有「本批交付模块」的逐模块说明节** —— 4 个模块本轮**尚未交付**，
 逐模块说明（迁移 / 端点 / 页面 / 测试 / 关键设计决策）**随 batch-65 一起写**。
@@ -211,11 +211,11 @@ SpringDoc 静默丢掉后一个，契约字段串味，而 typecheck / lint / vi
 
 本批已有 **3 条车道 land**（`state=ready`）：
 
-| 车道 | head | 迁移 | api-proxy 首 token | 落点核对 |
-| --- | --- | --- | --- | --- |
-| 15.2.1.2 评价回复 | `598e41c7` | `V298`（crm） | `review-replies` | 落在 `reviews` 与 `review-rules` **之间** = 指定锚点 ✅ |
-| 15.3.2.2 接触记录 | `2bd54d3` | `V299`（crm） | `customer-contacts` | 落在 `customer-tags` 之后 = 指定锚点 ✅ |
-| 16.1.1.1 账号健康总览 | `31dc6cfd` | `V300`（channel） | `account-health` | 落在 channel 的 `ad-rules` 之后 = 指定锚点 ✅ |
+| 车道                  | head       | 迁移              | api-proxy 首 token  | 落点核对                                                |
+| --------------------- | ---------- | ----------------- | ------------------- | ------------------------------------------------------- |
+| 15.2.1.2 评价回复     | `598e41c7` | `V298`（crm）     | `review-replies`    | 落在 `reviews` 与 `review-rules` **之间** = 指定锚点 ✅ |
+| 15.3.2.2 接触记录     | `2bd54d3`  | `V299`（crm）     | `customer-contacts` | 落在 `customer-tags` 之后 = 指定锚点 ✅                 |
+| 16.1.1.1 账号健康总览 | `31dc6cfd` | `V300`（channel） | `account-health`    | 落在 channel 的 `ad-rules` 之后 = 指定锚点 ✅           |
 
 三条车道**同时改**了协议点名的四个求并文件：`packages/api-contracts/src/contracts/crm.ts`、
 `packages/api-contracts/src/crm.openapi.json`、`apps/web/src/lib/api-proxy.ts`、
@@ -227,19 +227,19 @@ SpringDoc 静默丢掉后一个，契约字段串味，而 typecheck / lint / vi
 每步都是一次带并集驱动的 2 路合并，**三步 exit 0，无一步出现 `CONFLICT_KEYS`**。
 最终合并树 `e6419d08`。
 
-| 检查项 | 结果 |
-| --- | --- |
-| 合并是否报冲突 | **否**，三步全 exit 0 |
-| `CONFLICT_KEYS` | **三步均未出现** ⇒ 契约按「导出类型名 / paths / schemas 名」求并成功，无同名键冲突 |
-| `services[]` 元素数 | base **191** → 合并后 **194**（三条车道各 +1，精确相等） |
-| **从 base 掉落的元素** | **0 个** |
-| 新增首 token | `crm/:review-replies` · `crm/:customer-contacts` · `channel/:account-health` |
-| 台账行 | **465 行**、**重复 ID 0 个**；15.2.1.2 / 15.3.2.2 / 16.1.1.1 **均为「已交付」** |
-| 迁移文件 | `V298` / `V299` / `V300` **各 1 份，无重复无缺失** |
-| 契约 type 数 | `crm.ts` **159 → 199**；`channel.ts` **1348 → 1365**（+17 = 车道自报值） |
-| 契约 path 数 | `crm.openapi.json` **91 → 114**；`channel.openapi.json` **710 → 721**（+11 = 车道自报值） |
-| **重名 `export type`** | `crm.ts` **0 个**、`channel.ts` **0 个**（batch-56 抓过的「契约静默串味」形态，本次未复现） |
-| 车道纪律 | 三条都**零 ALTER / 零 DROP / 零外键**（`ALTER TABLE … ADD/DROP/ALTER` 计数 0、`REFERENCES` 计数 0） |
+| 检查项                 | 结果                                                                                                |
+| ---------------------- | --------------------------------------------------------------------------------------------------- |
+| 合并是否报冲突         | **否**，三步全 exit 0                                                                               |
+| `CONFLICT_KEYS`        | **三步均未出现** ⇒ 契约按「导出类型名 / paths / schemas 名」求并成功，无同名键冲突                  |
+| `services[]` 元素数    | base **191** → 合并后 **194**（三条车道各 +1，精确相等）                                            |
+| **从 base 掉落的元素** | **0 个**                                                                                            |
+| 新增首 token           | `crm/:review-replies` · `crm/:customer-contacts` · `channel/:account-health`                        |
+| 台账行                 | **465 行**、**重复 ID 0 个**；15.2.1.2 / 15.3.2.2 / 16.1.1.1 **均为「已交付」**                     |
+| 迁移文件               | `V298` / `V299` / `V300` **各 1 份，无重复无缺失**                                                  |
+| 契约 type 数           | `crm.ts` **159 → 199**；`channel.ts` **1348 → 1365**（+17 = 车道自报值）                            |
+| 契约 path 数           | `crm.openapi.json` **91 → 114**；`channel.openapi.json` **710 → 721**（+11 = 车道自报值）           |
+| **重名 `export type`** | `crm.ts` **0 个**、`channel.ts` **0 个**（batch-56 抓过的「契约静默串味」形态，本次未复现）         |
+| 车道纪律               | 三条都**零 ALTER / 零 DROP / 零外键**（`ALTER TABLE … ADD/DROP/ALTER` 计数 0、`REFERENCES` 计数 0） |
 
 ⚠️ 干跑 stderr 里出现 `merge-union: 走了行级兜底并集，请人工确认这个文件改对了` ——
 这是**台账分支**的固定提示（`merge-union.mjs` 第 374 行），紧跟着的

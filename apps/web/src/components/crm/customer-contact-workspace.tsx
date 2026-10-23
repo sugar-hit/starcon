@@ -254,23 +254,26 @@ export function CustomerContactWorkspace() {
     }
   }, [optOutCustomerRef, optOutCustomerName, optOutScopeInput, optOutReason, load]);
 
-  const submitRevoke = useCallback(async (optOutId: string) => {
-    setBusy(true);
-    setActionError(null);
-    setNotice('');
-    try {
-      await revokeCustomerContactOptOut(optOutId, { reason: revokeReason.trim() });
-      setNotice('已撤销该退订，并留下审计事件与时间线记录。');
-      setRevokeReason('');
-      const page = await fetchCustomerContactOptOutEvents(optOutId, { size: 20 });
-      setEvents(page);
-      await load();
-    } catch (e) {
-      setActionError(errorText(e, '撤销退订失败'));
-    } finally {
-      setBusy(false);
-    }
-  }, [revokeReason, load]);
+  const submitRevoke = useCallback(
+    async (optOutId: string) => {
+      setBusy(true);
+      setActionError(null);
+      setNotice('');
+      try {
+        await revokeCustomerContactOptOut(optOutId, { reason: revokeReason.trim() });
+        setNotice('已撤销该退订，并留下审计事件与时间线记录。');
+        setRevokeReason('');
+        const page = await fetchCustomerContactOptOutEvents(optOutId, { size: 20 });
+        setEvents(page);
+        await load();
+      } catch (e) {
+        setActionError(errorText(e, '撤销退订失败'));
+      } finally {
+        setBusy(false);
+      }
+    },
+    [revokeReason, load],
+  );
 
   const availableDimensions = useMemo(
     () => capabilities?.dimensions.filter((d) => d.available) ?? [],
@@ -558,8 +561,8 @@ export function CustomerContactWorkspace() {
         <>
           <SectionCard title="退订与豁免判定">
             <p className="text-muted-foreground text-copy-13">
-              客户明确表示「不要再联系我」之后，营销触达必须被排除。登记必须带依据；
-              撤销必须带原因 —— 两者都会留痕（审计事件 + 时间线记录）。
+              客户明确表示「不要再联系我」之后，营销触达必须被排除。登记必须带依据； 撤销必须带原因
+              —— 两者都会留痕（审计事件 + 时间线记录）。
             </p>
             {writable && (
               <div className="mt-4 grid gap-3 md:grid-cols-2">
@@ -816,7 +819,10 @@ export function CustomerContactWorkspace() {
                   <p className="flex items-start gap-2">
                     <ShieldOff className="mt-0.5 h-4 w-4 shrink-0" />
                     <span>
-                      豁免判定：<strong>{customerContactSuppressedText(timeline.optOut?.suppressed ?? false)}</strong>
+                      豁免判定：
+                      <strong>
+                        {customerContactSuppressedText(timeline.optOut?.suppressed ?? false)}
+                      </strong>
                       {timeline.optOut?.suppressed ? (
                         <>
                           {' '}
@@ -869,7 +875,9 @@ export function CustomerContactWorkspace() {
                             )}
                           </td>
                           <td className="py-2">
-                            <Badge tone={row.complianceState === 'VIOLATION' ? 'warning' : 'success'}>
+                            <Badge
+                              tone={row.complianceState === 'VIOLATION' ? 'warning' : 'success'}
+                            >
                               {row.complianceStateLabel}
                             </Badge>
                           </td>
@@ -889,7 +897,8 @@ export function CustomerContactWorkspace() {
                       上一页
                     </Button>
                     <span>
-                      第 {timeline.page + 1} / {timeline.totalPages} 页，共 {timeline.totalElements} 条
+                      第 {timeline.page + 1} / {timeline.totalPages} 页，共 {timeline.totalElements}{' '}
+                      条
                     </span>
                     <Button
                       size="sm"

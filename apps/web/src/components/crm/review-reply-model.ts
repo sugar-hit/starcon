@@ -346,8 +346,7 @@ export function templateVersionLabel(reply: {
       : `手写回复（规范第 ${reply.policyVersion} 版）`;
   }
   const locale = reply.templateLocale ? ` · 语言 ${reply.templateLocale}` : '';
-  const policy =
-    reply.policyVersion === null ? '' : ` · 规范第 ${reply.policyVersion} 版`;
+  const policy = reply.policyVersion === null ? '' : ` · 规范第 ${reply.policyVersion} 版`;
   return `模板 ${reply.templateKey} 第 ${reply.templateVersion} 版${locale}${policy}`;
 }
 

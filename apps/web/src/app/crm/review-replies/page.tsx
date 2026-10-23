@@ -35,8 +35,8 @@ export default function CrmReviewRepliesPage() {
         <p className="text-muted-foreground text-copy-13">
           回复评价：<strong>公开回复 + 部分平台的卖家评论追加</strong>，支持
           <strong>模板</strong>（一个模板 = 一个版本，带生效时间）、<strong>多语言</strong>、
-          <strong>批量回复同类评价</strong>。
-          <strong>差评回复是转化机会也是合规风险</strong> —— 所以模板必须符合
+          <strong>批量回复同类评价</strong>。<strong>差评回复是转化机会也是合规风险</strong> ——
+          所以模板必须符合
           <strong>平台措辞规范</strong>：不合规的正文发不出去，回复记录也追得到
           当时用的模板版本与规范版本。
         </p>

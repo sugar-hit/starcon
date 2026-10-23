@@ -546,9 +546,7 @@ export async function fetchExternalQueries(
   return api<IpDetectionExternalQueryPage>(`${BASE}/external-queries?${query.toString()}`);
 }
 
-export async function fetchExternalQuery(
-  queryId: string,
-): Promise<IpDetectionExternalQueryDetail> {
+export async function fetchExternalQuery(queryId: string): Promise<IpDetectionExternalQueryDetail> {
   return api<IpDetectionExternalQueryDetail>(`${BASE}/external-queries/${queryId}`);
 }
 
@@ -567,7 +565,11 @@ export async function registerExternalHits(
   queryId: string,
   hits: IpDetectionExternalHitInput[],
 ): Promise<IpDetectionExternalQueryDetail> {
-  return api<IpDetectionExternalQueryDetail>(`${BASE}/external-queries/${queryId}/hits`, 'POST', hits);
+  return api<IpDetectionExternalQueryDetail>(
+    `${BASE}/external-queries/${queryId}/hits`,
+    'POST',
+    hits,
+  );
 }
 
 export async function setExternalQueryStatus(
@@ -614,7 +616,10 @@ export async function updateInspectionPlan(
   return api<IpDetectionInspectionPlan>(`${BASE}/inspection-plans/${planId}`, 'PUT', input);
 }
 
-export async function fetchInspectionRuns(page = 0, size = 20): Promise<IpDetectionInspectionRunPage> {
+export async function fetchInspectionRuns(
+  page = 0,
+  size = 20,
+): Promise<IpDetectionInspectionRunPage> {
   const query = new URLSearchParams({ page: String(page), size: String(size) });
   return api<IpDetectionInspectionRunPage>(`${BASE}/inspection-runs?${query.toString()}`);
 }

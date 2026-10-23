@@ -2,14 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Badge, Button, EmptyState, SectionCard, Segmented, StatCard } from '@starcon/ui';
-import {
-  AlertTriangle,
-  BarChart3,
-  BellRing,
-  RefreshCw,
-  Send,
-  ShieldOff,
-} from 'lucide-react';
+import { AlertTriangle, BarChart3, BellRing, RefreshCw, Send, ShieldOff } from 'lucide-react';
 import type {
   CrmCareReminderCapabilities,
   CrmCareReminderRulePage,
@@ -161,7 +154,18 @@ export function CareReminderWorkspace() {
     } finally {
       setLoading(false);
     }
-  }, [ruleType, rulePlatform, ruleStatus, ruleKeyword, rulePage, taskType, taskStatus, taskBlock, taskCustomer, taskPage]);
+  }, [
+    ruleType,
+    rulePlatform,
+    ruleStatus,
+    ruleKeyword,
+    rulePage,
+    taskType,
+    taskStatus,
+    taskBlock,
+    taskCustomer,
+    taskPage,
+  ]);
 
   useEffect(() => {
     void load();
@@ -252,7 +256,11 @@ export function CareReminderWorkspace() {
       try {
         const next = currentStatus === 'ACTIVE' ? 'DISABLED' : 'ACTIVE';
         await setCareReminderRuleStatus(ruleId, next);
-        setNotice(next === 'DISABLED' ? '规则已停用：不能再生成新的触达任务，历史任务仍可读。' : '规则已启用。');
+        setNotice(
+          next === 'DISABLED'
+            ? '规则已停用：不能再生成新的触达任务，历史任务仍可读。'
+            : '规则已启用。',
+        );
         await load();
       } catch (e) {
         setActionError(errorText(e, '规则状态切换失败'));
@@ -460,12 +468,12 @@ export function CareReminderWorkspace() {
       </div>
 
       {notice && (
-        <div className="border-success/40 bg-success/10 text-success rounded-md px-3 py-2 text-copy-13">
+        <div className="border-success/40 bg-success/10 text-success text-copy-13 rounded-md px-3 py-2">
           {notice}
         </div>
       )}
       {actionError && (
-        <div className="border-destructive/40 bg-destructive/10 text-destructive rounded-md px-3 py-2 text-copy-13">
+        <div className="border-destructive/40 bg-destructive/10 text-destructive text-copy-13 rounded-md px-3 py-2">
           {actionError}
         </div>
       )}
@@ -476,7 +484,11 @@ export function CareReminderWorkspace() {
           <SectionCard title="触达规则">
             <div className="grid gap-3 md:grid-cols-4">
               <Field label="类型">
-                <select className={control} value={ruleType} onChange={(e) => setRuleType(e.target.value)}>
+                <select
+                  className={control}
+                  value={ruleType}
+                  onChange={(e) => setRuleType(e.target.value)}
+                >
                   <option value="">全部</option>
                   {capabilities?.reminderTypes.map((type) => (
                     <option key={type} value={type}>
@@ -494,7 +506,11 @@ export function CareReminderWorkspace() {
                 />
               </Field>
               <Field label="状态">
-                <select className={control} value={ruleStatus} onChange={(e) => setRuleStatus(e.target.value)}>
+                <select
+                  className={control}
+                  value={ruleStatus}
+                  onChange={(e) => setRuleStatus(e.target.value)}
+                >
                   <option value="">全部</option>
                   <option value="ACTIVE">启用</option>
                   <option value="DISABLED">停用</option>
@@ -629,7 +645,11 @@ export function CareReminderWorkspace() {
                   />
                 </Field>
                 <Field label="触达类型">
-                  <select className={control} value={newType} onChange={(e) => setNewType(e.target.value)}>
+                  <select
+                    className={control}
+                    value={newType}
+                    onChange={(e) => setNewType(e.target.value)}
+                  >
                     {capabilities?.reminderTypes.map((type) => (
                       <option key={type} value={type}>
                         {careReminderTypeLabel(type)}
@@ -746,7 +766,11 @@ export function CareReminderWorkspace() {
           <SectionCard title="触达任务">
             <div className="grid gap-3 md:grid-cols-4">
               <Field label="类型">
-                <select className={control} value={taskType} onChange={(e) => setTaskType(e.target.value)}>
+                <select
+                  className={control}
+                  value={taskType}
+                  onChange={(e) => setTaskType(e.target.value)}
+                >
                   <option value="">全部</option>
                   {capabilities?.reminderTypes.map((type) => (
                     <option key={type} value={type}>
@@ -756,7 +780,11 @@ export function CareReminderWorkspace() {
                 </select>
               </Field>
               <Field label="状态">
-                <select className={control} value={taskStatus} onChange={(e) => setTaskStatus(e.target.value)}>
+                <select
+                  className={control}
+                  value={taskStatus}
+                  onChange={(e) => setTaskStatus(e.target.value)}
+                >
                   <option value="">全部</option>
                   {capabilities?.reminderStatuses.map((status) => (
                     <option key={status} value={status}>
@@ -766,7 +794,11 @@ export function CareReminderWorkspace() {
                 </select>
               </Field>
               <Field label="拦截原因">
-                <select className={control} value={taskBlock} onChange={(e) => setTaskBlock(e.target.value)}>
+                <select
+                  className={control}
+                  value={taskBlock}
+                  onChange={(e) => setTaskBlock(e.target.value)}
+                >
                   <option value="">全部</option>
                   {capabilities?.blockCodes.map((code) => (
                     <option key={code} value={code}>
@@ -828,7 +860,9 @@ export function CareReminderWorkspace() {
                       </td>
                       <td className="py-2">
                         <div>计划 {task.plannedAt}</div>
-                        {task.sentAt && <div className="text-muted-foreground">发出 {task.sentAt}</div>}
+                        {task.sentAt && (
+                          <div className="text-muted-foreground">发出 {task.sentAt}</div>
+                        )}
                         <div className="text-muted-foreground">{task.transportLabel}</div>
                       </td>
                       <td className="py-2">
@@ -1005,16 +1039,25 @@ export function CareReminderWorkspace() {
               <StatCard label="已发出" value={stats?.sentTasks ?? 0} polarity="positive" />
               <StatCard label="发送失败" value={stats?.failedTasks ?? 0} polarity="negative" />
               <StatCard label="被拦截" value={stats?.blockedTasks ?? 0} polarity="negative" />
-              <StatCard label="退订拦截" value={stats?.optOutBlockedCount ?? 0} polarity="negative" />
-              <StatCard label="频次超限" value={stats?.frequencyBlockedCount ?? 0} polarity="negative" />
+              <StatCard
+                label="退订拦截"
+                value={stats?.optOutBlockedCount ?? 0}
+                polarity="negative"
+              />
+              <StatCard
+                label="频次超限"
+                value={stats?.frequencyBlockedCount ?? 0}
+                polarity="negative"
+              />
               <StatCard label="打开数" value={stats?.openCount ?? 0} polarity="neutral" />
               <StatCard label="点击数" value={stats?.clickCount ?? 0} polarity="neutral" />
             </div>
-            <p className="text-muted-foreground mt-3 text-copy-13">
+            <p className="text-muted-foreground text-copy-13 mt-3">
               {stats ? careReminderStatsText(stats.note) : '正在读取统计……'}
             </p>
             <p className="text-muted-foreground mt-1 text-xs">
-              ⚠️ 这些数字全部由**服务端聚合**，页面**不做任何算术**（自己再算一遍打开率，两处口径迟早会打架）。
+              ⚠️
+              这些数字全部由**服务端聚合**，页面**不做任何算术**（自己再算一遍打开率，两处口径迟早会打架）。
             </p>
           </SectionCard>
 
@@ -1044,7 +1087,11 @@ export function CareReminderWorkspace() {
                 </select>
               </Field>
               <Field label="事件类型">
-                <select className={control} value={eventType} onChange={(e) => setEventType(e.target.value)}>
+                <select
+                  className={control}
+                  value={eventType}
+                  onChange={(e) => setEventType(e.target.value)}
+                >
                   <option value="OPEN">打开</option>
                   <option value="CLICK">点击</option>
                 </select>
@@ -1062,7 +1109,11 @@ export function CareReminderWorkspace() {
               <Button onClick={() => void loadEvents()} variant="secondary" disabled={busy}>
                 查看事件
               </Button>
-              <Button onClick={() => void loadPlatformReceipt()} variant="secondary" disabled={busy}>
+              <Button
+                onClick={() => void loadPlatformReceipt()}
+                variant="secondary"
+                disabled={busy}
+              >
                 查平台回执接入状态
               </Button>
               {writable && (
@@ -1073,7 +1124,9 @@ export function CareReminderWorkspace() {
             </div>
 
             {platformReceipt && (
-              <p className="text-muted-foreground mt-3 text-copy-13">服务端答复：{platformReceipt}</p>
+              <p className="text-muted-foreground text-copy-13 mt-3">
+                服务端答复：{platformReceipt}
+              </p>
             )}
 
             {!events ? (

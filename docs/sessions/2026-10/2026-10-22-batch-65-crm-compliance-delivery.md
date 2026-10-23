@@ -16,14 +16,14 @@
 
 本批 4 条车道全部 land 后，集成头上**只跑这一次**全量验证（组批模式的核心：每组只验证一次）。
 
-| 步骤 | 命令 | 结果 |
-| --- | --- | --- |
-| 1 | `cd backend && ./mvnw verify` | **BUILD SUCCESS** — 6 个服务 **8178 例**，**failures 0 / errors 0**（catalog 1981 / trade 2383 / warehouse 1640 / channel 1638 / identity 270 / crm 266） |
-| 2 | `pnpm typecheck` | **3/3 通过** |
-| 3 | `pnpm lint` | **通过** |
-| 4 | `pnpm test` | **470 个测试文件 / 6894 例全过** |
-| 5 | `NEXT_TELEMETRY_DISABLED=1 pnpm --filter @starcon/web build` | **成功**（Next production build 全路由出图） |
-| 6 | `node tools/module-progress/sync.mjs --check` | **✓ 台账与蓝图一致** |
+| 步骤 | 命令                                                         | 结果                                                                                                                                                      |
+| ---- | ------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1    | `cd backend && ./mvnw verify`                                | **BUILD SUCCESS** — 6 个服务 **8178 例**，**failures 0 / errors 0**（catalog 1981 / trade 2383 / warehouse 1640 / channel 1638 / identity 270 / crm 266） |
+| 2    | `pnpm typecheck`                                             | **3/3 通过**                                                                                                                                              |
+| 3    | `pnpm lint`                                                  | **通过**                                                                                                                                                  |
+| 4    | `pnpm test`                                                  | **470 个测试文件 / 6894 例全过**                                                                                                                          |
+| 5    | `NEXT_TELEMETRY_DISABLED=1 pnpm --filter @starcon/web build` | **成功**（Next production build 全路由出图）                                                                                                              |
+| 6    | `node tools/module-progress/sync.mjs --check`                | **✓ 台账与蓝图一致**                                                                                                                                      |
 
 ⇒ 六步 exit code 全 0，**L2 绿**。
 
@@ -31,6 +31,7 @@
 > 汇报与估算一律以本轮实测为准。
 
 **这一轮没有出现过的失败形态**（留档给下一轮对照）：
+
 - ❌ 跨车道互相破坏（4 条车道同时改 `crm.ts` / `crm.openapi.json` / `api-proxy.ts` / 台账）⇒ **未发生**，
   并集驱动按「导出类型名 / OpenAPI 路径 / 模块 ID」求并，三步顺序合并全 exit 0、无 `CONFLICT_KEYS`；
 - ❌ 契约重名类型导致字段串味（batch-56 在 14.2.2.1 抓到过 `AdBudgetGuardrails` 撞名）⇒ **未复现**，
@@ -56,8 +57,8 @@
 - **迁移**：`V297__crm_message_send.sql`（crm 服务，479 行）— 4 张新表
   `crm_message_send_template`（回复模板）/ `crm_message_send`（发送记录）/ `crm_message_send_attachment`（附件）/ `crm_message_send_attempt`（投递尝试）；
   全部 `tenant_id NOT NULL` + `ENABLE` **与** `FORCE ROW LEVEL SECURITY` + `isolation` 策略（USING 与 WITH CHECK 同表达式）
-  + GRANT + **序列单独授权** + `REVOKE ALL ON flyway_schema_history FROM crm_app`；
-  **零 ALTER 任何既有表**、**零外键**（跨表引用校验用触发器）。
+  - GRANT + **序列单独授权** + `REVOKE ALL ON flyway_schema_history FROM crm_app`；
+    **零 ALTER 任何既有表**、**零外键**（跨表引用校验用触发器）。
 - **端点**：`/crm/message-sends/**` — 13 个方法映射 / 10 条路径
   `GET /capabilities`、`GET|POST /templates`、`GET|PUT|DELETE /templates/{templateId}`、`GET /knowledge-templates`、
   `GET /targets`、`GET /sends`、`GET /sends/{sendId}`、`POST /sends`、`POST /batch`、
@@ -70,6 +71,7 @@
   改共享白名单后跑了 `pnpm vitest run apps/web/src/app/api` 全量 **173 文件 / 1000 例**。
 
 **关键设计决策**：
+
 1. **「发送失败要保留原消息状态」落成「不建那根列」** —— 「已回复」这个事实**只由发送记录推导**
    （存在一条 `status='SENT'` 的 `crm_message_send` 即算已回复），本模块**从不 UPDATE `crm_message`**。
    ⇒ 失败的那次发送**根本没有能力**把源消息改成「已回复」，也就没有「忘了改回来」这种事故；
@@ -105,6 +107,7 @@
   前端 model + allowlist **21 例**，api-proxy 全量 allowlist 回归 **173 文件 / 1000 例**。
 
 **关键设计决策**：
+
 1. **加粗句「模板必须符合平台措辞规范」落成四处**：① 规范**可配置且版本化**（按平台 × 形态，带生效窗，
    触发器**禁止窗口重叠** —— 「当时生效的是哪一版」必须唯一）；② 校验**真的拦得住**
    （`ReplyWordingChecker`：按码点长度 / 联系方式 / 促销话术 / 外链 / 标点上限 / **1–2 星必致歉** /
@@ -130,7 +133,7 @@
 
 - **迁移**：`V299__crm_customer_contact.sql`（crm 服务，587 行）— 3 张新表
   `crm_customer_contact`（接触记录）/ `crm_customer_opt_out`（退订当前态）/ `crm_customer_opt_out_event`（退订审计事件，**只追加**）
-  + 1 序列 + 7 触发器；RLS 用一条 DO 循环对 3 张表逐张 `ENABLE`+`FORCE`+`isolation`；**零外键**、**零 ALTER**。
+  - 1 序列 + 7 触发器；RLS 用一条 DO 循环对 3 张表逐张 `ENABLE`+`FORCE`+`isolation`；**零外键**、**零 ALTER**。
 - **端点**：`/crm/customer-contacts/**` — 12 方法映射 / 10 路径：
   `GET /capabilities`、`GET /contacts`、`GET /contacts/{contactId}`、`POST /contacts`、`GET /timeline`、
   `POST /ingest`、`GET /opt-outs`、`GET /opt-outs/{optOutId}`、`GET /opt-outs/{optOutId}/events`、
@@ -142,6 +145,7 @@
   前端 model + allowlist **16 例**，api-proxy 全量 allowlist 回归 **173 文件 / 999 例**。
 
 **关键设计决策**：
+
 1. **加粗句「接触记录是自动化的豁免依据」落成一条完整链路**：
    退订是一等状态（登记必带依据 + 快照）→ **写普通接触记录根本碰不到退订状态**（模型层不给 `OPT_OUT` 口子）
    → 撤销是**显式动作**（必带原因 + 只追加审计事件 + 时间线留痕；**已撤销不能改回生效**、退订删不掉）
@@ -183,6 +187,7 @@
   api-proxy 全量 allowlist 回归 **173 文件 / 999 例**。
 
 **关键设计决策**：
+
 1. **量不到 ≠ 0、量不到 ≠ 低风险** —— 指标一律 0..1 比值（`NUMERIC(5,4)`），**NULL = 量不到**；
    四项没量全 ⇒ 等级 `UNKNOWN`（判不了），**不能断言 `HEALTHY`**。这条用 DB CHECK 钉住，不是靠代码自觉。
 2. **平台绩效适配器未交付 ⇒ 立端口如实答**：同步端点**恒 409 且一条数据都不写**；
@@ -204,12 +209,12 @@
 并入时发现 3 条**已交付行**的证据文本里写着本批模块「未交付」——那是派发时的事实、并入后就不再成立。
 按纪律**车道只改自己那一行**，所以由调度者在并入后统一订正（只改证据列的**这一句**，不重排整表）：
 
-| 行 | 订正前 | 订正后 |
-| --- | --- | --- |
-| 15.1.1.1 消息收件箱 | 已知缺口②「15.1.1.2 消息发送未交付 ⇒ 本模块是纯收件箱，不发消息」 | 改为「已交付（batch-64，V297）⇒ 发送能力在 `/crm/message-sends/**`；本模块仍只做**收件箱**」 |
-| 15.1.1.1 消息收件箱 | 未交付形状「`/messages/{uuid}/replies` 15.1.1.2 未交付」 | 改为「已交付但**走另一个首 token** ⇒ 收件箱侧刻意不放行」——**放行判定本身不变**（该路径后端确实不存在） |
-| 15.2.2.2 索评规则 | 「下游 15.1.1.2 消息发送未交付」 | 改为「已交付（batch-64，V297）」，**本模块只产话术不发送这个事实保持不变** |
-| 15.2.1.1 评价列表 | 「下游 15.2.1.2 评价回复 / 15.2.1.3 差评处理未交付」 | 改为「15.2.1.2 已交付（batch-64，V298）/ **15.2.1.3 差评处理仍未交付**」 |
+| 行                  | 订正前                                                            | 订正后                                                                                                  |
+| ------------------- | ----------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| 15.1.1.1 消息收件箱 | 已知缺口②「15.1.1.2 消息发送未交付 ⇒ 本模块是纯收件箱，不发消息」 | 改为「已交付（batch-64，V297）⇒ 发送能力在 `/crm/message-sends/**`；本模块仍只做**收件箱**」            |
+| 15.1.1.1 消息收件箱 | 未交付形状「`/messages/{uuid}/replies` 15.1.1.2 未交付」          | 改为「已交付但**走另一个首 token** ⇒ 收件箱侧刻意不放行」——**放行判定本身不变**（该路径后端确实不存在） |
+| 15.2.2.2 索评规则   | 「下游 15.1.1.2 消息发送未交付」                                  | 改为「已交付（batch-64，V297）」，**本模块只产话术不发送这个事实保持不变**                              |
+| 15.2.1.1 评价列表   | 「下游 15.2.1.2 评价回复 / 15.2.1.3 差评处理未交付」              | 改为「15.2.1.2 已交付（batch-64，V298）/ **15.2.1.3 差评处理仍未交付**」                                |
 
 ⚠️ **留一个已知欠账**：15.2.1.1 模块**自身**的 capabilities 里 `review_reply` 维度仍标 `available=false` —— 那是**代码事实**，
 本轮不越界改别的模块的代码。**下一批需要回填这一格**（`review_reply` 已可用，`negative_review_handling` 仍不可用）。
@@ -218,11 +223,11 @@
 
 ## 四、收尾三件套
 
-| 件 | 结果 |
-| --- | --- |
+| 件       | 结果                                                                                                    |
+| -------- | ------------------------------------------------------------------------------------------------------- |
 | ① 写说明 | ✅ 本文件（`docs/sessions/2026-10/2026-10-22-batch-65-crm-compliance-delivery.md`），**4 个模块各一节** |
-| ② commit | ✅ `docs(batch-65): ...` —— 说明文件与台账（4 行 + 总览 + 3 处交叉引用订正）**同一个 commit** |
-| ③ push | ✅ `origin integration/module-dev`（**只推集成分支，`main` 未动**） |
+| ② commit | ✅ `docs(batch-65): ...` —— 说明文件与台账（4 行 + 总览 + 3 处交叉引用订正）**同一个 commit**           |
+| ③ push   | ✅ `origin integration/module-dev`（**只推集成分支，`main` 未动**）                                     |
 
 ## 五、下一轮 tick 可以直接接手的事
 

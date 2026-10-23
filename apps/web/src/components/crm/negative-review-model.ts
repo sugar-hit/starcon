@@ -105,9 +105,7 @@ export function negativeReviewCaseQuery(params: NegativeReviewCaseParams = {}): 
 }
 
 /** 候选差评的查询串。 */
-export function negativeReviewCandidateQuery(
-  params: NegativeReviewCandidateParams = {},
-): string {
+export function negativeReviewCandidateQuery(params: NegativeReviewCandidateParams = {}): string {
   return queryOf({ ...params });
 }
 
@@ -122,10 +120,7 @@ export function negativeReviewRuleQuery(params: NegativeReviewRuleParams = {}): 
  * <p>刻意做成一个**独立的函数**而不是在模板里拼字符串 ——
  * 空白筛选时不能产出 `?` 后面直接跟 `&` 的畸形查询串。
  */
-export function negativeReviewStatsQuery(
-  params: NegativeReviewCaseParams = {},
-  days = 30,
-): string {
+export function negativeReviewStatsQuery(params: NegativeReviewCaseParams = {}, days = 30): string {
   const query = negativeReviewCaseQuery({ ...params, page: undefined, size: undefined });
   return query ? `${query}&days=${days}` : `?days=${days}`;
 }
@@ -158,15 +153,8 @@ export function createNegativeReviewRule(input: CrmNegativeReviewRuleInput) {
 }
 
 /** 更新规则（原地改 = 版本 +1）。 */
-export function updateNegativeReviewRule(
-  ruleId: string,
-  input: CrmNegativeReviewRuleUpdateInput,
-) {
-  return api<CrmNegativeReviewRuleRow>(
-    `${base}/rules/${encodeURIComponent(ruleId)}`,
-    'PUT',
-    input,
-  );
+export function updateNegativeReviewRule(ruleId: string, input: CrmNegativeReviewRuleUpdateInput) {
+  return api<CrmNegativeReviewRuleRow>(`${base}/rules/${encodeURIComponent(ruleId)}`, 'PUT', input);
 }
 
 /** 候选差评清单（还没建处理单的那些）。 */
@@ -211,9 +199,7 @@ export function classifyNegativeReviewCase(caseId: string, input: CrmNegativeRev
 
 /** 处理单的动作流水。 */
 export function fetchNegativeReviewActions(caseId: string) {
-  return api<CrmNegativeReviewActionRow[]>(
-    `${base}/${encodeURIComponent(caseId)}/actions`,
-  );
+  return api<CrmNegativeReviewActionRow[]>(`${base}/${encodeURIComponent(caseId)}/actions`);
 }
 
 /**
@@ -222,10 +208,7 @@ export function fetchNegativeReviewActions(caseId: string) {
  * <p>⚠️ 走平台侧的动作（{@code transport=PLATFORM_API}）在适配器未接入时
  * 返回 **409** 且**一行都不写** —— 页面据此显示「未接入」，不给假回执。
  */
-export function recordNegativeReviewAction(
-  caseId: string,
-  input: CrmNegativeReviewActionInput,
-) {
+export function recordNegativeReviewAction(caseId: string, input: CrmNegativeReviewActionInput) {
   return api<CrmNegativeReviewActionRow>(
     `${base}/${encodeURIComponent(caseId)}/actions`,
     'POST',

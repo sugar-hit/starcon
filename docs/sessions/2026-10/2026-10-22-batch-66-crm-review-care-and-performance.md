@@ -8,11 +8,11 @@
 
 ## 批次构成
 
-| 模块 | 名称 | 归属服务 | 迁移 | 分支 → 并入 commit |
-| --- | --- | --- | --- | --- |
-| 15.1.1.3 | 消息分类 | crm（8086 / `crm_app`） | `V301__crm_message_classification.sql` | `feat/15-1-1-3` `df0f72a2` → `f4c21467` |
-| 15.2.1.3 | 差评处理 | crm | `V302__crm_negative_review.sql` | `feat/15-2-1-3` `481fbd9f` → `e64b5391` |
-| 15.5.2.1 | 关怀与催办 | crm | `V303__crm_care_reminder.sql` | `feat/15-5-2-1` `d0810726` → `34741f72` |
+| 模块     | 名称         | 归属服务                        | 迁移                                   | 分支 → 并入 commit                                            |
+| -------- | ------------ | ------------------------------- | -------------------------------------- | ------------------------------------------------------------- |
+| 15.1.1.3 | 消息分类     | crm（8086 / `crm_app`）         | `V301__crm_message_classification.sql` | `feat/15-1-1-3` `df0f72a2` → `f4c21467`                       |
+| 15.2.1.3 | 差评处理     | crm                             | `V302__crm_negative_review.sql`        | `feat/15-2-1-3` `481fbd9f` → `e64b5391`                       |
+| 15.5.2.1 | 关怀与催办   | crm                             | `V303__crm_care_reminder.sql`          | `feat/15-5-2-1` `d0810726` → `34741f72`                       |
 | 16.1.1.2 | 绩效指标监控 | channel（8083 / `channel_app`） | `V304__account_health_performance.sql` | `feat/16-1-1-2` `7b6b861e`+`5ce23a96`+`97b838f5` → `3cbbf834` |
 
 ---
@@ -114,12 +114,12 @@
 
 本批 4 条车道全部改了**同一个共享文件** `apps/web/src/lib/api-proxy.ts`（累积型白名单，150+ 条 `services[]` 元素）与**同一批 codegen 契约产物**。三条结构性纪律让 git 能干净求并：
 
-| 车道 | 服务 | api-proxy 首 token | 插入锚点 | 契约 |
-| --- | --- | --- | --- | --- |
-| 15.1.1.3 | crm | `message-classifications` | `message-sends` 之后 | crm 两份 |
-| 15.2.1.3 | crm | `negative-reviews` | `review-replies` 之后 | crm 两份 |
-| 15.5.2.1 | crm | `care-reminders` | `customer-contacts` 之后 | crm 两份 |
-| 16.1.1.2 | channel | `performance-metrics` | `account-health` 之后 | **只有 channel 两份** |
+| 车道     | 服务    | api-proxy 首 token        | 插入锚点                 | 契约                  |
+| -------- | ------- | ------------------------- | ------------------------ | --------------------- |
+| 15.1.1.3 | crm     | `message-classifications` | `message-sends` 之后     | crm 两份              |
+| 15.2.1.3 | crm     | `negative-reviews`        | `review-replies` 之后    | crm 两份              |
+| 15.5.2.1 | crm     | `care-reminders`          | `customer-contacts` 之后 | crm 两份              |
+| 16.1.1.2 | channel | `performance-metrics`     | `account-health` 之后    | **只有 channel 两份** |
 
 - **四个锚点互不重叠** —— 上一版曾有两条车道选了同一锚点，同位置插入元素 ⇒ git 必然判冲突（结构性，retry 不会自愈）。本批四个锚点两两不同。
 - **既有元素一字未动、不重排** —— 既有条目保持原样，只**新增**独立 `services[]` 元素，不往既有 alternation 里并分支。
@@ -150,14 +150,14 @@ node tools/module-progress/sync.mjs --check
 
 **绿。六个阶段退出码全为 0：**
 
-| 阶段 | 结果 |
-| --- | --- |
-| `./mvnw verify` | **BUILD SUCCESS**（43:42）· **8317 例 0 失败 0 错误**（identity 270 / catalog 1981 / channel 1677 / warehouse 1640 / trade 2383 / crm 366）· 七模块 Reactor 全 SUCCESS |
-| `pnpm typecheck` | exit 0（3 包绿） |
-| `pnpm lint` | exit 0（无新增告警） |
-| `pnpm test` | exit 0 · **478 文件 / 6988 例全绿** |
-| `pnpm --filter @starcon/web build` | exit 0（Next production build 成功） |
-| `sync.mjs --check` | exit 0（✓ 台账与蓝图一致） |
+| 阶段                               | 结果                                                                                                                                                                   |
+| ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `./mvnw verify`                    | **BUILD SUCCESS**（43:42）· **8317 例 0 失败 0 错误**（identity 270 / catalog 1981 / channel 1677 / warehouse 1640 / trade 2383 / crm 366）· 七模块 Reactor 全 SUCCESS |
+| `pnpm typecheck`                   | exit 0（3 包绿）                                                                                                                                                       |
+| `pnpm lint`                        | exit 0（无新增告警）                                                                                                                                                   |
+| `pnpm test`                        | exit 0 · **478 文件 / 6988 例全绿**                                                                                                                                    |
+| `pnpm --filter @starcon/web build` | exit 0（Next production build 成功）                                                                                                                                   |
+| `sync.mjs --check`                 | exit 0（✓ 台账与蓝图一致）                                                                                                                                             |
 
 **L2 抓不到跨车道互相破坏** —— 四个模块分属 crm / channel 两个服务、表命名空间互不重叠、
 api-proxy 四个锚点互不相同、Flyway 版本号预分配，因此本批并入后第一次全量验证即绿。

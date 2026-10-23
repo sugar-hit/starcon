@@ -7,12 +7,12 @@
 
 ## 批次构成
 
-| 车道     | 模块         | 服务    | 迁移 | 分支            | commit    |
-| -------- | ------------ | ------- | ---- | --------------- | --------- |
-| 16.2.1.2 | 拦截执行     | channel | V313 | `feat/16-2-1-2` | `758b2d07` |
-| 16.3.2.2 | EPR/包装法   | channel | V314 | `feat/16-3-2-2` | `6d5c9a93` |
-| 16.4.1.1 | 侵权库       | channel | V315 | `feat/16-4-1-1` | `5902cf71` |
-| 16.5.1.2 | 风险评分     | channel | V316 | `feat/16-5-1-2` | `8c03f805` |
+| 车道     | 模块       | 服务    | 迁移 | 分支            | commit     |
+| -------- | ---------- | ------- | ---- | --------------- | ---------- |
+| 16.2.1.2 | 拦截执行   | channel | V313 | `feat/16-2-1-2` | `758b2d07` |
+| 16.3.2.2 | EPR/包装法 | channel | V314 | `feat/16-3-2-2` | `6d5c9a93` |
+| 16.4.1.1 | 侵权库     | channel | V315 | `feat/16-4-1-1` | `5902cf71` |
+| 16.5.1.2 | 风险评分   | channel | V316 | `feat/16-5-1-2` | `8c03f805` |
 
 **api-proxy 锚点互不重叠**（本批 4 条车道都改 `apps/web/src/lib/api-proxy.ts`）：
 16.2.1.2 → `compliance-rules` 之后／16.3.2.2 → `platform-appeals` 之后／
@@ -231,15 +231,15 @@
 
 **L2 结果：`L2 GREEN`（`L2_EXIT=0`，2026-10-23 03:35:12 → 04:23:50，耗时 48 分 38 秒）**
 
-| 闸 | 命令 | 结果 |
-| --- | ---- | ---- |
-| [1/6] 后端全量 | `backend/./mvnw verify` | **MVN_EXIT=0** —— 8 个模块全 SUCCESS（backend / tenancy / identity / catalog / channel / warehouse / trade / crm），**8693 例 0 失败 0 错误 0 跳过**（catalog 1981 · channel 1928 · trade 2383 · warehouse 1640 · crm 491 · identity 270） |
-| [2/6] 前端 | `pnpm typecheck && pnpm lint && pnpm test` | **TYPECHECK_EXIT=0 / LINT_EXIT=0 / TEST_EXIT=0** —— vitest **502 文件 / 7207 例全绿** |
-| [3/6] Next 构建 | `NEXT_TELEMETRY_DISABLED=1 pnpm --filter @starcon/web build` | **BUILD_EXIT=0** |
-| [4/6] 台账一致 | `node tools/module-progress/sync.mjs --check` | **SYNCCHECK_EXIT=0**（「✓ 台账与蓝图一致」） |
-| [5/6] 回归套件 | `merge-union.itest.mjs` + `python3 -m unittest discover -s tools/codegen` | **ITEST_EXIT=0 / CODEGEN_EXIT=0** |
-| [6/6] 契约闸 | `catalog-contracts.py --spec-dir backend/target/openapi --out-dir .tmp/l2-contract-gate --no-prettier` + 逐字节 diff | **CONTRACT_GENERATE_EXIT=0 / CONTRACT_GATE_EXIT=0 / CONTRACT_TREE_DRIFT_EXIT=0**（工作区契约产物与生成器输出**逐字节一致**，与 HEAD 零漂移） |
-| 附加 | `pnpm turbo run typecheck --force`（绕开 turbo 缓存） | **FORCED_TYPECHECK_EXIT=0** |
+| 闸              | 命令                                                                                                                 | 结果                                                                                                                                                                                                                                       |
+| --------------- | -------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| [1/6] 后端全量  | `backend/./mvnw verify`                                                                                              | **MVN_EXIT=0** —— 8 个模块全 SUCCESS（backend / tenancy / identity / catalog / channel / warehouse / trade / crm），**8693 例 0 失败 0 错误 0 跳过**（catalog 1981 · channel 1928 · trade 2383 · warehouse 1640 · crm 491 · identity 270） |
+| [2/6] 前端      | `pnpm typecheck && pnpm lint && pnpm test`                                                                           | **TYPECHECK_EXIT=0 / LINT_EXIT=0 / TEST_EXIT=0** —— vitest **502 文件 / 7207 例全绿**                                                                                                                                                      |
+| [3/6] Next 构建 | `NEXT_TELEMETRY_DISABLED=1 pnpm --filter @starcon/web build`                                                         | **BUILD_EXIT=0**                                                                                                                                                                                                                           |
+| [4/6] 台账一致  | `node tools/module-progress/sync.mjs --check`                                                                        | **SYNCCHECK_EXIT=0**（「✓ 台账与蓝图一致」）                                                                                                                                                                                               |
+| [5/6] 回归套件  | `merge-union.itest.mjs` + `python3 -m unittest discover -s tools/codegen`                                            | **ITEST_EXIT=0 / CODEGEN_EXIT=0**                                                                                                                                                                                                          |
+| [6/6] 契约闸    | `catalog-contracts.py --spec-dir backend/target/openapi --out-dir .tmp/l2-contract-gate --no-prettier` + 逐字节 diff | **CONTRACT_GENERATE_EXIT=0 / CONTRACT_GATE_EXIT=0 / CONTRACT_TREE_DRIFT_EXIT=0**（工作区契约产物与生成器输出**逐字节一致**，与 HEAD 零漂移）                                                                                               |
+| 附加            | `pnpm turbo run typecheck --force`（绕开 turbo 缓存）                                                                | **FORCED_TYPECHECK_EXIT=0**                                                                                                                                                                                                                |
 
 **合计 15900 例测试全绿**（后端 8693 + 前端 7207），本批 4 个模块的 126 例新测试（38 + 46 + 22 + 20）全部包含在内。
 

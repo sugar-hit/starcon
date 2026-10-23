@@ -111,9 +111,7 @@ describe('16.6.1.1 PII 管理前端模型', () => {
     expect(
       fieldText(
         detail({
-          fields: [
-            { fieldCode: 'NAME', label: '姓名', value: '', masked: true, present: true },
-          ],
+          fields: [{ fieldCode: 'NAME', label: '姓名', value: '', masked: true, present: true }],
         }),
         'NAME',
       ),

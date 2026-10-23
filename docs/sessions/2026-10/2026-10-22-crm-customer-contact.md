@@ -55,7 +55,7 @@ crm 是卷 15 客户与客服的服务，已有 `/crm/knowledge` `/crm/review-re
 ① 蓝图要求「可由各模块自动写入」**真的做出来**（不许占位）；
 ② 硬性要求「**只碰自己的文件**」，而 15.1.1.2 车道正在并行改 `MessageInboxService`；
 ③ 15.1（消息）、15.1.2.1（邮件）与本模块**同服务同库**，
-   而 11 售后在 **trade 服务**（跨服务）。
+而 11 售后在 **trade 服务**（跨服务）。
 
 自检事实：**15.1 与 15.1.2.1 的表就在本服务的库里**（`crm_message` / `crm_buyer_email`），
 所以「自动写入」对它们**不构成跨服务访问**。于是：
@@ -92,13 +92,13 @@ crm 是卷 15 客户与客服的服务，已有 `/crm/knowledge` `/crm/review-re
 
 ## 关键 trade-off 一览
 
-| 取舍 | 选择 | 代价 |
-| --- | --- | --- |
+| 取舍           | 选择                                                           | 代价                                                                                                                  |
+| -------------- | -------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
 | 自动写入的通路 | 同服务用**库内物化触发器**，跨服务用 **ingest 授权 HTTP 入口** | 接触记录与 `crm_message` / `crm_buyer_email` 在 DB 层耦合；trade 侧自动写入**尚未接线**（已如实标 `available=false`） |
-| 退订的表达 | 独立**状态表 + 只追加审计流水**（两张表） | 比「接触记录上一个布尔」多两张表；但换来「现在能不能营销」一次查得到、「曾经发生过什么」查得清 |
-| 营销触达的拦截 | 退订后发生的营销触达**落不了库**（要留痕须显式标违规） | 若真发生了违规触达，必须显式承认才能留痕 —— 代价是操作多一步，换来违规不会被静默洗掉 |
-| 页面路由 | 独立 `/crm/contacts`，**不挂** `/crm/customers` | 少一个「按客户档案进」的入口；换来不越权、不编造客户主数据 |
-| 迁移手法 | **零外键**、触发器做引用校验 | 外键会打破同服务既有测试的 TRUNCATE（仓库既有约定） |
+| 退订的表达     | 独立**状态表 + 只追加审计流水**（两张表）                      | 比「接触记录上一个布尔」多两张表；但换来「现在能不能营销」一次查得到、「曾经发生过什么」查得清                        |
+| 营销触达的拦截 | 退订后发生的营销触达**落不了库**（要留痕须显式标违规）         | 若真发生了违规触达，必须显式承认才能留痕 —— 代价是操作多一步，换来违规不会被静默洗掉                                  |
+| 页面路由       | 独立 `/crm/contacts`，**不挂** `/crm/customers`                | 少一个「按客户档案进」的入口；换来不越权、不编造客户主数据                                                            |
+| 迁移手法       | **零外键**、触发器做引用校验                                   | 外键会打破同服务既有测试的 TRUNCATE（仓库既有约定）                                                                   |
 
 ## 文件清单
 
@@ -106,8 +106,8 @@ crm 是卷 15 客户与客服的服务，已有 `/crm/knowledge` `/crm/review-re
 
 - `backend/services/crm/src/main/resources/db/migration/V299__crm_customer_contact.sql`
   —— 三张新表 + RLS（ENABLE **与** FORCE，策略名 `isolation`，USING 与 WITH CHECK 同表达式）
-  + GRANT（表与**序列单独**授权）+ `REVOKE ALL ON flyway_schema_history FROM crm_app`
-  + 5 个守卫触发器 + 2 个库内物化触发器。**零外键、零 ALTER 任何既有表。**
+  - GRANT（表与**序列单独**授权）+ `REVOKE ALL ON flyway_schema_history FROM crm_app`
+  - 5 个守卫触发器 + 2 个库内物化触发器。**零外键、零 ALTER 任何既有表。**
 - `backend/services/crm/src/main/java/com/starcon/crm/CustomerContactModels.java`
 - `backend/services/crm/src/main/java/com/starcon/crm/CustomerContactService.java`
 - `backend/services/crm/src/main/java/com/starcon/crm/CustomerContactController.java`
@@ -143,7 +143,7 @@ crm 是卷 15 客户与客服的服务，已有 `/crm/knowledge` `/crm/review-re
 - 契约：6 个服务导出 OpenAPI → `python3 tools/codegen/catalog-contracts.py --spec-dir backend/target/openapi`
   → **diff 只含 crm**（另 5 个服务的契约文件 codegen 未改动）✅
 - 前端：`pnpm vitest run apps/web/src/components/crm/customer-contact-model.test.ts
-  apps/web/src/app/api/crm/customer-contacts-allowlist.test.ts` → **16 例全绿** ✅
+apps/web/src/app/api/crm/customer-contacts-allowlist.test.ts` → **16 例全绿** ✅
 - **api-proxy 全量 allowlist 回归**（改了共享白名单 ⇒ 必跑）：
   `pnpm vitest run apps/web/src/app/api` → **173 个文件 / 999 例全绿** ✅
 - 额外自查：**整个 crm 服务全量 217 例全绿** ——

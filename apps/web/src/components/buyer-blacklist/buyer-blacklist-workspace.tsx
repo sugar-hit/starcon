@@ -232,7 +232,9 @@ export function BuyerBlacklistWorkspace() {
     setNotice(null);
     try {
       await submitAppeal(detail.entry.entryId, appealReason);
-      setNotice('申诉已提交，等待裁决。🔴 申诉通过 ⇒ 解除；申诉驳回 ⇒ 维持黑名单 —— 两种都会留痕。');
+      setNotice(
+        '申诉已提交，等待裁决。🔴 申诉通过 ⇒ 解除；申诉驳回 ⇒ 维持黑名单 —— 两种都会留痕。',
+      );
       setAppealReason('');
       await openDetail(detail.entry.entryId);
     } catch (e) {
@@ -285,11 +287,13 @@ export function BuyerBlacklistWorkspace() {
   }, [checkForm, loadFlags]);
 
   const entryPages = useMemo(
-    () => (page ? Math.max(1, Math.ceil(page.total / Math.max(1, page.size || ENTRY_PAGE_SIZE))) : 1),
+    () =>
+      page ? Math.max(1, Math.ceil(page.total / Math.max(1, page.size || ENTRY_PAGE_SIZE))) : 1,
     [page],
   );
   const flagPages = useMemo(
-    () => (flags ? Math.max(1, Math.ceil(flags.total / Math.max(1, flags.size || FLAG_PAGE_SIZE))) : 1),
+    () =>
+      flags ? Math.max(1, Math.ceil(flags.total / Math.max(1, flags.size || FLAG_PAGE_SIZE))) : 1,
     [flags],
   );
 
@@ -333,7 +337,11 @@ export function BuyerBlacklistWorkspace() {
         <StatCard label="黑名单登记" value={page?.counts.total ?? 0} polarity="neutral" />
         <StatCard label="生效中" value={page?.counts.active ?? 0} polarity="negative" />
         <StatCard label="已解除" value={page?.counts.released ?? 0} polarity="neutral" />
-        <StatCard label="极高 / 高风险" value={(page?.counts.critical ?? 0) + (page?.counts.high ?? 0)} polarity="negative" />
+        <StatCard
+          label="极高 / 高风险"
+          value={(page?.counts.critical ?? 0) + (page?.counts.high ?? 0)}
+          polarity="negative"
+        />
       </div>
 
       {/* ---------------- 能力声明 ---------------- */}
@@ -347,13 +355,17 @@ export function BuyerBlacklistWorkspace() {
               {caps.capabilities.map((c) => (
                 <div key={c.capabilityCode} className="border-border rounded-md border px-3 py-2">
                   <div className="flex items-center justify-between gap-2">
-                    <span className="text-copy-13 text-foreground font-medium">{c.capabilityLabel}</span>
+                    <span className="text-copy-13 text-foreground font-medium">
+                      {c.capabilityLabel}
+                    </span>
                     <Badge tone={c.available ? 'success' : 'warning'}>
                       {c.available ? '本模块负责' : '不代劳'}
                     </Badge>
                   </div>
                   {!c.available && c.ownerModule ? (
-                    <p className="text-copy-12 text-muted-foreground mt-1">归属模块：{c.ownerModule}</p>
+                    <p className="text-copy-12 text-muted-foreground mt-1">
+                      归属模块：{c.ownerModule}
+                    </p>
                   ) : null}
                   <p className="text-copy-12 text-muted-foreground mt-1">{c.impact}</p>
                 </div>
@@ -522,7 +534,12 @@ export function BuyerBlacklistWorkspace() {
                 onChange={(e) => setAuto({ ...auto, reason: e.target.value })}
               />
             </label>
-            <Button size="sm" variant="outline" disabled={busy} onClick={() => void doRegisterAuto()}>
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={busy}
+              onClick={() => void doRegisterAuto()}
+            >
               按信号自动登记
             </Button>
           </div>
@@ -593,7 +610,11 @@ export function BuyerBlacklistWorkspace() {
           <div className="space-y-3">
             <div className="space-y-2">
               {page.items.map((entry) => (
-                <EntryRow key={entry.entryId} entry={entry} onOpen={() => void openDetail(entry.entryId)} />
+                <EntryRow
+                  key={entry.entryId}
+                  entry={entry}
+                  onOpen={() => void openDetail(entry.entryId)}
+                />
               ))}
             </div>
             <div className="text-copy-12 text-muted-foreground flex items-center justify-between">
@@ -647,8 +668,8 @@ export function BuyerBlacklistWorkspace() {
               <div className="border-border rounded-md border px-3 py-2">
                 <div className="text-copy-12 text-muted-foreground">买家</div>
                 <div className="text-copy-13 text-foreground">
-                  {detail.entry.buyerName || '（未登记姓名）'} · {detail.entry.buyerPhone || '无电话'} ·{' '}
-                  {detail.entry.buyerEmail || '无邮箱'}
+                  {detail.entry.buyerName || '（未登记姓名）'} ·{' '}
+                  {detail.entry.buyerPhone || '无电话'} · {detail.entry.buyerEmail || '无邮箱'}
                 </div>
                 <div className="text-copy-12 text-muted-foreground mt-1 break-all">
                   主体键：{detail.entry.buyerKey}
@@ -690,7 +711,9 @@ export function BuyerBlacklistWorkspace() {
                     <div className="text-copy-12 text-muted-foreground mt-1">
                       {event.occurredAt} · {event.actor} · {event.fromStatus} → {event.toStatus}
                     </div>
-                    <div className="text-copy-12 text-foreground mt-1 whitespace-pre-line">{event.reason}</div>
+                    <div className="text-copy-12 text-foreground mt-1 whitespace-pre-line">
+                      {event.reason}
+                    </div>
                   </div>
                 ))}
               </div>
@@ -703,15 +726,29 @@ export function BuyerBlacklistWorkspace() {
               </div>
               {detail.appeals.length === 0 ? (
                 <p className="text-copy-12 text-muted-foreground">
-                  还没有申诉。🔴 蓝图要求「黑名单应支持申诉解除」—— 永久不解除会让误判的正常买家永久损失。
+                  还没有申诉。🔴 蓝图要求「黑名单应支持申诉解除」——
+                  永久不解除会让误判的正常买家永久损失。
                 </p>
               ) : (
                 <div className="space-y-2">
                   {detail.appeals.map((appeal) => (
-                    <div key={appeal.appealId} className="border-border rounded-md border px-3 py-2">
+                    <div
+                      key={appeal.appealId}
+                      className="border-border rounded-md border px-3 py-2"
+                    >
                       <div className="flex flex-wrap items-center justify-between gap-2">
-                        <span className="text-copy-13 text-foreground">{decisionLabel(appeal.decision)}</span>
-                        <Badge tone={appeal.decision === 'APPROVED' ? 'success' : appeal.decision === 'REJECTED' ? 'danger' : 'warning'}>
+                        <span className="text-copy-13 text-foreground">
+                          {decisionLabel(appeal.decision)}
+                        </span>
+                        <Badge
+                          tone={
+                            appeal.decision === 'APPROVED'
+                              ? 'success'
+                              : appeal.decision === 'REJECTED'
+                                ? 'danger'
+                                : 'warning'
+                          }
+                        >
                           {appeal.decision}
                         </Badge>
                       </div>
@@ -767,7 +804,12 @@ export function BuyerBlacklistWorkspace() {
                     value={releaseReason}
                     onChange={(e) => setReleaseReason(e.target.value)}
                   />
-                  <Button size="sm" variant="outline" disabled={busy} onClick={() => void doRelease()}>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    disabled={busy}
+                    onClick={() => void doRelease()}
+                  >
                     解除（留痕）
                   </Button>
                 </div>
@@ -778,7 +820,12 @@ export function BuyerBlacklistWorkspace() {
                     value={appealReason}
                     onChange={(e) => setAppealReason(e.target.value)}
                   />
-                  <Button size="sm" variant="outline" disabled={busy} onClick={() => void doSubmitAppeal()}>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    disabled={busy}
+                    onClick={() => void doSubmitAppeal()}
+                  >
                     提交申诉
                   </Button>
                 </div>
@@ -841,7 +888,7 @@ export function BuyerBlacklistWorkspace() {
           </Button>
 
           {checkResult && (
-            <div className="border-border rounded-md border px-3 py-2 space-y-2">
+            <div className="border-border space-y-2 rounded-md border px-3 py-2">
               {checkResult.blacklisted ? (
                 <>
                   <div className="flex flex-wrap items-center gap-2">
@@ -854,10 +901,13 @@ export function BuyerBlacklistWorkspace() {
                       风险等级 {checkResult.riskLevelLabel ?? checkResult.riskLevel}
                     </Badge>
                     <Badge tone={actionTone(checkResult.recommendedAction ?? '')}>
-                      {checkResult.recommendedActionLabel ?? actionLabel(checkResult.recommendedAction ?? '')}
+                      {checkResult.recommendedActionLabel ??
+                        actionLabel(checkResult.recommendedAction ?? '')}
                     </Badge>
                   </div>
-                  <div className="text-copy-12 text-muted-foreground">原因：{checkResult.reason}</div>
+                  <div className="text-copy-12 text-muted-foreground">
+                    原因：{checkResult.reason}
+                  </div>
                   <div className="text-copy-12 text-muted-foreground">
                     拦截标记已落库：{checkResult.flagId ?? '—'}
                   </div>
@@ -879,7 +929,9 @@ export function BuyerBlacklistWorkspace() {
               </div>
               <div className="text-copy-12 text-muted-foreground">
                 最近一次风险评分（16.5.1.2）：{scoreText(checkResult.latestRiskScore)}
-                {checkResult.latestEvaluationStatus ? ` · ${checkResult.latestEvaluationStatus}` : ''}
+                {checkResult.latestEvaluationStatus
+                  ? ` · ${checkResult.latestEvaluationStatus}`
+                  : ''}
                 {checkResult.latestRecommendedAction
                   ? ` · 建议 ${actionLabel(checkResult.latestRecommendedAction)}`
                   : ''}

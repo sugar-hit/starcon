@@ -67,12 +67,7 @@ describe('16.5.2.1 登录与访问安全前端模型', () => {
     ]);
     expect(IP_MODES.map((m) => m.value)).toEqual(['DISABLED', 'REPORT_ONLY', 'ENFORCE']);
     expect(MFA_FACTORS.map((f) => f.value)).toEqual(['TOTP', 'SMS', 'EMAIL']);
-    expect(MFA_STATUSES.map((s) => s.value)).toEqual([
-      'PENDING',
-      'ACTIVE',
-      'DISABLED',
-      'REVOKED',
-    ]);
+    expect(MFA_STATUSES.map((s) => s.value)).toEqual(['PENDING', 'ACTIVE', 'DISABLED', 'REVOKED']);
   });
 
   it('严重度的色调：严重红、高黄、中蓝、低中性 —— 低危不是「没事」', () => {
@@ -165,7 +160,12 @@ describe('16.5.2.1 登录与访问安全前端模型', () => {
     expect(notInAllowlist.allowed).toBe(true);
     expect(ipCheckText(notInAllowlist)).toContain('仍能进');
 
-    const enforced: AccessSecurityIpCheck = { ...notInAllowlist, mode: 'ENFORCE', enforce: true, allowed: false };
+    const enforced: AccessSecurityIpCheck = {
+      ...notInAllowlist,
+      mode: 'ENFORCE',
+      enforce: true,
+      allowed: false,
+    };
     expect(ipCheckText(enforced)).toContain('不能进');
 
     const inside: AccessSecurityIpCheck = {

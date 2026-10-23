@@ -10,6 +10,7 @@
 蓝图原文（`docs/product/capability-blueprint/16-compliance-and-risk.md` 第 161-166 行）：
 
 > ### 16.3.2.2 EPR/包装法
+>
 > - **职责**：管理 EPR 与包装法合规（德国 LUCID、包装注册、电池法、WEEE 等）：注册号、适用国家与品类、申报周期与关联费用。
 > - **输入**：注册信息；适用规则；申报数据。
 > - **输出**：EPR 档案 + 合规状态 + 费用记录。
@@ -48,58 +49,58 @@
 
 ## 关键 trade-off
 
-| 决策点 | 取舍 | 理由 |
-| --- | --- | --- |
-| 判定实现位置：Java 里算 vs **DB 函数** | **DB 函数 `epr_gate_findings`** | 「放行路径必须真的读服务端结论」。DB 函数让**服务层端点与 DB 触发器共用同一份判定**，杜绝两套实现漂移。Java 侧只做展示口径与编排 |
-| 闸门拦在哪：前端提示 vs **DB 触发器** | **DB 触发器**（两个真实放行口） | 蓝图加粗句是硬要求；前端显示不是防线。触发器只加函数、零 ALTER 既有表，跨车道 DDL 回归面 = 0 |
-| 制度粒度：沿用上游辖区级号 vs **制度级** | **制度级独立拥有** | 同一个国家下 LUCID / 包装注册 / 电池法 / WEEE 各有自己的注册号、申报周期与费用。粗 / 细两层，不互相复制 |
-| 「不适用」怎么定：只看参考表 vs **参考表 + 租户声明** | **两者都要** | 参考表管「该国要求哪些制度」；租户声明管「该制度在我的业务里适不适用」（例：只卖服装的卖家在德国不需要 WEEE）。只有参考表会把不该拦的全拦了；只有声明会漏拦 |
-| 有效期没记：算「没过期」 vs **判不了** | **判不了**（`VALIDITY_UNKNOWN`） | 没记有效期**不等于**没过期。但「判不了」也**不许默认放行** ⇒ 阻断 + 原因单列 |
-| 登记的修改：就地改 vs **版本化** | **版本化** | 「改了就是新的生效版本，历史判定按当时那版算」。就地改当前版本的事实在 DB 层被触发器直接拒 |
-| 刊登闸门的口径：品类维度 vs **国家维度** | **DB 层按国家维度** | 刊登入口只有平台类目路径（`category_path`，平台侧原文），**无法可靠地**映射到 EPR 品类 —— 在 DB 层猜一个映射就是编造。服务层端点同时给出**两份口径**（`allowed` 按请求口径 + `countryScope` = DB 层强制的口径），界面必须都显示 |
-| 适用品类的来源 | **本模块自己的 `epr_category`** | EPR 品类（包装 / 电子 / 电池 …）是 EPR 制度的适用维度，**不是**平台商品类目，混用会得出错误口径 |
-| 数据范围：RESTRICTIVE 收敛 vs **只有 isolation** | **只有 isolation** | EPR 档案是**租户级**合规事实，不挂在任何一家店下面；套店铺收敛会让「这个租户在德国注册了没有」凭空消失（同 V312 法人主体的理由） |
-| 费用的跨币种汇总 | **按币种分组**，不给总数 | EUR + USD 不是钱。给一个总数就是错的口径 |
-| 金额的传输格式 | **十进制字符串** | 让金额从头到尾不经过浮点。`numeric(19,4)` 读回来就是 4 位小数，前端原样显示 |
-| 申报期：存「上次什么时候报的」 vs **周期 + 起止月份** | **周期 + 起止月份** | 「上次报的」是**不需要**的事实（第一次报之前没有「上次」）。周期 + 起止月份能算出「当前是否在申报期内」，没记起止月份是**判不了**不是「不在期内」 |
+| 决策点                                                | 取舍                             | 理由                                                                                                                                                                                                                            |
+| ----------------------------------------------------- | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 判定实现位置：Java 里算 vs **DB 函数**                | **DB 函数 `epr_gate_findings`**  | 「放行路径必须真的读服务端结论」。DB 函数让**服务层端点与 DB 触发器共用同一份判定**，杜绝两套实现漂移。Java 侧只做展示口径与编排                                                                                                |
+| 闸门拦在哪：前端提示 vs **DB 触发器**                 | **DB 触发器**（两个真实放行口）  | 蓝图加粗句是硬要求；前端显示不是防线。触发器只加函数、零 ALTER 既有表，跨车道 DDL 回归面 = 0                                                                                                                                    |
+| 制度粒度：沿用上游辖区级号 vs **制度级**              | **制度级独立拥有**               | 同一个国家下 LUCID / 包装注册 / 电池法 / WEEE 各有自己的注册号、申报周期与费用。粗 / 细两层，不互相复制                                                                                                                         |
+| 「不适用」怎么定：只看参考表 vs **参考表 + 租户声明** | **两者都要**                     | 参考表管「该国要求哪些制度」；租户声明管「该制度在我的业务里适不适用」（例：只卖服装的卖家在德国不需要 WEEE）。只有参考表会把不该拦的全拦了；只有声明会漏拦                                                                     |
+| 有效期没记：算「没过期」 vs **判不了**                | **判不了**（`VALIDITY_UNKNOWN`） | 没记有效期**不等于**没过期。但「判不了」也**不许默认放行** ⇒ 阻断 + 原因单列                                                                                                                                                    |
+| 登记的修改：就地改 vs **版本化**                      | **版本化**                       | 「改了就是新的生效版本，历史判定按当时那版算」。就地改当前版本的事实在 DB 层被触发器直接拒                                                                                                                                      |
+| 刊登闸门的口径：品类维度 vs **国家维度**              | **DB 层按国家维度**              | 刊登入口只有平台类目路径（`category_path`，平台侧原文），**无法可靠地**映射到 EPR 品类 —— 在 DB 层猜一个映射就是编造。服务层端点同时给出**两份口径**（`allowed` 按请求口径 + `countryScope` = DB 层强制的口径），界面必须都显示 |
+| 适用品类的来源                                        | **本模块自己的 `epr_category`**  | EPR 品类（包装 / 电子 / 电池 …）是 EPR 制度的适用维度，**不是**平台商品类目，混用会得出错误口径                                                                                                                                 |
+| 数据范围：RESTRICTIVE 收敛 vs **只有 isolation**      | **只有 isolation**               | EPR 档案是**租户级**合规事实，不挂在任何一家店下面；套店铺收敛会让「这个租户在德国注册了没有」凭空消失（同 V312 法人主体的理由）                                                                                                |
+| 费用的跨币种汇总                                      | **按币种分组**，不给总数         | EUR + USD 不是钱。给一个总数就是错的口径                                                                                                                                                                                        |
+| 金额的传输格式                                        | **十进制字符串**                 | 让金额从头到尾不经过浮点。`numeric(19,4)` 读回来就是 4 位小数，前端原样显示                                                                                                                                                     |
+| 申报期：存「上次什么时候报的」 vs **周期 + 起止月份** | **周期 + 起止月份**              | 「上次报的」是**不需要**的事实（第一次报之前没有「上次」）。周期 + 起止月份能算出「当前是否在申报期内」，没记起止月份是**判不了**不是「不在期内」                                                                               |
 
 ## 文件清单
 
 ### 后端
 
-| 文件 | 说明 |
-| --- | --- |
+| 文件                                                                                          | 说明                                                                                             |
+| --------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
 | `backend/services/channel/src/main/resources/db/migration/V314__channel_epr_registration.sql` | 9 张表 + 7 个触发器 + `epr_gate_findings` 判定函数 + 刊登闸门触发器 + RLS + GRANT + 参考数据种子 |
-| `backend/services/channel/src/main/java/com/starcon/channel/EprRegistrationModels.java` | 传输模型（29 个 record） |
-| `backend/services/channel/src/main/java/com/starcon/channel/EprRegistrationRules.java` | 判定规则（**纯函数**，可单元测试）：申报期窗口 / 币种与国家码形状 / 判定原因 |
-| `backend/services/channel/src/main/java/com/starcon/channel/EprRegistrationService.java` | 服务层（jOOQ 显式 SQL） |
-| `backend/services/channel/src/main/java/com/starcon/channel/EprRegistrationController.java` | 17 条路径 / 21 个操作 |
+| `backend/services/channel/src/main/java/com/starcon/channel/EprRegistrationModels.java`       | 传输模型（29 个 record）                                                                         |
+| `backend/services/channel/src/main/java/com/starcon/channel/EprRegistrationRules.java`        | 判定规则（**纯函数**，可单元测试）：申报期窗口 / 币种与国家码形状 / 判定原因                     |
+| `backend/services/channel/src/main/java/com/starcon/channel/EprRegistrationService.java`      | 服务层（jOOQ 显式 SQL）                                                                          |
+| `backend/services/channel/src/main/java/com/starcon/channel/EprRegistrationController.java`   | 17 条路径 / 21 个操作                                                                            |
 
 ### 测试
 
-| 文件 | 例数 | 覆盖 |
-| --- | --- | --- |
-| `backend/services/channel/src/test/java/com/starcon/channel/EprRegistrationRulesTest.java` | 15 | 判定规则纯函数 |
-| `backend/services/channel/src/test/java/com/starcon/channel/EprRegistrationIntegrationTest.java` | 28 | Testcontainers 真实 PostgreSQL 16 |
-| `backend/services/channel/src/test/java/com/starcon/channel/EprRegistrationTenancyIntegrationTest.java` | 3 | **租户隔离三断言** |
+| 文件                                                                                                    | 例数 | 覆盖                              |
+| ------------------------------------------------------------------------------------------------------- | ---- | --------------------------------- |
+| `backend/services/channel/src/test/java/com/starcon/channel/EprRegistrationRulesTest.java`              | 15   | 判定规则纯函数                    |
+| `backend/services/channel/src/test/java/com/starcon/channel/EprRegistrationIntegrationTest.java`        | 28   | Testcontainers 真实 PostgreSQL 16 |
+| `backend/services/channel/src/test/java/com/starcon/channel/EprRegistrationTenancyIntegrationTest.java` | 3    | **租户隔离三断言**                |
 
 ### 前端
 
-| 文件 | 说明 |
-| --- | --- |
-| `apps/web/src/components/epr-registration/epr-registration-model.ts` | 前端模型 + API 调用 + 展示口径 |
-| `apps/web/src/components/epr-registration/epr-registration-model.test.ts` | 展示口径单测（13 例） |
-| `apps/web/src/components/epr-registration/epr-registration-workspace.tsx` | 工作区（刊登闸门 / 合规状态 / 覆盖反查 / 档案 / 申报期 / 费用 / 不适用声明） |
-| `apps/web/src/app/compliance/epr/page.tsx` | 页面入口 `/compliance/epr` |
-| `apps/web/src/app/api/channel/epr-registration-allowlist.test.ts` | api-proxy 白名单双向断言（6 例） |
-| `apps/web/src/lib/api-proxy.ts` | **新增一条独立 `services[]` 元素**（首 token `epr-registrations`，锚点在 `platform-appeals` 之后），既有条目一字未动、不重排 |
+| 文件                                                                      | 说明                                                                                                                         |
+| ------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `apps/web/src/components/epr-registration/epr-registration-model.ts`      | 前端模型 + API 调用 + 展示口径                                                                                               |
+| `apps/web/src/components/epr-registration/epr-registration-model.test.ts` | 展示口径单测（13 例）                                                                                                        |
+| `apps/web/src/components/epr-registration/epr-registration-workspace.tsx` | 工作区（刊登闸门 / 合规状态 / 覆盖反查 / 档案 / 申报期 / 费用 / 不适用声明）                                                 |
+| `apps/web/src/app/compliance/epr/page.tsx`                                | 页面入口 `/compliance/epr`                                                                                                   |
+| `apps/web/src/app/api/channel/epr-registration-allowlist.test.ts`         | api-proxy 白名单双向断言（6 例）                                                                                             |
+| `apps/web/src/lib/api-proxy.ts`                                           | **新增一条独立 `services[]` 元素**（首 token `epr-registrations`，锚点在 `platform-appeals` 之后），既有条目一字未动、不重排 |
 
 ### 契约与台账
 
-| 文件 | 说明 |
-| --- | --- |
-| `packages/api-contracts/src/channel.openapi.json` | codegen 产物（channel 纯新增 17 条路径） |
-| `packages/api-contracts/src/contracts/channel.ts` | codegen 产物（纯新增 35 个类型） |
+| 文件                                                   | 说明                                       |
+| ------------------------------------------------------ | ------------------------------------------ |
+| `packages/api-contracts/src/channel.openapi.json`      | codegen 产物（channel 纯新增 17 条路径）   |
+| `packages/api-contracts/src/contracts/channel.ts`      | codegen 产物（纯新增 35 个类型）           |
 | `docs/product/capability-blueprint/module-progress.md` | **只改本模块那一行**的「状态」「证据」两格 |
 
 ## 关键事实与验证

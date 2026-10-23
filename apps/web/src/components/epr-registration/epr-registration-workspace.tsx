@@ -241,28 +241,39 @@ export function EprRegistrationWorkspace({ focus }: Props) {
     setLoading(true);
     setError(null);
     try {
-      const [capsResult, regimeResult, categoryResult, shopResult, regResult, coverageResult, complianceResult, filingResult, feeResult, summaryResult, exemptionResult] =
-        await Promise.all([
-          fetchCapabilities(),
-          fetchRegimes(),
-          fetchCategories(),
-          fetchShops(),
-          fetchRegistrations(regPage, PAGE_SIZE, {
-            regimeCode: regimeCode || undefined,
-            status: status || undefined,
-            validityKind: validityKind || undefined,
-            countryCode: countryCode || undefined,
-          }),
-          fetchCoverage(coveragePage, PAGE_SIZE, {
-            countryCode: countryCode || undefined,
-            regimeCode: regimeCode || undefined,
-          }),
-          fetchComplianceStatus(),
-          fetchFilings(0, PAGE_SIZE),
-          fetchFees(feePage, PAGE_SIZE, { currency: feeCurrency || undefined }),
-          fetchFeeSummary({ currency: feeCurrency || undefined }),
-          fetchExemptions(0, PAGE_SIZE),
-        ]);
+      const [
+        capsResult,
+        regimeResult,
+        categoryResult,
+        shopResult,
+        regResult,
+        coverageResult,
+        complianceResult,
+        filingResult,
+        feeResult,
+        summaryResult,
+        exemptionResult,
+      ] = await Promise.all([
+        fetchCapabilities(),
+        fetchRegimes(),
+        fetchCategories(),
+        fetchShops(),
+        fetchRegistrations(regPage, PAGE_SIZE, {
+          regimeCode: regimeCode || undefined,
+          status: status || undefined,
+          validityKind: validityKind || undefined,
+          countryCode: countryCode || undefined,
+        }),
+        fetchCoverage(coveragePage, PAGE_SIZE, {
+          countryCode: countryCode || undefined,
+          regimeCode: regimeCode || undefined,
+        }),
+        fetchComplianceStatus(),
+        fetchFilings(0, PAGE_SIZE),
+        fetchFees(feePage, PAGE_SIZE, { currency: feeCurrency || undefined }),
+        fetchFeeSummary({ currency: feeCurrency || undefined }),
+        fetchExemptions(0, PAGE_SIZE),
+      ]);
       setCaps(capsResult);
       setRegimes(regimeResult);
       setCategories(categoryResult);
@@ -316,7 +327,9 @@ export function EprRegistrationWorkspace({ focus }: Props) {
   const runBatchGate = useCallback(
     () =>
       run(async () => {
-        const countries = [...new Set((shops?.items ?? []).flatMap((shop) => shop.eprCountryCodes))];
+        const countries = [
+          ...new Set((shops?.items ?? []).flatMap((shop) => shop.eprCountryCodes)),
+        ];
         if (countries.length === 0) {
           throw new Error('这个租户下还没有店铺在需要 EPR 的国家销售');
         }
@@ -418,7 +431,8 @@ export function EprRegistrationWorkspace({ focus }: Props) {
     () =>
       run(async () => {
         if (!exemptCountry.trim()) throw new Error('必须选国家');
-        if (!exemptReason.trim()) throw new Error('理由必填 —— 没有理由的「不适用」就是漏登记的遮羞布');
+        if (!exemptReason.trim())
+          throw new Error('理由必填 —— 没有理由的「不适用」就是漏登记的遮羞布');
         await createExemption({
           countryCode: exemptCountry.trim().toUpperCase(),
           regimeCode: exemptRegime,
@@ -438,7 +452,8 @@ export function EprRegistrationWorkspace({ focus }: Props) {
 
   /** 🔴 空态三态：没有店铺 ≠ 筛选无结果 ≠ 一条登记都没有。 */
   const emptyKind = useMemo(
-    () => emptyStateKind(shops?.total ?? 0, registrations?.total ?? 0, (registrations?.total ?? 0) > 0),
+    () =>
+      emptyStateKind(shops?.total ?? 0, registrations?.total ?? 0, (registrations?.total ?? 0) > 0),
     [shops, registrations],
   );
 
@@ -455,7 +470,7 @@ export function EprRegistrationWorkspace({ focus }: Props) {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center gap-2 py-16 text-muted-foreground">
+      <div className="text-muted-foreground flex items-center justify-center gap-2 py-16">
         <Loader2 className="size-4 animate-spin" />
         <span className="text-label-13">正在加载 EPR / 包装法…</span>
       </div>
@@ -466,7 +481,7 @@ export function EprRegistrationWorkspace({ focus }: Props) {
     return (
       <SectionCard title="EPR / 包装法">
         <EmptyState
-          icon={<TriangleAlert className="size-8 text-destructive" />}
+          icon={<TriangleAlert className="text-destructive size-8" />}
           title="EPR / 包装法加载失败"
           description={error}
           action={
@@ -501,7 +516,7 @@ export function EprRegistrationWorkspace({ focus }: Props) {
 
       {error && (
         <SectionCard>
-          <div className="text-destructive flex items-center gap-2 text-copy-13">
+          <div className="text-destructive text-copy-13 flex items-center gap-2">
             <TriangleAlert className="size-4" />
             {error}
           </div>
@@ -562,7 +577,7 @@ export function EprRegistrationWorkspace({ focus }: Props) {
               ))}
             </ul>
           )}
-          <p className="text-muted-foreground mt-3 text-copy-12">{caps.enforcementNote}</p>
+          <p className="text-muted-foreground text-copy-12 mt-3">{caps.enforcementNote}</p>
         </SectionCard>
       )}
 
@@ -1014,7 +1029,9 @@ export function EprRegistrationWorkspace({ focus }: Props) {
                     {item.currency} {item.amount}
                   </span>
                   <Badge tone="info">{item.billingCycleLabel}</Badge>
-                  <span className="text-muted-foreground">{item.statusLabel || feeStatusLabel(item.status)}</span>
+                  <span className="text-muted-foreground">
+                    {item.statusLabel || feeStatusLabel(item.status)}
+                  </span>
                   <span className="text-muted-foreground">
                     {item.paidByLabel || paidByLabel(item.paidBy)}
                   </span>
@@ -1092,7 +1109,8 @@ export function EprRegistrationWorkspace({ focus }: Props) {
             <ModalTitle>{editing ? '改 EPR 登记（生成新版本）' : '登记一条 EPR 登记'}</ModalTitle>
             <ModalDescription>
               制度从**受控码表**里选（值域钉死在 DB 层，不接受自由文本）。国家与品类都是**多对多**：
-              一条登记适用多个国家 + 多个品类。改一条 = 关掉当前版本 + 插入新版本，**生效时刻不许回填**。
+              一条登记适用多个国家 + 多个品类。改一条 = 关掉当前版本 +
+              插入新版本，**生效时刻不许回填**。
             </ModalDescription>
           </ModalHeader>
           <div className="space-y-3">
@@ -1145,7 +1163,9 @@ export function EprRegistrationWorkspace({ focus }: Props) {
             </label>
             <div className="grid gap-3 sm:grid-cols-2">
               <label className="block space-y-1">
-                <span className="text-copy-13 text-muted-foreground">有效期起（ISO-8601 带偏移量）</span>
+                <span className="text-copy-13 text-muted-foreground">
+                  有效期起（ISO-8601 带偏移量）
+                </span>
                 <Input
                   value={form.validFrom}
                   onChange={(e) => setForm({ ...form, validFrom: e.target.value })}
@@ -1153,7 +1173,9 @@ export function EprRegistrationWorkspace({ focus }: Props) {
                 />
               </label>
               <label className="block space-y-1">
-                <span className="text-copy-13 text-muted-foreground">有效期止（ISO-8601 带偏移量）</span>
+                <span className="text-copy-13 text-muted-foreground">
+                  有效期止（ISO-8601 带偏移量）
+                </span>
                 <Input
                   value={form.validUntil}
                   onChange={(e) => setForm({ ...form, validUntil: e.target.value })}
@@ -1239,14 +1261,19 @@ export function EprRegistrationWorkspace({ focus }: Props) {
             </div>
             <label className="block space-y-1">
               <span className="text-copy-13 text-muted-foreground">备注</span>
-              <Input value={form.note} onChange={(e) => setForm({ ...form, note: e.target.value })} />
+              <Input
+                value={form.note}
+                onChange={(e) => setForm({ ...form, note: e.target.value })}
+              />
             </label>
           </div>
           <ModalFooter>
             <Button variant="secondary" onClick={() => setFormOpen(false)}>
               取消
             </Button>
-            <Button onClick={() => void submitRegistration()}>{editing ? '保存为新版本' : '登记'}</Button>
+            <Button onClick={() => void submitRegistration()}>
+              {editing ? '保存为新版本' : '登记'}
+            </Button>
           </ModalFooter>
         </ModalContent>
       </Modal>
@@ -1375,8 +1402,8 @@ export function EprRegistrationWorkspace({ focus }: Props) {
           <ModalHeader>
             <ModalTitle>声明「本制度在本国不适用我的业务」</ModalTitle>
             <ModalDescription>
-              这是**租户声明**，不是事实（事实是「有没有登记」）。理由**必填** —— 没有理由的「不适用」
-              就是漏登记的遮羞布。
+              这是**租户声明**，不是事实（事实是「有没有登记」）。理由**必填** ——
+              没有理由的「不适用」 就是漏登记的遮羞布。
             </ModalDescription>
           </ModalHeader>
           <div className="space-y-3">

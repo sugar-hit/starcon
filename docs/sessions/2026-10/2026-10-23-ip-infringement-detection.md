@@ -11,12 +11,12 @@
    四个命名空间彼此隔离。上游侵权库**只读**（jOOQ 显式 SQL），命中项只存**逻辑 id + 快照** ⇒
    上游条目后来停用 / 改写，历史报告仍解释得清「当时命中了什么」。
 2. **图片命中必须进人工复核队列**（蓝图加粗句，DB 层 CHECK 钉死）：`field='IMAGE' ⇒
-   needs_manual_review=true`。且**图片命中永远不单独构成「可判定命中」** ⇒ 全是图片命中的报告，
+needs_manual_review=true`。且**图片命中永远不单独构成「可判定命中」** ⇒ 全是图片命中的报告，
    结论是「待人工复核」而不是「已判定侵权」。
 3. **结论三态**：CLEAR（无命中）/ REVIEW_REQUIRED（有命中但全部待复核）/ ACTION_REQUIRED（有可判定命中）。
    「判不了」与「判了没问题」是两件事。
 4. **本模块不拦截**：下游 16.2.1.2 已交付并拥有拦截权；本模块只产出 `recommended_action`（**建议**）
-   + 预警 + 整改建议，零写下游策略表。
+   - 预警 + 整改建议，零写下游策略表。
 5. **外部商标 / 专利查询走「登记承接」**：本仓没有真实凭据与网络出口 ⇒ 不写打真实域名的假 HTTP
    客户端。照抄 10.4.2.2 报送表 / 16.4.2.2 凭证文件的形状：租户登记查询单 → 登记查回来的结果
    → 检测时与本地侵权库一起比对。能力声明里 `available=false` + `ownerModule` + 影响面逐条标出。
@@ -27,13 +27,13 @@
 
 ## 关键 trade-off
 
-| 决策 | 取舍 |
-| --- | --- |
-| 命中项存**快照**（entry_code / right_type / risk_level）而不是只存外键 | 多存几列，换「条目后来被停用后历史报告仍解释得清」 |
-| 巡检运行**跑完才落行** | 放弃「运行中」可见性，换该表真正 append-only（只给 SELECT,INSERT） |
-| 图片比对是**标识文本比对**（文件名 / alt / URL），**不是**以图搜图 | 能力低于蓝图理想值，但**诚实**；配套「图片命中一律进复核队列」把误判挡在人工环节 |
-| 品牌维度跨服务只读 catalog（`IpDetectionSourcePort`），读不到就说读不到 | 多一次 HTTP 往返，换「读不到」与「没有品牌风险」不混淆 |
-| 关键词按**词边界**匹配、短语按包含匹配 | 「air」不命中「hair」；代价是首尾非字母数字的特征（`C++`）特判放行 |
+| 决策                                                                    | 取舍                                                                             |
+| ----------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| 命中项存**快照**（entry_code / right_type / risk_level）而不是只存外键  | 多存几列，换「条目后来被停用后历史报告仍解释得清」                               |
+| 巡检运行**跑完才落行**                                                  | 放弃「运行中」可见性，换该表真正 append-only（只给 SELECT,INSERT）               |
+| 图片比对是**标识文本比对**（文件名 / alt / URL），**不是**以图搜图      | 能力低于蓝图理想值，但**诚实**；配套「图片命中一律进复核队列」把误判挡在人工环节 |
+| 品牌维度跨服务只读 catalog（`IpDetectionSourcePort`），读不到就说读不到 | 多一次 HTTP 往返，换「读不到」与「没有品牌风险」不混淆                           |
+| 关键词按**词边界**匹配、短语按包含匹配                                  | 「air」不命中「hair」；代价是首尾非字母数字的特征（`C++`）特判放行               |
 
 ## 文件清单
 
@@ -70,7 +70,7 @@
 
 - L0 编译闸：`./mvnw -q compile`（backend）+ `pnpm typecheck` —— 全绿
 - L1 模块闸：`./mvnw -pl services/channel -am test -Dtest='IpDetection*' -Dsurefire.failIfNoSpecifiedTests=false
-  -DfailIfNoSpecifiedTests=false` ⇒ **42 例全绿**（21 + 18 + 3）
+-DfailIfNoSpecifiedTests=false` ⇒ **42 例全绿**（21 + 18 + 3）
 - 前端：`pnpm vitest run apps/web/src/app/api/channel/ip-detection-allowlist.test.ts apps/web/src/components/ip-detection`
   ⇒ 19 例全绿
 - **api-proxy 全量 allowlist 回归**（因为改了 `apps/web/src/lib/api-proxy.ts`）：

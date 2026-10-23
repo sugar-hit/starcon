@@ -95,7 +95,7 @@ api-proxy 新增一条独立 `services[]` 元素（首 token `negative-reviews`�
 - L1 后端：`./mvnw -pl services/crm -am test -Dtest='NegativeReview*'`
   ⇒ **42 例全绿**（25 + 5 + 12）。
 - L1 前端：`pnpm vitest run apps/web/src/components/crm/negative-review-model.test.ts
-  apps/web/src/app/api/crm/negative-reviews-allowlist.test.ts` ⇒ 19 例全绿；
+apps/web/src/app/api/crm/negative-reviews-allowlist.test.ts` ⇒ 19 例全绿；
   `pnpm vitest run apps/web/src/app/api`（**全量 allowlist 回归**）⇒ **177 文件 / 1024 例全绿**。
 - 契约：`python3 tools/codegen/catalog-contracts.py --spec-dir backend/target/openapi`
   （6 个服务的 spec 全部**从本车道基线重新导出**，未复用集成头的产物）。
