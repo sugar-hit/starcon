@@ -275,6 +275,940 @@
         },
         "type": "object"
       },
+      "FinancePayableCapabilities": {
+        "properties": {
+          "capabilities": {
+            "items": {
+              "$ref": "#/components/schemas/FinancePayableCapability"
+            },
+            "type": "array"
+          },
+          "downstreamGaps": {
+            "items": {
+              "$ref": "#/components/schemas/FinancePayableDownstreamGap"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "FinancePayableCapability": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "basis": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "module": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinancePayableCurrencySummary": {
+        "properties": {
+          "amount": {
+            "type": "number"
+          },
+          "count": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "overdueAmount": {
+            "type": "number"
+          },
+          "overdueCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "paidAmount": {
+            "type": "number"
+          },
+          "unpaidAmount": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "FinancePayableDetail": {
+        "properties": {
+          "events": {
+            "items": {
+              "$ref": "#/components/schemas/FinancePayableEventRow"
+            },
+            "type": "array"
+          },
+          "lines": {
+            "items": {
+              "$ref": "#/components/schemas/FinancePayableLineRow"
+            },
+            "type": "array"
+          },
+          "payable": {
+            "$ref": "#/components/schemas/FinancePayableRow"
+          }
+        },
+        "type": "object"
+      },
+      "FinancePayableDownstreamGap": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "group": {
+            "type": "string"
+          },
+          "module": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "ownerService": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinancePayableEventRow": {
+        "properties": {
+          "actorId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "eventType": {
+            "type": "string"
+          },
+          "fromStatus": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "occurredAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "toStatus": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinancePayableImportResult": {
+        "properties": {
+          "imported": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "importedRows": {
+            "items": {
+              "$ref": "#/components/schemas/FinancePayableRow"
+            },
+            "type": "array"
+          },
+          "scanned": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "skipped": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "truncated": {
+            "type": "boolean"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "FinancePayableInput": {
+        "properties": {
+          "baseCurrency": {
+            "nullable": true,
+            "type": "string"
+          },
+          "counterpartyName": {
+            "type": "string"
+          },
+          "counterpartyRef": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "counterpartyType": {
+            "enum": [
+              "SUPPLIER",
+              "CARRIER",
+              "PLATFORM",
+              "OTHER"
+            ],
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "dueDate": {
+            "format": "date",
+            "nullable": true,
+            "type": "string"
+          },
+          "exchangeRate": {
+            "nullable": true,
+            "type": "number"
+          },
+          "lines": {
+            "items": {
+              "$ref": "#/components/schemas/FinancePayableLineInput"
+            },
+            "type": "array"
+          },
+          "note": {
+            "nullable": true,
+            "type": "string"
+          },
+          "source": {
+            "enum": [
+              "PURCHASE_RECEIPT",
+              "LOGISTICS_FEE",
+              "ADVERTISING_FEE",
+              "SUPPLIER_STATEMENT",
+              "PLATFORM_FEE",
+              "MANUAL",
+              "OTHER"
+            ],
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinancePayableLineInput": {
+        "properties": {
+          "amount": {
+            "type": "number"
+          },
+          "description": {
+            "nullable": true,
+            "type": "string"
+          },
+          "quantity": {
+            "nullable": true,
+            "type": "number"
+          },
+          "skuCode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "sourceReference": {
+            "nullable": true,
+            "type": "string"
+          },
+          "unitPrice": {
+            "nullable": true,
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "FinancePayableLineRow": {
+        "properties": {
+          "amount": {
+            "type": "number"
+          },
+          "description": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "lineNo": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "paidAmount": {
+            "type": "number"
+          },
+          "paymentStatus": {
+            "type": "string"
+          },
+          "quantity": {
+            "nullable": true,
+            "type": "number"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "sourceReference": {
+            "nullable": true,
+            "type": "string"
+          },
+          "unitPrice": {
+            "nullable": true,
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "FinancePayableOptionRef": {
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinancePayableOptions": {
+        "properties": {
+          "counterparties": {
+            "items": {
+              "$ref": "#/components/schemas/FinancePayableOptionRef"
+            },
+            "type": "array"
+          },
+          "currencies": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "sources": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "statuses": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "FinancePayablePage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/FinancePayableRow"
+            },
+            "type": "array"
+          },
+          "overdueCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "summaryByCurrency": {
+            "items": {
+              "$ref": "#/components/schemas/FinancePayableCurrencySummary"
+            },
+            "type": "array"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinancePayablePolicyInput": {
+        "properties": {
+          "dueDays": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "enabled": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "note": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinancePayablePolicyRow": {
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "dueDays": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "obligationKind": {
+            "enum": [
+              "PAYABLE",
+              "PREPAYMENT",
+              "COMMITMENT"
+            ],
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "source": {
+            "enum": [
+              "PURCHASE_RECEIPT",
+              "LOGISTICS_FEE",
+              "ADVERTISING_FEE",
+              "SUPPLIER_STATEMENT",
+              "PLATFORM_FEE",
+              "MANUAL",
+              "OTHER"
+            ],
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinancePayablePolicyView": {
+        "properties": {
+          "configured": {
+            "type": "boolean"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "dueDays": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          },
+          "obligationKind": {
+            "enum": [
+              "PAYABLE",
+              "PREPAYMENT",
+              "COMMITMENT"
+            ],
+            "type": "string"
+          },
+          "obligationKindLabel": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "producible": {
+            "type": "boolean"
+          },
+          "source": {
+            "enum": [
+              "PURCHASE_RECEIPT",
+              "LOGISTICS_FEE",
+              "ADVERTISING_FEE",
+              "SUPPLIER_STATEMENT",
+              "PLATFORM_FEE",
+              "MANUAL",
+              "OTHER"
+            ],
+            "type": "string"
+          },
+          "sourceLabel": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinancePayableRow": {
+        "properties": {
+          "amount": {
+            "type": "number"
+          },
+          "baseAmount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "baseCurrency": {
+            "nullable": true,
+            "type": "string"
+          },
+          "confirmedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "counterpartyName": {
+            "type": "string"
+          },
+          "counterpartyRef": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "counterpartyType": {
+            "enum": [
+              "SUPPLIER",
+              "CARRIER",
+              "PLATFORM",
+              "OTHER"
+            ],
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "dueDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "exchangeRate": {
+            "nullable": true,
+            "type": "number"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "paidAmount": {
+            "type": "number"
+          },
+          "payableNo": {
+            "type": "string"
+          },
+          "source": {
+            "enum": [
+              "PURCHASE_RECEIPT",
+              "LOGISTICS_FEE",
+              "ADVERTISING_FEE",
+              "SUPPLIER_STATEMENT",
+              "PLATFORM_FEE",
+              "MANUAL",
+              "OTHER"
+            ],
+            "type": "string"
+          },
+          "sourceReference": {
+            "nullable": true,
+            "type": "string"
+          },
+          "sourceSystem": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "DRAFT",
+              "OPEN",
+              "PARTIALLY_PAID",
+              "PAID",
+              "VOID"
+            ],
+            "type": "string"
+          },
+          "unpaidAmount": {
+            "type": "number"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinancePayableUnpaidItem": {
+        "properties": {
+          "amount": {
+            "type": "number"
+          },
+          "counterpartyName": {
+            "type": "string"
+          },
+          "counterpartyType": {
+            "enum": [
+              "SUPPLIER",
+              "CARRIER",
+              "PLATFORM",
+              "OTHER"
+            ],
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "daysOverdue": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "dueDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "paidAmount": {
+            "type": "number"
+          },
+          "payableId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "payableNo": {
+            "type": "string"
+          },
+          "source": {
+            "enum": [
+              "PURCHASE_RECEIPT",
+              "LOGISTICS_FEE",
+              "ADVERTISING_FEE",
+              "SUPPLIER_STATEMENT",
+              "PLATFORM_FEE",
+              "MANUAL",
+              "OTHER"
+            ],
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "DRAFT",
+              "OPEN",
+              "PARTIALLY_PAID",
+              "PAID",
+              "VOID"
+            ],
+            "type": "string"
+          },
+          "unpaidAmount": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "FinancePayableUnpaidList": {
+        "properties": {
+          "asOfDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "itemCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/FinancePayableUnpaidItem"
+            },
+            "type": "array"
+          },
+          "summaryByCurrency": {
+            "items": {
+              "$ref": "#/components/schemas/FinancePayableCurrencySummary"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "FinancePayableVoidInput": {
+        "properties": {
+          "reason": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinancePrepaymentAllocationInput": {
+        "properties": {
+          "amount": {
+            "type": "number"
+          },
+          "note": {
+            "nullable": true,
+            "type": "string"
+          },
+          "payableId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "targetReference": {
+            "nullable": true,
+            "type": "string"
+          },
+          "targetType": {
+            "enum": [
+              "PAYABLE",
+              "PURCHASE_ORDER"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinancePrepaymentAllocationRow": {
+        "properties": {
+          "allocatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "payableId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "payableNo": {
+            "nullable": true,
+            "type": "string"
+          },
+          "targetReference": {
+            "nullable": true,
+            "type": "string"
+          },
+          "targetType": {
+            "enum": [
+              "PAYABLE",
+              "PURCHASE_ORDER"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinancePrepaymentCurrencyTotal": {
+        "properties": {
+          "currency": {
+            "type": "string"
+          },
+          "unallocatedAmount": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "FinancePrepaymentDetail": {
+        "properties": {
+          "allocations": {
+            "items": {
+              "$ref": "#/components/schemas/FinancePrepaymentAllocationRow"
+            },
+            "type": "array"
+          },
+          "prepayment": {
+            "$ref": "#/components/schemas/FinancePrepaymentRow"
+          }
+        },
+        "type": "object"
+      },
+      "FinancePrepaymentInput": {
+        "properties": {
+          "amount": {
+            "type": "number"
+          },
+          "counterpartyName": {
+            "type": "string"
+          },
+          "counterpartyRef": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "counterpartyType": {
+            "enum": [
+              "SUPPLIER",
+              "CARRIER",
+              "PLATFORM",
+              "OTHER"
+            ],
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "expectedPaidDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "note": {
+            "nullable": true,
+            "type": "string"
+          },
+          "sourceReference": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinancePrepaymentPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/FinancePrepaymentRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "unallocatedByCurrency": {
+            "items": {
+              "$ref": "#/components/schemas/FinancePrepaymentCurrencyTotal"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "FinancePrepaymentRow": {
+        "properties": {
+          "allocatedAmount": {
+            "type": "number"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "counterpartyName": {
+            "type": "string"
+          },
+          "counterpartyRef": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "counterpartyType": {
+            "enum": [
+              "SUPPLIER",
+              "CARRIER",
+              "PLATFORM",
+              "OTHER"
+            ],
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "expectedPaidDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "prepaymentNo": {
+            "type": "string"
+          },
+          "sourceReference": {
+            "nullable": true,
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "OPEN",
+              "PARTIALLY_ALLOCATED",
+              "ALLOCATED",
+              "VOID"
+            ],
+            "type": "string"
+          },
+          "unallocatedAmount": {
+            "type": "number"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinancePrepaymentVoidInput": {
+        "properties": {
+          "reason": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "FinanceReceivableAging": {
         "properties": {
           "asOfDate": {
@@ -1286,6 +2220,793 @@
   },
   "openapi": "3.0.1",
   "paths": {
+    "/finance/payables": {
+      "get": {
+        "operationId": "get_finance_payables",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "source",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "currency",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "counterpartyRef",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "overdueOnly",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dueFrom",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dueTo",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinancePayablePage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "payable-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_finance_payables",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinancePayableInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinancePayableRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "payable-controller"
+        ]
+      }
+    },
+    "/finance/payables/capabilities": {
+      "get": {
+        "operationId": "get_finance_payables_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinancePayableCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "payable-controller"
+        ]
+      }
+    },
+    "/finance/payables/import-ad-spend": {
+      "post": {
+        "operationId": "post_finance_payables_import_ad_spend",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinancePayableImportResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "payable-controller"
+        ]
+      }
+    },
+    "/finance/payables/import-first-mile": {
+      "post": {
+        "operationId": "post_finance_payables_import_first_mile",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinancePayableImportResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "payable-controller"
+        ]
+      }
+    },
+    "/finance/payables/import-purchase-arrivals": {
+      "post": {
+        "operationId": "post_finance_payables_import_purchase_arrivals",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinancePayableImportResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "payable-controller"
+        ]
+      }
+    },
+    "/finance/payables/options": {
+      "get": {
+        "operationId": "get_finance_payables_options",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinancePayableOptions"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "payable-controller"
+        ]
+      }
+    },
+    "/finance/payables/policies": {
+      "get": {
+        "operationId": "get_finance_payables_policies",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/FinancePayablePolicyView"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "payable-controller"
+        ]
+      }
+    },
+    "/finance/payables/policies/{source}": {
+      "put": {
+        "operationId": "put_finance_payables_policies_source",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "source",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "obligationKind",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinancePayablePolicyInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinancePayablePolicyRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "payable-controller"
+        ]
+      }
+    },
+    "/finance/payables/unpaid": {
+      "get": {
+        "operationId": "get_finance_payables_unpaid",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinancePayableUnpaidList"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "payable-controller"
+        ]
+      }
+    },
+    "/finance/payables/{id}": {
+      "get": {
+        "operationId": "get_finance_payables_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinancePayableDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "payable-controller"
+        ]
+      }
+    },
+    "/finance/payables/{id}/void": {
+      "post": {
+        "operationId": "post_finance_payables_id_void",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinancePayableVoidInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinancePayableRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "payable-controller"
+        ]
+      }
+    },
+    "/finance/prepayments": {
+      "get": {
+        "operationId": "get_finance_prepayments",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "currency",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "counterpartyRef",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinancePrepaymentPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "payable-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_finance_prepayments",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinancePrepaymentInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinancePrepaymentRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "payable-controller"
+        ]
+      }
+    },
+    "/finance/prepayments/{id}": {
+      "get": {
+        "operationId": "get_finance_prepayments_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinancePrepaymentDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "payable-controller"
+        ]
+      }
+    },
+    "/finance/prepayments/{id}/allocations": {
+      "post": {
+        "operationId": "post_finance_prepayments_id_allocations",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinancePrepaymentAllocationInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinancePrepaymentDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "payable-controller"
+        ]
+      }
+    },
+    "/finance/prepayments/{id}/void": {
+      "post": {
+        "operationId": "post_finance_prepayments_id_void",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinancePrepaymentVoidInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinancePrepaymentRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "payable-controller"
+        ]
+      }
+    },
     "/finance/receivable-aging/buckets": {
       "get": {
         "operationId": "get_finance_receivable_aging_buckets",
