@@ -20,6 +20,72 @@ const services: readonly {
   fallback: string;
 }[] = [
   {
+    // 12.2.2.1 付款单与审批（finance 服务，卷 12「财务核算」L3 12.2.2 付款下的第一格）。
+    //
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 finance 那条巨型 alternation 里并分支 ——
+    //   既有条目是单行超长正则，多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    //   既有条目**一字未改、也不重排**。
+    //
+    // ---- 插入锚点选在**数组最开头**（本文件第一个元素之前）----
+    //   同批其它车道的插入点是「第一个 `identity/` 之前」「第一个 `warehouse/` 之前」
+    //   与「数组末尾」；本车道落在这里，与它们的插入点相距 600 行以上，并入时 git 能干净求并。
+    //
+    // ---- 首 token「payment-orders」的零命中核对结论 ----
+    //   本文件既有 **204 条** services[] 正则（按 `pattern:` 逐条抽出、剔除行注释后实测）里，
+    //   对本模块 **8 个形状逐一实测零命中**：
+    //     payment-orders / payment-orders/capabilities / payment-orders/options
+    //     payment-orders/exchange-rate
+    //     payment-orders/payable-lines/{uuid}
+    //     payment-orders/{uuid} / payment-orders/{uuid}/submit
+    //     payment-orders/{uuid}/sync-approval
+    //   既有 finance 那支是单行超长 alternation，其首 token 是 `receivables` / `receivable-aging` /
+    //   `payables` / `prepayments` / `payment-plans` / `write-off` / `settlement` / `bad-debt` 等，
+    //   **全不相同**；特别是既有的 `^payment\-plans(?:\/…)?$` 与 `^payment(?:\/…)?$` 形状
+    //   都不匹配 `payment-orders`（首 token 就不同）⇒ 首 token 既是独立字面量，
+    //   也不会被既有分支的前缀吃掉。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   payment-orders                     列表（GET，真分页 + 真筛选 + 真排序 + 按币种分开汇总）
+    //   payment-orders                     建单（POST，草稿）
+    //   payment-orders/{uuid}              单张付款单详情（GET：单头 + 明细 + 分批 + 事件流 + 审批记录）
+    //   payment-orders/{uuid}              改单（PUT，**只限草稿态**）
+    //   payment-orders/capabilities        能力声明（付款执行 / 资金账户未交付 + 归属模块）
+    //   payment-orders/options             筛选项（状态 / 审批状态 / 币种 / 付款方式 / 付款对象 / 付款计划）
+    //   payment-orders/exchange-rate       汇率快照（GET，读 catalog 5.2.2.1）
+    //   payment-orders/payable-lines/{uuid} 某张应付单下可被选中的明细行（GET，只读 12.1.2.1）
+    //   payment-orders/{uuid}/submit        提交审批（POST）
+    //   payment-orders/{uuid}/sync-approval 同步审批结果（POST，读回 17 审批的链路）
+    //
+    // ⚠️ **刻意没有「审批通过 / 审批驳回」**：审批属 17 审批（identity，已交付）——
+    //   本模块只提交、只读回，**不造第二套审批引擎** ⇒ 放行这两个形状会让界面以为
+    //   「本地就能审」，那是一条假的审批路径。
+    //
+    // id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`（不是 `[0-9a-f-]+`）：
+    // 后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行。
+    // 字面量子路径（capabilities / options / exchange-rate / payable-lines）排在 {uuid} 段**之前**判别
+    // —— alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   payment-orders/{uuid}/execute       —— 🔴 付款执行属 12.2.2.2，**未交付**
+    //   payment-orders/{uuid}/pay            —— 同上
+    //   payment-orders/{uuid}/mark-paid      —— 同上
+    //   payment-orders/{uuid}/settle         —— 同上（结算/核销另属 12.2.1.2 / 12.1.1）
+    //   payment-orders/{uuid}/approve        —— 🔴 审批属 17 审批（identity），本模块**不提供**本地审批端点
+    //   payment-orders/{uuid}/reject         —— 同上
+    //   payment-orders/batch                 —— 本模块**没有**批量建单端点
+    //   payment-orders/{uuid}/ledger         —— 🔴 凭证属 12.5.2.1，未交付
+    //   payment-orders/not-a-uuid            —— 非 UUID 段不应被 uuid 分支吃掉
+    //   payment-orders/{uuid}/not-a-shape    —— 多一层仍然 404
+    //   payment-orders/capabilities/{uuid}   —— 字面量段刻意不接 id 段
+    //   payment-orders/options/{uuid}        —— 同上
+    //   payment-orders/payment-orders        —— 交替写错就会互相吃掉，必须反向钉住
+    prefix: 'finance/',
+    env: 'FINANCE_URL',
+    fallback: 'http://127.0.0.1:8087',
+    pattern:
+      /^payment\-orders(?:\/(?:capabilities|options|exchange\-rate|payable\-lines\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:submit|sync\-approval))?))?$/,
+  },
+  {
     // 12.1.1.3 坏账与核销（finance 服务，卷 12「财务核算」L3 12.1.1 应收与资金下的第三格）。
     //
     // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 finance 那条巨型 alternation 里并分支 ——
