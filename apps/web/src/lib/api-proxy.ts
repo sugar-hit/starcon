@@ -10370,6 +10370,65 @@ const services: readonly {
   //   identity/global-search 裸路径：identity 侧只有 recent 一个子路径。
   // ==========================================================================
   {
+    // 12.4.2.1 费用归集（finance 服务，卷 12「财务核算」L3 12.4.2 费用分摊下的第一格）。
+    //
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 finance 那条巨型 alternation 里并分支 ——
+    //   既有条目是单行超长正则，多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    //   既有条目**一字未改、也不重排**。
+    //
+    // ---- 插入锚点选在 global-search 那组之前 ----
+    //   同批其它车道的插入点是「数组最开头」「第一个 identity/ 之前」等；
+    //   本车道落在这里，与它们的插入点相距 10k 行以上，并入时 git 能干净求并。
+    //
+    // ---- 首 token「cost-collections」的零命中核对结论 ----
+    //   本文件既有 services[] 正则（按 `pattern:` 逐条抽出）里，对本模块 **14 个形状逐一实测零命中**：
+    //     cost-collections/capabilities / options / rules / rules/{uuid}
+    //     cost-collections/rule-templates
+    //     cost-collections/pools / pools/{uuid}
+    //     cost-collections/entries / entries/{uuid} / entries/{uuid}/remove
+    //     cost-collections/collect/platform-settlement / ad-spend / logistics / head-mile / manual
+    //   全文件 grep「cost-collection / costcollection」**零命中** ⇒ 首 token 既是独立字面量，
+    //   也不会被既有分支的前缀吃掉。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   cost-collections/capabilities       能力声明（上游真接通 / 下游缺口归谁）
+    //   cost-collections/options            筛选项（来源 / 费用项 / 维度 / 期间口径 / 币种 / 池 / 规则）
+    //   cost-collections/rules              归集规则列表（GET）/ 新建（POST）
+    //   cost-collections/rules/{uuid}       修改归集规则（PUT）
+    //   cost-collections/rule-templates     蓝图标准绑定模板（只读，不落库）
+    //   cost-collections/pools              费用池列表（GET）
+    //   cost-collections/pools/{uuid}       费用池详情（GET：池 + 它的归集条目）
+    //   cost-collections/entries            归集明细列表（GET，真分页 + 真筛选 + 汇总）
+    //   cost-collections/entries/{uuid}     归集条目详情（GET：条目 + 归集依据）
+    //   cost-collections/entries/{uuid}/remove  撤掉一条归集条目（POST · 调整用）
+    //   cost-collections/collect/platform-settlement  从 12.3.1.2 归集平台费（POST）
+    //   cost-collections/collect/ad-spend             从 14.3.1.1 归集广告费（POST）
+    //   cost-collections/collect/logistics             从 10.2.1.1 归集物流费（POST）
+    //   cost-collections/collect/head-mile             从 10.4.1.1 归集头程费（POST）
+    //   cost-collections/collect/manual                 人工录入归集（POST）
+    //
+    // ⚠️ **刻意不放行**：
+    //   cost-collections                          —— 裸路径：后端**没有**「一条不存在的汇总列表接口」
+    //                                               （列表在 /entries 与 /pools 两处）。
+    //   cost-collections/allocation / allocations  —— 🔴 分摊属 12.4.2.2，**未交付**：
+    //                                               放行会让界面以为「已经能分摊」，
+    //                                               而本模块只产出**待分摊的费用池**。
+    //   cost-collections/{uuid}                   —— 顶层没有 id 段。
+    //   cost-collections/entries/{uuid}/allocate   —— 同上，分摊结果不存在。
+    //   cost-collections/collect/anything-else     —— 归集入口只有上面五个。
+    //   cost-collections/not-a-uuid                —— 非 UUID 段不应被 uuid 分支吃掉。
+    //
+    // id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`（不是 `[0-9a-f-]+`）：
+    // 后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行。
+    // 字面量子路径（capabilities / options / rules / rule-templates / pools / entries / collect/*）
+    // 排在 {uuid} 段**之前**判别 —— alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    prefix: 'finance/',
+    env: 'FINANCE_URL',
+    fallback: 'http://127.0.0.1:8087',
+    pattern:
+      /^cost\-collections\/(?:(?:capabilities|options|rule\-templates|rules|pools|entries)(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/remove)?)?|collect\/(?:platform\-settlement|ad\-spend|logistics|head\-mile|manual))$/,
+  },
+  {
     prefix: 'catalog/',
     env: 'CATALOG_URL',
     fallback: 'http://127.0.0.1:8082',
