@@ -70383,6 +70383,491 @@
         },
         "type": "object"
       },
+      "SyncHealthBacklogSource": {
+        "properties": {
+          "label": {
+            "type": "string"
+          },
+          "pendingCondition": {
+            "type": "string"
+          },
+          "pendingCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "semantics": {
+            "type": "string"
+          },
+          "table": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SyncHealthCapabilities": {
+        "properties": {
+          "backlogNote": {
+            "type": "string"
+          },
+          "backlogSources": {
+            "items": {
+              "$ref": "#/components/schemas/SyncHealthBacklogSource"
+            },
+            "type": "array"
+          },
+          "dataAsOf": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "downstreamNote": {
+            "type": "string"
+          },
+          "failureWindowSemantics": {
+            "type": "string"
+          },
+          "gaps": {
+            "items": {
+              "$ref": "#/components/schemas/SyncHealthCapabilityGap"
+            },
+            "type": "array"
+          },
+          "lastSyncSemantics": {
+            "type": "string"
+          },
+          "readFailureSemantics": {
+            "type": "string"
+          },
+          "rules": {
+            "items": {
+              "$ref": "#/components/schemas/SyncHealthRuleDoc"
+            },
+            "type": "array"
+          },
+          "severityLevels": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "thresholds": {
+            "$ref": "#/components/schemas/SyncHealthThresholds"
+          },
+          "upstreamNote": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SyncHealthCapabilityGap": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "impact": {
+            "type": "string"
+          },
+          "module": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SyncHealthConnectionCard": {
+        "properties": {
+          "authorizedAccount": {
+            "type": "string"
+          },
+          "connectionId": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "effectiveLastSyncAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "failureByReason": {
+            "items": {
+              "$ref": "#/components/schemas/SyncHealthFailureReasonCount"
+            },
+            "type": "array"
+          },
+          "failureCountTotal": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "failureCountWindow": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "lastRunDurationMs": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "lastRunFinishedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "lastRunStartedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "lastRunStatus": {
+            "nullable": true,
+            "type": "string"
+          },
+          "lastRunTriggerSource": {
+            "nullable": true,
+            "type": "string"
+          },
+          "lastSyncAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "lastSyncAtSource": {
+            "type": "string"
+          },
+          "openFailureCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "platformName": {
+            "type": "string"
+          },
+          "rateLimitedCountTotal": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "rateLimitedCountWindow": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "reasons": {
+            "items": {
+              "$ref": "#/components/schemas/SyncHealthReason"
+            },
+            "type": "array"
+          },
+          "severity": {
+            "type": "string"
+          },
+          "shopCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "shops": {
+            "items": {
+              "$ref": "#/components/schemas/SyncHealthShopRef"
+            },
+            "type": "array"
+          },
+          "staleHours": {
+            "format": "int64",
+            "nullable": true,
+            "type": "integer"
+          },
+          "status": {
+            "type": "string"
+          },
+          "syncPaused": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "SyncHealthConnectionPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/SyncHealthConnectionCard"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "SyncHealthFailureReasonCount": {
+        "properties": {
+          "reason": {
+            "type": "string"
+          },
+          "totalCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "windowCount": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "SyncHealthOptions": {
+        "properties": {
+          "failureReasons": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "platforms": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "severities": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "statuses": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "SyncHealthPendingItem": {
+        "properties": {
+          "detail": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string"
+          },
+          "targetAvailable": {
+            "type": "boolean"
+          },
+          "targetHint": {
+            "nullable": true,
+            "type": "string"
+          },
+          "targetModule": {
+            "type": "string"
+          },
+          "targetNote": {
+            "type": "string"
+          },
+          "targetRoute": {
+            "nullable": true,
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SyncHealthPendingList": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/SyncHealthPendingItem"
+            },
+            "type": "array"
+          },
+          "total": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "truncated": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "SyncHealthPlatformGap": {
+        "properties": {
+          "message": {
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "platformName": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string"
+          },
+          "supportStatus": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SyncHealthReason": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SyncHealthRuleDoc": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "condition": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SyncHealthShopRef": {
+        "properties": {
+          "shopCode": {
+            "type": "string"
+          },
+          "shopId": {
+            "type": "string"
+          },
+          "shopName": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SyncHealthSummary": {
+        "properties": {
+          "backlog": {
+            "items": {
+              "$ref": "#/components/schemas/SyncHealthBacklogSource"
+            },
+            "type": "array"
+          },
+          "backlogTotal": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "cardsTruncated": {
+            "type": "boolean"
+          },
+          "dataAsOf": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "failureByReason": {
+            "items": {
+              "$ref": "#/components/schemas/SyncHealthFailureReasonCount"
+            },
+            "type": "array"
+          },
+          "failureCountTotal": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "failureCountWindow": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "greenCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "openFailureCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "platformsWithoutConnection": {
+            "items": {
+              "$ref": "#/components/schemas/SyncHealthPlatformGap"
+            },
+            "type": "array"
+          },
+          "rateLimitedCountTotal": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "rateLimitedCountWindow": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "redCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "totalConnections": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "yellowCount": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "SyncHealthThresholds": {
+        "properties": {
+          "failureWindowHours": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "staleSyncCriticalHours": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "staleSyncWarnHours": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
       "SyncInfluencersRequest": {
         "properties": {
           "platformCode": {
@@ -128384,6 +128869,244 @@
         },
         "tags": [
           "sync-controller"
+        ]
+      }
+    },
+    "/channel/sync-health/capabilities": {
+      "get": {
+        "operationId": "get_channel_sync_health_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SyncHealthCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "sync-health-controller"
+        ]
+      }
+    },
+    "/channel/sync-health/connections": {
+      "get": {
+        "operationId": "get_channel_sync_health_connections",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "platformCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SyncHealthConnectionPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "sync-health-controller"
+        ]
+      }
+    },
+    "/channel/sync-health/connections/{id}": {
+      "get": {
+        "operationId": "get_channel_sync_health_connections_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SyncHealthConnectionCard"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "sync-health-controller"
+        ]
+      }
+    },
+    "/channel/sync-health/options": {
+      "get": {
+        "operationId": "get_channel_sync_health_options",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SyncHealthOptions"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "sync-health-controller"
+        ]
+      }
+    },
+    "/channel/sync-health/pending-items": {
+      "get": {
+        "operationId": "get_channel_sync_health_pending_items",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SyncHealthPendingList"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "sync-health-controller"
+        ]
+      }
+    },
+    "/channel/sync-health/summary": {
+      "get": {
+        "operationId": "get_channel_sync_health_summary",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SyncHealthSummary"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "sync-health-controller"
         ]
       }
     },
