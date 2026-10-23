@@ -93,6 +93,13 @@ export function compareRuns(baselineJobs, prJobs, markerOf) {
 
   const newFailingTests = [];
   const incomparableJobs = [];
+  // ⚠️ **PR 侧取不到明细、而基线侧取得到** ⇒ 这不是「明细不可比」，
+  // 而是「PR 侧的作业**根本没跑到出结果的那一步**」——
+  //   典型形状：PR 侧挂在构建/格式检查阶段（如 spotless），
+  //   后续模块被 reactor 跳过，测试一条都没跑 ⇒ 明细天然为空。
+  // 此时若按「作业粒度持平」放行，就会把「PR 引入了一个新的失败原因」误判成「没有新增失败」。
+  // ⇒ 这类作业一律算**新增失败**，不按持平放行。
+  const unreachedJobs = [];
 
   for (const name of prFail) {
     if (!baseFail.has(name)) continue;
@@ -100,6 +107,8 @@ export function compareRuns(baselineJobs, prJobs, markerOf) {
     const prMarkers = markerOf(prJobs.find((j) => j.name === name));
     if (baseMarkers.length === 0 || prMarkers.length === 0) {
       incomparableJobs.push(name);
+      // 基线侧有明细、PR 侧没有 ⇒ PR 侧没跑到出结果那一步 ⇒ 按新增失败处理。
+      if (baseMarkers.length > 0 && prMarkers.length === 0) unreachedJobs.push(name);
       continue;
     }
     const baseSet = new Set(baseMarkers);
@@ -108,7 +117,8 @@ export function compareRuns(baselineJobs, prJobs, markerOf) {
     }
   }
 
-  const blocked = newFailingJobs.length > 0 || newFailingTests.length > 0;
+  const blocked =
+    newFailingJobs.length > 0 || newFailingTests.length > 0 || unreachedJobs.length > 0;
   return {
     blocked,
     baselineFailingJobs: [...baseFail].sort(),
@@ -116,6 +126,7 @@ export function compareRuns(baselineJobs, prJobs, markerOf) {
     newFailingJobs,
     newFailingTests,
     incomparableJobs: incomparableJobs.sort(),
+    unreachedJobs: unreachedJobs.sort(),
   };
 }
 
@@ -267,6 +278,12 @@ export function main(argv = process.argv.slice(2)) {
     );
     if (result.incomparableJobs.length) {
       console.log(`明细不可比的作业（只比对了作业粒度）：${result.incomparableJobs.join('、')}`);
+    }
+    if (result.unreachedJobs.length) {
+      console.log(
+        `PR 侧未跑到出结果那一步的作业（基线有明细、PR 侧无明细 ⇒ 视为新增失败）：` +
+          `${result.unreachedJobs.join('、')}`,
+      );
     }
     console.log('');
     console.log(

@@ -132,7 +132,31 @@ const check = (name, ok, detail = '') => {
   check('PR 比基线更绿不阻塞', !r.blocked);
 }
 
-// ── 8. run 没跑完 ⇒ 不得判为「可以合并」（假绿灯回归） ────────
+// ── 8. PR 侧作业「没跑到出结果那一步」⇒ 不得按持平放行 ────────
+//
+// 2026-10-24 实测：PR 侧 Java 作业挂在 spotless（构建期），
+// reactor 跳过 identity，测试一条都没跑 ⇒ 失败明细天然为空。
+// 旧判据把「明细取不到」一律归入「明细不可比 ⇒ 按作业粒度放行」，
+// 于是「PR 引入了新的失败原因」被误判成「没有新增失败」⇒ 假绿灯。
+{
+  const baseline = [{ name: 'Java 21 & PostgreSQL Integration', conclusion: 'failure' }];
+  const pr = [{ name: 'Java 21 & PostgreSQL Integration', conclusion: 'failure' }];
+  const markers = {
+    baseline: ['com.starcon.identity.ApprovalRecordIntegrationTest.驳回后重新发起'],
+    pr: [], // PR 侧挂在 spotless ⇒ 测试没跑 ⇒ 取不到任何用例标识
+  };
+  const r = compareRuns(baseline, pr, (job) => (job === baseline[0] ? markers.baseline : markers.pr));
+  check('PR 侧无明细 + 基线有明细 ⇒ 阻塞', r.blocked);
+  check('点名未跑到结果那一步的作业', r.unreachedJobs.includes('Java 21 & PostgreSQL Integration'));
+  check('同时仍标记为明细不可比', r.incomparableJobs.includes('Java 21 & PostgreSQL Integration'));
+
+  // 反向对照：两侧都取不到明细 ⇒ 确实是「不可比」，按作业粒度放行（不是新增失败）。
+  const both = compareRuns(baseline, pr, () => []);
+  check('两侧都无明细 ⇒ 不算新增失败（保持原语义）', !both.blocked);
+  check('两侧都无明细 ⇒ 不进 unreachedJobs', both.unreachedJobs.length === 0);
+}
+
+// ── 9. run 没跑完 ⇒ 不得判为「可以合并」（假绿灯回归） ────────
 //
 // 2026-10-24 实测：同一个 run，作业全部在飞时闸门输出「可以合并」，
 // 收尾后同一个 run 判「阻塞」。在飞作业的 conclusion 是 null，
@@ -165,7 +189,7 @@ const check = (name, ok, detail = '') => {
   check('取消的 run 不得当作有效判据', cancelled[0].conclusion === 'cancelled');
 }
 
-// ── 9. 真实仓库：能取到 main 基线的失败作业 ────────────────────
+// ── 10. 真实仓库：能取到 main 基线的失败作业 ────────────────────
 {
   try {
     const out = execFileSync(
