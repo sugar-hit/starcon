@@ -12325,6 +12325,750 @@
         },
         "type": "object"
       },
+      "FinanceVoucherCapabilities": {
+        "properties": {
+          "capabilities": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceVoucherCapability"
+            },
+            "type": "array"
+          },
+          "downstreamGaps": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceVoucherDownstreamGap"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceVoucherCapability": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "basis": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "module": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceVoucherCurrencySummary": {
+        "properties": {
+          "count": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "draftCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "postedCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "reversedCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalCredit": {
+            "type": "number"
+          },
+          "totalDebit": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceVoucherDetail": {
+        "properties": {
+          "events": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceVoucherEventRow"
+            },
+            "type": "array"
+          },
+          "lines": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceVoucherLineRow"
+            },
+            "type": "array"
+          },
+          "voucher": {
+            "$ref": "#/components/schemas/FinanceVoucherRow"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceVoucherDownstreamGap": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "group": {
+            "type": "string"
+          },
+          "module": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "ownerService": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceVoucherEventRow": {
+        "properties": {
+          "actorId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "eventType": {
+            "type": "string"
+          },
+          "eventTypeLabel": {
+            "type": "string"
+          },
+          "fromStatus": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "occurredAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "toStatus": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceVoucherGenerateInput": {
+        "properties": {
+          "description": {
+            "nullable": true,
+            "type": "string"
+          },
+          "eventKind": {
+            "type": "string"
+          },
+          "note": {
+            "nullable": true,
+            "type": "string"
+          },
+          "periodId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "sourceId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "sourceType": {
+            "type": "string"
+          },
+          "voucherDate": {
+            "format": "date",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceVoucherInput": {
+        "properties": {
+          "currency": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "expectedVersion": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "lines": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceVoucherLineInput"
+            },
+            "type": "array"
+          },
+          "note": {
+            "nullable": true,
+            "type": "string"
+          },
+          "periodId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "sourceId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "sourceNo": {
+            "nullable": true,
+            "type": "string"
+          },
+          "sourceType": {
+            "type": "string"
+          },
+          "voucherDate": {
+            "format": "date",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceVoucherLineInput": {
+        "properties": {
+          "amount": {
+            "type": "number"
+          },
+          "auxiliaryId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "auxiliaryName": {
+            "nullable": true,
+            "type": "string"
+          },
+          "auxiliaryType": {
+            "nullable": true,
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "lineType": {
+            "type": "string"
+          },
+          "quantity": {
+            "nullable": true,
+            "type": "number"
+          },
+          "subjectCode": {
+            "type": "string"
+          },
+          "subjectName": {
+            "type": "string"
+          },
+          "summary": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceVoucherLineRow": {
+        "properties": {
+          "amount": {
+            "type": "number"
+          },
+          "auxiliaryId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "auxiliaryName": {
+            "type": "string"
+          },
+          "auxiliaryType": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "lineNo": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "lineType": {
+            "type": "string"
+          },
+          "lineTypeLabel": {
+            "type": "string"
+          },
+          "quantity": {
+            "nullable": true,
+            "type": "number"
+          },
+          "subjectCode": {
+            "type": "string"
+          },
+          "subjectName": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceVoucherMappingInput": {
+        "properties": {
+          "creditSubjectCode": {
+            "type": "string"
+          },
+          "creditSubjectName": {
+            "type": "string"
+          },
+          "debitSubjectCode": {
+            "type": "string"
+          },
+          "debitSubjectName": {
+            "type": "string"
+          },
+          "enabled": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "eventKind": {
+            "type": "string"
+          },
+          "note": {
+            "nullable": true,
+            "type": "string"
+          },
+          "sourceType": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceVoucherMappingRow": {
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "creditSubjectCode": {
+            "type": "string"
+          },
+          "creditSubjectName": {
+            "type": "string"
+          },
+          "debitSubjectCode": {
+            "type": "string"
+          },
+          "debitSubjectName": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "eventKind": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "sourceType": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "version": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceVoucherOptionRef": {
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceVoucherOptions": {
+        "properties": {
+          "currencies": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "periods": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceVoucherOptionRef"
+            },
+            "type": "array"
+          },
+          "sourceTypes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "statuses": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "subjectCodes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceVoucherPage": {
+        "properties": {
+          "draftCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceVoucherRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "postedCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "summaryByCurrency": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceVoucherCurrencySummary"
+            },
+            "type": "array"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceVoucherPeriodCloseInput": {
+        "properties": {
+          "expectedVersion": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "reason": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceVoucherPeriodInput": {
+        "properties": {
+          "baseCurrency": {
+            "type": "string"
+          },
+          "note": {
+            "nullable": true,
+            "type": "string"
+          },
+          "periodCode": {
+            "type": "string"
+          },
+          "periodEnd": {
+            "format": "date",
+            "type": "string"
+          },
+          "periodStart": {
+            "format": "date",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceVoucherPeriodRow": {
+        "properties": {
+          "baseCurrency": {
+            "type": "string"
+          },
+          "closedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "closedBy": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "closedReason": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "periodCode": {
+            "type": "string"
+          },
+          "periodEnd": {
+            "format": "date",
+            "type": "string"
+          },
+          "periodStart": {
+            "format": "date",
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "version": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceVoucherPostInput": {
+        "properties": {
+          "expectedVersion": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "note": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceVoucherResult": {
+        "properties": {
+          "lines": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceVoucherLineRow"
+            },
+            "type": "array"
+          },
+          "message": {
+            "type": "string"
+          },
+          "reversalVoucher": {
+            "$ref": "#/components/schemas/FinanceVoucherRow"
+          },
+          "voucher": {
+            "$ref": "#/components/schemas/FinanceVoucherRow"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceVoucherReverseInput": {
+        "properties": {
+          "expectedVersion": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "note": {
+            "nullable": true,
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "voucherDate": {
+            "format": "date",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceVoucherRow": {
+        "nullable": true,
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdBy": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "lineCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "periodCode": {
+            "type": "string"
+          },
+          "periodId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "postedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "postedBy": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "reversalOfId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "reversalVoucherId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "reversedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "sourceId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "sourceNo": {
+            "type": "string"
+          },
+          "sourceType": {
+            "type": "string"
+          },
+          "sourceTypeLabel": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "totalCredit": {
+            "type": "number"
+          },
+          "totalDebit": {
+            "type": "number"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "version": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "voucherDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "voucherNo": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceVoucherVoidInput": {
+        "properties": {
+          "expectedVersion": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "reason": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "FinanceWriteOffAdvanceBalance": {
         "properties": {
           "asOf": {
@@ -22658,6 +23402,816 @@
         },
         "tags": [
           "transaction-controller"
+        ]
+      }
+    },
+    "/finance/vouchers": {
+      "get": {
+        "operationId": "get_finance_vouchers",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sourceType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "currency",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "periodId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dateFrom",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dateTo",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceVoucherPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "voucher-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_finance_vouchers",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinanceVoucherInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceVoucherResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "voucher-controller"
+        ]
+      }
+    },
+    "/finance/vouchers/capabilities": {
+      "get": {
+        "operationId": "get_finance_vouchers_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceVoucherCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "voucher-controller"
+        ]
+      }
+    },
+    "/finance/vouchers/export": {
+      "get": {
+        "operationId": "get_finance_vouchers_export",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "format",
+            "required": false,
+            "schema": {
+              "default": "CSV",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "periodId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dateFrom",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dateTo",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "voucher-controller"
+        ]
+      }
+    },
+    "/finance/vouchers/generate": {
+      "post": {
+        "operationId": "post_finance_vouchers_generate",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinanceVoucherGenerateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceVoucherResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "voucher-controller"
+        ]
+      }
+    },
+    "/finance/vouchers/mappings": {
+      "get": {
+        "operationId": "get_finance_vouchers_mappings",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/FinanceVoucherMappingRow"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "voucher-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_finance_vouchers_mappings",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinanceVoucherMappingInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceVoucherMappingRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "voucher-controller"
+        ]
+      }
+    },
+    "/finance/vouchers/mappings/{id}": {
+      "put": {
+        "operationId": "put_finance_vouchers_mappings_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinanceVoucherMappingInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceVoucherMappingRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "voucher-controller"
+        ]
+      }
+    },
+    "/finance/vouchers/options": {
+      "get": {
+        "operationId": "get_finance_vouchers_options",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceVoucherOptions"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "voucher-controller"
+        ]
+      }
+    },
+    "/finance/vouchers/periods": {
+      "get": {
+        "operationId": "get_finance_vouchers_periods",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/FinanceVoucherPeriodRow"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "voucher-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_finance_vouchers_periods",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinanceVoucherPeriodInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceVoucherPeriodRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "voucher-controller"
+        ]
+      }
+    },
+    "/finance/vouchers/periods/{id}/close": {
+      "post": {
+        "operationId": "post_finance_vouchers_periods_id_close",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinanceVoucherPeriodCloseInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceVoucherPeriodRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "voucher-controller"
+        ]
+      }
+    },
+    "/finance/vouchers/{id}": {
+      "get": {
+        "operationId": "get_finance_vouchers_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceVoucherDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "voucher-controller"
+        ]
+      },
+      "put": {
+        "operationId": "put_finance_vouchers_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinanceVoucherInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceVoucherResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "voucher-controller"
+        ]
+      }
+    },
+    "/finance/vouchers/{id}/post": {
+      "post": {
+        "operationId": "post_finance_vouchers_id_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinanceVoucherPostInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceVoucherResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "voucher-controller"
+        ]
+      }
+    },
+    "/finance/vouchers/{id}/reverse": {
+      "post": {
+        "operationId": "post_finance_vouchers_id_reverse",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinanceVoucherReverseInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceVoucherResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "voucher-controller"
+        ]
+      }
+    },
+    "/finance/vouchers/{id}/void": {
+      "post": {
+        "operationId": "post_finance_vouchers_id_void",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinanceVoucherVoidInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceVoucherResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "voucher-controller"
         ]
       }
     },
