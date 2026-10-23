@@ -6,15 +6,19 @@
 >
 > 状态词表只有三个值，统计逻辑依赖它，不要新增：
 > `已交付`（迁移 + API + 页面 + 测试齐全，无 TODO 残留）· `进行中`（部分交付、未收口，证据列写清缺哪一块）· `未开发`（未开工）。
+
 ## 总览
+
 | 指标 | 数量 |
 | --- | --- |
 | 模块总数 | 465 |
-| 已交付 | 340 |
+| 已交付 | 344 |
 | 进行中 | 0 |
-| **未开发** | **125** |
-| 完成率 | 73.1% |
+| **未开发** | **121** |
+| 完成率 | 74.0% |
+
 ## 分阶段进度（交付顺序看这里）
+
 | 阶段 | 已交付 | 进行中 | 未开发 | 合计 |
 | --- | --- | --- | --- | --- |
 | **D1–D2** | 80 | 0 | 0 | 80 |
@@ -22,9 +26,12 @@
 | **D4** | 59 | 0 | 1 | 60 |
 | **D5** | 52 | 0 | 0 | 52 |
 | **D6** | 43 | 0 | 35 | 78 |
-| **D7** | 66 | 0 | 89 | 155 |
+| **D7** | 70 | 0 | 85 | 155 |
+
 ## 分系统进度
+
 | 卷 | 系统 | 阶段 | 已交付 | 模块数 |
+| --- | --- | --- | --- | --- |
 | 01 | 工作台与门户系统 | D7 | 0 | 23 |
 | 02 | 渠道与店铺系统 | D1–D2 / D5 | 25 | 25 |
 | 03 | 商品主数据系统 | D1–D2 | 40 | 40 |
@@ -40,25 +47,33 @@
 | 13 | 利润与经营分析系统 | D7 | 0 | 23 |
 | 14 | 广告与增长系统 | D7 | 18 | 22 |
 | 15 | 客户与客服系统 | D7 | 18 | 24 |
-| 16 | 合规与风控系统 | D7 | 18 | 23 |
-| 17 | 组织权限与系统设置系统 | D1–D2 / D4 / D6 / D7 | 25 | 29 |
+| 16 | 合规与风控系统 | D7 | 20 | 23 |
+| 17 | 组织权限与系统设置系统 | D1–D2 / D4 / D6 / D7 | 27 | 29 |
 | 18 | 集成开放与智能自动化系统 | D7 | 0 | 24 |
+
 ## 判定「已交付」的标准
+
 一个模块标 `已交付` 当且仅当下面四件都成立，缺一件就是 `未开发` 或 `进行中`：
+
 1. **迁移** — `backend/services/<svc>/src/main/resources/db/migration/V*.sql` 里有真实表结构，
    带 `tenant_id NOT NULL` + RLS 策略，不是注释里的设计。
 2. **API** — 服务里有对应端点，走 jOOQ 显式 SQL，不是返回硬编码常量的桩。
 3. **页面** — `apps/web/src/app/**/page.tsx` 是真实工作区，不是 `DomainPlaceholder`。
 4. **测试** — `cd backend && ./mvnw verify` 绿；涉及租户隔离的必须实跑
    「两租户互不可见 / 伪造 tenant header 无效 / 连接池归还后不串租户」三条断言。
+
 **判定为 `未开发` 的典型形态**（见到就说明没做完，不许算进已交付）：
+
 - `DomainPlaceholder` 占位页
 - 硬编码数组 / 常量当数据源
 - 服务里 `TODO` + `throw new UnsupportedOperationException()`
 - 迁移文件存在但没有 RLS 策略
 - 前端有页面但后端没有对应端点（或反之）
+
 ## 跨期说明
+
 「阶段」列按**依赖就绪顺序**逐模块标注，不是卷归属。跨期卷的拆分如下：
+
 - **01 工作台与门户 → 全部 D7**：它是纯投影聚合层（蓝图原文「不写业务数据，只读投影」），
   聚合 09 订单 / 07 库存 / 02 渠道 / 12 财务 / 15 客户 / 17 审批的投影。
   这些数据源没落地之前建「我的待办」只能造假数据，所以整卷排到最后收口。
@@ -72,7 +87,9 @@
 - **11 售后与退货**：D4 交付售后单、退货授权与实收、退款换货；平台纠纷 / 客诉工单 / 分析排 D7。
 - **17 组织权限**：D1–D2 交付租户、法人、部门、成员、角色、页面权限、数据范围、审计；
   17.4 审批流随单据排 D4，17.6.1.1 账簿与本位币随财务排 D6，17.7 套餐与平台参数排 D7。
+
 ## 模块明细
+
 | 模块 ID | 模块名 | L3 锚点路由 | 阶段 | 状态 | 证据 |
 | --- | --- | --- | --- | --- | --- |
 | 1.1.1.1 | 我的待办 | /dashboard/todo | D7 | 未开发 | — |
@@ -514,7 +531,7 @@
 | 17.6.1.1 | 账簿与本位币 | — | D6 | 已交付 | **已交付**（后端 V81 + 端点 + 前端页面 + 契约重生成，四件齐）。后端：identity `V81__ledger_book_category_default_and_fact_ownership.sql`（**不重做账簿**：在 17.1.2.2 已交付的 accounting_book 上补 4 列 —— book_category 业务账/法定账（与 book_type 总账/现金/银行是两条正交轴）、base_currency_mode INHERIT/OWN、chart_of_accounts_source 科目体系来源、is_default；唯一总账口径从"一法人一本"放宽为"**一法人一个本位币**一本总账"；新表 book_fact_assignment 把"同一笔业务事实只在归属账簿记一次"落成 UNIQUE(tenant_id,fact_source,fact_ref) 的**数据库约束**，FORCE RLS）；端点新增 `GET /identity/legal-entities/{id}/ledger-books`（业务账/法定账分组）、`GET·PUT /identity/legal-entities/{id}/default-book`（**缺默认显式 409 不静默挑一本**）、`GET·POST /identity/accounting-books/{id}/fact-assignments` + `DELETE .../{assignmentId}`（混记时 409 并指明事实已在哪本账）；`LedgerBookIntegrationTest` 8 例实跑 Testcontainers PostgreSQL 16（含租户隔离三断言）。**前端（本车道补齐的三个缺口）**：① 页面 `apps/web/src/app/settings/books/page.tsx` + `components/iam/ledger-book-workspace.tsx`（照 17.1.2.2 `org/accounting-books` 的写法与命名，真实调用本模块**全部 6 个新端点**，按 LedgerBookGroups 呈现业务账/法定账两组，默认账簿 409 渲染成"去设默认"的可操作引导而非空态；加载态/错误态/空态三态齐全，禁 mock；`identity-workspace` 导航补 `/settings/books` 入口，补上本模块此前"零 UI 入口"的缺口）；② api-proxy 白名单放行三段新路径 `legal-entities/{uuid}/ledger-books`、`legal-entities/{uuid}/default-book`、`accounting-books/{uuid}/fact-assignments`（含 `/{assignmentId}` 子形状），**白名单只在浏览器端生效**，不补则页面在浏览器里 404 而 typecheck/lint/test 全绿；放行与反向各钉一层：`route.test.ts` 用**真实代理 handler 实测 HTTP 状态码**（放行=200 且 fetch 打到 `:8081/<path>`，未登记形状=404，`ledger-books/extra`、`default-books`、`fact-assignments/{id}/transfer` 仍 404），`ledger-book-api-proxy.test.ts` 再从前端源码反向抽真实调用点并**断言抽取条数 > 0** 防坏抽取器静默全绿；③ 契约用 `catalog-contracts.py --spec-dir` 重生成，新增 LedgerBookGroups / LedgerBookItem / DefaultBookView / DefaultBookInput / FactAssignmentView / FactAssignmentInput，AccountingBookView/Input 随 V81 补 4 字段（无字段删除），前端枚举一律从契约行类型派生、未手抄字符串联合。**落地前全量复验（2026-10-08，本车道自跑）**：`./mvnw verify` BUILD SUCCESS（identity 191 / catalog 1205 / channel 66 / warehouse 700 = 2162 例 0 失败，含 LedgerBookIntegrationTest 8 例实跑 Testcontainers PostgreSQL 16）；`pnpm typecheck --force`（绕过 turbo 缓存）3/3 通过；`pnpm lint` 通过（仅他车道文件 4 条既存 warning）；`pnpm test` 83 文件 1475 例全绿；`NEXT_TELEMETRY_DISABLED=1 pnpm --filter @starcon/web build` 通过且路由表出现 `/settings/books`；`sync.mjs --check` 一致。verify 结束后本车道 Testcontainers PG 容器已被 ryuk 回收。 |
 | 17.7.1.1 | 套餐与权益 | — | D7 | 已交付 | 迁移 `backend/services/identity/src/main/resources/db/migration/V323__saas_plan_entitlement.sql`（**平台级**：`saas_plan` / `saas_plan_entitlement` —— 不带 `tenant_id`、**不参与 RLS**、只 `GRANT SELECT TO identity_app`、零外键指向租户业务表、独立命名空间；出厂 4 个套餐 TRIAL/STARTER/GROWTH/ENTERPRISE 各带 6 个权益项（SHOP_COUNT/SKU_COUNT/ORDER_VOLUME/USER_COUNT/API_CALL/AI_USAGE）。**租户级**：`saas_subscription` / `saas_entitlement_usage` / `saas_subscription_event` 全部 `tenant_id NOT NULL` + `RLS FORCE isolation`；`saas_platform_role` 是平台运营角色的**只读登记**表。写入路径一律走 `SECURITY DEFINER` 专用函数（`saas_platform_create/update_plan`、`saas_platform_create/update/delete_entitlement`、`saas_platform_create/update_subscription`、`saas_platform_register_role` 等），应用侧对平台级表只有 SELECT ⇒ **租户结构上无法自升级**）· 端点 `SaasPlanController.java`（`@RequestMapping("/identity")`，20 个端点：19 个 `/identity/saas-plans/**` + 1 个 `/identity/saas-platform/roles`）· 页面 `apps/web/src/app/org/plans/page.tsx` + `apps/web/src/components/iam/saas-plan-{model,workspace}.tsx`（按仓内既有惯例放 `components/iam/` 而非新建 `components/plans/`）· 测试 `SaasPlanIntegrationTest.java` 12 例 + `saas-plan-model.test.ts` 28 例 + `saas-plan-allowlist.test.ts` 5 例。**分层口径**：套餐与权益定义是**平台级**事实（一个平台一套），订阅、用量与留痕是**租户级**事实，两层物理隔离在不同表、不同 RLS 策略、不同授权面——平台级表零 `tenant_id`、租户级表 FORCE RLS，跨租户读只有 `saas_platform_subscription_list` 一条 SECURITY DEFINER 路径。**仅平台管理员可见**用三道闸门同时把守（Java + DB 双重）：① 本租户 `saas_platform_role` 有登记；② 登记的 roleId 正是会话持有的角色且 `scope_mode='ALL'`；③ 该角色带有所需权限码（`identity.plan.{read,create,update}` / `identity.subscription.{read,create,update}`，**刻意不授 OWNER**，与 V53 先例相反）。**取舍：没给租户开任何读端点**（蓝图明写「租户不可访问」），普通租户即使经 `create_child` 拿到了 `identity.plan.*` 权限码也照样 403（集成测试实跑断言）。平台运营角色本身是**普通租户级角色**（默认码 `PLATFORM_OPS`），经 `POST /identity/saas-platform/roles`（需 `X-Internal-Key`，**刻意不进浏览器 allowlist**）在会话所在租户内建角色+授权+登记+自分配——没有另造全局超级角色，避免造出第二套身份体系。**不落任何金额**：没有发票/应收/付款/结算/收入确认，权益上限与用量都是数量（`NUMERIC(19,6)`），测试用 `information_schema` 断言 `saas_*` 表无金额语义列；时间一律 `OffsetDateTime` + `?::timestamptz` 且按值断言写回时刻，试用起止零漂移。**如实标注未接通**：用量计量未接通 ⇒ `available=false` ⇒ `usage_value` 必须为 NULL（DB CHECK 钉死，填 0 会被误读成「量过了正好是 0」）并强制带 `owner_module` + `impact`，判定结果是 `UNDETERMINED`（「判定不了」≠「没超限」），能力声明如实报 3 条 `available=false`（17.7.1.2 计量、17.7.2.1 开关执行、实体目录 §8 计费与收入确认）。租户级表**不给 DELETE**，`saas_subscription_event` 追加不可改（触发器 + REVOKE 双重）。前端 api-proxy 只**新增一条独立 `services[]` 元素**（`prefix: 'identity/'`），锚点固定在 `// 2.4.2.3 映射缺失队列（channel 服务）` 之前，既有条目一字未改；`saas-platform/roles` **刻意不放行**（浏览器打不到，只能走内部密钥）。 |
 | 17.7.1.2 | 用量统计 | — | D7 | 未开发 | — |
-| 17.7.2.1 | 平台参数与开关 | — | D7 | 已交付 | 迁移 backend/services/identity/src/main/resources/db/migration/V324__platform_feature_flags.sql（**两层分层**：平台全局层 platform_flag_definition 出厂码表 + platform_flag_setting 全局当前值 + platform_flag_history 变更历史，三张表**不带 tenant_id**、不启用租户 RLS、**只 GRANT SELECT** 给 identity_app —— 与 V53 的 dict_catalog 同一先例；租户例外层 platform_flag_tenant_exception + platform_flag_exception_history，**tenant_id NOT NULL + ENABLE/FORCE RLS isolation**；灰度比例 numeric(5,2) 禁浮点、限流阈值整数计数、timestamptz 一律 OffsetDateTime + ?::timestamptz）· 端点 11 个挂在 `/identity/platform-flags`：GET capabilities（逐维 available + ownerModule）/ GET definitions / GET settings / GET settings/{code} / PUT settings/{code} / GET exceptions / POST exceptions / DELETE exceptions/{id} / GET evaluate / GET evaluate-batch / GET history（PlatformFlagController.java；jOOQ 显式 SQL，全局层写入走 SECURITY DEFINER 函数 platform_flag_apply_setting）· 页面 apps/web/src/app/org/platform-flags/page.tsx + components/iam/platform-flag-workspace.tsx + platform-flag-model.ts（+ platform-flag-model.test.ts 25 例）· 测试 PlatformFlagIntegrationTest.java 19 例实跑 Testcontainers PostgreSQL 16（连接池压到 1）· **「平台开关不可被租户覆盖」四道独立防线**：① 全局层**没有租户副本**（库里不存在「按租户的那一份平台开关」这个对象）；② **应用角色对 platform_flag_setting 没有任何写入授权**（只 SELECT），唯一写入口是 SECURITY DEFINER 函数 —— 直接 SQL 写被数据库 42501 挡下（测试实跑）；③ 例外表 effect 的取值域被 CHECK **钉死在 'DISABLED'**，租户例外只能收紧、永远打不开平台禁用的功能；④ 限流阈值与公告**不参与**按租户禁用（platform_flag_exception_kind_guard 触发器拒绝 —— 禁用一个限流阈值等于放宽限制，不是收紧）· **裁决过程可见**：evaluate 返回平台全局值 / 租户例外 / 最终生效值**三层并列**（platformLayer / tenantLayer / effectiveLayer）+ 可读裁决码（PLATFORM_DISABLED / TENANT_DISABLED / ROLLOUT_INCLUDED / ROLLOUT_EXCLUDED / NOT_CONFIGURED / PLATFORM_THRESHOLD / ANNOUNCEMENT_*），不给孤零零的布尔值 · **灰度放量确定性**：分桶 = sha256(salt|tenant_id) 前 4 字节大端无符号 mod 10000（**用 long 不用 int** —— Java 的 int 有符号，首字节 ≥128 会算出负桶），与数据库函数 platform_flag_rollout_bucket（bigint）逐位同口径，测试逐个随机租户断言一致；同一租户反复请求分桶与结论恒定 · **限流阈值不给默认值**（照 16.5.2.1 先例）：出厂**不预置** platform_flag_setting 行，判定如实返回 NOT_CONFIGURED，不替平台选一个数字 · **平台运营写权限不默认授予任何角色**（只授 identity.platform_flag.read 给 OWNER），且平台全局层只允许**根租户**写 —— 本仓 create_child 会把 permission 表里的全部权限码授给子租户 OWNER，只看权限码挡不住子租户改全平台配置（测试实跑：子租户 OWNER 有写权限码但 403）· **多租户三断言实跑**：两租户互不可见（按主键直查对方例外行读到零行，且正对照查得到自己那行）/ 伪造 X-Tenant-Id 头无效（写仍然落在会话租户名下，对方库逐字节未变）/ 单连接（池压到 1）下交替读写 4 轮不串租户；另断言无租户上下文时例外两张表读到零行、逐表 relforcerowsecurity 为真、而平台全局层 relrowsecurity 为假（不参与租户隔离）· 其余用例覆盖：出厂一律 fail-closed（没显式打开的功能不对任何租户开放）、公告生效期按值往返（+08:00 夹具断言写回的绝对时刻，零漂移）、放量 0% 谁都不命中 / 100% 全部命中、平台禁用优先于租户例外（租户例外打不开它）、撤销例外后回到平台口径、变更历史追加不可改 · api-proxy 在 **services[] 数组末尾**（pii-access 之后）**纯新增一条** identity/ 元素，放行 9 个形状、刻意不放行 6 个形状（含 `platform-flags/tenant-switch` —— 租户覆盖平台开关是蓝图明令禁止的能力）；首 token「platform-flags」全文零命中且既有 identity/ 元素对全部路径形状零命中（双向实测），改共享文件后已跑全量 allowlist 回归 `pnpm vitest run apps/web/src/app/api/trade` **68 文件 379 例全过** · **下游未接入如实标注**：各服务消费判定的 feature-flag 客户端与 17.7.1.1 套餐超限降级均在 capabilities 里标 available=false 并写明 ownerModule，本模块只产出判定能力、不跨服务改代码；迁移到 apps/admin 是后续待办（apps/admin 目前仍只有空脚手架）|
+| 17.7.2.1 | 平台参数与开关 | — | D7 | 已交付 | 迁移 backend/services/identity/src/main/resources/db/migration/V324__platform_feature_flags.sql（**两层分层**：平台全局层 platform_flag_definition 出厂码表 + platform_flag_setting 全局当前值 + platform_flag_history 变更历史，三张表**不带 tenant_id**、不启用租户 RLS、**只 GRANT SELECT** 给 identity_app —— 与 V53 的 dict_catalog 同一先例；租户例外层 platform_flag_tenant_exception + platform_flag_exception_history，**tenant_id NOT NULL + ENABLE/FORCE RLS isolation**；灰度比例 numeric(5,2) 禁浮点、限流阈值整数计数、timestamptz 一律 OffsetDateTime + ?::timestamptz）· 端点 11 个挂在 `/identity/platform-flags`：GET capabilities（逐维 available + ownerModule）/ GET definitions / GET settings / GET settings/{code} / PUT settings/{code} / GET exceptions / POST exceptions / DELETE exceptions/{id} / GET evaluate / GET evaluate-batch / GET history（PlatformFlagController.java；jOOQ 显式 SQL，全局层写入走 SECURITY DEFINER 函数 platform_flag_apply_setting）· 页面 apps/web/src/app/org/platform-flags/page.tsx + components/iam/platform-flag-workspace.tsx + platform-flag-model.ts（+ platform-flag-model.test.ts 25 例）· 测试 PlatformFlagIntegrationTest.java 19 例实跑 Testcontainers PostgreSQL 16（连接池压到 1）· **「平台开关不可被租户覆盖」四道独立防线**：① 全局层**没有租户副本**（库里不存在「按租户的那一份平台开关」这个对象）；② **应用角色对 platform_flag_setting 没有任何写入授权**（只 SELECT），唯一写入口是 SECURITY DEFINER 函数 —— 直接 SQL 写被数据库 42501 挡下（测试实跑）；③ 例外表 effect 的取值域被 CHECK **钉死在 'DISABLED'**，租户例外只能收紧、永远打不开平台禁用的功能；④ 限流阈值与公告**不参与**按租户禁用（platform_flag_exception_kind_guard 触发器拒绝 —— 禁用一个限流阈值等于放宽限制，不是收紧）· **裁决过程可见**：evaluate 返回平台全局值 / 租户例外 / 最终生效值**三层并列**（platformLayer / tenantLayer / effectiveLayer）+ 可读裁决码（PLATFORM_DISABLED / TENANT_DISABLED / ROLLOUT_INCLUDED / ROLLOUT_EXCLUDED / NOT_CONFIGURED / PLATFORM_THRESHOLD / ANNOUNCEMENT_*），不给孤零零的布尔值 · **灰度放量确定性**：分桶 = sha256(salt |
 | 17.7.2.2 | 平台运维视图 | — | D7 | 未开发 | — |
 | 18.1.1.1 | 应用与凭证 | — | D7 | 未开发 | — |
 | 18.1.1.2 | 接口目录 | — | D7 | 未开发 | — |
@@ -540,9 +557,3 @@
 | 18.4.3.2 | 效果评估 | — | D7 | 未开发 | — |
 | 18.5.1.1 | 模板管理 | — | D7 | 未开发 | — |
 | 18.5.2.1 | 投递记录 | — | D7 | 未开发 | — |
-| 已交付 | 341 |
-| **未开发** | **124** |
-| 完成率 | 73.3% |
-| **D7** | 67 | 0 | 88 | 155 |
-| 16 | 合规与风控系统 | D7 | 19 | 23 |
-| 17 | 组织权限与系统设置系统 | D1–D2 / D4 / D6 / D7 | 26 | 29 |
