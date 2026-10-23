@@ -5271,6 +5271,930 @@
         },
         "type": "object"
       },
+      "FinanceSupplierReconciliationCapabilities": {
+        "properties": {
+          "capabilities": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceSupplierReconciliationCapability"
+            },
+            "type": "array"
+          },
+          "gaps": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceSupplierReconciliationGap"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceSupplierReconciliationCapability": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "basis": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "moduleId": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceSupplierReconciliationCurrencySummary": {
+        "properties": {
+          "adjustmentAmount": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "financeAmount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "openDifferenceCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "reconCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "statementAmount": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceSupplierReconciliationDetail": {
+        "properties": {
+          "actions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "differences": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceSupplierReconciliationDifferenceRow"
+            },
+            "type": "array"
+          },
+          "events": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceSupplierReconciliationEventRow"
+            },
+            "type": "array"
+          },
+          "explanations": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceSupplierReconciliationExplanationRow"
+            },
+            "type": "array"
+          },
+          "head": {
+            "$ref": "#/components/schemas/FinanceSupplierReconciliationRow"
+          },
+          "inspections": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceSupplierReconciliationInspectionRow"
+            },
+            "type": "array"
+          },
+          "lines": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceSupplierReconciliationLineRow"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "payableBasis": {
+            "$ref": "#/components/schemas/FinanceSupplierReconciliationPayableBasisRow"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceSupplierReconciliationDifferencePage": {
+        "properties": {
+          "explainedCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "openCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "resolvedCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceSupplierReconciliationDifferenceRow"
+            },
+            "type": "array"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceSupplierReconciliationDifferenceRow": {
+        "properties": {
+          "adjustmentAmount": {
+            "type": "number"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "differenceType": {
+            "enum": [
+              "RECEIPT_QUANTITY_MISMATCH",
+              "RECEIPT_EVIDENCE_MISSING",
+              "QUALITY_DEDUCTION_NOT_APPLIED",
+              "QUALITY_EVIDENCE_MISSING",
+              "AMOUNT_RESIDUAL"
+            ],
+            "type": "string"
+          },
+          "differenceTypeLabel": {
+            "type": "string"
+          },
+          "explainedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "explainedBy": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "explanation": {
+            "type": "string"
+          },
+          "financeValue": {
+            "nullable": true,
+            "type": "number"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "lineId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "lineNo": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "resolution": {
+            "enum": [
+              "APPLIED",
+              "KEPT"
+            ],
+            "nullable": true,
+            "type": "string"
+          },
+          "resolutionLabel": {
+            "type": "string"
+          },
+          "resolutionNote": {
+            "type": "string"
+          },
+          "resolvedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "resolvedBy": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "statementValue": {
+            "nullable": true,
+            "type": "number"
+          },
+          "status": {
+            "enum": [
+              "OPEN",
+              "EXPLAINED",
+              "RESOLVED"
+            ],
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "varianceAmount": {
+            "type": "number"
+          },
+          "varianceQuantity": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceSupplierReconciliationEventRow": {
+        "properties": {
+          "actorId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "actorRole": {
+            "type": "string"
+          },
+          "eventType": {
+            "type": "string"
+          },
+          "fromStatus": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "occurredAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "toStatus": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceSupplierReconciliationExplanationInput": {
+        "properties": {
+          "evidenceRef": {
+            "type": "string"
+          },
+          "explanation": {
+            "type": "string"
+          },
+          "providedRole": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceSupplierReconciliationExplanationRow": {
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "differenceId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "evidenceRef": {
+            "type": "string"
+          },
+          "explanation": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "providedBy": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "providedRole": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceSupplierReconciliationGap": {
+        "properties": {
+          "area": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "moduleId": {
+            "type": "string"
+          },
+          "service": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceSupplierReconciliationImportResult": {
+        "properties": {
+          "imported": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "refreshed": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceSupplierReconciliationRow"
+            },
+            "type": "array"
+          },
+          "scanned": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "skipped": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "truncated": {
+            "type": "boolean"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceSupplierReconciliationInspectionRow": {
+        "properties": {
+          "arrivedQuantity": {
+            "type": "number"
+          },
+          "completedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "concessionQuantity": {
+            "type": "number"
+          },
+          "currencyCode": {
+            "type": "string"
+          },
+          "deductedAmount": {
+            "type": "number"
+          },
+          "deductedQuantity": {
+            "type": "number"
+          },
+          "defectiveQuantity": {
+            "type": "number"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "inspectionId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "inspectionNo": {
+            "type": "string"
+          },
+          "inspectionResult": {
+            "type": "string"
+          },
+          "inspectionStatus": {
+            "type": "string"
+          },
+          "qualifiedQuantity": {
+            "type": "number"
+          },
+          "receiptCode": {
+            "type": "string"
+          },
+          "skuCode": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceSupplierReconciliationLinePage": {
+        "properties": {
+          "claimLines": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "deductionLines": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "financeAmount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "note": {
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "receiptLines": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceSupplierReconciliationLineRow"
+            },
+            "type": "array"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "statementAmount": {
+            "type": "number"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceSupplierReconciliationLineRow": {
+        "properties": {
+          "amount": {
+            "type": "number"
+          },
+          "baseQuantity": {
+            "nullable": true,
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "financeAmount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "financeQuantity": {
+            "nullable": true,
+            "type": "number"
+          },
+          "fxRate": {
+            "type": "number"
+          },
+          "fxRateSource": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "lineNo": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "lineType": {
+            "type": "string"
+          },
+          "lineTypeLabel": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "occurredAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "qualityDeductedQty": {
+            "nullable": true,
+            "type": "number"
+          },
+          "qualityMatched": {
+            "type": "boolean"
+          },
+          "qualityStatus": {
+            "type": "string"
+          },
+          "quantity": {
+            "nullable": true,
+            "type": "number"
+          },
+          "receiptArrivedQty": {
+            "nullable": true,
+            "type": "number"
+          },
+          "receiptMatched": {
+            "type": "boolean"
+          },
+          "receiptWarehouseCode": {
+            "type": "string"
+          },
+          "sourceLineRefCode": {
+            "type": "string"
+          },
+          "sourceRefCode": {
+            "type": "string"
+          },
+          "sourceType": {
+            "type": "string"
+          },
+          "statementAmount": {
+            "type": "number"
+          },
+          "unitCode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "unitPrice": {
+            "nullable": true,
+            "type": "number"
+          },
+          "upstreamQualityQuantity": {
+            "nullable": true,
+            "type": "number"
+          },
+          "upstreamQualityStatus": {
+            "type": "string"
+          },
+          "varianceAmount": {
+            "type": "number"
+          },
+          "varianceQuantity": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceSupplierReconciliationMatchResult": {
+        "properties": {
+          "matchedLines": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "notes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "openDifferences": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "raisedDifferences": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "reconId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "unmatchedLines": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceSupplierReconciliationOptions": {
+        "properties": {
+          "currencies": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "statuses": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "suppliers": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceSupplierReconciliationSupplierOption"
+            },
+            "type": "array"
+          },
+          "upstreamStatuses": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceSupplierReconciliationPage": {
+        "properties": {
+          "note": {
+            "type": "string"
+          },
+          "openDifferenceCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceSupplierReconciliationRow"
+            },
+            "type": "array"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "summaries": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceSupplierReconciliationCurrencySummary"
+            },
+            "type": "array"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceSupplierReconciliationPayableBasisRow": {
+        "nullable": true,
+        "properties": {
+          "adjustmentAmount": {
+            "type": "number"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "basisNote": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "generatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "generatedBy": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "payableId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "payableNo": {
+            "type": "string"
+          },
+          "statementAmount": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceSupplierReconciliationRejectInput": {
+        "properties": {
+          "reason": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceSupplierReconciliationResolveInput": {
+        "properties": {
+          "note": {
+            "type": "string"
+          },
+          "resolution": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceSupplierReconciliationRow": {
+        "properties": {
+          "confirmedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "confirmedBy": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "differenceCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "financeAdjustedAmount": {
+            "type": "number"
+          },
+          "financeConfirmedAmount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "financeConfirmedQuantity": {
+            "nullable": true,
+            "type": "number"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "lineCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "matchedLineCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "openDifferenceCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "payableId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "payableNo": {
+            "type": "string"
+          },
+          "periodEnd": {
+            "format": "date",
+            "type": "string"
+          },
+          "periodStart": {
+            "format": "date",
+            "type": "string"
+          },
+          "periodType": {
+            "type": "string"
+          },
+          "reconNo": {
+            "type": "string"
+          },
+          "rejectReason": {
+            "type": "string"
+          },
+          "rejectedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "rejectedBy": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "statementClaimAmount": {
+            "type": "number"
+          },
+          "statementCurrency": {
+            "type": "string"
+          },
+          "statementDeductionAmount": {
+            "type": "number"
+          },
+          "statementReceivedAmount": {
+            "type": "number"
+          },
+          "statementSuggestedAmount": {
+            "type": "number"
+          },
+          "statementTotalQuantity": {
+            "type": "number"
+          },
+          "status": {
+            "enum": [
+              "IMPORTED",
+              "MATCHED",
+              "DIFFERENCES",
+              "CONFIRMED",
+              "REJECTED"
+            ],
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "supplierCode": {
+            "type": "string"
+          },
+          "supplierName": {
+            "type": "string"
+          },
+          "supplierRefId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "unmatchedLineCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "upstreamReconId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "upstreamReconNo": {
+            "type": "string"
+          },
+          "upstreamStatus": {
+            "type": "string"
+          },
+          "upstreamSupplierConfirmedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "upstreamSupplierReference": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceSupplierReconciliationSupplierOption": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "refId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "FinanceWriteOffAdvanceBalance": {
         "properties": {
           "asOf": {
@@ -10391,6 +11315,615 @@
         },
         "tags": [
           "settlement-controller"
+        ]
+      }
+    },
+    "/finance/supplier-reconciliation": {
+      "get": {
+        "operationId": "get_finance_supplier_reconciliation",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "upstreamStatus",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "supplierRefId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "currency",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceSupplierReconciliationPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "supplier-reconciliation-controller"
+        ]
+      }
+    },
+    "/finance/supplier-reconciliation/capabilities": {
+      "get": {
+        "operationId": "get_finance_supplier_reconciliation_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceSupplierReconciliationCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "supplier-reconciliation-controller"
+        ]
+      }
+    },
+    "/finance/supplier-reconciliation/import": {
+      "post": {
+        "operationId": "post_finance_supplier_reconciliation_import",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceSupplierReconciliationImportResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "supplier-reconciliation-controller"
+        ]
+      }
+    },
+    "/finance/supplier-reconciliation/options": {
+      "get": {
+        "operationId": "get_finance_supplier_reconciliation_options",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceSupplierReconciliationOptions"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "supplier-reconciliation-controller"
+        ]
+      }
+    },
+    "/finance/supplier-reconciliation/{id}": {
+      "get": {
+        "operationId": "get_finance_supplier_reconciliation_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceSupplierReconciliationDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "supplier-reconciliation-controller"
+        ]
+      }
+    },
+    "/finance/supplier-reconciliation/{id}/confirm": {
+      "post": {
+        "operationId": "post_finance_supplier_reconciliation_id_confirm",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceSupplierReconciliationDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "supplier-reconciliation-controller"
+        ]
+      }
+    },
+    "/finance/supplier-reconciliation/{id}/differences": {
+      "get": {
+        "operationId": "get_finance_supplier_reconciliation_id_differences",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceSupplierReconciliationDifferencePage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "supplier-reconciliation-controller"
+        ]
+      }
+    },
+    "/finance/supplier-reconciliation/{id}/differences/{differenceId}/explanations": {
+      "post": {
+        "operationId": "post_finance_supplier_reconciliation_id_differences_differenceId_explanations",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "differenceId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinanceSupplierReconciliationExplanationInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceSupplierReconciliationDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "supplier-reconciliation-controller"
+        ]
+      }
+    },
+    "/finance/supplier-reconciliation/{id}/differences/{differenceId}/resolve": {
+      "post": {
+        "operationId": "post_finance_supplier_reconciliation_id_differences_differenceId_resolve",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "differenceId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinanceSupplierReconciliationResolveInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceSupplierReconciliationDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "supplier-reconciliation-controller"
+        ]
+      }
+    },
+    "/finance/supplier-reconciliation/{id}/lines": {
+      "get": {
+        "operationId": "get_finance_supplier_reconciliation_id_lines",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "lineType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceSupplierReconciliationLinePage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "supplier-reconciliation-controller"
+        ]
+      }
+    },
+    "/finance/supplier-reconciliation/{id}/match": {
+      "post": {
+        "operationId": "post_finance_supplier_reconciliation_id_match",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceSupplierReconciliationMatchResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "supplier-reconciliation-controller"
+        ]
+      }
+    },
+    "/finance/supplier-reconciliation/{id}/reject": {
+      "post": {
+        "operationId": "post_finance_supplier_reconciliation_id_reject",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinanceSupplierReconciliationRejectInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceSupplierReconciliationDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "supplier-reconciliation-controller"
         ]
       }
     },
