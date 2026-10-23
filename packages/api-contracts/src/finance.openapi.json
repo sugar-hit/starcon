@@ -1,6 +1,164 @@
 {
   "components": {
     "schemas": {
+      "FinanceAgingBucketAmount": {
+        "properties": {
+          "amount": {
+            "type": "number"
+          },
+          "code": {
+            "type": "string"
+          },
+          "count": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "label": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceAgingBucketConfigInput": {
+        "properties": {
+          "buckets": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceAgingBucketInput"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceAgingBucketDef": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "overdueFromDays": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "overdueToDays": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "sortOrder": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceAgingBucketInput": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "overdueFromDays": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "overdueToDays": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "sortOrder": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceAgingCurrencySummary": {
+        "properties": {
+          "count": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "disputeAmount": {
+            "type": "number"
+          },
+          "disputeCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "openAmount": {
+            "type": "number"
+          },
+          "overdueAmount": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceAgingCurrencyTotal": {
+        "properties": {
+          "buckets": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceAgingBucketAmount"
+            },
+            "type": "array"
+          },
+          "count": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "disputeAmount": {
+            "type": "number"
+          },
+          "disputeOverdueAmount": {
+            "type": "number"
+          },
+          "openAmount": {
+            "type": "number"
+          },
+          "overdueAmount": {
+            "type": "number"
+          },
+          "overdueShareTop": {
+            "nullable": true,
+            "type": "number"
+          },
+          "topDimensionKey": {
+            "nullable": true,
+            "type": "string"
+          },
+          "topDimensionName": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceAgingOptionRef": {
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "FinanceCollectionTaskCloseInput": {
         "properties": {
           "reason": {
@@ -168,6 +326,305 @@
             "type": "string"
           },
           "disputeAmount": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceReceivableAgingBucketConfig": {
+        "properties": {
+          "buckets": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceAgingBucketDef"
+            },
+            "type": "array"
+          },
+          "configured": {
+            "type": "boolean"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceReceivableAgingCapabilities": {
+        "properties": {
+          "capabilities": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceReceivableAgingCapability"
+            },
+            "type": "array"
+          },
+          "downstreamGaps": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceReceivableAgingDownstreamGap"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceReceivableAgingCapability": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "basis": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "module": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceReceivableAgingDistribution": {
+        "properties": {
+          "asOfDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "bucketSource": {
+            "type": "string"
+          },
+          "buckets": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceAgingBucketDef"
+            },
+            "type": "array"
+          },
+          "dimension": {
+            "type": "string"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceReceivableAgingRow"
+            },
+            "type": "array"
+          },
+          "totalCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totals": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceAgingCurrencyTotal"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceReceivableAgingDownstreamGap": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "group": {
+            "type": "string"
+          },
+          "module": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "ownerService": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceReceivableAgingOptions": {
+        "properties": {
+          "asOfDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "buckets": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceAgingBucketDef"
+            },
+            "type": "array"
+          },
+          "counterparties": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceAgingOptionRef"
+            },
+            "type": "array"
+          },
+          "currencies": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "shops": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceAgingOptionRef"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceReceivableAgingOverduePage": {
+        "properties": {
+          "asOfDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "disputeCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceReceivableAgingOverdueRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "summaryByCurrency": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceAgingCurrencySummary"
+            },
+            "type": "array"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceReceivableAgingOverdueRow": {
+        "properties": {
+          "amount": {
+            "type": "number"
+          },
+          "bucketCode": {
+            "type": "string"
+          },
+          "bucketLabel": {
+            "type": "string"
+          },
+          "counterpartyName": {
+            "type": "string"
+          },
+          "counterpartyRef": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "counterpartyType": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "disputeFlag": {
+            "type": "boolean"
+          },
+          "disputeNote": {
+            "type": "string"
+          },
+          "dueDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "openAmount": {
+            "type": "number"
+          },
+          "overdueDays": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "receivableNo": {
+            "type": "string"
+          },
+          "settledAmount": {
+            "type": "number"
+          },
+          "shopId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "shopName": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceReceivableAgingRow": {
+        "properties": {
+          "buckets": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceAgingBucketAmount"
+            },
+            "type": "array"
+          },
+          "count": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "dimension": {
+            "type": "string"
+          },
+          "dimensionKey": {
+            "type": "string"
+          },
+          "dimensionName": {
+            "type": "string"
+          },
+          "disputeAmount": {
+            "type": "number"
+          },
+          "disputeOverdueAmount": {
+            "type": "number"
+          },
+          "openAmount": {
+            "type": "number"
+          },
+          "overdueAmount": {
+            "type": "number"
+          },
+          "overdueShare": {
+            "nullable": true,
             "type": "number"
           }
         },
@@ -829,6 +1286,312 @@
   },
   "openapi": "3.0.1",
   "paths": {
+    "/finance/receivable-aging/buckets": {
+      "get": {
+        "operationId": "get_finance_receivable_aging_buckets",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceReceivableAgingBucketConfig"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "receivable-aging-controller"
+        ]
+      },
+      "put": {
+        "operationId": "put_finance_receivable_aging_buckets",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinanceAgingBucketConfigInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceReceivableAgingBucketConfig"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "receivable-aging-controller"
+        ]
+      }
+    },
+    "/finance/receivable-aging/capabilities": {
+      "get": {
+        "operationId": "get_finance_receivable_aging_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceReceivableAgingCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "receivable-aging-controller"
+        ]
+      }
+    },
+    "/finance/receivable-aging/distribution": {
+      "get": {
+        "operationId": "get_finance_receivable_aging_distribution",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "currency",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "shopId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "counterpartyRef",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "bucketCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "disputeOnly",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dimension",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceReceivableAgingDistribution"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "receivable-aging-controller"
+        ]
+      }
+    },
+    "/finance/receivable-aging/options": {
+      "get": {
+        "operationId": "get_finance_receivable_aging_options",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceReceivableAgingOptions"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "receivable-aging-controller"
+        ]
+      }
+    },
+    "/finance/receivable-aging/overdue": {
+      "get": {
+        "operationId": "get_finance_receivable_aging_overdue",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "currency",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "shopId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "counterpartyRef",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "bucketCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "disputeOnly",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceReceivableAgingOverduePage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "receivable-aging-controller"
+        ]
+      }
+    },
     "/finance/receivables": {
       "get": {
         "operationId": "get_finance_receivables",
