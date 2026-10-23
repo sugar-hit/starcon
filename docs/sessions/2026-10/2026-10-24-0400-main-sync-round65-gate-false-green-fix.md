@@ -164,5 +164,12 @@
    `trade`/`crm`/`finance` 六个模块不会再被 reactor 跳过 ——
    本次交付的 4 项财务能力（坏账与核销、付款计划、核销、结算单管理）
    的集成测试**至今在 CI 里一次都没跑过**。
+5. ⚠️ **修完 identity 那个缺陷之后，还会出现新的 CI 失败** ——
+   不是回归，是**排版债在潜伏期之后集中爆发**（详见
+   [`2026-10-24-spotless-debt-latent-reactor-early-stop.md`](../backlog/2026-10/2026-10-24-spotless-debt-latent-reactor-early-stop.md)）：
+   CI 的 `spotless:check` 是独立 goal，reactor 在第一个失败模块就停 ⇒
+   **CI 实际只判定 `backend` + `tenancy`**；`main` 基线自己就有 1167 个排版违规被掩盖着，
+   本 PR 增量 193 个（finance 71 个是纯新增）⇒ **那 71 个会在 identity 修好后立刻变成下一个阻塞点**。
+   ⇒ 集成侧应在下批交付前统一 `mvn spotless:apply`，至少清掉本次新交付模块的违规。
 
 <!-- probe -->
