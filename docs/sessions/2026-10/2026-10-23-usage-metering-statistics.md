@@ -82,6 +82,41 @@
 - `backend/services/identity/src/test/java/com/starcon/identity/SaasUsageIntegrationTest.java`
   —— 14 例，实跑 Testcontainers PostgreSQL 16；含多租户三断言与共享状态哨兵。
 
+### 测试隔离（17.7.1.1 回归的同款缺陷，本车道不重犯）
+
+平台运营角色登记（V323 的 `saas_platform_register_role`）会把 PLATFORM_OPS **永久挂到调用者本人**身上。
+挂在**共享的 local-admin** 上 = 污染同一次 maven 运行里的所有 identity 测试类：
+共享 owner 的角色从 1 个变成 2 个，而 `/auth/session` 的 grants 是**无序聚合**
+（V47 的 `session_access` 用 `jsonb_agg` 且没有 `ORDER BY`），别的测试类再靠 `grants.get(0)` 猜角色就会踩空
+——2026-10 的真实回归：`IdentityIntegrationTest` 因此把 PLATFORM_OPS 当成 OWNER 去删，拿到 200 而不是 403。
+
+⇒ 本车道的做法：
+1. **平台运营身份用专属子租户所有者**（真实走 `POST /identity/children`），**不挂共享 owner**。
+   闸门是**按租户**判的（`saas_platform_gate` 只要求 `saas_platform_role.tenant_id = 会话所在租户`，
+   没有「必须是根租户」的要求），所以子租户所有者可以在自己租户里登记 PLATFORM_OPS 并通过闸门。
+2. **`@AfterEach` 哨兵**：`/auth/session` 的 grants 长度 == 1 且 `roleCode == "OWNER"`；
+   数据库层 `select count(*) from role_assignment where membership_id = <共享 owner 的 membershipId>` == 1。
+   放在 `@AfterEach` 而不是某个用例里：污染当场红，而不是等到别的测试类炸出来。
+
+## 验证
+
+- **L0**：`./mvnw -q -pl services/identity -am compile` 通过；`pnpm typecheck` 3 个包全绿。
+- **L1（整个 identity 套件，连跑两次，证明确定性）**：
+  ```
+  [INFO] Tests run: 315, Failures: 0, Errors: 0, Skipped: 0
+  [INFO] BUILD SUCCESS
+  [INFO] Tests run: 315, Failures: 0, Errors: 0, Skipped: 0
+  [INFO] BUILD SUCCESS
+  ```
+  其中本模块 `SaasUsageIntegrationTest` 14 例全过，`IdentityIntegrationTest` 17 例全过
+  （共享 owner 哨兵在两个测试类里都是绿的 ⇒ 两条车道都不再污染共享状态）。
+- **前端**：`usage-stat-model.test.ts` 19 例 + `usage-allowlist.test.ts` 5 例全过；
+  改共享 `api-proxy.ts` 后跑了**全量 allowlist 回归** `pnpm vitest run apps/web/src/app/api/trade`
+  ⇒ 68 文件 379 例全过。
+- **首 token 零命中核对**：既有 182 条 `services[]` 正则对本模块 8 个 shape **零命中**（脚本实测，
+  脚本落在 `.tmp/allowlist-zero-hit.mjs`）；反向核对本模块正则不误伤既有 identity/ 形状。
+
+
 ### 前端
 
 - `apps/web/src/app/org/usage/page.tsx` —— 页面入口。
