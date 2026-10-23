@@ -75,6 +75,34 @@ grep -rn "confirmedAt().toLocalDate()\|toLocalDate().plusDays" backend/services/
 **本批新交付的三个车道（12.1.1.3 / 12.1.2.2 / 12.2.1.2）没有照抄这个写法** ——
 所以这批的失败面**只有 2 条断言**，不是每条车道都炸。
 
+## 第三个实例（同一个坑的第三条数据通路）：jOOQ 读 `timestamptz`
+
+**12.2.1.2 核销车道在写自己的自动匹配逻辑时，独立撞上了同一个坑**（2026-10-24）：
+
+> 实测抓到并修掉一个真 bug：**jOOQ 读 `timestamptz` 返回本机时区的 `OffsetDateTime`**，
+> 直接 `toLocalDate()` 会比 SQL 侧 UTC 日期差一天 ⇒ 自动匹配**静默失配**
+> （不报错、永远不命中）。已统一 `atZoneSameInstant(UTC)`。
+
+⇒ **同一个「本地日历日 vs UTC 日历日」的差一天，有三条互相独立的入口**：
+
+| 入口 | 谁踩到 | 症状 |
+| --- | --- | --- |
+| **Jackson 反序列化** `OffsetDateTime` → context time zone | 测试断言（`confirmedAt().toLocalDate()`） | 断言失败，差一天 |
+| **jOOQ 读 `timestamptz`** → 本机时区的 `OffsetDateTime` | 12.2.1.2 的自动匹配 | **静默失配**（不报错、永远不命中） |
+| **`Timestamp.valueOf(LocalDateTime)`** | AGENTS.md 已明令禁止（会静默偏 −28800s） | 时刻偏 8 小时 |
+
+⚠️ 第二条最阴 —— **它不报错**，只是「永远匹配不上」，
+在集成测试里如果只断言「命中 0 条」就会看起来像正常业务结果。
+
+⇒ **统一处置口径**：
+> **凡是「从库里读回来的时刻」再取日历日，一律先转到 DB 的口径时区（本仓是 UTC）**：
+> - Jackson 出来的 `OffsetDateTime` → `withOffsetSameInstant(ZoneOffset.UTC)`
+> - jOOQ 出来的 `OffsetDateTime` → `atZoneSameInstant(ZoneOffset.UTC)`
+> - 然后再 `.toLocalDate()`。
+>
+> 想要本地日历日时**先想清楚**：服务端是按 UTC 日历日算的（账龄/逾期判定），
+> 改成按本地时区会让**同一条记录在不同连接下落到不同桶里** —— 那才是真正的错。
+
 ## 处置
 
 已派**修复车道** `fix/12-1-1-1-due-date-timezone-assertion`（车道 id 12.1.1.1）：
