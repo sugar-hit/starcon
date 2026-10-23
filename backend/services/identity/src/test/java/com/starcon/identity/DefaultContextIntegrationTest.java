@@ -59,7 +59,8 @@ class DefaultContextIntegrationTest extends DefaultContextTestBase {
     UUID warehouseId = UUID.randomUUID();
     stubShops(token, shopListJson(shopJson(shopId, "S-1", "美国店", "ACTIVE")));
     stubWarehouses(token, warehouseListJson(warehouseJson(warehouseId, "W-1", "深圳仓", "ACTIVE", false)));
-    String legalEntityId = legalEntity(token, "LC" + suffix());
+    String legalEntityCode = "LC" + suffix();
+    String legalEntityId = legalEntity(token, legalEntityCode);
 
     var view = request(token, "GET", "/identity/default-context", null, 200);
     assertThat(view.get("stored").asBoolean()).as("从没设过就是 stored=false").isFalse();
@@ -70,8 +71,13 @@ class DefaultContextIntegrationTest extends DefaultContextTestBase {
     assertThat(options.get("shops")).hasSize(1);
     assertThat(options.get("shops").get(0).get("code").asText()).isEqualTo("S-1");
     assertThat(options.get("warehouses")).hasSize(1);
-    assertThat(options.get("legalEntities")).hasSize(1);
-    assertThat(options.get("legalEntities").get(0).get("id").asText()).isEqualTo(legalEntityId);
+    // 法人候选集是**本租户的全部法人**：集成测试共用同一个库、login() 又是固定的
+    // local-admin 租户 ⇒ 别的测试类建的法人行会累积在同一个租户里，数量天然会变。
+    // 所以按 id 找到**自己创建的那一条**来断言，而不是断言总数
+    // （与 IdentityIntegrationTest 对法人列表的 contains 语义一致）。
+    var mine = byId(options.get("legalEntities"), legalEntityId);
+    assertThat(mine).as("法人候选集应包含本测试创建的法人 %s", legalEntityId).isNotNull();
+    assertThat(mine.get("code").asText()).isEqualTo(legalEntityCode);
     for (JsonNode source : options.get("sources")) {
       assertThat(source.get("available").asBoolean())
           .as("维度 %s 应当读得到", source.get("dimension").asText())
@@ -317,5 +323,18 @@ class DefaultContextIntegrationTest extends DefaultContextTestBase {
       if (dimension.equals(node.get("dimension").asText())) return node;
     }
     throw new IllegalStateException("没有这个维度：" + dimension);
+  }
+
+  /**
+   * 从候选集里按 id 找出那一条。
+   *
+   * <p>共享租户下候选集的数量会变（别的测试类也会往同一个租户里建法人），所以只能按
+   * id / code 定位，**不能**取「第 0 条」或断言总数 —— 两者都依赖集合的大小与顺序。
+   */
+  private JsonNode byId(JsonNode candidates, String id) {
+    for (JsonNode node : candidates) {
+      if (id.equals(node.get("id").asText())) return node;
+    }
+    return null;
   }
 }
