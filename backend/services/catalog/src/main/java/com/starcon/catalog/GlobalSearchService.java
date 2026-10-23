@@ -88,14 +88,20 @@ public class GlobalSearchService {
 
     Map<String, List<GlobalSearchHit>> byDomain = new LinkedHashMap<>();
     List<String> unavailable = new ArrayList<>();
+    List<GlobalSearchSuppressed> suppressed = new ArrayList<>();
+    // 每个业务域**实际生效**的数据范围（同一域由多个子域组成时取更严的一侧）。
+    Map<String, String> scopeByGroup = new LinkedHashMap<>();
 
     // ---- SKU（03 商品主数据）----
     if (permits(actor, PERM_SKU)) {
       List<GlobalSearchHit> hits =
           access.run(actor, PERM_SKU, () -> skuHits(prefix, size));
       byDomain.computeIfAbsent("PRODUCT", k -> new ArrayList<>()).addAll(hits);
+      // SKU 的范围落在它所属的 SPU 上（sku 继承 SPU 的归属），所以用的就是 sku.read 这条授权的范围。
+      scopeByGroup.merge("PRODUCT", scopeOf(actor, PERM_SKU), GlobalSearchService::narrower);
     } else {
       unavailable.add("PRODUCT_SKU");
+      suppressed.add(new GlobalSearchSuppressed("PRODUCT_SKU", "SKU", "PRODUCT", "商品"));
     }
 
     // ---- SPU（03 商品主数据）----
@@ -103,8 +109,10 @@ public class GlobalSearchService {
       List<GlobalSearchHit> hits =
           access.run(actor, PERM_SPU, () -> spuHits(prefix, size));
       byDomain.computeIfAbsent("PRODUCT", k -> new ArrayList<>()).addAll(hits);
+      scopeByGroup.merge("PRODUCT", scopeOf(actor, PERM_SPU), GlobalSearchService::narrower);
     } else {
       unavailable.add("PRODUCT_SPU");
+      suppressed.add(new GlobalSearchSuppressed("PRODUCT_SPU", "SPU", "PRODUCT", "商品"));
     }
 
     // ---- 客户（3.6.1.1 往来单位 · CUSTOMER 角色）----
@@ -113,8 +121,11 @@ public class GlobalSearchService {
       List<GlobalSearchHit> hits =
           access.run(actor, PERM_SPU, () -> partyHits("CUSTOMER", "客户", prefix, size));
       byDomain.computeIfAbsent("CUSTOMER", k -> new ArrayList<>()).addAll(hits);
+      // party 是租户级主数据（表上没有归属列）⇒ 个人 / 部门范围收窄不了它。
+      scopeByGroup.merge("CUSTOMER", GrantPermissions.SCOPE_TENANT, GlobalSearchService::narrower);
     } else {
       unavailable.add("CUSTOMER");
+      suppressed.add(new GlobalSearchSuppressed("CUSTOMER", "客户", "CUSTOMER", "客户"));
     }
 
     // ---- 供应商（3.6.1.1 往来单位 · SUPPLIER 角色）----
@@ -122,16 +133,19 @@ public class GlobalSearchService {
       List<GlobalSearchHit> hits =
           access.run(actor, PERM_SPU, () -> partyHits("SUPPLIER", "供应商", prefix, size));
       byDomain.computeIfAbsent("SUPPLIER", k -> new ArrayList<>()).addAll(hits);
+      scopeByGroup.merge("SUPPLIER", GrantPermissions.SCOPE_TENANT, GlobalSearchService::narrower);
     } else {
       unavailable.add("SUPPLIER");
+      suppressed.add(new GlobalSearchSuppressed("SUPPLIER", "供应商", "SUPPLIER", "供应商"));
     }
 
     List<GlobalSearchGroup> groups = new ArrayList<>();
-    addGroup(groups, "PRODUCT", "商品", byDomain);
-    addGroup(groups, "CUSTOMER", "客户", byDomain);
-    addGroup(groups, "SUPPLIER", "供应商", byDomain);
+    addGroup(groups, "PRODUCT", "商品", byDomain, scopeByGroup);
+    addGroup(groups, "CUSTOMER", "客户", byDomain, scopeByGroup);
+    addGroup(groups, "SUPPLIER", "供应商", byDomain, scopeByGroup);
 
-    return new GlobalSearchResponse(keyword, MATCH_MODE, MIN_KEYWORD_LENGTH, groups, unavailable);
+    return new GlobalSearchResponse(
+        keyword, MATCH_MODE, MIN_KEYWORD_LENGTH, groups, unavailable, suppressed);
   }
 
   // ================================================================ 能力声明
@@ -290,21 +304,69 @@ public class GlobalSearchService {
       List<GlobalSearchGroup> groups,
       String domain,
       String label,
-      Map<String, List<GlobalSearchHit>> byDomain) {
+      Map<String, List<GlobalSearchHit>> byDomain,
+      Map<String, String> scopeByGroup) {
     List<GlobalSearchHit> hits = byDomain.get(domain);
     if (hits == null || hits.isEmpty()) return;
-    groups.add(new GlobalSearchGroup(domain, label, hits));
+    String scope = scopeByGroup.getOrDefault(domain, GrantPermissions.SCOPE_TENANT);
+    groups.add(new GlobalSearchGroup(domain, label, hits, scope, scopeNote(domain, scope)));
+  }
+
+  /**
+   * 该权限码上实际生效的数据范围。
+   *
+   * <p>与 RLS 的 {@code catalog_scope} 同语义：多条授权里只要有一条 ALL，返回的行就是全租户可见。
+   */
+  private String scopeOf(AccessService.Access actor, String permission) {
+    return GrantPermissions.scopeMode(
+        grantsOf(actor), permission, actor.departmentId() != null);
+  }
+
+  /** 同一业务域由多个子域组成时（商品 = SKU + SPU），取**更严**的一侧。 */
+  private static String narrower(String left, String right) {
+    return rank(left) >= rank(right) ? left : right;
+  }
+
+  private static int rank(String scope) {
+    if (GrantPermissions.SCOPE_SELF.equals(scope)) return 3;
+    if (GrantPermissions.SCOPE_DEPARTMENT.equals(scope)) return 2;
+    if (GrantPermissions.SCOPE_ALL.equals(scope) || GrantPermissions.SCOPE_TENANT.equals(scope)) return 1;
+    return 0;
+  }
+
+  /** 数据范围说明文案：界面上要讲清「这一组到底能看到多大范围」。 */
+  private static String scopeNote(String domain, String scope) {
+    String subject =
+        switch (domain) {
+          case "PRODUCT" -> "商品档案";
+          case "CUSTOMER" -> "客户";
+          case "SUPPLIER" -> "供应商";
+          default -> "该域数据";
+        };
+    if (GrantPermissions.SCOPE_ALL.equals(scope)) {
+      return subject + "在你的授权范围内全租户可见。";
+    }
+    if (GrantPermissions.SCOPE_DEPARTMENT.equals(scope)) {
+      return subject + "只返回本部门负责的记录。";
+    }
+    if (GrantPermissions.SCOPE_SELF.equals(scope)) {
+      return subject + "只返回归属人是你（或你负责的 SPU）的记录。";
+    }
+    return subject + "是租户级主数据，不按个人或部门范围收窄 —— 看到的是本租户全部记录。";
   }
 
   /** 会话是否具备该域的读权限。判定规则与各服务 {@code AccessService.require} 同构。 */
   private boolean permits(AccessService.Access actor, String permission) {
-    List<GrantPermissions.Grant> grants =
-        actor.grants() == null
-            ? List.of()
-            : actor.grants().stream()
-                .map(g -> new GrantPermissions.Grant(g.roleCode(), g.scopeMode(), g.permissions()))
-                .toList();
-    return GrantPermissions.permits(grants, permission, actor.departmentId() != null);
+    return GrantPermissions.permits(grantsOf(actor), permission, actor.departmentId() != null);
+  }
+
+  /** 各服务 {@code AccessService.Grant} → 共享判定用的 {@code GrantPermissions.Grant}。 */
+  private static List<GrantPermissions.Grant> grantsOf(AccessService.Access actor) {
+    return actor.grants() == null
+        ? List.of()
+        : actor.grants().stream()
+            .map(g -> new GrantPermissions.Grant(g.roleCode(), g.scopeMode(), g.permissions()))
+            .toList();
   }
 
   /** 关键词归一化：去首尾空白；少于 2 个字符直接 400（蓝图写死的约束，后端是权威）。 */

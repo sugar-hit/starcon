@@ -7,7 +7,10 @@ import {
   hitSubtitle,
   mergeServiceResults,
   MIN_KEYWORD_LENGTH,
+  narrowerScope,
   normalizeKeyword,
+  scopeLabel,
+  type GlobalSearchGroup,
   type GlobalSearchHit,
   type GlobalSearchResponse,
   type ServiceSearchOutcome,
@@ -24,6 +27,21 @@ function hit(overrides: Partial<GlobalSearchHit> = {}): GlobalSearchHit {
   };
 }
 
+function group(
+  domain: string,
+  hits: GlobalSearchHit[],
+  scope = 'ALL',
+  label?: string,
+): GlobalSearchGroup {
+  return {
+    domain,
+    label: label ?? domain,
+    hits,
+    dataScope: scope,
+    dataScopeNote: `${domain} 的数据范围说明`,
+  };
+}
+
 function response(overrides: Partial<GlobalSearchResponse> = {}): GlobalSearchResponse {
   return {
     keyword: 'SKU-AX',
@@ -31,6 +49,7 @@ function response(overrides: Partial<GlobalSearchResponse> = {}): GlobalSearchRe
     minKeywordLength: MIN_KEYWORD_LENGTH,
     groups: [],
     unavailableDomains: [],
+    suppressedDomains: [],
     ...overrides,
   };
 }
@@ -39,8 +58,13 @@ function outcome(
   service: string,
   groups: GlobalSearchResponse['groups'],
   unavailable: string[] = [],
+  suppressed: GlobalSearchResponse['suppressedDomains'] = [],
 ): ServiceSearchOutcome {
-  return { service, response: response({ groups, unavailableDomains: unavailable }), error: null };
+  return {
+    service,
+    response: response({ groups, unavailableDomains: unavailable, suppressedDomains: suppressed }),
+    error: null,
+  };
 }
 
 describe('normalizeKeyword', () => {
@@ -60,8 +84,8 @@ describe('mergeServiceResults', () => {
   it('同名域的命中合成一组（商品域同时有 SKU 与 SPU）', () => {
     const merged = mergeServiceResults([
       outcome('catalog', [
-        { domain: 'PRODUCT', label: '商品', hits: [hit({ kind: 'SKU', id: 'a' })] },
-        { domain: 'PRODUCT', label: '商品', hits: [hit({ kind: 'SPU', id: 'b' })] },
+        group('PRODUCT', [hit({ kind: 'SKU', id: 'a' })], 'ALL', '商品'),
+        group('PRODUCT', [hit({ kind: 'SPU', id: 'b' })], 'ALL', '商品'),
       ]),
     ]);
     expect(merged.groups).toHaveLength(1);
@@ -70,37 +94,95 @@ describe('mergeServiceResults', () => {
 
   it('同一条命中被两个来源同时命中时只留一条', () => {
     const merged = mergeServiceResults([
-      outcome('catalog', [{ domain: 'PRODUCT', label: '商品', hits: [hit({ id: 'same' })] }]),
-      outcome('trade', [{ domain: 'PRODUCT', label: '商品', hits: [hit({ id: 'same' })] }]),
+      outcome('catalog', [group('PRODUCT', [hit({ id: 'same' })], 'ALL', '商品')]),
+      outcome('trade', [group('PRODUCT', [hit({ id: 'same' })], 'ALL', '商品')]),
     ]);
     expect(merged.groups[0]?.hits).toHaveLength(1);
   });
 
   it('组按蓝图的域次序排列，不按服务返回次序', () => {
     const merged = mergeServiceResults([
-      outcome('warehouse', [{ domain: 'LOGISTICS', label: '物流', hits: [hit({ domain: 'LOGISTICS' })] }]),
-      outcome('trade', [{ domain: 'ORDER', label: '订单', hits: [hit({ domain: 'ORDER' })] }]),
-      outcome('catalog', [{ domain: 'PRODUCT', label: '商品', hits: [hit()] }]),
+      outcome('warehouse', [group('LOGISTICS', [hit({ domain: 'LOGISTICS' })], 'TENANT', '物流')]),
+      outcome('trade', [group('ORDER', [hit({ domain: 'ORDER' })], 'ALL', '订单')]),
+      outcome('catalog', [group('PRODUCT', [hit()], 'ALL', '商品')]),
     ]);
     expect(merged.groups.map((g) => g.domain)).toEqual(['PRODUCT', 'ORDER', 'LOGISTICS']);
   });
 
   it('没权限的域与失败的服务必须分开报', () => {
     const merged = mergeServiceResults([
-      outcome('catalog', [{ domain: 'PRODUCT', label: '商品', hits: [hit()] }], ['CUSTOMER']),
+      outcome(
+        'catalog',
+        [group('PRODUCT', [hit()], 'ALL', '商品')],
+        ['CUSTOMER'],
+        [{ domain: 'CUSTOMER', label: '客户', group: 'CUSTOMER', groupLabel: '客户' }],
+      ),
       { service: 'warehouse', response: null, error: '服务暂时不可用' },
     ]);
     expect(merged.unavailableDomains).toEqual(['CUSTOMER']);
     expect(merged.failedServices).toEqual(['warehouse']);
     expect(merged.groups).toHaveLength(1);
+    expect(merged.suppressedDomains).toHaveLength(1);
   });
 
   it('一个服务失败不影响其余域返回', () => {
     const merged = mergeServiceResults([
       { service: 'catalog', response: null, error: 'boom' },
-      outcome('trade', [{ domain: 'ORDER', label: '订单', hits: [hit({ domain: 'ORDER' })] }]),
+      outcome('trade', [group('ORDER', [hit({ domain: 'ORDER' })], 'ALL', '订单')]),
     ]);
     expect(merged.groups.map((g) => g.domain)).toEqual(['ORDER']);
+  });
+
+  it('被权限抑制的子域带归属业务域一起带回来（按业务域 + 子域去重）', () => {
+    const merged = mergeServiceResults([
+      outcome(
+        'catalog',
+        [group('PRODUCT', [hit()], 'ALL', '商品')],
+        ['PRODUCT_SKU', 'PRODUCT_SPU'],
+        [
+          { domain: 'PRODUCT_SKU', label: 'SKU', group: 'PRODUCT', groupLabel: '商品' },
+          { domain: 'PRODUCT_SPU', label: 'SPU', group: 'PRODUCT', groupLabel: '商品' },
+        ],
+      ),
+      outcome(
+        'catalog',
+        [],
+        ['PRODUCT_SKU'],
+        [{ domain: 'PRODUCT_SKU', label: 'SKU', group: 'PRODUCT', groupLabel: '商品' }],
+      ),
+    ]);
+    expect(merged.suppressedDomains.map((s) => s.domain)).toEqual(['PRODUCT_SKU', 'PRODUCT_SPU']);
+  });
+
+  it('同一域被多个服务返回时取更严的数据范围', () => {
+    const merged = mergeServiceResults([
+      outcome('catalog', [group('PRODUCT', [hit({ id: '1' })], 'ALL', '商品')]),
+      outcome('trade', [group('PRODUCT', [hit({ id: '2' })], 'SELF', '商品')]),
+    ]);
+    expect(merged.groups[0]?.dataScope).toBe('SELF');
+    expect(merged.groups[0]?.hits).toHaveLength(2);
+  });
+});
+
+describe('数据范围', () => {
+  it('短标签按后端口径逐条对应', () => {
+    expect(scopeLabel('ALL')).toBe('全范围');
+    expect(scopeLabel('DEPARTMENT')).toBe('本部门');
+    expect(scopeLabel('SELF')).toBe('仅本人');
+    expect(scopeLabel('TENANT')).toBe('租户级');
+  });
+
+  it('未知口径原样回显，不假装它属于某个已知范围', () => {
+    expect(scopeLabel('WHATEVER')).toBe('WHATEVER');
+    expect(scopeLabel('')).toBe('范围未声明');
+    expect(scopeLabel(null)).toBe('范围未声明');
+  });
+
+  it('取更严的一侧：SELF > DEPARTMENT > ALL / TENANT', () => {
+    expect(narrowerScope('ALL', 'SELF')).toBe('SELF');
+    expect(narrowerScope('DEPARTMENT', 'ALL')).toBe('DEPARTMENT');
+    expect(narrowerScope('TENANT', 'DEPARTMENT')).toBe('DEPARTMENT');
+    expect(narrowerScope('ALL', 'ALL')).toBe('ALL');
   });
 });
 
@@ -141,9 +223,9 @@ describe('展示辅助', () => {
   it('命中总数跨域累加', () => {
     const merged = mergeServiceResults([
       outcome('catalog', [
-        { domain: 'PRODUCT', label: '商品', hits: [hit({ id: '1' }), hit({ id: '2' })] },
+        group('PRODUCT', [hit({ id: '1' }), hit({ id: '2' })], 'ALL', '商品'),
       ]),
-      outcome('trade', [{ domain: 'ORDER', label: '订单', hits: [hit({ domain: 'ORDER', id: '3' })] }]),
+      outcome('trade', [group('ORDER', [hit({ domain: 'ORDER', id: '3' })], 'ALL', '订单')]),
     ]);
     expect(countHits(merged.groups)).toBe(3);
   });

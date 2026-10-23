@@ -33594,6 +33594,12 @@
       },
       "GlobalSearchGroup": {
         "properties": {
+          "dataScope": {
+            "type": "string"
+          },
+          "dataScopeNote": {
+            "type": "string"
+          },
           "domain": {
             "type": "string"
           },
@@ -33649,11 +33655,34 @@
             "format": "int32",
             "type": "integer"
           },
+          "suppressedDomains": {
+            "items": {
+              "$ref": "#/components/schemas/GlobalSearchSuppressed"
+            },
+            "type": "array"
+          },
           "unavailableDomains": {
             "items": {
               "type": "string"
             },
             "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "GlobalSearchSuppressed": {
+        "properties": {
+          "domain": {
+            "type": "string"
+          },
+          "group": {
+            "type": "string"
+          },
+          "groupLabel": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
           }
         },
         "type": "object"
