@@ -80,7 +80,7 @@
 | 1.1.1.3 | 审批待办 | /dashboard/todo | D7 | 未开发 | — |
 | 1.1.2.1 | 核心指标卡 | — | D7 | 未开发 | — |
 | 1.1.2.2 | 店铺概览 | — | D7 | 未开发 | — |
-| 1.1.2.3 | 履约健康 | — | D7 | 未开发 | — |
+| 1.1.2.3 | 履约健康 | — | D7 | 已交付 | 端点 3 个挂 `/trade/fulfillment/health`：capabilities（七个维度逐条报出算法/分母/来源表，**平台 ODR 无上游 ⇒ available=false + ownerModule「02 渠道与店铺 · 平台绩效指标同步」+ impact**，没有上游就**不给公式也不给分母**，给了就是编一个）/ summary（健康度卡片，每张带 metricKind、分子分母、灯色与灯色判定依据）/ red-flags（五类红灯项，真分页 + 真筛选，**口径与卡片同源**：卡片 `redFlagKind` 过滤后的 total 必须等于该卡片的 `alertCount`）· **零迁移零新表**（卷 01 是只读投影层，不产生新的业务事实）：待发货积压读 V124 `shipment_pending_unit`、超时发货率与物流异常件占比与平台绩效读 V127 `shipment_record`（+ `shipment_record_tracking_observation`）、代发路径未结案异常读 V126 `fulfillment_dropship_tracking_exception` · **「平均出库时长」刻意不落在本服务**：出库时效属 08 仓储作业 8.5.3.1，由 warehouse 服务自己的只读端点 `/warehouse/outbound-timeliness/report` 出数，前端合并时补上那张卡 —— 本模块**不**跨服务查表（AGENTS.md 模块边界纪律：跨服务只走授权 API）· **迟发率与有效追踪率直接引用 9.4.1.2 的口径单点**（`ShipmentRecordService.performance`），**不另立第二套算法**：作废（VOID）是错发货不是迟发货，不进任何分母；时限未登记落 UNSET 桶，既不算准时也不算迟发（迟发率分母 = 登记过时限且非作废的记录）· 灯色只由**业务事实**判定（超时未发出 / 迟发 / 轨迹异常 ⇒ 红；今日到期未发出、时限未登记、有运单号但无轨迹观测 ⇒ 黄；量不到 ⇒ 灰），**不设拍脑袋的百分比阈值**（平台迟发率与有效追踪率门槛按平台与店铺不同，仓内无阈值配置，只报数与绝对单量）· 租户来自**已认证成员关系**（`AccessService.run` 在事务里绑定 `app.current_tenant`，每条查询再显式写一遍 `tenant_id = ?` 作第二道防线），**不信任 `X-Tenant-Id` 头** · 页面 `/dashboard/fulfillment-health`（`fulfillment-health-workspace.tsx` + `fulfillment-health-model.ts`）是**真实可访问的工作区**：六张卡片 + 覆盖度提示（未登记时限 / 无轨迹观测的量单独报出来）+ 拆分 + 红灯项明细（可按类型筛选、可翻页、每条都能跳到归属系统处理页）+ 未接通维度单列 + 口径表；**没有改 `apps/web/src/app/page.tsx` 首页** · api-proxy **新增一条独立 services[] 元素**（`fulfillment/health` 组，插入锚点固定在 `prefix: 'identity/'` 那条元素之前），既有条目一字未改也不重排 · 测试 `FulfillmentHealthIntegrationTest` 14 例 + `FulfillmentHealthTenancyIntegrationTest` 7 例实跑 Testcontainers PostgreSQL 16（连接池压到 1）+ 前端 `fulfillment-health-model.test.ts` 14 例 + `fulfillment-health-allowlist.test.ts` 6 例 · **多租户三断言全部实跑**：两租户互不可见（A 3 件 / B 7 件，红灯项 6 / 10）、伪造 tenant header 无效（A 会话带伪造 B 的头仍按 A 解析）、连接池固定 1 条时交替使用 5 轮不串租户；且伪造 `app.current_tenant` 时读到的是**零行**而不是别家的量（显式谓词钉住已认证租户） |
 | 1.1.3.1 | 库存风险 | — | D7 | 未开发 | — |
 | 1.1.3.2 | 资金与回款风险 | — | D7 | 未开发 | — |
 | 1.2.1.1 | 全局搜索框 | ⌘K | D7 | 未开发 | — |
@@ -545,3 +545,25 @@
 | 完成率 | 74.6% |
 | **D7** | 73 | 0 | 82 | 155 |
 | 01 | 工作台与门户系统 | D7 | 1 | 23 |
+| 已交付 | 344 |
+| **未开发** | **121** |
+| 完成率 | 74.0% |
+| **D7** | 70 | 0 | 85 | 155 |
+| 17 | 组织权限与系统设置系统 | D1–D2 / D4 / D6 / D7 | 27 | 29 |
+| 已交付 | 340 |
+| **未开发** | **125** |
+| 完成率 | 73.1% |
+| **D7** | 66 | 0 | 89 | 155 |
+| 16 | 合规与风控系统 | D7 | 18 | 23 |
+| 17 | 组织权限与系统设置系统 | D1–D2 / D4 / D6 / D7 | 25 | 29 |
+| 已交付 | 341 |
+| **未开发** | **124** |
+| 完成率 | 73.3% |
+| **D7** | 67 | 0 | 88 | 155 |
+| 16 | 合规与风控系统 | D7 | 19 | 23 |
+| 17 | 组织权限与系统设置系统 | D1–D2 / D4 / D6 / D7 | 26 | 29 |
+| 已交付 | 345 |
+| **未开发** | **120** |
+| 完成率 | 74.2% |
+| **D7** | 71 | 0 | 84 | 155 |
+| 17 | 组织权限与系统设置系统 | D1–D2 / D4 / D6 / D7 | 28 | 29 |
