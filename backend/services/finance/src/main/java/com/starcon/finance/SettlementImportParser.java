@@ -326,7 +326,7 @@ final class SettlementImportParser {
           lineNo,
           "类别不认识（收到 \""
               + categoryText
-              + "\"）：只认 SALES / REFUND / COMMISSION / FBA_FEE / ADVERTISING / COMPENSATION / ADJUSTMENT"
+              + "\"）：只认 SALES / REFUND / COMMISSION / FBA_FEE / ADVERTISING / COMPENSATION / ADJUSTMENT / TAX"
               + " 及其常见别名 —— 猜错类别等于把退款记成销售额");
     }
     BigDecimal rawAmount = parseAmount(lineNo, amountText);

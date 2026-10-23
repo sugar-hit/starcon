@@ -471,6 +471,69 @@ const services: readonly {
       /^payment\-plans(?:\/(?:capabilities|options|forecast|reminders(?:\/scan)?|batches|term\-rules|milestone\-rules|generate|schedule|reminders\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/(?:acknowledge|dismiss)|term\-rules\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}|milestone\-rules\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/cancel)?))?$/,
   },
   {
+    // 12.3.1.2 交易明细（finance 服务，卷 12「财务核算」L3 12.3.1 平台结算下的第三格）。
+    //
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 finance 那条巨型 alternation 里并分支 ——
+    //   既有条目是单行超长正则，多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    //   既有条目**一字未改、也不重排**。
+    //
+    // ---- 插入锚点选在**第一个 `prefix: 'identity/'` 那条元素之前** ----
+    //   同批其它车道的插入点各不相同（数组最开头 / `prefix: 'warehouse/'` 之前 / 数组末尾），
+    //   本车道落在这里，与它们的插入点相距 100 行以上，并入时 git 能干净求并。
+    //
+    // ---- 首 token「transactions」的零命中核对结论 ----
+    //   ① 本文件既有 services[] 正则里**没有任何一条**含 `transactions` 这个串
+    //      （既有 finance 支部的首 token 是 `receivables` / `receivable-aging` / `payables` /
+    //      `receipts` / `payment-plans` / `bad-debt` / `settlement`，全不相同）；
+    //   ② 逐条实测（不是目测、不是 grep 计数）：把本文件既有 services[] 的**全部 199 条正则**逐条抽出来
+    //      （**198 条**既有 + 本车道新增的这一条），对本模块的**全部 7 个 path shape** 逐个
+    //      `new RegExp(pat).test(path.slice(prefix.length))`（与 `resolve()` 同一套判别口径），
+    //      结果是**零命中** —— 既没有既有条目会放行本模块的路径，
+    //      也没有本模块的路径会被既有条目误吞。
+    //      另测了**全部 13 个负向 shape**（未交付 / 不该存在的映射）：同样零命中。
+    //      （实测脚本：`.tmp/verify-api-proxy-transactions.mjs`，随车道提交前可重跑复现。）
+    //   ③ ⚠️ 首 token **刻意不用 `settlement-transactions`**：12.3.1.1 结算单管理已经占了
+    //      `settlement`（正则 `/^settlement(?:\/(?:capabilities|options|shops|cycles|import|...))?$/`）。
+    //      若本模块也用 `settlement` 开头，两条正则会互相吃掉对方的路径 ⇒ 页面会**静默 404**，
+    //      而 typecheck / lint / vitest / Playwright **全部全绿**。
+    //      `transactions` 与它不同首 token ⇒ 互不影响（双向断言见 transactions-allowlist.test.ts）。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   transactions                     集合读（GET，真分页 + 真筛选 + 真排序 + 按币种/交易类型汇总）
+    //                                   / 登记一条明细（POST）
+    //   transactions/capabilities        能力声明（上游真接通 / 下游缺口归谁 / 平台交易报告同步不可用）
+    //   transactions/options             筛选项（交易类型 / 类别 / 币种 / 来源 / 结算单 / 平台，全部来自真实数据）
+    //   transactions/batch               批量登记明细（POST）
+    //   transactions/import              上传平台交易报告（POST，CSV / JSON 真解析 + 真入库）
+    //   transactions/reconciliation       汇总校验（GET，明细合计 = 结算单汇总，实时算出来的）
+    //   transactions/{uuid}              单条明细详情（GET）
+    //
+    // id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`（不是 `[0-9a-f-]+`）：
+    // 后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行。
+    // 字面量子路径（capabilities / options / batch / import / reconciliation）排在 {uuid} 段**之前**判别 ——
+    // alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    //
+    // ⚠️ **刻意不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   transactions/{uuid}/reconcile   —— 🔴 自动对账任务属 12.3.2.1，**未交付**
+    //   transactions/{uuid}/match        —— 🔴 对账匹配属 12.3.2.1，**未交付**
+    //   transactions/{uuid}/profit       —— 🔴 利润属 13，**未交付**
+    //   transactions/{uuid}/sync         —— 🔴 平台交易报告自动同步属「卷 02 同步」，**未交付**
+    //   transactions/{uuid}/edit         —— 明细行是 append-only 的外部事实，**没有**编辑端点
+    //   transactions/{uuid}/delete       —— 同上，**没有**删除端点
+    //   transactions/not-a-uuid          —— 非 UUID 段不应被 uuid 分支吃掉
+    //   transactions/{uuid}/not-a-shape  —— 多一层仍然 404
+    //   transactions/capabilities/{uuid} —— 字面量段刻意不接 id 段
+    //   transactions/import/{uuid}       —— 同上
+    //   transactions/reconciliation/{uuid} —— 同上
+    //   transactions/batch/{uuid}        —— 同上
+    //   transactions/settlement-transactions —— 首 token 写错（12.3.1.1 占的是 `settlement`）
+    prefix: 'finance/',
+    env: 'FINANCE_URL',
+    fallback: 'http://127.0.0.1:8087',
+    pattern:
+      /^transactions(?:\/(?:capabilities|options|batch|import|reconciliation|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}))?$/,
+  },
+  {
     prefix: 'identity/',
     env: 'IDENTITY_URL',
     fallback: 'http://127.0.0.1:8081',
