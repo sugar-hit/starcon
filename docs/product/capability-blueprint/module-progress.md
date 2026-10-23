@@ -6,15 +6,19 @@
 >
 > 状态词表只有三个值，统计逻辑依赖它，不要新增：
 > `已交付`（迁移 + API + 页面 + 测试齐全，无 TODO 残留）· `进行中`（部分交付、未收口，证据列写清缺哪一块）· `未开发`（未开工）。
+
 ## 总览
+
 | 指标 | 数量 |
 | --- | --- |
 | 模块总数 | 465 |
-| 已交付 | 350 |
+| 已交付 | 354 |
 | 进行中 | 0 |
-| **未开发** | **115** |
-| 完成率 | 75.3% |
+| **未开发** | **111** |
+| 完成率 | 76.1% |
+
 ## 分阶段进度（交付顺序看这里）
+
 | 阶段 | 已交付 | 进行中 | 未开发 | 合计 |
 | --- | --- | --- | --- | --- |
 | **D1–D2** | 80 | 0 | 0 | 80 |
@@ -22,10 +26,13 @@
 | **D4** | 59 | 0 | 1 | 60 |
 | **D5** | 52 | 0 | 0 | 52 |
 | **D6** | 43 | 0 | 35 | 78 |
-| **D7** | 76 | 0 | 79 | 155 |
+| **D7** | 80 | 0 | 75 | 155 |
+
 ## 分系统进度
+
 | 卷 | 系统 | 阶段 | 已交付 | 模块数 |
-| 01 | 工作台与门户系统 | D7 | 4 | 23 |
+| --- | --- | --- | --- | --- |
+| 01 | 工作台与门户系统 | D7 | 8 | 23 |
 | 02 | 渠道与店铺系统 | D1–D2 / D5 | 25 | 25 |
 | 03 | 商品主数据系统 | D1–D2 | 40 | 40 |
 | 04 | 刊登与内容系统 | D5 | 26 | 26 |
@@ -43,22 +50,30 @@
 | 16 | 合规与风控系统 | D7 | 20 | 23 |
 | 17 | 组织权限与系统设置系统 | D1–D2 / D4 / D6 / D7 | 29 | 29 |
 | 18 | 集成开放与智能自动化系统 | D7 | 0 | 24 |
+
 ## 判定「已交付」的标准
+
 一个模块标 `已交付` 当且仅当下面四件都成立，缺一件就是 `未开发` 或 `进行中`：
+
 1. **迁移** — `backend/services/<svc>/src/main/resources/db/migration/V*.sql` 里有真实表结构，
    带 `tenant_id NOT NULL` + RLS 策略，不是注释里的设计。
 2. **API** — 服务里有对应端点，走 jOOQ 显式 SQL，不是返回硬编码常量的桩。
 3. **页面** — `apps/web/src/app/**/page.tsx` 是真实工作区，不是 `DomainPlaceholder`。
 4. **测试** — `cd backend && ./mvnw verify` 绿；涉及租户隔离的必须实跑
    「两租户互不可见 / 伪造 tenant header 无效 / 连接池归还后不串租户」三条断言。
+
 **判定为 `未开发` 的典型形态**（见到就说明没做完，不许算进已交付）：
+
 - `DomainPlaceholder` 占位页
 - 硬编码数组 / 常量当数据源
 - 服务里 `TODO` + `throw new UnsupportedOperationException()`
 - 迁移文件存在但没有 RLS 策略
 - 前端有页面但后端没有对应端点（或反之）
+
 ## 跨期说明
+
 「阶段」列按**依赖就绪顺序**逐模块标注，不是卷归属。跨期卷的拆分如下：
+
 - **01 工作台与门户 → 全部 D7**：它是纯投影聚合层（蓝图原文「不写业务数据，只读投影」），
   聚合 09 订单 / 07 库存 / 02 渠道 / 12 财务 / 15 客户 / 17 审批的投影。
   这些数据源没落地之前建「我的待办」只能造假数据，所以整卷排到最后收口。
@@ -72,7 +87,9 @@
 - **11 售后与退货**：D4 交付售后单、退货授权与实收、退款换货；平台纠纷 / 客诉工单 / 分析排 D7。
 - **17 组织权限**：D1–D2 交付租户、法人、部门、成员、角色、页面权限、数据范围、审计；
   17.4 审批流随单据排 D4，17.6.1.1 账簿与本位币随财务排 D6，17.7 套餐与平台参数排 D7。
+
 ## 模块明细
+
 | 模块 ID | 模块名 | L3 锚点路由 | 阶段 | 状态 | 证据 |
 | --- | --- | --- | --- | --- | --- |
 | 1.1.1.1 | 我的待办 | /dashboard/todo | D7 | 未开发 | — |
@@ -92,7 +109,7 @@
 | 1.3.2.1 | 预警规则 | /notifications/rules | D7 | 未开发 | — |
 | 1.3.2.2 | 外部渠道推送 | /notifications/rules | D7 | 未开发 | — |
 | 1.4.1.1 | 工作台布局 | — | D7 | 未开发 | — |
-| 1.4.1.2 | 列表与表格偏好 | /settings/profile | D7 | 已交付 | 迁移 identity `V336__identity_user_preference.sql`（**本仓第一张个人偏好表**：新建 `user_preference(id, tenant_id NOT NULL, membership_id, page_key varchar(160), preference jsonb, created_at, updated_at)`，UNIQUE(tenant_id, membership_id, page_key) ⇒ 同 page_key 二次写入是**覆盖不是新增**；复合外键 (tenant_id, membership_id) → membership(tenant_id, id) 把「这份偏好属于本租户的这个成员」钉在**数据层**（租户内的「这个人」是 membership.id，不是全局 app_user.id）；**载荷是 JSONB 而不是大宽表** —— 蓝图「偏好按页面 key 存储，新增字段不影响旧偏好」是硬约束，做成宽表就意味着每加一个偏好字段都要 ALTER 表、老行的默认语义被重写；jsonb 载荷缺键是**正常**的（老偏好没有新字段），读取时由前端对缺失键套默认值，于是新增字段零 ALTER、零数据迁移；CHECK 钉死 page_key 词表 `^[a-z0-9][a-z0-9._-]{0,159}$` 与载荷必须是 JSON 对象；**tenant_id NOT NULL + ENABLE/FORCE RLS** isolation（只认 app.current_tenant，FORCE 是必须的：否则表 owner 身份能绕过隔离）+ GRANT SELECT/INSERT/UPDATE/DELETE TO identity_app；**零 ALTER 任何既有表**）；端点 `/identity/user-preferences/**`（GET 读一页 / PUT upsert 一页 / DELETE 重置一页 / GET 列出我全部页 / DELETE 全部重置，共 5 个形状，identity 服务）：租户与 membership_id **只从已认证会话解析**（session_access），**不接受请求参数传 membershipId / userId / tenantId**，X-Tenant-Id 头从头到尾没有出现过；**读不到偏好返回 200 + stored=false 而不是 404**（没保存过是列表页的常态不是异常）；写入前统一过 `UserPreferencePayloadRules`（纯函数）：载荷必须是对象、键名字符集、深度 ≤4、键数 ≤64、数组 ≤64 项、字符串 ≤512 字符、总体积 ≤16KB，且**敏感键名与凭据形状的值一律 400 拒绝**（password / token / idCard / apiKey / secret / credential / bankCardNo …，键名归一化后按词干匹配，accessToken 与 access_token 一样被拦）—— 蓝图的「敏感值不得进 preference JSON」必须在**服务端**钉住，前端是可以被绕过的；**刻意不新登记权限码**：每一行都是「我自己的」偏好，边界是数据归属（tenant_id + membership_id + RLS）而不是功能开关，另立 identity.user_preference.* 只会让管理员新建角色时忘了勾、普通成员的列表页偏好静默失效；前端 `apps/web/src/lib/list-preferences-model.ts`（纯模型：缺键套默认值 / 只认这一页认识的列 / 用 columnSet 区分「用户显式隐藏」与「这一列当时还不存在」/ 白名单 + 安全 token 才落库）+ `use-list-preferences.ts`（可复用 hook：挂载读回、读不到按默认视图继续渲染不白屏、**恢复时不写库**否则会把当时的默认列集冻住、只存用户真的改过的东西、失败只留提示不打断列表）+ `components/common/list-preference-bar.tsx`（每页条数 / 排序 / 列显示 / 恢复默认 / 保存态）；**真实接入 5 个已交付列表工作区**（catalog 商品列表 `catalog.products`、orders 待发货 `orders.pending-shipment`、orders 发货记录 `orders.shipment-records`、inventory 库存风险 `inventory.risk`、warehouse 出库时效 `warehouse.outbound-timeliness`），排序键就是**后端排序白名单里的 token**（PACKED_AT_DESC / SLA_DEADLINE_AT_ASC / SHIPPED_AT_DESC …，方向编在 token 里，拆成「字段 + 方向」会拼出后端不认的组合），**自由文本筛选一律不落库**（关键字 / 姓名 / 备注可能含 PII，只有枚举与编号才进白名单）；设置入口 `/settings/profile`（列出我保存过的页面偏好 + 单页/全部恢复默认 + 页面 key 命名约定）。测试 `UserPreferenceIntegrationTest`（19 例）+ `UserPreferenceTenancyIntegrationTest`（4 例，三断言实跑 Testcontainers PostgreSQL 16，池压到 1 条连接）= **23 例全绿**；前端 `list-preferences-model.test.ts` + `list-preferences-api-proxy.test.ts` = **29 例全绿**，api-proxy 累积白名单全量回归 206 文件 / 1195 例零回归。**与兄弟模块 1.4.1.1 工作台布局的关系**：`user_preference` 的 schema 由**本模块定义**，1.4.1.1 将来用**同一张表**、用它自己的 page_key（例如 dashboard.layout）存自己的载荷形状 —— 这正是「一页一行 + JSONB」要换来的东西：它落地时不需要 ALTER 本表，也不需要数据迁移；本轮**未**替它实现工作台布局 |
+| 1.4.1.2 | 列表与表格偏好 | — | D7 | 已交付 | 迁移 identity `V336__identity_user_preference.sql`（**本仓第一张个人偏好表**：新建 `user_preference(id, tenant_id NOT NULL, membership_id, page_key varchar(160), preference jsonb, created_at, updated_at)`，UNIQUE(tenant_id, membership_id, page_key) ⇒ 同 page_key 二次写入是**覆盖不是新增**；复合外键 (tenant_id, membership_id) → membership(tenant_id, id) 把「这份偏好属于本租户的这个成员」钉在**数据层**（租户内的「这个人」是 membership.id，不是全局 app_user.id）；**载荷是 JSONB 而不是大宽表** —— 蓝图「偏好按页面 key 存储，新增字段不影响旧偏好」是硬约束，做成宽表就意味着每加一个偏好字段都要 ALTER 表、老行的默认语义被重写；jsonb 载荷缺键是**正常**的（老偏好没有新字段），读取时由前端对缺失键套默认值，于是新增字段零 ALTER、零数据迁移；CHECK 钉死 page_key 词表 `^[a-z0-9][a-z0-9._-]{0,159}$` 与载荷必须是 JSON 对象；**tenant_id NOT NULL + ENABLE/FORCE RLS** isolation（只认 app.current_tenant，FORCE 是必须的：否则表 owner 身份能绕过隔离）+ GRANT SELECT/INSERT/UPDATE/DELETE TO identity_app；**零 ALTER 任何既有表**）；端点 `/identity/user-preferences/**`（GET 读一页 / PUT upsert 一页 / DELETE 重置一页 / GET 列出我全部页 / DELETE 全部重置，共 5 个形状，identity 服务）：租户与 membership_id **只从已认证会话解析**（session_access），**不接受请求参数传 membershipId / userId / tenantId**，X-Tenant-Id 头从头到尾没有出现过；**读不到偏好返回 200 + stored=false 而不是 404**（没保存过是列表页的常态不是异常）；写入前统一过 `UserPreferencePayloadRules`（纯函数）：载荷必须是对象、键名字符集、深度 ≤4、键数 ≤64、数组 ≤64 项、字符串 ≤512 字符、总体积 ≤16KB，且**敏感键名与凭据形状的值一律 400 拒绝**（password / token / idCard / apiKey / secret / credential / bankCardNo …，键名归一化后按词干匹配，accessToken 与 access_token 一样被拦）—— 蓝图的「敏感值不得进 preference JSON」必须在**服务端**钉住，前端是可以被绕过的；**刻意不新登记权限码**：每一行都是「我自己的」偏好，边界是数据归属（tenant_id + membership_id + RLS）而不是功能开关，另立 identity.user_preference.* 只会让管理员新建角色时忘了勾、普通成员的列表页偏好静默失效；前端 `apps/web/src/lib/list-preferences-model.ts`（纯模型：缺键套默认值 / 只认这一页认识的列 / 用 columnSet 区分「用户显式隐藏」与「这一列当时还不存在」/ 白名单 + 安全 token 才落库）+ `use-list-preferences.ts`（可复用 hook：挂载读回、读不到按默认视图继续渲染不白屏、**恢复时不写库**否则会把当时的默认列集冻住、只存用户真的改过的东西、失败只留提示不打断列表）+ `components/common/list-preference-bar.tsx`（每页条数 / 排序 / 列显示 / 恢复默认 / 保存态）；**真实接入 5 个已交付列表工作区**（catalog 商品列表 `catalog.products`、orders 待发货 `orders.pending-shipment`、orders 发货记录 `orders.shipment-records`、inventory 库存风险 `inventory.risk`、warehouse 出库时效 `warehouse.outbound-timeliness`），排序键就是**后端排序白名单里的 token**（PACKED_AT_DESC / SLA_DEADLINE_AT_ASC / SHIPPED_AT_DESC …，方向编在 token 里，拆成「字段 + 方向」会拼出后端不认的组合），**自由文本筛选一律不落库**（关键字 / 姓名 / 备注可能含 PII，只有枚举与编号才进白名单）；设置入口 `/settings/profile`（列出我保存过的页面偏好 + 单页/全部恢复默认 + 页面 key 命名约定）。测试 `UserPreferenceIntegrationTest`（19 例）+ `UserPreferenceTenancyIntegrationTest`（4 例，三断言实跑 Testcontainers PostgreSQL 16，池压到 1 条连接）= **23 例全绿**；前端 `list-preferences-model.test.ts` + `list-preferences-api-proxy.test.ts` = **29 例全绿**，api-proxy 累积白名单全量回归 206 文件 / 1195 例零回归。**与兄弟模块 1.4.1.1 工作台布局的关系**：`user_preference` 的 schema 由**本模块定义**，1.4.1.1 将来用**同一张表**、用它自己的 page_key（例如 dashboard.layout）存自己的载荷形状 —— 这正是「一页一行 + JSONB」要换来的东西：它落地时不需要 ALTER 本表，也不需要数据迁移；本轮**未**替它实现工作台布局 |
 | 1.4.2.1 | 语言与时区 | — | D7 | 未开发 | — |
 | 1.4.2.2 | 默认店铺与仓库 | — | D7 | 未开发 | — |
 | 1.5.1.1 | 同步与 API 健康 | — | D7 | 已交付 | **只读投影层（channel 服务），不建表、不占用 V338**：蓝图卷 01 头写死「不产生新的业务事实，只聚合各系统的投影」「不做：任何写业务数据的操作。工作台只读 + 跳转」⇒ 本模块**零迁移**（V338 预分配但按此**不占用**：四类输入逐条落在 channel 自己的既有事实表上，落一张派生表只会比它描述的事实更早过期），**不新增任何写端点**，权限码复用 02.4 已有的 `channel.sync.read`（identity 零改动），租户只来自已认证成员关系。**上游逐条落到真实列**：连接状态 = `channel_connection.status`（ACTIVE/EXPIRING/EXPIRED/REVOKED/PAUSED）+ `sync_paused`；最近同步 = `channel_connection.last_sync_at`（连接级）与 `sync_run.finished_at`（运行级）**两个来源分开报**，并用 `lastSyncAtSource` 标出当前生效的是哪一个 —— 🔴 开工取证发现**本仓没有任何代码写 `channel_connection.last_sync_at`**（只读不写，恒为 null），所以生效值实际来自运行级，能力声明里写明了这件事，不让人把「这一列没人写」误读成「这条连接从没同步过」；失败计数 = `sync_failure`（`reason` 六值），限流命中 = **同一个 `sync_failure` 表 `reason='RATE_LIMITED'` 的计数**（不是新表）；队列积压 = `outbox_event.published_at IS NULL` **外加三张真实队列表**（`listing_content_writeback_task` state='PENDING'、`listing_status_action_queue` state IN OPEN/ACKNOWLEDGED/DISPATCHED、`publish_task` state='PENDING'），**逐张表各报一行并带「算作积压」的判定条件**，合计 = 逐行相加（不在列表里再塞一行「合计」——那会被算两遍）；店铺 = `shop` 挂到它所属的连接卡片下。**端点 6 个**挂 `/channel/sync-health`：`capabilities`（红黄绿规则表 + 阈值 + 计数口径 + 积压来源 + 未接通下游）、`options`、`summary`、`connections`（真分页 + 真筛选）、`connections/{id}`、`pending-items`。**红黄绿是一张显式的「枚举 → 严重度」映射表**（`SyncHealthRules.ruleTable()`，服务端算、前端不重算，逐条给命中条件 / 严重度 / 人话理由 / 事实来源表列）：`status ∈ {EXPIRED,REVOKED}` ⇒ 红（连接已失效，持续漏单）`status='EXPIRING'` ⇒ 黄、`status='PAUSED'` ⇒ 黄、`sync_paused=true` ⇒ 黄、生效的最近同步时刻为空 ⇒ 黄（**从来没有同步过**，不等于「一切正常」）、距最近同步 > 24h ⇒ 黄 / > 72h ⇒ 红（阈值写进代码常量并在能力声明公布，**是本模块的默认政策不是平台下发的口径**）、最近一次 `sync_run.status='FAILED'` ⇒ 红、∈{PARTIAL,CANCELLED} ⇒ 黄、近 24h `AUTHORIZATION_EXPIRED` 失败 > 0 ⇒ 红（**持续**发生，不重授权就一直漏）、`RATE_LIMITED` > 0 ⇒ 黄（平台在限速，**变慢但没断**，和授权失效不是一回事）、其余失败 > 0 ⇒ 黄。**「读不到」与「没有」分得开（三处）**：① 上游读不到 ⇒ 整个端点 **503**，绝不折成空集合冒充「一切正常」；② 当前角色数据范围（SELF/DEPARTMENT）看不到 `sync_cursor`/`sync_failure` 时（这两张表挂着 RESTRICTIVE 的 `cursor_scope`/`failure_scope` 策略），卡片标 `SYNC_DATA_NOT_VISIBLE`「判不了」并**跳过全部依赖同步事实的规则** —— 🔴 看不见的时候判「从来没有同步过」是一次彻头彻尾的撒谎；③ 某个平台压根没有连接 ⇒ 单列 `platformsWithoutConnection`（区分 NO_CONNECTION / NO_CONNECTION_BETA / **NOT_INTEGRATED**：尚未接入的平台没连接是预期内的，不是缺口），**不是**变成一张绿卡片。**计数口径显式**：失败同时报「近 24 小时」与「累计」两个口径，不合并成一个数。**只读**：不提供「重试同步 / 重新授权」写端点；需处理项一律是**跳转到归属系统**。🔴 **落点按真实路由校正**：台账上的 `/channels/connections`、`/channels/sync` 是**页内 Tab 的概念锚点**，本仓 Next.js 路由里**没有这两个路径**（`/channels` 是单页 + 页内 Tab，没有 URL 参数），照抄会跳到兜底页「这里没有页面」⇒ 待处理项改指**真实存在的** `/channels`（并写明落点是哪个 Tab）与本页 `/system-health`；失败队列（2.4.2.1）**本仓无独立前端页面**（台账路由为 —），待处理项指向「渠道与店铺 → 同步运行」Tab 的失败原因分布并写明这件事，**不**指向不存在的路由。**前端** `/system-health` 新建独立页（卷 01 排查起点要的是「一屏看全」），六段（总览 / 连接健康卡片 / 队列积压 / 没有连接的平台 / 需处理项 / 能力声明），真实加载态·错误态（「读不到」显式摆出且**不渲染绿色空态**）·空态。**api-proxy**：在 `services[]` **数组末尾**新增一条独立 `channel/` 元素（首 token `sync-health` 全文 grep 零命中），id 段用完整 UUID 形状、末尾刻意不带 `?`，只放行六个真路径；既有条目**一字未动、不重排**。**测试**：后端 `SyncHealthRulesTest` 23 例（每条规则各一条断言 + 规则表与实现一致）、`SyncHealthIntegrationTest` 26 例（红黄绿逐个枚举值、限流真按 reason 统计、积压真等于未发布 outbox 行数、两个最近同步时刻分开、**时间写回值逐字相等**（刻意用非整点微秒时刻，绑错会静默偏 −28800s）、只读端点 405、真分页真筛选）、`SyncHealthTenancyIntegrationTest` 3 例（**多租户三断言实跑 Testcontainers PG16**：两租户互不可见（连接/店铺/失败/积压四类事实 + 九张表 FORCE RLS 断言 + 本租户可见的对照行）、伪造 tenant header 无效（并断言行确实落在会话租户名下）、连接池压到 1 后 A→B→A 交替 5 轮不串租户）；前端 `sync-health-model.test.ts` 23 例 + `sync-health-allowlist.test.ts` 6 例（api-proxy 白名单**双向**断言：真实调用点全放行、不存在的形状全 404、既有 channel 模块入口零误伤）。**验证**：后端 `./mvnw -pl services/channel -am test -Dtest='SyncHealth*'` 52 例全绿；`pnpm typecheck` 全绿；`pnpm vitest run apps/web/src/app/api` 全量白名单回归 206 文件 1191 例全绿（改 api-proxy.ts 必跑）；`pnpm lint` 全绿。 |
@@ -540,35 +557,3 @@
 | 18.4.3.2 | 效果评估 | — | D7 | 未开发 | — |
 | 18.5.1.1 | 模板管理 | — | D7 | 未开发 | — |
 | 18.5.2.1 | 投递记录 | — | D7 | 未开发 | — |
-| 已交付 | 346 |
-| **未开发** | **119** |
-| 完成率 | 74.4% |
-| **D7** | 72 | 0 | 83 | 155 |
-| 01 | 工作台与门户系统 | D7 | 0 | 23 |
-| 已交付 | 347 |
-| **未开发** | **118** |
-| 完成率 | 74.6% |
-| **D7** | 73 | 0 | 82 | 155 |
-| 01 | 工作台与门户系统 | D7 | 1 | 23 |
-| 已交付 | 344 |
-| **未开发** | **121** |
-| 完成率 | 74.0% |
-| **D7** | 70 | 0 | 85 | 155 |
-| 17 | 组织权限与系统设置系统 | D1–D2 / D4 / D6 / D7 | 27 | 29 |
-| 已交付 | 340 |
-| **未开发** | **125** |
-| 完成率 | 73.1% |
-| **D7** | 66 | 0 | 89 | 155 |
-| 16 | 合规与风控系统 | D7 | 18 | 23 |
-| 17 | 组织权限与系统设置系统 | D1–D2 / D4 / D6 / D7 | 25 | 29 |
-| 已交付 | 341 |
-| **未开发** | **124** |
-| 完成率 | 73.3% |
-| **D7** | 67 | 0 | 88 | 155 |
-| 16 | 合规与风控系统 | D7 | 19 | 23 |
-| 17 | 组织权限与系统设置系统 | D1–D2 / D4 / D6 / D7 | 26 | 29 |
-| 已交付 | 345 |
-| **未开发** | **120** |
-| 完成率 | 74.2% |
-| **D7** | 71 | 0 | 84 | 155 |
-| 17 | 组织权限与系统设置系统 | D1–D2 / D4 / D6 / D7 | 28 | 29 |
