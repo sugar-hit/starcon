@@ -371,8 +371,15 @@ class IdentityIntegrationTest extends IdentityIntegrationTestBase {
   void ownerIsProtectedAndTransferIsExplicitAndCannotBeUsedToEscalate() throws Exception {
     String token = login(), tag = suffix();
     var me = request(token, "GET", "/auth/session", null, 200);
-    String ownerRole = me.get("grants").get(0).get("roleId").asText(),
-        ownerMember = me.get("membershipId").asText();
+    // grants 是**无序聚合**（V47 的 session_access 用 jsonb_agg 且没有 ORDER BY），
+    // grants.get(0) 取到哪个角色取决于查询计划，不取决于数据语义。
+    // 这个成员一旦挂了第二个角色，第一个就可能是别的角色 —— 按 roleCode 显式挑 OWNER。
+    String ownerRole = null;
+    for (JsonNode grant : me.get("grants"))
+      if ("OWNER".equals(grant.get("roleCode").asText()))
+        ownerRole = grant.get("roleId").asText();
+    assertThat(ownerRole).as("会话里必须带 OWNER 角色").isNotNull();
+    String ownerMember = me.get("membershipId").asText();
     request(token, "DELETE", "/identity/roles/" + ownerRole, null, 403);
     request(token, "DELETE", "/identity/members/" + ownerMember, null, 403);
     String username = "successor-" + tag;
