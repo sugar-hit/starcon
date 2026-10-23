@@ -214,10 +214,37 @@ function LogoLink() {
 export interface AppShellProps {
   system?: SystemId;
   account?: React.ReactNode;
+  /**
+   * 业务侧注入的 ⌘K 面板内容（1.2.1.1 全局搜索）。
+   *
+   * <p>提供时，面板里那个**占位**的「业务对象」组被它替换：
+   * 面板本身不发起任何请求，只把用户键入的关键词交给业务侧
+   * （`onQueryChange`），业务侧把检索到的分组塞回 `groups`。
+   *
+   * <p>不提供时行为与从前完全一致（占位组照旧），所以这是一条**纯增量**的接线。
+   */
+  commandPalette?: CommandPaletteBinding;
   children: React.ReactNode;
 }
 
-function AppShellInner({ system, children, account }: AppShellProps) {
+/**
+ * 业务侧注入 ⌘K 面板的方式。
+ *
+ * <p>放在 `packages/ui` 而不是业务应用里，是因为 AppShell 自己拥有面板的开关与
+ * ⌘K 快捷键；业务侧只提供**内容**。
+ */
+export interface CommandPaletteBinding {
+  /** 注入的分组（会与「功能导航」「系统动作」并列显示）。 */
+  groups: CommandPaletteGroup[];
+  placeholder?: string;
+  emptyMessage?: string;
+  /** 输入框下方的状态提示（正在检索 / 失败 / 无权限）。 */
+  statusText?: string;
+  /** 输入内容变化回调（业务侧据此发起检索）。 */
+  onQueryChange?: (query: string) => void;
+}
+
+function AppShellInner({ system, children, account, commandPalette }: AppShellProps) {
   const { activateTab } = useWorkspaceTabs();
   const pathname = usePathname();
   const mainRef = React.useRef<HTMLElement>(null);
@@ -328,8 +355,11 @@ function AppShellInner({ system, children, account }: AppShellProps) {
         },
       ],
     };
+    // 业务侧注入（1.2.1.1 全局搜索）时，用注入的分组替换那个**占位**的「业务对象」组 ——
+    // 占位组是「业务数据接入后启用」留下的空壳，接入之后还留着它就是两个真相。
+    if (commandPalette) return [navItems, ...commandPalette.groups, actions];
     return [navItems, businessObjects, actions];
-  }, []);
+  }, [commandPalette]);
 
   const systemsDesktop = <SystemSwitcher currentSystem={currentSystem} variant="desktop" />;
   const systemsSheet = (
@@ -480,7 +510,16 @@ function AppShellInner({ system, children, account }: AppShellProps) {
           </div>
         </main>
       </div>
-      <CommandPalette open={searchOpen} onOpenChange={setSearchOpen} groups={searchGroups} />
+      {/* exactOptionalPropertyTypes：可选属性不能显式传 undefined，只能「有才传」。 */}
+      <CommandPalette
+        open={searchOpen}
+        onOpenChange={setSearchOpen}
+        groups={searchGroups}
+        {...(commandPalette?.placeholder ? { placeholder: commandPalette.placeholder } : {})}
+        {...(commandPalette?.emptyMessage ? { emptyMessage: commandPalette.emptyMessage } : {})}
+        {...(commandPalette?.statusText ? { statusText: commandPalette.statusText } : {})}
+        {...(commandPalette?.onQueryChange ? { onQueryChange: commandPalette.onQueryChange } : {})}
+      />
     </div>
   );
 }

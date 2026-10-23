@@ -1,6 +1,7 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { usePrefillKeyword } from '@/lib/global-search-handoff';
 import Link from 'next/link';
 import { Badge, Button } from '@starcon/ui';
 import {
@@ -63,6 +64,8 @@ export function SkuListWorkspace() {
   const { session } = useIdentity();
   const [filters, setFilters] = useState<SkuFilters>(emptySkuFilters);
   const [applied, setApplied] = useState<SkuFilters>(emptySkuFilters);
+  // 1.2.1.1 全局搜索跳过来时带 ?keyword=：把它回填进关键字筛选器并立即生效。
+  const [prefillKeyword] = usePrefillKeyword();
   const [rows, setRows] = useState<SkuListRow[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(0);
@@ -115,6 +118,16 @@ export function SkuListWorkspace() {
   const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const update = (patch: Partial<SkuFilters>) =>
     setFilters((current) => ({ ...current, ...patch }));
+
+  // 回填只做一次：用户随后自己改筛选器时不再被 URL 里的旧值覆盖回去。
+  const prefilled = useRef(false);
+  useEffect(() => {
+    if (prefilled.current || !prefillKeyword) return;
+    prefilled.current = true;
+    setFilters((current) => ({ ...current, keyword: prefillKeyword }));
+    setApplied((current) => ({ ...current, keyword: prefillKeyword }));
+    setPage(0);
+  }, [prefillKeyword]);
   const allSelected = rows.length > 0 && selected.length === rows.length;
 
   const toggleStatus = (value: string) => {

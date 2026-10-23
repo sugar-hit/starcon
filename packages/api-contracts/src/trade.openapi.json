@@ -4208,6 +4208,511 @@
         },
         "type": "object"
       },
+      "AnomalyOrderAction": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "code": {
+            "type": "string"
+          },
+          "impact": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AnomalyOrderCapabilities": {
+        "properties": {
+          "actions": {
+            "items": {
+              "$ref": "#/components/schemas/AnomalyOrderAction"
+            },
+            "type": "array"
+          },
+          "buyerMessageTimeoutHours": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "crossServiceSources": {
+            "items": {
+              "$ref": "#/components/schemas/AnomalyOrderCrossSource"
+            },
+            "type": "array"
+          },
+          "dataAsOf": {
+            "type": "string"
+          },
+          "dimensions": {
+            "items": {
+              "$ref": "#/components/schemas/AnomalyOrderCapability"
+            },
+            "type": "array"
+          },
+          "notConnected": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "platformWritebackTimeoutHours": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AnomalyOrderCapability": {
+        "properties": {
+          "aggregation": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "dimension": {
+            "type": "string"
+          },
+          "impact": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AnomalyOrderCharge": {
+        "properties": {
+          "amount": {
+            "type": "number"
+          },
+          "chargeKind": {
+            "type": "string"
+          },
+          "chargeType": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AnomalyOrderCrossSource": {
+        "properties": {
+          "dimension": {
+            "type": "string"
+          },
+          "endpoint": {
+            "type": "string"
+          },
+          "joinKey": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AnomalyOrderDetail": {
+        "properties": {
+          "actions": {
+            "items": {
+              "$ref": "#/components/schemas/AnomalyOrderAction"
+            },
+            "type": "array"
+          },
+          "buyerEmail": {
+            "type": "string"
+          },
+          "buyerName": {
+            "type": "string"
+          },
+          "buyerPhone": {
+            "type": "string"
+          },
+          "charges": {
+            "items": {
+              "$ref": "#/components/schemas/AnomalyOrderCharge"
+            },
+            "type": "array"
+          },
+          "dataAsOf": {
+            "type": "string"
+          },
+          "evidence": {
+            "items": {
+              "$ref": "#/components/schemas/AnomalyOrderEvidence"
+            },
+            "type": "array"
+          },
+          "lines": {
+            "items": {
+              "$ref": "#/components/schemas/AnomalyOrderLine"
+            },
+            "type": "array"
+          },
+          "order": {
+            "$ref": "#/components/schemas/AnomalyOrderListRow"
+          },
+          "shippingAddress": {
+            "type": "string"
+          },
+          "shippingCountry": {
+            "type": "string"
+          },
+          "statusHistory": {
+            "items": {
+              "$ref": "#/components/schemas/AnomalyOrderStatusEvent"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "AnomalyOrderDwellPreset": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "minHours": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AnomalyOrderEvidence": {
+        "properties": {
+          "dimension": {
+            "type": "string"
+          },
+          "dwellSeconds": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "facts": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "label": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string"
+          },
+          "since": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AnomalyOrderLine": {
+        "properties": {
+          "lineAmount": {
+            "type": "number"
+          },
+          "lineNo": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "specSnapshot": {
+            "type": "string"
+          },
+          "unitPrice": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "AnomalyOrderListRow": {
+        "properties": {
+          "anomalyLabels": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "anomalyTypes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "buyerKey": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "dwellSeconds": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "dwellSince": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "grandTotalAmount": {
+            "type": "number"
+          },
+          "lineCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "orderId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "orderNo": {
+            "type": "string"
+          },
+          "orderSource": {
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "recommendedActions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "severity": {
+            "type": "string"
+          },
+          "shopCode": {
+            "type": "string"
+          },
+          "skuNeeds": {
+            "items": {
+              "$ref": "#/components/schemas/AnomalyOrderSkuNeed"
+            },
+            "type": "array"
+          },
+          "status": {
+            "type": "string"
+          },
+          "submittedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "totalQuantity": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "AnomalyOrderOptions": {
+        "properties": {
+          "anomalyTypes": {
+            "items": {
+              "$ref": "#/components/schemas/AnomalyOrderTypeOption"
+            },
+            "type": "array"
+          },
+          "dataAsOf": {
+            "type": "string"
+          },
+          "defaultMinDwellHours": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "dwellPresets": {
+            "items": {
+              "$ref": "#/components/schemas/AnomalyOrderDwellPreset"
+            },
+            "type": "array"
+          },
+          "orderSources": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "shops": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "AnomalyOrderPage": {
+        "properties": {
+          "dataAsOf": {
+            "type": "string"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AnomalyOrderListRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/AnomalyOrderSummary"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalPages": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AnomalyOrderSkuNeed": {
+        "properties": {
+          "quantity": {
+            "type": "number"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AnomalyOrderStatusEvent": {
+        "properties": {
+          "eventType": {
+            "type": "string"
+          },
+          "fromStatus": {
+            "type": "string"
+          },
+          "occurredAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "toStatus": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AnomalyOrderSummary": {
+        "properties": {
+          "addressFraudSuspected": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "addressUndeliverable": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "blacklistBuyer": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "buyerMessagePending": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "byShop": {
+            "additionalProperties": {
+              "format": "int64",
+              "type": "integer"
+            },
+            "type": "object"
+          },
+          "duplicateOrder": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "insufficientStock": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "oldestDwellSeconds": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "platformShipmentTimeout": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AnomalyOrderTypeOption": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "ownerService": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "ApprovableRule": {
         "description": "可作为批量通过依据的规则",
         "properties": {
@@ -19503,6 +20008,305 @@
         },
         "type": "object"
       },
+      "FulfillmentHealthBreakdown": {
+        "properties": {
+          "buckets": {
+            "items": {
+              "$ref": "#/components/schemas/FulfillmentHealthBucket"
+            },
+            "type": "array"
+          },
+          "key": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FulfillmentHealthBucket": {
+        "properties": {
+          "count": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "key": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FulfillmentHealthCapabilities": {
+        "properties": {
+          "boundaryNote": {
+            "type": "string"
+          },
+          "dimensions": {
+            "items": {
+              "$ref": "#/components/schemas/FulfillmentHealthCapabilityDimension"
+            },
+            "type": "array"
+          },
+          "levelRule": {
+            "type": "string"
+          },
+          "ownershipNote": {
+            "type": "string"
+          },
+          "redFlagKinds": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "upstreamNote": {
+            "type": "string"
+          },
+          "windowBasis": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FulfillmentHealthCapabilityDimension": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "denominator": {
+            "type": "string"
+          },
+          "formula": {
+            "type": "string"
+          },
+          "handling": {
+            "type": "string"
+          },
+          "impact": {
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "sourceTables": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FulfillmentHealthCard": {
+        "properties": {
+          "alertCount": {
+            "format": "int64",
+            "nullable": true,
+            "type": "integer"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "basis": {
+            "type": "string"
+          },
+          "denominator": {
+            "format": "int64",
+            "nullable": true,
+            "type": "integer"
+          },
+          "detailPath": {
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "level": {
+            "type": "string"
+          },
+          "levelRule": {
+            "type": "string"
+          },
+          "metricKind": {
+            "type": "string"
+          },
+          "numerator": {
+            "format": "int64",
+            "nullable": true,
+            "type": "integer"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "redFlagKind": {
+            "nullable": true,
+            "type": "string"
+          },
+          "sourceTables": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "unavailableReason": {
+            "type": "string"
+          },
+          "unit": {
+            "type": "string"
+          },
+          "value": {
+            "nullable": true,
+            "type": "number"
+          },
+          "valueText": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FulfillmentHealthCoverage": {
+        "properties": {
+          "dropshipOpenExceptions": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "dropshipTrackings": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "pendingCancelledUnits": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "pendingHandedOverUnits": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "pendingProjectionTotal": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "shipmentRecordsEvaluated": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "shipmentRecordsUnsetSla": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "shipmentRecordsUntrackable": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FulfillmentHealthRedFlag": {
+        "properties": {
+          "detail": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "kindLabel": {
+            "type": "string"
+          },
+          "linkPath": {
+            "type": "string"
+          },
+          "occurredAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "refId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "refNo": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FulfillmentHealthRedFlagPage": {
+        "properties": {
+          "boundaryNotes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/FulfillmentHealthRedFlag"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FulfillmentHealthSummary": {
+        "properties": {
+          "boundaryNotes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "breakdowns": {
+            "items": {
+              "$ref": "#/components/schemas/FulfillmentHealthBreakdown"
+            },
+            "type": "array"
+          },
+          "cards": {
+            "items": {
+              "$ref": "#/components/schemas/FulfillmentHealthCard"
+            },
+            "type": "array"
+          },
+          "coverage": {
+            "$ref": "#/components/schemas/FulfillmentHealthCoverage"
+          }
+        },
+        "type": "object"
+      },
       "FulfillmentMonitorCapabilities": {
         "properties": {
           "actionKinds": {
@@ -22173,6 +22977,145 @@
             "type": "array"
           },
           "upstreamNote": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "GlobalSearchCapabilities": {
+        "properties": {
+          "domains": {
+            "items": {
+              "$ref": "#/components/schemas/GlobalSearchDomain"
+            },
+            "type": "array"
+          },
+          "notes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "GlobalSearchDomain": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "domain": {
+            "type": "string"
+          },
+          "impact": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "matchMode": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "source": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "GlobalSearchGroup": {
+        "properties": {
+          "dataScope": {
+            "type": "string"
+          },
+          "dataScopeNote": {
+            "type": "string"
+          },
+          "domain": {
+            "type": "string"
+          },
+          "hits": {
+            "items": {
+              "$ref": "#/components/schemas/GlobalSearchHit"
+            },
+            "type": "array"
+          },
+          "label": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "GlobalSearchHit": {
+        "properties": {
+          "domain": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "primary": {
+            "type": "string"
+          },
+          "secondary": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "GlobalSearchResponse": {
+        "properties": {
+          "groups": {
+            "items": {
+              "$ref": "#/components/schemas/GlobalSearchGroup"
+            },
+            "type": "array"
+          },
+          "keyword": {
+            "type": "string"
+          },
+          "matchMode": {
+            "type": "string"
+          },
+          "minKeywordLength": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "suppressedDomains": {
+            "items": {
+              "$ref": "#/components/schemas/GlobalSearchSuppressed"
+            },
+            "type": "array"
+          },
+          "unavailableDomains": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "GlobalSearchSuppressed": {
+        "properties": {
+          "domain": {
+            "type": "string"
+          },
+          "group": {
+            "type": "string"
+          },
+          "groupLabel": {
+            "type": "string"
+          },
+          "label": {
             "type": "string"
           }
         },
@@ -50162,6 +51105,764 @@
         },
         "type": "object"
       },
+      "ReturnInventoryDispositionAction": {
+        "properties": {
+          "action": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "label": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ReturnInventoryDispositionBoundary": {
+        "properties": {
+          "boundary": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ReturnInventoryDispositionCancel": {
+        "properties": {
+          "cancelReason": {
+            "type": "string"
+          },
+          "expectedVersion": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ReturnInventoryDispositionCapabilities": {
+        "properties": {
+          "blocks": {
+            "items": {
+              "$ref": "#/components/schemas/ReturnInventoryDispositionCapability"
+            },
+            "type": "array"
+          },
+          "boundaries": {
+            "items": {
+              "$ref": "#/components/schemas/ReturnInventoryDispositionBoundary"
+            },
+            "type": "array"
+          },
+          "downstreams": {
+            "items": {
+              "$ref": "#/components/schemas/ReturnInventoryDispositionDownstream"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "ReturnInventoryDispositionCapability": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "block": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ReturnInventoryDispositionCreate": {
+        "properties": {
+          "instructionId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "qty": {
+            "nullable": true,
+            "type": "number"
+          },
+          "reasonNote": {
+            "type": "string"
+          },
+          "scrapReasonCode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "sourceBucketId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "targetLocationId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ReturnInventoryDispositionDecision": {
+        "properties": {
+          "decisionNote": {
+            "type": "string"
+          },
+          "expectedVersion": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ReturnInventoryDispositionDetail": {
+        "properties": {
+          "actions": {
+            "items": {
+              "$ref": "#/components/schemas/ReturnInventoryDispositionAction"
+            },
+            "type": "array"
+          },
+          "disposition": {
+            "$ref": "#/components/schemas/ReturnInventoryDispositionRow"
+          },
+          "events": {
+            "items": {
+              "$ref": "#/components/schemas/ReturnInventoryDispositionEventRow"
+            },
+            "type": "array"
+          },
+          "instruction": {
+            "$ref": "#/components/schemas/ReturnInventoryDispositionInstructionRow"
+          },
+          "loss": {
+            "$ref": "#/components/schemas/ReturnInventoryDispositionLossRow"
+          }
+        },
+        "type": "object"
+      },
+      "ReturnInventoryDispositionDownstream": {
+        "properties": {
+          "delivered": {
+            "type": "boolean"
+          },
+          "downstream": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ReturnInventoryDispositionEventRow": {
+        "properties": {
+          "actorId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "eventType": {
+            "type": "string"
+          },
+          "fromStatus": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "occurredAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "qty": {
+            "type": "number"
+          },
+          "reasonNote": {
+            "type": "string"
+          },
+          "targetInventoryState": {
+            "type": "string"
+          },
+          "toStatus": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ReturnInventoryDispositionExecute": {
+        "properties": {
+          "expectedVersion": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ReturnInventoryDispositionInstructionPage": {
+        "properties": {
+          "instructions": {
+            "items": {
+              "$ref": "#/components/schemas/ReturnInventoryDispositionInstructionRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ReturnInventoryDispositionInstructionRow": {
+        "properties": {
+          "batchNo": {
+            "type": "string"
+          },
+          "consumed": {
+            "type": "boolean"
+          },
+          "gradeCoefficient": {
+            "type": "number"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "inspectionId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "instructionStatus": {
+            "type": "string"
+          },
+          "instructionType": {
+            "type": "string"
+          },
+          "issuedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "issuedBy": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "originalValue": {
+            "type": "number"
+          },
+          "qty": {
+            "type": "number"
+          },
+          "receiptId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "receiptLineId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "salvageAmount": {
+            "type": "number"
+          },
+          "salvageCurrency": {
+            "type": "string"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "targetInventoryState": {
+            "type": "string"
+          },
+          "targetInventoryStateLabel": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ReturnInventoryDispositionLossRow": {
+        "properties": {
+          "dispositionId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "financeConfirmedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "financeCurrency": {
+            "type": "string"
+          },
+          "financeLossAmount": {
+            "type": "number"
+          },
+          "financeOwnerModule": {
+            "type": "string"
+          },
+          "financeReference": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "instructionId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "lossStatus": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "originalValue": {
+            "type": "number"
+          },
+          "proposedLossAmount": {
+            "type": "number"
+          },
+          "recordedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "recordedBy": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "salvageAmount": {
+            "type": "number"
+          },
+          "salvageCurrency": {
+            "type": "string"
+          },
+          "scrapQty": {
+            "type": "number"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ReturnInventoryDispositionOptions": {
+        "properties": {
+          "note": {
+            "type": "string"
+          },
+          "pendingBuckets": {
+            "items": {
+              "$ref": "#/components/schemas/ReturnInventoryDispositionPendingBucket"
+            },
+            "type": "array"
+          },
+          "requiredLocationType": {
+            "type": "string"
+          },
+          "targetInventoryState": {
+            "type": "string"
+          },
+          "targetLocations": {
+            "items": {
+              "$ref": "#/components/schemas/ReturnInventoryDispositionTargetLocation"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "ReturnInventoryDispositionPage": {
+        "properties": {
+          "dispositions": {
+            "items": {
+              "$ref": "#/components/schemas/ReturnInventoryDispositionRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/ReturnInventoryDispositionSummary"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ReturnInventoryDispositionPendingBucket": {
+        "properties": {
+          "available": {
+            "type": "number"
+          },
+          "bucketId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "legalEntityId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "locationCode": {
+            "type": "string"
+          },
+          "locationId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "locationName": {
+            "type": "string"
+          },
+          "lotCode": {
+            "type": "string"
+          },
+          "lotId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "onHand": {
+            "type": "number"
+          },
+          "qualityStatusCode": {
+            "type": "string"
+          },
+          "reserved": {
+            "type": "number"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "warehouseCode": {
+            "type": "string"
+          },
+          "warehouseId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "warehouseName": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ReturnInventoryDispositionRow": {
+        "properties": {
+          "batchNo": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdBy": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "decidedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "decidedBy": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "decisionNote": {
+            "type": "string"
+          },
+          "dispositionNo": {
+            "type": "string"
+          },
+          "executedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "executedBy": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "executionBucketId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "executionFailureReason": {
+            "type": "string"
+          },
+          "executionTransactionId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "inspectionId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "instructionConsumed": {
+            "type": "boolean"
+          },
+          "instructionId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "instructionType": {
+            "type": "string"
+          },
+          "qty": {
+            "type": "number"
+          },
+          "reasonNote": {
+            "type": "string"
+          },
+          "receiptId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "scrapReasonCode": {
+            "type": "string"
+          },
+          "scrapReasonCodeLabel": {
+            "type": "string"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "sourceBucketId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "sourceLocationCode": {
+            "type": "string"
+          },
+          "sourceLocationId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "sourceLotCode": {
+            "type": "string"
+          },
+          "sourceLotId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "sourceWarehouseCode": {
+            "type": "string"
+          },
+          "sourceWarehouseId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "submittedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "submittedBy": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "targetInventoryState": {
+            "type": "string"
+          },
+          "targetInventoryStateLabel": {
+            "type": "string"
+          },
+          "targetLocationCode": {
+            "type": "string"
+          },
+          "targetLocationId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "version": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ReturnInventoryDispositionSubmit": {
+        "properties": {
+          "expectedVersion": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "note": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ReturnInventoryDispositionSummary": {
+        "properties": {
+          "approvedCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "draftCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "executedCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "executedDefectiveQty": {
+            "type": "number"
+          },
+          "executedScrapQty": {
+            "type": "number"
+          },
+          "executedSellableQty": {
+            "type": "number"
+          },
+          "executionFailedCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "pendingApprovalCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "scrapExecutedCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalCount": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ReturnInventoryDispositionTargetLocation": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "locationId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "pickable": {
+            "type": "boolean"
+          },
+          "status": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "warehouseCode": {
+            "type": "string"
+          },
+          "warehouseId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ReturnInventoryDispositionUpdate": {
+        "properties": {
+          "expectedVersion": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "qty": {
+            "nullable": true,
+            "type": "number"
+          },
+          "reasonNote": {
+            "nullable": true,
+            "type": "string"
+          },
+          "scrapReasonCode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "sourceBucketId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "targetLocationId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "ReturnInventoryPosting": {
         "properties": {
           "batchNo": {
@@ -73174,6 +74875,208 @@
         ]
       }
     },
+    "/trade/anomaly-orders": {
+      "get": {
+        "operationId": "get_trade_anomaly_orders",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "anomalyType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "shopCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "orderSource",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "minDwellHours",
+            "required": false,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnomalyOrderPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "anomaly-order-controller"
+        ]
+      }
+    },
+    "/trade/anomaly-orders/capabilities": {
+      "get": {
+        "operationId": "get_trade_anomaly_orders_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnomalyOrderCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "anomaly-order-controller"
+        ]
+      }
+    },
+    "/trade/anomaly-orders/options": {
+      "get": {
+        "operationId": "get_trade_anomaly_orders_options",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnomalyOrderOptions"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "anomaly-order-controller"
+        ]
+      }
+    },
+    "/trade/anomaly-orders/{orderId}": {
+      "get": {
+        "operationId": "get_trade_anomaly_orders_orderId",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "orderId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnomalyOrderDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "anomaly-order-controller"
+        ]
+      }
+    },
     "/trade/b2b-orders": {
       "get": {
         "operationId": "get_trade_b2b_orders",
@@ -83819,6 +85722,127 @@
         ]
       }
     },
+    "/trade/fulfillment/health/capabilities": {
+      "get": {
+        "operationId": "get_trade_fulfillment_health_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FulfillmentHealthCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "fulfillment-health-controller"
+        ]
+      }
+    },
+    "/trade/fulfillment/health/red-flags": {
+      "get": {
+        "operationId": "get_trade_fulfillment_health_red_flags",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "kind",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FulfillmentHealthRedFlagPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "fulfillment-health-controller"
+        ]
+      }
+    },
+    "/trade/fulfillment/health/summary": {
+      "get": {
+        "operationId": "get_trade_fulfillment_health_summary",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FulfillmentHealthSummary"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "fulfillment-health-controller"
+        ]
+      }
+    },
     "/trade/fulfillment/monitor/capabilities": {
       "get": {
         "operationId": "get_trade_fulfillment_monitor_capabilities",
@@ -90638,6 +92662,87 @@
         },
         "tags": [
           "order-timeliness-controller"
+        ]
+      }
+    },
+    "/trade/global-search": {
+      "get": {
+        "operationId": "get_trade_global_search",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "q",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/GlobalSearchResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "global-search-controller"
+        ]
+      }
+    },
+    "/trade/global-search/capabilities": {
+      "get": {
+        "operationId": "get_trade_global_search_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/GlobalSearchCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "global-search-controller"
         ]
       }
     },
@@ -110436,6 +112541,600 @@
         },
         "tags": [
           "return-analytics-controller"
+        ]
+      }
+    },
+    "/trade/return-dispositions": {
+      "get": {
+        "operationId": "get_trade_return_dispositions",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "targetState",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "skuCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReturnInventoryDispositionPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "return-disposition-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_trade_return_dispositions",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReturnInventoryDispositionCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReturnInventoryDispositionDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "return-disposition-controller"
+        ]
+      }
+    },
+    "/trade/return-dispositions/capabilities": {
+      "get": {
+        "operationId": "get_trade_return_dispositions_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReturnInventoryDispositionCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "return-disposition-controller"
+        ]
+      }
+    },
+    "/trade/return-dispositions/instructions": {
+      "get": {
+        "operationId": "get_trade_return_dispositions_instructions",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "skuCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReturnInventoryDispositionInstructionPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "return-disposition-controller"
+        ]
+      }
+    },
+    "/trade/return-dispositions/options": {
+      "get": {
+        "operationId": "get_trade_return_dispositions_options",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "skuId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "targetState",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReturnInventoryDispositionOptions"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "return-disposition-controller"
+        ]
+      }
+    },
+    "/trade/return-dispositions/{id}": {
+      "get": {
+        "operationId": "get_trade_return_dispositions_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReturnInventoryDispositionDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "return-disposition-controller"
+        ]
+      },
+      "put": {
+        "operationId": "put_trade_return_dispositions_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReturnInventoryDispositionUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReturnInventoryDispositionDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "return-disposition-controller"
+        ]
+      }
+    },
+    "/trade/return-dispositions/{id}/approve": {
+      "post": {
+        "operationId": "post_trade_return_dispositions_id_approve",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReturnInventoryDispositionDecision"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReturnInventoryDispositionDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "return-disposition-controller"
+        ]
+      }
+    },
+    "/trade/return-dispositions/{id}/cancel": {
+      "post": {
+        "operationId": "post_trade_return_dispositions_id_cancel",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReturnInventoryDispositionCancel"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReturnInventoryDispositionDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "return-disposition-controller"
+        ]
+      }
+    },
+    "/trade/return-dispositions/{id}/execute": {
+      "post": {
+        "operationId": "post_trade_return_dispositions_id_execute",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReturnInventoryDispositionExecute"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReturnInventoryDispositionDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "return-disposition-controller"
+        ]
+      }
+    },
+    "/trade/return-dispositions/{id}/reject": {
+      "post": {
+        "operationId": "post_trade_return_dispositions_id_reject",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReturnInventoryDispositionDecision"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReturnInventoryDispositionDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "return-disposition-controller"
+        ]
+      }
+    },
+    "/trade/return-dispositions/{id}/submit": {
+      "post": {
+        "operationId": "post_trade_return_dispositions_id_submit",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReturnInventoryDispositionSubmit"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReturnInventoryDispositionDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "return-disposition-controller"
         ]
       }
     },

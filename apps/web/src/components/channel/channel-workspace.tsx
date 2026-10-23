@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { usePrefillKeyword } from '@/lib/global-search-handoff';
 import { Badge, Button } from '@starcon/ui';
 import {
   AlertTriangle,
@@ -142,7 +143,7 @@ export function ChannelWorkspace() {
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
   const [busy, setBusy] = useState(false);
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = usePrefillKeyword();
   const [platforms, setPlatforms] = useState<PlatformView[]>([]);
   const [connections, setConnections] = useState<ConnectionView[]>([]);
   const [reminders, setReminders] = useState<ReauthorizationReminderView[]>([]);

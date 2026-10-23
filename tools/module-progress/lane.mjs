@@ -178,10 +178,26 @@ function allocateVersions(count) {
  * 实测 3.6.2.1 供应商报价写着「上游 = 3.6.1.2」，而 3.6.1.2 自己还没开发 ——
  * 只按 ID 顺序排队会把「必须串联」的一对排成并行，worker 写到一半才发现上游的表不存在，
  * 整条车道的 40 分钟就白烧了。493KB 蓝图每次 plan 全量解析一次，代价可忽略。
+ *
+ * 返回**两张**图（2026-10-23 加第二张）：
+ *
+ *   l4  —— L4 粒度上游：「上游 = 11.2.3.1」
+ *   vol —— 卷粒度上游：「上游 = 09 订单、07 库存」「上游 = 02、18」
+ *
+ * 为什么必须解第二层（实测取证，2026-10-23）：
+ * 蓝图对上游有**两种粒度**，而原来只解 L4 那一种 ⇒ 卷 01 的上游图**整卷失明**：
+ * 卷 01 的「关系」字段几乎全是卷粒度写法（"上游 = 09 订单、07 库存、02 渠道、
+ * 12 财务、15 客户、17 审批"），解不出任何 L4 ID ⇒ 每个卷 01 模块的 upstream
+ * 都是空数组 ⇒ `every()` 恒真 ⇒ 一律判「上游已就绪」。
+ * 于是闸门一旦放行卷 01，就会把「上游是 12 财务（0 交付）的模块」也排出去 ——
+ * 正是微服务闸当初要消灭的那类浪费（一条车道 40 分钟 + 一个 worktree + 一个
+ * Flyway 版本号，产出为零）。
  */
 function readUpstreamMap() {
-  const map = new Map();
+  const l4 = new Map();
+  const vol = new Map();
   const L4 = /\b(\d+\.\d+\.\d+\.\d+)\b/g;
+  const NUM = /\d+(?:\.\d+)*/g;
 
   for (const f of readdirSync(BLUEPRINT_DIR)) {
     if (!f.endsWith('.md') || f === 'README.md' || f === 'module-progress.md') continue;
@@ -191,13 +207,24 @@ function readUpstreamMap() {
       if (!id) continue;
       const rel = /\*\*关系\*\*[：:]([^\n]*)/.exec(sec)?.[1] ?? '';
       const upPart = /上游\s*[=：:]\s*([^；;。\n]*)/.exec(rel)?.[1] ?? '';
-      map.set(
+      l4.set(
         id,
         [...upPart.matchAll(L4)].map((m) => m[1]),
       );
+      // 卷粒度：上游段里的**裸**数字（1..18）。带点的 token 是 L4/L3 路径，
+      // 归 l4 那张图管，不在这里当卷号。
+      vol.set(
+        id,
+        [...upPart.matchAll(NUM)]
+          .map((m) => m[0])
+          .filter((t) => !t.includes('.'))
+          .map((t) => Number(t))
+          .filter((n) => Number.isInteger(n) && n >= 1 && n <= 18)
+          .map(String),
+      );
     }
   }
-  return map;
+  return { l4, vol };
 }
 
 /* ── 卷 → 后端主责服务（微服务盲区闸）─────────────────────────────────────
@@ -288,6 +315,23 @@ function serviceGate() {
     } else if (!primary) {
       // 主责不是服务标识符（如卷 01「前端聚合 + 各服务投影」）→ 纯前端聚合层，照排
       verdict = null;
+    } else if (!/^[a-z][a-z0-9_-]*$/.test(primary)) {
+      // ★ 2026-10-23 修掉的死代码分支（此前这一整个卷被永久误封）
+      //
+      // 上面 `!primary` 那条分支**永远进不去**：readVolumeOwners 取的是
+      // 「后端主责服务」列按 '+' 拆开后的第一项，卷 01 的原文是
+      // 「前端聚合 + 各服务投影」⇒ primary = '前端聚合'（非空字符串）⇒
+      // `!primary` 为 false ⇒ 落到 serviceInHead('前端聚合')。
+      // 而 serviceInHead 的正则 /^[a-z][a-z0-9_-]*$/ 只认 ASCII 服务标识符，
+      // 非 ASCII 一律返回 false ⇒ 卷 01 被判「主责服务不在集成头」⇒ 永久阻塞。
+      //
+      // 但卷 01 根本不需要后端服务 —— 蓝图 01 开头写死了：
+      //   「后端归属：前端聚合层 + 各服务的只读投影（**不新增业务服务**）」
+      // 于是 10 个批次（batch-54/55/56/57/64/65/68/70/71/72）都把卷 01
+      // 记成「服务缺口」，等着「把前端聚合服务并进集成头」—— 而它永远不会存在。
+      //
+      // 修法：主责**不是服务标识符**时（纯前端聚合层 / 跨服务投影），照排。
+      verdict = null;
     } else if (!serviceInHead(primary)) {
       verdict = `卷 ${vol} 主责服务 ${primary} 不在集成头`;
     }
@@ -319,8 +363,16 @@ function pickModules(count, ledger, state) {
   );
 
   const delivered = new Set(ledger.filter((r) => r.status === '已交付').map((r) => r.id));
-  const upstream = readUpstreamMap();
+  const { l4: upstream, vol: volUpstream } = readUpstreamMap();
   const gate = serviceGate();
+
+  // 每卷已交付的模块数 —— 「上游卷整卷还不存在」的硬阻塞判定要用
+  const volDelivered = new Map();
+  for (const r of ledger) {
+    if (r.status !== '已交付') continue;
+    const v = String(Number(r.id.split('.')[0]));
+    volDelivered.set(v, (volDelivered.get(v) ?? 0) + 1);
+  }
 
   // 服务未落地的卷：既不排车道，也不烧版本号。顺带把原因带出去，
   // 否则 plan 返回空数组时，调度器只会以为「没活了」，看不出是整体被服务缺口堵死。
@@ -330,9 +382,43 @@ function pickModules(count, ledger, state) {
     (r) => (r.status === '未开发' || r.status === '进行中') && !taken.has(r.id),
   );
 
+  // ★ 2026-10-23：serviceBlocked 改为对**所有未完成模块**登记，不受上游过滤与
+  // L3 去重影响。为什么要改：serviceBlocked 是调度者判断「这是服务缺口还是上游
+  // 未就绪」的唯一依据（协议第 4 步）。若只登记「排到 tryTake 时才撞上闸」的卷，
+  // 那些**同时**被上游挡住的服务缺口卷就会从报告里整个消失 ——
+  // 实测卷 13（reporting）就是这样掉出去的，而 reporting 服务确实还不存在，
+  // 下一轮就会有人误判成「服务缺口已经清干净，只差上游」。
+  // 登记全量未完成模块 ⇒ 永久性服务缺口永远可见。
+  for (const r of unfinished) {
+    const blocked = gate(r.id);
+    if (!blocked) continue;
+    const vol = String(Number(r.id.split('.')[0]));
+    if (!serviceBlocked.has(vol)) {
+      serviceBlocked.set(vol, { reason: blocked, sample: [r.id] });
+    } else {
+      serviceBlocked.get(vol).sample.push(r.id);
+    }
+  }
+
   // 上游没交付的不进候选（进行中例外：它自己已经开工了，收尾优先）
+  //
+  // 卷粒度上游的判据刻意保守：**只认「整个上游卷一行都没交付」这一种硬阻塞**。
+  // 理由：卷粒度依赖只能解出卷号，解不出「需要的是这个卷里的哪个 L4」。
+  // 卷已交付过一部分 ⇒ 需要的那个 L4 可能已经在了 ⇒ 不能凭卷号误杀 ⇒ 放行，
+  // 交给 worker 的「开工前 10 分钟自检」兜底（协议第 4 步）。
+  // 只有「整个卷 0 交付」时，那个上游才**事实上**不存在 ⇒ 必然 BLOCK ⇒ 直接挡住。
+  const volUpstreamReady = (r) => {
+    const own = String(Number(r.id.split('.')[0]));
+    for (const v of volUpstream.get(r.id) ?? []) {
+      if (v === own) continue; // 自引用不算依赖
+      if ((volDelivered.get(v) ?? 0) === 0) return false;
+    }
+    return true;
+  };
+
   const upstreamReady = (r) =>
-    r.status === '进行中' || (upstream.get(r.id) ?? []).every((u) => delivered.has(u));
+    r.status === '进行中' ||
+    ((upstream.get(r.id) ?? []).every((u) => delivered.has(u)) && volUpstreamReady(r));
 
   // 进行中优先：有人开了头没收口，收尾比开新坑重要
   const inFlight = unfinished
@@ -348,16 +434,8 @@ function pickModules(count, ledger, state) {
       const l3 = l3Of(r.id);
       if (usedL3.has(l3)) continue;
       // 落地微服务必须已存在于集成头，否则这条车道注定 BLOCK
-      const blocked = gate(r.id);
-      if (blocked) {
-        const vol = String(Number(r.id.split('.')[0]));
-        if (!serviceBlocked.has(vol)) {
-          serviceBlocked.set(vol, { reason: blocked, sample: [r.id] });
-        } else {
-          serviceBlocked.get(vol).sample.push(r.id);
-        }
-        continue;
-      }
+      // （serviceBlocked 已在上面对全量未完成模块统一登记，这里只负责跳过）
+      if (gate(r.id)) continue;
       // 已知阻塞项（证据列带「阻塞：」）先跳过，除非实在凑不满
       if (/^阻塞[：:]/.test(r.evidence)) continue;
       usedL3.add(l3);

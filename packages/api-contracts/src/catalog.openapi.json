@@ -13733,6 +13733,145 @@
         },
         "type": "object"
       },
+      "GlobalSearchCapabilities": {
+        "properties": {
+          "domains": {
+            "items": {
+              "$ref": "#/components/schemas/GlobalSearchDomain"
+            },
+            "type": "array"
+          },
+          "notes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "GlobalSearchDomain": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "domain": {
+            "type": "string"
+          },
+          "impact": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "matchMode": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "source": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "GlobalSearchGroup": {
+        "properties": {
+          "dataScope": {
+            "type": "string"
+          },
+          "dataScopeNote": {
+            "type": "string"
+          },
+          "domain": {
+            "type": "string"
+          },
+          "hits": {
+            "items": {
+              "$ref": "#/components/schemas/GlobalSearchHit"
+            },
+            "type": "array"
+          },
+          "label": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "GlobalSearchHit": {
+        "properties": {
+          "domain": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "primary": {
+            "type": "string"
+          },
+          "secondary": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "GlobalSearchResponse": {
+        "properties": {
+          "groups": {
+            "items": {
+              "$ref": "#/components/schemas/GlobalSearchGroup"
+            },
+            "type": "array"
+          },
+          "keyword": {
+            "type": "string"
+          },
+          "matchMode": {
+            "type": "string"
+          },
+          "minKeywordLength": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "suppressedDomains": {
+            "items": {
+              "$ref": "#/components/schemas/GlobalSearchSuppressed"
+            },
+            "type": "array"
+          },
+          "unavailableDomains": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "GlobalSearchSuppressed": {
+        "properties": {
+          "domain": {
+            "type": "string"
+          },
+          "group": {
+            "type": "string"
+          },
+          "groupLabel": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "GradeCount": {
         "properties": {
           "count": {
@@ -46617,6 +46756,87 @@
         },
         "tags": [
           "export-controller"
+        ]
+      }
+    },
+    "/catalog/global-search": {
+      "get": {
+        "operationId": "get_catalog_global_search",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "q",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/GlobalSearchResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "global-search-controller"
+        ]
+      }
+    },
+    "/catalog/global-search/capabilities": {
+      "get": {
+        "operationId": "get_catalog_global_search_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/GlobalSearchCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "global-search-controller"
         ]
       }
     },
