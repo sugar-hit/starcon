@@ -117,6 +117,519 @@
         },
         "type": "object"
       },
+      "FinanceReceiptAllocationInput": {
+        "properties": {
+          "note": {
+            "nullable": true,
+            "type": "string"
+          },
+          "receivableId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "reservedAmount": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceReceiptAllocationRow": {
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "receiptId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "receiptNo": {
+            "type": "string"
+          },
+          "receivableId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "receivableNo": {
+            "type": "string"
+          },
+          "reservedAmount": {
+            "type": "number"
+          },
+          "status": {
+            "enum": [
+              "RESERVED",
+              "RELEASED"
+            ],
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceReceiptBalance": {
+        "properties": {
+          "advanceCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "asOf": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "byCurrency": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceReceiptCurrencySummary"
+            },
+            "type": "array"
+          },
+          "receiptCount": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceReceiptCapabilities": {
+        "properties": {
+          "capabilities": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceReceiptCapability"
+            },
+            "type": "array"
+          },
+          "downstreamGaps": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceReceiptDownstreamGap"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceReceiptCapability": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "basis": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "module": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceReceiptCurrencySummary": {
+        "properties": {
+          "advanceAmount": {
+            "type": "number"
+          },
+          "advanceCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "count": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "settledAmount": {
+            "type": "number"
+          },
+          "unsettledAmount": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceReceiptDetail": {
+        "properties": {
+          "allocations": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceReceiptAllocationRow"
+            },
+            "type": "array"
+          },
+          "events": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceReceiptEventRow"
+            },
+            "type": "array"
+          },
+          "receipt": {
+            "$ref": "#/components/schemas/FinanceReceiptRow"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceReceiptDownstreamGap": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "group": {
+            "type": "string"
+          },
+          "module": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "ownerService": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceReceiptEventRow": {
+        "properties": {
+          "actorId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "eventType": {
+            "type": "string"
+          },
+          "fromStatus": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "occurredAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "toStatus": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceReceiptImportInput": {
+        "properties": {
+          "content": {
+            "type": "string"
+          },
+          "format": {
+            "enum": [
+              "CSV",
+              "JSON"
+            ],
+            "type": "string"
+          },
+          "source": {
+            "enum": [
+              "PLATFORM_SETTLEMENT",
+              "BANK_TRANSFER",
+              "PAYMENT_GATEWAY",
+              "MANUAL",
+              "OTHER"
+            ],
+            "nullable": true,
+            "type": "string"
+          },
+          "sourceSystem": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceReceiptImportResult": {
+        "properties": {
+          "imported": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "importedRows": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceReceiptRow"
+            },
+            "type": "array"
+          },
+          "scanned": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "skipped": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceReceiptInput": {
+        "properties": {
+          "advanceFlag": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "fundAccountLabel": {
+            "nullable": true,
+            "type": "string"
+          },
+          "note": {
+            "nullable": true,
+            "type": "string"
+          },
+          "payerName": {
+            "type": "string"
+          },
+          "payerRef": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "payerType": {
+            "enum": [
+              "PLATFORM",
+              "CUSTOMER",
+              "PARTNER",
+              "OTHER"
+            ],
+            "type": "string"
+          },
+          "receivedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "source": {
+            "enum": [
+              "PLATFORM_SETTLEMENT",
+              "BANK_TRANSFER",
+              "PAYMENT_GATEWAY",
+              "MANUAL",
+              "OTHER"
+            ],
+            "nullable": true,
+            "type": "string"
+          },
+          "sourceReference": {
+            "nullable": true,
+            "type": "string"
+          },
+          "sourceSystem": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceReceiptOptions": {
+        "properties": {
+          "currencies": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "payerTypes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "sourceSystems": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "sources": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "statuses": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceReceiptPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceReceiptRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "summaryByCurrency": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceReceiptCurrencySummary"
+            },
+            "type": "array"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceReceiptRow": {
+        "properties": {
+          "advanceFlag": {
+            "type": "boolean"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "fundAccountLabel": {
+            "type": "string"
+          },
+          "fundAccountRef": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "payerName": {
+            "type": "string"
+          },
+          "payerRef": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "payerType": {
+            "enum": [
+              "PLATFORM",
+              "CUSTOMER",
+              "PARTNER",
+              "OTHER"
+            ],
+            "type": "string"
+          },
+          "receiptNo": {
+            "type": "string"
+          },
+          "receivedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "settledAmount": {
+            "type": "number"
+          },
+          "settlementNo": {
+            "nullable": true,
+            "type": "string"
+          },
+          "source": {
+            "enum": [
+              "PLATFORM_SETTLEMENT",
+              "BANK_TRANSFER",
+              "PAYMENT_GATEWAY",
+              "MANUAL",
+              "OTHER"
+            ],
+            "type": "string"
+          },
+          "sourceReference": {
+            "nullable": true,
+            "type": "string"
+          },
+          "sourceSystem": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "RECORDED",
+              "VOID"
+            ],
+            "type": "string"
+          },
+          "unsettledAmount": {
+            "type": "number"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceReceiptVoidInput": {
+        "properties": {
+          "reason": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "FinanceReceivableAging": {
         "properties": {
           "asOfDate": {
@@ -829,6 +1342,493 @@
   },
   "openapi": "3.0.1",
   "paths": {
+    "/finance/receipts": {
+      "get": {
+        "operationId": "get_finance_receipts",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "source",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sourceSystem",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "currency",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "payerType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "advanceOnly",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "receivedFrom",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "receivedTo",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceReceiptPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "receipt-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_finance_receipts",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinanceReceiptInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceReceiptRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "receipt-controller"
+        ]
+      }
+    },
+    "/finance/receipts/balance": {
+      "get": {
+        "operationId": "get_finance_receipts_balance",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceReceiptBalance"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "receipt-controller"
+        ]
+      }
+    },
+    "/finance/receipts/capabilities": {
+      "get": {
+        "operationId": "get_finance_receipts_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceReceiptCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "receipt-controller"
+        ]
+      }
+    },
+    "/finance/receipts/import": {
+      "post": {
+        "operationId": "post_finance_receipts_import",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinanceReceiptImportInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceReceiptImportResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "receipt-controller"
+        ]
+      }
+    },
+    "/finance/receipts/options": {
+      "get": {
+        "operationId": "get_finance_receipts_options",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceReceiptOptions"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "receipt-controller"
+        ]
+      }
+    },
+    "/finance/receipts/{id}": {
+      "get": {
+        "operationId": "get_finance_receipts_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceReceiptDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "receipt-controller"
+        ]
+      }
+    },
+    "/finance/receipts/{id}/allocations": {
+      "post": {
+        "operationId": "post_finance_receipts_id_allocations",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinanceReceiptAllocationInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceReceiptAllocationRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "receipt-controller"
+        ]
+      }
+    },
+    "/finance/receipts/{id}/allocations/{allocationId}/release": {
+      "post": {
+        "operationId": "post_finance_receipts_id_allocations_allocationId_release",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "allocationId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceReceiptAllocationRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "receipt-controller"
+        ]
+      }
+    },
+    "/finance/receipts/{id}/void": {
+      "post": {
+        "operationId": "post_finance_receipts_id_void",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinanceReceiptVoidInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceReceiptRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "receipt-controller"
+        ]
+      }
+    },
     "/finance/receivables": {
       "get": {
         "operationId": "get_finance_receivables",
