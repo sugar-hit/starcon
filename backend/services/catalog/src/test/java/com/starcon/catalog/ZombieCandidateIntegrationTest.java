@@ -197,8 +197,11 @@ class ZombieCandidateIntegrationTest {
    *
    * <p>直连 SQL 而不是加个"创建于过去"的入口：主数据的 {@code updated_at} 由服务层维护， 让业务接口接受任意过去时刻等于开一个"可以把任何记录改成很久以前"的后门。
    * 这里用 {@code ?::timestamptz} 绑定 OffsetDateTime —— 与服务层同一手法。
+   *
+   * <p>返回写进库的那个 {@code updated_at}：调用方要拿它当期望值，别自己再算一次 {@code now()} ——
+   * 两次独立取时钟只要跨过一个毫秒边界，期望值和实际写入值就差 1 毫秒，断言会假红（竞态，不是时区问题）。
    */
-  void backdate(String table, UUID tenant, UUID id, long days) {
+  OffsetDateTime backdate(String table, UUID tenant, UUID id, long days) {
     // 截断到毫秒：PG 的 timestamptz 是微秒精度，用带纳秒的「期望值」去比会恒不相等，
     // 而那种失败与时区无关、纯粹是精度噪音，会盖掉真正的时区断言。
     var moment =
@@ -216,6 +219,7 @@ class ZombieCandidateIntegrationTest {
               id);
           return null;
         });
+    return moment;
   }
 
   /**
@@ -491,11 +495,8 @@ class ZombieCandidateIntegrationTest {
     ruleOnly(365);
     var product = spu(a, "P-" + UUID.randomUUID());
     var target = sku(a, product, "MT-" + UUID.randomUUID().toString().substring(0, 8));
-    var moment =
-        OffsetDateTime.now(ZoneOffset.UTC)
-            .minusDays(500)
-            .truncatedTo(java.time.temporal.ChronoUnit.MILLIS);
-    backdate("sku", a, target, 500);
+    // 期望值直接取 helper 写进库的那个时刻：自己另算一次 now() 会和写入值差一个毫秒边界，断言假红。
+    var expected = backdate("sku", a, target, 500);
     var stored =
         call(
             actor,
@@ -503,7 +504,7 @@ class ZombieCandidateIntegrationTest {
             () ->
                 sql.fetchOne("select updated_at from sku where tenant_id=? and id=?", a, target)
                     .get(0, OffsetDateTime.class));
-    assertThat(stored.toInstant()).isEqualTo(moment.toInstant());
+    assertThat(stored.toInstant()).isEqualTo(expected.toInstant());
   }
 
   // ================================================================ 批量停用
