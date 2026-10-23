@@ -1220,6 +1220,47 @@ const services: readonly {
       /^linkage\-risk(?:\/(?:capabilities|policy|shops|graph|scan|alerts(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:acknowledge|resolve|dismiss))?)?|identifiers(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/shops(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?)?)?|remediations(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/status)?))$/,
   },
   {
+    // 1.1.3.1 库存风险（卷 01 工作台与门户）。纯**新增一条独立的 services[] 元素**：
+    // 既有那条 `warehouse/` 巨型 alternation **一字未动、也不重排** ——
+    // 本文件是多车道共用的累积型白名单，每条服务规则是一段超长单行正则，
+    // 往同一条 alternation 里并分支会让同批多车道并入时 git 必然判冲突（结构性，retry 不会自愈）。
+    //
+    // ---- 插入锚点固定在 `prefix: 'warehouse/'` 那条元素**之前** ----
+    //   同批其它车道的锚点分别是「数组最开头」「`prefix: 'identity/'` 之前」「数组末尾」，
+    //   四处相距 600 行以上，git 能干净求并。
+    //
+    // ---- 为什么是第二条 `warehouse/` 元素而不是往既有那条里并分支 ----
+    //   代理的判别顺序是「`path.startsWith(prefix)` 收窄服务 → 再测正则」（见文件末尾 resolve()），
+    //   所以**同一服务可以有多条元素**：本条排在既有 warehouse 那条**之前**，
+    //   `warehouse/inventory-risk/...` 命中本条，其它 warehouse 路径继续落到既有那条。
+    //   两条元素的 env / fallback 完全一致，路由到的仍是同一个 warehouse 服务。
+    //
+    // ---- 首 token「inventory-risk」的零命中核对结论 ----
+    //   本文件既有 100+ 条 services[] 正则里**没有任何一条**含 `inventory-risk` 这个串
+    //   （既有的是 `inventory/...` 家族与 `inventory/stockout-alerts` / `inventory/consignment-stock`），
+    //   所以首 token 既是独立字面量，也不会被既有分支的前缀吃掉。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   inventory-risk/capabilities   能力声明（哪些输入接通了、哪些没接通及归属模块与影响）
+    //   inventory-risk/projection     (仓 × SKU) 库存事实投影（GET，真分页 + 真筛选）
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   inventory-risk                 —— 裸路径：后端没有「一条不存在的汇总端点」，汇总在 projection 里。
+    //   inventory-risk/projection/{...} —— 投影是集合读，明细在行内，没有子资源。
+    //   任何写形状（POST / PUT / DELETE 的**独立子路径**）—— 本模块是**只读投影**，
+    //     不产生任何业务事实，卷 01 的定位写死了「工作台只读 + 跳转；一切状态变更回到归属系统完成」。
+    //     代理的白名单是**按路径**判别、不看 HTTP 方法，所以往 projection 上 POST 会被转发，
+    //     但后端 InventoryRiskProjectionController 只映射了两个 GET —— 落上去是 405，不是「静默生效」。
+    //     刻意**不新开** inventory-risk/refresh 这类写子路径：放行一个后端不存在的映射比 404 更糟。
+    //   注意既有 warehouse 那条里已有 `inventory/...` 分支，**本条不动它**：
+    //     `inventory-risk` 与 `inventory` 是两个不同的首段（前者多一个 `-risk`），互不覆盖。
+    prefix: 'warehouse/',
+    env: 'WAREHOUSE_URL',
+    fallback: 'http://127.0.0.1:8084',
+    pattern:
+      /^inventory\-risk\/(?:capabilities|projection)$/,
+  },
+  {
     // 07 库存：库存总览（7.1.1.1）、库存明细 bucket（7.1.1.2）、筛选下拉参照数据与超储阈值。
     // overview/capabilities/policies 是总览本身；warehouses/legal-entities/skus/quality-statuses
     // 是筛选下拉项。policies/{id} 后面接一段 id（更新与删除）。

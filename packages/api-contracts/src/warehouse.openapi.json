@@ -31152,6 +31152,250 @@
         },
         "type": "object"
       },
+      "RiskProjectionCapabilities": {
+        "properties": {
+          "agingAvailable": {
+            "type": "boolean"
+          },
+          "agingNote": {
+            "type": "string"
+          },
+          "agingSource": {
+            "type": "string"
+          },
+          "availableDaysNote": {
+            "type": "string"
+          },
+          "inTransitAvailable": {
+            "type": "boolean"
+          },
+          "inTransitNote": {
+            "type": "string"
+          },
+          "inTransitSource": {
+            "type": "string"
+          },
+          "purchaseArrivalAvailable": {
+            "type": "boolean"
+          },
+          "purchaseArrivalImpact": {
+            "type": "string"
+          },
+          "purchaseArrivalOwnerModule": {
+            "type": "string"
+          },
+          "reservationAvailable": {
+            "type": "boolean"
+          },
+          "reservationNote": {
+            "type": "string"
+          },
+          "reservationSource": {
+            "type": "string"
+          },
+          "riskRuleNote": {
+            "type": "string"
+          },
+          "salesVelocityAvailable": {
+            "type": "boolean"
+          },
+          "salesVelocityImpact": {
+            "type": "string"
+          },
+          "salesVelocityOwnerModule": {
+            "type": "string"
+          },
+          "stockProjectionAvailable": {
+            "type": "boolean"
+          },
+          "stockProjectionNote": {
+            "type": "string"
+          },
+          "stockProjectionSource": {
+            "type": "string"
+          },
+          "thresholdAvailable": {
+            "type": "boolean"
+          },
+          "thresholdNote": {
+            "type": "string"
+          },
+          "thresholdSource": {
+            "type": "string"
+          },
+          "writeScopeNote": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "RiskProjectionPage": {
+        "properties": {
+          "asOfDate": {
+            "type": "string"
+          },
+          "computedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/RiskProjectionRow"
+            },
+            "type": "array"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "truncationNote": {
+            "type": "string"
+          },
+          "warehouseKindOptions": {
+            "items": {
+              "$ref": "#/components/schemas/WarehouseKindOption"
+            },
+            "type": "array"
+          },
+          "warehouseOptions": {
+            "items": {
+              "$ref": "#/components/schemas/WarehouseOption"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "RiskProjectionRow": {
+        "properties": {
+          "activeReservationCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "activeReservedQuantity": {
+            "type": "number"
+          },
+          "agingBasis": {
+            "type": "string"
+          },
+          "agingDays": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "available": {
+            "type": "number"
+          },
+          "bucketCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "inTransitFirstMileQuantity": {
+            "type": "number"
+          },
+          "inTransitLegCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "inTransitPurchaseQuantity": {
+            "type": "number"
+          },
+          "inTransitQuantity": {
+            "type": "number"
+          },
+          "inTransitTransferQuantity": {
+            "type": "number"
+          },
+          "inboundDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "lastMovementAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "locationCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "lotCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "maxOnHand": {
+            "nullable": true,
+            "type": "number"
+          },
+          "minOnHand": {
+            "nullable": true,
+            "type": "number"
+          },
+          "obsoleteDays": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "obsoleteThresholdSource": {
+            "type": "string"
+          },
+          "onHand": {
+            "type": "number"
+          },
+          "reorderPoint": {
+            "nullable": true,
+            "type": "number"
+          },
+          "reserved": {
+            "type": "number"
+          },
+          "safetyStock": {
+            "nullable": true,
+            "type": "number"
+          },
+          "sellableBeforeBuffer": {
+            "type": "number"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "thresholdScopeKey": {
+            "type": "string"
+          },
+          "thresholdScopeType": {
+            "type": "string"
+          },
+          "warehouseCode": {
+            "type": "string"
+          },
+          "warehouseId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "warehouseKind": {
+            "type": "string"
+          },
+          "warehouseKindLabel": {
+            "type": "string"
+          },
+          "warehouseName": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "SafetyStockAlertActionResult": {
         "properties": {
           "alertId": {
@@ -41332,16 +41576,34 @@
         },
         "type": "object"
       },
+      "WarehouseKindOption": {
+        "properties": {
+          "label": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          },
+          "warehouseCount": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
       "WarehouseOption": {
         "properties": {
           "code": {
             "type": "string"
           },
-          "countryCode": {
-            "type": "string"
-          },
           "id": {
             "format": "uuid",
+            "type": "string"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "kindLabel": {
             "type": "string"
           },
           "name": {
@@ -46470,6 +46732,122 @@
         },
         "tags": [
           "goods-receipt-controller"
+        ]
+      }
+    },
+    "/warehouse/inventory-risk/capabilities": {
+      "get": {
+        "operationId": "get_warehouse_inventory_risk_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RiskProjectionCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "inventory-risk-projection-controller"
+        ]
+      }
+    },
+    "/warehouse/inventory-risk/projection": {
+      "get": {
+        "operationId": "get_warehouse_inventory_risk_projection",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "warehouseId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "skuId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "warehouseKind",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 100,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RiskProjectionPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "inventory-risk-projection-controller"
         ]
       }
     },
