@@ -2412,6 +2412,55 @@ const services: readonly {
     // 裸路径 logistics-channels **放行**：它就是本模块的集合读 + POST 登记入口。
   },
   {
+    // 12.3.1.3 延迟结算（finance 服务，卷 12「财务核算」L3 12.3.1 结算与对账下的第三格）。
+    //
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 finance 那条巨型 alternation 里并分支 ——
+    //   既有条目是单行超长正则，多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    //   既有条目**一字未改、也不重排**。
+    //
+    // ---- 插入锚点选在**数组中段**（`logistics-channels` 那条之后）----
+    //   本车道与同批其它车道的插入点相距 **8000 行以上**（它们的锚点都在数组末尾附近），
+    //   并入时 git 能干净求并。
+    //
+    // ---- 首 token「deferred-settlement」的零命中核对结论 ----
+    //   本文件既有 200+ 条 services[] 正则里**没有任何一条**含 `deferred` 这个串
+    //   （逐条 `pattern:` 实测：命中数 0），所以首 token 既是独立字面量，
+    //   也不会被既有分支的前缀吃掉。
+    //   ⚠️ 与同服务的兄弟模块首 token **互不相同**：`settlement`（12.3.1.1 结算单）、
+    //   `transactions`（12.3.1.2 交易明细）、`deferred-settlement`（本模块）——
+    //   三条正则两两不相交，吞掉的表现是页面 404，而 typecheck / lint / vitest 全绿。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   deferred-settlement                    列表（GET，真分页 + 真筛选 + 两套口径汇总）
+    //   deferred-settlement/capabilities       能力声明（哪些上游真接通 + 缺口归谁）
+    //   deferred-settlement/options            筛选项（状态 / 平台 / 店铺 / 币种 / 结算模式）
+    //   deferred-settlement/rules              结算规则清单（GET）/ 登记规则（POST）
+    //   deferred-settlement/summary            在途资金统计（GET：两套口径 + 预计到账时间）
+    //   deferred-settlement/scan               扫描已发货订单入台账（POST）
+    //   deferred-settlement/{uuid}             台账明细（GET：单头 + 事件流）
+    //   deferred-settlement/{uuid}/void        作废（POST，终态）
+    //
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //   （不是 `[0-9a-f-]+`）：后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行。
+    //   字面量子路径（capabilities / options / rules / summary / scan）排在 {uuid} 段之前判别 ——
+    //   alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   deferred-settlement/{uuid}/arrival      —— 🔴 到账登记属 12.3.1.1 结算单，本模块**只读**它的到账事实
+    //   deferred-settlement/{uuid}/profit        —— 🔴 利润（13）**未交付**
+    //   deferred-settlement/{uuid}/reconcile     —— 🔴 对账任务（12.3.2.1）**未交付**
+    //   deferred-settlement/{uuid}/sync          —— 🔴 平台结算报告自动同步（卷 02）**未交付**
+    //   deferred-settlement/{uuid}/edit|delete   —— 台账行没有改、没有删（作废走 status='VOID'）
+    //   deferred-settlement/not-a-uuid           —— 非 UUID 段不应被 uuid 分支吃掉
+    //   deferred-settlement/{uuid}/not-a-shape   —— 本模块的动作只有 void
+    //   deferred-settlement/settlement-deferred  —— 首 token 写错（12.3.1.1 占的是 `settlement`）
+    prefix: 'finance/',
+    env: 'FINANCE_URL',
+    fallback: 'http://127.0.0.1:8087',
+    pattern:
+      /^deferred\-settlement(?:\/(?:capabilities|options|rules|summary|scan|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/void)?))?$/,
+  },
+  {
     // 16.5.1.1 黑名单（channel 服务，卷 16 合规与风险 / L3 16.5.1 买家风控下的第一格）。
     //
     // 本条目是**新增一条独立的 `services[]` 元素**，不是往既有 channel 分支的 alternation 里
