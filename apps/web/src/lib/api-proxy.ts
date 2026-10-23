@@ -20,6 +20,48 @@ const services: readonly {
   fallback: string;
 }[] = [
   {
+    // 1.1.1.2 异常订单队列（trade 服务，卷 01「工作台与门户」L3 1.1.1 待办与待决策的第三格）。
+    //
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 trade 那条巨型 alternation 里并分支 ——
+    //   那一支是单行超长正则，多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    //   既有条目**一字未改、也不重排**。
+    //
+    // ---- 插入锚点选在**数组最开头**（本文件第一个元素之前）----
+    //   同批其它车道的插入点是「`prefix: 'identity/'` 之前」「`prefix: 'warehouse/'` 之前」
+    //   与「数组末尾」；本车道落在这里，与它们的插入点相距 600 行以上，并入时 git 能干净求并。
+    //
+    // ---- 首 token「anomaly-orders」的零命中核对结论 ----
+    //   本文件既有 100+ 条 services[] 正则里**没有任何一条**含 `anomaly-orders` 这个串
+    //   （既有含 "anomaly" 的是 catalog 的 `price-anomaly-alerts`，首 token 全不相同），
+    //   所以首 token 既是独立字面量，也不会被既有分支的前缀吃掉。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   anomaly-orders                    异常订单清单（GET，真分页 + 真筛选 + 真排序 + 汇总）
+    //   anomaly-orders/capabilities       能力声明（七类异常哪几类真接通 + 动作缺口）
+    //   anomaly-orders/options            筛选项（异常类型 / 店铺 / 订单来源 / 停留时长档位）
+    //   anomaly-orders/{uuid}             单条明细（GET：订单行 + 费用 + 状态留痕 + 逐条凭据）
+    //
+    // ⚠️ **本模块是只读的**：没有 POST / PUT / DELETE 端点，所以这里**一个写形状都不放行**。
+    //   卷 01 的边界写死「工作台只读 + 跳转；一切状态变更回到归属系统完成」——
+    //   放行一个不存在的写入口，比 404 更糟（界面会以为功能已交付）。
+    //
+    // id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`（不是 `[0-9a-f-]+`）：
+    // 后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行。
+    // 字面量子路径（capabilities / options）排在 {uuid} 段之前判别 —— alternation 是首个命中即返回，
+    // 顺序反了会被通配支吃掉半截。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   anomaly-orders/not-a-uuid         —— 非 UUID 段不应被 uuid 分支吃掉
+    //   anomaly-orders/{uuid}/ignore       —— 🔴 「标记忽略」没有归属系统的写端点，
+    //                                         工作台不写业务数据 ⇒ 这个形状不存在
+    //   anomaly-orders/bulk-*              —— 批量动作一律落到归属系统，工作台不另建写路径
+    prefix: 'trade/',
+    env: 'TRADE_URL',
+    fallback: 'http://127.0.0.1:8085',
+    pattern:
+      /^anomaly\-orders(?:\/(?:capabilities|options|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}))?$/,
+  },
+  {
     // 6.1.1.3 供应商评级（trade 服务，卷 06「采购与供应」L3 6.1.1 供应商管理下的第三格）。
     //
     // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 trade 那条巨型 alternation 里并分支 ——
