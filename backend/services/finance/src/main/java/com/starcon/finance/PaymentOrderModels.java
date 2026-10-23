@@ -80,7 +80,7 @@ public final class PaymentOrderModels {
       return this == PAID || this == FAILED;
     }
 
-    /** 执行态：写入权属 12.2.2.2（未交付）。 */
+    /** 执行态：写入权属 12.2.2.2「付款执行」（已交付）。 */
     public boolean executionOwned() {
       return this == EXECUTING || this == PAID || this == FAILED;
     }
@@ -215,9 +215,9 @@ public final class PaymentOrderModels {
       @Schema(nullable = true) UUID paymentPlanId,
       String paymentPlanNo,
       PaymentOrderStatus status,
-      /** 付款执行归属模块（恒为 12.2.2.2 —— 它未交付）。 */
+      /** 付款执行归属模块（恒为 12.2.2.2 —— 它已交付）。 */
       String executionOwnerModule,
-      /** 付款执行是否可用（**恒为 false** —— 12.2.2.2 未交付）。 */
+      /** 付款执行是否可用（**恒为 true** —— 12.2.2.2 已交付，V350 把 CHECK 与默认值钉死为 true）。 */
       boolean executionAvailable,
       ApprovalStatus approvalStatus,
       @Schema(nullable = true) UUID approvalFlowId,

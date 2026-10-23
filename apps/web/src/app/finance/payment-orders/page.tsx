@@ -17,8 +17,8 @@ import { PaymentOrderWorkspace } from '@/components/finance/payment-order-worksp
  * 12.1.2.2 的 {@code /finance/payment-plans} **并列**而非嵌套：
  * 三个模块的页面各自独立，前端一眼能分清「单据」「计划」「付款申请」。
  *
- * <p>页面<b>刻意没有</b>「执行付款」「标记已付」两个入口：付款属 12.2.2.2（未交付），
- * 能力声明会如实把它们报成 {@code available=false} 并写明归属模块；
+ * <p>页面<b>刻意没有</b>「执行付款」「标记已付」两个入口：付款属 12.2.2.2「付款执行」
+ * （已交付，端点在 {@code /finance/payment-executions}），本页面只做申请与审批；
  * 同样<b>没有</b>本地的「审批通过 / 审批驳回」入口：审批属 17 审批（identity），
  * 审批动作要去 identity 的待我审批里做。
  */

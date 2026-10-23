@@ -37,9 +37,12 @@ import org.springframework.web.server.ResponseStatusException;
  *       真正的审批判定、金额阈值分支、并行/串行流转全在 identity 的 17 审批里
  *       （见 {@link ApprovalPort}）。本模块**不提供**本地的「审批通过 / 驳回」端点 ——
  *       那会造出第二套审批引擎，两套引擎必然打架。
- *   <li><b>「已付」写不出来。</b>付款单有蓝图要求的完整六态，但
- *       {@code execution_available} 被表级 CHECK 钉死为 false ⇒ 触发器拒绝写入
- *       EXECUTING / PAID / FAILED ⇒ 那三个状态的写入权属 12.2.2.2（未交付）。
+ *   <li><b>「已付」本模块写不出来。</b>付款单有蓝图要求的完整六态，但
+ *       EXECUTING / PAID / FAILED 三个状态的写入权属 <b>12.2.2.2「付款执行」</b>
+ *       （已交付）：{@code execution_available} 由表级 CHECK 钉死为 true，
+ *       状态守卫 {@code guard_finance_payment_order_state} 只允许沿
+ *       草稿→待审→已批→执行中→已付/失败 单向流转，且进入执行中 / 已付 / 失败
+ *       之前必须有对应的付款执行记录 ⇒ 本模块**直写**写不出这三个状态。
  *       <b>审批通过 ≠ 钱已付出。</b>
  *   <li><b>付款必须精确到应付明细行。</b>明细行的 {@code payable_line_id} 是 NOT NULL 外键，
  *       指向 12.1.2.1 的 {@code finance_payable_line}（同服务同库）⇒
@@ -213,14 +216,19 @@ public class PaymentOrderService {
         new FinancePaymentOrderCapability(
             "12.2.2.2",
             "付款执行（把已批的付款单真的付出去）",
-            false,
-            "写路径未开放：execution_available 由表级 CHECK 钉死为 false，"
-                + "触发器 guard_finance_payment_order_state 拒绝写入 EXECUTING / PAID / FAILED",
+            true,
+            "写路径已开放：12.2.2.2 已交付（自己的迁移 + 自己的端点）。"
+                + "execution_available 由表级 CHECK 钉死为 true；"
+                + "触发器 guard_finance_payment_order_state 只允许沿 "
+                + "草稿→待审→已批→执行中→已付/失败 单向流转，"
+                + "且进入 EXECUTING / PAID / FAILED 之前必须有对应的付款执行记录",
             "12.2.2.2",
-            "蓝图关系写死「下游 = 12.2.2.2」。本模块交付的是**申请 + 审批**，"
-                + "**交付不了执行**。审批通过 ≠ 钱已付出："
+            "蓝图关系写死「下游 = 12.2.2.2」，**它已交付**。本模块交付的是"
+                + "**申请 + 审批**，**执行由 12.2.2.2 接管**。审批通过 ≠ 钱已付出："
                 + "行级 paid_amount 由 12.2.2.2 在真正付出钱的那一刻回写。"
-                + "本模块**刻意不写** paid_amount —— 审批阶段就写会让「已付」早于它真正发生。"));
+                + "本模块**刻意不写** paid_amount —— 审批阶段就写会让「已付」早于它真正发生。"
+                + "本模块**不碰** V343 的 finance_payment_plan / finance_payment_batch，"
+                + "那两张表 execution_available 恒为 false 的 CHECK 一个字都不动。"));
 
     capabilities.add(
         new FinancePaymentOrderCapability(
@@ -233,21 +241,12 @@ public class PaymentOrderService {
                 + "那会造出第二份资金账户真相，而两份真相必然打架。"
                 + "它交付后由它接管账户登记与余额，本表结构不用改。"));
 
-    gaps.add(
-        new FinancePaymentOrderDownstreamGap(
-            "12.2.2.2",
-            "付款执行",
-            "finance",
-            false,
-            "下游未交付",
-            "交接面：① finance_payment_order.status 的 EXECUTING / PAID / FAILED 三态已备好，"
-                + "但 execution_available 的 CHECK 与 guard_finance_payment_order_state 触发器"
-                + "把写入挡在外面 —— 12.2.2.2 交付时**接管**这两个守卫；"
-                + "② finance_payment_order_installment 同理（守卫函数 "
-                + "guard_finance_payment_order_installment_state）；"
-                + "③ 行级 paid_amount（finance_payable_line，V340 列名）由 12.2.2.2 在付款成功时回写；"
-                + "④ 本模块**不碰** V343 的 finance_payment_plan / finance_payment_batch，"
-                + "那两张表 execution_available 恒为 false 的 CHECK 一个字都不动。"));
+    // ⚠️ 12.2.2.2「付款执行」**已交付** ⇒ 它不再是「下游缺口」，这条 gap 已移除。
+    //    交接面（谁接管哪一块）现在写在上面 capabilities 的 12.2.2.2 那一条里：
+    //    · 付款单头 EXECUTING / PAID / FAILED 三态与分批执行态归 12.2.2.2 的状态机守卫；
+    //    · 行级 paid_amount（finance_payable_line，V340 列名）由 12.2.2.2 在付款成功时回写。
+    //    · V343 的 finance_payment_plan / finance_payment_batch **不在交接面内** ——
+    //      那两张表 execution_available 恒为 false 的 CHECK 一个字都不动。
 
     gaps.add(
         new FinancePaymentOrderDownstreamGap(
