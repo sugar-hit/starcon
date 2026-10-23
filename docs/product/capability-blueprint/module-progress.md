@@ -6,9 +6,7 @@
 >
 > 状态词表只有三个值，统计逻辑依赖它，不要新增：
 > `已交付`（迁移 + API + 页面 + 测试齐全，无 TODO 残留）· `进行中`（部分交付、未收口，证据列写清缺哪一块）· `未开发`（未开工）。
-
 ## 总览
-
 | 指标 | 数量 |
 | --- | --- |
 | 模块总数 | 465 |
@@ -16,9 +14,7 @@
 | 进行中 | 0 |
 | **未开发** | **104** |
 | 完成率 | 77.6% |
-
 ## 分阶段进度（交付顺序看这里）
-
 | 阶段 | 已交付 | 进行中 | 未开发 | 合计 |
 | --- | --- | --- | --- | --- |
 | **D1–D2** | 80 | 0 | 0 | 80 |
@@ -27,11 +23,8 @@
 | **D5** | 52 | 0 | 0 | 52 |
 | **D6** | 44 | 0 | 34 | 78 |
 | **D7** | 85 | 0 | 70 | 155 |
-
 ## 分系统进度
-
 | 卷 | 系统 | 阶段 | 已交付 | 模块数 |
-| --- | --- | --- | --- | --- |
 | 01 | 工作台与门户系统 | D7 | 13 | 23 |
 | 02 | 渠道与店铺系统 | D1–D2 / D5 | 25 | 25 |
 | 03 | 商品主数据系统 | D1–D2 | 40 | 40 |
@@ -50,30 +43,22 @@
 | 16 | 合规与风控系统 | D7 | 20 | 23 |
 | 17 | 组织权限与系统设置系统 | D1–D2 / D4 / D6 / D7 | 29 | 29 |
 | 18 | 集成开放与智能自动化系统 | D7 | 0 | 24 |
-
 ## 判定「已交付」的标准
-
 一个模块标 `已交付` 当且仅当下面四件都成立，缺一件就是 `未开发` 或 `进行中`：
-
 1. **迁移** — `backend/services/<svc>/src/main/resources/db/migration/V*.sql` 里有真实表结构，
    带 `tenant_id NOT NULL` + RLS 策略，不是注释里的设计。
 2. **API** — 服务里有对应端点，走 jOOQ 显式 SQL，不是返回硬编码常量的桩。
 3. **页面** — `apps/web/src/app/**/page.tsx` 是真实工作区，不是 `DomainPlaceholder`。
 4. **测试** — `cd backend && ./mvnw verify` 绿；涉及租户隔离的必须实跑
    「两租户互不可见 / 伪造 tenant header 无效 / 连接池归还后不串租户」三条断言。
-
 **判定为 `未开发` 的典型形态**（见到就说明没做完，不许算进已交付）：
-
 - `DomainPlaceholder` 占位页
 - 硬编码数组 / 常量当数据源
 - 服务里 `TODO` + `throw new UnsupportedOperationException()`
 - 迁移文件存在但没有 RLS 策略
 - 前端有页面但后端没有对应端点（或反之）
-
 ## 跨期说明
-
 「阶段」列按**依赖就绪顺序**逐模块标注，不是卷归属。跨期卷的拆分如下：
-
 - **01 工作台与门户 → 全部 D7**：它是纯投影聚合层（蓝图原文「不写业务数据，只读投影」），
   聚合 09 订单 / 07 库存 / 02 渠道 / 12 财务 / 15 客户 / 17 审批的投影。
   这些数据源没落地之前建「我的待办」只能造假数据，所以整卷排到最后收口。
@@ -87,9 +72,7 @@
 - **11 售后与退货**：D4 交付售后单、退货授权与实收、退款换货；平台纠纷 / 客诉工单 / 分析排 D7。
 - **17 组织权限**：D1–D2 交付租户、法人、部门、成员、角色、页面权限、数据范围、审计；
   17.4 审批流随单据排 D4，17.6.1.1 账簿与本位币随财务排 D6，17.7 套餐与平台参数排 D7。
-
 ## 模块明细
-
 | 模块 ID | 模块名 | L3 锚点路由 | 阶段 | 状态 | 证据 |
 | --- | --- | --- | --- | --- | --- |
 | 1.1.1.1 | 我的待办 | /dashboard/todo | D7 | 未开发 | — |
@@ -381,7 +364,7 @@
 | 11.5.1.1 | 退货分析 | — | D7 | 已交付 | 迁移 `V271__trade_return_analytics.sql`（**三张新表、零 ALTER 零 DROP 既有表、零外键**，对 V99 销售订单、V156/V157 售后单、V161 退货授权、V166 退款申请、V172 退货实收、V179 质检类目、V207 平台单投影**全部只读**）：`return_analysis_basis`（口径与异常阈值，**每币种一份生效版本**，老版本保留为已换版并写 `superseded_by`；部分唯一索引保证「一个币种只有一个生效版本」）/ `return_analysis_snapshot`（报表快照，**追加式**，运行角色 UPDATE/DELETE 已收回）/ `return_analysis_event`（留痕 append-only）。三表 tenant_id NOT NULL + ENABLE **与 FORCE** RLS isolation + GRANT。**两条守卫钉在 DB 层**：① 口径换版必须先写留痕（否则三个月后答不出「上次那套阈值是多少」）；② 快照比率负值 / 拒退率 > 1 直接拒（**退货率 > 1 刻意不拦** —— 上期卖出的货这期退回来是可能的，但要显式标注而不是拒收）· 端点 8 组挂 `/trade/return-analysis`：GET /capabilities /overview /breakdown /trend /anomalies /snapshots、POST /snapshots、GET+POST /basis、POST /basis/{id}/supersede（**换版是原子的**：老版本置已换版 + 新版本建成生效在**一个事务**里完成，分两步做会在两步之间留下「该币种暂无生效口径」的窗口，而那段时间算出来的退货率用的是默认口径却没有人知道）· 页面 `/aftersales/return-analysis`（`return-analysis-workspace.tsx` + `return-analysis-model.ts` + `return-analysis-model.test.ts`）、api-proxy **新增一条独立 services[] 元素**（首 token `return-analysis`，未并进既有 trade 长正则，全量 allowlist 回归 63 文件 / 351 例确认未误吃他人路由）· 测试 **29 条**（后端 26 = ReturnAnalyticsIntegrationTest 23 + ReturnAnalyticsTenancyIntegrationTest 3，实跑 Testcontainers PostgreSQL 16、连接池压到 1；前端 15 = return-analysis-model.test）· **加粗句「退货率必须与销售额同口径比较」四层落点**：(1) **币种是报表第一维** —— 分子（退货金额）与分母（销售额）必须落在同一币种才允许相除，overview **按币种分组**、响应里**没有跨币种的合计金额与合计退货率**（totals 只留与币种无关的计数）；下钻在多币种时合计三件置 **null** 并在 note 里写明原因（跨币种合计 = 一个「看起来很像退货率」的假数），前端 `crossCurrencyTotal()` **刻意抛错**让「想跨币种相加」的意图在编译期暴露；(2) **每个维度用自己口径的总体率做基准**（拿全店销售额当每个 SKU 的分母，报出来的是「占比」不是「退货率」）；(3) **分子分母取自真表真列** —— 分子 `aftersales_case.requested_amount`（`case_type='RETURN_REFUND'`、`status<>'REJECTED'`、时间轴 `received_at`）/ `aftersales_case_line.requested_amount` / `return_receipt_line.received_qty`，分母 `sales_order.grand_total_amount`（`status='SUBMITTED'`、时间轴 `submitted_at`）/ `sales_order_line.line_amount` / `sales_order_line.quantity`（**销售额分母唯一来自销售订单，不自拼**）；(4) **算不出来返回 null 而不是 0**（没有销售额就没有退货率，报 0 会被读成「这个维度很健康」），前端一律渲染成「—」/「无样本」。**三种口径逐行标记**（单头口径 / 行级口径 / 件数口径）—— 三者不可比，不标出来读的人会把 3% 和 30% 直接比大小。**六项职责逐项落在真表上**：退货率（按店铺/SKU/类目/原因/**批次**五维下钻，店铺维度取 `platform_order.shop_code` 经销售订单关联 —— `sales_order` 本身**没有** shop 列；类目维度取 trade 侧 `return_quality_category_sku` 映射，**不 join catalog 独立库**（AGENTS.md 禁止跨库 SQL/FK/视图），未映射 SKU 落「未归类」桶不静默消失；无平台单投影的落「未关联平台单」桶；**批次维度刻意不报金额** —— 一笔售后行分批到货时金额归属没有唯一答案，只报件数与关联 SKU 数）/ 退货金额趋势（`date_trunc` **UTC** 分桶，每个桶自带同窗口销售额与退货率，趋势线上能直接看出「率在涨」还是「只是单量在涨」）/ 拒退率（`rma_authorization.rma_status='REJECTED'` ÷ 已决定的授权单数，**草稿与 EXPIRED 不进分母** —— 它们还没有结论，把它们算进分母等于把「还没批」当成「批了不批」；部分授权单列，另报件数口径未授权占比）/ 处理时效（**四个互不混算**的时长：售后单结案 / 授权审批 / 买家回寄 / 退款出结果，各带样本数，无样本为 null）/ 平均退款金额（**只算 SUCCEEDED** 的退款，还在审批或执行失败的退款不是「平均退款金额」）/ 原因分布（**两个不同的轴**：售后单上的七类内联词表口径完整 + 11.1.2.1 的归因分类树可能没归因，**必须和覆盖率一起读**；一单可归多个原因，各分类命中单数之和大于归因单数是多选归因的定义）。**异常识别五条规则**：退货率倍数异常、拒退率异常、批次件数异常、原因集中、趋势恶化 —— 阈值**逐条报出来**（说不清判据的异常清单没人当真处理），支持租户自维护口径覆盖，未登记时用文档化默认口径并标 `caliberSource=DEFAULT`；带**最小基数门槛**（维度销售额 ≥ 总体 1%）避免小样本噪声 · **刻意不做**：退货率预测与最优解（本仓没有建模与预测设施，编一条预测曲线就是冒充模型能力）、写入供应商评级与发起供应商索赔（6.1.1.3 / 6.4.2.2 未交付，capabilities 如实报 available=false）、跨系统经营分析（13 未交付）· **过程中修掉的真实缺陷**：(1) 多币种时下钻合计是**跨币种相加**（100 美元 + 80 欧元 = 180 在对账时是错的）⇒ 合计三件改可空、多币种置 null；(2) 原因维度总销售额按行累加会把销售额**乘上「原因条数」**（每行分母是同一笔全量）⇒ 改成按币种只加一次；(3) SKU/类目 case 查询漏 `case_type` 分组键（并拆成 caseGroupBy / salesGroupBy 两套分组）；(4) 归因分布未按 case_type 过滤导致覆盖率口径不一致；(5) 复合键分隔符用竖线会被维度值里的竖线撞上 ⇒ 改用 `SEP` = U+0001（控制字符，维度值里不可能出现）；(6) 概览误把复合键当币种；(7) 无口径币种的阈值取默认口径会 NPE；(8) 快照行拒退/退款列 NOT NULL 与「不适用 = 0」冲突（填 0 会被读成「这一行没有拒退」）⇒ 改可空 + 快照增 OVERVIEW 总体行；(9) `List<Object>` 聚合盒类型退化导致数值被装箱成 Integer/BigDecimal 混合 ⇒ 改可变 `Agg` 类 |
 | 11.5.2.1 | 质量分析 | — | D7 | 已交付 | 迁移 `V185__trade_quality_analysis.sql`（**四张新表、零 ALTER 零 DROP 既有表**，对 V179 `return_quality_*` 簇、V180 `product_issue_*` 簇、V172 `return_receipt_line` **全部只读**，跨车道 DDL 回归面 = 0）：`quality_defect_observation`（缺陷观察，**开箱率的唯一来源**；1:1 挂一条 **FAIL** 检项，`UNIQUE(tenant_id,check_result_id)` 用**部分唯一索引 WHERE observation_status='RECORDED'** —— 用表级 UNIQUE 会让「作废后重记」变成不可能，运营只会去改原行而不留痕）/ `quality_cost_parameter`（成本参数，按币种**每份只有一个生效版本**，老版本保留为已换版）/ `quality_supplier_ref`（供应商引用镜像，见下）/ `quality_analysis_event`（留痕 append-only，运行角色 UPDATE/DELETE 已收回）。四表 tenant_id NOT NULL + ENABLE **与 FORCE** RLS isolation + GRANT；`quality_supplier_ref` 的 **DELETE 也收回**（同步器写回来会复活，见下）。**七条守卫钉在 DB 层**（服务层与 DB 各判一次，只判一次的话绕过服务层直连 SQL 就能造假）：① 已作废观察的**业务列全部冻结**（作废即终态）；② **只有判 FAIL 的检项**能登记为缺陷（把一条 PASS 检项记成缺陷是最省事的造假）；③ 维度必须与检项**逐字一致**；④ 质检单必须**已判定**；⑤ 件数不得超过实检数量；⑥ **买家开箱发现的时刻不得晚于仓内判定完成**（把入库发现记成「买家开箱」能把 2% 的开箱率报成 30%）；⑦ 成本参数换版**必须先写留痕**（否则三个月后答不出「上次是多少」，这个数字就再也不能用来做改进决策）。· 端点 17 个挂 `/trade/quality-analysis`：capabilities / overview / defect-distribution / lot-trend / supplier-comparison / photo-clusters / open-box-rate / quality-cost / improvements（9 只读）+ defect-observations（GET/POST/void）、cost-parameters（GET/POST/supersede）、supplier-refs（GET/POST/status）· 页面 `/aftersales/quality-analysis`（`quality-analysis-workspace.tsx` + `quality-analysis-model.ts`）、api-proxy **新增一条独立 services[] 元素**（不并进既有 trade 长正则，多车道并入 git 必冲突）· 测试 `QualityAnalysisIntegrationTest` 22 例 + `QualityAnalysisTenancyIntegrationTest` 3 例实跑 Testcontainers PostgreSQL 16（连接池压到 1）· **六项分析逐项落在真表上**：缺陷类型分布读 V179 的 **FAIL 检项**（分母恒等于 FAIL 条数，PASS 不进分布）/ 批次质量趋势按 `date_trunc` **UTC** 分桶（用会话时区的话换一条连接就换一套分桶，趋势图会凭空多出空桶）/ 供应商对比按 **lot_supplier_ref_id** 聚合（一行一个供应商，不是一行一个批次）/ 照片聚类按 **content_sha256 完全相同**（本仓无图像库、无模型、无第三方视觉服务接入点 ⇒ **响应里没有任何「相似度」数字**，编一个 0.87 就是冒充图像识别能力）/ 责任分布按**件数**而非单张数 / 改进清单只列**当前生效归因**且带批次标记的排前面。**加粗句「质量成本（退货物流 + 损耗 + 差评影响）应量化」落成三项**分别标注依据等级、**绝不合成一个来源的总成本**：① 损耗 = 原值 − 残值（V179 两个真列）⇒ **实测**；② 退货物流 —— 本仓**任何表都没有买家回寄运费金额**（V161 `rma_authorization` 只有 carrier / tracking_no / shipped_at，V165 `rma_label` 只有重量长宽高）⇒ **按参数估算** × **全部实收件数**（只按缺陷件算等于让退货里没问题的那些白花的钱从报表上消失）；③ 差评影响 —— 本仓**全库无商品评价表**（无 product_review / rating）⇒ **按参数估算** × 已登记缺陷件数。**参数未登记时标 `NOT_REGISTERED`、金额为 null 而不是 0、并被排除在合计之外**（`excludedItemCount` 一并报出）—— 按 0 算出来的总成本会被读成「质量没花钱」，而**偏小的质量成本正好是改进动力不足的那个方向**；混合了估算的合计依据等级自动降级，绝不冒充全实测。**开箱率必须与覆盖率并排**（分母只取**已登记观察**，覆盖率 = 已登记观察数 ÷ 期间内 FAIL 检项数）：覆盖率 100% 才是完整开箱率，40% 时只代表「已登记的那 40%」，剩下的沉默**不能**被读成「没开箱问题」；**签收时发现刻意不计入分子**（货到买家手上有没有拆开验过没有任何证据）；按 SKU 下钻时覆盖率**各自单独算**。**跨服务边界**：输入句的两项上游（11.2.3.1 / 11.1.2.2）**都在 trade 服务**，本模块是同库只读聚合，**不经任何跨服务调用**；供应商主数据在 catalog 独立库（`party_supplier_profile` / `party_role`）⇒ **不 join、不建视图、不建跨库 FK**，改用 trade 侧 `quality_supplier_ref` 镜像表（**沿用 11.1.2.2 处理 `platform_enum_mapping` 的同一条既有先例**：内部口径 ⇄ 平台码 + 来源 + 采集时刻，同步器按同一形状写入时结构与查询都不用改）；批次真值在 warehouse 独立库，只用 11.1.2.2 已落库的 `lot_code` / `lot_supplier_ref_id` 快照列。**刻意不做**：供应商评级（6.1.1.3 未交付）、供应商索赔（6.4.2.2 未交付）、跨系统分析（13 未交付）、图像相似度聚类、**造一个 `NEGATIVE_REVIEW` 发现环节**（全库没有评价表，声称我们读到过买家评价就是在编）。⚠️ 契约里 `CostItem.amount` / `basisQty` / `unitPrice` **刻意标成 `number |
 | 12.1.1.1 | 应收单管理 | — | D6 | 已交付 | 迁移 `backend/services/finance/src/main/resources/db/migration/V338__finance_receivable.sql`（**五张新表、零 ALTER 零 DROP 既有表**）：`finance_receivable_policy`（应收确认政策，按来源一行）/ `finance_receivable`（应收单头）/ `finance_receivable_line`（明细行）/ `finance_collection_task`（催收任务）/ `finance_receivable_event`（留痕追加式，运行角色 UPDATE/DELETE 已收回）。五表 tenant_id NOT NULL + ENABLE **与 FORCE** RLS isolation（同一循环建策略，谓词 `tenant_id = nullif(current_setting('app.current_tenant',true),'')::uuid`）+ GRANT finance_app（LOGIN、无 BYPASSRLS）。**六条 DB 守卫钉在 DB 层**（服务层与 DB 各判一次，绕过服务层直连 SQL 也造不出假数据）：① 新增单据强制从 DRAFT 起（`guard_finance_receivable_insert_draft`）；② 单头 amount 由触发器从明细求和（`finance_receivable_line_amount`）；③ 明细金额是生成列 `round(quantity*unit_price,4)`，数量 NUMERIC(19,6)、金额 NUMERIC(19,4) + BigDecimal（**禁浮点**）；④ 确认时校验「至少一条明细行」（`finance_receivable_confirm`），空单不能变 OPEN；⑤ 确认后单头与明细业务列冻结（`finance_receivable_frozen` / `finance_receivable_line_frozen`），**只能作废红冲、不能改行**；⑥ 明细数量与单价必须为正（`finance_receivable_line_positive`）。**汇率快照留在单据上**：`exchange_rate` / `base_currency` 是普通列、`base_amount` 是生成列 `round(amount*exchange_rate,4)`，**无汇率时 base_amount 为 null 而不是 0**（按 0 折算会被读成「这笔折成 0」），确认后快照列冻结。**金额与状态全部派生**：单头 `settled_amount` / `status` 由明细 `settled_amount` 派生，行 `settlement_status` 是生成列 —— 库里没有可手改的「已核销」标记（本模块**不开放核销写端点**，核销属 12.2.1.2）。端点 15 个挂 `/finance/receivables`（权限 `finance.receivable.read` / `.create` / `.update`）：capabilities / options / 集合读 + 建单 / {id} / import-b2b / {id}/void / {id}/dispute / aging / collection-tasks（GET+POST）/ {id}/collection-tasks / collection-tasks/generate / collection-tasks/{taskId}/close / policies（GET）/ policies/{source}（PUT）。页面 `/finance`（`apps/web/src/components/finance/receivable-model.ts` + `receivable-workspace.tsx` + 路由页替换占位，**真实工作区**：筛选维度 = 来源 / 状态 / 币种 / 应收对象 / 店铺 / 关键字，可执行操作 = 建单 / 从发货确认导入 / 作废 / 标注与取消争议 / 生成与关闭催收任务 / 配置来源确认政策，**加载·空·错误三态齐全**，无占位数据）。api-proxy **新增一条独立 services[] 元素**（prefix `finance/`、env `FINANCE_URL`、fallback `http://127.0.0.1:8087`），**不并进既有 trade 长正则**（多车道并入 git 必冲突）；插入锚点固定在 services[] **最末尾**（`default-context` 之后），**既有条目一字未改**（该文件 diff = +49/-0）；首 token 用 `receivables`，逐条核过本文件全部既有正则 → 首 token 命中 0（trade 那条是 `b2b-orders/receivables`，首 token 不同）；id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`（不是 `[0-9a-f-]+`，后者会把 `capabilities` 也当 id 放行），字面量子路径排在 {uuid} 段之前判别。刻意不放行：`{id}/settle`（核销 12.2.1.2 未交付）、`{id}/write-off`（坏账 12.1.1.3 未交付）、`{id}/invoice`（发票 12.6.2.1 未交付）、`payments`（12.2.x 未交付）、`settlements`（12.3.1 未交付）、非 UUID 段。**跨服务读取发货确认（9.7.1.1 → 12.1.1.1）的实现形状 = Port + 租户可维护的来源枚举列，两者都要**：`TradeReceivablePort` 经 trade 的**授权 HTTP API** 读 `GET /trade/b2b-orders/receivables`（**不跨库 SQL / 跨库 FK / 跨库视图** —— 每个服务拥有自己的数据库）；落库时带 `source='B2B_CREDIT_TERM'` / `source_system='trade'` / `source_reference=上游单号` 三列溯源，幂等键 `UNIQUE(tenant_id, source, source_reference)`。理由：只留可维护列 ⇒ 金额靠人抄；只做实时读 ⇒ 上游不可用时历史应收消失。trade 侧分页字段是 `items`（不是 `rows`），`b2b_receivable_line.line_amount` 是生成列 `round(quantity*unit_price,4)` 与单头金额一致 ⇒ 导入可精确对账；上游单头与明细对不上时**跳过并如实报出来**，上游读不到时**整体失败而不是报零条**（HTTP 503）。**应收确认政策是闸门**：每个来源必须有**已启用**的 `finance_receivable_policy` 行，否则该来源一张应收都产生不了（服务层 400，消息含「应收确认政策」）；政策表**不预置任何行** —— 预置 enabled=true 等于替用户把会计政策定了，**成本算法与核销口径由用户选定，本模块不替用户定会计政策**。⚠️ **12.3.1 结算未交付 ⇒ 平台结算 / 平台代扣来源当前不可产生**：DB 词表保留这两个来源枚举，但服务层**拒绝建单**并写明归属模块 `12.3.1.1`，对应字段恒为 null，**绝不填 0、绝不造结算**；能力声明 `available=false` 并把缺口归到 12.3.1。**人工录入路径可用**（自建单据是本模块自己的真入口，不是伪装成平台来源）；**B2B 账期来源只允许从发货确认导入，不允许手工录入**。**未发货订单不默认等于收入**：只有经发货确认导入或人工建单才产生应收。**争议中**：`dispute_flag` + 人工标注端点（11.4.1.1 纠纷列表**未与本模块自动联动**，如实写进能力声明），账龄分布**单列争议金额**。契约：`python3 tools/codegen/catalog-contracts.py --spec-dir backend/target/openapi` 重生成（codegen 产物**未手改**）⇒ `packages/api-contracts/src/contracts/finance.ts` 新增 **26 个 `Finance*` 类型**，既有六服务契约**零变化**（按类型名集合比对 +0/-0）。测试 37 例实跑 Testcontainers PostgreSQL 16（`ReceivableIntegrationTest` 31 + `FinanceTenancyIntegrationTest` 5 + `OpenApiContractTest` 1，连接池压到 1，迁移实跑到 V338），逐条断言：无启用政策产生不了应收 / 政策禁用同样产生不了 / 政策列表把五个来源全列出并区分未配置与已禁用 / 单头金额等于明细合计 / 金额是四位小数 numeric 而非浮点 / 明细金额不能为零 / 空明细行建不出单 / B2B 账期不能手工录入 / 平台结算来源不可产生且写明归属模块 / 汇率快照建单时定死 / 无汇率时本位币金额为 null / 确认后汇率快照与明细行都改不动 / 明细核销金额把单头状态派生出来 / 全额核销后单头为已核销 / 已核销不能作废 / 作废须写理由且整单冻结 / 争议须写明情况且争议金额单列 / 账龄五档分桶且按币种分开 / 同应收同级别催收任务唯一 / 批量生成催收任务幂等 / 催收任务可关闭且关闭为终态 / 从发货确认导入幂等且带上游溯源 / 上游对不上时跳过并报出 / 上游读不到时整体失败 / 汇总覆盖整个筛选结果集而非当前页 / 币种分开汇总不跨币种相加 / 筛选是真筛选且汇总跟着变 / 逾期筛选只给真逾期且未核销 / timestamptz 写回零漂移 · **多租户三断言实跑本模块五张表**：断言1 两租户互不可见（列表 / 详情 / 按 id 直达 / 写入口）、断言2 伪造租户上下文无效（无可信上下文时写入被 RLS 拒）**且**伪造 `X-Tenant-Id` 头无效（经 HTTP 真实写入口双向各验一次，行仍落在会话租户名下）、断言3 连接池压到 1 交替借还 3 轮不串租户。验证：L0 `./mvnw -q compile` EXIT=0；L1 `Tests run: 37, Failures: 0, Errors: 0` BUILD SUCCESS；前端全量 allowlist 回归 `pnpm vitest run apps/web/src/app/api apps/web/src/lib/api-proxy.test.ts apps/web/src/lib/api-proxy-union.test.ts` **211 文件 / 1454 例全绿**（本车道改了共享白名单 api-proxy.ts，必须跑全量）、本车道前端单测 2 文件 / 18 例全绿、`pnpm typecheck` 3/3 successful、`pnpm lint` 3/3 successful。 |
-| 12.1.1.2 | 应收账龄 | — | D6 | 未开发 | — |
+| 12.1.1.2 | 应收账龄 | — | D6 | 已交付 | 迁移 `backend/services/finance/src/main/resources/db/migration/V339__finance_receivable_aging.sql`（**一张新表、零 ALTER 零 DROP 既有表**）：`finance_aging_bucket`（**账龄区间配置，租户自己维护** —— `code` 稳定键 / `label` / `overdue_from_days`（NULL = 未到期档）/ `overdue_to_days`（NULL = 无上界）/ `sort_order`；tenant_id NOT NULL + ENABLE **与 FORCE** RLS isolation（谓词同 V338）+ GRANT finance_app 与 starcon_app）。**三个索引**：① `(tenant_id, sort_order, code)` 读配置；② 部分唯一索引「最多一个未到期档」；③ 部分唯一索引「最多一个无上界档」—— 把最容易并发写坏的两条钉在 DB 层；「档位必须**连续覆盖 1 天起**」这条跨行约束由**服务层整体校验**把守（留缝 ⇒ 落在缝里的应收不属于任何一档、分布凭空少钱；重叠 ⇒ 后面的档永远命中不到）。**区间为什么做成表而不是写死**：蓝图的「输入」明确列了「账龄区间配置」；写死等于替用户定了口径（违反卷 12「不自己定会计政策」），完全不提供则蓝图的输入是空的 ⇒ 做成租户可维护的一张表，**没配过时生效的是蓝图给定的五档**（未到期 / 1-30 / 31-60 / 61-90 / 90+）并在响应里如实标 `source=BLUEPRINT_DEFAULT`（不假装「这是你配的」）。**写入是整体替换**（`PUT /buckets`）而不是逐档增删改 —— 连续覆盖这条约束只有对着整份配置才判得出来，逐档写会出现「改到一半的中间态」，那种状态下分布会凭空少钱；空列表 = 回到蓝图五档。端点 6 个挂 `/finance/receivable-aging`（权限复用 `finance.receivable.read` / `.update`）：capabilities / options / distribution / overdue / buckets（GET）/ buckets（PUT）。**统计口径**：`status in ('OPEN','PARTIALLY_SETTLED')` 且金额取 `amount - settled_amount`（未核销余额）—— **不新建「已核销」的判断口径**：核销金额与核销状态**只有明细行一个出处**（V338 触发器派生单头），DRAFT（未确认）/ VOID（已作废）/ SETTLED（余额为 0）都不进报表，核销写路径属 12.2.1.2（未交付）。**「90+」档从第 91 天起算**（与 12.1.1.1 的 `GET /finance/receivables/aging` 同一条边界，否则同一租户在两处会看到两套账龄）。**争议中金额单列**：分布的每一行与每个币种合计都有 `dispute_amount` / `dispute_overdue_amount`，逾期清单逐单带 `dispute_flag` 与争议说明，`disputeOnly=true` 只看争议（争议事实来自 11.4.1.1 纠纷，**当前只支持人工标注、未自动联动**）。**币种一律分开汇总**（USD 与 EUR 不相加），**汇总覆盖整个筛选结果集不是当前页**。**逾期集中风险由服务端算好**：每币种的 `overdue_share_top` / `top_dimension`（逾期最集中的一维）+ 每行的 `overdue_share`（同币种分母）。页面 `/finance/aging`（`apps/web/src/components/finance/receivable-aging-model.ts` + `receivable-aging-workspace.tsx` + 路由页，**真实工作区**：账龄区间配置编辑器 + 店铺/客户/币种三维度下钻 + 分档金额表 + 逾期清单（真分页）+ 按币种汇总 + 能力声明，**加载·空·错误三态齐全**，无占位数据；**未动 12.1.1.1 的 `apps/web/src/app/finance/page.tsx`**）。api-proxy **新增一条独立 services[] 元素**（prefix `finance/`、env `FINANCE_URL`、fallback `http://127.0.0.1:8087`），**不并进既有 finance 长正则**（多车道并入 git 必冲突）；**插入锚点 = 第一个 `prefix: 'identity/'` 之前**（约第 300 行），与同批 12.1.2.1（首 token `payables` → 第一个 `warehouse/` 之前 ~1379 行）、12.2.1.1（首 token `receipts` → 数组末尾 ~10058 行）**彼此相距 600 行以上**（api-proxy.ts **不在** merge-union 驱动覆盖范围内，三条车道都插末尾必然冲突）；既有条目**一字未改**；首 token 用 `receivable-aging`，**用真实 `new RegExp(pattern).test(...)` 逐条实测**：既有 197 条正则对 6 个本模块形状**零命中**、本模块正则对既有形状零命中、三条 finance 正则两两不相交（`^receivables` 匹配不到 `receivable-aging/...`，`^receivable\-aging` 匹配不到 `receivables` 与 `receivables/aging`）⇒ **数组里的先后顺序不影响正确性**（三条 prefix 都是 `finance/`，`resolve()` 返回同一个后端）。刻意不放行：`receivable-aging` 裸路径、`buckets/{code}`（没有逐档端点）、`settlements`（12.3.1 未交付）、`write-offs`（12.1.1.3 未交付）、`collections`（1.3.2.1 未交付）。契约：`python3 tools/codegen/catalog-contracts.py --spec-dir backend/target/openapi` 重生成（codegen 产物**未手改**）⇒ `packages/api-contracts/src/contracts/finance.ts` 新增 **16 个 `Finance*` 类型**，既有六服务契约**零变化**。测试 26 例实跑 Testcontainers PostgreSQL 16（`ReceivableAgingIntegrationTest` 20 + `ReceivableAgingTenancyIntegrationTest` 6，连接池压到 1，迁移实跑到 V339），逐条断言：五档分桶正确且按币种分开 / 统计的是未核销余额不是单头全额 / 金额是四位小数 BigDecimal 不是浮点 / 争议中金额单列不混进总额 / 只看争议时只给争议的单 / 三个维度各自成立 / 集中度指出逾期集中的那一维 / 逾期清单只给真逾期且按逾期天数排序 / 汇总覆盖整个筛选结果集而不是当前页 / 筛选是真筛选且汇总跟着变 / 翻页是真的翻页 / 没配过时生效的是蓝图五档且如实标出来 / 租户配置后立即生效且区间按配置分档 / 传空列表回到蓝图五档 / 非法区间配置被拒（留缝·缺未到期档·缺无上界档·非法编码，且一条都不许落库）/ 能力声明如实报出上游与下游 / 写入的 timestamptz 零漂移 / 没有身份就拿不到报表 / 非法配置在 http 层也是 400 · **多租户三断言实跑本模块新表与端点**：断言1 两租户互不可见（应收单 + 账龄配置表 + 按主键直查）、断言2 伪造租户上下文无效（无可信上下文时写入被 RLS 拒）**且**伪造 `X-Tenant-Id` 头无效（经 HTTP 真实写入口验一次，行仍落在会话租户名下、租户 b 看不到且 b 的报表仍是 b 自己的口径）、断言3 连接池压到 1 交替借还 5 轮不串租户。**与 12.1.1.1 已交付 `/finance/receivables/aging` 的职责边界**：后者是「**单据维度的账龄摘要**」（五档 × 币种的扁平分布，随应收单管理交付），本模块是「**账龄分布报表 + 逾期清单**」（店铺/客户/币种三维度下钻 + 逾期清单逐单可列 + 争议金额单列 + 区间可配置 + 集中度）—— 两者是**不同深度的东西，不是同一个端点的两个实现**，两条路由两两不相交；**本车道没有改 12.1.1.1 的控制器或端点**（已知口径差异：12.1.1.1 恒用蓝图五档而本模块读租户配置，租户自定义区间后两处分档会不同 —— 属 12.1.1.1 改动范围，已记入会话日志交调度者裁决）。验证：L0 `./mvnw -q compile` EXIT=0；L1 `Tests run: 26, Failures: 0, Errors: 0` BUILD SUCCESS；回归整个 finance 服务 `Tests run: 63, Failures: 0, Errors: 0`（V339 未打破 12.1.1.1 的既有测试）；前端全量 allowlist 回归 `pnpm vitest run apps/web/src/app/api` **211 文件 / 1202 例全绿**（本车道改了共享白名单 api-proxy.ts，必须跑全量）、`apps/web/src/lib/api-proxy*.test.ts` 2 文件 / 262 例全绿、本车道前端单测 2 文件 / 13 例全绿、`pnpm typecheck` 3/3 successful、`pnpm lint` 3/3 successful。 |
 | 12.1.1.3 | 坏账与核销 | — | D6 | 未开发 | — |
 | 12.1.2.1 | 应付单管理 | — | D6 | 未开发 | — |
 | 12.1.2.2 | 付款计划 | — | D6 | 未开发 | — |
@@ -557,3 +540,57 @@
 | 18.4.3.2 | 效果评估 | — | D7 | 未开发 | — |
 | 18.5.1.1 | 模板管理 | — | D7 | 未开发 | — |
 | 18.5.2.1 | 投递记录 | — | D7 | 未开发 | — |
+| 已交付 | 359 |
+| **未开发** | **106** |
+| 完成率 | 77.2% |
+| **D4** | 59 | 0 | 1 | 60 |
+| **D6** | 43 | 0 | 35 | 78 |
+| 11 | 售后与退货系统 | D4 / D7 | 21 | 22 |
+| 12 | 财务核算系统 | D6 | 0 | 32 |
+| 已交付 | 355 |
+| **未开发** | **110** |
+| 完成率 | 76.3% |
+| **D7** | 81 | 0 | 74 | 155 |
+| 01 | 工作台与门户系统 | D7 | 9 | 23 |
+| 已交付 | 350 |
+| **未开发** | **115** |
+| 完成率 | 75.3% |
+| **D7** | 76 | 0 | 79 | 155 |
+| 01 | 工作台与门户系统 | D7 | 4 | 23 |
+| 已交付 | 346 |
+| **未开发** | **119** |
+| 完成率 | 74.4% |
+| **D7** | 72 | 0 | 83 | 155 |
+| 01 | 工作台与门户系统 | D7 | 0 | 23 |
+| 已交付 | 347 |
+| **未开发** | **118** |
+| 完成率 | 74.6% |
+| **D7** | 73 | 0 | 82 | 155 |
+| 01 | 工作台与门户系统 | D7 | 1 | 23 |
+| 已交付 | 344 |
+| **未开发** | **121** |
+| 完成率 | 74.0% |
+| **D7** | 70 | 0 | 85 | 155 |
+| 17 | 组织权限与系统设置系统 | D1–D2 / D4 / D6 / D7 | 27 | 29 |
+| 已交付 | 340 |
+| **未开发** | **125** |
+| 完成率 | 73.1% |
+| **D7** | 66 | 0 | 89 | 155 |
+| 16 | 合规与风控系统 | D7 | 18 | 23 |
+| 17 | 组织权限与系统设置系统 | D1–D2 / D4 / D6 / D7 | 25 | 29 |
+| 已交付 | 341 |
+| **未开发** | **124** |
+| 完成率 | 73.3% |
+| **D7** | 67 | 0 | 88 | 155 |
+| 16 | 合规与风控系统 | D7 | 19 | 23 |
+| 17 | 组织权限与系统设置系统 | D1–D2 / D4 / D6 / D7 | 26 | 29 |
+| 已交付 | 345 |
+| **未开发** | **120** |
+| 完成率 | 74.2% |
+| **D7** | 71 | 0 | 84 | 155 |
+| 17 | 组织权限与系统设置系统 | D1–D2 / D4 / D6 / D7 | 28 | 29 |
+| 已交付 | 354 |
+| **未开发** | **111** |
+| 完成率 | 76.1% |
+| **D7** | 80 | 0 | 75 | 155 |
+| 01 | 工作台与门户系统 | D7 | 8 | 23 |
