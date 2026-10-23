@@ -302,6 +302,20 @@ export function IdentityWorkspace({
                 </p>
               </Link>
             )}
+            {/* 1.4.1.2 列表与表格偏好（路由 /settings/profile）。
+                刻意**不挂页面权限码**：这一页里的每一行都是「我自己的」偏好，
+                读不到别人的也改不了别人的 —— 边界是数据归属（tenant_id + membership_id + RLS），
+                不是功能开关。挂一个权限码只会让管理员新建角色时忘了勾，
+                于是普通成员的列表页偏好静默失效。 */}
+            <Link
+              href="/settings/profile"
+              className="bg-card hover:border-brand rounded-lg border p-5"
+            >
+              <h2 className="font-semibold">列表与表格偏好</h2>
+              <p className="text-muted-foreground mt-2 text-sm">
+                记住各列表页的列显示、排序、每页条数与筛选条件，下次进入该页自动恢复
+              </p>
+            </Link>
           </div>
           <p className="text-muted-foreground text-sm">
             用户账号可加入多个租户。成员停用仅影响该租户；父子租户之间不会自动获得数据访问权。

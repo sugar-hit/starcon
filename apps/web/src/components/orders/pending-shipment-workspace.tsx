@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AlertTriangle, Boxes, Filter, PackageCheck, RefreshCw, Truck } from 'lucide-react';
 import {
   Button,
@@ -94,8 +94,51 @@ import {
   waybillText,
   weightText,
 } from './pending-shipment-model';
+import { ListPreferenceBar } from '../common/list-preference-bar';
+import { useListPreferences } from '../../lib/use-list-preferences';
+import type { ListColumn } from '../../lib/list-preferences-model';
 
 const PAGE_SIZE = 20;
+
+/**
+ * 1.4.1.2 列表与表格偏好 —— 待发货清单的**列定义**。
+ *
+ * <p>「选」是勾选列，不在这里：没有它就没法批量申请运单，那是这张表的出口，不该被关掉。
+ */
+const UNIT_COLUMNS: ListColumn[] = [
+  { key: 'outbound', label: '出库单' },
+  { key: 'warehouse', label: '仓库' },
+  { key: 'carrierChannel', label: '承运渠道' },
+  { key: 'carrier', label: '承运商' },
+  { key: 'sla', label: '时限' },
+  { key: 'parcel', label: '包裹/重量' },
+  { key: 'waybill', label: '运单号' },
+  { key: 'status', label: '状态' },
+  { key: 'nextAction', label: '下一步' },
+];
+
+/**
+ * 排序键就是**后端排序白名单里的 token**（见 trade 的 PendingShipmentService.orderBy）。
+ *
+ * <p>方向编在 token 里（有的维度只有降序），所以这里是一组现成的 token，
+ * 而不是「字段 + 方向」两个下拉 —— 那会拼出后端不认的组合。
+ */
+const UNIT_SORTS: ListColumn[] = [
+  { key: 'PACKED_AT_DESC', label: '打包时间（新→旧）' },
+  { key: 'PACKED_AT_ASC', label: '打包时间（旧→新）' },
+  { key: 'SLA_DEADLINE_AT_ASC', label: '发货时限（近→远）' },
+  { key: 'SLA_DEADLINE_AT_DESC', label: '发货时限（远→近）' },
+  { key: 'WEIGHT_DESC', label: '总重（重→轻）' },
+  { key: 'PARCEL_COUNT_DESC', label: '包裹数（多→少）' },
+];
+
+/**
+ * 可以被记住的筛选条件：**只有枚举与编号**。
+ *
+ * <p>「关键字」是自由文本（出库单号 / 销售单号 / 店铺 / 买家），可能含 PII，
+ * 刻意**不**进白名单 —— 宁可下次重打一次，也不把它写进个人偏好表。
+ */
+const PERSISTABLE_FILTERS = ['groupBy', 'carrierCode'] as const;
 
 /** 蓝图点名的四个分组维度，顺序按「现场最先看的那个」排：承运商在大促期最要紧。 */
 const GROUP_BY_OPTIONS = [
@@ -151,6 +194,31 @@ export function PendingShipmentWorkspace() {
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
 
+  // 1.4.1.2 列表与表格偏好：这一页记「列显示 + 排序 + 每页条数 + 分组维度/承运商」。
+  const prefs = useListPreferences({
+    pageKey: 'orders.pending-shipment',
+    columns: UNIT_COLUMNS,
+    sortOptions: UNIT_SORTS,
+    pageSize: PAGE_SIZE,
+    pageSizeOptions: [10, 20, 50, 100],
+    filters: { groupBy: 'CARRIER' },
+    persistableFilterKeys: PERSISTABLE_FILTERS,
+  });
+  const columnVisible = (key: string) => prefs.state.columns.includes(key);
+  /** 恢复出来的视图状态只在「恢复完成」那一刻应用一次，之后由用户自己的操作驱动。 */
+  const restored = useRef(false);
+  useEffect(() => {
+    if (!prefs.ready || restored.current) return;
+    restored.current = true;
+    const restoredFilters = prefs.state.filters;
+    setGroupBy(restoredFilters.groupBy ?? 'CARRIER');
+    setCarrierCode(restoredFilters.carrierCode ?? '');
+  }, [prefs.ready, prefs.state.filters]);
+  // 每页条数变了以后，原来的页码可能已经越界 —— 回到第一页，而不是停在空白页上。
+  useEffect(() => {
+    setPageIndex(0);
+  }, [prefs.state.pageSize]);
+
   const load = useCallback(async () => {
     setLoading(true);
     setError('');
@@ -162,7 +230,8 @@ export function PendingShipmentWorkspace() {
           carrierCode,
           keyword,
           page: pageIndex,
-          size: PAGE_SIZE,
+          size: prefs.state.pageSize,
+          sort: prefs.state.sortKey,
         }),
         fetchShipmentBatchTasks({ page: 0, size: PAGE_SIZE }),
       ]);
@@ -175,7 +244,7 @@ export function PendingShipmentWorkspace() {
     } finally {
       setLoading(false);
     }
-  }, [groupBy, carrierCode, keyword, pageIndex]);
+  }, [groupBy, carrierCode, keyword, pageIndex, prefs.state.pageSize, prefs.state.sortKey]);
 
   useEffect(() => {
     void load();
@@ -332,14 +401,20 @@ export function PendingShipmentWorkspace() {
             id="pending-shipment-group-by"
             label="分组维度"
             value={groupBy}
-            onChange={setGroupBy}
+            onChange={(value) => {
+              setGroupBy(value);
+              prefs.setFilter('groupBy', value);
+            }}
             options={GROUP_BY_OPTIONS}
           />
           <FormField id="pending-shipment-carrier" label="承运商">
             <Input
               value={carrierCode}
               placeholder="按承运商筛选"
-              onChange={(e) => setCarrierCode(e.target.value)}
+              onChange={(e) => {
+                setCarrierCode(e.target.value);
+                prefs.setFilter('carrierCode', e.target.value);
+              }}
             />
           </FormField>
           <FormField id="pending-shipment-keyword" label="关键字">
@@ -468,6 +543,12 @@ export function PendingShipmentWorkspace() {
       </SectionCard>
 
       <SectionCard title="待发货清单">
+        <ListPreferenceBar
+          columns={UNIT_COLUMNS}
+          sortOptions={UNIT_SORTS}
+          pageSizeOptions={[10, 20, 50, 100]}
+          prefs={prefs}
+        />
         {loading ? (
           <p className="text-muted-foreground text-sm">加载中…</p>
         ) : units.length === 0 ? (
@@ -481,15 +562,15 @@ export function PendingShipmentWorkspace() {
               <thead className="text-muted-foreground text-left text-xs">
                 <tr>
                   <th className="py-2">选</th>
-                  <th className="py-2">出库单</th>
-                  <th className="py-2">仓库</th>
-                  <th className="py-2">承运渠道</th>
-                  <th className="py-2">承运商</th>
-                  <th className="py-2">时限</th>
-                  <th className="py-2">包裹/重量</th>
-                  <th className="py-2">运单号</th>
-                  <th className="py-2">状态</th>
-                  <th className="py-2">下一步</th>
+                  {columnVisible('outbound') && <th className="py-2">出库单</th>}
+                  {columnVisible('warehouse') && <th className="py-2">仓库</th>}
+                  {columnVisible('carrierChannel') && <th className="py-2">承运渠道</th>}
+                  {columnVisible('carrier') && <th className="py-2">承运商</th>}
+                  {columnVisible('sla') && <th className="py-2">时限</th>}
+                  {columnVisible('parcel') && <th className="py-2">包裹/重量</th>}
+                  {columnVisible('waybill') && <th className="py-2">运单号</th>}
+                  {columnVisible('status') && <th className="py-2">状态</th>}
+                  {columnVisible('nextAction') && <th className="py-2">下一步</th>}
                 </tr>
               </thead>
               <tbody>
@@ -505,57 +586,73 @@ export function PendingShipmentWorkspace() {
                           onChange={() => toggle(unit.id)}
                         />
                       </td>
-                      <td className="py-2">
-                        <button
-                          type="button"
-                          className="underline"
-                          onClick={() =>
-                            void run(async () => {
-                              const detail = await fetchPendingShipmentUnit(unit.id);
-                              setUnitDetail(detail);
-                              return '';
-                            })
-                          }
-                        >
-                          {unit.outboundOrderNo}
-                        </button>
-                      </td>
-                      <td className="py-2">{unit.warehouseRef}</td>
-                      <td className="py-2">{carrierChannelLabel(unit.carrierChannel)}</td>
-                      <td className="py-2">
-                        {carrierMissing(unit) ? (
-                          <span className="text-amber-700">还没选承运商</span>
-                        ) : (
-                          unit.carrierCode
-                        )}
-                      </td>
-                      <td className="py-2">
-                        <span
-                          className={
-                            slaBucketSeverity(unit.slaBucket) === 'danger'
-                              ? 'font-medium text-red-700'
-                              : slaBucketSeverity(unit.slaBucket) === 'warn'
-                                ? 'text-amber-700'
-                                : 'text-muted-foreground'
-                          }
-                        >
-                          {shipmentSlaBucketLabel(unit.slaBucket)}
-                        </span>
-                        <div className="text-muted-foreground text-xs">
-                          {timeText(unit.slaDeadline)} · {shipmentSlaSourceLabel(unit.slaSource)}
-                        </div>
-                      </td>
-                      <td className="py-2">
-                        {unit.parcelCount} 件 / {weightText(unit.totalWeightKg)}
-                      </td>
-                      <td className="py-2">{unit.waybillNo || '—'}</td>
-                      <td className="py-2">{pendingShipmentStatusLabel(unit.status)}</td>
-                      <td className="py-2 text-xs">
-                        {nextActionText(unit)}
-                        {!eligibility.eligible ? (
-                          <div className="text-muted-foreground">{eligibility.reason}</div>
-                        ) : null}
-                      </td>
+                      {columnVisible('outbound') && (
+                        <td className="py-2">
+                          <button
+                            type="button"
+                            className="underline"
+                            onClick={() =>
+                              void run(async () => {
+                                const detail = await fetchPendingShipmentUnit(unit.id);
+                                setUnitDetail(detail);
+                                return '';
+                              })
+                            }
+                          >
+                            {unit.outboundOrderNo}
+                          </button>
+                        </td>
+                      )}
+                      {columnVisible('warehouse') && <td className="py-2">{unit.warehouseRef}</td>}
+                      {columnVisible('carrierChannel') && (
+                        <td className="py-2">{carrierChannelLabel(unit.carrierChannel)}</td>
+                      )}
+                      {columnVisible('carrier') && (
+                        <td className="py-2">
+                          {carrierMissing(unit) ? (
+                            <span className="text-amber-700">还没选承运商</span>
+                          ) : (
+                            unit.carrierCode
+                          )}
+                        </td>
+                      )}
+                      {columnVisible('sla') && (
+                        <td className="py-2">
+                          <span
+                            className={
+                              slaBucketSeverity(unit.slaBucket) === 'danger'
+                                ? 'font-medium text-red-700'
+                                : slaBucketSeverity(unit.slaBucket) === 'warn'
+                                  ? 'text-amber-700'
+                                  : 'text-muted-foreground'
+                            }
+                          >
+                            {shipmentSlaBucketLabel(unit.slaBucket)}
+                          </span>
+                          <div className="text-muted-foreground text-xs">
+                            {timeText(unit.slaDeadline)} · {shipmentSlaSourceLabel(unit.slaSource)}
+                          </div>
+                        </td>
+                      )}
+                      {columnVisible('parcel') && (
+                        <td className="py-2">
+                          {unit.parcelCount} 件 / {weightText(unit.totalWeightKg)}
+                        </td>
+                      )}
+                      {columnVisible('waybill') && (
+                        <td className="py-2">{unit.waybillNo || '—'}</td>
+                      )}
+                      {columnVisible('status') && (
+                        <td className="py-2">{pendingShipmentStatusLabel(unit.status)}</td>
+                      )}
+                      {columnVisible('nextAction') && (
+                        <td className="py-2 text-xs">
+                          {nextActionText(unit)}
+                          {!eligibility.eligible ? (
+                            <div className="text-muted-foreground">{eligibility.reason}</div>
+                          ) : null}
+                        </td>
+                      )}
                     </tr>
                   );
                 })}

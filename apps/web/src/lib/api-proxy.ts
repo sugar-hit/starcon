@@ -1339,6 +1339,46 @@ const services: readonly {
       /^inventory\-risk\/(?:capabilities|projection)$/,
   },
   {
+    // 1.4.1.2 列表与表格偏好（identity 服务）。纯**新增一条独立的 `services[]` 元素**，
+    // 既有的 `identity/` 与 `warehouse/` 元素**一字未动、也不重排** ——
+    // 本文件是多车道共用的累积型白名单，每条服务规则是一段超长单行正则，
+    // 往同一条 alternation 里并分支会让同批多车道并入时 git 必然判冲突（结构性，retry 不会自愈）。
+    //
+    // ---- 插入锚点固定在 `prefix: 'warehouse/'` 那条**元素之前**（07 库存 / 08 仓储作业那条，
+    //   它的注释块很长，所以按「元素的 `{`」而不是按 `prefix:` 行定位）----
+    //   同批其它车道的锚点分别是「`prefix: 'catalog/'` 之前」「`prefix: 'identity/'` 之前」
+    //   「数组末尾」，与本处相距 300 行以上，git 能干净求并。
+    //
+    // ---- 首 token「user-preferences」的零命中核对结论 ----
+    //   本文件既有 200+ 条 services[] 正则里**没有任何一条**含 `user-preferences` 这个串
+    //   （既有的是 `identity/roles`、`identity/tenants`… 一类），所以首 token 既是独立字面量，
+    //   也不会被既有分支的前缀吃掉。
+    //
+    // ---- 路径段为什么不是 UUID 形状 ----
+    //   本模块的路径段是**页面 key**（如 `orders.pending-shipment`），不是资源 id：
+    //   偏好的自然键就是「哪一页」，用 id 寻址反而多绕一层（要先查列表才知道 id）。
+    //   所以这里用**严格的小写 slug 词表** `[a-z0-9][a-z0-9._-]{0,159}`，
+    //   刻意**不**用宽松的 `[0-9a-f-]+` —— 那种写法会把 `capabilities` 这类字面量子路径
+    //   当成 id 放行。本模块**没有** id 段，所以「id 段用完整 UUID 形状」这条约定在此不适用。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   user-preferences                 列出我全部页面的偏好（GET）/ 全部重置（DELETE）
+    //   user-preferences/{pageKey}       读一页（GET）/ 保存一页（PUT，upsert）/ 重置一页（DELETE）
+    //
+    // 末尾**刻意不带 `?`**：裸 `user-preferences` 是本模块**真实存在**的端点（列表 / 全部重置），
+    //   所以它作为一条**显式**的备选写出来，而不是靠一个尾部 `?` 顺带放行出来的。
+    //
+    // 刻意**不放行**的形状：
+    //   * `user-preferences/{任意非 slug 形状}` —— 页面 key 词表之外的一律 404
+    //     （含大写字母、空格、路径分隔符）。后端的 CHECK 与本正则同词表。
+    //   * `user-preferences/{pageKey}/{子路径}` —— 本模块没有子资源。
+    prefix: 'identity/',
+    env: 'IDENTITY_URL',
+    fallback: 'http://127.0.0.1:8081',
+    pattern:
+      /^user\-preferences$|^user\-preferences\/[a-z0-9][a-z0-9._-]{0,159}$/,
+  },
+  {
     // 07 库存：库存总览（7.1.1.1）、库存明细 bucket（7.1.1.2）、筛选下拉参照数据与超储阈值。
     // overview/capabilities/policies 是总览本身；warehouses/legal-entities/skus/quality-statuses
     // 是筛选下拉项。policies/{id} 后面接一段 id（更新与删除）。
