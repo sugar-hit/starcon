@@ -3367,6 +3367,74 @@
         },
         "type": "object"
       },
+      "EffectiveShortcut": {
+        "properties": {
+          "icon": {
+            "nullable": true,
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "overridden": {
+            "type": "boolean"
+          },
+          "pageCode": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "position": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "source": {
+            "type": "string"
+          },
+          "sourceTemplateCode": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "EffectiveShortcutSet": {
+        "properties": {
+          "entries": {
+            "items": {
+              "$ref": "#/components/schemas/EffectiveShortcut"
+            },
+            "type": "array"
+          },
+          "hiddenByPermission": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "mergeRules": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "overrideCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "removedByOverride": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "templateCount": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
       "EntitlementCheckView": {
         "properties": {
           "available": {
@@ -6965,6 +7033,265 @@
           "entitlementCode",
           "tenantId"
         ],
+        "type": "object"
+      },
+      "ShortcutCapabilities": {
+        "properties": {
+          "boundaries": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "effectiveSet": {
+            "type": "boolean"
+          },
+          "favoritesList": {
+            "type": "boolean"
+          },
+          "favoritesOwnerModule": {
+            "type": "string"
+          },
+          "mergeRules": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "permissionScopedEntries": {
+            "type": "boolean"
+          },
+          "personalOverride": {
+            "type": "boolean"
+          },
+          "templateManagement": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "ShortcutEntry": {
+        "properties": {
+          "icon": {
+            "nullable": true,
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "pageCode": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "position": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ShortcutOverride": {
+        "properties": {
+          "action": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "icon": {
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "label": {
+            "nullable": true,
+            "type": "string"
+          },
+          "pageCode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "path": {
+            "nullable": true,
+            "type": "string"
+          },
+          "position": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "targetKey": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ShortcutOverrideInput": {
+        "properties": {
+          "action": {
+            "type": "string"
+          },
+          "icon": {
+            "nullable": true,
+            "type": "string"
+          },
+          "label": {
+            "nullable": true,
+            "type": "string"
+          },
+          "pageCode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "path": {
+            "nullable": true,
+            "type": "string"
+          },
+          "position": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "targetKey": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ShortcutTemplate": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdBy": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "departmentId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "entries": {
+            "items": {
+              "$ref": "#/components/schemas/ShortcutEntry"
+            },
+            "type": "array"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "priority": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "roleId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "scopeType": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ShortcutTemplateInput": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "departmentId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "description": {
+            "nullable": true,
+            "type": "string"
+          },
+          "entries": {
+            "items": {
+              "$ref": "#/components/schemas/ShortcutEntry"
+            },
+            "type": "array"
+          },
+          "name": {
+            "type": "string"
+          },
+          "priority": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "roleId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "scopeType": {
+            "type": "string"
+          },
+          "status": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ShortcutTemplateList": {
+        "properties": {
+          "limit": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "offset": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "templates": {
+            "items": {
+              "$ref": "#/components/schemas/ShortcutTemplate"
+            },
+            "type": "array"
+          },
+          "total": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
         "type": "object"
       },
       "SubscriptionDetailView": {
@@ -16529,6 +16856,399 @@
         },
         "tags": [
           "saas-usage-controller"
+        ]
+      }
+    },
+    "/identity/shortcut-templates": {
+      "get": {
+        "operationId": "get_identity_shortcut_templates",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "scopeType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShortcutTemplateList"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "shortcut-template-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_identity_shortcut_templates",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ShortcutTemplateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShortcutTemplate"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "shortcut-template-controller"
+        ]
+      }
+    },
+    "/identity/shortcut-templates/capabilities": {
+      "get": {
+        "operationId": "get_identity_shortcut_templates_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShortcutCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "shortcut-template-controller"
+        ]
+      }
+    },
+    "/identity/shortcut-templates/effective": {
+      "get": {
+        "operationId": "get_identity_shortcut_templates_effective",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/EffectiveShortcutSet"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "shortcut-template-controller"
+        ]
+      }
+    },
+    "/identity/shortcut-templates/overrides": {
+      "get": {
+        "operationId": "get_identity_shortcut_templates_overrides",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ShortcutOverride"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "shortcut-template-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_identity_shortcut_templates_overrides",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ShortcutOverrideInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShortcutOverride"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "shortcut-template-controller"
+        ]
+      }
+    },
+    "/identity/shortcut-templates/overrides/{id}": {
+      "delete": {
+        "operationId": "delete_identity_shortcut_templates_overrides_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "shortcut-template-controller"
+        ]
+      }
+    },
+    "/identity/shortcut-templates/{id}": {
+      "delete": {
+        "operationId": "delete_identity_shortcut_templates_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "shortcut-template-controller"
+        ]
+      },
+      "get": {
+        "operationId": "get_identity_shortcut_templates_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShortcutTemplate"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "shortcut-template-controller"
+        ]
+      },
+      "put": {
+        "operationId": "put_identity_shortcut_templates_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ShortcutTemplateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShortcutTemplate"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "shortcut-template-controller"
         ]
       }
     },
