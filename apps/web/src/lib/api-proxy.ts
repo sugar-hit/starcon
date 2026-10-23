@@ -921,6 +921,50 @@ const services: readonly {
       /^dict\-(?:catalog|history|items(?:\/options\/[A-Z][A-Z0-9_]{0,63}|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:usage|deactivate|reactivate))?)?)$/,
   },
   {
+    // 1.1.1.3 审批待办（identity 服务，卷 01「工作台与门户」L3 1.1.1 待办与待决策的第四格）。
+    //
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 identity 那条巨型 alternation 里并分支 ——
+    //   那一支是单行超长正则，多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    //   既有条目**一字未改、也不重排**。
+    //
+    // ---- 插入锚点选在 **identity/ 的「17.5.2.1 数据字典」那条之后** ----
+    //   锚点元素的 pattern 以 `/^dict\-(?:catalog|history|items` 开头，在本文件**全文唯一**。
+    //   本批其它常见锚点（数组最开头、identity 前缀那两处之前、数组末尾）
+    //   与本处相距均在 900 行以上 ⇒ 并入时 git 能干净求并。
+    //
+    // ---- 首 token「approval-todos」的零命中核对结论 ----
+    //   用脚本把本文件既有 **260** 条 services[] 正则**逐条实测**（不是目测、不是 grep 计数）：
+    //   对本模块的 7 个 shape（approval-todos / …/capabilities / …/options / …/{uuid} /
+    //   …/not-a-uuid / …/{uuid}/decide / …/{uuid}/transfer）**全部零命中** ⇒
+    //   首 token 既是独立字面量，也不会被既有分支的前缀吃掉。
+    //   既有含 "approval" 的是 `approval-records` / `approval-flows` / `approval-rules` /
+    //   `my-approvals` / `approval-instances`（都挂在 identity/ 下），首 token 全不相同。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   approval-todos    待审批清单（GET，真分页 + 真筛选 + 真排序 + 整集合分档 + 能力声明）
+    //
+    // ⚠️ **本模块是只读的**：蓝图 1.1.1.3 原文「工作台不执行审批动作，避免两处审批逻辑不一致」，
+    //   后端**一个写端点都没有** ⇒ 这里**一个写形状都不放行**。
+    //   能力声明（filters / actions）与分档（documentTypes / businessDomains / currencies /
+    //   amountBranches）都**在同一个响应体里** ⇒ **没有** `/capabilities`、`/options` 子路径。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   approval-todos/capabilities          —— 后端没有这个端点（能力声明在清单响应体里）
+    //   approval-todos/options               —— 同上（分档在清单响应体里）
+    //   approval-todos/{uuid}                —— 没有单条待办详情端点
+    //   approval-todos/{uuid}/decide         —— 🔴 审批动作归 17.4.2.1，工作台不执行审批动作
+    //   approval-todos/{uuid}/transfer       —— 同上（转交也归 17）
+    //   approval-todos/{uuid}/copy           —— 复制单号是页内动作，没有端点
+    //   approval-todos/not-a-uuid            —— 非 UUID 段不应被放行
+    //
+    // ⚠️ id 段**根本不存在**：本模块只有一个集合读端点，没有「按 id 取单条」的形状，
+    //   所以这里**不需要** uuid 段，也就没有「非 UUID 段被 uuid 分支吃掉」这一类风险。
+    prefix: 'identity/',
+    env: 'IDENTITY_URL',
+    fallback: 'http://127.0.0.1:8081',
+    pattern: /^approval\-todos$/,
+  },
+  {
     // 14.2.2.1 预算分配（channel 服务）。纯**新增一条独立的 `services[]` 元素**，
     // 既有的 `ad-campaigns`（14.1.1.1）、`ad-rules`（14.2.2.2）、`ad-keywords`（14.1.3.1）
     // 等**一字未动、也不重排** —— 本文件是多车道共用的累积型白名单，每条服务规则是一段

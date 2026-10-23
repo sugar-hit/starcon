@@ -6,9 +6,7 @@
 >
 > 状态词表只有三个值，统计逻辑依赖它，不要新增：
 > `已交付`（迁移 + API + 页面 + 测试齐全，无 TODO 残留）· `进行中`（部分交付、未收口，证据列写清缺哪一块）· `未开发`（未开工）。
-
 ## 总览
-
 | 指标 | 数量 |
 | --- | --- |
 | 模块总数 | 465 |
@@ -16,9 +14,7 @@
 | 进行中 | 0 |
 | **未开发** | **110** |
 | 完成率 | 76.3% |
-
 ## 分阶段进度（交付顺序看这里）
-
 | 阶段 | 已交付 | 进行中 | 未开发 | 合计 |
 | --- | --- | --- | --- | --- |
 | **D1–D2** | 80 | 0 | 0 | 80 |
@@ -27,11 +23,8 @@
 | **D5** | 52 | 0 | 0 | 52 |
 | **D6** | 43 | 0 | 35 | 78 |
 | **D7** | 81 | 0 | 74 | 155 |
-
 ## 分系统进度
-
 | 卷 | 系统 | 阶段 | 已交付 | 模块数 |
-| --- | --- | --- | --- | --- |
 | 01 | 工作台与门户系统 | D7 | 9 | 23 |
 | 02 | 渠道与店铺系统 | D1–D2 / D5 | 25 | 25 |
 | 03 | 商品主数据系统 | D1–D2 | 40 | 40 |
@@ -50,30 +43,22 @@
 | 16 | 合规与风控系统 | D7 | 20 | 23 |
 | 17 | 组织权限与系统设置系统 | D1–D2 / D4 / D6 / D7 | 29 | 29 |
 | 18 | 集成开放与智能自动化系统 | D7 | 0 | 24 |
-
 ## 判定「已交付」的标准
-
 一个模块标 `已交付` 当且仅当下面四件都成立，缺一件就是 `未开发` 或 `进行中`：
-
 1. **迁移** — `backend/services/<svc>/src/main/resources/db/migration/V*.sql` 里有真实表结构，
    带 `tenant_id NOT NULL` + RLS 策略，不是注释里的设计。
 2. **API** — 服务里有对应端点，走 jOOQ 显式 SQL，不是返回硬编码常量的桩。
 3. **页面** — `apps/web/src/app/**/page.tsx` 是真实工作区，不是 `DomainPlaceholder`。
 4. **测试** — `cd backend && ./mvnw verify` 绿；涉及租户隔离的必须实跑
    「两租户互不可见 / 伪造 tenant header 无效 / 连接池归还后不串租户」三条断言。
-
 **判定为 `未开发` 的典型形态**（见到就说明没做完，不许算进已交付）：
-
 - `DomainPlaceholder` 占位页
 - 硬编码数组 / 常量当数据源
 - 服务里 `TODO` + `throw new UnsupportedOperationException()`
 - 迁移文件存在但没有 RLS 策略
 - 前端有页面但后端没有对应端点（或反之）
-
 ## 跨期说明
-
 「阶段」列按**依赖就绪顺序**逐模块标注，不是卷归属。跨期卷的拆分如下：
-
 - **01 工作台与门户 → 全部 D7**：它是纯投影聚合层（蓝图原文「不写业务数据，只读投影」），
   聚合 09 订单 / 07 库存 / 02 渠道 / 12 财务 / 15 客户 / 17 审批的投影。
   这些数据源没落地之前建「我的待办」只能造假数据，所以整卷排到最后收口。
@@ -87,14 +72,12 @@
 - **11 售后与退货**：D4 交付售后单、退货授权与实收、退款换货；平台纠纷 / 客诉工单 / 分析排 D7。
 - **17 组织权限**：D1–D2 交付租户、法人、部门、成员、角色、页面权限、数据范围、审计；
   17.4 审批流随单据排 D4，17.6.1.1 账簿与本位币随财务排 D6，17.7 套餐与平台参数排 D7。
-
 ## 模块明细
-
 | 模块 ID | 模块名 | L3 锚点路由 | 阶段 | 状态 | 证据 |
 | --- | --- | --- | --- | --- | --- |
 | 1.1.1.1 | 我的待办 | /dashboard/todo | D7 | 未开发 | — |
 | 1.1.1.2 | 异常订单队列 | /dashboard/todo | D7 | 已交付 | **卷 01 第一条车道**：本模块是**只读投影**（蓝图卷 01 头写死「不产生新的业务事实，只聚合各系统的投影」「不做：任何写业务数据的操作。工作台只读 + 跳转」）⇒ **不新建任何表、不占用 V327**（Flyway 版本号留给真正需要它的场景）、**不建后端微服务**、**不提供任何写端点**。**迁移**：无（本模块只读 09 / 11 已有事实表）。**端点** 4 个挂在 trade 的 `/trade/anomaly-orders`（`AnomalyOrderController.java`，jOOQ 显式 SQL，权限码 `trade.orders.read`）：GET `/capabilities`（七类异常逐条报 available + ownerModule + source + aggregation，外加跨服务来源清单、动作清单、**未接通清单**、两个阈值、数据截至时刻）· GET `/options`（异常类型词表 + 店铺 + 订单来源 + 停留时长档位）· GET 列表（**真分页 + 真筛选 + 真排序白名单 4 键 + 汇总 + 数据截至时刻**）· GET `/{orderId}` 明细（订单行 + 费用 + 状态留痕 + 逐条异常凭据 + 建议动作；跨租户 RLS 下 404 而不是空对象）。**七类异常 → 真实事实表**（蓝图写的 `order.status_history` 真实表名是 **`sales_order_status_history`**；蓝图写的 `order_charge` 真实存在但**没有「异常标记」列** —— 它记的是费用，正负由 DB CHECK 钉死，所以本模块把它当**订单费用明细**进详情页，**不当异常判据**）：① 平台超时未回传发货 ← `shipment_writeback_task`（PENDING / SUBMITTED / PENDING_VERIFICATION / REJECTED 且超过 24 小时）+ `shipment_record`；② 地址不可达 ← `order_address_check.delivery_status='NOT_DELIVERABLE'`（取**最近一次**校验，地址改了以最新结论为准）；③ 买家留言待确认 ← `platform_order.normalized_status='PENDING_CONFIRMATION'` 且下单超过 24 小时；④ 黑名单买家 ← **channel 16.5.1.1**（前端合并）；⑤ 库存不足卡单 ← **warehouse 7.1.1.3 可售量**（前端合并）；⑥ 地址欺诈疑似 ← `order_risk_assessment_component.dimension='ADDRESS_CONCENTRATION'` 且 SCORED + contribution>0；⑦ 重复下单 ← 同表 `ORDER_FREQUENCY` 维。**停留时长逐类锚定**（不是「订单创建至今」）：平台回传任务创建时刻 / 地址校验判定基准时刻 / 平台单下单时刻 / 风控评估基准时刻；一张单命中多类时清单行取**最久**那一条，逐条凭据各给各的起点。**跨服务分工严格按边界做**：黑名单在 channel、可用量在 warehouse ⇒ 本服务**不跨库查它们的表**，由**前端聚合层**读它们的授权只读端点（`GET /channel/buyer-blacklist/flags`、`GET /warehouse/inventory/sellable/skus`）后合并 —— 连接键逐字同式：黑名单按 `buyer_key`（收件人三件套 md5，**分隔符 U+001F**，trade 侧现算 `md5(concat_ws(E'\x1f', ...))`）、库存按 `sku_id`。**「查无库存账」≠「库存充足」**：warehouse 对没有库存账的 SKU 返回**没有那一行**而不是 0，本模块把它单列为「查无库存账」如实报出，**不**算成「库存不足」；channel / warehouse 读不到时页面明确写「本次**没有**黑名单信号 / **判不了**库存不足」，**不冒充「没有异常」**。**批量动作一律落到归属系统**：转售后 → 11 售后（`/aftersales/intake`）、转人工 → 09 异常拦截（`/compliance/intercept`）、平台侧查询 → 02 渠道发货回传（`/channels/writeback`）、查看黑名单 → 16（`/compliance/buyer-blacklist`）、查看可售量 → 07（`/inventory`）；🔴 **「标记忽略」在 capabilities 里 available=false 并写明缺什么**（归属系统当前没有「忽略一条异常」的写端点，而卷 01 明确工作台不写业务数据）—— 页面把它渲染成**带缺口的说明而不是能一键落地的按钮**，绝不造第二条写路径。工作台**不代兄弟模块实现**：1.1.1.1 我的待办与 1.1.1.3 审批待办**未交付**，本车道只做本格，页面留好扩展位。**页面** `/dashboard/todo`（`apps/web/src/app/dashboard/todo/page.tsx`）+ `apps/web/src/components/dashboard/anomaly-order-{model,workspace}.tsx`：能力声明区（七类逐条 + 跨服务两条 + **未接通清单**）+ 异常概览（**七类计数点一下就按这一类筛**，与清单**同一个集合**算出来，翻页不变）+ 筛选（类型 / 店铺 / 停留时长 / 关键字）+ 清单（订单号 / 店铺 / 异常类型 / 停留时长 / 严重度 / 建议动作 / 明细）+ 批量处置条（勾选后给归属系统入口 + **复制选中订单号**）+ 单条明细（凭据逐条带起点与时长、订单行、费用、状态留痕、建议动作）；加载 / 错误 / 空三态齐全，**禁 mock**；跨服务与清单的取数上限被截断时**如实报出「只取回前 N 条（共 M 条）」**。**如实标注未接通**：蓝图点名的 `platform_performance_metric`（平台绩效指标）**本仓没有这张表也没有模块持有**（它属 1.1.2.3 履约健康）⇒ 写进 `capabilities.notConnected` 而不是造一张表；蓝图的「共享数据 listing」归 02 渠道所有 ⇒ 清单里的「店铺」取发货侧业务键（`platform_order.shop_code` / `shipment_writeback_task.shop_code`），**不是**渠道的 listing 映射结论。**契约**：`python3 tools/codegen/catalog-contracts.py --spec-dir backend/target/openapi` 重生成（6 个服务导出真实 SpringDoc 契约后跑，**只 trade.ts 与 trade.openapi.json 变化，其余 5 个服务逐字节不变**；新增 16 个 `AnomalyOrder*` 类型，无同名冲突）。**api-proxy**：**新增一条独立的 `services[]` 元素**（`prefix: 'trade/'`，锚在**数组最开头**、既有的 supplier-ratings 那条之前 —— 同批另外三条车道的锚点分别是 `identity/` 之前、`warehouse/` 之前、数组末尾，与本条相距 600 行以上），放行 `anomaly-orders`（裸路径 = 集合读）/ `anomaly-orders/capabilities` / `anomaly-orders/options` / `anomaly-orders/{uuid}`；**一个写形状都不放行**（`/{uuid}/ignore`、`bulk-*` 仍 404）；首 token「anomaly-orders」在既有 100+ 条正则里零命中（既有含 "anomaly" 的是 catalog 的 `price-anomaly-alerts`，首 token 全不相同）；改共享白名单后已跑**全量 allowlist 回归** `pnpm vitest run apps/web/src/app/api/trade` **70 文件 404 例全过**。**测试** `AnomalyOrderIntegrationTest` 12 例 + `AnomalyOrderTenancyIntegrationTest` 7 例 = 19 例实跑 Testcontainers PostgreSQL 16（连接池压到 1），覆盖能力声明逐条点名、**阈值是真的**（回传 3 小时 / 平台单 3 小时一律不进队列）、停留时长锚点、清单与明细口径一致、真分页三页不重叠且合计不变、筛选（类型 / 店铺 / 关键字 / 来源 / 停留时长）、非法排序键与非法类型报 400、端点命名空间与认证（无 Authorization 401）；**多租户三断言**：两租户互不可见（清单 + 按主键直查）、伪造租户上下文无效（`set_config('app.current_tenant', …)` 伪造后读不到对方行）、**连接池固定 1 条时交替使用 5 轮不串租户**，另断言事务外读零行；前端 `anomaly-order-model.test.ts` 25 例（连接键漏判、查无库存账、单集合计数）+ `anomaly-order-allowlist.test.ts`（从源码反向抽真实调用点逐条断言放行 + 刻意不放行的形状仍 404）· 2026-10-23 交付 |
-| 1.1.1.3 | 审批待办 | /dashboard/todo | D7 | 未开发 | — |
+| 1.1.1.3 | 审批待办 | /dashboard/todo | D7 | 已交付 | **卷 01 第一批**：本模块是**只读投影**（卷 01 头写死「不产生新的业务事实，只聚合各系统的投影」「不做：任何写业务数据的操作。工作台只读 + 跳转」+ 蓝图 1.1.1.3 原文「**工作台不执行审批动作**，避免两处审批逻辑不一致」）⇒ **不新建任何表、不占用 V337**（Flyway 版本号留给真正需要它的场景）、**不建后端微服务**、**不提供任何写端点**。**迁移**：无（本模块只读 17 的既有事实表）。**端点** 1 个挂在 identity 的 `/identity/approval-todos`（`ApprovalTodoController.java`，jOOQ 显式 SQL，权限码沿用 `identity.approval_inbox.read` —— 另立工作台专属码会让新建角色默认没有它，管理员配了审批权限待办页却静默空着）：GET 列表（**真分页 + 真筛选 + 真排序白名单 7 键 + 整集合分档 + 能力声明**），一个响应体里同时给清单、汇总、四维分档与能力声明。**上游表就在 identity 服务里**（卷 17 整服务尚未并入本仓）：`approval_instance`（单据头信息、金额、申请人、当前节点、停留起点；17.4.2.1 拥有，本模块**只读**）· `approval_flow` + `approval_document_type`（单据类型与流程名）· `approval_flow_node`（当前节点名称/顺序/审批人类型）· `approval_flow_escalation`（**超时口径**：节点上配的 `timeout_hours`，同一节点挂多条时取**最先触发**的那条）· `approval_flow_amount_branch`（**金额阈值口径**：流程上配的金额区间分支，上界是**开区间**、按 `priority desc` 取档，与上游 `ApprovalInboxController.startNode` 逐字同式）。**「归我」的判定逐字对齐上游**（`ApprovalInboxController` 的同名常量）：被转交指派的人优先，否则按当前节点审批人类型判定（USER 指定人 / ROLE 角色分配），POSITION 节点解析不出具体的人、本模块**不假装能解析**；测试里有一条**清单等价性**断言把两边钉在一起，两边一旦漂移就会给出不同的待办清单。**筛选全在 DB 层**：`documentTypeCode`（单据类型）/ `sourceSystem`（业务域）/ `currencyCode`（币种）/ `amountBranchName`（**金额阈值分支**，与行上显示的档位**同一口径**）/ `minAmount`+`maxAmount`（金额区间，打 numeric）/ `minDwellSeconds`（停留时长，走 `node_entered_at <= now() - N * interval`，命中 `approval_instance_pending` 部分索引）/ `overdueOnly`（只看已超时，**按节点上配的时限判，没有硬编码的「多久算超时」**）/ `sort` 白名单 7 键（WAITING / NEWEST / OLDEST / AMOUNT_DESC / AMOUNT_ASC / DOCUMENT / OVERDUE，**未知键直接 400** 而不是静默回落到默认序）。**分档是整集合的计数**：`documentTypes` / `businessDomains` / `currencies` / `amountBranches` 四维各自 GROUP BY 整集合，并且**各自排除自己那一维的筛选**（点一下「按这一类筛」之后，这一档的计数仍然是它自己的真实条数，其余档的计数也不会因为多筛了一维就消失）。**能力声明逐条如实报**：DOCUMENT_TYPE / BUSINESS_DOMAIN / AMOUNT_RANGE / AMOUNT_BRANCH / OVERDUE_DURATION 真接通；🔴 **LEGAL_ENTITY_AMOUNT_THRESHOLD `available=false`**（蓝图说「金额阈值按法人配置」，但 `legal_entity` **没有**金额阈值列、`approval_instance` 也**不**带 `legal_entity_id` ⇒ 法人级阈值在当前 schema 下**判不了** —— 写明缺什么，**绝不能**拿一个硬编码常量冒充审批 SLA 口径）；审批动作 APPROVE / REJECT / TRANSFER **一律 `available=false` 并写明归属 17.4.2.1**，页面上渲染成**带缺口的说明**而不是第二个能改单子的按钮；OPEN_APPROVAL_DETAIL（→ `/org/my-approvals`，该前端路由**真实存在**）与 COPY_INSTANCE_NO 可用。**金额与时间**：金额一律 `BigDecimal` + `NUMERIC`（`approval_instance.amount` 是 `numeric(19,6)`，禁浮点记账）；时间列是 `timestamptz`，测试用 `OffsetDateTime` 绑定 + `?::timestamptz` 并**断言写回的值**（用 `Timestamp.valueOf` 会静默偏 −28800s）。**页面** `/dashboard/todo/approvals`（`apps/web/src/app/dashboard/todo/approvals/page.tsx`）+ `apps/web/src/components/dashboard/approval-todo-{model,workspace}.tsx`：能力声明区（筛选维度逐条 + 动作逐条，`available=false` 的渲染成带缺口的说明）+ 审批概览（待我审批 / 当前筛选命中 / 最久停留 / 已超时 / **判不了超时**）+ 四维分档（点一下就按这一维筛）+ 筛选（金额区间 / 停留时长 / 只看已超时 / 排序；**没配超时规则时「只看已超时」直接禁用并写明缺什么**，否则用户点了只会拿到空列表、误以为「没有超时的单子」）+ 清单（单据号与来源 / 单据类型与流程 / 标题 / 金额与阈值档 / 申请人 / 当前节点与链路位置 / 当前节点停留与提交至今 / 超时三态 / 去审批 + 复制单号）+ 真分页；加载 / 错误 / 空三态齐全，**禁 mock**。**不代兄弟模块实现**：1.1.1.1 我的待办未交付，本车道只做本格；页面挂在 `/dashboard/todo/approvals` 子路由，**不碰 1.1.1.2 的 `/dashboard/todo/page.tsx`**（别人的文件），并入时也就不会与之判冲突。**契约**：`python3 tools/codegen/catalog-contracts.py --spec-dir backend/target/openapi` 重生成（6 个服务导出真实 SpringDoc 契约后跑，**只 identity.ts 与 identity.openapi.json 变化，其余 5 个服务逐字节不变**；新增 7 个 `ApprovalTodo*` 类型，无同名冲突）。**api-proxy**：**新增一条独立的 `services[]` 元素**（identity/ 前缀，锚在 **identity/ 的「17.5.2.1 数据字典」那条之后** —— 其 pattern 以 `/^dict\-` 开头（字典目录/历史/条目那一条）、在本文件**全文唯一**；同批其它常见锚点相距 900 行以上 ⇒ git 能干净求并），放行 `approval-todos`（裸路径 = 集合读）；**一个写形状都不放行**（`/capabilities`、`/options`、`/{uuid}`、`/{uuid}/decide`、`/{uuid}/transfer`、`/{uuid}/copy` 仍 404 —— 能力声明与分档都在同一个响应体里，后端没有这些子路径）；首 token「approval-todos」用脚本把本文件既有 **261** 条 services[] 正则**逐条实测**（不是目测、不是 grep 计数），对本模块 7 个 shape **全部零命中**；改共享白名单后已跑**全量 allowlist 回归** `pnpm vitest run apps/web/src/app/api` **207 文件 1182 例全过**。**测试** `ApprovalTodoIntegrationTest` 12 例 + `ApprovalTodoTenancyIntegrationTest` 4 例 = **16 例实跑 Testcontainers PostgreSQL 16**（连接池压到 1），覆盖与上游 17.4.2.1 的**清单逐条等价**、筛选（单据类型 / 业务域 / 金额区间 / 金额阈值分支）、**阈值是真的**（超时口径来自节点上配的 `timeout_hours`、金额档位来自流程上配的分支；没配时限就**判不了超时**、没落在任何一档就报空**不硬凑一档**）、分档是整集合的计数、真分页三页不重叠且合计不变、非法排序键与非法分页/金额/停留下限参数一律 400、能力声明逐条点名、申请人名解析不到时为空但申请人 id 仍可信、无令牌 401、无权限 403；**多租户三断言**：两租户互不可见（清单层 + **按主键直查对方的行读到零行**）、伪造 `X-Tenant-Id` 头无效（含用**子租户真实租户 id** 那一档 —— 调用方确实知道一个存在的租户 id）、**连接池固定 1 条时多轮交替读写不串租户**，另断言事务外读零行 + `approval_instance` 是 FORCE RLS + 应用连接无 bypassrls；前端 `approval-todo-model.test.ts` 27 例（超时三态 / 上界开区间 / 空值不下发 / 判不了的维度单列）+ `approval-todo-allowlist.test.ts` 4 例（从源码**反向抽真实调用点**逐条断言放行 + 刻意不放行的形状仍 404 + 不误伤上游既有形状）· 2026-10-23 交付 |
 | 1.1.2.1 | 核心指标卡 | — | D7 | 未开发 | — |
 | 1.1.2.2 | 店铺概览 | — | D7 | 未开发 | — |
 | 1.1.2.3 | 履约健康 | — | D7 | 已交付 | 端点 3 个挂 `/trade/fulfillment/health`：capabilities（七个维度逐条报出算法/分母/来源表，**平台 ODR 无上游 ⇒ available=false + ownerModule「02 渠道与店铺 · 平台绩效指标同步」+ impact**，没有上游就**不给公式也不给分母**，给了就是编一个）/ summary（健康度卡片，每张带 metricKind、分子分母、灯色与灯色判定依据）/ red-flags（五类红灯项，真分页 + 真筛选，**口径与卡片同源**：卡片 `redFlagKind` 过滤后的 total 必须等于该卡片的 `alertCount`）· **零迁移零新表**（卷 01 是只读投影层，不产生新的业务事实）：待发货积压读 V124 `shipment_pending_unit`、超时发货率与物流异常件占比与平台绩效读 V127 `shipment_record`（+ `shipment_record_tracking_observation`）、代发路径未结案异常读 V126 `fulfillment_dropship_tracking_exception` · **「平均出库时长」刻意不落在本服务**：出库时效属 08 仓储作业 8.5.3.1，由 warehouse 服务自己的只读端点 `/warehouse/outbound-timeliness/report` 出数，前端合并时补上那张卡 —— 本模块**不**跨服务查表（AGENTS.md 模块边界纪律：跨服务只走授权 API）· **迟发率与有效追踪率直接引用 9.4.1.2 的口径单点**（`ShipmentRecordService.performance`），**不另立第二套算法**：作废（VOID）是错发货不是迟发货，不进任何分母；时限未登记落 UNSET 桶，既不算准时也不算迟发（迟发率分母 = 登记过时限且非作废的记录）· 灯色只由**业务事实**判定（超时未发出 / 迟发 / 轨迹异常 ⇒ 红；今日到期未发出、时限未登记、有运单号但无轨迹观测 ⇒ 黄；量不到 ⇒ 灰），**不设拍脑袋的百分比阈值**（平台迟发率与有效追踪率门槛按平台与店铺不同，仓内无阈值配置，只报数与绝对单量）· 租户来自**已认证成员关系**（`AccessService.run` 在事务里绑定 `app.current_tenant`，每条查询再显式写一遍 `tenant_id = ?` 作第二道防线），**不信任 `X-Tenant-Id` 头** · 页面 `/dashboard/fulfillment-health`（`fulfillment-health-workspace.tsx` + `fulfillment-health-model.ts`）是**真实可访问的工作区**：六张卡片 + 覆盖度提示（未登记时限 / 无轨迹观测的量单独报出来）+ 拆分 + 红灯项明细（可按类型筛选、可翻页、每条都能跳到归属系统处理页）+ 未接通维度单列 + 口径表；**没有改 `apps/web/src/app/page.tsx` 首页** · api-proxy **新增一条独立 services[] 元素**（`fulfillment/health` 组，插入锚点固定在 `prefix: 'identity/'` 那条元素之前），既有条目一字未改也不重排 · 测试 `FulfillmentHealthIntegrationTest` 14 例 + `FulfillmentHealthTenancyIntegrationTest` 7 例实跑 Testcontainers PostgreSQL 16（连接池压到 1）+ 前端 `fulfillment-health-model.test.ts` 14 例 + `fulfillment-health-allowlist.test.ts` 6 例 · **多租户三断言全部实跑**：两租户互不可见（A 3 件 / B 7 件，红灯项 6 / 10）、伪造 tenant header 无效（A 会话带伪造 B 的头仍按 A 解析）、连接池固定 1 条时交替使用 5 轮不串租户；且伪造 `app.current_tenant` 时读到的是**零行**而不是别家的量（显式谓词钉住已认证租户） |
@@ -557,3 +540,40 @@
 | 18.4.3.2 | 效果评估 | — | D7 | 未开发 | — |
 | 18.5.1.1 | 模板管理 | — | D7 | 未开发 | — |
 | 18.5.2.1 | 投递记录 | — | D7 | 未开发 | — |
+| 已交付 | 350 |
+| **未开发** | **115** |
+| 完成率 | 75.3% |
+| **D7** | 76 | 0 | 79 | 155 |
+| 01 | 工作台与门户系统 | D7 | 4 | 23 |
+| 已交付 | 346 |
+| **未开发** | **119** |
+| 完成率 | 74.4% |
+| **D7** | 72 | 0 | 83 | 155 |
+| 01 | 工作台与门户系统 | D7 | 0 | 23 |
+| 已交付 | 347 |
+| **未开发** | **118** |
+| 完成率 | 74.6% |
+| **D7** | 73 | 0 | 82 | 155 |
+| 01 | 工作台与门户系统 | D7 | 1 | 23 |
+| 已交付 | 344 |
+| **未开发** | **121** |
+| 完成率 | 74.0% |
+| **D7** | 70 | 0 | 85 | 155 |
+| 17 | 组织权限与系统设置系统 | D1–D2 / D4 / D6 / D7 | 27 | 29 |
+| 已交付 | 340 |
+| **未开发** | **125** |
+| 完成率 | 73.1% |
+| **D7** | 66 | 0 | 89 | 155 |
+| 16 | 合规与风控系统 | D7 | 18 | 23 |
+| 17 | 组织权限与系统设置系统 | D1–D2 / D4 / D6 / D7 | 25 | 29 |
+| 已交付 | 341 |
+| **未开发** | **124** |
+| 完成率 | 73.3% |
+| **D7** | 67 | 0 | 88 | 155 |
+| 16 | 合规与风控系统 | D7 | 19 | 23 |
+| 17 | 组织权限与系统设置系统 | D1–D2 / D4 / D6 / D7 | 26 | 29 |
+| 已交付 | 345 |
+| **未开发** | **120** |
+| 完成率 | 74.2% |
+| **D7** | 71 | 0 | 84 | 155 |
+| 17 | 组织权限与系统设置系统 | D1–D2 / D4 / D6 / D7 | 28 | 29 |

@@ -2034,6 +2034,279 @@
         },
         "type": "object"
       },
+      "ApprovalTodoAction": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "reason": {
+            "nullable": true,
+            "type": "string"
+          },
+          "target": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ApprovalTodoBucket": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "count": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ApprovalTodoCapabilities": {
+        "properties": {
+          "actions": {
+            "items": {
+              "$ref": "#/components/schemas/ApprovalTodoAction"
+            },
+            "type": "array"
+          },
+          "dataSource": {
+            "type": "string"
+          },
+          "filters": {
+            "items": {
+              "$ref": "#/components/schemas/ApprovalTodoFilterCapability"
+            },
+            "type": "array"
+          },
+          "module": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ApprovalTodoFilterCapability": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "key": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "reason": {
+            "nullable": true,
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ApprovalTodoItem": {
+        "properties": {
+          "amount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "amountThresholdCurrency": {
+            "nullable": true,
+            "type": "string"
+          },
+          "amountThresholdMax": {
+            "nullable": true,
+            "type": "number"
+          },
+          "amountThresholdMin": {
+            "nullable": true,
+            "type": "number"
+          },
+          "amountThresholdName": {
+            "nullable": true,
+            "type": "string"
+          },
+          "applicantId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "applicantName": {
+            "nullable": true,
+            "type": "string"
+          },
+          "approverType": {
+            "type": "string"
+          },
+          "currencyCode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "currentNodeKey": {
+            "type": "string"
+          },
+          "currentNodeName": {
+            "type": "string"
+          },
+          "currentNodeOrder": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "currentStageIndex": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "documentTypeCode": {
+            "type": "string"
+          },
+          "documentTypeName": {
+            "type": "string"
+          },
+          "dwellSeconds": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "flowName": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "instanceNo": {
+            "type": "string"
+          },
+          "nodeEnteredAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "overdueSeconds": {
+            "format": "int64",
+            "nullable": true,
+            "type": "integer"
+          },
+          "sourceReferenceId": {
+            "type": "string"
+          },
+          "sourceSystem": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "subjectTitle": {
+            "type": "string"
+          },
+          "submittedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "timeoutSeconds": {
+            "format": "int64",
+            "nullable": true,
+            "type": "integer"
+          },
+          "totalSeconds": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ApprovalTodoPage": {
+        "properties": {
+          "amountBranches": {
+            "items": {
+              "$ref": "#/components/schemas/ApprovalTodoBucket"
+            },
+            "type": "array"
+          },
+          "businessDomains": {
+            "items": {
+              "$ref": "#/components/schemas/ApprovalTodoBucket"
+            },
+            "type": "array"
+          },
+          "capabilities": {
+            "$ref": "#/components/schemas/ApprovalTodoCapabilities"
+          },
+          "currencies": {
+            "items": {
+              "$ref": "#/components/schemas/ApprovalTodoBucket"
+            },
+            "type": "array"
+          },
+          "documentTypes": {
+            "items": {
+              "$ref": "#/components/schemas/ApprovalTodoBucket"
+            },
+            "type": "array"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ApprovalTodoItem"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/ApprovalTodoSummary"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ApprovalTodoSummary": {
+        "properties": {
+          "filteredTotal": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "longestDwellSeconds": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "overdueTotal": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "pendingTotal": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "unconfiguredTimeoutTotal": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
       "ApprovalTransferInput": {
         "properties": {
           "comment": {
@@ -10124,6 +10397,132 @@
         },
         "tags": [
           "approval-rule-controller"
+        ]
+      }
+    },
+    "/identity/approval-todos": {
+      "get": {
+        "operationId": "get_identity_approval_todos",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "documentTypeCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sourceSystem",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "currencyCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "amountBranchName",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "minAmount",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "in": "query",
+            "name": "maxAmount",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "in": "query",
+            "name": "minDwellSeconds",
+            "required": false,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "overdueOnly",
+            "required": false,
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "required": false,
+            "schema": {
+              "default": "WAITING",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApprovalTodoPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "approval-todo-controller"
         ]
       }
     },
