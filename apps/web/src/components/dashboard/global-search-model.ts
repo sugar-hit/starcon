@@ -18,11 +18,34 @@ export interface GlobalSearchHit {
   secondary?: string | null;
 }
 
-/** 一个业务域的命中集合。 */
+/**
+ * 一个业务域的命中集合。
+ *
+ * <p>{@code dataScope} 是这一组**实际生效**的数据范围（ALL / DEPARTMENT / SELF / TENANT），
+ * {@code dataScopeNote} 是它的说明文案 —— 界面靠它们标注「这一组在你的数据范围内吗」。
+ * 两个字段由后端给出（各服务按自己那张表的归属维度判定），前端不另算一套。
+ */
 export interface GlobalSearchGroup {
   domain: string;
   label: string;
   hits: GlobalSearchHit[];
+  dataScope: string;
+  dataScopeNote: string;
+}
+
+/**
+ * 因**权限**未返回的一个子域。
+ *
+ * <p>域码与响应里的 {@code unavailableDomains} 一致（catalog 侧是 {@code PRODUCT_SKU} /
+ * {@code PRODUCT_SPU} 这种带域内实体前缀的码），额外带上它归属的业务域 ——
+ * 前端要按**业务域**计数（「N 个业务域因权限未返回」）并把提示挂到对应的组上，
+ * 光有一串子域码是算不出业务域数的。
+ */
+export interface SuppressedDomain {
+  domain: string;
+  label: string;
+  group: string;
+  groupLabel: string;
 }
 
 /** 一个服务的检索响应。 */
@@ -32,6 +55,7 @@ export interface GlobalSearchResponse {
   minKeywordLength: number;
   groups: GlobalSearchGroup[];
   unavailableDomains: string[];
+  suppressedDomains: SuppressedDomain[];
 }
 
 /** 单个服务的检索结果（成功或失败）。 */
@@ -128,16 +152,21 @@ export function buildHref(domain: string, hit: GlobalSearchHit): string {
  * <p><b>「没权限的域」与「失败的域」必须分开</b>：前者是 `unavailableDomains`
  * （这个角色看不到那个域），后者是 `failedServices`（那个服务这次没响应）。
  * 混为一谈，界面就会把「服务挂了」显示成「没有数据」。
+ *
+ * <p><b>被权限抑制的子域要带归属业务域</b>（`suppressedDomains`）：catalog 侧的域码是
+ * `PRODUCT_SKU` / `PRODUCT_SPU` 这种带域内实体前缀的码，光有一串码算不出「几个业务域没返回」。
  */
 export function mergeServiceResults(outcomes: ServiceSearchOutcome[]): {
   groups: GlobalSearchGroup[];
   unavailableDomains: string[];
   failedServices: string[];
+  suppressedDomains: SuppressedDomain[];
 } {
   const byDomain = new Map<string, GlobalSearchGroup>();
   const unavailable = new Set<string>();
   const failed: string[] = [];
   const seen = new Set<string>();
+  const suppressed = new Map<string, SuppressedDomain>();
 
   for (const outcome of outcomes) {
     if (!outcome.response) {
@@ -145,12 +174,25 @@ export function mergeServiceResults(outcomes: ServiceSearchOutcome[]): {
       continue;
     }
     for (const domain of outcome.response.unavailableDomains ?? []) unavailable.add(domain);
+    for (const item of outcome.response.suppressedDomains ?? []) {
+      suppressed.set(`${item.group}:${item.domain}`, item);
+    }
     for (const group of outcome.response.groups ?? []) {
       const existing = byDomain.get(group.domain);
       if (!existing) {
-        byDomain.set(group.domain, { domain: group.domain, label: group.label, hits: [] });
+        byDomain.set(group.domain, {
+          domain: group.domain,
+          label: group.label,
+          hits: [],
+          dataScope: group.dataScope,
+          dataScopeNote: group.dataScopeNote,
+        });
       }
       const bucket = byDomain.get(group.domain)!;
+      // 同一域被多个服务返回时取**更严**的一侧（每个域实际只有一个归属服务，这里是防御）。
+      const winner = narrowerScope(bucket.dataScope, group.dataScope);
+      if (winner !== bucket.dataScope) bucket.dataScopeNote = group.dataScopeNote;
+      bucket.dataScope = winner;
       for (const hit of group.hits ?? []) {
         const key = `${hit.domain}:${hit.id}:${hit.kind}`;
         if (seen.has(key)) continue;
@@ -163,7 +205,54 @@ export function mergeServiceResults(outcomes: ServiceSearchOutcome[]): {
   const groups = [...byDomain.values()].sort(
     (a, b) => domainRank(a.domain) - domainRank(b.domain),
   );
-  return { groups, unavailableDomains: [...unavailable].sort(), failedServices: failed.sort() };
+  return {
+    groups,
+    unavailableDomains: [...unavailable].sort(),
+    failedServices: failed.sort(),
+    suppressedDomains: [...suppressed.values()].sort(
+      (a, b) => a.group.localeCompare(b.group) || a.domain.localeCompare(b.domain),
+    ),
+  };
+}
+
+/**
+ * 数据范围的中文短标签。
+ *
+ * <p>未知取值原样回显 —— 不假装它属于某个已知口径（界面上写「范围未声明」比写错强）。
+ */
+export function scopeLabel(scope: string | null | undefined): string {
+  switch (scope) {
+    case 'ALL':
+      return '全范围';
+    case 'DEPARTMENT':
+      return '本部门';
+    case 'SELF':
+      return '仅本人';
+    case 'TENANT':
+      return '租户级';
+    default:
+      return scope?.trim() ? scope : '范围未声明';
+  }
+}
+
+/** 范围的收窄程度：数字越大越窄（ALL / TENANT 都不收窄）。 */
+export function scopeRank(scope: string | null | undefined): number {
+  switch (scope) {
+    case 'SELF':
+      return 3;
+    case 'DEPARTMENT':
+      return 2;
+    case 'ALL':
+    case 'TENANT':
+      return 1;
+    default:
+      return 0;
+  }
+}
+
+/** 两个范围取**更严**的一侧。 */
+export function narrowerScope(left: string | null | undefined, right: string | null | undefined) {
+  return scopeRank(left) >= scopeRank(right) ? (left ?? '') : (right ?? '');
 }
 
 function domainRank(domain: string): number {

@@ -3,19 +3,27 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Badge, Button, EmptyState, Input, type CommandPaletteGroup } from '@starcon/ui';
-import { Search } from 'lucide-react';
+import { Badge, Button, EmptyState, Input, Segmented, type CommandPaletteGroup } from '@starcon/ui';
+import { Search, TriangleAlert } from 'lucide-react';
 import {
   buildHref,
-  countHits,
   domainLabel,
   hitSubtitle,
   mergeServiceResults,
   MIN_KEYWORD_LENGTH,
   normalizeKeyword,
-  type GlobalSearchGroup,
   type GlobalSearchHit,
 } from './global-search-model';
+import {
+  buildGroupedView,
+  describeGroupedOutcome,
+  emptyGroupedView,
+  filterGroups,
+  groupOptions,
+  permissionNotice,
+  suppressedPartsNotice,
+  type SearchGroupedView,
+} from './global-search-group-model';
 import {
   clearRecentSearches,
   fetchRecentSearches,
@@ -25,7 +33,7 @@ import {
 } from './global-search-client';
 
 /**
- * 1.2.1.1 全局搜索框 —— 前端工作区。
+ * 1.2.1.1 全局搜索框 / 1.2.1.2 搜索结果分组 —— 前端工作区。
  *
  * <p><b>两处入口，同一套逻辑</b>：
  *
@@ -33,7 +41,8 @@ import {
  *   <li><b>⌘K 面板</b>：{@link GlobalSearchProvider} 把结果注入 AppShell 的命令面板
  *       （「业务对象」那个占位组由真实检索结果替换）。</li>
  *   <li><b>独立页</b>：{@link GlobalSearchPageWorkspace} 是 {@code /dashboard/search}，
- *       同一个输入框、同一套分组、同一批错误/空/加载态。</li>
+ *       同一个输入框、同一套分组、同一批错误/空/加载态，
+ *       外加 1.2.1.2 的<b>只看某一组</b>筛选与<b>无权限计数提示</b>。</li>
  * </ul>
  *
  * <p><b>检索在四个服务上并发做，合并在这一层做</b>（蓝图的「前端聚合层」）。
@@ -48,7 +57,8 @@ const DEBOUNCE_MS = 220;
 /** 检索状态：结果、状态行、加载中。 */
 export interface GlobalSearchState {
   keyword: string;
-  groups: GlobalSearchGroup[];
+  /** 1.2.1.2 的分组视图（组 + 计数 + 数据范围 + 无权限提示）。 */
+  view: SearchGroupedView;
   statusText: string;
   loading: boolean;
   recent: GlobalSearchRecentEntry[];
@@ -62,7 +72,7 @@ export interface GlobalSearchState {
 export function useGlobalSearchState(initialKeyword = ''): GlobalSearchState {
   const router = useRouter();
   const [keyword, setKeyword] = useState(initialKeyword);
-  const [groups, setGroups] = useState<GlobalSearchGroup[]>([]);
+  const [view, setView] = useState<SearchGroupedView>(emptyGroupedView);
   const [statusText, setStatusText] = useState('');
   const [loading, setLoading] = useState(false);
   const [recent, setRecent] = useState<GlobalSearchRecentEntry[]>([]);
@@ -84,7 +94,7 @@ export function useGlobalSearchState(initialKeyword = ''): GlobalSearchState {
   const runSearch = useCallback(async (raw: string) => {
     const normalized = normalizeKeyword(raw);
     if (!normalized.ok) {
-      setGroups([]);
+      setView(emptyGroupedView());
       setStatusText(normalized.hint);
       setLoading(false);
       return;
@@ -92,9 +102,9 @@ export function useGlobalSearchState(initialKeyword = ''): GlobalSearchState {
     setLoading(true);
     setStatusText('正在检索…');
     const outcomes = await searchAllServices(normalized.keyword);
-    const merged = mergeServiceResults(outcomes);
-    setGroups(merged.groups);
-    setStatusText(describeOutcome(merged.unavailableDomains, merged.failedServices, merged.groups));
+    const merged = buildGroupedView(mergeServiceResults(outcomes));
+    setView(merged);
+    setStatusText(describeGroupedOutcome(merged));
     setLoading(false);
   }, []);
 
@@ -150,7 +160,7 @@ export function useGlobalSearchState(initialKeyword = ''): GlobalSearchState {
 
   return {
     keyword,
-    groups,
+    view,
     statusText,
     loading,
     recent,
@@ -159,20 +169,6 @@ export function useGlobalSearchState(initialKeyword = ''): GlobalSearchState {
     recordSelection,
     clearRecent,
   };
-}
-
-/** 状态行：把「没权限的域」与「失败的域」分开说。 */
-function describeOutcome(
-  unavailable: string[],
-  failed: string[],
-  groups: GlobalSearchGroup[],
-): string {
-  const parts: string[] = [];
-  if (groups.length) parts.push(`命中 ${countHits(groups)} 条`);
-  if (unavailable.length) parts.push(`${unavailable.length} 个域无权限`);
-  if (failed.length) parts.push(`${failed.join('、')} 服务未响应`);
-  if (!parts.length) return '没有匹配的记录';
-  return parts.join(' · ');
 }
 
 /**
@@ -193,9 +189,9 @@ export function GlobalSearchProvider({
   }) => React.ReactNode;
 }) {
   const state = useGlobalSearchState();
-  const { groups: resultGroups, recent, recordSelection } = state;
+  const { view, recent, recordSelection } = state;
   const groups = useMemo<CommandPaletteGroup[]>(() => {
-    const paletteGroups: CommandPaletteGroup[] = resultGroups.map((group) => ({
+    const paletteGroups: CommandPaletteGroup[] = view.groups.map((group) => ({
       heading: group.label || domainLabel(group.domain),
       items: group.hits.map((hit) => ({
         id: `${group.domain}-${hit.kind}-${hit.id}`,
@@ -219,7 +215,7 @@ export function GlobalSearchProvider({
       });
     }
     return paletteGroups;
-  }, [resultGroups, recent, recordSelection]);
+  }, [view.groups, recent, recordSelection]);
 
   return children({
     groups,
@@ -234,6 +230,8 @@ export function GlobalSearchProvider({
 export function GlobalSearchPageWorkspace() {
   const state = useGlobalSearchState();
   const input = useRef<HTMLInputElement>(null);
+  // 1.2.1.2：「只看某一组」是纯前端过滤，不重新发请求。
+  const [selectedDomain, setSelectedDomain] = useState<string | null>(null);
 
   // 从 URL 带进来的关键词（从「最近搜索」点进来时）：读一次就跑检索。
   useEffect(() => {
@@ -246,6 +244,11 @@ export function GlobalSearchPageWorkspace() {
   useEffect(() => {
     input.current?.focus();
   }, []);
+
+  const groups = state.view.groups;
+  const visible = filterGroups(groups, selectedDomain);
+  const options = groupOptions(groups);
+  const notice = permissionNotice(state.view);
 
   return (
     <div className="space-y-4">
@@ -274,12 +277,47 @@ export function GlobalSearchPageWorkspace() {
         {state.statusText}
       </p>
 
-      {state.groups.map((group) => (
+      {/* 无权限的域整组不返回（不是返回后置灰）—— 只能在提示里点名。 */}
+      {notice && (
+        <div className="border-warning/40 bg-warning-soft flex items-start gap-3 rounded-md border p-3 text-sm">
+          <TriangleAlert className="text-warning mt-0.5 h-4 w-4 shrink-0" />
+          <p>{notice}</p>
+        </div>
+      )}
+
+      {groups.length > 0 && (
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-copy-12 text-muted-foreground">只看某一组</span>
+          <Segmented
+            value={selectedDomain ?? 'ALL'}
+            onChange={(value) => setSelectedDomain(value === 'ALL' ? null : value)}
+            options={options.map((option) => ({
+              value: option.value,
+              label: (
+                <>
+                  {option.label}
+                  <span className="text-label-12 text-muted-foreground ml-1">{option.count}</span>
+                </>
+              ),
+            }))}
+            aria-label="按业务域筛选搜索结果"
+          />
+        </div>
+      )}
+
+      {visible.map((group) => (
         <section key={group.domain} className="space-y-2">
-          <div className="flex items-center gap-2">
-            <h2 className="text-copy-14 font-semibold">{group.label || domainLabel(group.domain)}</h2>
-            <Badge tone="neutral">{group.hits.length}</Badge>
+          <div className="flex flex-wrap items-center gap-2">
+            <h2 className="text-copy-14 font-semibold">{group.label}</h2>
+            <Badge tone="neutral">{group.count}</Badge>
+            <Badge tone="info">{group.dataScopeLabel}</Badge>
           </div>
+          {group.dataScopeNote && (
+            <p className="text-copy-12 text-muted-foreground">{group.dataScopeNote}</p>
+          )}
+          {suppressedPartsNotice(group) && (
+            <p className="text-copy-12 text-warning">{suppressedPartsNotice(group)}</p>
+          )}
           <ul className="divide-border divide-y rounded-md border">
             {group.hits.map((hit) => (
               <li key={`${hit.kind}-${hit.id}`}>
@@ -302,7 +340,7 @@ export function GlobalSearchPageWorkspace() {
         </section>
       ))}
 
-      {!state.loading && !state.groups.length && (
+      {!state.loading && !groups.length && (
         <EmptyState
           icon={<Search className="h-6 w-6" />}
           title={
