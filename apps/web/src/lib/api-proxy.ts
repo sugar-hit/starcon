@@ -297,6 +297,59 @@ const services: readonly {
       /^ip\-detections(?:\/(?:capabilities|detections|alerts|remediations|reviews|external\-queries|inspection\-plans|inspection\-runs)|\/detections\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}|\/alerts\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/status|\/remediations\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/status|\/reviews\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}|\/external\-queries\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/hits|\/status)?|\/inspection\-plans\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}|\/inspection\-runs\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})$/,
   },
   {
+    // 12.1.1.2 应收账龄（finance 服务，卷 12「财务核算」L3 12.1.1 应收下的第二格）。
+    //
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 finance 那条
+    //   alternation 里并分支 —— 那一支是单行超长正则，多车道同时并进去 git 必然判冲突
+    //   （结构性，retry 不会自愈）。既有条目**一字未改、也不重排**。
+    //
+    // ---- 插入锚点选在**第一个 `prefix: 'identity/'` 之前**（约第 300 行）----
+    //   ⚠️ 本文件**不在** merge-union 驱动器的覆盖范围内（.gitattributes 只给
+    //   `packages/api-contracts/src/**` 与 `module-progress.md` 配了驱动）⇒ 它走**普通 git merge**。
+    //   同批三条 finance 车道如果都插在**数组末尾同一个位置**，三边插入不同内容 ⇒ **必然冲突**，
+    //   下一轮并入时该车道会被标 conflict、整个模块交付被卡住一轮。
+    //   ⇒ 本批三条车道的锚点必须**彼此相距 600 行以上**：
+    //     本车道（12.1.1.2，首 token `receivable-aging`）→ 第一个 `identity/` 之前（~300 行）
+    //     12.1.2.1（首 token `payables`）              → 第一个 `warehouse/` 之前（~1379 行）
+    //     12.2.1.1（首 token `receipts`）                → 数组末尾（~10058 行）
+    //   既有条目**一字未改、也不重排** —— 只是把本块从数组末尾搬到这里。
+    //
+    // ---- 首 token「receivable-aging」的零命中核对结论 ----
+    //   本文件既有 200+ 条 services[] 正则里**没有任何一条**含 `receivable-aging`
+    //   这个串（12.1.1.1 那条的首 token 是 `receivables`，全不相同），
+    //   所以「receivable-aging」既是独立字面量，也不会被既有分支的前缀吃掉。
+    //   另核：全文件只有**一个** `prefix: 'finance/'`（12.1.1.1 的），
+    //   它的正则是 `^receivables...`，匹配不到 `receivable-aging/...`。
+    //   （三条 finance 条目的 prefix 都是 `finance/`，但首 token 互不相同 ⇒ 三个正则两两不相交；
+    //     `resolve()` 对同一个 prefix 返回的 `{base: FINANCE_URL}` 也是同一个后端 ⇒
+    //     **数组里的先后顺序不影响正确性**。）
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   receivable-aging/capabilities   能力声明（上游真接通 / 下游缺口归谁）
+    //   receivable-aging/options        筛选项（币种 / 店铺 / 客户）+ 当前生效的账龄区间
+    //   receivable-aging/distribution    账龄分布报表（GET，按店铺 / 客户 / 币种下钻）
+    //   receivable-aging/overdue         逾期清单（GET，真分页 + 真筛选 + 汇总覆盖整个结果集）
+    //   receivable-aging/buckets         账龄区间配置（GET 读 / PUT 整体替换）
+    //
+    // ⚠️ **本模块没有 id 形状的端点**：账龄区间配置是**整体替换**（PUT /buckets），
+    //   不是逐档增删改 —— 档位之间必须连续覆盖 1 天起，这条约束只有对着整份配置才判得出来，
+    //   逐档写会出现「改到一半的中间态」，落在缝里的应收会不属于任何一档。
+    //   所以 `buckets/{code}` **刻意不放行**：后端没有这个映射。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   receivable-aging                     —— 裸路径：没有「一个不存在的汇总列表接口」
+    //   receivable-aging/buckets/NOT_DUE      —— 没有逐档端点（配置是整体替换）
+    //   receivable-aging/settlements         —— 🔴 平台结算（12.3.1）**未交付**
+    //   receivable-aging/write-offs          —— 🔴 坏账核销（12.1.1.3）**未交付**
+    //   receivable-aging/collections          —— 🔴 催收预警（1.3.2.1）**未交付**
+    //   receivable-aging/settlements/...     —— 同上
+    prefix: 'finance/',
+    env: 'FINANCE_URL',
+    fallback: 'http://127.0.0.1:8087',
+    pattern:
+      /^receivable\-aging\/(?:capabilities|options|distribution|overdue|buckets)$/,
+  },
+  {
     prefix: 'identity/',
     env: 'IDENTITY_URL',
     fallback: 'http://127.0.0.1:8081',
@@ -10057,51 +10110,6 @@ const services: readonly {
     fallback: 'http://127.0.0.1:8087',
     pattern:
       /^receivables(?:\/(?:capabilities|options|aging|import\-b2b|policies(?:\/[A-Z_]+)?|collection\-tasks(?:\/(?:generate|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/close))?|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:void|dispute|collection\-tasks))?))?$/,
-  },
-  {
-    // 12.1.1.2 应收账龄（finance 服务，卷 12「财务核算」L3 12.1.1 应收下的第二格）。
-    //
-    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 finance 那条
-    //   alternation 里并分支 —— 那一支是单行超长正则，多车道同时并进去 git 必然判冲突
-    //   （结构性，retry 不会自愈）。既有条目**一字未改、也不重排**。
-    //
-    // ---- 插入锚点选在**数组末尾**（12.1.1.1 那条 finance 之后）----
-    //   与本批其它车道的插入点相距足够远，并入时 git 能干净求并。
-    //
-    // ---- 首 token「receivable-aging」的零命中核对结论 ----
-    //   本文件既有 200+ 条 services[] 正则里**没有任何一条**含 `receivable-aging`
-    //   这个串（12.1.1.1 那条的首 token 是 `receivables`，全不相同），
-    //   所以「receivable-aging」既是独立字面量，也不会被既有分支的前缀吃掉。
-    //   另核：全文件只有**一个** `prefix: 'finance/'`（12.1.1.1 的），
-    //   它的正则是 `^receivables...`，匹配不到 `receivable-aging/...`。
-    //   （三条 finance 条目的 prefix 都是 `finance/`，但首 token 互不相同 ⇒ 三个正则两两不相交；
-    //     `resolve()` 对同一个 prefix 返回的 `{base: FINANCE_URL}` 也是同一个后端 ⇒
-    //     **数组里的先后顺序不影响正确性**。）
-    //
-    // 形状逐个列出（**只放行本模块真实实现的路径**）：
-    //   receivable-aging/capabilities   能力声明（上游真接通 / 下游缺口归谁）
-    //   receivable-aging/options        筛选项（币种 / 店铺 / 客户）+ 当前生效的账龄区间
-    //   receivable-aging/distribution    账龄分布报表（GET，按店铺 / 客户 / 币种下钻）
-    //   receivable-aging/overdue         逾期清单（GET，真分页 + 真筛选 + 汇总覆盖整个结果集）
-    //   receivable-aging/buckets         账龄区间配置（GET 读 / PUT 整体替换）
-    //
-    // ⚠️ **本模块没有 id 形状的端点**：账龄区间配置是**整体替换**（PUT /buckets），
-    //   不是逐档增删改 —— 档位之间必须连续覆盖 1 天起，这条约束只有对着整份配置才判得出来，
-    //   逐档写会出现「改到一半的中间态」，落在缝里的应收会不属于任何一档。
-    //   所以 `buckets/{code}` **刻意不放行**：后端没有这个映射。
-    //
-    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
-    //   receivable-aging                     —— 裸路径：没有「一个不存在的汇总列表接口」
-    //   receivable-aging/buckets/NOT_DUE      —— 没有逐档端点（配置是整体替换）
-    //   receivable-aging/settlements         —— 🔴 平台结算（12.3.1）**未交付**
-    //   receivable-aging/write-offs          —— 🔴 坏账核销（12.1.1.3）**未交付**
-    //   receivable-aging/collections          —— 🔴 催收预警（1.3.2.1）**未交付**
-    //   receivable-aging/settlements/...     —— 同上
-    prefix: 'finance/',
-    env: 'FINANCE_URL',
-    fallback: 'http://127.0.0.1:8087',
-    pattern:
-      /^receivable\-aging\/(?:capabilities|options|distribution|overdue|buckets)$/,
   },
 ];
 
