@@ -54,6 +54,11 @@ public final class SettlementModels {
    * </ul>
    *
    * <p>⇒ 各汇总项之和 == 结算金额，这条等式由 DB 触发器保证（V345 的派生链），不是靠人记。
+   *
+   * <p>⚠️ **12.3.1.2（V348）给本枚举补了一个值 {@link #TAX}（代扣税）**：
+   * 蓝图 12.3.1.2 点名的「代扣税」在原来的七个类别里没有位置，
+   * 而「明细行的类别」与「汇总项的类别」必须同词表（V345 的派生链按 category 聚合），
+   * 所以两张表的 CHECK 被 V348 同时放宽。已有的七个取值语义**一个字没改**。
    */
   public enum SettlementCategory {
     SALES("销售额", 1),
@@ -62,7 +67,16 @@ public final class SettlementModels {
     FBA_FEE("FBA 费用", -1),
     ADVERTISING("广告费", -1),
     COMPENSATION("赔付", 1),
-    ADJUSTMENT("其他调整", 0);
+    ADJUSTMENT("其他调整", 0),
+    /**
+     * 代扣税（12.3.1.2 交易明细加的类别）。
+     *
+     * <p>⚠️ **这是 12.3.1.2 落地时补上的一个值**：V345 建表时类别词表只有七个，
+     * 「代扣税」没有位置 —— 塞进 ADJUSTMENT 会让「其他调整」不再是「其他」，
+     * 塞进 COMMISSION 则是口径错。V348 同时放宽了明细行与汇总项两张表的 CHECK
+     * （派生链要求汇总项词表是明细行词表的超集）。
+     */
+    TAX("代扣税", -1);
 
     private final String label;
 
@@ -135,6 +149,12 @@ public final class SettlementModels {
         case "adjustment", "adjustments", "other", "other_adjustment", "other_adjustments",
             "adjustment_amount", "misc", "调整", "其他调整", "其它调整", "杂项" -> {
           return ADJUSTMENT;
+        }
+        // 代扣税（12.3.1.2 加的类别，见 V348）。
+        case "tax", "withholding_tax", "withholding", "vat", "marketplace_facilitator_tax",
+            "marketplace_facilitator_tax_fee", "sales_tax", "代扣税", "代扣税费", "增值税",
+            "税费", "销售税", "平台代扣税" -> {
+          return TAX;
         }
         default -> {
           return null;

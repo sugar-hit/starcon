@@ -6456,7 +6456,8 @@
               "FBA_FEE",
               "ADVERTISING",
               "COMPENSATION",
-              "ADJUSTMENT"
+              "ADJUSTMENT",
+              "TAX"
             ],
             "type": "string"
           },
@@ -6493,7 +6494,8 @@
               "FBA_FEE",
               "ADVERTISING",
               "COMPENSATION",
-              "ADJUSTMENT"
+              "ADJUSTMENT",
+              "TAX"
             ],
             "type": "string"
           },
@@ -6805,7 +6807,8 @@
               "FBA_FEE",
               "ADVERTISING",
               "COMPENSATION",
-              "ADJUSTMENT"
+              "ADJUSTMENT",
+              "TAX"
             ],
             "type": "string"
           },
@@ -6830,6 +6833,801 @@
       "FinanceSettlementVoidInput": {
         "properties": {
           "reason": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceTransactionBatchInput": {
+        "properties": {
+          "lines": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceTransactionLineInput"
+            },
+            "type": "array"
+          },
+          "settlementId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "source": {
+            "enum": [
+              "MANUAL_UPLOAD",
+              "PLATFORM_SYNC",
+              "MANUAL"
+            ],
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceTransactionCapabilities": {
+        "properties": {
+          "capabilities": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceTransactionCapability"
+            },
+            "type": "array"
+          },
+          "downstreamGaps": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceTransactionDownstreamGap"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceTransactionCapability": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "basis": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "module": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceTransactionCategoryCheck": {
+        "properties": {
+          "category": {
+            "enum": [
+              "SALES",
+              "REFUND",
+              "COMMISSION",
+              "FBA_FEE",
+              "ADVERTISING",
+              "COMPENSATION",
+              "ADJUSTMENT",
+              "TAX"
+            ],
+            "type": "string"
+          },
+          "categoryLabel": {
+            "type": "string"
+          },
+          "lineAmount": {
+            "type": "number"
+          },
+          "lineCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "matched": {
+            "type": "boolean"
+          },
+          "summaryAmount": {
+            "type": "number"
+          },
+          "summaryLineCount": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceTransactionCurrencySummary": {
+        "properties": {
+          "amount": {
+            "type": "number"
+          },
+          "count": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "orderlessCount": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceTransactionDetail": {
+        "properties": {
+          "settlementAmount": {
+            "type": "number"
+          },
+          "settlementReceivedAmount": {
+            "type": "number"
+          },
+          "settlementStatus": {
+            "type": "string"
+          },
+          "summary": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceTransactionSummaryRow"
+            },
+            "type": "array"
+          },
+          "transaction": {
+            "$ref": "#/components/schemas/FinanceTransactionRow"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceTransactionDownstreamGap": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "group": {
+            "type": "string"
+          },
+          "module": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "ownerService": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceTransactionImportInput": {
+        "properties": {
+          "content": {
+            "type": "string"
+          },
+          "fileKey": {
+            "type": "string"
+          },
+          "format": {
+            "enum": [
+              "CSV",
+              "JSON"
+            ],
+            "type": "string"
+          },
+          "note": {
+            "nullable": true,
+            "type": "string"
+          },
+          "settlementId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "source": {
+            "enum": [
+              "MANUAL_UPLOAD",
+              "PLATFORM_SYNC",
+              "MANUAL"
+            ],
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceTransactionImportResult": {
+        "properties": {
+          "duplicated": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "imported": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "parseVersion": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "scanned": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "skipped": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "sourceFile": {
+            "$ref": "#/components/schemas/FinanceTransactionSourceFileRow"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceTransactionInput": {
+        "properties": {
+          "amount": {
+            "type": "number"
+          },
+          "currency": {
+            "nullable": true,
+            "type": "string"
+          },
+          "description": {
+            "nullable": true,
+            "type": "string"
+          },
+          "externalReference": {
+            "nullable": true,
+            "type": "string"
+          },
+          "idempotencyKey": {
+            "nullable": true,
+            "type": "string"
+          },
+          "occurredOn": {
+            "format": "date",
+            "nullable": true,
+            "type": "string"
+          },
+          "orderLineReference": {
+            "nullable": true,
+            "type": "string"
+          },
+          "orderReference": {
+            "nullable": true,
+            "type": "string"
+          },
+          "quantity": {
+            "nullable": true,
+            "type": "number"
+          },
+          "settlementId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "source": {
+            "enum": [
+              "MANUAL_UPLOAD",
+              "PLATFORM_SYNC",
+              "MANUAL"
+            ],
+            "nullable": true,
+            "type": "string"
+          },
+          "transactionType": {
+            "enum": [
+              "ORDER_SALES",
+              "REFUND",
+              "COMMISSION",
+              "FBA_FEE",
+              "STORAGE_FEE",
+              "SHIPPING_FEE",
+              "ADVERTISING",
+              "COMPENSATION",
+              "ADJUSTMENT",
+              "WITHHOLDING_TAX"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceTransactionLineInput": {
+        "properties": {
+          "amount": {
+            "type": "number"
+          },
+          "currency": {
+            "nullable": true,
+            "type": "string"
+          },
+          "description": {
+            "nullable": true,
+            "type": "string"
+          },
+          "externalReference": {
+            "nullable": true,
+            "type": "string"
+          },
+          "idempotencyKey": {
+            "nullable": true,
+            "type": "string"
+          },
+          "occurredOn": {
+            "format": "date",
+            "nullable": true,
+            "type": "string"
+          },
+          "orderLineReference": {
+            "nullable": true,
+            "type": "string"
+          },
+          "orderReference": {
+            "nullable": true,
+            "type": "string"
+          },
+          "quantity": {
+            "nullable": true,
+            "type": "number"
+          },
+          "transactionType": {
+            "enum": [
+              "ORDER_SALES",
+              "REFUND",
+              "COMMISSION",
+              "FBA_FEE",
+              "STORAGE_FEE",
+              "SHIPPING_FEE",
+              "ADVERTISING",
+              "COMPENSATION",
+              "ADJUSTMENT",
+              "WITHHOLDING_TAX"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceTransactionOptions": {
+        "properties": {
+          "categories": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "currencies": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "platforms": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "settlements": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceTransactionSettlementOption"
+            },
+            "type": "array"
+          },
+          "sources": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "transactionTypes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceTransactionPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceTransactionRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "summaryByCurrency": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceTransactionCurrencySummary"
+            },
+            "type": "array"
+          },
+          "summaryByType": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceTransactionTypeSummary"
+            },
+            "type": "array"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceTransactionReconciliation": {
+        "properties": {
+          "balanced": {
+            "type": "boolean"
+          },
+          "categories": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceTransactionCategoryCheck"
+            },
+            "type": "array"
+          },
+          "checkedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "currencyMismatchLineCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "issues": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "lineCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "lineTotal": {
+            "type": "number"
+          },
+          "orderlessFeeLineCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "orderlessLineCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "outsidePeriodLineCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "periodEnd": {
+            "format": "date",
+            "type": "string"
+          },
+          "periodStart": {
+            "format": "date",
+            "type": "string"
+          },
+          "salesWithoutOrderLineCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "settlementAmount": {
+            "type": "number"
+          },
+          "settlementId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "settlementNo": {
+            "type": "string"
+          },
+          "settlementStatus": {
+            "type": "string"
+          },
+          "signViolationLineCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "summaryTotal": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceTransactionRow": {
+        "properties": {
+          "amount": {
+            "type": "number"
+          },
+          "category": {
+            "enum": [
+              "SALES",
+              "REFUND",
+              "COMMISSION",
+              "FBA_FEE",
+              "ADVERTISING",
+              "COMPENSATION",
+              "ADJUSTMENT",
+              "TAX"
+            ],
+            "type": "string"
+          },
+          "categoryLabel": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "externalReference": {
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "idempotencyKey": {
+            "nullable": true,
+            "type": "string"
+          },
+          "lineNo": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "occurredOn": {
+            "format": "date",
+            "nullable": true,
+            "type": "string"
+          },
+          "orderLineReference": {
+            "nullable": true,
+            "type": "string"
+          },
+          "orderReference": {
+            "nullable": true,
+            "type": "string"
+          },
+          "periodEnd": {
+            "format": "date",
+            "type": "string"
+          },
+          "periodStart": {
+            "format": "date",
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "quantity": {
+            "nullable": true,
+            "type": "number"
+          },
+          "rawAmount": {
+            "type": "number"
+          },
+          "settlementId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "settlementNo": {
+            "type": "string"
+          },
+          "shopCode": {
+            "type": "string"
+          },
+          "shopName": {
+            "type": "string"
+          },
+          "source": {
+            "enum": [
+              "MANUAL_UPLOAD",
+              "PLATFORM_SYNC",
+              "MANUAL"
+            ],
+            "type": "string"
+          },
+          "sourceLabel": {
+            "type": "string"
+          },
+          "transactionType": {
+            "enum": [
+              "ORDER_SALES",
+              "REFUND",
+              "COMMISSION",
+              "FBA_FEE",
+              "STORAGE_FEE",
+              "SHIPPING_FEE",
+              "ADVERTISING",
+              "COMPENSATION",
+              "ADJUSTMENT",
+              "WITHHOLDING_TAX"
+            ],
+            "type": "string"
+          },
+          "transactionTypeLabel": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceTransactionSettlementOption": {
+        "properties": {
+          "currency": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "periodEnd": {
+            "format": "date",
+            "type": "string"
+          },
+          "periodStart": {
+            "format": "date",
+            "type": "string"
+          },
+          "settlementNo": {
+            "type": "string"
+          },
+          "shopCode": {
+            "type": "string"
+          },
+          "shopName": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceTransactionSourceFileRow": {
+        "nullable": true,
+        "properties": {
+          "byteSize": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "contentHash": {
+            "type": "string"
+          },
+          "contentType": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "fileKey": {
+            "type": "string"
+          },
+          "fileName": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "parseStatus": {
+            "type": "string"
+          },
+          "parseVersion": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "parseWarnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "parsedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceTransactionSummaryRow": {
+        "properties": {
+          "amount": {
+            "type": "number"
+          },
+          "category": {
+            "enum": [
+              "SALES",
+              "REFUND",
+              "COMMISSION",
+              "FBA_FEE",
+              "ADVERTISING",
+              "COMPENSATION",
+              "ADJUSTMENT",
+              "TAX"
+            ],
+            "type": "string"
+          },
+          "categoryLabel": {
+            "type": "string"
+          },
+          "lineCount": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceTransactionTypeSummary": {
+        "properties": {
+          "amount": {
+            "type": "number"
+          },
+          "category": {
+            "enum": [
+              "SALES",
+              "REFUND",
+              "COMMISSION",
+              "FBA_FEE",
+              "ADVERTISING",
+              "COMPENSATION",
+              "ADJUSTMENT",
+              "TAX"
+            ],
+            "type": "string"
+          },
+          "categoryLabel": {
+            "type": "string"
+          },
+          "count": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "orderlessCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "transactionType": {
+            "enum": [
+              "ORDER_SALES",
+              "REFUND",
+              "COMMISSION",
+              "FBA_FEE",
+              "STORAGE_FEE",
+              "SHIPPING_FEE",
+              "ADVERTISING",
+              "COMPENSATION",
+              "ADJUSTMENT",
+              "WITHHOLDING_TAX"
+            ],
+            "type": "string"
+          },
+          "transactionTypeLabel": {
             "type": "string"
           }
         },
@@ -12984,6 +13782,412 @@
         },
         "tags": [
           "settlement-controller"
+        ]
+      }
+    },
+    "/finance/transactions": {
+      "get": {
+        "operationId": "get_finance_transactions",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "settlementId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "shopId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "transactionType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "category",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "currency",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "source",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "platformCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "occurredFrom",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "occurredTo",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "hasOrder",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceTransactionPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "transaction-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_finance_transactions",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinanceTransactionInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceTransactionRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "transaction-controller"
+        ]
+      }
+    },
+    "/finance/transactions/batch": {
+      "post": {
+        "operationId": "post_finance_transactions_batch",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinanceTransactionBatchInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/FinanceTransactionRow"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "transaction-controller"
+        ]
+      }
+    },
+    "/finance/transactions/capabilities": {
+      "get": {
+        "operationId": "get_finance_transactions_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceTransactionCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "transaction-controller"
+        ]
+      }
+    },
+    "/finance/transactions/import": {
+      "post": {
+        "operationId": "post_finance_transactions_import",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinanceTransactionImportInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceTransactionImportResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "transaction-controller"
+        ]
+      }
+    },
+    "/finance/transactions/options": {
+      "get": {
+        "operationId": "get_finance_transactions_options",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceTransactionOptions"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "transaction-controller"
+        ]
+      }
+    },
+    "/finance/transactions/reconciliation": {
+      "get": {
+        "operationId": "get_finance_transactions_reconciliation",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "settlementId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceTransactionReconciliation"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "transaction-controller"
+        ]
+      }
+    },
+    "/finance/transactions/{id}": {
+      "get": {
+        "operationId": "get_finance_transactions_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceTransactionDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "transaction-controller"
         ]
       }
     },
