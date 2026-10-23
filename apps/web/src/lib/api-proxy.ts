@@ -403,6 +403,74 @@ const services: readonly {
       /^receivable\-aging\/(?:capabilities|options|distribution|overdue|buckets)$/,
   },
   {
+    // 12.1.2.2 付款计划（finance 服务，卷 12「财务核算」L3 12.1.2 应付下的第二格）。
+    //
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 finance 那条
+    //   alternation 里并分支 —— 那一支是单行超长正则，多车道同时并进去 git 必然判冲突
+    //   （结构性，retry 不会自愈）。既有条目**一字未改、也不重排**。
+    //
+    // ---- 插入锚点选在**第一个 `prefix: 'identity/'` 之前** ----
+    //   ⚠️ 本文件**不在** merge-union 驱动器的覆盖范围内（.gitattributes 只给
+    //   `packages/api-contracts/src/**` 与 `module-progress.md` 配了驱动）⇒ 它走**普通 git merge**。
+    //   同批四条车道如果都插在**同一个位置**，四边插入不同内容 ⇒ **必然冲突**。
+    //   ⇒ 本批四条车道的锚点必须**彼此相距 600 行以上**：
+    //     本车道（12.1.2.2，首 token `payment-plans`）→ 第一个 `identity/` 之前（约 350 行）
+    //     同批另外三条 → 「数组最开头」「第一个 `warehouse/` 之前」「数组末尾」
+    //   既有条目**一字未改、也不重排** —— 只是把本块放到这个锚点上。
+    //
+    // ---- 首 token「payment-plans」的零命中核对结论 ----
+    //   本文件既有 200+ 条 services[] 正则里**没有任何一条**含 `payment-plans`
+    //   这个串（全文件 grep 零命中），所以「payment-plans」既是独立字面量，
+    //   也不会被既有分支的前缀吃掉。
+    //   另核：12.1.1.1 的首 token 是 `receivables`、12.1.1.2 是 `receivable-aging`、
+    //   12.1.2.1 是 `payables` —— 与本条**两两不相交**。
+    //   （finance 的几条条目 prefix 都是 `finance/`，但首 token 互不相同 ⇒ 正则两两不相交；
+    //     `resolve()` 对同一个 prefix 返回的 `{base: FINANCE_URL}` 也是同一个后端 ⇒
+    //     **数组里的先后顺序不影响正确性**。）
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   payment-plans                          付款计划表（GET，真分页 + 真筛选 + 真排序 + 汇总）
+    //   payment-plans/capabilities             能力声明（付款执行 / 提醒推送未交付 + 归属模块）
+    //   payment-plans/options                  筛选项（币种 / 状态 / 条件 / 供应商 / 两类规则）
+    //   payment-plans/forecast                 资金需求预测（GET，按币种 × 到期窗口实时聚合）
+    //   payment-plans/reminders                到期提醒清单（GET，真分页 + 真筛选）
+    //   payment-plans/reminders/scan           扫描到期提醒（POST，真实写入口）
+    //   payment-plans/reminders/{uuid}/acknowledge  确认提醒（POST）
+    //   payment-plans/reminders/{uuid}/dismiss      忽略提醒（POST）
+    //   payment-plans/batches                  付款批次清单（GET，真分页 + 真筛选）
+    //   payment-plans/term-rules               账期规则（GET 读 / POST 新建）
+    //   payment-plans/term-rules/{uuid}        改账期规则（PUT）
+    //   payment-plans/milestone-rules          里程碑规则（GET 读 / POST 新建整套）
+    //   payment-plans/milestone-rules/{uuid}   改里程碑规则（PUT，整套替换）
+    //   payment-plans/generate                 生成付款计划（POST，只生成不排批次）
+    //   payment-plans/schedule                 按供应商与到期窗口批量安排付款（POST）
+    //   payment-plans/{uuid}                   单条计划详情（GET）
+    //   payment-plans/{uuid}/cancel            取消计划（POST）
+    //
+    // ⚠️ **刻意不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   payment-plans/{uuid}/execute           —— 🔴 付款执行属 12.2.2.1，**未交付**
+    //   payment-plans/{uuid}/pay               —— 同上
+    //   payment-plans/{uuid}/settle            —— 同上
+    //   payment-plans/payments                 —— 🔴 付款单属 12.2.2.1，**未交付**
+    //   payment-plans/push                     —— 🔴 提醒推送属 1.3，**未交付**
+    //   payment-plans/notifications            —— 同上
+    //   payment-plans/not-a-uuid               —— 非 UUID 段不应被 uuid 分支吃掉
+    //   payment-plans/{uuid}/not-a-shape       —— 多一层仍然 404
+    //   payment-plans/capabilities/{uuid}      —— 字面量段刻意不接 id 段
+    //   payment-plans/forecast/{uuid}          —— 同上
+    //
+    // id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`（不是 `[0-9a-f-]+`）：
+    // 后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行。
+    // 字面量子路径（capabilities / options / forecast / reminders / batches / term-rules /
+    // milestone-rules / generate / schedule）排在 {uuid} 段之前判别 ——
+    // alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    prefix: 'finance/',
+    env: 'FINANCE_URL',
+    fallback: 'http://127.0.0.1:8087',
+    pattern:
+      /^payment\-plans(?:\/(?:capabilities|options|forecast|reminders(?:\/scan)?|batches|term\-rules|milestone\-rules|generate|schedule|reminders\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/(?:acknowledge|dismiss)|term\-rules\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}|milestone\-rules\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/cancel)?))?$/,
+  },
+  {
     prefix: 'identity/',
     env: 'IDENTITY_URL',
     fallback: 'http://127.0.0.1:8081',
