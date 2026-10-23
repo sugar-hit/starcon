@@ -10223,6 +10223,57 @@ const services: readonly {
     pattern:
       /^receipts(?:\/(?:capabilities|options|import|balance|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:void|allocations(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/release)?))?))?$/,
   },
+  {
+    // 12.3.1.1 结算单管理（finance 服务，卷 12「财务核算」L3 12.3.1 结算与对账下的第一格）。
+    //
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 `receivables` / `receipts`
+    //   那两条巨型 alternation 里并分支 —— 那一支是单行超长正则，多车道同时并进去 git 必然判冲突
+    //   （结构性，retry 不会自愈）。既有条目**一字未改、也不重排**。
+    //
+    // ---- 插入锚点选在**数组末尾**（`receipts` 那条之后）----
+    //   与本批其它车道的插入点相距足够远 ⇒ 并入时 git 能干净求并。
+    //
+    // ---- 首 token「settlement」的零命中核对结论 ----
+    //   本文件既有 **187** 条 services[] 正则里**没有任何一条**能命中 `settlement` 开头的形状：
+    //   同服务的兄弟模块首 token 分别是 `receivables`（12.1.1.1）与 `receipts`（12.2.1.1），
+    //   两者与 `settlement` 没有任何公共前缀（`receipt` vs `settle` 第 4 个字母就分岔）；
+    //   其余 185 条与 `settlement` 无公共前缀。
+    //   逐条用 `new RegExp(pat).test('…')` 实测过：既有全部正则对本模块的 10 个正向 shape
+    //   **零命中**，本模块的 8 个负向 shape 对既有正则也**零命中**。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   settlement/capabilities      能力声明（哪些上游真接通 + 缺口归谁）
+    //   settlement/options           筛选项（状态 / 来源 / 币种 / 平台）
+    //   settlement/shops             店铺选项（上游 2 渠道与店铺 2.3.1.1，经授权 HTTP 只读）
+    //   settlement/cycles             结算周期配置列表（GET）/ 登记改写（POST）
+    //   settlement                   列表（GET，真分页 + 真筛选 + 汇总）/ 手工登记（POST）
+    //   settlement/import            平台账单导入（POST，CSV / JSON，真解析 + 真入库 + 幂等）
+    //   settlement/{uuid}            单条详情（GET：单头 + 汇总项 + 明细行 + 事件流 + 原始文件）
+    //   settlement/{uuid}/difference 与我方账的差额（GET，实时计算）
+    //   settlement/{uuid}/arrival    登记到账（POST）
+    //   settlement/{uuid}/void       作废（POST，终态）
+    //
+    // 判别顺序：字面量子路径（capabilities / options / shops / cycles / import）排在 {uuid} 段之前 ——
+    // alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   settlement/{uuid}/settle       —— 🔴 核销（12.2.1.2）**未交付**
+    //   settlement/{uuid}/write-off    —— 🔴 坏账核销（12.1.1.3）**未交付**
+    //   settlement/{uuid}/reconcile    —— 🔴 自动对账任务（12.3.2.1）**未交付**
+    //   settlement/{uuid}/profit       —— 🔴 利润（13）**未交付**
+    //   settlement/{uuid}/sync         —— 🔴 平台结算报告自动同步（上游「卷 02 同步」）**未交付**
+    //   settlement/{uuid}/not-a-shape  —— 本模块的动作只有 arrival / void / difference
+    //   settlement/not-a-uuid          —— 非 UUID 段不应被 uuid 分支吃掉
+    //   settlement/settlements        —— 交替写错就会互相吃掉，必须反向钉住
+    //
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //   （不是 `[0-9a-f-]+`）：后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行。
+    prefix: 'finance/',
+    env: 'FINANCE_URL',
+    fallback: 'http://127.0.0.1:8087',
+    pattern:
+      /^settlement(?:\/(?:capabilities|options|shops|cycles|import|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:arrival|void|difference))?))?$/,
+  },
 ];
 
 function resolve(path: string) {
