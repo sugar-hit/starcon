@@ -4439,6 +4439,673 @@
           }
         },
         "type": "object"
+      },
+      "FinanceWriteOffAdvanceBalance": {
+        "properties": {
+          "asOf": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "byCurrency": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceWriteOffAdvanceCurrencySummary"
+            },
+            "type": "array"
+          },
+          "ledgerCount": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceWriteOffAdvanceCurrencySummary": {
+        "properties": {
+          "count": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "flaggedAmount": {
+            "type": "number"
+          },
+          "parkedAmount": {
+            "type": "number"
+          },
+          "totalAmount": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceWriteOffAdvanceRow": {
+        "properties": {
+          "amount": {
+            "type": "number"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "receiptId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "receiptNo": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "OPEN",
+              "RELEASED",
+              "REVERSED"
+            ],
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "writeOffId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "writeOffNo": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceWriteOffAllocationInput": {
+        "properties": {
+          "amount": {
+            "type": "number"
+          },
+          "note": {
+            "nullable": true,
+            "type": "string"
+          },
+          "receivableLineId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "SETTLEMENT",
+              "ADVANCE"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceWriteOffAllocationRow": {
+        "properties": {
+          "allocationType": {
+            "enum": [
+              "SETTLEMENT",
+              "ADVANCE"
+            ],
+            "type": "string"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "lineNo": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "orderNo": {
+            "nullable": true,
+            "type": "string"
+          },
+          "receiptId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "receivableId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "receivableLineId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "receivableNo": {
+            "nullable": true,
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "POSTED",
+              "REVERSED"
+            ],
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "writeOffId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceWriteOffAutoMatchInput": {
+        "properties": {
+          "amount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "dateToleranceDays": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "matchDate": {
+            "format": "date",
+            "nullable": true,
+            "type": "string"
+          },
+          "note": {
+            "nullable": true,
+            "type": "string"
+          },
+          "orderNo": {
+            "type": "string"
+          },
+          "receiptId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceWriteOffAutoMatchResult": {
+        "properties": {
+          "candidates": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceWriteOffMatchCandidate"
+            },
+            "type": "array"
+          },
+          "writeOff": {
+            "$ref": "#/components/schemas/FinanceWriteOffRow"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceWriteOffCapabilities": {
+        "properties": {
+          "capabilities": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceWriteOffCapability"
+            },
+            "type": "array"
+          },
+          "downstreamGaps": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceWriteOffDownstreamGap"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceWriteOffCapability": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "basis": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "module": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceWriteOffCurrencySummary": {
+        "properties": {
+          "advanceAmount": {
+            "type": "number"
+          },
+          "count": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "settlementAmount": {
+            "type": "number"
+          },
+          "totalAmount": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceWriteOffDetail": {
+        "properties": {
+          "allocations": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceWriteOffAllocationRow"
+            },
+            "type": "array"
+          },
+          "events": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceWriteOffEventRow"
+            },
+            "type": "array"
+          },
+          "writeOff": {
+            "$ref": "#/components/schemas/FinanceWriteOffRow"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceWriteOffDownstreamGap": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "group": {
+            "type": "string"
+          },
+          "module": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "ownerService": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceWriteOffEventRow": {
+        "properties": {
+          "actorId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "eventType": {
+            "type": "string"
+          },
+          "fromStatus": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "occurredAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "toStatus": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceWriteOffInput": {
+        "properties": {
+          "allocations": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceWriteOffAllocationInput"
+            },
+            "type": "array"
+          },
+          "note": {
+            "nullable": true,
+            "type": "string"
+          },
+          "occurredAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "receiptId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceWriteOffMatchCandidate": {
+        "properties": {
+          "amount": {
+            "type": "number"
+          },
+          "confirmedDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "lineNo": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "matchDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "matchedAmount": {
+            "type": "number"
+          },
+          "openAmount": {
+            "type": "number"
+          },
+          "orderNo": {
+            "nullable": true,
+            "type": "string"
+          },
+          "reasons": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "receivableId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "receivableLineId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "receivableNo": {
+            "type": "string"
+          },
+          "settledAmount": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceWriteOffOptions": {
+        "properties": {
+          "currencies": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "modes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "statuses": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceWriteOffPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceWriteOffRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "summaryByCurrency": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceWriteOffCurrencySummary"
+            },
+            "type": "array"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceWriteOffPending": {
+        "properties": {
+          "lines": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceWriteOffPendingLine"
+            },
+            "type": "array"
+          },
+          "receipts": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceWriteOffPendingReceipt"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceWriteOffPendingLine": {
+        "properties": {
+          "amount": {
+            "type": "number"
+          },
+          "confirmedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "dueDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "lineNo": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "openAmount": {
+            "type": "number"
+          },
+          "orderNo": {
+            "nullable": true,
+            "type": "string"
+          },
+          "receivableId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "receivableNo": {
+            "type": "string"
+          },
+          "settledAmount": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceWriteOffPendingReceipt": {
+        "properties": {
+          "advanceFlag": {
+            "type": "boolean"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "availableAmount": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "openAdvanceAmount": {
+            "type": "number"
+          },
+          "payerName": {
+            "type": "string"
+          },
+          "receiptNo": {
+            "type": "string"
+          },
+          "receivedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "settledAmount": {
+            "type": "number"
+          },
+          "unsettledAmount": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceWriteOffReverseInput": {
+        "properties": {
+          "reason": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceWriteOffRow": {
+        "properties": {
+          "actorId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "advanceAmount": {
+            "type": "number"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "mode": {
+            "enum": [
+              "AUTO_MATCH",
+              "MANUAL",
+              "ADVANCE_PARKING"
+            ],
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "occurredAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "receiptId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "receiptNo": {
+            "type": "string"
+          },
+          "reversedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "settlementAmount": {
+            "type": "number"
+          },
+          "status": {
+            "enum": [
+              "POSTED",
+              "REVERSED"
+            ],
+            "type": "string"
+          },
+          "totalAmount": {
+            "type": "number"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "writeOffNo": {
+            "type": "string"
+          }
+        },
+        "type": "object"
       }
     }
   },
@@ -8347,6 +9014,559 @@
         },
         "tags": [
           "receivable-controller"
+        ]
+      }
+    },
+    "/finance/write-off": {
+      "get": {
+        "operationId": "get_finance_write_off",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "mode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "currency",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "receiptId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceWriteOffPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "write-off-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_finance_write_off",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinanceWriteOffInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceWriteOffDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "write-off-controller"
+        ]
+      }
+    },
+    "/finance/write-off/advance": {
+      "get": {
+        "operationId": "get_finance_write_off_advance",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "currency",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/FinanceWriteOffAdvanceRow"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "write-off-controller"
+        ]
+      }
+    },
+    "/finance/write-off/advance-balance": {
+      "get": {
+        "operationId": "get_finance_write_off_advance_balance",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceWriteOffAdvanceBalance"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "write-off-controller"
+        ]
+      }
+    },
+    "/finance/write-off/advance/{ledgerId}/release": {
+      "post": {
+        "operationId": "post_finance_write_off_advance_ledgerId_release",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "ledgerId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceWriteOffAdvanceRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "write-off-controller"
+        ]
+      }
+    },
+    "/finance/write-off/auto-match": {
+      "post": {
+        "operationId": "post_finance_write_off_auto_match",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinanceWriteOffAutoMatchInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceWriteOffAutoMatchResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "write-off-controller"
+        ]
+      }
+    },
+    "/finance/write-off/auto-match/candidates": {
+      "get": {
+        "operationId": "get_finance_write_off_auto_match_candidates",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "receiptId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "orderNo",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "amount",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "in": "query",
+            "name": "matchDate",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dateToleranceDays",
+            "required": false,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/FinanceWriteOffMatchCandidate"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "write-off-controller"
+        ]
+      }
+    },
+    "/finance/write-off/capabilities": {
+      "get": {
+        "operationId": "get_finance_write_off_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceWriteOffCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "write-off-controller"
+        ]
+      }
+    },
+    "/finance/write-off/options": {
+      "get": {
+        "operationId": "get_finance_write_off_options",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceWriteOffOptions"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "write-off-controller"
+        ]
+      }
+    },
+    "/finance/write-off/pending": {
+      "get": {
+        "operationId": "get_finance_write_off_pending",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceWriteOffPending"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "write-off-controller"
+        ]
+      }
+    },
+    "/finance/write-off/{id}": {
+      "get": {
+        "operationId": "get_finance_write_off_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceWriteOffDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "write-off-controller"
+        ]
+      }
+    },
+    "/finance/write-off/{id}/reverse": {
+      "post": {
+        "operationId": "post_finance_write_off_id_reverse",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinanceWriteOffReverseInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceWriteOffDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "write-off-controller"
         ]
       }
     }

@@ -1577,6 +1577,56 @@ const services: readonly {
       /^(?:payables(?:\/(?:capabilities|options|unpaid|policies(?:\/[A-Z_]+)?|import\-purchase\-arrivals|import\-first\-mile|import\-ad\-spend|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/void)?))?|prepayments(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:allocations|void))?)?)$/,
   },
   {
+    // 12.2.1.2 核销（finance 服务）。纯**新增一条独立的 services[] 元素**：
+    // 既有条目**一字未改、也不重排** —— 本文件是多车道共用的累积型白名单，
+    // 每条服务规则是一段超长单行正则，往同一条 alternation 里并分支会让
+    // 同批多车道并入时 git 必然判冲突（结构性，retry 不会自愈）。
+    //
+    // ---- 插入锚点固定在 services[] 里**第一个 `prefix: 'warehouse/'` 那条元素之前** ----
+    //   `warehouse/` 在本文件里出现多次（认准**第一个**）：本条插在它那条元素**之前**。
+    //   同批其它车道的锚点分别是「数组最开头」「第一个 `prefix: 'identity/'` 之前」「数组末尾」，
+    //   各自相距 600 行以上，git 能干净求并。
+    //
+    // ---- 首 token「write-off」的零命中核对结论（在本文件全文上实测）----
+    //   本文件既有 200+ 条 services[] 正则里**没有任何一条的首 token 是 `write-off`**：
+    //   既有与「核销」相关的字面量都是**子路径**（`receivables/{uuid}/write-off`、
+    //   `receipts/{uuid}/write-off`、`receivable-aging/write-offs`、`payables/{uuid}/write-off`），
+    //   首 token 分别是 receivables / receipts / receivable-aging / payables —— 与本条互不相同。
+    //   ⇒ 本条既不会被既有分支的前缀吃掉，也不会吃掉别人的路由。
+    //
+    // ---- 与同服务其它 finance 条目的先后顺序**不影响正确性** ----
+    //   resolve() 对同一个 prefix 只返回 `{base: FINANCE_URL}`（同一个后端），
+    //   而各条 finance 条目的首 token 互不相同（`receivables` / `receipts` / `payables` /
+    //   `prepayments` / `write-off`）、正则两两不相交 ⇒ 谁先谁后都命中同一条正确路由。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   write-off                            核销记录集合（GET 真分页 + 真筛选 + 汇总；POST 人工指定核销）
+    //   write-off/capabilities               能力声明（哪些真接通 + 缺口归谁）
+    //   write-off/options                    筛选项（状态 / 方式 / 币种）
+    //   write-off/pending                    待核销视图（可核销的收款 + **应收明细行**）
+    //   write-off/advance-balance            预收余额（按币种分开，两段口径不重复计数）
+    //   write-off/advance                    预收挂账行列表
+    //   write-off/advance/{uuid}/release     释放一笔预收挂账
+    //   write-off/auto-match                 自动匹配核销（金额 + 订单号 + 日期三者对上）
+    //   write-off/auto-match/candidates      自动匹配候选（只读，不落库）
+    //   write-off/{uuid}                     核销记录详情（单头 + 分配明细 + 事件流）
+    //   write-off/{uuid}/reverse             核销撤销（把明细行的已核销金额退回去）
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   write-off/{uuid}/write-off           —— 🔴 坏账核销（12.1.1.3）**未交付**
+    //   write-off/{uuid}/settle              —— 🔴 付款（12.2.2.1）**未交付**
+    //   write-off/profit                     —— 🔴 回款口径 / 利润（13）**未交付**
+    //   write-off/not-a-uuid                 —— 非 UUID 段不应被 uuid 分支吃掉
+    //   write-off/{uuid}/not-a-shape         —— 本模块的动作只有 reverse
+    //   write-off/auto-match/{uuid}          —— 自动匹配不接受 id 段
+    //   write-off/capabilities/{uuid}        —— 字面量段刻意不接 id 段
+    prefix: 'finance/',
+    env: 'FINANCE_URL',
+    fallback: 'http://127.0.0.1:8087',
+    pattern:
+      /^write\-off(?:\/(?:capabilities|options|pending|advance-balance|auto\-match(?:\/candidates)?|advance(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/release)?|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/reverse)?))?$/,
+  },
+  {
     // 1.1.3.1 库存风险（卷 01 工作台与门户）。纯**新增一条独立的 services[] 元素**：
     // 既有那条 `warehouse/` 巨型 alternation **一字未动、也不重排** ——
     // 本文件是多车道共用的累积型白名单，每条服务规则是一段超长单行正则，
