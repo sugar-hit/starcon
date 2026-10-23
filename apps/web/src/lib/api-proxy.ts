@@ -10172,6 +10172,57 @@ const services: readonly {
     pattern:
       /^receivables(?:\/(?:capabilities|options|aging|import\-b2b|policies(?:\/[A-Z_]+)?|collection\-tasks(?:\/(?:generate|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/close))?|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:void|dispute|collection\-tasks))?))?$/,
   },
+  {
+    // 12.2.1.1 收款单（finance 服务，卷 12「财务核算」L3 12.2.1 资金收付下的第一格）。
+    //
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 `receivables`（12.1.1.1）那条
+    //   alternation 里并分支 —— 多车道同时并入时 git 必然判冲突（结构性，retry 不会自愈）。
+    //   既有条目**一字未改、也不重排**。
+    //
+    // ---- 插入锚点选在**数组末尾**（`receivables` 那条之后）----
+    //   与本批其它车道的插入点相距足够远 ⇒ 并入时 git 能干净求并。
+    //
+    // ---- 首 token「receipts」的零命中核对结论 ----
+    //   本文件既有 200+ 条 services[] 正则里**没有任何一条**能命中 `receipts` 开头的形状：
+    //   既有的 `receivables`（12.1.1.1）首 token 是 `receivables`（第 7 个字母就是 a，不是 p），
+    //   `b2b-orders/receivables` 属于 trade 的巨型 alternation（首 token 是 `b2b-orders`），
+    //   其余 200+ 条与 `receipts` 无公共前缀。
+    //   逐条用 `new RegExp(pat).test('…')` 实测过：既有全部正则对本模块的 9 个 shape
+    //   **零命中**，且本模块的 9 个负向 shape 对既有正则**也零命中**。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   receipts/capabilities              能力声明（哪些上游真接通 + 缺口归谁）
+    //   receipts/options                   筛选项（来源 / 来源系统 / 状态 / 币种 / 付款方）
+    //   receipts                           列表（GET，真分页 + 真筛选 + 汇总）/ 建单（POST）
+    //   receipts/{uuid}                    单条详情（GET：单头 + 预留核销关系 + 事件流）
+    //   receipts/import                    到账流水导入（POST，CSV / JSON，幂等）
+    //   receipts/balance                   未核销余额（GET，按币种分开）
+    //   receipts/{uuid}/allocations        登记预留核销（POST，**预留不是核销**）
+    //   receipts/{uuid}/allocations/{uuid}/release  释放预留核销（POST）
+    //   receipts/{uuid}/void               作废（POST，终态）
+    //
+    // 判别顺序：字面量子路径（capabilities / options / import / balance）排在 {uuid} 段之前 ——
+    // alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   receipts/{uuid}/settle             —— 🔴 核销（12.2.1.2）**未交付**，
+    //                                          本模块不提供任何改核销状态的写入口
+    //   receipts/{uuid}/write-off          —— 🔴 坏账核销（12.1.1.3）**未交付**
+    //   receipts/settlements               —— 🔴 平台结算（12.3.1）**未交付**
+    //   receipts/accounts                  —— 🔴 受管资金账户（12.7.1）**未交付**
+    //   receipts/{uuid}/not-a-shape        —— 本模块的动作只有 void / allocations
+    //   receipts/not-a-uuid                —— 非 UUID 段不应被 uuid 分支吃掉
+    //   receipts/receipts                  —— 交替写错就会互相吃掉，必须反向钉住
+    //   receipt                            —— 单数形态不存在
+    //
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //   （不是 `[0-9a-f-]+`）：后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行。
+    prefix: 'finance/',
+    env: 'FINANCE_URL',
+    fallback: 'http://127.0.0.1:8087',
+    pattern:
+      /^receipts(?:\/(?:capabilities|options|import|balance|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:void|allocations(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/release)?))?))?$/,
+  },
 ];
 
 function resolve(path: string) {
