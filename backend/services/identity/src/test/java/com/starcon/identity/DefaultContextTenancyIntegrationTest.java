@@ -27,6 +27,11 @@ import org.junit.jupiter.api.Test;
  * 断言读到零行**。只在 HTTP 层断言「列表里没有对方数据」是不够的 —— 那个结论可能来自
  * 过滤条件写对了，而底下的行照样在库里可见。
  *
+ * <p><b>行数断言一律按 membership 收窄</b>：父租户是 {@code login()} 登录的固定 local-admin 租户，
+ * 而本仓 identity 的集成测试**共用同一个 Testcontainers 库** ⇒ 别的测试类也会往这个租户里写
+ * {@code default-context} 行。所以「这个租户里 page_key=default-context 的行有几条」会随
+ * **测试类执行顺序**漂移 —— 断言只问「**我这一行**在 / 不在」，不写死整租户的行数。
+ *
  * <p><b>池压到 1 条连接</b>（{@link IdentityIntegrationTestBase} 已设）：只有复用同一条物理连接，
  * 「归还后不串租户」才是真的被验证过。
  */
@@ -52,6 +57,54 @@ class DefaultContextTenancyIntegrationTest extends DefaultContextTestBase {
 
   private List<Record> rowsIn(UUID tenant, String statement, Object... bindings) {
     return tx().run(tenant, () -> List.copyOf(sql.fetch(statement, bindings)));
+  }
+
+  /**
+   * 当前会话的 membership_id（租户内的「这个人」）。
+   *
+   * <p>走公开的 {@code GET /auth/memberships}：{@code app_user} 对应用角色不可读，硬查会撞权限。
+   */
+  private UUID membershipOf(String token) throws Exception {
+    UUID tenant = tenantOf(token);
+    for (JsonNode membership : request(token, "GET", "/auth/memberships", null, 200)) {
+      if (tenant.toString().equals(membership.get("tenantId").asText())) {
+        return UUID.fromString(membership.get("id").asText());
+      }
+    }
+    throw new IllegalStateException("会话里找不到当前租户的成员关系");
+  }
+
+  /**
+   * 在某个租户的事务里按 membership 查这一页的行（用来验证「读不到别人的行」）。
+   *
+   * <p>刻意带上 {@code membership_id}：父租户是 {@code login()} 的固定 local-admin 租户，
+   * 同一个库里别的测试类、乃至本类的另一个用例也会往这个租户里写 {@code default-context} 行 ⇒
+   * 只按 page_key 数行会把**别人的行**算进来，数量断言就会随测试类执行顺序漂移。
+   */
+  private List<Record> rowsIn(UUID tenant, UUID membership) {
+    return rowsIn(
+        tenant,
+        "select id from user_preference where page_key = ? and membership_id = ?::uuid",
+        DefaultContextRules.PAGE_KEY,
+        membership);
+  }
+
+  /** 某个会话自己那一页的行。 */
+  private List<Record> rowsOf(String token) throws Exception {
+    return rowsIn(tenantOf(token), membershipOf(token));
+  }
+
+  /** 某个会话自己那一页的载荷（用来断言内容没被别人改掉）。 */
+  private List<String> payloadsOf(String token) throws Exception {
+    return rowsIn(
+            tenantOf(token),
+            "select preference::text as pref from user_preference"
+                + " where page_key = ? and membership_id = ?::uuid",
+            DefaultContextRules.PAGE_KEY,
+            membershipOf(token))
+        .stream()
+        .map(row -> row.get("pref", String.class))
+        .toList();
   }
 
   private JsonNode save(String token, String shopId) throws Exception {
@@ -150,21 +203,12 @@ class DefaultContextTenancyIntegrationTest extends DefaultContextTestBase {
         .as("同租户的同事不得读到我的默认上下文")
         .isFalse();
 
-    // 按主键直查：子租户租户事务里读父租户的行 → 零行
-    assertThat(
-            rowsIn(
-                tenantOf(child),
-                "select id from user_preference where page_key = ?",
-                DefaultContextRules.PAGE_KEY))
+    // 按主键直查：子租户租户事务里读父租户的那一行 → 零行
+    UUID parentMembership = membershipOf(parent);
+    assertThat(rowsIn(tenantOf(child), parentMembership))
         .as("子租户按页面 key 直查父租户的默认上下文必须读到零行")
         .isEmpty();
-    assertThat(
-            rowsIn(
-                tenantOf(parent),
-                "select id from user_preference where page_key = ?",
-                DefaultContextRules.PAGE_KEY))
-        .as("父租户自己那一行确实在")
-        .hasSize(1);
+    assertThat(rowsOf(parent)).as("父租户自己那一行确实在").hasSize(1);
 
     // 别人**写**同一个页面 key 也覆盖不了我的
     save(child, childShop.toString());
@@ -172,20 +216,9 @@ class DefaultContextTenancyIntegrationTest extends DefaultContextTestBase {
     assertThat(read(parent).get("shop").get("id").asText())
         .as("别人的写不得覆盖我的默认上下文")
         .isEqualTo(parentShop.toString());
-    assertThat(
-            rowsIn(
-                tenantOf(parent),
-                "select id from user_preference where page_key = ?",
-                DefaultContextRules.PAGE_KEY))
-        .as("同租户不同成员各存各的：两行")
-        .hasSize(2);
-    assertThat(
-            rowsIn(
-                tenantOf(child),
-                "select id from user_preference where page_key = ?",
-                DefaultContextRules.PAGE_KEY))
-        .as("子租户写的那一行落在子租户自己的库里")
-        .hasSize(1);
+    assertThat(rowsOf(parent)).as("同租户不同成员各存各的：我这一行没被动").hasSize(1);
+    assertThat(rowsOf(colleague)).as("同事写的是他自己那一行").hasSize(1);
+    assertThat(rowsOf(child)).as("子租户写的那一行落在子租户自己的库里").hasSize(1);
   }
 
   // ------------------------------------------------------------------
@@ -240,20 +273,10 @@ class DefaultContextTenancyIntegrationTest extends DefaultContextTestBase {
                     json.writeValueAsString(
                         Map.of("shopId", anotherParentShop.toString()))))
         .andExpect(status().isOk());
-    assertThat(
-            rowsIn(
-                tenantOf(parent),
-                "select id from user_preference where page_key = ?",
-                DefaultContextRules.PAGE_KEY))
+    assertThat(rowsOf(parent))
         .as("伪造租户头的写仍然落在父租户自己的库")
         .hasSize(1);
-    assertThat(
-            rowsIn(
-                tenantOf(child),
-                "select id from user_preference where page_key = ?",
-                DefaultContextRules.PAGE_KEY))
-        .as("伪造租户头不得把行写进子租户的库")
-        .isEmpty();
+    assertThat(rowsOf(child)).as("伪造租户头不得把行写进子租户的库").isEmpty();
   }
 
   // ------------------------------------------------------------------
@@ -277,9 +300,16 @@ class DefaultContextTenancyIntegrationTest extends DefaultContextTestBase {
 
     // 池大小是 1（见基类），下面每一轮都必然复用同一条物理连接。
     //
-    // 断言用「行数不变」而不是「父租户只有一行」：同一个租户里可能还有别的成员
-    // （本类的另一个用例会在父租户里造一个同事并给他存一份），那是**别人的**行，
-    // 与本用例要证明的「子租户的写不落到父租户」无关。
+    // 行数断言按 **membership** 收窄：问的是「**我这一行**在不在」，而不是
+    // 「这个租户里 page_key=default-context 的行有几条」—— 父租户是 login() 的固定
+    // local-admin 租户，别的测试类也会往里写这一页的行，写死整租户的行数就会随
+    // 测试类执行顺序漂移。
+    UUID parentMembership = membershipOf(parent);
+    UUID childMembership = membershipOf(child);
+
+    // 整租户的行数只做**基线不变**比较，不写死数字：父租户是共享租户，基线在用例
+    // 开始时取一次，之后「谁往父租户里多写了一行」就能被看见（这条是租户级的，
+    // 按 membership 收窄看不到 —— 别人的 membership 不在我的断言范围里）。
     long parentRowsBefore =
         rowsIn(
                 tenantOf(parent),
@@ -306,12 +336,11 @@ class DefaultContextTenancyIntegrationTest extends DefaultContextTestBase {
       stubShops(child, shopListJson(shopJson(next, "C-" + tag + "-" + i, "子租户店", "ACTIVE")));
       save(child, next.toString());
       expectedChildShop = next.toString();
-      assertThat(
-              rowsIn(
-                  tenantOf(child),
-                  "select id from user_preference where page_key = ?",
-                  DefaultContextRules.PAGE_KEY))
+      assertThat(rowsIn(tenantOf(child), childMembership))
           .as("第 %d 轮：子租户的写必须落在子租户自己的库", i)
+          .hasSize(1);
+      assertThat(rowsIn(tenantOf(parent), parentMembership))
+          .as("第 %d 轮：子租户的写不得动我在父租户里的那一行", i)
           .hasSize(1);
       assertThat(
               rowsIn(
@@ -329,15 +358,9 @@ class DefaultContextTenancyIntegrationTest extends DefaultContextTestBase {
                   .size())
           .as("第 %d 轮：子租户自己的那一行还在", i)
           .isEqualTo(childRowsBefore);
-      assertThat(
-              rowsIn(
-                      tenantOf(parent),
-                      "select preference::text as pref from user_preference where page_key = ?",
-                      DefaultContextRules.PAGE_KEY)
-                  .stream()
-                  .anyMatch(row -> row.get("pref", String.class).contains(parentShop.toString())))
+      assertThat(payloadsOf(parent))
           .as("第 %d 轮：父租户自己那一行的内容没有被子租户改掉", i)
-          .isTrue();
+          .anyMatch(pref -> pref.contains(parentShop.toString()));
 
       // 回到父租户：连接刚被子租户用过，父租户必须仍然只见父租户
       assertThat(read(parent).get("shop").get("id").asText())
