@@ -928,6 +928,825 @@
         },
         "type": "object"
       },
+      "FinanceCostAllocationBatch": {
+        "properties": {
+          "allocatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "allocatedTotal": {
+            "description": "分摊总额（🔴 恒等于被分摊总额）",
+            "type": "number"
+          },
+          "basisUnavailableCount": {
+            "description": "基数不可得的对象数",
+            "format": "int32",
+            "type": "integer"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "poolId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "poolKey": {
+            "type": "string"
+          },
+          "poolName": {
+            "type": "string"
+          },
+          "revertedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "roundingDifference": {
+            "description": "舍入差（被补回去的零头，不消失）",
+            "type": "number"
+          },
+          "roundingTargetCode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "roundingTargetType": {
+            "enum": [
+              "SKU",
+              "SPU",
+              "SHOP",
+              "ORDER",
+              "CATEGORY"
+            ],
+            "nullable": true,
+            "type": "string"
+          },
+          "ruleCode": {
+            "type": "string"
+          },
+          "ruleId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "ruleName": {
+            "type": "string"
+          },
+          "sourceTotal": {
+            "description": "被分摊总额",
+            "type": "number"
+          },
+          "status": {
+            "enum": [
+              "ALLOCATED",
+              "REVERTED"
+            ],
+            "type": "string"
+          },
+          "targetCount": {
+            "description": "参与分摊的对象数",
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceCostAllocationBatchCurrencyTotal": {
+        "properties": {
+          "allocatedTotal": {
+            "type": "number"
+          },
+          "batchCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "sourceTotal": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceCostAllocationBatchDetail": {
+        "properties": {
+          "batch": {
+            "$ref": "#/components/schemas/FinanceCostAllocationBatch"
+          },
+          "results": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceCostAllocationResult"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceCostAllocationBatchPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceCostAllocationBatch"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalsByCurrency": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceCostAllocationBatchCurrencyTotal"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceCostAllocationCapabilities": {
+        "properties": {
+          "capabilities": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceCostAllocationCapability"
+            },
+            "type": "array"
+          },
+          "gaps": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceCostAllocationDownstreamGap"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceCostAllocationCapability": {
+        "properties": {
+          "available": {
+            "description": "本模块真接通了没有",
+            "type": "boolean"
+          },
+          "dimension": {
+            "description": "这一维是什么",
+            "type": "string"
+          },
+          "evidence": {
+            "description": "依据（表 / 端点 / 上游模块）",
+            "type": "string"
+          },
+          "moduleId": {
+            "description": "模块 ID",
+            "type": "string"
+          },
+          "note": {
+            "description": "说明",
+            "type": "string"
+          },
+          "ownerModule": {
+            "description": "不归本模块时归谁",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceCostAllocationDownstreamGap": {
+        "properties": {
+          "available": {
+            "description": "已交付没有",
+            "type": "boolean"
+          },
+          "moduleId": {
+            "description": "模块 ID",
+            "type": "string"
+          },
+          "name": {
+            "description": "模块名",
+            "type": "string"
+          },
+          "note": {
+            "description": "说明",
+            "type": "string"
+          },
+          "ownerVolume": {
+            "description": "归属卷",
+            "type": "string"
+          },
+          "service": {
+            "description": "归属服务",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceCostAllocationOptions": {
+        "properties": {
+          "bases": {
+            "items": {
+              "enum": [
+                "QUANTITY",
+                "AMOUNT",
+                "WEIGHT",
+                "VOLUME",
+                "EQUAL"
+              ],
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "currencies": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "dimensions": {
+            "items": {
+              "enum": [
+                "SKU",
+                "SPU",
+                "SHOP",
+                "ORDER",
+                "CATEGORY"
+              ],
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "poolKeys": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "roundingPolicies": {
+            "items": {
+              "enum": [
+                "LARGEST_REMAINDER",
+                "SMALLEST_REMAINDER",
+                "FIRST_TARGET",
+                "LAST_TARGET",
+                "SPECIFIED"
+              ],
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "ruleCodes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceCostAllocationPool": {
+        "properties": {
+          "allocatedBatchId": {
+            "description": "已生效的分摊批次 id（还没分摊时为空）",
+            "format": "uuid",
+            "type": "string"
+          },
+          "allocatedBatchStatus": {
+            "description": "已生效的分摊批次状态",
+            "type": "string"
+          },
+          "allocationAvailable": {
+            "description": "是否已完成分摊",
+            "type": "boolean"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "entryCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "periodEnd": {
+            "format": "date",
+            "type": "string"
+          },
+          "periodStart": {
+            "format": "date",
+            "type": "string"
+          },
+          "poolDimension": {
+            "description": "归集口径维度（12.4.2.1 的口径，不是分摊维度）",
+            "type": "string"
+          },
+          "poolId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "poolKey": {
+            "type": "string"
+          },
+          "poolName": {
+            "type": "string"
+          },
+          "targetCount": {
+            "description": "已采集的分摊对象数",
+            "format": "int32",
+            "type": "integer"
+          },
+          "totalAmount": {
+            "description": "被分摊总额（= 池合计，由归集条目派生）",
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceCostAllocationPoolPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceCostAllocationPool"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceCostAllocationRequest": {
+        "properties": {
+          "note": {
+            "nullable": true,
+            "type": "string"
+          },
+          "poolId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "ruleId": {
+            "description": "指定规则（留空 = 按分摊顺序自动选）",
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "poolId"
+        ],
+        "type": "object"
+      },
+      "FinanceCostAllocationResult": {
+        "properties": {
+          "allocatedAmount": {
+            "description": "最终分摊额",
+            "type": "number"
+          },
+          "basisAvailable": {
+            "description": "基数是否可得（false ⇒ 分摊额 0，且不参与分母）",
+            "type": "boolean"
+          },
+          "basisNote": {
+            "description": "基数不可得时的原因",
+            "type": "string"
+          },
+          "basisValue": {
+            "description": "实际用的基数（等额口径下恒为 1）",
+            "type": "number"
+          },
+          "batchId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "exactAmount": {
+            "description": "未舍入的理论分摊额",
+            "type": "number"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "isRoundingTarget": {
+            "description": "是不是规则指定的零头落点",
+            "type": "boolean"
+          },
+          "roundingAdjustment": {
+            "description": "这一行拿到的零头",
+            "type": "number"
+          },
+          "shareRatio": {
+            "description": "占比",
+            "type": "number"
+          },
+          "targetCode": {
+            "type": "string"
+          },
+          "targetDimension": {
+            "enum": [
+              "SKU",
+              "SPU",
+              "SHOP",
+              "ORDER",
+              "CATEGORY"
+            ],
+            "type": "string"
+          },
+          "targetName": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceCostAllocationResultPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceCostAllocationResult"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "roundingDifference": {
+            "description": "筛选结果集里被补回去的零头合计",
+            "type": "number"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalAmount": {
+            "description": "筛选结果集的分摊总额（🔴 恒等于该批次被分摊总额）",
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceCostAllocationRule": {
+        "properties": {
+          "allocationBasis": {
+            "description": "分摊基数（按什么摊）",
+            "enum": [
+              "QUANTITY",
+              "AMOUNT",
+              "WEIGHT",
+              "VOLUME",
+              "EQUAL"
+            ],
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "effectiveFrom": {
+            "format": "date",
+            "type": "string"
+          },
+          "effectiveTo": {
+            "format": "date",
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "poolKey": {
+            "description": "适用费用池标识（* = 全部池）",
+            "type": "string"
+          },
+          "priority": {
+            "description": "分摊顺序：数字小的先用",
+            "format": "int32",
+            "type": "integer"
+          },
+          "roundingPolicy": {
+            "description": "舍入差处理",
+            "enum": [
+              "LARGEST_REMAINDER",
+              "SMALLEST_REMAINDER",
+              "FIRST_TARGET",
+              "LAST_TARGET",
+              "SPECIFIED"
+            ],
+            "type": "string"
+          },
+          "roundingTargetCode": {
+            "description": "零头落点的对象编码（策略 = 指定对象时必填）",
+            "nullable": true,
+            "type": "string"
+          },
+          "roundingTargetType": {
+            "description": "零头落点的类型（策略 = 指定对象时必填）",
+            "enum": [
+              "SKU",
+              "SPU",
+              "SHOP",
+              "ORDER",
+              "CATEGORY"
+            ],
+            "nullable": true,
+            "type": "string"
+          },
+          "ruleCode": {
+            "type": "string"
+          },
+          "ruleName": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "ACTIVE",
+              "INACTIVE"
+            ],
+            "type": "string"
+          },
+          "targetDimension": {
+            "description": "分摊维度（摊给谁）",
+            "enum": [
+              "SKU",
+              "SPU",
+              "SHOP",
+              "ORDER",
+              "CATEGORY"
+            ],
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceCostAllocationRuleInput": {
+        "properties": {
+          "allocationBasis": {
+            "enum": [
+              "QUANTITY",
+              "AMOUNT",
+              "WEIGHT",
+              "VOLUME",
+              "EQUAL"
+            ],
+            "type": "string"
+          },
+          "effectiveFrom": {
+            "format": "date",
+            "type": "string"
+          },
+          "effectiveTo": {
+            "format": "date",
+            "nullable": true,
+            "type": "string"
+          },
+          "note": {
+            "nullable": true,
+            "type": "string"
+          },
+          "poolKey": {
+            "description": "适用费用池标识（留空 = 全部池）",
+            "nullable": true,
+            "type": "string"
+          },
+          "priority": {
+            "description": "分摊顺序（数字小的先用）",
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "roundingPolicy": {
+            "description": "舍入差处理（默认 最大余数优先）",
+            "enum": [
+              "LARGEST_REMAINDER",
+              "SMALLEST_REMAINDER",
+              "FIRST_TARGET",
+              "LAST_TARGET",
+              "SPECIFIED"
+            ],
+            "nullable": true,
+            "type": "string"
+          },
+          "roundingTargetCode": {
+            "description": "零头落点对象编码（策略 = 指定对象时必填）",
+            "nullable": true,
+            "type": "string"
+          },
+          "roundingTargetType": {
+            "description": "零头落点类型（策略 = 指定对象时必填）",
+            "enum": [
+              "SKU",
+              "SPU",
+              "SHOP",
+              "ORDER",
+              "CATEGORY"
+            ],
+            "nullable": true,
+            "type": "string"
+          },
+          "ruleCode": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "ruleName": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "ACTIVE",
+              "INACTIVE"
+            ],
+            "nullable": true,
+            "type": "string"
+          },
+          "targetDimension": {
+            "enum": [
+              "SKU",
+              "SPU",
+              "SHOP",
+              "ORDER",
+              "CATEGORY"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "allocationBasis",
+          "effectiveFrom",
+          "ruleCode",
+          "ruleName",
+          "targetDimension"
+        ],
+        "type": "object"
+      },
+      "FinanceCostAllocationTarget": {
+        "description": "采集到的分摊对象",
+        "properties": {
+          "basisAmount": {
+            "description": "金额基数",
+            "nullable": true,
+            "type": "number"
+          },
+          "basisNote": {
+            "description": "基数取不到时的原因（空 = 取到了）",
+            "type": "string"
+          },
+          "basisQuantity": {
+            "description": "数量基数",
+            "nullable": true,
+            "type": "number"
+          },
+          "basisSource": {
+            "description": "这份基数来自哪个上游事实",
+            "type": "string"
+          },
+          "basisVolume": {
+            "description": "体积基数（cm³）",
+            "nullable": true,
+            "type": "number"
+          },
+          "basisWeight": {
+            "description": "重量基数（克）",
+            "nullable": true,
+            "type": "number"
+          },
+          "collectedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "poolId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "targetCode": {
+            "type": "string"
+          },
+          "targetDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "targetDimension": {
+            "enum": [
+              "SKU",
+              "SPU",
+              "SHOP",
+              "ORDER",
+              "CATEGORY"
+            ],
+            "type": "string"
+          },
+          "targetName": {
+            "type": "string"
+          },
+          "targetType": {
+            "description": "对象类型（与维度一致）",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceCostAllocationTargetCollectResult": {
+        "properties": {
+          "collected": {
+            "description": "采集到的对象数",
+            "format": "int32",
+            "type": "integer"
+          },
+          "dimension": {
+            "description": "分摊维度",
+            "enum": [
+              "SKU",
+              "SPU",
+              "SHOP",
+              "ORDER",
+              "CATEGORY"
+            ],
+            "type": "string"
+          },
+          "notes": {
+            "description": "跳过的明细原因（逐条说明）",
+            "items": {
+              "description": "跳过的明细原因（逐条说明）",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "poolId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "skipped": {
+            "description": "因上游取不到而跳过的条数",
+            "format": "int32",
+            "type": "integer"
+          },
+          "targets": {
+            "description": "采集到的分摊对象",
+            "items": {
+              "$ref": "#/components/schemas/FinanceCostAllocationTarget"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceCostAllocationTargetPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceCostAllocationTarget"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
       "FinanceCostCollectionBasis": {
         "nullable": true,
         "properties": {
@@ -12117,6 +12936,682 @@
         },
         "tags": [
           "bad-debt-controller"
+        ]
+      }
+    },
+    "/finance/cost-allocations/allocate": {
+      "post": {
+        "operationId": "post_finance_cost_allocations_allocate",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinanceCostAllocationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceCostAllocationBatchDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "cost-allocation-controller"
+        ]
+      }
+    },
+    "/finance/cost-allocations/batches": {
+      "get": {
+        "operationId": "get_finance_cost_allocations_batches",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "poolId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "currency",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceCostAllocationBatchPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "cost-allocation-controller"
+        ]
+      }
+    },
+    "/finance/cost-allocations/batches/{id}": {
+      "get": {
+        "operationId": "get_finance_cost_allocations_batches_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceCostAllocationBatchDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "cost-allocation-controller"
+        ]
+      }
+    },
+    "/finance/cost-allocations/batches/{id}/revert": {
+      "post": {
+        "operationId": "post_finance_cost_allocations_batches_id_revert",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceCostAllocationBatchDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "cost-allocation-controller"
+        ]
+      }
+    },
+    "/finance/cost-allocations/capabilities": {
+      "get": {
+        "operationId": "get_finance_cost_allocations_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceCostAllocationCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "cost-allocation-controller"
+        ]
+      }
+    },
+    "/finance/cost-allocations/options": {
+      "get": {
+        "operationId": "get_finance_cost_allocations_options",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceCostAllocationOptions"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "cost-allocation-controller"
+        ]
+      }
+    },
+    "/finance/cost-allocations/pools": {
+      "get": {
+        "operationId": "get_finance_cost_allocations_pools",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "poolKey",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "currency",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "periodFrom",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "periodTo",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceCostAllocationPoolPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "cost-allocation-controller"
+        ]
+      }
+    },
+    "/finance/cost-allocations/results": {
+      "get": {
+        "operationId": "get_finance_cost_allocations_results",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "poolId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "batchId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dimension",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "basisAvailable",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceCostAllocationResultPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "cost-allocation-controller"
+        ]
+      }
+    },
+    "/finance/cost-allocations/rules": {
+      "get": {
+        "operationId": "get_finance_cost_allocations_rules",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/FinanceCostAllocationRule"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "cost-allocation-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_finance_cost_allocations_rules",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinanceCostAllocationRuleInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceCostAllocationRule"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "cost-allocation-controller"
+        ]
+      }
+    },
+    "/finance/cost-allocations/rules/{id}": {
+      "put": {
+        "operationId": "put_finance_cost_allocations_rules_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinanceCostAllocationRuleInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceCostAllocationRule"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "cost-allocation-controller"
+        ]
+      }
+    },
+    "/finance/cost-allocations/targets": {
+      "get": {
+        "operationId": "get_finance_cost_allocations_targets",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "poolId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dimension",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceCostAllocationTargetPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "cost-allocation-controller"
+        ]
+      }
+    },
+    "/finance/cost-allocations/targets/collect": {
+      "post": {
+        "operationId": "post_finance_cost_allocations_targets_collect",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "poolId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dimension",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceCostAllocationTargetCollectResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "cost-allocation-controller"
         ]
       }
     },

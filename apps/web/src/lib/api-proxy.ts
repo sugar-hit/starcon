@@ -10858,6 +10858,61 @@ const services: readonly {
       /^settlement(?:\/(?:capabilities|options|shops|cycles|import|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:arrival|void|difference))?))?$/,
   },
   {
+    // 12.4.2.2 分摊规则（finance 服务，卷 12「财务核算」L3 12.4.2 费用分摊下的第二格）。
+    //
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 finance 那几条巨型 alternation 里
+    //   并分支 —— 那一支是单行超长正则，多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    //   既有条目**一字未改、也不重排**。
+    //
+    // ---- 插入锚点选在 `supplier-reconciliation` 那条之前 ----
+    //   同批其它车道的插入点是「数组最开头」「第一个 identity/ 之前」等；
+    //   本车道落在这里，与它们的插入点相距足够远 ⇒ 并入时 git 能干净求并。
+    //
+    // ---- 首 token「cost-allocations」的核对结论（本车道实测）----
+    //   ⚠️ catalog 服务**也**有一个 `cost-allocations`（5.2.1.3 成本分摊：把混合成本的货件
+    //   按重量/体积/金额/数量摊到各 SKU）。两者**首 token 相同但前缀作用域不同**：
+    //   那条是 `catalog/`，本条是 `finance/`，而 `resolve()` 先按前缀筛、再按正则判 ⇒
+    //   两条互不吃掉（实测：202 条既有正则里，finance/ 作用域下**零命中** `cost-allocations`）。
+    //   两者是**不同的模块**：catalog 那条摊的是「一次采购共用头程的货件成本」，
+    //   本条摊的是「12.4.2.1 归集出来的费用池」—— 页面与端点都不共用。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   cost-allocations/capabilities        能力声明（上游真接通 / 下游缺口归谁）
+    //   cost-allocations/options             筛选项（维度 / 基数 / 舍入差策略 / 池 / 规则 / 币种）
+    //   cost-allocations/rules               分摊规则列表（GET）/ 新建（POST）
+    //   cost-allocations/rules/{uuid}        修改分摊规则（PUT）
+    //   cost-allocations/pools               待分摊的费用池列表（GET）
+    //   cost-allocations/targets             分摊对象列表（GET）
+    //   cost-allocations/targets/collect     采集分摊对象（POST）
+    //   cost-allocations/allocate            执行分摊（POST）
+    //   cost-allocations/batches             分摊批次列表（GET）
+    //   cost-allocations/batches/{uuid}      批次详情（GET：批次 + 分摊明细）
+    //   cost-allocations/batches/{uuid}/revert  撤销一次分摊（POST）
+    //   cost-allocations/results             分摊结果列表（GET，真分页 + 真筛选 + 汇总）
+    //
+    // ⚠️ **刻意不放行**：
+    //   cost-allocations                     —— 裸路径：后端**没有**「一条不存在的汇总列表接口」
+    //                                              （列表在 /pools、/batches、/results 三处）。
+    //   cost-allocations/targets/{uuid}      —— 分摊对象没有单条详情端点。
+    //   cost-allocations/pools/{uuid}        —— 费用池没有单条详情端点（列表里已带全部字段）。
+    //   cost-allocations/results/{uuid}      —— 分摊结果没有单条详情端点。
+    //   cost-allocations/ledger / vouchers   —— 🔴 会计凭证（12.5.2.1）与总账**未交付**：
+    //                                              放行会让界面以为「分摊已经能生成凭证」。
+    //   cost-allocations/profit              —— 🔴 13 利润**未交付**（在别的服务）。
+    //   cost-allocations/not-a-shape         —— 非本模块的子路径。
+    //   cost-allocations/rules/not-a-uuid    —— 非 UUID 段不应被 uuid 分支吃掉。
+    //
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //   （不是 `[0-9a-f-]+`）：后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行。
+    //   字面量子路径（capabilities / options / pools / targets / results / allocate）排在
+    //   {uuid} 段**之前**判别 —— alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    prefix: 'finance/',
+    env: 'FINANCE_URL',
+    fallback: 'http://127.0.0.1:8087',
+    pattern:
+      /^cost\-allocations\/(?:targets\/collect|allocate|(?:capabilities|options|pools|targets|results)|rules(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|batches(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/revert)?)?)$/,
+  },
+  {
     // 12.1.2.3 供应商对账（finance 服务，卷 12「财务核算」L3 12.1.2 应付下的第三格）。
     //
     // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 `receivables` / `receipts` /
