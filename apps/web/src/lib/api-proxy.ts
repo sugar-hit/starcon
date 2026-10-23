@@ -1423,6 +1423,42 @@ const services: readonly {
       /^user\-preferences$|^user\-preferences\/[a-z0-9][a-z0-9._-]{0,159}$/,
   },
   {
+    // 1.4.2.1 语言与时区（identity 服务）。纯**新增一条独立的 `services[]` 元素**，
+    // 既有的 `identity/` 与 `user-preferences` 元素**一字未动、也不重排** ——
+    // 本文件是多车道共用的累积型白名单，往同一条 alternation 里并分支会让同批多车道
+    // 并入时 git 必然判冲突（结构性，retry 不会自愈）。
+    //
+    // ---- 插入锚点固定在 `user-preferences` 那条元素**之后**（按内容定位：该元素
+    //   的 pattern `/^user\-preferences$|^user\-preferences\/[a-z0-9][a-z0-9._-]{0,159}$/`
+    //   全文唯一）----
+    //   **与同批其它车道的锚点距离（2026-10-23 实测本车道基线 7725fdd0）**：
+    //     · 1.2.2.1「常用页面收藏」锚在 identity 段约第 **2916** 行 ⇒ 与本处相距约 **1538 行**；
+    //     · 1.4.2.2「默认店铺与仓库」锚在别处 ⇒ 与本处相距 **300 行以上**。
+    //   两条都远超 300 行的安全距离 ⇒ git 能干净求并（本文件没有 union merge driver，
+    //   两条车道改同一位置必然冲突，且 retry 不会自愈）。
+    //
+    // ---- 首 token「user-locale」的零命中核对结论 ----
+    //   本文件既有 **192** 条 services[] 正则**逐条实测**（.tmp/zero-hit-check.mjs，
+    //   与运行时 resolve() 同样的 fallthrough 口径）：`user-locale` 与
+    //   `user-locale/capabilities` 两个新路径对既有 192 条正则 ⇒ **命中 0 处**。
+    //   既有含 `user` 的是 `user-preferences`（1.4.1.2），首 token 全不相同，互不遮蔽。
+    //   反向也测了：本条正则对既有 identity 形状（`user-preferences` / `roles` /
+    //   `tenants` / `global-search/recent` / `shortcut-templates` …）⇒ **全部不命中**。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   user-locale                 读 / 写 / 重置我的界面语言与展示时区
+    //   user-locale/capabilities    能力声明（逐维 available + 缺什么 + 归谁）
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   user-locale/{任意子路径}    —— 本模块没有子资源。
+    //   user-locale/preferences     —— 偏好走 1.4.1.2 的 user-preferences 端点。
+    //   user-locale/history         —— 本模块不存历史，只存当前选择。
+    prefix: 'identity/',
+    env: 'IDENTITY_URL',
+    fallback: 'http://127.0.0.1:8081',
+    pattern: /^user\-locale(?:\/capabilities)?$/,
+  },
+  {
     // 07 库存：库存总览（7.1.1.1）、库存明细 bucket（7.1.1.2）、筛选下拉参照数据与超储阈值。
     // overview/capabilities/policies 是总览本身；warehouses/legal-entities/skus/quality-statuses
     // 是筛选下拉项。policies/{id} 后面接一段 id（更新与删除）。

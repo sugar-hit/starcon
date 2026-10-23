@@ -89,6 +89,127 @@
         },
         "type": "object"
       },
+      "AccountLocaleCapabilities": {
+        "properties": {
+          "boundaries": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "defaultLocale": {
+            "type": "string"
+          },
+          "defaultTimezone": {
+            "type": "string"
+          },
+          "dimensions": {
+            "items": {
+              "$ref": "#/components/schemas/AccountLocaleCapabilityDimension"
+            },
+            "type": "array"
+          },
+          "displayConvention": {
+            "$ref": "#/components/schemas/AccountLocaleDisplayConvention"
+          },
+          "module": {
+            "type": "string"
+          },
+          "plannedLocales": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "supportedLocales": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "AccountLocaleCapabilityDimension": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "key": {
+            "type": "string"
+          },
+          "missing": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "ownerModule": {
+            "nullable": true,
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AccountLocaleDisplayConvention": {
+        "properties": {
+          "locale": {
+            "type": "string"
+          },
+          "options": {
+            "additionalProperties": {
+              "type": "object"
+            },
+            "type": "object"
+          }
+        },
+        "type": "object"
+      },
+      "AccountLocaleInput": {
+        "properties": {
+          "locale": {
+            "nullable": true,
+            "type": "string"
+          },
+          "timezone": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AccountLocaleView": {
+        "properties": {
+          "defaultLocale": {
+            "type": "string"
+          },
+          "defaultTimezone": {
+            "type": "string"
+          },
+          "fallbackReason": {
+            "nullable": true,
+            "type": "string"
+          },
+          "locale": {
+            "type": "string"
+          },
+          "stored": {
+            "type": "boolean"
+          },
+          "timezone": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "AccountingBookInput": {
         "properties": {
           "amountRounding": {
@@ -18043,6 +18164,129 @@
         },
         "tags": [
           "administration-controller"
+        ]
+      }
+    },
+    "/identity/user-locale": {
+      "delete": {
+        "operationId": "delete_identity_user_locale",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "account-locale-controller"
+        ]
+      },
+      "get": {
+        "operationId": "get_identity_user_locale",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccountLocaleView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "account-locale-controller"
+        ]
+      },
+      "put": {
+        "operationId": "put_identity_user_locale",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AccountLocaleInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccountLocaleView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "account-locale-controller"
+        ]
+      }
+    },
+    "/identity/user-locale/capabilities": {
+      "get": {
+        "operationId": "get_identity_user_locale_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccountLocaleCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "account-locale-controller"
         ]
       }
     },
