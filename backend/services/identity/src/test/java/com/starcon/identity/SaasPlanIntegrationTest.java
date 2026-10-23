@@ -12,6 +12,7 @@ import java.time.ZoneOffset;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -37,6 +38,34 @@ import org.springframework.transaction.support.TransactionTemplate;
  */
 class SaasPlanIntegrationTest extends IdentityIntegrationTestBase {
 
+  /**
+   * 用例级护栏：本测试类的**任何一个**用例跑完之后，共享的 local-admin（root 租户 OWNER）
+   * 仍然**只有一个角色**。
+   *
+   * <p>这条断言是那个回归的哨兵。平台运营角色登记会把 PLATFORM_OPS **永久挂到调用者本人**身上；
+   * 挂在共享 owner 上，就会让同一次 maven 运行里的其它测试类看到一个多角色的 owner，
+   * 而 {@code /auth/session} 的 grants 是**无序聚合**（V47 的 session_access 没有 ORDER BY）——
+   * 别的测试类一旦靠 {@code grants.get(0)} 猜角色就会踩空。
+   *
+   * <p>放在 {@code @AfterEach} 而不是某个用例里：污染一旦发生，当场红，而不是等到别的测试类炸出来。
+   */
+  @AfterEach
+  void sharedOwnerKeepsExactlyOneRole() throws Exception {
+    String token = login();
+    var me = request(token, "GET", "/auth/session", null, 200);
+    var grants = me.get("grants");
+    assertThat(grants).as("共享 owner 的角色集合不得被本测试类扩大").hasSize(1);
+    assertThat(grants.get(0).get("roleCode").asText()).isEqualTo("OWNER");
+    // 数据库层同样看一眼：role_assignment 里这个成员仍然只有一行。
+    assertThat(
+            superuserCount(
+                "select count(*) from role_assignment where membership_id='"
+                    + me.get("membershipId").asText()
+                    + "'"))
+        .as("共享 owner 在 role_assignment 里必须仍然只有一行")
+        .isEqualTo(1);
+  }
+
   private TenantTransactions tx() {
     return new TenantTransactions(sql, new TransactionTemplate(manager));
   }
@@ -47,6 +76,17 @@ class SaasPlanIntegrationTest extends IdentityIntegrationTestBase {
             DriverManager.getConnection(pg().getJdbcUrl(), pg().getUsername(), pg().getPassword());
         var s = c.createStatement()) {
       s.execute(statement);
+    }
+  }
+
+  /** 直连库跑一条 count 查询（绕过应用连接池与 RLS），用于核对共享状态有没有被污染。 */
+  private long superuserCount(String query) throws Exception {
+    try (var c =
+            DriverManager.getConnection(pg().getJdbcUrl(), pg().getUsername(), pg().getPassword());
+        var s = c.createStatement();
+        var rs = s.executeQuery(query)) {
+      rs.next();
+      return rs.getLong(1);
     }
   }
 
@@ -67,20 +107,67 @@ class SaasPlanIntegrationTest extends IdentityIntegrationTestBase {
   }
 
   /**
-   * 平台运营身份：本地所有者所在租户被登记为平台租户，PLATFORM_OPS 角色分配给他本人。
+   * 平台运营身份：**专属子租户**里的所有者，PLATFORM_OPS 角色登记在他自己租户里。
    *
-   * <p>登记走的是平台运营专用路径（要内部密钥），浏览器打不到——这正是「平台运营侧专用路径」
-   * 的形状。
+   * <p>为什么不用共享的 local-admin（root 租户 OWNER）：平台运营角色登记（V323 的
+   * {@code saas_platform_register_role}）会把 PLATFORM_OPS 角色**永久挂到调用者本人**身上。
+   * 挂在共享 owner 上 = 污染同一次 maven 运行里的**所有** identity 测试类：共享 owner 的角色
+   * 从 1 个变成 2 个，而 {@code /auth/session} 的 grants 是**无序聚合**（V47 的 session_access
+   * 用 jsonb_agg 且没有 ORDER BY），别的测试类再靠 {@code grants.get(0)} 猜角色就会踩空 ——
+   * 2026-10 的真实回归：IdentityIntegrationTest 因此把 PLATFORM_OPS 当成 OWNER 去删，拿到 200 而不是 403。
+   *
+   * <p>闸门是**按租户**判的：{@code saas_platform_gate} 只要求
+   * {@code saas_platform_role.tenant_id = 会话所在租户}，没有「必须是根租户」的要求，
+   * 所以子租户的所有者可以在**自己租户里**登记 PLATFORM_OPS 并通过闸门。
+   * 平台运营身份因此可以是专属的，与共享 owner 完全解耦：共享状态零污染。
    */
   private String platformToken() throws Exception {
-    String token = login();
+    String token = platformOpsOwnerToken();
+    registerPlatformRole(token);
+    return token;
+  }
+
+  /**
+   * 专属平台运营身份：一个**只属于本次用例**的子租户所有者，尚未登记平台运营角色。
+   *
+   * <p>用真实的 {@code POST /identity/children} 造子租户（而不是直接插库）：走的是生产路径，
+   * 租户 / 成员 / OWNER 角色 / 角色分配由 create_child 一次性建好，与普通租户用例同一套机制。
+   */
+  private String platformOpsOwnerToken() throws Exception {
+    String tag = suffix();
+    String root = login();
+    String opsUser = "saas-platform-ops-" + tag.toLowerCase();
+    request(
+        root,
+        "POST",
+        "/identity/children",
+        Map.of(
+            "code",
+            "SAP" + tag,
+            "name",
+            "套餐与权益平台运营租户",
+            "ownerUsername",
+            opsUser,
+            "ownerPassword",
+            "test-member-password"),
+        200);
+    return loginUser(opsUser);
+  }
+
+  /**
+   * 平台运营角色登记（平台运营侧专用路径：浏览器打不到，要内部密钥）。
+   *
+   * <p>登记走的是平台运营专用路径（要内部密钥），浏览器打不到——这正是「平台运营侧专用路径」
+   * 的形状。登记会把 PLATFORM_OPS 角色挂到**调用者本人**身上，所以只能对**专属身份**做，
+   * 绝不能对共享的 local-admin 做。
+   */
+  private void registerPlatformRole(String token) throws Exception {
     http.perform(
             org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post(
                     "/identity/saas-platform/roles")
                 .header("Authorization", "Bearer " + token)
                 .header("X-Internal-Key", "test-key"))
         .andExpect(status().isOk());
-    return token;
   }
 
   /** 一个**普通租户**的所有者：带着 identity.plan.* 权限码，但不是平台运营方。 */
@@ -203,7 +290,8 @@ class SaasPlanIntegrationTest extends IdentityIntegrationTestBase {
 
   @Test
   void platformRoleRegistrationIsServerToServerOnly() throws Exception {
-    String token = login();
+    // 专属身份：登记会把 PLATFORM_OPS 挂到调用者本人身上，不能挂在共享的 local-admin 上。
+    String token = platformOpsOwnerToken();
     // 没有内部密钥 → 拒绝：这条路径是平台运营侧的专用路径，浏览器打不到。
     http.perform(
             org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post(
@@ -218,12 +306,7 @@ class SaasPlanIntegrationTest extends IdentityIntegrationTestBase {
                 .header("X-Internal-Key", "forged"))
         .andExpect(status().isForbidden());
     // 正确密钥 → 登记成功。
-    http.perform(
-            org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post(
-                    "/identity/saas-platform/roles")
-                .header("Authorization", "Bearer " + token)
-                .header("X-Internal-Key", "test-key"))
-        .andExpect(status().isOk());
+    registerPlatformRole(token);
     // 登记之后，这个身份才拿到平台运营域的读权限。
     request(token, "GET", "/identity/saas-plans/capabilities", null, 200);
   }
