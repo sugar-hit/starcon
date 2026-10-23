@@ -404,9 +404,7 @@ export function WarehouseOutboundTimelinessWorkspace() {
                         key={`${d.outboundOrderId}-${d.stageCode}`}
                         className="border-border border-t"
                       >
-                        {columnVisible('orderCode') && (
-                          <td className="py-2 pr-3">{d.orderCode}</td>
-                        )}
+                        {columnVisible('orderCode') && <td className="py-2 pr-3">{d.orderCode}</td>}
                         {columnVisible('warehouse') && (
                           <td className="py-2 pr-3">{d.warehouseCode}</td>
                         )}

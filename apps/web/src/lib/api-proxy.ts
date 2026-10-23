@@ -524,8 +524,7 @@ const services: readonly {
     prefix: 'finance/',
     env: 'FINANCE_URL',
     fallback: 'http://127.0.0.1:8087',
-    pattern:
-      /^receivable\-aging\/(?:capabilities|options|distribution|overdue|buckets)$/,
+    pattern: /^receivable\-aging\/(?:capabilities|options|distribution|overdue|buckets)$/,
   },
   {
     // 12.1.2.2 付款计划（finance 服务，卷 12「财务核算」L3 12.1.2 应付下的第二格）。
@@ -1852,8 +1851,7 @@ const services: readonly {
     prefix: 'warehouse/',
     env: 'WAREHOUSE_URL',
     fallback: 'http://127.0.0.1:8084',
-    pattern:
-      /^inventory\-risk\/(?:capabilities|projection)$/,
+    pattern: /^inventory\-risk\/(?:capabilities|projection)$/,
   },
   {
     // 1.4.1.2 列表与表格偏好（identity 服务）。纯**新增一条独立的 `services[]` 元素**，
@@ -1892,8 +1890,7 @@ const services: readonly {
     prefix: 'identity/',
     env: 'IDENTITY_URL',
     fallback: 'http://127.0.0.1:8081',
-    pattern:
-      /^user\-preferences$|^user\-preferences\/[a-z0-9][a-z0-9._-]{0,159}$/,
+    pattern: /^user\-preferences$|^user\-preferences\/[a-z0-9][a-z0-9._-]{0,159}$/,
   },
   {
     // 1.4.2.1 语言与时区（identity 服务）。纯**新增一条独立的 `services[]` 元素**，
@@ -3537,8 +3534,7 @@ const services: readonly {
     prefix: 'identity/',
     env: 'IDENTITY_URL',
     fallback: 'http://127.0.0.1:8081',
-    pattern:
-      /^page\-favorites(?:\/(?:order|hidden))?$/,
+    pattern: /^page\-favorites(?:\/(?:order|hidden))?$/,
   },
   {
     // 17.7.1.1 套餐与权益（identity 服务，卷 17「组织权限与设置」L3 17.7.1 下的第一格）。

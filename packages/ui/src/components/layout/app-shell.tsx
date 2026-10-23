@@ -244,12 +244,7 @@ export interface CommandPaletteBinding {
   onQueryChange?: (query: string) => void;
 }
 
-function AppShellInner({
-  system,
-  children,
-  account,
-  commandPalette,
-}: AppShellProps) {
+function AppShellInner({ system, children, account, commandPalette }: AppShellProps) {
   const { activateTab } = useWorkspaceTabs();
   const pathname = usePathname();
   const mainRef = React.useRef<HTMLElement>(null);

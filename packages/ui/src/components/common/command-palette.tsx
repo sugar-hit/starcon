@@ -122,10 +122,7 @@ export function CommandPalette({
             </kbd>
           </div>
           {statusText ? (
-            <p
-              role="status"
-              className="text-label-12 text-muted-foreground border-b px-4 py-2"
-            >
+            <p role="status" className="text-label-12 text-muted-foreground border-b px-4 py-2">
               {statusText}
             </p>
           ) : null}

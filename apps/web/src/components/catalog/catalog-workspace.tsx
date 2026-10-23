@@ -452,11 +452,7 @@ export function CatalogWorkspace({ kind = 'products' }: { kind?: WorkspaceKind }
               )}
             </div>
           </div>
-          <ListPreferenceBar
-            columns={CATALOG_COLUMNS}
-            pageSizeOptions={[]}
-            prefs={prefs}
-          />
+          <ListPreferenceBar columns={CATALOG_COLUMNS} pageSizeOptions={[]} prefs={prefs} />
           <div className="bg-card overflow-x-auto rounded-lg border">
             <table className="w-full text-left text-sm">
               <thead className="bg-muted/50">
@@ -498,9 +494,7 @@ export function CatalogWorkspace({ kind = 'products' }: { kind?: WorkspaceKind }
                     {columnVisible('skuCount') && (
                       <td className="px-4 py-4 tabular-nums">{p.skuCount}</td>
                     )}
-                    {columnVisible('status') && (
-                      <td className="px-4 py-4">{statuses[p.status]}</td>
-                    )}
+                    {columnVisible('status') && <td className="px-4 py-4">{statuses[p.status]}</td>}
                     <td className="whitespace-nowrap px-4 py-4">
                       <Button variant="ghost" size="sm" onClick={() => void open(p.id)}>
                         管理商品
