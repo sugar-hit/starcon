@@ -299,20 +299,146 @@
 > `RoleAssignmentIntegrationTest` 等既有测试类是**受害者**不是肇事者（在 17.7.1.1 之前就存在且当时全绿）。
 > 泄漏之所以能跨测试类，是因为 **identity 模块 17 个测试类在同一次 maven 运行里共用同一个 Testcontainers PG16 实例**。
 
-### 已派发的修复车道
+### 修复车道 17.7.1.1-fix 的交付（已并入 `df6d340b`）
 
-车道 `17.7.1.1-fix`（分支 `fix/17-7-1-1-test-isolation`），**只修 17.7.1.1 自己的测试**，不重写：
+分支 `fix/17-7-1-1-test-isolation`，commit `018f43d8`，**纯测试代码改动，零生产代码、零迁移、零契约、零前端**。
 
-- **修复 A（主责）**：`SaasPlanIntegrationTest` 不得再污染共享的 `local-admin`。
-  关键前提：`saas_platform_gate` 是**按租户**判的（V323:323-339，只要求 `saas_platform_role.tenant_id = a.tenant_id`，
-  **没有根租户要求**）⇒ 可以给平台运营身份一个专属租户/成员，共享 owner 从头到尾只有一个角色。
-- **修复 B（次责，调度者明确授权）**：`IdentityIntegrationTest` 那一处断言改为**按 `roleCode == "OWNER"` 显式选角色**，
-  不再依赖无序聚合 —— 只改这一处，不许重构该测试方法、不许放宽任何期望状态码。
-- 明确禁止改 `session_access`（V47）加 `ORDER BY`：那是全仓安全相关函数，爆炸半径远大于本缺陷。
+| 修复 | 做法 |
+| --- | --- |
+| **A（主责）** | `SaasPlanIntegrationTest` 的平台运营身份从共享的 `local-admin` 换成**专属子租户所有者**：新增 `platformOpsOwnerToken()`（走真实的 `POST /identity/children` 造子租户）+ `registerPlatformRole(token)`，`platformToken()` = 两者。**另外发现并修掉了第二条污染路径** —— `platformRoleRegistrationIsServerToServerOnly` 也在用 `login()`。 |
+| **B（次责）** | `IdentityIntegrationTest.java:374` 改为**按 `roleCode == "OWNER"` 显式挑角色**，不再依赖 `grants.get(0]` 的顺序；原 403 断言原样保留，并加了一条「会话里必须带 OWNER 角色」的前置断言。 |
+| **哨兵** | 新增 `@AfterEach sharedOwnerKeepsExactlyOneRole()`：`/auth/session` 的 grants 长度 == 1 且 `roleCode == "OWNER"`，**且**直连库 `select count(*) from role_assignment where membership_id = <共享 owner>` == 1。污染当场红，而不是等到别的测试类炸出来。 |
+
+**为什么 A1（专属身份）优于 A2（事后清理）**：清理多一个失败面（「清理成功了吗」），而且只在整类跑完后才生效；
+A1 直接掐断污染源。**A3（每测试类独立 schema）不可行** —— identity 模块 17 个测试类共用一个容器、一个 `local-admin`。
+
+**验证（车道自报，且带反向对照）**：
+
+| 闸 | 结果 |
+| --- | --- |
+| `./mvnw -q compile` | exit 0 |
+| `pnpm typecheck` / `pnpm lint` | 3/3 通过（仅既有 warning） |
+| identity 全量套件 第 1 次 | **Tests run: 301, Failures: 0, Errors: 0** · BUILD SUCCESS |
+| identity 全量套件 第 2 次 | **Tests run: 301, Failures: 0, Errors: 0** · BUILD SUCCESS（证明确定性） |
+| identity 全量套件 第 3 次（还原后复测） | **Tests run: 301, Failures: 0, Errors: 0** · BUILD SUCCESS |
+| **反向对照（证明哨兵非空转）** | 临时把 `platformToken()` 还原成污染形态跑该类 → **12 例全红**，报错正是 `共享 owner 的角色集合不得被本测试类扩大 / Expected size: 1 but was: 2`，grants 数组显示 `[OWNER, PLATFORM_OPS]`；随后从备份还原并复跑全绿 |
+
+测试数与基线一致（总 301，`SaasPlanIntegrationTest` 仍 12 例、`IdentityIntegrationTest` 仍 17 例），24 个测试类逐类绿。
+
+### ⚠️ 顺带拦下了两颗同样的雷（本轮最重要的调度动作）
+
+修复车道在跑的过程中，调度者检查了同批另两条车道（17.7.1.2 用量统计 / 17.7.2.2 平台运维视图）的测试代码，
+发现它们**逐字复制了同一个污染写法**：
+
+```java
+// 17.7.1.2 SaasUsageIntegrationTest.platformToken()
+String token = login();                       // ← 共享的 local-admin
+http.perform(post("/identity/saas-platform/roles") …)
+
+// 17.7.2.2 PlatformOpsIntegrationTest.platformToken()
+String token = login();                       // ← 共享的 local-admin
+http.perform(post("/identity/platform-ops/roles") …)
+```
+
+⇒ **它们一旦落地，就会把刚修好的缺陷原样带回来**（17.7.2.2 更是自己新造了一个同形状的自分配端点）。
+
+调度者对两条车道**分别发了追加要求**（`task_append`）：换专属平台运营身份 + 加同样的 `@AfterEach` 哨兵 +
+**把 L1 验收标准从「只跑自己的测试类」改成「跑整个 identity 模块、连跑两次」** ——
+因为本缺陷**只有全套一起跑才复现**（`-Dtest='SaasPlanIntegrationTest,IdentityIntegrationTest'` 一起跑是**绿**的），
+原来的窄 L1 根本看不见它。两条车道均已照办。
+
+**这条是本轮 L2 事故真正教出来的东西**：组批协议把「发车」与「验收」分离之后，
+**worker 的窄 L1 与调度器的宽 L2 之间，出现了一个「只有合在一起才可见」的盲区** ——
+它不在任何一个车道的视野里，只在批次的视野里。所以窄 L1 的适用范围必须由调度者按缺陷类型**显式收紧**。
 
 ---
 
-<!-- L2_ROUND2 -->
+### 顺带查出来的另一个静默数据损坏：台账证据格被 `sync.mjs` 截断
+
+17.7.2.2 车道的交付报告提到「集成头里 17.7.2.1 那一行的证据格被截断」。复核后确认属实，并且**这是个系统性问题**：
+
+**机制**（`tools/module-progress/sync.mjs:192`）：
+
+```js
+const row = /^\|\s*(\d+\.\d+\.\d+\.\d+)\s*\|([^|\n]*)\|([^|\n]*)\|([^|\n]*)\|([^|\n]*)\|([^|\n]*)\|/gm;
+const [, id, name, route, phase, status, evidence] = m;   // ← 证据格用 [^|\n]*
+```
+
+证据格用 `([^|\n]*)` 捕获 ⇒ **遇到字面竖线 `|` 就停**。
+`sync.mjs` 随后把捕获到的证据**原样写回**（`render()` 第 272 行）⇒
+**证据里只要有一个字面竖线，它后面的内容就被静默吃掉，而脚本照样报「✓ 同步成功」。**
+
+17.7.2.1 的证据里有 `sha256(salt|tenant_id)` —— 就这一个字符，把 2948 字的证据截到 2411 字。
+
+**为什么 `sync --check` 拦不住**：`--check` 是「用同一套截断规则重新渲染一遍，再和当前文件逐字节比」。
+当前文件本身就是被同一套规则写出来的 ⇒ **它天然自洽，结构上不可能发现证据丢失**。
+这就是兄弟车道日志里「脚本照样报『同步成功』，看起来一切正常，证据却只剩前半截」的确切原因。
+
+**扫描全 history 的结果**：**35 个模块**的证据格历史上出现过字面竖线（行分段数 ≠ 8），即都被截断过：
+
+| 模块 | 首现 | 模块 | 首现 | 模块 | 首现 |
+| --- | --- | --- | --- | --- | --- |
+| **17.7.2.1（本批）** | `7208cb40` | 16.4.1.2 | `1263267d` | 16.6.1.1 | `1263267d` |
+| 16.5.1.2 | `9a0d3563` | 15.4.1.2 | `16303da8` | 15.4.1.1 | `4f9015f8` |
+| 15.2.1.2 | `a1dcfdf5` | 15.3.2.2 | `a1dcfdf5` | 15.1.2.1 | `c2d14dcb` |
+| 14.1.2.1 | `0b06653e` | 14.1.1.2 | `3d92801b` | 6.3.1.3 | `4a35c899` |
+| 6.3.1.2 | `850bfdfc` | 16.4.2.1 | `5a685e01` | 16.2.2.2 | `ce656ac0` |
+| 6.3.2.2 | `77f24baf` | 15.2.2.1 | `8dfc5b8f` | 4.5.2.2 | `b463ffb8` |
+| 4.5.2.1 | `abd8b21a` | 11.5.2.1 | `894d8ab3` | 4.3.1.2 | `e0ef150a` |
+| 11.1.2.2 | `e0ef150a` | 4.1.2.2 | `f14c71d1` | 11.2.2.2 | `f0226162` |
+| 11.3.2.2 | `9d3a3ef4` | 11.2.1.1 | `06beab27` | 11.1.2.1 | `53cd8ff3` |
+| 9.3.1.2 | `6ca92f11` | 10.2.1.1 | `e67b8696` | 8.3.3.1 | `4d9b674d` |
+| 8.3.2.2 | `2e909b62` | 7.1.1.3 | `e98155f6` | 8.2.2.1 | `e98155f6` |
+| 7.2.1.2 | `17d7787d` | 10.5.1.1 | `ab8606bb` | | |
+
+**本轮的处理**：
+
+- **17.7.2.1（本批模块，调度者负责）**：从引入它的提交 `1b01a56a` 取回完整证据（2948 字），
+  把唯一那个字面竖线换成 `‖`（`sha256(salt‖tenant_id)`，语义不变、字面不再是竖线），
+  写回台账。**用 `‖` 而不是删字，是为了让证据里那个公式仍然可读可核对。**
+- **其余 34 个模块**（历史批次，不属本批）：**本轮不动** ——
+  恢复它们需要逐条从 git 历史取回 + 净化竖线 + 校验，
+  而且**真正的根治是改 `sync.mjs` 的正则**（把证据格改成「吃到行尾最后一个竖线」，
+  即 `([^|\n]*)\|(.*)\|\s*$`），这是一处**工具链改动**，不该塞进一个批次窗口里顺手做。
+  ⇒ 已作为独立工作项留给下一轮（见「后续待办」）。
+
+> 📌 **教训**：`sync.mjs --check` 绿 **不等于** 台账内容没丢。
+> 校验和被校验方共用同一套有损规则时，校验必然自洽 —— 这是「自证式校验」的典型陷阱。
+> 真正的判据是**拿历史最长版本对当前版本做长度回归**，本轮用的就是这一招。
+
+---
+
+### ✅ 第二轮：**绿** ⇒ 本轮 push
+
+修复车道 `17.7.1.1-fix`（`018f43d8`）并入集成头（`df6d340b`）后，在集成头上重跑**全量** L2：
+
+```
+===== [1/6] backend ./mvnw verify =====      BUILD SUCCESS · MVN_EXIT=0
+===== [2/6] pnpm typecheck && lint && test ==== TYPECHECK_EXIT=0 · LINT_EXIT=0 · TEST_EXIT=0
+===== [3/6] Next production build =====       BUILD_EXIT=0
+===== [4/6] sync --check =====                SYNCCHECK_EXIT=0
+===== [5/6] merge-union.itest + codegen 单测 == ITEST_EXIT=0 · CODEGEN_EXIT=0
+===== [6/6] 契约闸（重新生成 + 逐字节比对）==== CONTRACT_GENERATE_EXIT=0 · CONTRACT_GATE_EXIT=0
+                                                CONTRACT_TREE_DRIFT_EXIT=0
+===== [附加] 强制 typecheck（--force）======= FORCED_TYPECHECK_EXIT=0
+===== L2 GREEN =====
+```
+
+**实际规模**（现场取自 surefire 报告，不引用任何文档里的写死数字）：
+
+| 层 | 结果 |
+| --- | --- |
+| 后端 | **8944 例 / 552 个测试类**（identity 301 · catalog 1981 · channel 2148 · warehouse 1640 · trade 2383 · crm 491）全绿 |
+| 前端 | **517 文件 / 7386 例**全绿 |
+| typecheck / lint / Next production build / 契约闸 | 全绿（契约闸是 CI `catalog-e2e` 同款：重新生成 + 逐字节比对 + 工作区无漂移） |
+
+⚠️ 协议正文里写的「后端 2829 + 前端 2163」是**过期数字** —— 实际规模已经翻了一倍多。
+汇报一律按现场数字说话（协议本身也写着「任何写死的数字都会让汇报失真」）。
+
+**本轮 L2 的总耗时**：08:25:47 → 09:17 约 51 分钟（比协议估的 25–40 分钟长，
+因为同一时间窗内两条新车道也在跑自己的测试套件，机器上一度有 39 个 Testcontainers PG 容器并存）。
+
+---
 
 ---
 
@@ -335,3 +461,20 @@
    将来任何给共享 owner 增加角色的模块，都可能再次引爆同类问题。
    若要根治（给 `session_access` 加 `ORDER BY`，需新迁移 `CREATE OR REPLACE FUNCTION`），
    必须单独评估它对全仓 identity 消费者的影响，**不能塞进一个测试修复车道里顺手做**。
+8. **🔴 `sync.mjs` 的台账证据格截断（35 个模块）需要一次专门修复** —— 根因已定位在
+   `tools/module-progress/sync.mjs:192` 的 `([^|\n]*)`，改法是把证据格改成「吃到行尾最后一个竖线」
+   （`([^|\n]*)\|(.*)\|\s*$`），**并且**把另外 34 个模块的证据从各自的引入提交里取回 + 净化竖线。
+   这是**工具链改动 + 批量数据修复**，要单独一轮做完并让 L2 的 `sync --check` 重新验证。
+   本轮只修了本批的 17.7.2.1（已恢复 2947 字完整证据、`sync --check` 绿、连续两次 sync 文件 md5 不变 = 幂等）。
+9. **下一轮 tick 要回收的 2 条车道（本轮派发，已 ready，worktree 仍在）**：
+
+   | 模块 | 名称 | 分支 | head | 迁移 | 车道自报验证 |
+   | --- | --- | --- | --- | --- | --- |
+   | 17.7.1.2 | 用量统计 | `feat/17-7-1-2` | `d240b46` | `V325` | identity 全量 **315 例 × 2 次全绿**；前端 24 例 |
+   | 17.7.2.2 | 平台运维视图 | `feat/17-7-2-2` | `a20ed00` | `V326` | identity 全量 **317 例 × 2 次全绿**；前端 33 例 |
+
+   两条都**已按调度者的追加要求**改掉测试隔离（专属子租户平台运营身份 + `@AfterEach` 共享 owner 哨兵），
+   并且都**主动并入了集成头 `df6d340b`**（含 17.7.1.1 的测试隔离修复）才跑的验收 ——
+   这说明它们自己也撞上了同一个「窄 L1 看不见」的坑。
+   ⚠️ 下一轮 `merge-ready` 时注意：这两条车道都**已经把集成头合进了自己的分支**，
+   合入时不会冲突，但合并后要重跑一次全量 L2（它们的代码从未经过 L2）。
