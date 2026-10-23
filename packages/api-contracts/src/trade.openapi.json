@@ -19503,6 +19503,305 @@
         },
         "type": "object"
       },
+      "FulfillmentHealthBreakdown": {
+        "properties": {
+          "buckets": {
+            "items": {
+              "$ref": "#/components/schemas/FulfillmentHealthBucket"
+            },
+            "type": "array"
+          },
+          "key": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FulfillmentHealthBucket": {
+        "properties": {
+          "count": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "key": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FulfillmentHealthCapabilities": {
+        "properties": {
+          "boundaryNote": {
+            "type": "string"
+          },
+          "dimensions": {
+            "items": {
+              "$ref": "#/components/schemas/FulfillmentHealthCapabilityDimension"
+            },
+            "type": "array"
+          },
+          "levelRule": {
+            "type": "string"
+          },
+          "ownershipNote": {
+            "type": "string"
+          },
+          "redFlagKinds": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "upstreamNote": {
+            "type": "string"
+          },
+          "windowBasis": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FulfillmentHealthCapabilityDimension": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "denominator": {
+            "type": "string"
+          },
+          "formula": {
+            "type": "string"
+          },
+          "handling": {
+            "type": "string"
+          },
+          "impact": {
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "sourceTables": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FulfillmentHealthCard": {
+        "properties": {
+          "alertCount": {
+            "format": "int64",
+            "nullable": true,
+            "type": "integer"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "basis": {
+            "type": "string"
+          },
+          "denominator": {
+            "format": "int64",
+            "nullable": true,
+            "type": "integer"
+          },
+          "detailPath": {
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "level": {
+            "type": "string"
+          },
+          "levelRule": {
+            "type": "string"
+          },
+          "metricKind": {
+            "type": "string"
+          },
+          "numerator": {
+            "format": "int64",
+            "nullable": true,
+            "type": "integer"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "redFlagKind": {
+            "nullable": true,
+            "type": "string"
+          },
+          "sourceTables": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "unavailableReason": {
+            "type": "string"
+          },
+          "unit": {
+            "type": "string"
+          },
+          "value": {
+            "nullable": true,
+            "type": "number"
+          },
+          "valueText": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FulfillmentHealthCoverage": {
+        "properties": {
+          "dropshipOpenExceptions": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "dropshipTrackings": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "pendingCancelledUnits": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "pendingHandedOverUnits": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "pendingProjectionTotal": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "shipmentRecordsEvaluated": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "shipmentRecordsUnsetSla": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "shipmentRecordsUntrackable": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FulfillmentHealthRedFlag": {
+        "properties": {
+          "detail": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "kindLabel": {
+            "type": "string"
+          },
+          "linkPath": {
+            "type": "string"
+          },
+          "occurredAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "refId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "refNo": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FulfillmentHealthRedFlagPage": {
+        "properties": {
+          "boundaryNotes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/FulfillmentHealthRedFlag"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FulfillmentHealthSummary": {
+        "properties": {
+          "boundaryNotes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "breakdowns": {
+            "items": {
+              "$ref": "#/components/schemas/FulfillmentHealthBreakdown"
+            },
+            "type": "array"
+          },
+          "cards": {
+            "items": {
+              "$ref": "#/components/schemas/FulfillmentHealthCard"
+            },
+            "type": "array"
+          },
+          "coverage": {
+            "$ref": "#/components/schemas/FulfillmentHealthCoverage"
+          }
+        },
+        "type": "object"
+      },
       "FulfillmentMonitorCapabilities": {
         "properties": {
           "actionKinds": {
@@ -83816,6 +84115,127 @@
         },
         "tags": [
           "dropship-config-controller"
+        ]
+      }
+    },
+    "/trade/fulfillment/health/capabilities": {
+      "get": {
+        "operationId": "get_trade_fulfillment_health_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FulfillmentHealthCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "fulfillment-health-controller"
+        ]
+      }
+    },
+    "/trade/fulfillment/health/red-flags": {
+      "get": {
+        "operationId": "get_trade_fulfillment_health_red_flags",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "kind",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FulfillmentHealthRedFlagPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "fulfillment-health-controller"
+        ]
+      }
+    },
+    "/trade/fulfillment/health/summary": {
+      "get": {
+        "operationId": "get_trade_fulfillment_health_summary",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FulfillmentHealthSummary"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "fulfillment-health-controller"
         ]
       }
     },
