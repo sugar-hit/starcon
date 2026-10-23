@@ -9928,6 +9928,42 @@ const services: readonly {
     pattern:
       /^sync\-health(?:\/(?:capabilities|options|summary|pending\-items|connections(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?))$/,
   },
+  {
+    // 1.4.2.2 默认店铺与仓库（identity 服务，卷 01「工作台与门户」L3 1.4.2 账号偏好的第二格）。
+    //
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 identity 那条巨型 alternation 里
+    //   并分支 —— 那一支是单行超长正则，多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    //   既有条目**一字未改、也不重排**。
+    //
+    // ---- 插入锚点选在**数组末尾**（`sync-health` 那条之后）----
+    //   本车道与同批另两条车道（1.1.1.3、1.4.2.1）的插入点相距 **8000 行以上**：
+    //   那两条的锚点都在 `user-preferences` 那条元素附近（本文件第 1352 行上下），
+    //   本条在第 9880 行附近 ⇒ 并入时 git 能干净求并。
+    //
+    // ---- 首 token「default-context」的零命中核对结论 ----
+    //   本文件既有 200+ 条 services[] 正则里**没有任何一条**含 `default-context` 这个串
+    //   （既有含 "default" 的是 `saas-plans` 之类的其它命名，首 token 全不相同），
+    //   所以首 token 既是独立字面量，也不会被既有分支的前缀吃掉。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   default-context               当前生效的默认上下文（GET 读 / PUT 存 / DELETE 重置）
+    //   default-context/options       三个维度的候选集（GET：店铺 / 法人 / 仓库）
+    //   default-context/capabilities  能力声明（GET：哪些维度真接通 + 缺什么 + 归谁）
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   default-context/{uuid}        —— 默认上下文是**单数**的一份，没有按 id 取单条的端点
+    //   default-context/shops         —— 店铺清单是**读上游**的结果，由 options 一次给全，
+    //                                    不另开一个按维度分的路径
+    //   default-context/legal-entities —— 同上
+    //   default-context/{任意其他子路径} —— 本模块的子路径只有 options 与 capabilities 两个
+    //
+    // ⚠️ 写形状（PUT / DELETE）放行的是**同一个 default-context 路径**：
+    //   它们是「设置我自己这一份偏好」，不涉及别的租户的数据；跨服务的写路径一律不放行。
+    prefix: 'identity/',
+    env: 'IDENTITY_URL',
+    fallback: 'http://127.0.0.1:8081',
+    pattern: /^default\-context(?:\/(?:capabilities|options))?$/,
+  },
 ];
 
 function resolve(path: string) {
