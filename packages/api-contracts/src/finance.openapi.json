@@ -1624,6 +1624,66 @@
         },
         "type": "object"
       },
+      "FinancePaymentApprovalRecordRow": {
+        "properties": {
+          "action": {
+            "type": "string"
+          },
+          "actionId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "actorId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "actorName": {
+            "type": "string"
+          },
+          "approvalInstanceId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "approvalInstanceNo": {
+            "type": "string"
+          },
+          "comment": {
+            "type": "string"
+          },
+          "decidedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "dwellSeconds": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "nodeKey": {
+            "type": "string"
+          },
+          "nodeName": {
+            "type": "string"
+          },
+          "nodeOrder": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "sourceSystem": {
+            "type": "string"
+          },
+          "syncedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "FinancePaymentBatchPage": {
         "properties": {
           "items": {
@@ -1721,6 +1781,36 @@
           },
           "updatedAt": {
             "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinancePaymentExchangeRateView": {
+        "properties": {
+          "baseCurrency": {
+            "type": "string"
+          },
+          "display": {
+            "type": "string"
+          },
+          "effectiveDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "inverted": {
+            "type": "boolean"
+          },
+          "quoteCurrency": {
+            "type": "string"
+          },
+          "rate": {
+            "type": "number"
+          },
+          "sourceCode": {
+            "type": "string"
+          },
+          "sourceName": {
             "type": "string"
           }
         },
@@ -1943,6 +2033,727 @@
           "updatedAt": {
             "format": "date-time",
             "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinancePaymentOrderCapabilities": {
+        "properties": {
+          "capabilities": {
+            "items": {
+              "$ref": "#/components/schemas/FinancePaymentOrderCapability"
+            },
+            "type": "array"
+          },
+          "downstreamGaps": {
+            "items": {
+              "$ref": "#/components/schemas/FinancePaymentOrderDownstreamGap"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "FinancePaymentOrderCapability": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "basis": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "module": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinancePaymentOrderCurrencySummary": {
+        "properties": {
+          "amount": {
+            "type": "number"
+          },
+          "approvedCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "count": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "draftCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "pendingApprovalCount": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinancePaymentOrderDetail": {
+        "properties": {
+          "approvalRecords": {
+            "items": {
+              "$ref": "#/components/schemas/FinancePaymentApprovalRecordRow"
+            },
+            "type": "array"
+          },
+          "events": {
+            "items": {
+              "$ref": "#/components/schemas/FinancePaymentOrderEventRow"
+            },
+            "type": "array"
+          },
+          "installments": {
+            "items": {
+              "$ref": "#/components/schemas/FinancePaymentOrderInstallmentRow"
+            },
+            "type": "array"
+          },
+          "lines": {
+            "items": {
+              "$ref": "#/components/schemas/FinancePaymentOrderLineRow"
+            },
+            "type": "array"
+          },
+          "order": {
+            "$ref": "#/components/schemas/FinancePaymentOrderRow"
+          }
+        },
+        "type": "object"
+      },
+      "FinancePaymentOrderDownstreamGap": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "group": {
+            "type": "string"
+          },
+          "module": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "ownerService": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinancePaymentOrderEventRow": {
+        "properties": {
+          "actorId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "eventType": {
+            "type": "string"
+          },
+          "fromStatus": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "occurredAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "toStatus": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinancePaymentOrderInput": {
+        "properties": {
+          "amount": {
+            "type": "number"
+          },
+          "baseCurrency": {
+            "nullable": true,
+            "type": "string"
+          },
+          "counterpartyName": {
+            "nullable": true,
+            "type": "string"
+          },
+          "counterpartyRef": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "counterpartyType": {
+            "enum": [
+              "SUPPLIER",
+              "CARRIER",
+              "PLATFORM",
+              "OTHER"
+            ],
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "exchangeRate": {
+            "nullable": true,
+            "type": "number"
+          },
+          "installments": {
+            "items": {
+              "$ref": "#/components/schemas/FinancePaymentOrderInstallmentInput"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "lines": {
+            "items": {
+              "$ref": "#/components/schemas/FinancePaymentOrderLineInput"
+            },
+            "type": "array"
+          },
+          "note": {
+            "nullable": true,
+            "type": "string"
+          },
+          "paymentAccountCurrency": {
+            "nullable": true,
+            "type": "string"
+          },
+          "paymentAccountId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "paymentAccountName": {
+            "nullable": true,
+            "type": "string"
+          },
+          "paymentMethod": {
+            "enum": [
+              "BANK_TRANSFER",
+              "PAYPAL",
+              "STRIPE",
+              "PINGPONG",
+              "OTHER"
+            ],
+            "type": "string"
+          },
+          "paymentPlanId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinancePaymentOrderInstallmentInput": {
+        "nullable": true,
+        "properties": {
+          "amount": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "plannedPaidDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "seq": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinancePaymentOrderInstallmentRow": {
+        "properties": {
+          "amount": {
+            "type": "number"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "executionAvailable": {
+            "type": "boolean"
+          },
+          "executionOwnerModule": {
+            "type": "string"
+          },
+          "failureReason": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "plannedPaidDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "seq": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "status": {
+            "enum": [
+              "PLANNED",
+              "EXECUTING",
+              "PAID",
+              "FAILED"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinancePaymentOrderLineInput": {
+        "properties": {
+          "amount": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "description": {
+            "nullable": true,
+            "type": "string"
+          },
+          "payableLineId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinancePaymentOrderLineRow": {
+        "properties": {
+          "active": {
+            "type": "boolean"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "lineNo": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "payableAmountSnapshot": {
+            "type": "number"
+          },
+          "payableId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "payableLineId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "payableNo": {
+            "type": "string"
+          },
+          "payablePaidSnapshot": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "FinancePaymentOrderOptionRef": {
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinancePaymentOrderOptions": {
+        "properties": {
+          "approvalStatuses": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "counterparties": {
+            "items": {
+              "$ref": "#/components/schemas/FinancePaymentOrderOptionRef"
+            },
+            "type": "array"
+          },
+          "currencies": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "paymentMethods": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "paymentPlans": {
+            "items": {
+              "$ref": "#/components/schemas/FinancePaymentOrderOptionRef"
+            },
+            "type": "array"
+          },
+          "statuses": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "FinancePaymentOrderPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/FinancePaymentOrderRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "pendingApprovalCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "summaryByCurrency": {
+            "items": {
+              "$ref": "#/components/schemas/FinancePaymentOrderCurrencySummary"
+            },
+            "type": "array"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinancePaymentOrderRow": {
+        "properties": {
+          "amount": {
+            "type": "number"
+          },
+          "approvalCurrentNodeKey": {
+            "type": "string"
+          },
+          "approvalCurrentNodeName": {
+            "type": "string"
+          },
+          "approvalFlowId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "approvalFlowName": {
+            "type": "string"
+          },
+          "approvalInstanceId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "approvalInstanceNo": {
+            "type": "string"
+          },
+          "approvalRoutedBy": {
+            "type": "string"
+          },
+          "approvalStatus": {
+            "enum": [
+              "NOT_SUBMITTED",
+              "PENDING",
+              "APPROVED",
+              "REJECTED"
+            ],
+            "type": "string"
+          },
+          "approvedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "approvedBy": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "baseAmount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "baseCurrency": {
+            "nullable": true,
+            "type": "string"
+          },
+          "counterpartyName": {
+            "type": "string"
+          },
+          "counterpartyRef": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "counterpartyType": {
+            "enum": [
+              "SUPPLIER",
+              "CARRIER",
+              "PLATFORM",
+              "OTHER"
+            ],
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "exchangeRate": {
+            "nullable": true,
+            "type": "number"
+          },
+          "executionAvailable": {
+            "type": "boolean"
+          },
+          "executionOwnerModule": {
+            "type": "string"
+          },
+          "failureReason": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "orderNo": {
+            "type": "string"
+          },
+          "paymentAccountCurrency": {
+            "nullable": true,
+            "type": "string"
+          },
+          "paymentAccountId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "paymentAccountName": {
+            "type": "string"
+          },
+          "paymentAccountOwnerModule": {
+            "type": "string"
+          },
+          "paymentMethod": {
+            "enum": [
+              "BANK_TRANSFER",
+              "PAYPAL",
+              "STRIPE",
+              "PINGPONG",
+              "OTHER"
+            ],
+            "type": "string"
+          },
+          "paymentPlanId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "paymentPlanNo": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "DRAFT",
+              "PENDING_APPROVAL",
+              "APPROVED",
+              "EXECUTING",
+              "PAID",
+              "FAILED"
+            ],
+            "type": "string"
+          },
+          "submittedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "submittedBy": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinancePaymentOrderSubmitResult": {
+        "properties": {
+          "approvalCurrentNodeKey": {
+            "type": "string"
+          },
+          "approvalCurrentNodeName": {
+            "type": "string"
+          },
+          "approvalInstanceId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "approvalInstanceNo": {
+            "type": "string"
+          },
+          "approvalRoutedBy": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "order": {
+            "$ref": "#/components/schemas/FinancePaymentOrderRow"
+          }
+        },
+        "type": "object"
+      },
+      "FinancePaymentOrderSyncResult": {
+        "properties": {
+          "approvalStatus": {
+            "enum": [
+              "NOT_SUBMITTED",
+              "PENDING",
+              "APPROVED",
+              "REJECTED"
+            ],
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "newRecordCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "order": {
+            "$ref": "#/components/schemas/FinancePaymentOrderRow"
+          }
+        },
+        "type": "object"
+      },
+      "FinancePaymentPayableLineOption": {
+        "properties": {
+          "amount": {
+            "type": "number"
+          },
+          "counterpartyName": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "dueDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "lineNo": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "lockedByOrderId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "lockedByOrderNo": {
+            "nullable": true,
+            "type": "string"
+          },
+          "paidAmount": {
+            "type": "number"
+          },
+          "payableId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "payableLineId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "payableNo": {
+            "type": "string"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "unpaidAmount": {
+            "type": "number"
           }
         },
         "type": "object"
@@ -7078,6 +7889,473 @@
         },
         "tags": [
           "payable-controller"
+        ]
+      }
+    },
+    "/finance/payment-orders": {
+      "get": {
+        "operationId": "get_finance_payment_orders",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "approvalStatus",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "currency",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "counterpartyType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "counterpartyRef",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "paymentMethod",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinancePaymentOrderPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "payment-order-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_finance_payment_orders",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinancePaymentOrderInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinancePaymentOrderRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "payment-order-controller"
+        ]
+      }
+    },
+    "/finance/payment-orders/capabilities": {
+      "get": {
+        "operationId": "get_finance_payment_orders_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinancePaymentOrderCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "payment-order-controller"
+        ]
+      }
+    },
+    "/finance/payment-orders/exchange-rate": {
+      "get": {
+        "operationId": "get_finance_payment_orders_exchange_rate",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "baseCurrency",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quoteCurrency",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinancePaymentExchangeRateView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "payment-order-controller"
+        ]
+      }
+    },
+    "/finance/payment-orders/options": {
+      "get": {
+        "operationId": "get_finance_payment_orders_options",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinancePaymentOrderOptions"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "payment-order-controller"
+        ]
+      }
+    },
+    "/finance/payment-orders/payable-lines/{payableId}": {
+      "get": {
+        "operationId": "get_finance_payment_orders_payable_lines_payableId",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "payableId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/FinancePaymentPayableLineOption"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "payment-order-controller"
+        ]
+      }
+    },
+    "/finance/payment-orders/{id}": {
+      "get": {
+        "operationId": "get_finance_payment_orders_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinancePaymentOrderDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "payment-order-controller"
+        ]
+      },
+      "put": {
+        "operationId": "put_finance_payment_orders_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinancePaymentOrderInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinancePaymentOrderRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "payment-order-controller"
+        ]
+      }
+    },
+    "/finance/payment-orders/{id}/submit": {
+      "post": {
+        "operationId": "post_finance_payment_orders_id_submit",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinancePaymentOrderSubmitResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "payment-order-controller"
+        ]
+      }
+    },
+    "/finance/payment-orders/{id}/sync-approval": {
+      "post": {
+        "operationId": "post_finance_payment_orders_id_sync_approval",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinancePaymentOrderSyncResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "payment-order-controller"
         ]
       }
     },
