@@ -9626,6 +9626,53 @@ const services: readonly {
     fallback: 'http://127.0.0.1:8081',
     pattern: /^global\-search\/recent$/,
   },
+  {
+    // 1.5.1.1 同步与 API 健康（channel 服务，卷 01「工作台与门户」L3 1.5.1「集成健康」的第一格）。
+    //
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 channel 分支的 alternation 里
+    //   并分支 —— 那一支是单行超长正则，多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    //   既有条目**一字未动、也不重排**。
+    //
+    // ---- 插入锚点选在**数组末尾**（`identity/global-search/recent` 那条之后）----
+    //   同批其它三条车道的插入点分别是「`prefix: 'catalog/'` 之前」「`prefix: 'identity/'` 之前」
+    //   与「`prefix: 'warehouse/'` 之前」，与本处互不重叠 ⇒ 并入时 git 能干净求并。
+    //
+    // ---- 首 token「sync-health」的零命中核对结论 ----
+    //   本文件既有 100+ 条 services[] 正则里**没有任何一条**含 `sync-health` 这个串
+    //   （既有含 "sync" 的是 `logistics-channels/sync` 一类，首 token 全不相同），
+    //   所以首 token 既是独立字面量，也不会被既有分支的前缀吃掉。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   sync-health/capabilities    能力声明（红黄绿规则表 · 阈值 · 计数口径 · 积压来源）
+    //   sync-health/options         筛选项（平台码来自真实连接）
+    //   sync-health/summary         总览（红黄绿分布 + 失败 / 限流计数 + 积压 + 没有连接的平台）
+    //   sync-health/connections      连接健康卡片（GET，真分页 + 真筛选）
+    //   sync-health/connections/{uuid} 单张卡片（GET）
+    //   sync-health/pending-items   需处理项（GET；落点是**归属系统**的页面）
+    //
+    // ⚠️ **本模块是只读的**：卷 01 的边界写死「工作台只读 + 跳转；一切状态变更回到
+    //   归属系统完成」。所以这里**一个写形状都不放行** —— 放行一个不存在的写入口
+    //   比 404 更糟（界面会以为「重试同步 / 重新授权」在这儿能做）。
+    //
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //   （不是 `[0-9a-f-]+`：后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行）。
+    //   字面量子路径（capabilities / options / summary / pending-items / connections）
+    //   排在 {uuid} 段之前判别 —— alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   sync-health                                —— 裸路径：后端没有「一条汇总列表接口」
+    //   sync-health/{任意其他子路径}                 —— 本模块的子路径只有上面那六个
+    //   sync-health/connections/{uuid}/retry        —— 🔴 「重试同步」没有归属系统的写端点，
+    //                                                    工作台不写业务数据 ⇒ 这个形状不存在
+    //   sync-health/connections/{uuid}/reauthorize  —— 同上，「重新授权」归 2.2.1.2
+    //   sync-health/connections/not-a-uuid          —— 非 UUID 段不应被 uuid 分支吃掉
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    // 末尾**刻意不带 `?`**：带了就等于放行裸路径 `sync-health`。
+    pattern:
+      /^sync\-health(?:\/(?:capabilities|options|summary|pending\-items|connections(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?))$/,
+  },
 ];
 
 function resolve(path: string) {
