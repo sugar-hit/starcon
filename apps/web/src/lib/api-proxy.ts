@@ -9385,6 +9385,68 @@ const services: readonly {
     pattern:
       /^platform\-flags\/(?:capabilities|definitions|settings(?:\/[A-Z][A-Z0-9_]{1,63})?|exceptions(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|evaluate(?:-batch)?|history)$/,
   },
+  {
+    // ---------------------------------------------------------------------------
+    // 17.7.2.2 平台运维视图（identity 服务）
+    // ---------------------------------------------------------------------------
+    //
+    // ---- 插入锚点固定在 **services[] 数组的末尾**（`platform-flags` 那条之后、数组结尾的 `];` 之前）----
+    //   同批另外那条车道（17.7.1.2 用量统计）锚在 `// 2.4.2.3 映射缺失队列` 之前，
+    //   与本锚点相隔 6000 行以上 ⇒ git 能干净求并。
+    //
+    // ---- 纯**新增一条独立的 `services[]` 元素** ----
+    //   既有条目**一字未动、也不重排、不格式化整文件**。往既有那条 `identity/` 巨型
+    //   alternation 里并分支会让多车道同时并入时 git 必然判冲突（结构性，retry 永不
+    //   自愈）。本仓已有两条 `identity/` 元素（各带一条 alternation），本模块自己
+    //   单独占一条。
+    //
+    // ---- 首 token「platform-ops」的零命中核对结论 ----
+    //   本文件既有 services[] 共 179 条正则，**逐条**用 `new RegExp(pat).test(...)`
+    //   实测过本模块的**全部**路径形状（放行的 10 个 + 刻意不放行的 8 个），
+    //   **零命中**（核对脚本见 .tmp/allowlist-check.mjs，结论同样写在这里）。
+    //   既有两条 `identity/` 元素的 alternation 里既没有 `platform-ops`，
+    //   也没有任何通配段（`[0-9a-f-]+` 之类）能顺带吃掉这个首 token。
+    //   ⇒ 既有的 `identity/` 元素**不会**静默吞掉本模块的任何路径，
+    //      本模块的元素也**不会**吃掉别人的任何路径（双向都实测过）。
+    //   ⇒ resolve() 是「首个命中即返回」，所以本元素放在数组末尾也能命中：
+    //      前面的 `identity/` 元素对 `platform-ops/...` 一条都不匹配，会继续往下 fallthrough。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   platform-ops/capabilities                     能力声明（逐维 available + ownerModule + impact）
+    //   platform-ops/overview                         平台健康看板汇总
+    //   platform-ops/tenants                          逐租户技术健康摘要（看板主表）
+    //   platform-ops/metrics                          技术指标列表（GET，真分页 + 真筛选）
+    //   platform-ops/alerts                           告警列表（GET，真分页 + 真筛选）
+    //   platform-ops/thresholds                       告警阈值列表
+    //   platform-ops/thresholds/{metricCode}          单个指标的阈值（PUT 改也在这一支）
+    //   platform-ops/alerts/{uuid}/acknowledge        确认告警
+    //   platform-ops/alerts/{uuid}/resolve            闭环告警
+    //   platform-ops/self/metrics                     本租户自检视角（只看得到自己租户的行）
+    //
+    // ⚠️ `{metricCode}` 段用**受控值域** `[A-Z][A-Z0-9_]{1,39}`（大写字母开头的标识符），
+    //   不是自由文本 —— 指标码在库里有同样的 CHECK 约束。
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //   （不是 `[0-9a-f-]+`）：后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行。
+    // ⚠️ 字面量子路径（`alerts` / `thresholds`）与带 id 的子动作是**并列的 alternation
+    //   分支**，不是前缀：alternation 首个命中即返回，但本正则整段带 `^...$`，
+    //   所以 `alerts` 分支不会吃掉 `alerts/{uuid}/acknowledge`（尾部对不上 `$` 会回溯）。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸路径 `platform-ops` —— 本模块没有裸集合读
+    //   * `platform-ops/ingest/metrics` —— **指标接入是服务端到服务端的内部密钥路径**
+    //     （要 `X-Internal-Key`），浏览器放行它等于让任意租户往别的租户写指标
+    //   * `platform-ops/roles` —— **平台运营角色登记**同样是内部密钥路径，
+    //     浏览器打不到它；放行它等于让任意租户把自己升级成平台运营方
+    //   * `platform-ops/metrics/{uuid}` —— 指标没有按 id 取单条的端点
+    //   * `platform-ops/alerts/{uuid}` —— 告警只有「确认 / 闭环」两种子动作
+    //   * `platform-ops/tenants/{uuid}` —— 逐租户健康摘要只有列表，没有按 id 取单条
+    //   * `platform-ops/{任意其他首段}` —— 本模块的路径根只有 `platform-ops` 一个
+    prefix: 'identity/',
+    env: 'IDENTITY_URL',
+    fallback: 'http://127.0.0.1:8081',
+    pattern:
+      /^platform\-ops\/(?:capabilities|overview|tenants|metrics|alerts|thresholds|self\/metrics|alerts\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/(?:acknowledge|resolve)|thresholds\/[A-Z][A-Z0-9_]{1,39})$/,
+  },
 ];
 
 function resolve(path: string) {
