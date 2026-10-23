@@ -4760,6 +4760,51 @@ const services: readonly {
       /^return-quality\/(?:capabilities|categories|templates|queue|verdict-preview|inspections)$|^return-quality\/categories\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/skus)?$|^return-quality\/templates\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:activate|retire))?$|^return-quality\/inspections\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:conclude|cancel))?$/,
   },
   {
+    // 11.2.3.2 转可售/残次/报废（trade 服务）。本条目是**新增一条 services[] 元素**，
+    // 不是往既有 trade 分支的超长单行 alternation 里并分支 —— 那一支多车道同时并进去
+    // git 必然判冲突（结构性，retry 永远不会自愈），而**求并**又会在取错一侧时静默删掉
+    // 同批兄弟车道已交付的路由（表现是页面 404，而 typecheck / lint / vitest 全绿）。
+    // 插入锚点固定在 11.2.3.1 `return-quality` 那条**之后**、11.1.2.2 那条**之前**：
+    // 三条的前缀形状互不相交（`return-dispositions/` vs `return-quality/` vs
+    // `product-attribution/`），谁先被匹配都不误吃，且插入点被既有条目隔开，git 能干净求并。
+    //
+    // 命名空间**独立于 `/trade/return-quality`**：11.2.3.1 判的是「这批货怎么样」，
+    // 11.2.3.2 做的是「按结论把这批货转入什么库存状态」—— 一个出结论，一个出单据。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   `return-dispositions`                          处置单集合读（GET，真分页 + 多维筛选 + 汇总）
+    //   `return-dispositions/capabilities`             能力与边界声明（GET）
+    //   `return-dispositions/instructions`             待处置的质量状态指令（GET）
+    //   `return-dispositions/options`                  候选来源库位 + 候选目标库位（GET）
+    //   `return-dispositions/{uuid}`                   单条处置单详情（GET）
+    //   `return-dispositions`                          建处置决定单（POST，**草稿**）
+    //   `return-dispositions/{uuid}`                   改草稿要素（PUT，**仅 DRAFT**）
+    //   `return-dispositions/{uuid}/submit`            提交待审（POST）
+    //   `return-dispositions/{uuid}/approve`           批准（POST，**独立权限码**）
+    //   `return-dispositions/{uuid}/reject`            驳回（POST）
+    //   `return-dispositions/{uuid}/cancel`            撤销（POST，仅未执行）
+    //   `return-dispositions/{uuid}/execute`           执行库存状态变更（POST）
+    //
+    // ⚠️ **刻意不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `return-dispositions/{uuid}/resell` / `/defective` / `/scrap`
+    //     —— **报废不是一个按钮**：蓝图加粗句「报废是不可逆的，需审批与原因，
+    //     不能由客服随手处理」。放行这些形状等于把不可逆动作做成随手点一下。
+    //   * 任何 **DELETE** —— 处置决定是「谁批的、为什么报」的举证材料
+    //     （运行角色对留痕表的 UPDATE/DELETE 已在 DB 层收回）。
+    //   * `return-dispositions/{uuid}/salvage-posting` —— 残值入账属 **12 财务，未交付**。
+    //   * `return-dispositions/{uuid}/claim` —— 供应商索赔属 **11.2.3.3**，不在本模块。
+    //
+    // id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`（不是 `[0-9a-f-]+`）：
+    // 后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行。
+    prefix: 'trade/',
+    env: 'TRADE_URL',
+    fallback: 'http://127.0.0.1:8085',
+    // 一段整段锚定到 $，所以不存在「字面量子路径被 uuid 段吃掉」的顺序陷阱
+    // （capabilities / instructions / options 与 UUID 形状互不相交）。
+    pattern:
+      /^return\-dispositions(?:\/(?:capabilities|instructions|options|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:submit|approve|reject|cancel|execute))?))?$/,
+  },
+  {
     // 11.1.2.2 商品问题归因（trade 服务）。本条目是**新增一条 services[] 元素**，
     // 不是往既有 trade 分支的超长单行 alternation 里并分支 —— 那一支多车道同时并进去
     // git 必然判冲突（结构性，retry 永远不会自愈），而**求并**又会在取错一侧时静默删掉
