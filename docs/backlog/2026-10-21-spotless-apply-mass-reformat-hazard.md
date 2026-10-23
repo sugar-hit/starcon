@@ -52,8 +52,54 @@
    现在是「有配置、无执行入口、无 CI 校验」的三不管状态 ——
    要么接进 CI 做 check，要么把插件从 pom 里拿掉。现状下它只会制造噪音。
 
+## 2026-10-24 实例：集成头里出现了一次**前端侧**的批量格式化改写
+
+同一主题的第二次发生，但触发器不是 `spotless`，是**前端格式化器按非标准列宽重排**。
+
+### 现象
+
+集成头相对同步分支头推进 7 个文件（+49 / −23），逐个核对后：
+
+- 1 个 Java 文件：`backend/libraries/tenancy/src/main/java/com/starcon/tenancy/GrantPermissions.java`。
+  去掉注释与空白后两侧归一化到**同一个 1747 字符、同一个 SHA-1** ⇒ 代码零变化，
+  差异全是 Javadoc 折行与一行赋值语句的换行。
+- 6 个 TS/TSX 文件：差异全是长行折行，**功能零变化**。
+  关键点：这些折行是按**约 80 列**排的，而仓库自己的 `.prettierrc` 规定 `printWidth: 100`。
+  例 `packages/ui/src/components/common/command-palette.tsx`：集成侧把
+  `<p role="status" className="...">` 拆成 4 行，仓库自己的 Prettier 会放回 1 行（95 字符，放得下）。
+- 台账文件不在改动列表里 ⇒ **无能力增量**。
+
+⇒ 这次推进是一次**纯格式化改写**，功能增量为零。
+
+### 为什么值得单独记
+
+因为它会造成一个**反向陷阱**：同步分支侧（`main` 侧）原本合规，集成侧原文**不合规**
+⇒ 沿用「冲突默认取集成分支侧」的直觉，就会**新增 6 个未格式化文件 = 自造排版债**，
+而 Lint 作业本来就红 ⇒ 红灯的原因还会多出 6 个文件，且很难归因。
+
+### 同步侧本轮的处置
+
+- **不刷新同步分支**：改动无功能增量、无台账增量，取用只会新增排版债。
+- 若将来必须取用这批文件：**逐文件用仓库自己的 Prettier 归一化后比对合规性，取合规的一侧**。
+  验证方式用 `node_modules/.bin/prettier --stdin-filepath <file>`（管道进 stdin、拿 stdout 比字节），
+  **不要**用 `prettier --check <path>` —— 被 `.gitignore` 忽略的路径会被静默跳过，
+  却仍然打印「全部合规」的假绿灯。
+- 排版债对账口径：基线不合规数 + PR 独有数 = PR 总数（须与 CI 自报数字吻合）；
+  再逐个核对 PR 独有的文件在基线上是否存在，区分「新增文件自带」与「既有文件退化」。
+
+### 建议（补充给流水线与调度者）
+
+1. 上面「建议 2」的并入前静态闸，本轮再次证明是必要的：
+   **改动文件数少但全是无关文件的格式化改写，同样要拦** ——
+   本次只有 7 个文件，数量阈值 20 抓不到它，要看的是「改动是否与本车道模块相关」。
+2. 前端格式化必须走仓库自己的 `pnpm format`（它读 `.prettierrc` 的 100 列）；
+   任何带自定义列宽的格式化器都不该进本仓。
+3. 建议把「格式化改写不得进集成头」写进 `tools/module-progress/PIPELINE.md` 的子任务模板 ——
+   与已有的 `spotless:apply` 禁令并列。
+
 ## 关联
 
 - `docs/sessions/2026-10/2026-10-21-batch-47-consignment-pricing-request-certification.md` —— 本轮 L2 诊断
 - `docs/sessions/2026-10/2026-10-21-batch-48-quality-reconciliation-analytics.md` —— 本轮第二组车道
+- `docs/sessions/2026-10/2026-10-24-0237-main-sync-round62-platform-flag-precision-rootcause.md` —— 本次实例的取证
 - `tools/module-progress/PIPELINE.md` —— 需要加禁令的子任务模板

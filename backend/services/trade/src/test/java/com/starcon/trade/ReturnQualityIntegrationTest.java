@@ -52,8 +52,9 @@ import org.testcontainers.containers.PostgreSQLContainer;
  *   <li><b>判定是三值枚举不是布尔开关</b>：三档在库里有三个不同的取值与三个不同的指令类型。</li>
  *   <li><b>残值真算且算得对</b>：逐项断言原值 / 扣减 / 系数 / 上限 / 残值五个数，
  *       并断言<b>绕过服务层塞一个错的残值会被 DB 触发器当场拒</b>。</li>
- *   <li><b>质量状态指令由 DB 生成</b>：判定那一刻出现一张 PENDING 的指令，
- *       消费方恒为 11.2.3.2，运行角色 UPDATE/DELETE 被拒（正对照：同角色能改别��表）。</li>
+ *   <li><b>质量状态指令由 DB 生成</b>：判定那一刻出现一张 PENDING 的指令，消费方恒为 11.2.3.2；
+ *       运行角色只被授了 instruction_status 这一列的 UPDATE（其余列与 DELETE 仍被拒），
+ *       且没有已执行处置单顶着就标不成已消费（正对照：同角色能改类目表）。</li>
  *   <li><b>判定是终态</b>：判完改结论 / 撤销 / 直连 SQL 改残值，服务层与触发器都拒。</li>
  *   <li><b>强制检项漏检不能判定</b>。</li>
  *   <li><b>时间写回零漂移</b>：夹具刻意用 +08:00 非 UTC 偏移。</li>
@@ -167,7 +168,9 @@ class ReturnQualityIntegrationTest {
     try (var c = DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
         var s = c.createStatement()) {
       s.execute(
-          "truncate return_quality_disposition_instruction, return_quality_check_result,"
+          "truncate return_inventory_disposition_loss, return_inventory_disposition_event,"
+              + " return_inventory_disposition, return_quality_disposition_instruction,"
+              + " return_quality_check_result,"
               + " return_quality_event, return_quality_inspection,"
               + " return_quality_template_item, return_quality_template,"
               + " return_quality_category_sku, return_quality_category,"
@@ -598,11 +601,11 @@ class ReturnQualityIntegrationTest {
   }
 
   // ==========================================================================
-  // 三、质量状态指令：只出不消费
+  // 三、质量状态指令：由 DB 生成，消费权在 11.2.3.2（受消费守卫约束）
   // ==========================================================================
 
   @Test
-  void 质量状态指令由数据库生成且恒为待消费() {
+  void 质量状态指令由数据库生成且只能被已执行的处置单消费() {
     Posted p = post("INSTR-1", new BigDecimal("2"), "INTACT", "OPENED_UNDAMAGED");
     QualityFixture f = seedTemplate(p.skuId(), p.skuCode());
     UUID id = openInspection(p);
@@ -626,23 +629,170 @@ class ReturnQualityIntegrationTest {
     assertThat(instruction.get("qty", BigDecimal.class)).isEqualByComparingTo("2");
     assertThat(instruction.get("salvage_amount", BigDecimal.class)).isEqualByComparingTo("8.0000");
     assertThat(instruction.get("sku_code", String.class)).isEqualTo(p.skuCode());
-    // 消费侧未交付 ⇒ 恒 PENDING、消费方恒 11.2.3.2。
+    // 判定这一刻它**还没被消费**：消费方恒 11.2.3.2，而消费要等处置单真正执行完（库存已改）。
     assertThat(instruction.get("instruction_status", String.class)).isEqualTo("PENDING");
     assertThat(instruction.get("consumer_module", String.class)).isEqualTo("11.2.3.2");
     assertThat(done.instruction().instructionStatus()).isEqualTo("PENDING");
 
-    // 运行角色对指令表**没有** UPDATE/DELETE：正对照是同一角色能改别的表。
+    UUID instructionId = instruction.get("id", UUID.class);
+
+    // ---- ① 没有已执行处置单时，改成已消费被**消费守卫**拒（不是权限拒）----
+    // 11.2.3.2 交付后，运行角色**有** instruction_status 这一列的 UPDATE 权限（V337 的列级 GRANT），
+    // 所以这里拒的**不是权限**而是守卫：没有真正执行过的处置单，就不许把指令标成已消费。
     assertThatThrownBy(
             () -> as(() -> sql.execute(
                 "update return_quality_disposition_instruction set instruction_status='CONSUMED'"
                     + " where tenant_id=?::uuid and id=?::uuid",
-                tenant, instruction.get("id", UUID.class))))
+                tenant, instructionId)))
+        .hasStackTraceContaining("质量状态指令只能在处置单真正执行（库存已改）之后才标为已消费");
+    assertThat(as(() -> sql.fetchOne(
+            "select instruction_status from return_quality_disposition_instruction"
+                + " where tenant_id=?::uuid and id=?::uuid", tenant, instructionId))
+        .get("instruction_status", String.class))
+        .as("被拒的事务整体回滚，指令仍是待消费")
+        .isEqualTo("PENDING");
+
+    // ---- ② 最小权限仍然成立：列级授权只给了 instruction_status 这一列 ----
+    // 改成**同样的值**（'11.2.3.2'）也照样被拒 ⇒ 拒的确实是**权限**，不是那条 CHECK 约束。
+    assertThatThrownBy(
+            () -> as(() -> sql.execute(
+                "update return_quality_disposition_instruction set consumer_module='11.2.3.2'"
+                    + " where tenant_id=?::uuid and id=?::uuid",
+                tenant, instructionId)))
         .hasStackTraceContaining("permission denied");
+    // 表级 DELETE 仍被 V179 收回：指令是交给下游的交接凭据，删不得。
+    assertThatThrownBy(
+            () -> as(() -> sql.execute(
+                "delete from return_quality_disposition_instruction"
+                    + " where tenant_id=?::uuid and id=?::uuid",
+                tenant, instructionId)))
+        .hasStackTraceContaining("permission denied");
+
+    // ---- ③ 正对照：同一个运行角色仍然能改本模块的类目表 ----
     assertThat(as(() -> sql.execute(
             "update return_quality_category set note = '运行角色可改本模块的类目表' "
                 + "where tenant_id=?::uuid", tenant)))
-        .as("正对照：同一个运行角色能改本模块的类目表，所以上一条拒的是**权限**不是连接")
+        .as("正对照：同一个运行角色能改本模块的类目表，所以上面被拒的是**权限 / 守卫**不是连接")
         .isEqualTo(1);
+
+    // ---- ④ 有已执行处置单顶着之后，那一列的 UPDATE 真能用（正向路径）----
+    seedExecutedDisposition(p, id, instruction);
+    assertThat(as(() -> sql.execute(
+            "update return_quality_disposition_instruction set instruction_status='CONSUMED'"
+                + " where tenant_id=?::uuid and id=?::uuid",
+            tenant, instructionId)))
+        .as("11.2.3.2 授的那一列是**可用**的：守卫放行，不是被全堵死")
+        .isEqualTo(1);
+    assertThat(as(() -> sql.fetchOne(
+            "select instruction_status from return_quality_disposition_instruction"
+                + " where tenant_id=?::uuid and id=?::uuid", tenant, instructionId))
+        .get("instruction_status", String.class))
+        .as("指令真的被消费了")
+        .isEqualTo("CONSUMED");
+
+    // ---- ⑤ 消费不可逆：标错了也改不回去（守卫只认 PENDING → CONSUMED）----
+    assertThatThrownBy(
+            () -> as(() -> sql.execute(
+                "update return_quality_disposition_instruction set instruction_status='PENDING'"
+                    + " where tenant_id=?::uuid and id=?::uuid",
+                tenant, instructionId)))
+        .hasStackTraceContaining("不能变回去");
+  }
+
+  /**
+   * 造一张**已执行**的处置单（指向指定的质量状态指令）。
+   *
+   * <p><b>这是测试夹具，不是生产逻辑。</b>11.2.3.2 的处置单正常由服务层建，但那条链路要真连
+   * warehouse（建单要候选库位、执行要回执），而本类<b>刻意不开额外监听端口</b>（见类注释里的理由）。
+   * ⇒ 这里直连 SQL 走<b>完整状态机</b>：草稿 → 待审 → 已批 → 已执行，每一步都过 V337 的守卫触发器
+   * （状态流转合法 / 提交人 ≠ 审批人 / 审批意见必填 / 草稿之外不许改业务要素）。
+   *
+   * <p>它只用来证明一件事：<b>有</b>一张已执行处置单顶着的时候，那一列的 UPDATE 是真能用的。
+   */
+  UUID seedExecutedDisposition(Posted p, UUID inspectionId, Record instruction) {
+    UUID instructionId = instruction.get("id", UUID.class);
+    String targetState = instruction.get("target_inventory_state", String.class);
+    String reasonCode =
+        switch (targetState) {
+          case "SELLABLE" -> "RESALABLE";
+          case "DEFECTIVE" -> "DEFECTIVE";
+          default -> "SCRAPPED";
+        };
+    UUID dispositionId = UUID.randomUUID();
+    // 审批人 ≠ 提交人：职责分离是 V337 守卫⑤钉死的，不满足就当场拒。
+    UUID approver = UUID.randomUUID();
+    // 库位是 warehouse 侧的事实：跨服务只有逻辑 ID（DB 不建 FK），这里固定成夹具常量。
+    UUID bucketId = UUID.nameUUIDFromBytes("rq-bucket".getBytes());
+    UUID warehouseId = UUID.nameUUIDFromBytes("rq-warehouse".getBytes());
+    UUID locationId = UUID.nameUUIDFromBytes("rq-location".getBytes());
+    UUID targetLocationId = UUID.nameUUIDFromBytes("rq-target-location".getBytes());
+    UUID legalEntityId = UUID.nameUUIDFromBytes("rq-legal-entity".getBytes());
+
+    // 建单（草稿）：守卫①真查一次指令 —— 指令必须在、属于本租户、还是待消费，
+    // 且处置数量必须等于质检结论的数量、目标状态必须与质检结论一致。
+    as(() -> {
+      sql.execute(
+          "insert into return_inventory_disposition(id,tenant_id,disposition_no,instruction_id,"
+              + "inspection_id,receipt_id,receipt_line_id,instruction_type,target_inventory_state,"
+              + "sku_id,sku_code,qty,source_bucket_id,source_warehouse_id,source_location_id,"
+              + "source_legal_entity_id,target_location_id,reason_code,reason_note,status,created_by,"
+              + "created_at,updated_at)"
+              + " values(?::uuid,?::uuid,?::varchar,?::uuid,?::uuid,?::uuid,?::uuid,?::varchar,"
+              + "?::varchar,?::uuid,?::varchar,?::numeric,?::uuid,?::uuid,?::uuid,?::uuid,?::uuid,"
+              + "?::varchar,?::varchar,'DRAFT',?::uuid,?::timestamptz,?::timestamptz)",
+          dispositionId,
+          tenant,
+          "RDP-" + UUID.randomUUID().toString().substring(0, 12),
+          instructionId,
+          inspectionId,
+          p.receiptId(),
+          p.receiptLineId(),
+          instruction.get("instruction_type", String.class),
+          targetState,
+          p.skuId(),
+          p.skuCode(),
+          instruction.get("qty", BigDecimal.class),
+          bucketId,
+          warehouseId,
+          locationId,
+          legalEntityId,
+          targetLocationId,
+          reasonCode,
+          "外箱压损，商品完好，转可售",
+          user,
+          T1,
+          T1);
+      return null;
+    });
+    // 提交（草稿 → 待审）：提交人写进 submitted_by。
+    as(() -> {
+      sql.execute(
+          "update return_inventory_disposition set status='PENDING_APPROVAL',"
+              + " submitted_by=?::uuid, submitted_at=?::timestamptz, version=version+1,"
+              + " updated_at=?::timestamptz where tenant_id=?::uuid and id=?::uuid",
+          user, T1, T1, tenant, dispositionId);
+      return null;
+    });
+    // 审批（待审 → 已批）：守卫⑤要审批人 ≠ 提交人、审批意见必填。
+    as(() -> {
+      sql.execute(
+          "update return_inventory_disposition set status='APPROVED',"
+              + " decided_by=?::uuid, decided_at=?::timestamptz, decision_note=?::varchar,"
+              + " version=version+1, updated_at=?::timestamptz"
+              + " where tenant_id=?::uuid and id=?::uuid",
+          approver, T1, "外箱压损，商品完好，准予转可售", T1, tenant, dispositionId);
+      return null;
+    });
+    // 执行（已批 → 已执行）：这一步才是真正动库存的那一步，也是指令能被消费的前提。
+    as(() -> {
+      sql.execute(
+          "update return_inventory_disposition set status='EXECUTED',"
+              + " executed_by=?::uuid, executed_at=?::timestamptz, version=version+1,"
+              + " updated_at=?::timestamptz where tenant_id=?::uuid and id=?::uuid",
+          user, T1, T1, tenant, dispositionId);
+      return null;
+    });
+    return dispositionId;
   }
 
   // ==========================================================================

@@ -119,6 +119,21 @@ export function compareRuns(baselineJobs, prJobs, markerOf) {
   };
 }
 
+/**
+ * 一个 run 的作业是否都已有结论。
+ *
+ * ⚠️ **run 没跑完时，不能拿它的作业状态当判据** ——
+ * 在飞作业的 `conclusion` 是 `null`，若把 `null` 一律当成「非失败」，
+ * 「PR 的失败集合 ⊆ 基线的失败集合」这条判据会**空洞地成立**，
+ * 于是输出「可以合并」。这就是本闸门最危险的假绿灯（2026-10-24 实测：
+ * 同一个 run，收尾前判「可以合并」，收尾后判「阻塞」）。
+ *
+ * ⇒ 只有 run 收尾（`status === 'completed'`）后，它的作业结论才可采信。
+ */
+export function runIsSettled(run) {
+  return run?.status === 'completed';
+}
+
 /** 取 main 最近一次 CI run 的作业列表 */
 export function baselineRun() {
   const runs = ghJson([
@@ -129,11 +144,18 @@ export function baselineRun() {
     '--limit',
     '5',
     '--json',
-    'databaseId,conclusion,createdAt',
+    'databaseId,status,conclusion,createdAt',
   ]);
   if (!runs.length) throw new Error('main 上没有任何 CI run');
-  // 取最近一次「跑完了」的 run（跳过还在排队/运行中的）
-  const done = runs.find((r) => r.conclusion !== null) ?? runs[0];
+  // 取最近一次「跑完了」的 run（跳过还在排队/运行中的）。
+  // 判据用 `status === 'completed'`，不用 `conclusion !== null` ——
+  // 后者在排队中（尚未开始）时同样是 null，会把一个还没跑的 run 当成基线。
+  //
+  // ⚠️ 这里**不兜底**取 `runs[0]`：若 main 上一个收尾的 run 都没有，
+  // 拿在飞 run 当基线同样会造出假绿灯（基线的失败集合被低估）。
+  // 取不到合格基线就应当「状态取不到」（退出码 2），而不是硬判。
+  const done = runs.find((r) => runIsSettled(r));
+  if (!done) throw new Error('main 上没有已收尾的 CI run，基线取不到（不许拿在飞 run 当基线）');
   const detail = ghJson(['run', 'view', String(done.databaseId), '--json', 'jobs']);
   return { ...done, jobs: detail.jobs };
 }
@@ -149,10 +171,30 @@ export function prRun(prNumber) {
     '--limit',
     '10',
     '--json',
-    'databaseId,event,status,conclusion',
+    'databaseId,event,status,conclusion,createdAt',
   ]);
-  const run = runs.find((r) => r.event === 'pull_request') ?? runs[0];
+  // 显式按创建时间取最新的一条 —— 不依赖 `gh run list` 的返回顺序。
+  const candidates = runs
+    .filter((r) => r.event === 'pull_request')
+    .sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)));
+  const run = candidates[0] ?? runs[0];
   if (!run) throw new Error(`PR #${prNumber} 的 head commit ${pr.headRefOid} 上没有 CI run`);
+  // ⚠️ run 还在跑 ⇒ 作业结论取不全 ⇒ 按「状态取不到」处理（退出码 2），
+  // **不得**给出「可以合并」。见 runIsSettled 的说明。
+  if (!runIsSettled(run)) {
+    throw new Error(
+      `PR #${prNumber} 的 CI run #${run.databaseId} 还没跑完（status=${run.status}）—— ` +
+        '作业结论尚不可比，必须等它收尾后再判',
+    );
+  }
+  // 被取消的 run 没有完整的作业结论（大量作业停在 cancelled/skipped），
+  // 拿它当判据会把「没跑完」误当成「没失败」⇒ 同样按「状态取不到」处理。
+  if (run.conclusion === 'cancelled') {
+    throw new Error(
+      `PR #${prNumber} 的 CI run #${run.databaseId} 被取消了 —— ` +
+        '作业结论不可比，不能据此判断是否可以合并',
+    );
+  }
   const detail = ghJson(['run', 'view', String(run.databaseId), '--json', 'jobs']);
   return { ...pr, run, jobs: detail.jobs };
 }
@@ -203,10 +245,17 @@ export function main(argv = process.argv.slice(2)) {
   if (args.json) {
     console.log(JSON.stringify(result, null, 2));
   } else {
-    console.log(`基线（main 最近一次 run #${baseline.databaseId}）：`);
+    // 打印被判读的 run 标识 —— 让读结论的人能一眼看出这份结论是不是基于一个收尾后的 run。
+    console.log(
+      `基线（main 最近一次 run #${baseline.databaseId}，status=${baseline.status}，` +
+        `conclusion=${baseline.conclusion}）：`,
+    );
     for (const j of result.baselineFailingJobs) console.log(`  ✗ ${j}`);
     if (!result.baselineFailingJobs.length) console.log('  （无失败作业）');
-    console.log(`PR #${pr.number}（run #${pr.run.databaseId}）：`);
+    console.log(
+      `PR #${pr.number}（run #${pr.run.databaseId}，status=${pr.run.status}，` +
+        `conclusion=${pr.run.conclusion}，head=${pr.headRefOid.slice(0, 8)}）：`,
+    );
     for (const j of result.prFailingJobs) console.log(`  ✗ ${j}`);
     if (!result.prFailingJobs.length) console.log('  （无失败作业）');
     console.log('');

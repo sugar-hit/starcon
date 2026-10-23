@@ -65,6 +65,20 @@ export interface CommandPaletteProps {
   /** 空结果时显示 */
   emptyMessage?: string;
   className?: string;
+  /**
+   * 输入内容变化回调。
+   *
+   * <p>1.2.1.1 全局搜索用它驱动**跨服务实时检索**：面板本身不发起任何请求，
+   * 只把用户键入的关键词交给业务侧（业务侧拿到结果后再把分组塞回 `groups`）。
+   */
+  onQueryChange?: (query: string) => void;
+  /**
+   * 输入框下方的状态提示（正在检索 / 检索失败 / 没有权限…）。
+   *
+   * <p>空串不渲染。它存在的理由：一次全局搜索要打四个服务，
+   * 没有状态行的话用户在等待期间只会看到「没有匹配的命令」。
+   */
+  statusText?: string;
 }
 
 export function CommandPalette({
@@ -74,6 +88,8 @@ export function CommandPalette({
   placeholder = '搜索功能或执行动作…',
   emptyMessage = '没有匹配的命令。试试其他关键词。',
   className,
+  onQueryChange,
+  statusText,
 }: CommandPaletteProps) {
   const router = useRouter();
   return (
@@ -98,12 +114,21 @@ export function CommandPalette({
             <Command.Input
               autoFocus
               placeholder={placeholder}
+              {...(onQueryChange ? { onValueChange: onQueryChange } : {})}
               className="text-copy-14 placeholder:text-muted-foreground w-full bg-transparent outline-none"
             />
             <kbd className="border-border text-label-12 text-muted-foreground hidden shrink-0 rounded border px-1.5 py-0.5 sm:inline">
               Esc
             </kbd>
           </div>
+          {statusText ? (
+            <p
+              role="status"
+              className="text-label-12 text-muted-foreground border-b px-4 py-2"
+            >
+              {statusText}
+            </p>
+          ) : null}
           <Command.List className="max-h-[60dvh] flex-1 overflow-y-auto p-2">
             <Command.Empty className="text-copy-13 text-muted-foreground px-3 py-8 text-center">
               {emptyMessage}

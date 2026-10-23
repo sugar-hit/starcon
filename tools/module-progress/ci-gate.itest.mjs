@@ -14,7 +14,7 @@ import { execFileSync } from 'node:child_process';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { extractFailureMarkers, failingJobs, compareRuns } from './ci-gate.mjs';
+import { extractFailureMarkers, failingJobs, compareRuns, runIsSettled } from './ci-gate.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 
@@ -132,7 +132,40 @@ const check = (name, ok, detail = '') => {
   check('PR 比基线更绿不阻塞', !r.blocked);
 }
 
-// ── 8. 真实仓库：能取到 main 基线的失败作业 ────────────────────
+// ── 8. run 没跑完 ⇒ 不得判为「可以合并」（假绿灯回归） ────────
+//
+// 2026-10-24 实测：同一个 run，作业全部在飞时闸门输出「可以合并」，
+// 收尾后同一个 run 判「阻塞」。在飞作业的 conclusion 是 null，
+// 若默认归入「非失败」，「PR 失败 ⊆ 基线失败」这条判据会空洞地成立。
+{
+  check('在飞 run 不算收尾', !runIsSettled({ status: 'in_progress' }));
+  check('排队中的 run 不算收尾', !runIsSettled({ status: 'queued' }));
+  check('收尾的 run 才算收尾', runIsSettled({ status: 'completed' }));
+  check('状态缺失时不算收尾', !runIsSettled({}));
+
+  // 在飞作业被当成「非失败」时的比较结果 —— 这就是假绿灯的形态。
+  const inFlight = [
+    { name: 'Lint', status: 'in_progress', conclusion: null },
+    { name: 'Java', status: 'in_progress', conclusion: null },
+  ];
+  const settledFailure = [{ name: 'Lint', status: 'completed', conclusion: 'failure' }];
+  const r = compareRuns(settledFailure, inFlight, () => []);
+  check('在飞作业被误判成通过（假绿灯的形态）', !r.blocked);
+  // ⇒ 正因为它会给出「不阻塞」，取 run 的那一步必须先卡住「run 没收尾」。
+  check('因此必须在取 run 处拦住（runIsSettled 存在且拒绝在飞）', !runIsSettled(inFlight[0]));
+
+  // 被取消的 run：大量作业停在 cancelled/skipped，同样没有可用结论。
+  const cancelled = [
+    { name: 'Lint', status: 'completed', conclusion: 'cancelled' },
+    { name: 'Java', status: 'completed', conclusion: 'skipped' },
+  ];
+  const rc = compareRuns(settledFailure, cancelled, () => []);
+  check('取消的 run 会被误判成通过（同类假绿灯）', !rc.blocked);
+  // ⇒ 取 run 处必须另外拦住 conclusion === 'cancelled'。
+  check('取消的 run 不得当作有效判据', cancelled[0].conclusion === 'cancelled');
+}
+
+// ── 9. 真实仓库：能取到 main 基线的失败作业 ────────────────────
 {
   try {
     const out = execFileSync(

@@ -10279,6 +10279,145 @@
         },
         "type": "object"
       },
+      "GlobalSearchCapabilities": {
+        "properties": {
+          "domains": {
+            "items": {
+              "$ref": "#/components/schemas/GlobalSearchDomain"
+            },
+            "type": "array"
+          },
+          "notes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "GlobalSearchDomain": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "domain": {
+            "type": "string"
+          },
+          "impact": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "matchMode": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "source": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "GlobalSearchGroup": {
+        "properties": {
+          "dataScope": {
+            "type": "string"
+          },
+          "dataScopeNote": {
+            "type": "string"
+          },
+          "domain": {
+            "type": "string"
+          },
+          "hits": {
+            "items": {
+              "$ref": "#/components/schemas/GlobalSearchHit"
+            },
+            "type": "array"
+          },
+          "label": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "GlobalSearchHit": {
+        "properties": {
+          "domain": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "primary": {
+            "type": "string"
+          },
+          "secondary": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "GlobalSearchResponse": {
+        "properties": {
+          "groups": {
+            "items": {
+              "$ref": "#/components/schemas/GlobalSearchGroup"
+            },
+            "type": "array"
+          },
+          "keyword": {
+            "type": "string"
+          },
+          "matchMode": {
+            "type": "string"
+          },
+          "minKeywordLength": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "suppressedDomains": {
+            "items": {
+              "$ref": "#/components/schemas/GlobalSearchSuppressed"
+            },
+            "type": "array"
+          },
+          "unavailableDomains": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "GlobalSearchSuppressed": {
+        "properties": {
+          "domain": {
+            "type": "string"
+          },
+          "group": {
+            "type": "string"
+          },
+          "groupLabel": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "GoodsReceiptCapabilities": {
         "properties": {
           "conservationNote": {
@@ -31141,12 +31280,634 @@
         },
         "type": "object"
       },
+      "ReturnDispositionExecuteRequest": {
+        "properties": {
+          "batchNo": {
+            "nullable": true,
+            "type": "string"
+          },
+          "dispositionId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "dispositionNo": {
+            "type": "string"
+          },
+          "inspectionId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "instructionId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "occurredAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "qty": {
+            "type": "number"
+          },
+          "skuCode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "skuId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "skuName": {
+            "nullable": true,
+            "type": "string"
+          },
+          "sourceBucketId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "targetInventoryState": {
+            "type": "string"
+          },
+          "targetLocationId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ReturnDispositionExecutionBoundary": {
+        "properties": {
+          "boundary": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ReturnDispositionExecutionCapabilities": {
+        "properties": {
+          "blocks": {
+            "items": {
+              "$ref": "#/components/schemas/ReturnDispositionExecutionCapability"
+            },
+            "type": "array"
+          },
+          "boundaries": {
+            "items": {
+              "$ref": "#/components/schemas/ReturnDispositionExecutionBoundary"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "ReturnDispositionExecutionCapability": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "block": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ReturnDispositionExecutionOptions": {
+        "properties": {
+          "pendingBuckets": {
+            "items": {
+              "$ref": "#/components/schemas/ReturnDispositionExecutionPendingBucket"
+            },
+            "type": "array"
+          },
+          "requiredLocationType": {
+            "type": "string"
+          },
+          "targetInventoryState": {
+            "type": "string"
+          },
+          "targetLocations": {
+            "items": {
+              "$ref": "#/components/schemas/ReturnDispositionExecutionTargetLocation"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "ReturnDispositionExecutionPage": {
+        "properties": {
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/ReturnDispositionExecutionRow"
+            },
+            "type": "array"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ReturnDispositionExecutionPendingBucket": {
+        "properties": {
+          "available": {
+            "type": "number"
+          },
+          "bucketId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "legalEntityId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "locationCode": {
+            "type": "string"
+          },
+          "locationId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "locationName": {
+            "type": "string"
+          },
+          "lotCode": {
+            "type": "string"
+          },
+          "lotId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "onHand": {
+            "type": "number"
+          },
+          "qualityStatusCode": {
+            "type": "string"
+          },
+          "qualityStatusId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "reserved": {
+            "type": "number"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "warehouseCode": {
+            "type": "string"
+          },
+          "warehouseId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "warehouseName": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ReturnDispositionExecutionResult": {
+        "properties": {
+          "dispositionId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "dispositionNo": {
+            "type": "string"
+          },
+          "executionId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "executionNo": {
+            "type": "string"
+          },
+          "idempotentReplay": {
+            "type": "boolean"
+          },
+          "inventoryTransactionId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "occurredAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "qty": {
+            "type": "number"
+          },
+          "sellableQuantityAfter": {
+            "type": "number"
+          },
+          "sellableQuantityBefore": {
+            "type": "number"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "sourceBucketId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "targetBucketId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "targetInventoryState": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ReturnDispositionExecutionRow": {
+        "properties": {
+          "batchNo": {
+            "type": "string"
+          },
+          "dispositionId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "dispositionNo": {
+            "type": "string"
+          },
+          "executedBy": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "executionNo": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "instructionId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "inventoryTransactionId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "occurredAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "qty": {
+            "type": "number"
+          },
+          "sellableQuantityAfter": {
+            "type": "number"
+          },
+          "sellableQuantityBefore": {
+            "type": "number"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "sourceBucketId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "sourceLocationId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "targetBucketId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "targetInventoryState": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ReturnDispositionExecutionTargetLocation": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "locationId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "pickable": {
+            "type": "boolean"
+          },
+          "status": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "warehouseCode": {
+            "type": "string"
+          },
+          "warehouseId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "RiskBearerOption": {
         "properties": {
           "label": {
             "type": "string"
           },
           "value": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "RiskProjectionCapabilities": {
+        "properties": {
+          "agingAvailable": {
+            "type": "boolean"
+          },
+          "agingNote": {
+            "type": "string"
+          },
+          "agingSource": {
+            "type": "string"
+          },
+          "availableDaysNote": {
+            "type": "string"
+          },
+          "inTransitAvailable": {
+            "type": "boolean"
+          },
+          "inTransitNote": {
+            "type": "string"
+          },
+          "inTransitSource": {
+            "type": "string"
+          },
+          "purchaseArrivalAvailable": {
+            "type": "boolean"
+          },
+          "purchaseArrivalImpact": {
+            "type": "string"
+          },
+          "purchaseArrivalOwnerModule": {
+            "type": "string"
+          },
+          "reservationAvailable": {
+            "type": "boolean"
+          },
+          "reservationNote": {
+            "type": "string"
+          },
+          "reservationSource": {
+            "type": "string"
+          },
+          "riskRuleNote": {
+            "type": "string"
+          },
+          "salesVelocityAvailable": {
+            "type": "boolean"
+          },
+          "salesVelocityImpact": {
+            "type": "string"
+          },
+          "salesVelocityOwnerModule": {
+            "type": "string"
+          },
+          "stockProjectionAvailable": {
+            "type": "boolean"
+          },
+          "stockProjectionNote": {
+            "type": "string"
+          },
+          "stockProjectionSource": {
+            "type": "string"
+          },
+          "thresholdAvailable": {
+            "type": "boolean"
+          },
+          "thresholdNote": {
+            "type": "string"
+          },
+          "thresholdSource": {
+            "type": "string"
+          },
+          "writeScopeNote": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "RiskProjectionPage": {
+        "properties": {
+          "asOfDate": {
+            "type": "string"
+          },
+          "computedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/RiskProjectionRow"
+            },
+            "type": "array"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "truncationNote": {
+            "type": "string"
+          },
+          "warehouseKindOptions": {
+            "items": {
+              "$ref": "#/components/schemas/WarehouseKindOption"
+            },
+            "type": "array"
+          },
+          "warehouseOptions": {
+            "items": {
+              "$ref": "#/components/schemas/WarehouseOption"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "RiskProjectionRow": {
+        "properties": {
+          "activeReservationCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "activeReservedQuantity": {
+            "type": "number"
+          },
+          "agingBasis": {
+            "type": "string"
+          },
+          "agingDays": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "available": {
+            "type": "number"
+          },
+          "bucketCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "inTransitFirstMileQuantity": {
+            "type": "number"
+          },
+          "inTransitLegCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "inTransitPurchaseQuantity": {
+            "type": "number"
+          },
+          "inTransitQuantity": {
+            "type": "number"
+          },
+          "inTransitTransferQuantity": {
+            "type": "number"
+          },
+          "inboundDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "lastMovementAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "locationCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "lotCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "maxOnHand": {
+            "nullable": true,
+            "type": "number"
+          },
+          "minOnHand": {
+            "nullable": true,
+            "type": "number"
+          },
+          "obsoleteDays": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "obsoleteThresholdSource": {
+            "type": "string"
+          },
+          "onHand": {
+            "type": "number"
+          },
+          "reorderPoint": {
+            "nullable": true,
+            "type": "number"
+          },
+          "reserved": {
+            "type": "number"
+          },
+          "safetyStock": {
+            "nullable": true,
+            "type": "number"
+          },
+          "sellableBeforeBuffer": {
+            "type": "number"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "thresholdScopeKey": {
+            "type": "string"
+          },
+          "thresholdScopeType": {
+            "type": "string"
+          },
+          "warehouseCode": {
+            "type": "string"
+          },
+          "warehouseId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "warehouseKind": {
+            "type": "string"
+          },
+          "warehouseKindLabel": {
+            "type": "string"
+          },
+          "warehouseName": {
             "type": "string"
           }
         },
@@ -41332,16 +42093,34 @@
         },
         "type": "object"
       },
+      "WarehouseKindOption": {
+        "properties": {
+          "label": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          },
+          "warehouseCount": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
       "WarehouseOption": {
         "properties": {
           "code": {
             "type": "string"
           },
-          "countryCode": {
-            "type": "string"
-          },
           "id": {
             "format": "uuid",
+            "type": "string"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "kindLabel": {
             "type": "string"
           },
           "name": {
@@ -45494,6 +46273,87 @@
         ]
       }
     },
+    "/warehouse/global-search": {
+      "get": {
+        "operationId": "get_warehouse_global_search",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "q",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/GlobalSearchResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "global-search-controller"
+        ]
+      }
+    },
+    "/warehouse/global-search/capabilities": {
+      "get": {
+        "operationId": "get_warehouse_global_search_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/GlobalSearchCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "global-search-controller"
+        ]
+      }
+    },
     "/warehouse/goods-receipt-discrepancies": {
       "get": {
         "operationId": "get_warehouse_goods_receipt_discrepancies",
@@ -46470,6 +47330,122 @@
         },
         "tags": [
           "goods-receipt-controller"
+        ]
+      }
+    },
+    "/warehouse/inventory-risk/capabilities": {
+      "get": {
+        "operationId": "get_warehouse_inventory_risk_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RiskProjectionCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "inventory-risk-projection-controller"
+        ]
+      }
+    },
+    "/warehouse/inventory-risk/projection": {
+      "get": {
+        "operationId": "get_warehouse_inventory_risk_projection",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "warehouseId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "skuId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "warehouseKind",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 100,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RiskProjectionPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "inventory-risk-projection-controller"
         ]
       }
     },
@@ -58638,6 +59614,240 @@
         },
         "tags": [
           "reservation-allocation-controller"
+        ]
+      }
+    },
+    "/warehouse/inventory/return-dispositions/capabilities": {
+      "get": {
+        "operationId": "get_warehouse_inventory_return_dispositions_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReturnDispositionExecutionCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "return-disposition-execution-controller"
+        ]
+      }
+    },
+    "/warehouse/inventory/return-dispositions/execute": {
+      "post": {
+        "operationId": "post_warehouse_inventory_return_dispositions_execute",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReturnDispositionExecuteRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReturnDispositionExecutionResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "return-disposition-execution-controller"
+        ]
+      }
+    },
+    "/warehouse/inventory/return-dispositions/executions": {
+      "get": {
+        "operationId": "get_warehouse_inventory_return_dispositions_executions",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dispositionId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "targetState",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReturnDispositionExecutionPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "return-disposition-execution-controller"
+        ]
+      }
+    },
+    "/warehouse/inventory/return-dispositions/executions/{id}": {
+      "get": {
+        "operationId": "get_warehouse_inventory_return_dispositions_executions_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReturnDispositionExecutionRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "return-disposition-execution-controller"
+        ]
+      }
+    },
+    "/warehouse/inventory/return-dispositions/options": {
+      "get": {
+        "operationId": "get_warehouse_inventory_return_dispositions_options",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "skuId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "targetState",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReturnDispositionExecutionOptions"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "return-disposition-execution-controller"
         ]
       }
     },

@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { usePrefillKeyword } from '@/lib/global-search-handoff';
 import { Boxes, Filter, Plus, RefreshCw, Warehouse } from 'lucide-react';
 import {
   Button,
@@ -92,7 +93,7 @@ export function WarehouseFacilityWorkspace() {
   const [legalEntityId, setLegalEntityId] = useState(ALL);
   const [countryCode, setCountryCode] = useState(ALL);
   const [status, setStatus] = useState(ALL);
-  const [keyword, setKeyword] = useState('');
+  const [keyword, setKeyword] = usePrefillKeyword();
   const [sort, setSort] = useState('CODE');
   const [pageNo, setPageNo] = useState(0);
 

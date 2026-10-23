@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { usePrefillKeyword } from '@/lib/global-search-handoff';
 import { Download, RefreshCw, Send, TriangleAlert, XCircle } from 'lucide-react';
 import {
   Badge,
@@ -86,7 +87,7 @@ export function PurchaseOrderListWorkspace() {
   const [status, setStatus] = useState('');
   const [targetWarehouseId, setTargetWarehouseId] = useState('');
   const [currency, setCurrency] = useState('');
-  const [keyword, setKeyword] = useState('');
+  const [keyword, setKeyword] = usePrefillKeyword();
   const [sort, setSort] = useState('CREATED_AT_DESC');
   const [promisedFrom, setPromisedFrom] = useState('');
   const [promisedTo, setPromisedTo] = useState('');
