@@ -10707,6 +10707,69 @@ const services: readonly {
     pattern: /^default\-context(?:\/(?:capabilities|options))?$/,
   },
   {
+    // 12.5.2.1 凭证管理（finance 服务，卷 12「财务核算」L3 12.5.2 凭证下的第一格）。
+    //
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 `receivables` / `receipts` /
+    //   `settlement` 那几条巨型 alternation 里并分支 —— 那一支是单行超长正则，
+    //   多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。既有条目**一字未改、也不重排**。
+    //
+    // ---- 插入锚点选在 **`default-context`（identity）那条之后、`receivables` 那条之前**----
+    //   也就是「identity 簇的末尾」与「末尾那簇 finance 条目」之间。
+    //   与本批其它车道用过的插入点（数组最开头 / 某个 identity|warehouse|auth 之前 /
+    //   `payment-orders` 之后 / `settlement` 之后 / 数组末尾）都相距足够远 ⇒ 并入时 git 能干净求并。
+    //
+    // ---- 首 token「vouchers」的零命中核对结论 ----
+    //   本文件既有 **200+ 条** services[] 正则（按 `pattern:` 逐条抽出实测）里，
+    //   **没有任何一条**含 `vouchers` 这个串（逐条 `grep -c voucher` = 0）；
+    //   既有 finance 那几条的首 token 是 `receivables` / `receipts` / `settlement` /
+    //   `supplier-reconciliation` / `payment-orders` / `payment-executions` /
+    //   `payment-plans` / `write-off` / `bad-debt` / `transactions` / `fund-analysis` /
+    //   `cost-collections` 等，**全不相同** ⇒ 首 token 既是独立字面量，
+    //   也不会被既有分支的前缀吃掉。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   vouchers                         列表（GET，真分页 + 真筛选 + 按币种分开汇总）/ 建单（POST）
+    //   vouchers/capabilities            能力声明（12.5.1.1 / 12.5.1.2 / 12.5.2.2 缺口归谁）
+    //   vouchers/options                 筛选项（币种 / 状态 / 来源类型 / 期间 / 已用过的科目编码）
+    //   vouchers/export                  导出标准凭证文件（GET，CSV / JSON）
+    //   vouchers/generate                由业务事件自动生成凭证（POST）
+    //   vouchers/periods                 会计期间列表（GET）/ 登记期间（POST）
+    //   vouchers/periods/{uuid}/close    关闭会计期间（POST）
+    //   vouchers/mappings                业务事件 → 借贷科目映射（GET）/ 登记映射（POST）
+    //   vouchers/mappings/{uuid}         修改映射（PUT）
+    //   vouchers/{uuid}                  凭证详情（GET：凭证 + 分录行 + 审计留痕）/ 改草稿（PUT）
+    //   vouchers/{uuid}/post             过账（POST）
+    //   vouchers/{uuid}/reverse          红冲（POST，生成一张反向凭证）
+    //   vouchers/{uuid}/void             作废草稿（POST）
+    //
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //   （不是 `[0-9a-f-]+`）：后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行。
+    //   字面量子路径（capabilities / options / export / generate / periods / mappings）
+    //   排在 {uuid} 段**之前**判别 —— alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   vouchers/{uuid}/delete           —— 🔴 凭证是凭据，**不可删**（错了只能作废 / 红冲）
+    //   vouchers/{uuid}/unpost            —— 🔴 没有「反过账」：已过账只能红冲
+    //   vouchers/{uuid}/edit              —— 改草稿是**同一个** {uuid} 上的 PUT
+    //   vouchers/{uuid}/approve           —— 🔴 审批属 17 审批（identity），本模块**不提供**本地审批端点
+    //   vouchers/{uuid}/reject            —— 同上
+    //   vouchers/batch                    —— 本模块**没有**批量端点
+    //   vouchers/not-a-uuid               —— 非 UUID 段不应被 uuid 分支吃掉
+    //   vouchers/{uuid}/not-a-shape       —— 本模块的动作只有 post / reverse / void
+    //   vouchers/capabilities/{uuid}      —— 字面量段刻意不接 id 段
+    //   vouchers/options/{uuid}           —— 同上
+    //   vouchers/export/{uuid}            —— 导出是集合级动作，不按 id 取
+    //   vouchers/generate/{uuid}          —— 同上
+    //   vouchers/periods/{uuid}           —— 期间按 id 的动作只有 close（多一层子路径）
+    //   vouchers/mappings/{uuid}/not-a-shape —— 映射按 id 的动作只有 PUT 本身
+    //   vouchers/vouchers                 —— 交替写错就会互相吃掉，必须反向钉住
+    prefix: 'finance/',
+    env: 'FINANCE_URL',
+    fallback: 'http://127.0.0.1:8087',
+    pattern:
+      /^vouchers(?:\/(?:capabilities|options|export|generate|mappings(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|periods(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/close)?|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:post|reverse|void))?))?$/,
+  },
+  {
     // 12.1.1.1 应收单管理（finance 服务，卷 12「财务核算」L3 12.1.1 应收下的第一格）。
     //
     // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 trade / crm 那条巨型
