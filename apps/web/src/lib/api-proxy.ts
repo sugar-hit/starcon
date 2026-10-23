@@ -2746,6 +2746,49 @@ const services: readonly {
       /^saas\-plans\/(?:capabilities|options|plans(?:\/[A-Z][A-Z0-9_]{1,63}(?:\/entitlements(?:\/[A-Z][A-Z0-9_]{1,63})?)?)?|subscriptions(?:\/expire\-due|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:status|events))?)?|usage|entitlement\-check)$/,
   },
   {
+    // 17.7.1.2 用量统计（identity 服务，卷 17「组织权限与设置」L3 17.7.1 下的第二格）。
+    //
+    // 本条目是**新增一条独立的 `services[]` 元素**，既有的 `identity/` 巨型 alternation
+    // **一字未动、也不重排** —— 那一支是单行超长正则，往里并分支会让多车道同时并入时
+    // git 必然判冲突（结构性，retry 不会自愈）。
+    //
+    // ---- 插入锚点固定在 `// 2.4.2.3 映射缺失队列（channel 服务）` 那条元素**之前** ----
+    //   即 17.7.1.1 套餐与权益那条元素**之后**。同批另一条车道（17.7.2.2 平台运维视图）
+    //   锚在数组末尾，与本处相隔 6000 行以上 ⇒ git 能干净求并。
+    //
+    // ---- 首 token「saas-usage」的零命中核对结论 ----
+    //   本文件既有 **182** 条 services[] 正则里**没有任何一条**会命中本模块的 8 个 shape：
+    //   逐条用 `new RegExp(pat).test('…')` 实测过（既有的是 `saas-plans` / `business-parameters`
+    //   / `platform-flags` / `dictionary` 一类），**全部零命中** ⇒ resolve() 的
+    //   「首个命中即返回」不会让本模块的路径落到别的分支上。
+    //   反向也核过：本模块这条正则对既有 identity/ 形状（`saas-plans/**` / `tenants` /
+    //   `roles` / `business-parameters` / `platform-flags/**` / `dictionary/**` …）零命中。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   saas-usage/capabilities   能力声明（哪些已交付、哪些未交付 + 归属模块 + 影响面）
+    //   saas-usage/options        词表（六个维度码 / 四个周期码 / 覆盖与计费状态）
+    //   saas-usage/report         用量报表（GET，?tenantId=&kind=&periodType=）
+    //   saas-usage/trend          趋势（GET，?tenantId=&kind=&periodType=）
+    //   saas-usage/billing-basis  计费依据（GET，?tenantId=&kind=&periodType=）
+    //   saas-usage/capacity       容量规划（GET，?periodType=）
+    //   saas-usage/coverage       维度覆盖与来源系统现状（GET）
+    //   saas-usage/collections    归集批次历史（GET，?tenantId=）/ 运行归集（POST）
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸路径 `saas-usage` —— 本模块没有裸集合读，一切入口都带子路径
+    //   * `saas-usage/not-a-shape` —— 非本模块的子路径
+    //   * `saas-usage/report/extra` —— 本模块的读出口下面没有更深的一层
+    //   * `saas-usage/collections/{uuid}` —— 归集批次没有单条详情端点
+    //
+    // ⚠️ query string 不参与这里的比对（proxy() 拿的是 params.path，不含 search），
+    //    所以 `?tenantId=…` 这类筛选参数不用登记。
+    prefix: 'identity/',
+    env: 'IDENTITY_URL',
+    fallback: 'http://127.0.0.1:8081',
+    pattern:
+      /^saas\-usage\/(?:capabilities|options|report|trend|billing\-basis|capacity|coverage|collections)$/,
+  },
+  {
     // 2.4.2.3 映射缺失队列（channel 服务）。本条目是**新增一条独立的 `channel/` 元素**，
     // 不是往既有 channel 分支的超长 alternation 里并分支 —— 那一支是单行超长正则，
     // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。

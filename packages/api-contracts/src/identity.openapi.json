@@ -6838,6 +6838,548 @@
         },
         "type": "object"
       },
+      "UsageBillingRow": {
+        "properties": {
+          "collectedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "entitlementCode": {
+            "type": "string"
+          },
+          "entitlementKind": {
+            "type": "string"
+          },
+          "entitlementLimit": {
+            "type": "number"
+          },
+          "entitlementPeriod": {
+            "type": "string"
+          },
+          "entitlementUnit": {
+            "type": "string"
+          },
+          "entitlementUnlimited": {
+            "type": "boolean"
+          },
+          "measuredAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "overLimit": {
+            "type": "boolean"
+          },
+          "overLimitAction": {
+            "type": "string"
+          },
+          "periodEnd": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "periodStart": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "periodType": {
+            "nullable": true,
+            "type": "string"
+          },
+          "planCode": {
+            "type": "string"
+          },
+          "planName": {
+            "type": "string"
+          },
+          "quantity": {
+            "nullable": true,
+            "type": "number"
+          },
+          "sourceSystem": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string"
+          },
+          "stateNote": {
+            "type": "string"
+          },
+          "subscriptionStatus": {
+            "type": "string"
+          },
+          "tenantCode": {
+            "type": "string"
+          },
+          "tenantId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "tenantName": {
+            "type": "string"
+          },
+          "utilization": {
+            "nullable": true,
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "UsageCapabilitiesView": {
+        "properties": {
+          "billingStates": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "boundaryNote": {
+            "type": "string"
+          },
+          "caliberNote": {
+            "type": "string"
+          },
+          "coverageStates": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "dimensions": {
+            "items": {
+              "$ref": "#/components/schemas/UsageCapabilityDimension"
+            },
+            "type": "array"
+          },
+          "entitlementKinds": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "moneyNote": {
+            "type": "string"
+          },
+          "periods": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "UsageCapabilityDimension": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "description": {
+            "type": "string"
+          },
+          "dimension": {
+            "type": "string"
+          },
+          "impact": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "UsageCapacityRow": {
+        "properties": {
+          "entitlementKind": {
+            "type": "string"
+          },
+          "headroom": {
+            "type": "number"
+          },
+          "latestPeriodStart": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "licensedTotal": {
+            "type": "number"
+          },
+          "measuredTenantCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "subscribedTenantCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "unlimitedTenantCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "unmeasuredTenantCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "usedTotal": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "UsageCollectionRequest": {
+        "properties": {
+          "asOf": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "periodType": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "tenantId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "periodType"
+        ],
+        "type": "object"
+      },
+      "UsageCollectionRow": {
+        "properties": {
+          "collectionId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "dimensionCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "finishedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "measuredCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "periodEnd": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "periodStart": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "periodType": {
+            "type": "string"
+          },
+          "sourceSystems": {
+            "type": "string"
+          },
+          "startedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "subscriptionId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "tenantCode": {
+            "type": "string"
+          },
+          "tenantId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "tenantName": {
+            "type": "string"
+          },
+          "unmeasuredCount": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "UsageCollectionRun": {
+        "properties": {
+          "asOf": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "measuredDimensionCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "periodType": {
+            "type": "string"
+          },
+          "tenantCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "tenants": {
+            "items": {
+              "$ref": "#/components/schemas/UsageCollectionTenantResult"
+            },
+            "type": "array"
+          },
+          "unmeasuredDimensionCount": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "UsageCollectionTenantResult": {
+        "properties": {
+          "collectionId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "dimensionCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "measuredCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "measuredKinds": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "planCode": {
+            "type": "string"
+          },
+          "sourceSystems": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "status": {
+            "type": "string"
+          },
+          "subscriptionId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "tenantId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "unmeasuredCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "unmeasuredKinds": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "UsageCoverageRow": {
+        "properties": {
+          "entitlementKind": {
+            "type": "string"
+          },
+          "measuredTenantCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "registeredTenantCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "state": {
+            "type": "string"
+          },
+          "stateNote": {
+            "type": "string"
+          },
+          "subscribedTenantCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "wiredSourceSystems": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "UsageOptionsView": {
+        "properties": {
+          "billingStates": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "coverageStates": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "entitlementKinds": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "periods": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "UsageReportRow": {
+        "properties": {
+          "collectedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "entitlementCode": {
+            "type": "string"
+          },
+          "entitlementKind": {
+            "type": "string"
+          },
+          "entitlementLimit": {
+            "nullable": true,
+            "type": "number"
+          },
+          "entitlementPeriod": {
+            "type": "string"
+          },
+          "entitlementUnit": {
+            "type": "string"
+          },
+          "entitlementUnlimited": {
+            "type": "boolean"
+          },
+          "measuredAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "overLimit": {
+            "type": "boolean"
+          },
+          "overLimitAction": {
+            "type": "string"
+          },
+          "periodEnd": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "periodStart": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "periodType": {
+            "type": "string"
+          },
+          "planCode": {
+            "type": "string"
+          },
+          "planName": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "sourceSystem": {
+            "type": "string"
+          },
+          "subscriptionId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "subscriptionStatus": {
+            "type": "string"
+          },
+          "tenantCode": {
+            "type": "string"
+          },
+          "tenantId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "tenantName": {
+            "type": "string"
+          },
+          "utilization": {
+            "nullable": true,
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "UsageTrendPoint": {
+        "properties": {
+          "collectedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "entitlementKind": {
+            "type": "string"
+          },
+          "periodEnd": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "periodStart": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "periodType": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "sourceSystems": {
+            "type": "string"
+          },
+          "tenantCode": {
+            "type": "string"
+          },
+          "tenantId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "tenantName": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "UsageView": {
         "properties": {
           "available": {
@@ -14461,6 +15003,403 @@
         },
         "tags": [
           "saas-plan-controller"
+        ]
+      }
+    },
+    "/identity/saas-usage/billing-basis": {
+      "get": {
+        "operationId": "get_identity_saas_usage_billing_basis",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "tenantId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "kind",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "periodType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/UsageBillingRow"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "saas-usage-controller"
+        ]
+      }
+    },
+    "/identity/saas-usage/capabilities": {
+      "get": {
+        "operationId": "get_identity_saas_usage_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/UsageCapabilitiesView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "saas-usage-controller"
+        ]
+      }
+    },
+    "/identity/saas-usage/capacity": {
+      "get": {
+        "operationId": "get_identity_saas_usage_capacity",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "periodType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/UsageCapacityRow"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "saas-usage-controller"
+        ]
+      }
+    },
+    "/identity/saas-usage/collections": {
+      "get": {
+        "operationId": "get_identity_saas_usage_collections",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "tenantId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/UsageCollectionRow"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "saas-usage-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_identity_saas_usage_collections",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UsageCollectionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/UsageCollectionRun"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "saas-usage-controller"
+        ]
+      }
+    },
+    "/identity/saas-usage/coverage": {
+      "get": {
+        "operationId": "get_identity_saas_usage_coverage",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/UsageCoverageRow"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "saas-usage-controller"
+        ]
+      }
+    },
+    "/identity/saas-usage/options": {
+      "get": {
+        "operationId": "get_identity_saas_usage_options",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/UsageOptionsView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "saas-usage-controller"
+        ]
+      }
+    },
+    "/identity/saas-usage/report": {
+      "get": {
+        "operationId": "get_identity_saas_usage_report",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "tenantId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "kind",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "periodType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/UsageReportRow"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "saas-usage-controller"
+        ]
+      }
+    },
+    "/identity/saas-usage/trend": {
+      "get": {
+        "operationId": "get_identity_saas_usage_trend",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "tenantId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "kind",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "periodType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/UsageTrendPoint"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "saas-usage-controller"
         ]
       }
     },
