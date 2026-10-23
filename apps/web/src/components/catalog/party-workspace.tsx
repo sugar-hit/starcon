@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { usePrefillKeyword } from '@/lib/global-search-handoff';
 import { Badge, Button, EmptyState, SectionCard, StatCard } from '@starcon/ui';
 import {
   Building2,
@@ -99,7 +100,7 @@ export function PartyWorkspace() {
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState('');
 
-  const [keyword, setKeyword] = useState('');
+  const [keyword, setKeyword] = usePrefillKeyword();
   const [partyType, setPartyType] = useState('');
   const [status, setStatus] = useState('');
   const [roleType, setRoleType] = useState('');

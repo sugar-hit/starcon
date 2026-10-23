@@ -3535,6 +3535,57 @@
         },
         "type": "object"
       },
+      "GlobalSearchRecentEntry": {
+        "properties": {
+          "domain": {
+            "nullable": true,
+            "type": "string"
+          },
+          "keyword": {
+            "type": "string"
+          },
+          "primaryRef": {
+            "nullable": true,
+            "type": "string"
+          },
+          "searchedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "GlobalSearchRecentInput": {
+        "properties": {
+          "domain": {
+            "nullable": true,
+            "type": "string"
+          },
+          "keyword": {
+            "type": "string"
+          },
+          "primaryRef": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "GlobalSearchRecentList": {
+        "properties": {
+          "entries": {
+            "items": {
+              "$ref": "#/components/schemas/GlobalSearchRecentEntry"
+            },
+            "type": "array"
+          },
+          "limit": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
       "Grant": {
         "properties": {
           "permissions": {
@@ -11444,6 +11495,108 @@
         },
         "tags": [
           "dictionary-controller"
+        ]
+      }
+    },
+    "/identity/global-search/recent": {
+      "delete": {
+        "operationId": "delete_identity_global_search_recent",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "global-search-recent-controller"
+        ]
+      },
+      "get": {
+        "operationId": "get_identity_global_search_recent",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 10,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/GlobalSearchRecentList"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "global-search-recent-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_identity_global_search_recent",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GlobalSearchRecentInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/GlobalSearchRecentEntry"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "global-search-recent-controller"
         ]
       }
     },

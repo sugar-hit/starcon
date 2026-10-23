@@ -9,4 +9,9 @@ export * from './contracts/crm';
 
 // 重名的类型：显式指定一份，消除 export * 的歧义。
 export type { Dimension } from './contracts/warehouse';
+export type { GlobalSearchCapabilities } from './contracts/catalog';
+export type { GlobalSearchDomain } from './contracts/catalog';
+export type { GlobalSearchGroup } from './contracts/catalog';
+export type { GlobalSearchHit } from './contracts/catalog';
+export type { GlobalSearchResponse } from './contracts/catalog';
 export type { StreamingResponseBody } from './contracts/catalog';

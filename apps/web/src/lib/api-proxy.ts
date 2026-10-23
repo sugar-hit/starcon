@@ -9566,6 +9566,66 @@ const services: readonly {
     pattern:
       /^platform\-ops\/(?:capabilities|overview|tenants|metrics|alerts|thresholds|self\/metrics|alerts\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/(?:acknowledge|resolve)|thresholds\/[A-Z][A-Z0-9_]{1,39})$/,
   },
+  // ==========================================================================
+  // 1.2.1.1 全局搜索框（前端聚合层 + 五个服务的只读检索端点）。
+  //
+  // ---- 插入锚点：**数组末尾**（`platform-ops` 那条之后）----
+  //   同批其它车道的插入点分别是「数组最开头」「`prefix: 'identity/'` 之前」
+  //   「`prefix: 'warehouse/'` 之前」，与本处相距 600 行以上，git 能干净求并。
+  //
+  // ---- 为什么是**五条**独立的 services[] 元素而不是一条 ----
+  //   services[] 的每条元素只带**一个** prefix（一个后端服务）。
+  //   全局搜索跨五个服务（catalog / trade / channel / warehouse / identity），
+  //   每个服务各占一条 —— 既有的 100+ 条元素**一字未改、也不重排**。
+  //
+  // ---- 形状（**只放行本模块真实实现的路径**）----
+  //   catalog/global-search              商品（SKU / SPU）+ 客户 + 供应商的只读检索
+  //   catalog/global-search/capabilities 能力声明（逐域 available + ownerModule + impact）
+  //   trade/global-search                销售订单 + 采购单
+  //   trade/global-search/capabilities   能力声明
+  //   channel/global-search              店铺
+  //   channel/global-search/capabilities 能力声明
+  //   warehouse/global-search            仓库 + 物流单号
+  //   warehouse/global-search/capabilities 能力声明
+  //   identity/global-search/recent      最近搜索记录（GET 读 / POST 登记 / DELETE 清空）
+  //
+  // ---- 刻意**不放行**的形状 ----
+  //   global-search 裸路径以外的写端点：四个业务服务的检索端点**只有 GET**
+  //     （工作台只读 + 跳转是蓝图的硬约束），放行不存在的 POST/PUT 只会让界面以为
+  //     「全局搜索能改数据」。
+  //   global-search/{任意其他子路径}：本模块的子路径只有 capabilities 一个。
+  //   identity/global-search 裸路径：identity 侧只有 recent 一个子路径。
+  // ==========================================================================
+  {
+    prefix: 'catalog/',
+    env: 'CATALOG_URL',
+    fallback: 'http://127.0.0.1:8082',
+    pattern: /^global\-search(?:\/capabilities)?$/,
+  },
+  {
+    prefix: 'trade/',
+    env: 'TRADE_URL',
+    fallback: 'http://127.0.0.1:8085',
+    pattern: /^global\-search(?:\/capabilities)?$/,
+  },
+  {
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern: /^global\-search(?:\/capabilities)?$/,
+  },
+  {
+    prefix: 'warehouse/',
+    env: 'WAREHOUSE_URL',
+    fallback: 'http://127.0.0.1:8084',
+    pattern: /^global\-search(?:\/capabilities)?$/,
+  },
+  {
+    prefix: 'identity/',
+    env: 'IDENTITY_URL',
+    fallback: 'http://127.0.0.1:8081',
+    pattern: /^global\-search\/recent$/,
+  },
 ];
 
 function resolve(path: string) {
