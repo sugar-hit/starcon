@@ -65798,6 +65798,990 @@
         ],
         "type": "object"
       },
+      "SalesTaxCapabilities": {
+        "properties": {
+          "downstreamNote": {
+            "type": "string"
+          },
+          "filingCycles": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "filingObligations": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "gaps": {
+            "items": {
+              "$ref": "#/components/schemas/SalesTaxCapabilityGap"
+            },
+            "type": "array"
+          },
+          "nexusTypes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "rateSemantics": {
+            "type": "string"
+          },
+          "reconciliationSemantics": {
+            "type": "string"
+          },
+          "reconciliationStatuses": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "upstreamNote": {
+            "type": "string"
+          },
+          "upstreams": {
+            "items": {
+              "$ref": "#/components/schemas/SalesTaxUpstream"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "SalesTaxCapabilityGap": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "impact": {
+            "type": "string"
+          },
+          "moduleId": {
+            "type": "string"
+          },
+          "moduleName": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SalesTaxEffectiveRule": {
+        "properties": {
+          "asOf": {
+            "format": "date",
+            "type": "string"
+          },
+          "found": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          },
+          "rule": {
+            "$ref": "#/components/schemas/SalesTaxRateRuleView"
+          },
+          "stateCode": {
+            "type": "string"
+          },
+          "stateName": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SalesTaxFacilitatorImportInput": {
+        "properties": {
+          "content": {
+            "type": "string"
+          },
+          "contentType": {
+            "type": "string"
+          },
+          "fileKey": {
+            "type": "string"
+          },
+          "fileName": {
+            "type": "string"
+          },
+          "periodEnd": {
+            "type": "string"
+          },
+          "periodStart": {
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SalesTaxFacilitatorImportResult": {
+        "properties": {
+          "imported": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "report": {
+            "$ref": "#/components/schemas/SalesTaxFacilitatorReportView"
+          },
+          "scanned": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "skipped": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "SalesTaxFacilitatorLineView": {
+        "properties": {
+          "currency": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "orderCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "remark": {
+            "type": "string"
+          },
+          "shopCode": {
+            "type": "string"
+          },
+          "sourceLineNo": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "stateCode": {
+            "type": "string"
+          },
+          "stateName": {
+            "type": "string"
+          },
+          "taxCollected": {
+            "type": "number"
+          },
+          "taxableAmount": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "SalesTaxFacilitatorReportDetail": {
+        "properties": {
+          "lines": {
+            "items": {
+              "$ref": "#/components/schemas/SalesTaxFacilitatorLineView"
+            },
+            "type": "array"
+          },
+          "report": {
+            "$ref": "#/components/schemas/SalesTaxFacilitatorReportView"
+          }
+        },
+        "type": "object"
+      },
+      "SalesTaxFacilitatorReportPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/SalesTaxFacilitatorReportView"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "SalesTaxFacilitatorReportView": {
+        "properties": {
+          "byteSize": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "contentHash": {
+            "type": "string"
+          },
+          "contentType": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "fileKey": {
+            "type": "string"
+          },
+          "fileName": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "lineCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "parseStatus": {
+            "type": "string"
+          },
+          "parseVersion": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "parseWarnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "parsedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "periodEnd": {
+            "format": "date",
+            "type": "string"
+          },
+          "periodStart": {
+            "format": "date",
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "uploadedBy": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SalesTaxFacilitatorScopeInput": {
+        "properties": {
+          "facilitatorEnabled": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "remitTo": {
+            "type": "string"
+          },
+          "reportRequired": {
+            "type": "boolean"
+          },
+          "stateCode": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SalesTaxFacilitatorScopePage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/SalesTaxFacilitatorScopeView"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "SalesTaxFacilitatorScopeView": {
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "facilitatorEnabled": {
+            "type": "boolean"
+          },
+          "id": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "remitTo": {
+            "type": "string"
+          },
+          "reportRequired": {
+            "type": "boolean"
+          },
+          "stateCode": {
+            "type": "string"
+          },
+          "stateName": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SalesTaxObligationPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/SalesTaxObligationRow"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "SalesTaxObligationRow": {
+        "properties": {
+          "currency": {
+            "type": "string"
+          },
+          "expectedTax": {
+            "type": "number"
+          },
+          "facilitatorTax": {
+            "type": "number"
+          },
+          "filingCycle": {
+            "type": "string"
+          },
+          "filingObligation": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "periodEnd": {
+            "format": "date",
+            "type": "string"
+          },
+          "periodStart": {
+            "format": "date",
+            "type": "string"
+          },
+          "reconciliationId": {
+            "type": "string"
+          },
+          "reconciliationStatus": {
+            "type": "string"
+          },
+          "registrationStatus": {
+            "type": "string"
+          },
+          "stateCode": {
+            "type": "string"
+          },
+          "stateName": {
+            "type": "string"
+          },
+          "variance": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "SalesTaxRateRuleInput": {
+        "properties": {
+          "baseRate": {
+            "type": "string"
+          },
+          "effectiveFrom": {
+            "type": "string"
+          },
+          "effectiveTo": {
+            "type": "string"
+          },
+          "exemptionAmount": {
+            "type": "string"
+          },
+          "filingCycle": {
+            "type": "string"
+          },
+          "marketplaceFacilitator": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          },
+          "stateCode": {
+            "type": "string"
+          },
+          "thresholdAmount": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SalesTaxRateRulePage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/SalesTaxRateRuleView"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "SalesTaxRateRuleView": {
+        "properties": {
+          "baseRate": {
+            "type": "number"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "effectiveFrom": {
+            "format": "date",
+            "type": "string"
+          },
+          "effectiveTo": {
+            "format": "date",
+            "type": "string"
+          },
+          "exemptionAmount": {
+            "type": "number"
+          },
+          "filingCycle": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "marketplaceFacilitator": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          },
+          "ruleVersion": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "stateCode": {
+            "type": "string"
+          },
+          "stateName": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "thresholdAmount": {
+            "type": "number"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SalesTaxReconciliationPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/SalesTaxReconciliationView"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "SalesTaxReconciliationRequest": {
+        "properties": {
+          "currency": {
+            "type": "string"
+          },
+          "periodEnd": {
+            "type": "string"
+          },
+          "periodStart": {
+            "type": "string"
+          },
+          "stateCode": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SalesTaxReconciliationView": {
+        "properties": {
+          "baseRate": {
+            "type": "number"
+          },
+          "computedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "exemptSales": {
+            "type": "number"
+          },
+          "exemptionAmount": {
+            "type": "number"
+          },
+          "expectedTax": {
+            "type": "number"
+          },
+          "facilitatorTax": {
+            "type": "number"
+          },
+          "id": {
+            "type": "string"
+          },
+          "periodEnd": {
+            "format": "date",
+            "type": "string"
+          },
+          "periodStart": {
+            "format": "date",
+            "type": "string"
+          },
+          "rateChangedInPeriod": {
+            "type": "boolean"
+          },
+          "ruleVersion": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "selfTaxableSales": {
+            "type": "number"
+          },
+          "settlementTax": {
+            "type": "number"
+          },
+          "shopCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "stateCode": {
+            "type": "string"
+          },
+          "stateName": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "taxableBase": {
+            "type": "number"
+          },
+          "thresholdAmount": {
+            "type": "number"
+          },
+          "variance": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "SalesTaxShopPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/SalesTaxShopView"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "SalesTaxShopStateInput": {
+        "properties": {
+          "nexusType": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "registered": {
+            "type": "boolean"
+          },
+          "registeredFrom": {
+            "type": "string"
+          },
+          "registrationNo": {
+            "type": "string"
+          },
+          "shopId": {
+            "type": "string"
+          },
+          "stateCode": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SalesTaxShopStatePage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/SalesTaxShopStateView"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "SalesTaxShopStateView": {
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "nexusType": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "registered": {
+            "type": "boolean"
+          },
+          "registeredFrom": {
+            "format": "date",
+            "type": "string"
+          },
+          "registrationNo": {
+            "type": "string"
+          },
+          "shopCode": {
+            "type": "string"
+          },
+          "shopId": {
+            "type": "string"
+          },
+          "shopName": {
+            "type": "string"
+          },
+          "stateCode": {
+            "type": "string"
+          },
+          "stateName": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SalesTaxShopView": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "operatingMode": {
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "platformName": {
+            "type": "string"
+          },
+          "registeredStateCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "stateCodes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SalesTaxStatePage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/SalesTaxStateRow"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "SalesTaxStateRow": {
+        "properties": {
+          "baseRate": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "exemptionAmount": {
+            "type": "number"
+          },
+          "expectedTax": {
+            "type": "number"
+          },
+          "facilitatorScopeCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "facilitatorTax": {
+            "type": "number"
+          },
+          "filingCycle": {
+            "type": "string"
+          },
+          "filingObligation": {
+            "type": "string"
+          },
+          "latestPeriodEnd": {
+            "format": "date",
+            "type": "string"
+          },
+          "latestPeriodStart": {
+            "format": "date",
+            "type": "string"
+          },
+          "latestReconciliationId": {
+            "type": "string"
+          },
+          "marketplaceFacilitator": {
+            "type": "boolean"
+          },
+          "notes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "reconciliationStatus": {
+            "type": "string"
+          },
+          "registeredShopCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "registrationStatus": {
+            "type": "string"
+          },
+          "ruleStatus": {
+            "type": "string"
+          },
+          "ruleVersion": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "selfTaxableSales": {
+            "type": "number"
+          },
+          "shopCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "stateCode": {
+            "type": "string"
+          },
+          "stateName": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "thresholdAmount": {
+            "type": "number"
+          },
+          "variance": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "SalesTaxUpstream": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "impact": {
+            "type": "string"
+          },
+          "moduleId": {
+            "type": "string"
+          },
+          "moduleName": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "SaveBudgetPoolRequest": {
         "properties": {
           "currency": {
@@ -127249,6 +128233,1146 @@
         },
         "tags": [
           "return-shipback-controller"
+        ]
+      }
+    },
+    "/channel/sales-tax/capabilities": {
+      "get": {
+        "operationId": "get_channel_sales_tax_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SalesTaxCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "sales-tax-controller"
+        ]
+      }
+    },
+    "/channel/sales-tax/facilitator-reports": {
+      "get": {
+        "operationId": "get_channel_sales_tax_facilitator_reports",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "platformCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "periodStart",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "periodEnd",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SalesTaxFacilitatorReportPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "sales-tax-controller"
+        ]
+      }
+    },
+    "/channel/sales-tax/facilitator-reports/import": {
+      "post": {
+        "operationId": "post_channel_sales_tax_facilitator_reports_import",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SalesTaxFacilitatorImportInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SalesTaxFacilitatorImportResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "sales-tax-controller"
+        ]
+      }
+    },
+    "/channel/sales-tax/facilitator-reports/{id}": {
+      "get": {
+        "operationId": "get_channel_sales_tax_facilitator_reports_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SalesTaxFacilitatorReportDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "sales-tax-controller"
+        ]
+      }
+    },
+    "/channel/sales-tax/facilitator-scopes": {
+      "get": {
+        "operationId": "get_channel_sales_tax_facilitator_scopes",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "stateCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "platformCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SalesTaxFacilitatorScopePage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "sales-tax-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_channel_sales_tax_facilitator_scopes",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SalesTaxFacilitatorScopeInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SalesTaxFacilitatorScopeView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "sales-tax-controller"
+        ]
+      }
+    },
+    "/channel/sales-tax/facilitator-scopes/{id}": {
+      "put": {
+        "operationId": "put_channel_sales_tax_facilitator_scopes_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SalesTaxFacilitatorScopeInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SalesTaxFacilitatorScopeView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "sales-tax-controller"
+        ]
+      }
+    },
+    "/channel/sales-tax/obligations": {
+      "get": {
+        "operationId": "get_channel_sales_tax_obligations",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "stateCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "periodStart",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "periodEnd",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "currency",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SalesTaxObligationPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "sales-tax-controller"
+        ]
+      }
+    },
+    "/channel/sales-tax/rate-rules": {
+      "get": {
+        "operationId": "get_channel_sales_tax_rate_rules",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "stateCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SalesTaxRateRulePage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "sales-tax-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_channel_sales_tax_rate_rules",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SalesTaxRateRuleInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SalesTaxRateRuleView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "sales-tax-controller"
+        ]
+      }
+    },
+    "/channel/sales-tax/rate-rules/effective": {
+      "get": {
+        "operationId": "get_channel_sales_tax_rate_rules_effective",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "stateCode",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "asOf",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SalesTaxEffectiveRule"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "sales-tax-controller"
+        ]
+      }
+    },
+    "/channel/sales-tax/rate-rules/{id}": {
+      "get": {
+        "operationId": "get_channel_sales_tax_rate_rules_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SalesTaxRateRuleView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "sales-tax-controller"
+        ]
+      },
+      "put": {
+        "operationId": "put_channel_sales_tax_rate_rules_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SalesTaxRateRuleInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SalesTaxRateRuleView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "sales-tax-controller"
+        ]
+      }
+    },
+    "/channel/sales-tax/rate-rules/{id}/archive": {
+      "put": {
+        "operationId": "put_channel_sales_tax_rate_rules_id_archive",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SalesTaxRateRuleView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "sales-tax-controller"
+        ]
+      }
+    },
+    "/channel/sales-tax/reconciliations": {
+      "get": {
+        "operationId": "get_channel_sales_tax_reconciliations",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "stateCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "periodStart",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "periodEnd",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "currency",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SalesTaxReconciliationPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "sales-tax-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_channel_sales_tax_reconciliations",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SalesTaxReconciliationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/SalesTaxReconciliationView"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "sales-tax-controller"
+        ]
+      }
+    },
+    "/channel/sales-tax/shop-states": {
+      "get": {
+        "operationId": "get_channel_sales_tax_shop_states",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "shopId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "stateCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "nexusType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SalesTaxShopStatePage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "sales-tax-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_channel_sales_tax_shop_states",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SalesTaxShopStateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SalesTaxShopStateView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "sales-tax-controller"
+        ]
+      }
+    },
+    "/channel/sales-tax/shop-states/{id}": {
+      "put": {
+        "operationId": "put_channel_sales_tax_shop_states_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SalesTaxShopStateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SalesTaxShopStateView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "sales-tax-controller"
+        ]
+      }
+    },
+    "/channel/sales-tax/shops": {
+      "get": {
+        "operationId": "get_channel_sales_tax_shops",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "platformCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SalesTaxShopPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "sales-tax-controller"
+        ]
+      }
+    },
+    "/channel/sales-tax/states": {
+      "get": {
+        "operationId": "get_channel_sales_tax_states",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "stateCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "registered",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "ruleStatus",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "asOf",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SalesTaxStatePage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "sales-tax-controller"
         ]
       }
     },
