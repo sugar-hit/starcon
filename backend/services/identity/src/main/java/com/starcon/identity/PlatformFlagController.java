@@ -455,7 +455,7 @@ public class PlatformFlagController {
                         "平台跨租户运维视图",
                         true,
                         "platform_ops_metric / platform_ops_alert + /identity/platform-ops/*",
-                        "",
+                        "17.7.2.2",
                         "看板只出技术指标（在线状态、错误率、任务积压、队列深度、容量占用、响应延迟、可用性），不含任何租户业务数据；成本是容量 / 调用量口径的估算数量，不是金额"))));
   }
 
