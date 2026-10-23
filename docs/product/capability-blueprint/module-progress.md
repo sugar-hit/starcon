@@ -6,9 +6,7 @@
 >
 > 状态词表只有三个值，统计逻辑依赖它，不要新增：
 > `已交付`（迁移 + API + 页面 + 测试齐全，无 TODO 残留）· `进行中`（部分交付、未收口，证据列写清缺哪一块）· `未开发`（未开工）。
-
 ## 总览
-
 | 指标 | 数量 |
 | --- | --- |
 | 模块总数 | 465 |
@@ -16,9 +14,7 @@
 | 进行中 | 0 |
 | **未开发** | **111** |
 | 完成率 | 76.1% |
-
 ## 分阶段进度（交付顺序看这里）
-
 | 阶段 | 已交付 | 进行中 | 未开发 | 合计 |
 | --- | --- | --- | --- | --- |
 | **D1–D2** | 80 | 0 | 0 | 80 |
@@ -27,11 +23,8 @@
 | **D5** | 52 | 0 | 0 | 52 |
 | **D6** | 43 | 0 | 35 | 78 |
 | **D7** | 80 | 0 | 75 | 155 |
-
 ## 分系统进度
-
 | 卷 | 系统 | 阶段 | 已交付 | 模块数 |
-| --- | --- | --- | --- | --- |
 | 01 | 工作台与门户系统 | D7 | 8 | 23 |
 | 02 | 渠道与店铺系统 | D1–D2 / D5 | 25 | 25 |
 | 03 | 商品主数据系统 | D1–D2 | 40 | 40 |
@@ -50,30 +43,22 @@
 | 16 | 合规与风控系统 | D7 | 20 | 23 |
 | 17 | 组织权限与系统设置系统 | D1–D2 / D4 / D6 / D7 | 29 | 29 |
 | 18 | 集成开放与智能自动化系统 | D7 | 0 | 24 |
-
 ## 判定「已交付」的标准
-
 一个模块标 `已交付` 当且仅当下面四件都成立，缺一件就是 `未开发` 或 `进行中`：
-
 1. **迁移** — `backend/services/<svc>/src/main/resources/db/migration/V*.sql` 里有真实表结构，
    带 `tenant_id NOT NULL` + RLS 策略，不是注释里的设计。
 2. **API** — 服务里有对应端点，走 jOOQ 显式 SQL，不是返回硬编码常量的桩。
 3. **页面** — `apps/web/src/app/**/page.tsx` 是真实工作区，不是 `DomainPlaceholder`。
 4. **测试** — `cd backend && ./mvnw verify` 绿；涉及租户隔离的必须实跑
    「两租户互不可见 / 伪造 tenant header 无效 / 连接池归还后不串租户」三条断言。
-
 **判定为 `未开发` 的典型形态**（见到就说明没做完，不许算进已交付）：
-
 - `DomainPlaceholder` 占位页
 - 硬编码数组 / 常量当数据源
 - 服务里 `TODO` + `throw new UnsupportedOperationException()`
 - 迁移文件存在但没有 RLS 策略
 - 前端有页面但后端没有对应端点（或反之）
-
 ## 跨期说明
-
 「阶段」列按**依赖就绪顺序**逐模块标注，不是卷归属。跨期卷的拆分如下：
-
 - **01 工作台与门户 → 全部 D7**：它是纯投影聚合层（蓝图原文「不写业务数据，只读投影」），
   聚合 09 订单 / 07 库存 / 02 渠道 / 12 财务 / 15 客户 / 17 审批的投影。
   这些数据源没落地之前建「我的待办」只能造假数据，所以整卷排到最后收口。
@@ -87,9 +72,7 @@
 - **11 售后与退货**：D4 交付售后单、退货授权与实收、退款换货；平台纠纷 / 客诉工单 / 分析排 D7。
 - **17 组织权限**：D1–D2 交付租户、法人、部门、成员、角色、页面权限、数据范围、审计；
   17.4 审批流随单据排 D4，17.6.1.1 账簿与本位币随财务排 D6，17.7 套餐与平台参数排 D7。
-
 ## 模块明细
-
 | 模块 ID | 模块名 | L3 锚点路由 | 阶段 | 状态 | 证据 |
 | --- | --- | --- | --- | --- | --- |
 | 1.1.1.1 | 我的待办 | /dashboard/todo | D7 | 未开发 | — |
@@ -108,7 +91,7 @@
 | 1.3.1.2 | 通知偏好 | /notifications | D7 | 未开发 | — |
 | 1.3.2.1 | 预警规则 | /notifications/rules | D7 | 未开发 | — |
 | 1.3.2.2 | 外部渠道推送 | /notifications/rules | D7 | 未开发 | — |
-| 1.4.1.1 | 工作台布局 | — | D7 | 未开发 | — |
+| 1.4.1.1 | 工作台布局 | — | D7 | 已交付 | **无新表（V339 特意留空未占用）** —— 蓝图写死「**布局是纯个人偏好，不进业务库**」，本模块因此**不新建任何表**：布局落在 1.4.1.2 已建的 `user_preference`（`V336__identity_user_preference.sql`）里，用本模块自己的 page_key `dashboard.layout`；UNIQUE(tenant_id,membership_id,page_key) ⇒ 同一页二次写入是**覆盖不是新增**；`tenant_id NOT NULL` + ENABLE/**FORCE** RLS 由 V336 设好，本模块**零 ALTER**（同批 1.2.2.1 / 1.4.2.1 也用这张表，任何无 DEFAULT 的 ADD COLUMN 都会让对方的 INSERT 违约）—— **不为了「用掉版本号」造一张没有业务事实的表**。**端点：复用 1.4.1.2 的 `GET/PUT/DELETE /identity/user-preferences/{pageKey}`（page_key = `dashboard.layout`），本模块零新增端点、零改后端生产代码** —— 依据：`UserPreferencePayloadRules` 的校验是**通用形状**校验（载荷必须是 JSON 对象、键名字符集、深度 ≤4、键数 ≤64、数组 ≤64 项、字符串 ≤512 字符、总体积 ≤16KB、敏感键名与凭据形状的值一律 400），**不是按 page key 分派** ⇒ 本模块的载荷 `{order[],hidden[],defaultTab}` 直接被它覆盖，**不需要**加性扩展、也不需要另开端点（也就不需要动 api-proxy 白名单）；租户与 membership_id **只从已认证会话解析**（session_access），请求体不接受 membershipId/userId/tenantId，X-Tenant-Id 头从头到尾没有出现过。**卡片注册表（系统事实）**：`apps/web/src/components/dashboard/workbench-card-registry.ts` —— 本仓此前**没有**统一的卡片注册表（这正是本模块要建的东西之一），本文件把「系统能提供哪些卡片 / 每张卡片属于哪个分区 / 默认是否显示 / 默认顺序」列成**显式数据**；🔴 **系统事实与个人偏好严格分开**：卡片清单是**代码里的声明**（改一次对所有人生效），用户布局是**个人数据**（存 `user_preference`）—— 绝不把清单塞进 `user_preference`（系统事实变一次就要给所有人改数据）；只登记**已交付、真的能打开**的页面（指向未开发模块 = 假承诺）：异常订单队列 1.1.1.2 `/dashboard/todo`、库存风险 1.1.3.1 `/dashboard/inventory-risk`、履约健康 1.1.2.3 `/dashboard/fulfillment-health`、全局搜索 1.2.1.1 `/dashboard/search`、快捷入口配置 1.2.2.2 `/dashboard/shortcuts`；分区按蓝图 1.1 的三段结构 = 概览 / 待办与待决策 / 风险速览（1.1.2.1 核心指标卡、1.1.3.2 资金与回款风险尚未交付 ⇒ **不登记**）。**前端**：`workbench-layout-model.ts`（纯模型 + 接口调用）/ `use-workbench-layout.ts`（hook）/ `workbench-layout-workspace.tsx`（工作区：按布局渲染的卡片区 + 排序/显隐/默认 Tab/重置 + 加载/错误/空三态）/ `app/dashboard/workbench-layout/page.tsx`（路由；**不用 `layout` 这个 Next.js 保留名**）。四条语义都做完：排序（载荷里的**数组顺序**表达，**不新增列**存 sort_order）、显隐、默认落地 Tab、持久化、**真的重置**（DELETE 删掉那一行，不是「提示用户刷新」）。**缺键套默认值**（老布局没有新字段是常态）；存回来的顺序**只认现在认识的卡片**（下架的卡片不占位）；**系统新加的卡片默认可见**（只有用户明确藏过的那几张才继续藏着）；落库的 order **永远是一份完整排列**。排序方式 = **HTML5 原生拖拽**（照抄本仓既有写法：`components/iam/department-tree.tsx`、`packages/ui/src/components/layout/workspace-tabs.tsx`）+ **每行同时给「上移 / 下移」按钮**（HTML5 拖拽对键盘与读屏用户不可用，**不**为此引入重量级依赖）。**api-proxy：零改动** —— 1.4.1.2 登记的那条独立元素（`user-preferences` 裸路径 + 单个小写 slug 段，已含 `dashboard.layout`）已覆盖任何 slug 形状的 page_key ⇒ 本模块不碰这个多车道共用的累积型白名单（也**不需要**跑全量 allowlist 回归）。**测试**：后端 `WorkbenchLayoutIntegrationTest`（11 例）+ `WorkbenchLayoutTenancyIntegrationTest`（4 例，**三断言实跑 Testcontainers PostgreSQL 16，池压到 1 条连接**）= **15 例全绿**；前端 `workbench-layout-model.test.ts`（35 例）+ `workbench-layout-api-proxy.test.ts`（7 例）= **42 例全绿**。覆盖：布局载荷**真的落 PostgreSQL 16**（直查 `user_preference` 断言 tenant_id / membership_id / page_key / jsonb）、**卡片顺序按数组顺序原样往返**（jsonb 会重排对象的键但**不重排数组元素** —— 整个模块的地基）、同页二次写入是覆盖不是新增、没存过返回 stored=false 而不是 404、缺键原样收下、**重置真的删行**且幂等、敏感键被服务端 400 拒掉、载荷必须是对象不是数组、timestamptz 写回零漂移；隔离三断言：两租户互不可见（+ 同租户不同成员也互不可见）、伪造 X-Tenant-Id 无效（比对**数据库**而不只看状态码）、连接池固定 1 条 + 5 轮交替读写不串租户、偏好表是 FORCE RLS 且应用连接不持 bypassrls。**契约**：本模块**未改任何后端生产代码** ⇒ OpenAPI spec 逐字节不变 ⇒ 契约**无需重生成**（已实测：用 `OpenApiContractTest` 导出当前 identity spec → `python3 tools/codegen/catalog-contracts.py --spec-dir …` 重生成 → `contracts/identity.ts` / `identity.openapi.json` / `index.ts` 与已提交产物**逐字节相同**）。**边界**：**未改首页 `/`**（`apps/web/src/app/page.tsx` 是跨车道共用文件，源码里明写「首页是人工与别的模块共用的」）—— 本模块把「按布局渲染的卡片区」做成独立组件，工作台布局页自己渲染它，首页接入留给首页所有者；**未改 `packages/ui`（nav-config / task-pages）与 `apps/web/src/lib/api-proxy.ts`**。 |
 | 1.4.1.2 | 列表与表格偏好 | — | D7 | 已交付 | 迁移 identity `V336__identity_user_preference.sql`（**本仓第一张个人偏好表**：新建 `user_preference(id, tenant_id NOT NULL, membership_id, page_key varchar(160), preference jsonb, created_at, updated_at)`，UNIQUE(tenant_id, membership_id, page_key) ⇒ 同 page_key 二次写入是**覆盖不是新增**；复合外键 (tenant_id, membership_id) → membership(tenant_id, id) 把「这份偏好属于本租户的这个成员」钉在**数据层**（租户内的「这个人」是 membership.id，不是全局 app_user.id）；**载荷是 JSONB 而不是大宽表** —— 蓝图「偏好按页面 key 存储，新增字段不影响旧偏好」是硬约束，做成宽表就意味着每加一个偏好字段都要 ALTER 表、老行的默认语义被重写；jsonb 载荷缺键是**正常**的（老偏好没有新字段），读取时由前端对缺失键套默认值，于是新增字段零 ALTER、零数据迁移；CHECK 钉死 page_key 词表 `^[a-z0-9][a-z0-9._-]{0,159}$` 与载荷必须是 JSON 对象；**tenant_id NOT NULL + ENABLE/FORCE RLS** isolation（只认 app.current_tenant，FORCE 是必须的：否则表 owner 身份能绕过隔离）+ GRANT SELECT/INSERT/UPDATE/DELETE TO identity_app；**零 ALTER 任何既有表**）；端点 `/identity/user-preferences/**`（GET 读一页 / PUT upsert 一页 / DELETE 重置一页 / GET 列出我全部页 / DELETE 全部重置，共 5 个形状，identity 服务）：租户与 membership_id **只从已认证会话解析**（session_access），**不接受请求参数传 membershipId / userId / tenantId**，X-Tenant-Id 头从头到尾没有出现过；**读不到偏好返回 200 + stored=false 而不是 404**（没保存过是列表页的常态不是异常）；写入前统一过 `UserPreferencePayloadRules`（纯函数）：载荷必须是对象、键名字符集、深度 ≤4、键数 ≤64、数组 ≤64 项、字符串 ≤512 字符、总体积 ≤16KB，且**敏感键名与凭据形状的值一律 400 拒绝**（password / token / idCard / apiKey / secret / credential / bankCardNo …，键名归一化后按词干匹配，accessToken 与 access_token 一样被拦）—— 蓝图的「敏感值不得进 preference JSON」必须在**服务端**钉住，前端是可以被绕过的；**刻意不新登记权限码**：每一行都是「我自己的」偏好，边界是数据归属（tenant_id + membership_id + RLS）而不是功能开关，另立 identity.user_preference.* 只会让管理员新建角色时忘了勾、普通成员的列表页偏好静默失效；前端 `apps/web/src/lib/list-preferences-model.ts`（纯模型：缺键套默认值 / 只认这一页认识的列 / 用 columnSet 区分「用户显式隐藏」与「这一列当时还不存在」/ 白名单 + 安全 token 才落库）+ `use-list-preferences.ts`（可复用 hook：挂载读回、读不到按默认视图继续渲染不白屏、**恢复时不写库**否则会把当时的默认列集冻住、只存用户真的改过的东西、失败只留提示不打断列表）+ `components/common/list-preference-bar.tsx`（每页条数 / 排序 / 列显示 / 恢复默认 / 保存态）；**真实接入 5 个已交付列表工作区**（catalog 商品列表 `catalog.products`、orders 待发货 `orders.pending-shipment`、orders 发货记录 `orders.shipment-records`、inventory 库存风险 `inventory.risk`、warehouse 出库时效 `warehouse.outbound-timeliness`），排序键就是**后端排序白名单里的 token**（PACKED_AT_DESC / SLA_DEADLINE_AT_ASC / SHIPPED_AT_DESC …，方向编在 token 里，拆成「字段 + 方向」会拼出后端不认的组合），**自由文本筛选一律不落库**（关键字 / 姓名 / 备注可能含 PII，只有枚举与编号才进白名单）；设置入口 `/settings/profile`（列出我保存过的页面偏好 + 单页/全部恢复默认 + 页面 key 命名约定）。测试 `UserPreferenceIntegrationTest`（19 例）+ `UserPreferenceTenancyIntegrationTest`（4 例，三断言实跑 Testcontainers PostgreSQL 16，池压到 1 条连接）= **23 例全绿**；前端 `list-preferences-model.test.ts` + `list-preferences-api-proxy.test.ts` = **29 例全绿**，api-proxy 累积白名单全量回归 206 文件 / 1195 例零回归。**与兄弟模块 1.4.1.1 工作台布局的关系**：`user_preference` 的 schema 由**本模块定义**，1.4.1.1 将来用**同一张表**、用它自己的 page_key（例如 dashboard.layout）存自己的载荷形状 —— 这正是「一页一行 + JSONB」要换来的东西：它落地时不需要 ALTER 本表，也不需要数据迁移；本轮**未**替它实现工作台布局 |
 | 1.4.2.1 | 语言与时区 | — | D7 | 未开发 | — |
 | 1.4.2.2 | 默认店铺与仓库 | — | D7 | 未开发 | — |
@@ -557,3 +540,40 @@
 | 18.4.3.2 | 效果评估 | — | D7 | 未开发 | — |
 | 18.5.1.1 | 模板管理 | — | D7 | 未开发 | — |
 | 18.5.2.1 | 投递记录 | — | D7 | 未开发 | — |
+| 已交付 | 350 |
+| **未开发** | **115** |
+| 完成率 | 75.3% |
+| **D7** | 76 | 0 | 79 | 155 |
+| 01 | 工作台与门户系统 | D7 | 4 | 23 |
+| 已交付 | 346 |
+| **未开发** | **119** |
+| 完成率 | 74.4% |
+| **D7** | 72 | 0 | 83 | 155 |
+| 01 | 工作台与门户系统 | D7 | 0 | 23 |
+| 已交付 | 347 |
+| **未开发** | **118** |
+| 完成率 | 74.6% |
+| **D7** | 73 | 0 | 82 | 155 |
+| 01 | 工作台与门户系统 | D7 | 1 | 23 |
+| 已交付 | 344 |
+| **未开发** | **121** |
+| 完成率 | 74.0% |
+| **D7** | 70 | 0 | 85 | 155 |
+| 17 | 组织权限与系统设置系统 | D1–D2 / D4 / D6 / D7 | 27 | 29 |
+| 已交付 | 340 |
+| **未开发** | **125** |
+| 完成率 | 73.1% |
+| **D7** | 66 | 0 | 89 | 155 |
+| 16 | 合规与风控系统 | D7 | 18 | 23 |
+| 17 | 组织权限与系统设置系统 | D1–D2 / D4 / D6 / D7 | 25 | 29 |
+| 已交付 | 341 |
+| **未开发** | **124** |
+| 完成率 | 73.3% |
+| **D7** | 67 | 0 | 88 | 155 |
+| 16 | 合规与风控系统 | D7 | 19 | 23 |
+| 17 | 组织权限与系统设置系统 | D1–D2 / D4 / D6 / D7 | 26 | 29 |
+| 已交付 | 345 |
+| **未开发** | **120** |
+| 完成率 | 74.2% |
+| **D7** | 71 | 0 | 84 | 155 |
+| 17 | 组织权限与系统设置系统 | D1–D2 / D4 / D6 / D7 | 28 | 29 |
