@@ -14,4 +14,5 @@ export type { GlobalSearchDomain } from './contracts/catalog';
 export type { GlobalSearchGroup } from './contracts/catalog';
 export type { GlobalSearchHit } from './contracts/catalog';
 export type { GlobalSearchResponse } from './contracts/catalog';
+export type { GlobalSearchSuppressed } from './contracts/catalog';
 export type { StreamingResponseBody } from './contracts/catalog';

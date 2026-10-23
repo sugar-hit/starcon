@@ -36,7 +36,28 @@ public final class GlobalSearchModels {
       @Schema(nullable = true) String secondary) {}
 
   /** 一个业务域的命中集合。空组不返回（空组会让界面出现「有这一类但一条都没有」的噪声）。 */
-  public record GlobalSearchGroup(String domain, String label, List<GlobalSearchHit> hits) {}
+  public record GlobalSearchGroup(
+      String domain,
+      String label,
+      List<GlobalSearchHit> hits,
+      String dataScope,
+      String dataScopeNote) {}
+
+  /**
+   * 因**权限**未返回的一个子域。
+   *
+   * <p>域码与 {@code unavailableDomains} 里的一致（catalog 侧是 {@code PRODUCT_SKU} /
+   * {@code PRODUCT_SPU} 这种带域内实体前缀的码），额外带上它归属的业务域 ——
+   * 前端要按**业务域**计数（「N 个业务域因权限未返回」）并把提示挂到对应的组上，
+   * 光有一串子域码是算不出业务域数的。
+   *
+   * @param domain 被抑制的子域码
+   * @param label 该子域的中文名（SKU / SPU / 订单 ...）
+   * @param group 归属的业务域码（{@code PRODUCT} / {@code ORDER} ...）
+   * @param groupLabel 归属业务域的中文名（商品 / 订单 ...）
+   */
+  public record GlobalSearchSuppressed(
+      String domain, String label, String group, String groupLabel) {}
 
   /**
    * 检索响应。
@@ -46,13 +67,15 @@ public final class GlobalSearchModels {
    * @param minKeywordLength 最小关键词长度（少于这个长度后端直接 400）
    * @param groups 命中的业务域
    * @param unavailableDomains 因**权限**未返回的域（不是「没有数据」，是「没权限看」）
+   * @param suppressedDomains 因权限未返回的子域（带归属业务域；被抑制的**命中条数**不返回）
    */
   public record GlobalSearchResponse(
       String keyword,
       String matchMode,
       int minKeywordLength,
       List<GlobalSearchGroup> groups,
-      List<String> unavailableDomains) {}
+      List<String> unavailableDomains,
+      List<GlobalSearchSuppressed> suppressedDomains) {}
 
   /**
    * 一个业务域的能力声明。

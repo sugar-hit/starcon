@@ -78,14 +78,19 @@ public class GlobalSearchService {
 
     Map<String, List<GlobalSearchHit>> byDomain = new LinkedHashMap<>();
     List<String> unavailable = new ArrayList<>();
+    List<GlobalSearchSuppressed> suppressed = new ArrayList<>();
+    // 每个业务域**实际生效**的数据范围。
+    Map<String, String> scopeByGroup = new LinkedHashMap<>();
 
     if (permits(actor, PERM_ORDERS)) {
-      String scope = scopeMode(actor, PERM_ORDERS);
+      String scope = orderScope(actor);
       List<GlobalSearchHit> hits =
           access.run(actor, PERM_ORDERS, () -> orderHits(prefix, size, scope, actor.userId()));
       byDomain.computeIfAbsent("ORDER", k -> new ArrayList<>()).addAll(hits);
+      scopeByGroup.merge("ORDER", scope, GlobalSearchService::narrower);
     } else {
       unavailable.add("ORDER");
+      suppressed.add(new GlobalSearchSuppressed("ORDER", "订单", "ORDER", "订单"));
     }
 
     if (permits(actor, PERM_PURCHASE)) {
@@ -96,15 +101,18 @@ public class GlobalSearchService {
               PERM_PURCHASE,
               () -> purchaseHits(prefix, size, scope, actor.userId(), actor.departmentId()));
       byDomain.computeIfAbsent("PURCHASE", k -> new ArrayList<>()).addAll(hits);
+      scopeByGroup.merge("PURCHASE", scope, GlobalSearchService::narrower);
     } else {
       unavailable.add("PURCHASE");
+      suppressed.add(new GlobalSearchSuppressed("PURCHASE", "采购单", "PURCHASE", "采购单"));
     }
 
     List<GlobalSearchGroup> groups = new ArrayList<>();
-    addGroup(groups, "ORDER", "订单", byDomain);
-    addGroup(groups, "PURCHASE", "采购单", byDomain);
+    addGroup(groups, "ORDER", "订单", byDomain, scopeByGroup);
+    addGroup(groups, "PURCHASE", "采购单", byDomain, scopeByGroup);
 
-    return new GlobalSearchResponse(keyword, MATCH_MODE, MIN_KEYWORD_LENGTH, groups, unavailable);
+    return new GlobalSearchResponse(
+        keyword, MATCH_MODE, MIN_KEYWORD_LENGTH, groups, unavailable, suppressed);
   }
 
   // ================================================================ 能力声明
@@ -177,10 +185,12 @@ public class GlobalSearchService {
     List<Object> binds = new ArrayList<>();
     StringBuilder where = new StringBuilder(" where o.order_no ilike ? escape '!'");
     binds.add(prefix);
-    if (SCOPE_SELF.equals(scope)) {
+    if (!SCOPE_ALL.equals(scope)) {
       // 订单没有 owner / department 列（那是 9.1.2.2 的写入所有权范围，不在本服务），
       // SELF 落在「本人经手过」上：sales_order_status_history 里有本人的留痕。
-      // 与 9.1.1.1 订单列表逐字同构。
+      // 与 9.1.1.1 订单列表逐字同构（那边是「只要有一条 ALL 就按 ALL，否则按 SELF 收窄」）。
+      // 刻意**不是**只判 SELF：DEPARTMENT 也必须收窄到本人经手过 ——
+      // 部门范围在 sales_order 上没有可落地的列，放行等于把全租户订单返回给部门范围的角色。
       where.append(
           " and exists (select 1 from sales_order_status_history h"
               + " where h.tenant_id = o.tenant_id and h.order_id = o.id and h.actor_id = ?::uuid)");
@@ -253,20 +263,26 @@ public class GlobalSearchService {
    *
    * <p>「操作和范围必须由同一分配满足」（ADR-0005）：只看<b>含有本权限</b>的授权，
    * 别的权限的授权（哪怕是 ALL）不参与本域的范围判定。
+   *
+   * <p>判定本体在共享库 {@code GrantPermissions}（与各服务 RLS 的判定同语义：
+   * 多条授权里只要有一条 ALL，返回的行就是全租户可见），这里只做映射。
    */
   static String scopeMode(AccessService.Access actor, String permission) {
-    List<AccessService.Grant> grants =
-        actor.grants() == null ? List.<AccessService.Grant>of() : actor.grants();
-    boolean all =
-        grants.stream()
-            .anyMatch(g -> "ALL".equals(g.scopeMode()) && g.permissions().contains(permission));
-    if (all) return SCOPE_ALL;
-    boolean department =
-        grants.stream()
-            .anyMatch(
-                g -> "DEPARTMENT".equals(g.scopeMode()) && g.permissions().contains(permission));
-    if (department && actor.departmentId() != null) return SCOPE_DEPARTMENT;
-    return SCOPE_SELF;
+    return GrantPermissions.scopeMode(
+        grantsOf(actor), permission, actor.departmentId() != null);
+  }
+
+  /**
+   * 销售订单的实际范围：{@code sales_order} 没有部门列（V99 的订单簇里没有），
+   * 所以 {@code DEPARTMENT} 退化为 {@code SELF} —— 与 9.1.1.1 订单列表逐字同构
+   * （那边是「只要有一条 ALL 就按 ALL，否则按 SELF 收窄到本人经手过的订单」）。
+   *
+   * <p>退化方向刻意选<b>更严</b>的一侧：报成 DEPARTMENT 会让界面显示「只看本部门」，
+   * 实际返回的却是本人经手过的订单 —— 标注与事实不符。
+   */
+  static String orderScope(AccessService.Access actor) {
+    String scope = scopeMode(actor, PERM_ORDERS);
+    return SCOPE_DEPARTMENT.equals(scope) ? SCOPE_SELF : scope;
   }
 
   /** 域 → 分组。空组不返回。 */
@@ -274,21 +290,56 @@ public class GlobalSearchService {
       List<GlobalSearchGroup> groups,
       String domain,
       String label,
-      Map<String, List<GlobalSearchHit>> byDomain) {
+      Map<String, List<GlobalSearchHit>> byDomain,
+      Map<String, String> scopeByGroup) {
     List<GlobalSearchHit> hits = byDomain.get(domain);
     if (hits == null || hits.isEmpty()) return;
-    groups.add(new GlobalSearchGroup(domain, label, hits));
+    String scope = scopeByGroup.getOrDefault(domain, GrantPermissions.SCOPE_SELF);
+    groups.add(new GlobalSearchGroup(domain, label, hits, scope, scopeNote(domain, scope)));
+  }
+
+  /** 同一业务域由多个子域组成时，取**更严**的一侧。 */
+  private static String narrower(String left, String right) {
+    return rank(left) >= rank(right) ? left : right;
+  }
+
+  private static int rank(String scope) {
+    if (GrantPermissions.SCOPE_SELF.equals(scope)) return 3;
+    if (GrantPermissions.SCOPE_DEPARTMENT.equals(scope)) return 2;
+    if (GrantPermissions.SCOPE_ALL.equals(scope) || GrantPermissions.SCOPE_TENANT.equals(scope)) return 1;
+    return 0;
+  }
+
+  /** 数据范围说明文案：界面上要讲清「这一组到底能看到多大范围」。 */
+  private static String scopeNote(String domain, String scope) {
+    boolean purchase = "PURCHASE".equals(domain);
+    String subject = purchase ? "采购单" : "销售订单";
+    if (GrantPermissions.SCOPE_ALL.equals(scope)) {
+      return subject + "在你的授权范围内全租户可见。";
+    }
+    if (GrantPermissions.SCOPE_DEPARTMENT.equals(scope)) {
+      return subject + "只返回本部门负责的单据。";
+    }
+    if (GrantPermissions.SCOPE_SELF.equals(scope)) {
+      return purchase
+          ? "采购单只返回你负责的单据。"
+          : "销售订单没有部门维度，范围退化为「仅本人经手过」（sales_order_status_history.actor_id = 本人）。";
+    }
+    return subject + "的数据范围以你的角色配置为准。";
   }
 
   /** 会话是否具备该域的读权限。判定规则与各服务 {@code AccessService.require} 同构。 */
   private boolean permits(AccessService.Access actor, String permission) {
-    List<GrantPermissions.Grant> grants =
-        actor.grants() == null
-            ? List.of()
-            : actor.grants().stream()
-                .map(g -> new GrantPermissions.Grant(g.roleCode(), g.scopeMode(), g.permissions()))
-                .toList();
-    return GrantPermissions.permits(grants, permission, actor.departmentId() != null);
+    return GrantPermissions.permits(grantsOf(actor), permission, actor.departmentId() != null);
+  }
+
+  /** 各服务 {@code AccessService.Grant} → 共享判定用的 {@code GrantPermissions.Grant}。 */
+  private static List<GrantPermissions.Grant> grantsOf(AccessService.Access actor) {
+    return actor.grants() == null
+        ? List.of()
+        : actor.grants().stream()
+            .map(g -> new GrantPermissions.Grant(g.roleCode(), g.scopeMode(), g.permissions()))
+            .toList();
   }
 
   /** 关键词归一化：去首尾空白；少于 2 个字符直接 400。 */

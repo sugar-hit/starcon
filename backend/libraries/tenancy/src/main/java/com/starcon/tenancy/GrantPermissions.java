@@ -51,4 +51,58 @@ public final class GrantPermissions {
     }
     return false;
   }
+
+  // ================================================================ 数据范围
+
+  /** 数据范围：全租户可见。 */
+  public static final String SCOPE_ALL = "ALL";
+
+  /** 数据范围：只可见本部门负责的。 */
+  public static final String SCOPE_DEPARTMENT = "DEPARTMENT";
+
+  /** 数据范围：只可见本人相关（或本人经手过）的。 */
+  public static final String SCOPE_SELF = "SELF";
+
+  /**
+   * 数据范围：租户级数据 —— 授权之外**不再**按个人 / 部门收窄。
+   *
+   * <p>这不是一种授权范围模式，而是「该域的表没有归属维度」时的事实：
+   * 往来单位（party）、仓库档案、物流单据这类表上只有 {@code tenant_id}，
+   * 任何人的授权都看不到比「本租户」更小的范围。
+   */
+  public static final String SCOPE_TENANT = "TENANT";
+
+  /**
+   * 某个权限码上**实际生效**的数据范围。
+   *
+   * <p>取「最宽」的一条授权（ALL &gt; DEPARTMENT &gt; SELF），与 RLS 的判定同语义：
+   * {@code catalog_scope} / {@code channel_scope} 是「任一条授权成立即成立」，
+   * 所以多条授权里只要有一条 ALL，返回的行就是全租户可见 ——
+   * 报成 SELF 会与实际可见范围不符（界面就会说「只看到本人的」，实际看到的是全租户的）。
+   *
+   * <p>DEPARTMENT 需要会话确实带部门（{@code hasDepartment}），否则退化为 SELF ——
+   * 往更严的一侧退化，与各服务既有口径一致。
+   *
+   * @param grants 会话的全部授权
+   * @param permission 形如 {@code catalog.sku.read} 的权限码
+   * @param hasDepartment 会话是否带部门
+   */
+  public static String scopeMode(List<Grant> grants, String permission, boolean hasDepartment) {
+    if (grants == null || grants.isEmpty()) return SCOPE_SELF;
+    String siblingRead =
+        permission.substring(0, permission.lastIndexOf('.')) + ".read";
+    boolean all = false;
+    boolean department = false;
+    for (Grant grant : grants) {
+      if (grant == null) continue;
+      List<String> permissions = grant.permissions();
+      if (permissions == null || permissions.isEmpty()) continue;
+      if (!permissions.contains(permission) || !permissions.contains(siblingRead)) continue;
+      if (SCOPE_ALL.equals(grant.scopeMode())) all = true;
+      else if (SCOPE_DEPARTMENT.equals(grant.scopeMode())) department = true;
+    }
+    if (all) return SCOPE_ALL;
+    if (department && hasDepartment) return SCOPE_DEPARTMENT;
+    return SCOPE_SELF;
+  }
 }
