@@ -1,6 +1,875 @@
 {
   "components": {
     "schemas": {
+      "FinanceAccountSubjectByCodeResult": {
+        "properties": {
+          "basis": {
+            "type": "string"
+          },
+          "found": {
+            "type": "boolean"
+          },
+          "subject": {
+            "$ref": "#/components/schemas/FinanceAccountSubjectRow"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceAccountSubjectCapabilities": {
+        "properties": {
+          "capabilities": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceAccountSubjectCapability"
+            },
+            "type": "array"
+          },
+          "downstreamGaps": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceAccountSubjectDownstreamGap"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceAccountSubjectCapability": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "basis": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "module": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceAccountSubjectCategorySummary": {
+        "properties": {
+          "category": {
+            "enum": [
+              "ASSET",
+              "LIABILITY",
+              "EQUITY",
+              "COST",
+              "PROFIT_LOSS"
+            ],
+            "type": "string"
+          },
+          "categoryLabel": {
+            "type": "string"
+          },
+          "count": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "detailCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "groupCount": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceAccountSubjectDetail": {
+        "properties": {
+          "events": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceAccountSubjectEventRow"
+            },
+            "type": "array"
+          },
+          "mappingReferences": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceAccountSubjectMappingRef"
+            },
+            "type": "array"
+          },
+          "subject": {
+            "$ref": "#/components/schemas/FinanceAccountSubjectRow"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceAccountSubjectDownstreamGap": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "group": {
+            "type": "string"
+          },
+          "module": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "ownerService": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceAccountSubjectEventRow": {
+        "properties": {
+          "actorId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "eventType": {
+            "type": "string"
+          },
+          "fieldName": {
+            "type": "string"
+          },
+          "fromValue": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "occurredAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "targetId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "targetType": {
+            "type": "string"
+          },
+          "toValue": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceAccountSubjectInput": {
+        "properties": {
+          "accountingBookId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "balanceDirection": {
+            "enum": [
+              "DEBIT",
+              "CREDIT"
+            ],
+            "type": "string"
+          },
+          "category": {
+            "enum": [
+              "ASSET",
+              "LIABILITY",
+              "EQUITY",
+              "COST",
+              "PROFIT_LOSS"
+            ],
+            "type": "string"
+          },
+          "detail": {
+            "type": "boolean"
+          },
+          "legalEntityId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "parentSubjectCode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "subjectCode": {
+            "type": "string"
+          },
+          "subjectName": {
+            "type": "string"
+          },
+          "taxNote": {
+            "nullable": true,
+            "type": "string"
+          },
+          "taxRate": {
+            "nullable": true,
+            "type": "number"
+          },
+          "taxTreatment": {
+            "enum": [
+              "TAXABLE",
+              "EXEMPT",
+              "ZERO_RATED",
+              "NON_TAXABLE",
+              "REVERSE_CHARGE"
+            ],
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceAccountSubjectMappingInput": {
+        "properties": {
+          "accountingBookId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "effectiveFrom": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "eventLabel": {
+            "nullable": true,
+            "type": "string"
+          },
+          "eventType": {
+            "type": "string"
+          },
+          "lines": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceAccountSubjectMappingLineInput"
+            },
+            "type": "array"
+          },
+          "note": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceAccountSubjectMappingLineInput": {
+        "properties": {
+          "amountBasis": {
+            "enum": [
+              "ORDER_ITEM_AMOUNT",
+              "ITEM_COST",
+              "SHIPPING_AMOUNT",
+              "TAX_AMOUNT",
+              "PLATFORM_FEE",
+              "REFUND_AMOUNT",
+              "ADJUSTMENT_AMOUNT",
+              "OTHER"
+            ],
+            "type": "string"
+          },
+          "direction": {
+            "enum": [
+              "DEBIT",
+              "CREDIT"
+            ],
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "sequence": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "subjectCode": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceAccountSubjectMappingLineRow": {
+        "properties": {
+          "amountBasis": {
+            "enum": [
+              "ORDER_ITEM_AMOUNT",
+              "ITEM_COST",
+              "SHIPPING_AMOUNT",
+              "TAX_AMOUNT",
+              "PLATFORM_FEE",
+              "REFUND_AMOUNT",
+              "ADJUSTMENT_AMOUNT",
+              "OTHER"
+            ],
+            "type": "string"
+          },
+          "amountBasisLabel": {
+            "type": "string"
+          },
+          "direction": {
+            "enum": [
+              "DEBIT",
+              "CREDIT"
+            ],
+            "type": "string"
+          },
+          "directionLabel": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "mappingId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "sequence": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "subjectCode": {
+            "type": "string"
+          },
+          "subjectName": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceAccountSubjectMappingPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceAccountSubjectMappingRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceAccountSubjectMappingRef": {
+        "properties": {
+          "amountBasis": {
+            "type": "string"
+          },
+          "direction": {
+            "type": "string"
+          },
+          "eventLabel": {
+            "type": "string"
+          },
+          "eventType": {
+            "type": "string"
+          },
+          "mappingId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceAccountSubjectMappingRow": {
+        "properties": {
+          "accountingBookId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "balanced": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "creditLineCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "debitLineCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "effectiveFrom": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "eventLabel": {
+            "type": "string"
+          },
+          "eventType": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "lines": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceAccountSubjectMappingLineRow"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "DRAFT",
+              "ACTIVE",
+              "INACTIVE"
+            ],
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceAccountSubjectMappingUpdateInput": {
+        "properties": {
+          "effectiveFrom": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "eventLabel": {
+            "nullable": true,
+            "type": "string"
+          },
+          "lines": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceAccountSubjectMappingLineInput"
+            },
+            "type": "array"
+          },
+          "note": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceAccountSubjectOptions": {
+        "properties": {
+          "accountingBookIds": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "balanceDirections": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "categories": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "parentSubjectCodes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "sources": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "statuses": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "taxTreatments": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceAccountSubjectPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceAccountSubjectRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "summaryByCategory": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceAccountSubjectCategorySummary"
+            },
+            "type": "array"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceAccountSubjectRow": {
+        "properties": {
+          "accountingBookId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "balanceDirection": {
+            "enum": [
+              "DEBIT",
+              "CREDIT"
+            ],
+            "type": "string"
+          },
+          "balanceDirectionLabel": {
+            "type": "string"
+          },
+          "category": {
+            "enum": [
+              "ASSET",
+              "LIABILITY",
+              "EQUITY",
+              "COST",
+              "PROFIT_LOSS"
+            ],
+            "type": "string"
+          },
+          "categoryLabel": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "detail": {
+            "type": "boolean"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "legalEntityId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "level": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "mappingReferenceCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "parentSubjectCode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "ACTIVE",
+              "DISABLED"
+            ],
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "subjectCode": {
+            "type": "string"
+          },
+          "subjectName": {
+            "type": "string"
+          },
+          "taxNote": {
+            "type": "string"
+          },
+          "taxRate": {
+            "nullable": true,
+            "type": "number"
+          },
+          "taxTreatment": {
+            "enum": [
+              "TAXABLE",
+              "EXEMPT",
+              "ZERO_RATED",
+              "NON_TAXABLE",
+              "REVERSE_CHARGE"
+            ],
+            "type": "string"
+          },
+          "taxTreatmentLabel": {
+            "type": "string"
+          },
+          "templateKey": {
+            "nullable": true,
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceAccountSubjectTemplateApplyInput": {
+        "properties": {
+          "accountingBookId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "legalEntityId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "templateKey": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceAccountSubjectTemplateApplyResult": {
+        "properties": {
+          "accountingBookId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "created": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "skipped": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "skippedCodes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "templateKey": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceAccountSubjectTemplateCatalog": {
+        "properties": {
+          "basis": {
+            "type": "string"
+          },
+          "subjects": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceAccountSubjectTemplateRow"
+            },
+            "type": "array"
+          },
+          "templates": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceAccountSubjectTemplateSummary"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceAccountSubjectTemplateRow": {
+        "properties": {
+          "balanceDirection": {
+            "enum": [
+              "DEBIT",
+              "CREDIT"
+            ],
+            "type": "string"
+          },
+          "balanceDirectionLabel": {
+            "type": "string"
+          },
+          "category": {
+            "enum": [
+              "ASSET",
+              "LIABILITY",
+              "EQUITY",
+              "COST",
+              "PROFIT_LOSS"
+            ],
+            "type": "string"
+          },
+          "categoryLabel": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "boolean"
+          },
+          "parentSubjectCode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "sortOrder": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "subjectCode": {
+            "type": "string"
+          },
+          "subjectName": {
+            "type": "string"
+          },
+          "taxNote": {
+            "type": "string"
+          },
+          "taxRate": {
+            "nullable": true,
+            "type": "number"
+          },
+          "taxTreatment": {
+            "enum": [
+              "TAXABLE",
+              "EXEMPT",
+              "ZERO_RATED",
+              "NON_TAXABLE",
+              "REVERSE_CHARGE"
+            ],
+            "type": "string"
+          },
+          "taxTreatmentLabel": {
+            "type": "string"
+          },
+          "templateKey": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceAccountSubjectTemplateSummary": {
+        "properties": {
+          "detailCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "groupCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "subjectCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "templateKey": {
+            "type": "string"
+          },
+          "templateName": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceAccountSubjectUpdateInput": {
+        "properties": {
+          "balanceDirection": {
+            "enum": [
+              "DEBIT",
+              "CREDIT"
+            ],
+            "type": "string"
+          },
+          "category": {
+            "enum": [
+              "ASSET",
+              "LIABILITY",
+              "EQUITY",
+              "COST",
+              "PROFIT_LOSS"
+            ],
+            "type": "string"
+          },
+          "detail": {
+            "type": "boolean"
+          },
+          "parentSubjectCode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "subjectName": {
+            "type": "string"
+          },
+          "taxNote": {
+            "nullable": true,
+            "type": "string"
+          },
+          "taxRate": {
+            "nullable": true,
+            "type": "number"
+          },
+          "taxTreatment": {
+            "enum": [
+              "TAXABLE",
+              "EXEMPT",
+              "ZERO_RATED",
+              "NON_TAXABLE",
+              "REVERSE_CHARGE"
+            ],
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "FinanceAgingBucketAmount": {
         "properties": {
           "amount": {
@@ -12131,6 +13000,785 @@
   },
   "openapi": "3.0.1",
   "paths": {
+    "/finance/account-subjects": {
+      "get": {
+        "operationId": "get_finance_account_subjects",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "accountingBookId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "category",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "balanceDirection",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "taxTreatment",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "detail",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "parentSubjectCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceAccountSubjectPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "account-subject-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_finance_account_subjects",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinanceAccountSubjectInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceAccountSubjectRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "account-subject-controller"
+        ]
+      }
+    },
+    "/finance/account-subjects/by-code": {
+      "get": {
+        "operationId": "get_finance_account_subjects_by_code",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "subjectCode",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceAccountSubjectByCodeResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "account-subject-controller"
+        ]
+      }
+    },
+    "/finance/account-subjects/capabilities": {
+      "get": {
+        "operationId": "get_finance_account_subjects_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceAccountSubjectCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "account-subject-controller"
+        ]
+      }
+    },
+    "/finance/account-subjects/mappings": {
+      "get": {
+        "operationId": "get_finance_account_subjects_mappings",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "accountingBookId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceAccountSubjectMappingPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "account-subject-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_finance_account_subjects_mappings",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinanceAccountSubjectMappingInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceAccountSubjectMappingRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "account-subject-controller"
+        ]
+      }
+    },
+    "/finance/account-subjects/mappings/{id}": {
+      "get": {
+        "operationId": "get_finance_account_subjects_mappings_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceAccountSubjectMappingRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "account-subject-controller"
+        ]
+      },
+      "put": {
+        "operationId": "put_finance_account_subjects_mappings_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinanceAccountSubjectMappingUpdateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceAccountSubjectMappingRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "account-subject-controller"
+        ]
+      }
+    },
+    "/finance/account-subjects/mappings/{id}/activate": {
+      "post": {
+        "operationId": "post_finance_account_subjects_mappings_id_activate",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceAccountSubjectMappingRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "account-subject-controller"
+        ]
+      }
+    },
+    "/finance/account-subjects/mappings/{id}/deactivate": {
+      "post": {
+        "operationId": "post_finance_account_subjects_mappings_id_deactivate",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceAccountSubjectMappingRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "account-subject-controller"
+        ]
+      }
+    },
+    "/finance/account-subjects/options": {
+      "get": {
+        "operationId": "get_finance_account_subjects_options",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceAccountSubjectOptions"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "account-subject-controller"
+        ]
+      }
+    },
+    "/finance/account-subjects/templates": {
+      "get": {
+        "operationId": "get_finance_account_subjects_templates",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceAccountSubjectTemplateCatalog"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "account-subject-controller"
+        ]
+      }
+    },
+    "/finance/account-subjects/templates/apply": {
+      "post": {
+        "operationId": "post_finance_account_subjects_templates_apply",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinanceAccountSubjectTemplateApplyInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceAccountSubjectTemplateApplyResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "account-subject-controller"
+        ]
+      }
+    },
+    "/finance/account-subjects/{id}": {
+      "get": {
+        "operationId": "get_finance_account_subjects_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceAccountSubjectDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "account-subject-controller"
+        ]
+      },
+      "put": {
+        "operationId": "put_finance_account_subjects_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinanceAccountSubjectUpdateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceAccountSubjectRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "account-subject-controller"
+        ]
+      }
+    },
+    "/finance/account-subjects/{id}/disable": {
+      "post": {
+        "operationId": "post_finance_account_subjects_id_disable",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceAccountSubjectRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "account-subject-controller"
+        ]
+      }
+    },
+    "/finance/account-subjects/{id}/enable": {
+      "post": {
+        "operationId": "post_finance_account_subjects_id_enable",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceAccountSubjectRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "account-subject-controller"
+        ]
+      }
+    },
     "/finance/bad-debt": {
       "get": {
         "operationId": "get_finance_bad_debt",

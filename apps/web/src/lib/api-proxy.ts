@@ -10899,6 +10899,64 @@ const services: readonly {
       /^settlement(?:\/(?:capabilities|options|shops|cycles|import|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:arrival|void|difference))?))?$/,
   },
   {
+    // 12.5.1.1 会计科目（finance 服务，卷 12「财务核算」L3 12.5.1 账簿与科目下的第一格）。
+    //
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 finance 那几条巨型 alternation 里并分支 ——
+    //   既有条目是单行超长正则，多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    //   既有条目**一字未改、也不重排**。
+    //
+    // ---- 插入锚点选在 **`settlement` 那条之后 / `supplier-reconciliation` 那条之前**----
+    //   同批其它车道的插入点多数落在数组前段（`payment-orders` / `payment-executions` / `bad-debt`
+    //   / `transactions` / `fund-analysis` …）或数组末尾；本处离它们都足够远 ⇒ 并入时 git 能干净求并。
+    //
+    // ---- 首 token「account-subjects」的零命中核对结论（本车道实测）----
+    //   本文件既有 **213** 条 services[] 正则（按 `pattern:` 逐条抽出实测）与本模块 **13** 个形状
+    //   **逐一零命中**；本模块的正则对其它车道已放行的前缀（`receivables` / `settlement` /
+    //   `transactions` / `bad-debt` / `supplier-reconciliation` …）也**零命中**
+    //   （首 token 完全不同，且本正则首尾都锚定）。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   account-subjects                          列表（GET，真分页 + 真筛选 + 分类汇总）/ 建科目（POST）
+    //   account-subjects/capabilities             能力声明（科目表 / 模板 / 映射 / 下游缺口归谁）
+    //   account-subjects/options                  筛选项（类别 / 余额方向 / 税务属性 / 状态 / 来源）
+    //   account-subjects/templates                系统科目模板目录（模板只是导入源）
+    //   account-subjects/templates/apply          从模板导入科目到指定账簿（POST）
+    //   account-subjects/by-code                  按科目编码查（GET，**下游 12.5.2.1 凭证的集成点**）
+    //   account-subjects/mappings                 映射规则清单（GET）/ 新建映射规则（POST）
+    //   account-subjects/mappings/{uuid}          映射规则详情（GET）
+    //   account-subjects/mappings/{uuid}          改映射规则（PUT，分录行全量替换）
+    //   account-subjects/mappings/{uuid}/activate  启用映射规则（POST，借贷齐备才让启用）
+    //   account-subjects/mappings/{uuid}/deactivate 停用映射规则（POST）
+    //   account-subjects/{uuid}                   科目详情（GET：科目 + 变更留痕 + 被引用的映射）
+    //   account-subjects/{uuid}                   改科目（PUT，**编码不可改**）
+    //   account-subjects/{uuid}/disable           停用科目（POST，停用不是删除）
+    //   account-subjects/{uuid}/enable            启用科目（POST）
+    //
+    // 判别顺序：字面量子路径（capabilities / options / templates / by-code / mappings）排在 {uuid} 段
+    // **之前** —— alternation 是首个命中即返回，顺序反了会被通配支吃掉半截
+    //（`mappings` 尤其危险：它不是 uuid 形状，放到 {uuid} 段之后会被吃掉）。
+    //
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //   （不是 `[0-9a-f-]+`）：后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   account-subjects/{uuid}/ledger      —— 🔴 凭证属 12.5.2.1，未交付
+    //   account-subjects/{uuid}/periods     —— 🔴 会计期间属 12.5.1.2，未交付
+    //   account-subjects/{uuid}/close       —— 🔴 关账属 12.5.1.3，未交付
+    //   account-subjects/{uuid}/delete      —— 刻意**不导出 DELETE**：停用才是「不用了」，
+    //                                              删除会让历史凭证引用的科目凭空消失
+    //   account-subjects/batch               —— 本模块**没有**批量端点
+    //   account-subjects/not-a-uuid          —— 非 UUID 段不应被 uuid 分支吃掉
+    //   account-subjects/{uuid}/not-a-shape  —— 多一层仍然 404
+    //   account-subjects/capabilities/{uuid} —— 字面量段刻意不接 id 段
+    //   account-subjects/account-subjects    —— 交替写错就会互相吃掉，必须反向钉住
+    prefix: 'finance/',
+    env: 'FINANCE_URL',
+    fallback: 'http://127.0.0.1:8087',
+    pattern:
+      /^account\-subjects(?:\/(?:capabilities|options|templates(?:\/apply)?|by\-code|mappings(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:activate|deactivate))?)?|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:disable|enable))?))?$/,
+  },
+  {
     // 12.1.2.3 供应商对账（finance 服务，卷 12「财务核算」L3 12.1.2 应付下的第三格）。
     //
     // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 `receivables` / `receipts` /
