@@ -1,11 +1,1776 @@
 {
-  "components": {},
+  "components": {
+    "schemas": {
+      "IntegrationAppCapabilities": {
+        "properties": {
+          "capabilities": {
+            "items": {
+              "$ref": "#/components/schemas/IntegrationAppCapability"
+            },
+            "type": "array"
+          },
+          "downstreamGaps": {
+            "items": {
+              "$ref": "#/components/schemas/IntegrationAppGap"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "IntegrationAppCapability": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "basis": {
+            "type": "string"
+          },
+          "impact": {
+            "type": "string"
+          },
+          "module": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IntegrationAppDetail": {
+        "properties": {
+          "app": {
+            "$ref": "#/components/schemas/IntegrationAppRow"
+          },
+          "credentials": {
+            "items": {
+              "$ref": "#/components/schemas/IntegrationCredentialRow"
+            },
+            "type": "array"
+          },
+          "ipAllowlist": {
+            "items": {
+              "$ref": "#/components/schemas/IntegrationIpAllowlistRow"
+            },
+            "type": "array"
+          },
+          "quotaStatus": {
+            "items": {
+              "$ref": "#/components/schemas/IntegrationQuotaStatusRow"
+            },
+            "type": "array"
+          },
+          "quotas": {
+            "items": {
+              "$ref": "#/components/schemas/IntegrationQuotaRow"
+            },
+            "type": "array"
+          },
+          "scopes": {
+            "items": {
+              "$ref": "#/components/schemas/IntegrationScopeRow"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "IntegrationAppGap": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "group": {
+            "type": "string"
+          },
+          "module": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "ownerService": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IntegrationAppInput": {
+        "properties": {
+          "appCode": {
+            "type": "string"
+          },
+          "appName": {
+            "type": "string"
+          },
+          "appType": {
+            "type": "string"
+          },
+          "contactEmail": {
+            "type": "string"
+          },
+          "contactName": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IntegrationAppOption": {
+        "properties": {
+          "basis": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IntegrationAppOptions": {
+        "properties": {
+          "appTypes": {
+            "items": {
+              "$ref": "#/components/schemas/IntegrationAppOption"
+            },
+            "type": "array"
+          },
+          "quotaWindows": {
+            "items": {
+              "$ref": "#/components/schemas/IntegrationAppOption"
+            },
+            "type": "array"
+          },
+          "scopeActions": {
+            "items": {
+              "$ref": "#/components/schemas/IntegrationAppOption"
+            },
+            "type": "array"
+          },
+          "scopeResources": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "statuses": {
+            "items": {
+              "$ref": "#/components/schemas/IntegrationAppOption"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "IntegrationAppOverview": {
+        "properties": {
+          "activeApps": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "activeCredentials": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "appsWithIpAllowlist": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "appsWithQuota": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "generatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "revokedApps": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalApps": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "IntegrationAppPage": {
+        "properties": {
+          "activeCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/IntegrationAppRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "revokedCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "IntegrationAppRow": {
+        "properties": {
+          "activeCredentialCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "appCode": {
+            "type": "string"
+          },
+          "appName": {
+            "type": "string"
+          },
+          "appType": {
+            "type": "string"
+          },
+          "appTypeLabel": {
+            "type": "string"
+          },
+          "contactEmail": {
+            "type": "string"
+          },
+          "contactName": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "ipAllowlistCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "ownerUserId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "quotaCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "revokeReason": {
+            "type": "string"
+          },
+          "revokedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "scopeCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IntegrationAuditEventPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/IntegrationAuditEventRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "IntegrationAuditEventRow": {
+        "properties": {
+          "actorKind": {
+            "type": "string"
+          },
+          "actorUserId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "appId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "credentialId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "eventType": {
+            "type": "string"
+          },
+          "eventTypeLabel": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IntegrationCredentialIssued": {
+        "properties": {
+          "apiKey": {
+            "type": "string"
+          },
+          "credential": {
+            "$ref": "#/components/schemas/IntegrationCredentialRow"
+          },
+          "notice": {
+            "type": "string"
+          },
+          "secret": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IntegrationCredentialRow": {
+        "properties": {
+          "apiKeyPrefix": {
+            "type": "string"
+          },
+          "appId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "expiresAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "issuedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "lastUsedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "revokeReason": {
+            "type": "string"
+          },
+          "revokedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "rotatedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "rotatedFromId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "secretHint": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "version": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "IntegrationCredentialVerifyInput": {
+        "properties": {
+          "actionCode": {
+            "type": "string"
+          },
+          "apiKey": {
+            "type": "string"
+          },
+          "clientIp": {
+            "type": "string"
+          },
+          "resourceCode": {
+            "type": "string"
+          },
+          "secret": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IntegrationCredentialVerifyResult": {
+        "properties": {
+          "appStatus": {
+            "type": "string"
+          },
+          "conclusion": {
+            "type": "string"
+          },
+          "credentialMatched": {
+            "type": "boolean"
+          },
+          "credentialStatus": {
+            "type": "string"
+          },
+          "ipAllowed": {
+            "type": "boolean"
+          },
+          "ipChecked": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          },
+          "quotaExceeded": {
+            "type": "boolean"
+          },
+          "quotaStatus": {
+            "items": {
+              "$ref": "#/components/schemas/IntegrationQuotaStatusRow"
+            },
+            "type": "array"
+          },
+          "scopeChecked": {
+            "type": "boolean"
+          },
+          "scopeGranted": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "IntegrationIpAllowlistInput": {
+        "properties": {
+          "cidr": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IntegrationIpAllowlistRow": {
+        "properties": {
+          "appId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "cidr": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdBy": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IntegrationQuotaInput": {
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "limitCount": {
+            "type": "number"
+          },
+          "windowType": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IntegrationQuotaRow": {
+        "properties": {
+          "appId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "limitCount": {
+            "type": "number"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "windowType": {
+            "type": "string"
+          },
+          "windowTypeLabel": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IntegrationQuotaStatusRow": {
+        "properties": {
+          "configured": {
+            "type": "boolean"
+          },
+          "decision": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "exceeded": {
+            "type": "boolean"
+          },
+          "limitCount": {
+            "type": "number"
+          },
+          "note": {
+            "type": "string"
+          },
+          "remainingCount": {
+            "type": "number"
+          },
+          "usedCount": {
+            "type": "number"
+          },
+          "windowEndsAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "windowStartedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "windowType": {
+            "type": "string"
+          },
+          "windowTypeLabel": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IntegrationQuotaUsageInput": {
+        "properties": {
+          "appId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "count": {
+            "type": "number"
+          },
+          "tenantId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "windowType": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IntegrationQuotaUsageResult": {
+        "properties": {
+          "appId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "exceeded": {
+            "type": "boolean"
+          },
+          "limitCount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "usedCount": {
+            "type": "number"
+          },
+          "windowStartedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "windowType": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IntegrationScopeInput": {
+        "properties": {
+          "actionCode": {
+            "type": "string"
+          },
+          "resourceCode": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IntegrationScopeRow": {
+        "properties": {
+          "actionCode": {
+            "type": "string"
+          },
+          "actionCodeLabel": {
+            "type": "string"
+          },
+          "appId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "grantedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "grantedBy": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "resourceCode": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      }
+    }
+  },
   "info": {
     "title": "OpenAPI definition",
     "version": "v0"
   },
   "openapi": "3.0.1",
-  "paths": {},
+  "paths": {
+    "/platform/app-quota-usages": {
+      "post": {
+        "operationId": "post_platform_app_quota_usages",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Internal-Key",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IntegrationQuotaUsageInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntegrationQuotaUsageResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "app-credential-controller"
+        ]
+      }
+    },
+    "/platform/apps": {
+      "get": {
+        "operationId": "get_platform_apps",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "appType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntegrationAppPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "app-credential-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_platform_apps",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IntegrationAppInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntegrationAppRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "app-credential-controller"
+        ]
+      }
+    },
+    "/platform/apps/capabilities": {
+      "get": {
+        "operationId": "get_platform_apps_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntegrationAppCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "app-credential-controller"
+        ]
+      }
+    },
+    "/platform/apps/options": {
+      "get": {
+        "operationId": "get_platform_apps_options",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntegrationAppOptions"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "app-credential-controller"
+        ]
+      }
+    },
+    "/platform/apps/overview": {
+      "get": {
+        "operationId": "get_platform_apps_overview",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntegrationAppOverview"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "app-credential-controller"
+        ]
+      }
+    },
+    "/platform/apps/{appId}": {
+      "get": {
+        "operationId": "get_platform_apps_appId",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "appId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntegrationAppDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "app-credential-controller"
+        ]
+      }
+    },
+    "/platform/apps/{appId}/audit-events": {
+      "get": {
+        "operationId": "get_platform_apps_appId_audit_events",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "appId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntegrationAuditEventPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "app-credential-controller"
+        ]
+      }
+    },
+    "/platform/apps/{appId}/credentials": {
+      "get": {
+        "operationId": "get_platform_apps_appId_credentials",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "appId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/IntegrationCredentialRow"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "app-credential-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_platform_apps_appId_credentials",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "appId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntegrationCredentialIssued"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "app-credential-controller"
+        ]
+      }
+    },
+    "/platform/apps/{appId}/credentials/rotate": {
+      "post": {
+        "operationId": "post_platform_apps_appId_credentials_rotate",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "appId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntegrationCredentialIssued"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "app-credential-controller"
+        ]
+      }
+    },
+    "/platform/apps/{appId}/credentials/verify": {
+      "post": {
+        "operationId": "post_platform_apps_appId_credentials_verify",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "appId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IntegrationCredentialVerifyInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntegrationCredentialVerifyResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "app-credential-controller"
+        ]
+      }
+    },
+    "/platform/apps/{appId}/credentials/{credentialId}/revoke": {
+      "post": {
+        "operationId": "post_platform_apps_appId_credentials_credentialId_revoke",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "appId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "credentialId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "reason",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntegrationCredentialRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "app-credential-controller"
+        ]
+      }
+    },
+    "/platform/apps/{appId}/ip-allowlist": {
+      "get": {
+        "operationId": "get_platform_apps_appId_ip_allowlist",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "appId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/IntegrationIpAllowlistRow"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "app-credential-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_platform_apps_appId_ip_allowlist",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "appId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IntegrationIpAllowlistInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntegrationIpAllowlistRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "app-credential-controller"
+        ]
+      }
+    },
+    "/platform/apps/{appId}/ip-allowlist/{entryId}": {
+      "delete": {
+        "operationId": "delete_platform_apps_appId_ip_allowlist_entryId",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "appId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "entryId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "app-credential-controller"
+        ]
+      }
+    },
+    "/platform/apps/{appId}/quota-status": {
+      "get": {
+        "operationId": "get_platform_apps_appId_quota_status",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "appId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/IntegrationQuotaStatusRow"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "app-credential-controller"
+        ]
+      }
+    },
+    "/platform/apps/{appId}/quotas": {
+      "get": {
+        "operationId": "get_platform_apps_appId_quotas",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "appId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/IntegrationQuotaRow"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "app-credential-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_platform_apps_appId_quotas",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "appId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IntegrationQuotaInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntegrationQuotaRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "app-credential-controller"
+        ]
+      }
+    },
+    "/platform/apps/{appId}/revoke": {
+      "post": {
+        "operationId": "post_platform_apps_appId_revoke",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "appId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "reason",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntegrationAppRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "app-credential-controller"
+        ]
+      }
+    },
+    "/platform/apps/{appId}/scopes": {
+      "get": {
+        "operationId": "get_platform_apps_appId_scopes",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "appId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/IntegrationScopeRow"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "app-credential-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_platform_apps_appId_scopes",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "appId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IntegrationScopeInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntegrationScopeRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "app-credential-controller"
+        ]
+      }
+    },
+    "/platform/apps/{appId}/scopes/{scopeId}": {
+      "delete": {
+        "operationId": "delete_platform_apps_appId_scopes_scopeId",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "appId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "scopeId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "app-credential-controller"
+        ]
+      }
+    }
+  },
   "servers": [
     {
       "description": "Same-origin service base",
