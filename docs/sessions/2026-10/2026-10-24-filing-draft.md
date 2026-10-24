@@ -4,7 +4,7 @@
 
 | 项   | 结论                                                                                                                                    |
 | ---- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| 迁移 | `backend/services/finance/src/main/resources/db/migration/V364__filing_draft.sql`（三张新表，纯 CREATE TABLE，零 ALTER 零 DROP 零 ADD COLUMN 到别人的表） |
+| 迁移 | `backend/services/finance/src/main/resources/db/migration/V368__filing_draft.sql`（三张新表，纯 CREATE TABLE，零 ALTER 零 DROP 零 ADD COLUMN 到别人的表；**版本号第二轮由 V364 改为 V368**，见文末「第二轮修订」） |
 | 表   | `finance_filing_draft`（申报底稿头）· `finance_filing_draft_line`（汇总行，**按币种分组**）· `finance_filing_draft_export`（导出留痕）              |
 | 端点 | 8 个，挂 `/finance/filing-draft`；权限 `finance.filing_draft.read / .create`                                                             |
 | 页面 | `/finance/filing-draft`                                                                                                                 |
@@ -86,7 +86,7 @@ trade 的 `sales_order` **没有**辖区字段，也没有 `shop_id`；唯一能
 
 **新增**
 
-- `backend/services/finance/src/main/resources/db/migration/V364__filing_draft.sql`
+- `backend/services/finance/src/main/resources/db/migration/V368__filing_draft.sql`
 - `backend/services/finance/src/main/java/com/starcon/finance/FilingDraftModels.java`
 - `backend/services/finance/src/main/java/com/starcon/finance/FilingDraftService.java`
 - `backend/services/finance/src/main/java/com/starcon/finance/FilingDraftController.java`
@@ -103,7 +103,7 @@ trade 的 `sales_order` **没有**辖区字段，也没有 `shop_id`；唯一能
 
 **改动**
 
-- `apps/web/src/lib/api-proxy.ts` —— **新增一条独立 `services[]` 元素**（prefix `finance/`、首 token `filing-draft`、锚在第一个 `prefix: 'warehouse/'` 元素之前；既有条目**一字未改、也不重排**）
+- `apps/web/src/lib/api-proxy.ts` —— **新增一条独立 `services[]` 元素**（prefix `finance/`、首 token `filing-draft`；**插入锚点第二轮改为集成分支当前文件第 4071 行那条「2.4.2.3 映射缺失队列（channel 服务）」元素之前**，见文末「第二轮修订」；既有条目**一字未改、也不重排**）
 - `docs/product/capability-blueprint/module-progress.md` —— 只改 **12.6.1.2 那一行**的「状态」「证据」两格
 - `packages/api-contracts/src/contracts/finance.ts` · `packages/api-contracts/src/finance.openapi.json` —— codegen 重生成（**未手改**）
 
@@ -121,3 +121,61 @@ trade 的 `sales_order` **没有**辖区字段，也没有 `shop_id`；唯一能
 3. **税率版本快照**：底稿行上记的是 12.6.1.1 的税率版本 id + 生效区间；若 12.6.1.1 的传输模型将来补 `effectiveFrom` / `effectiveTo` 字段，本模块可以直接改用（当前是按 id 查表取，不动 12.6.1.1 的模型文件）。
 4. **可抵扣进项口径**：若 12.5.1.1 后续给出更明确的「进项税」科目口径（当前靠 `category` + `tax_treatment` 推导），本模块的 SQL 口径要跟着复核。
 5. **16.3.1.2 申报日历**（下游）：本模块**不建**任何日历表，提醒归它。
+
+## 第二轮修订（重派车道 · 只做 4 件事，实现未重写）
+
+上一轮并入时 `apps/web/src/lib/api-proxy.ts` 撞车被判 conflict，本车道被回收重派。
+**领域实现（迁移 / 服务 / 端点 / 前端工作区 / 契约 / 测试）一字未改**，本轮只做 4 件事：
+
+### 1. 迁移改名 V364 → V368（Flyway 硬约束）
+
+集成分支上已存在 V362 / V363 / V365 / V367，而本仓 Flyway **未开 `out-of-order`**（默认 false）：
+V364 低于已应用的 V367 ⇒ 启动直接报
+「Detected resolved migration not applied to database: 364」。
+
+⇒ `git mv V364__filing_draft.sql → V368__filing_draft.sql`（本车道本轮预分配版本号）。
+**迁移文件内部内容未改**（版本号只体现在文件名上）。
+**刻意没有新建第二个迁移文件** —— V364 与 V368 同时存在 = 同一批表被建两次 = 迁移炸。
+
+连带把两处源码里的版本号字面量同步过来（都是纯文案，不影响行为）：
+
+- `FilingDraftService.java` 的 capabilities 描述串：`（V364，纯 CREATE TABLE）` → `（V368，…）`
+- `FilingDraftTenancyIntegrationTest.java` 的断言说明串：`"V364 必须真的建出 "` → `"V368 必须真的建出 "`
+
+### 2. api-proxy.ts 白名单条目按集成锚点重新对齐
+
+`apps/web/src/lib/api-proxy.ts` 是**多车道共用的累积型白名单**（`services[]` 数组）。
+本批 4 条车道并发改它 ⇒ 插入位置重叠就会在并入时冲突；
+而**漏掉任何一条已交付的路由 = 页面静默 404，而 typecheck / lint / vitest / Playwright 全部全绿**。
+
+⇒ 基线换成**集成分支当前版本**（本车道分支基线是旧的 `1c73d1e8`，集成头是 `1e9ab421`），
+再把本车道那 1 条元素（首 token `filing-draft`）搬到**调度者分配的锚点**：
+
+- 锚点 = 集成分支当前文件**第 4071 行**那条元素的 `{` 起始行**之前**
+  （该元素注释标题 =「2.4.2.3 映射缺失队列（channel 服务）」）
+- 同批另外 3 条车道的锚点分别在第 314 行、第 1505 行、第 9040 行 —— 四处互不相邻，git 能干净求并。
+- 插入点是**元素 `{` 起始行之前**，不是 `prefix:` 行之前（插错位置会破坏对象字面量）。
+
+核对口径与实测：
+
+- 元素计数（`sed -n '/^const services/,/^];/p' … | grep -cE "^[[:space:]]+prefix: '"`）：
+  基线 **225** → 本车道 **226**（不用 `grep -c "prefix: '"`，那个会把注释里的 `prefix:` 也数进去）。
+- 首 token 零命中：对基线实测 `grep -c "filing-draft"` = **0**。
+- 与既有元素两两不相交：既有 finance 那几支首 token 是 `receivables` / `receivable-aging` /
+  `payables` / `receipts` / `bad-debt` / `payment-plans` / `payment-orders` /
+  `payment-executions` / `write-offs` / `settlement` / `transactions` / `fund-analysis` /
+  `cost-collections` / `cost-valuation` / `deferred-settlement` / `cost-calculation` /
+  `cost-variance` / `tax-rates` 等，**全不相同**。
+- `diff` 基线 vs 本车道文件：**59 行新增、0 行删除** ⇒ 既有 225 条元素**一字未改、也不重排**。
+
+### 3. 契约与台账
+
+- `packages/api-contracts` **未重新生成**（本轮未改端点 / 模型；契约是 codegen 产物，禁止手改）。
+  并入时由 git merge 按「类型名 / OpenAPI 路径」自动求并。
+- 台账 `docs/product/capability-blueprint/module-progress.md`：**12.6.1.2 那一行保持「已交付」**，
+  只把证据列里的迁移版本号 `V364__filing_draft.sql` 改成 `V368__filing_draft.sql`；
+  **未重排整表、未动别的行**。
+
+### 4. 验证与并入预演
+
+见文末「第二轮验证结果」。
