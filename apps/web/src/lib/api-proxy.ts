@@ -1669,6 +1669,54 @@ const services: readonly {
       /^dict\-(?:catalog|history|items(?:\/options\/[A-Z][A-Z0-9_]{0,63}|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:usage|deactivate|reactivate))?)?)$/,
   },
   {
+    // 1.3.1.1 通知列表（identity 服务，卷 01「工作台与门户」L3 1.3.1 消息与预警的第一格）。
+    //
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 identity 那条巨型 alternation 里并分支 ——
+    //   既有条目**一字未改、也不重排**（本文件是多车道共用的累积型白名单，
+    //   每条服务规则是一段超长单行正则，往同一条 alternation 里并分支会让多车道并入时 git 必然判冲突）。
+    //
+    // ---- 插入锚点固定在 `17.5.2.1 数据字典（identity 服务）` 那条元素**之后** ----
+    //   按内容定位：该元素的 pattern `/^dict\-(?:catalog|history|items…)$/` 全文唯一。
+    //   同批并发车道是 12.3.2.1（finance）、16.3.1.2（channel）、1.1.3.2（不改 api-proxy），
+    //   都不落在这个 identity 簇 ⇒ 相距足够远，git 能干净求并。
+    //
+    // ---- 首 token「notification-inbox」的零命中核对结论（.tmp/zero-hit-check.mjs 实测）----
+    //   既有 **224** 条 services[] 正则里含 `notification` 串的只有 **2** 条：
+    //     `price-anomaly-alerts/notifications`（catalog 5.5.2.1 价格异常预警）
+    //     `logistics-pickup-signoff/notifications`（channel 物流签收的下游待通知清单）
+    //   两条都是**别的模块的 notification 子路径**，首 token 与 `notification-inbox` 不同 ⇒ 互不吃掉。
+    //   本模块的 5 个形状对既有 224 条正则**逐一实测零命中**；
+    //   既有 31 条 `prefix: 'identity/'` 的正则对本模块的 5 个形状也**全部零命中**。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   notification-inbox/capabilities   能力声明（受控类型词表 + 批量上限 + 未交付的相邻模块）
+    //   notification-inbox/read-state     查一批通知的已读状态（POST：要查的键集合可能几百条，
+    //                                      GET 的 URL 扛不住这个长度）
+    //   notification-inbox/read           批量标记已读（POST，只对点名的那几条生效）
+    //   notification-inbox/unread         批量取消已读（POST，幂等）
+    //   notification-inbox/subscriptions  订阅类型（GET 读生效值 / PUT 整体替换）
+    //
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   notification-inbox                 —— 裸路径：后端**没有**「一条汇总列表接口」，
+    //                                          通知内容是各域的只读投影，前端聚合层自己取。
+    //   notification-inbox/read-state/all  —— 🔴 **刻意没有**「把本租户全部通知标已读」这种端点：
+    //                                          批量已读只对**点名**的键生效。
+    //   notification-inbox/preferences     —— 🔴 1.3.1.2 通知偏好（渠道 / 免打扰）**未交付**。
+    //   notification-inbox/rules           —— 🔴 1.3.2.1 预警规则**未交付**。
+    //   notification-inbox/push            —— 🔴 1.3.2.2 外部渠道推送**未交付**。
+    //   notification-inbox/not-a-shape     —— 不是本模块的任何形状。
+    //
+    // ⚠️ 本模块**没有 id 段**（通知键是「类型 + 上游主键」的复合键，走请求体），
+    //   所以「id 段用完整 UUID 形状」这条约定在此不适用。
+    // ⚠️ `read-state` 排在 `read` **之前**判别 —— alternation 是首个命中即返回，
+    //   顺序反了会被 `read` 这支吃掉半截（`read` 后面多一段 `-state` 就 404 了）。
+    prefix: 'identity/',
+    env: 'IDENTITY_URL',
+    fallback: 'http://127.0.0.1:8081',
+    pattern:
+      /^notification\-inbox\/(?:capabilities|read\-state|read|unread|subscriptions)$/,
+  },
+  {
     // 1.1.1.3 审批待办（identity 服务，卷 01「工作台与门户」L3 1.1.1 待办与待决策的第四格）。
     //
     // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 identity 那条巨型 alternation 里并分支 ——
