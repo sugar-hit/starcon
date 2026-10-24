@@ -870,6 +870,663 @@
         },
         "type": "object"
       },
+      "FinanceAccountingCalendarDetail": {
+        "properties": {
+          "calendar": {
+            "$ref": "#/components/schemas/FinanceAccountingCalendarRow"
+          },
+          "periods": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceAccountingPeriodRow"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceAccountingCalendarInput": {
+        "properties": {
+          "anchorDate": {
+            "format": "date",
+            "nullable": true,
+            "type": "string"
+          },
+          "baseCurrency": {
+            "type": "string"
+          },
+          "calendarCode": {
+            "type": "string"
+          },
+          "calendarName": {
+            "type": "string"
+          },
+          "calendarType": {
+            "enum": [
+              "CALENDAR_MONTH",
+              "FISCAL_445",
+              "CUSTOM"
+            ],
+            "type": "string"
+          },
+          "fiscalYearStartMonth": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceAccountingCalendarRow": {
+        "properties": {
+          "anchorDate": {
+            "format": "date",
+            "nullable": true,
+            "type": "string"
+          },
+          "baseCurrency": {
+            "type": "string"
+          },
+          "calendarCode": {
+            "type": "string"
+          },
+          "calendarName": {
+            "type": "string"
+          },
+          "calendarType": {
+            "enum": [
+              "CALENDAR_MONTH",
+              "FISCAL_445",
+              "CUSTOM"
+            ],
+            "type": "string"
+          },
+          "calendarTypeLabel": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "fiscalYearStartMonth": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "ACTIVE",
+              "DISABLED"
+            ],
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "version": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceAccountingCalendarUpdateInput": {
+        "properties": {
+          "calendarName": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "ACTIVE",
+              "DISABLED"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceAccountingPeriodApprovalRow": {
+        "properties": {
+          "action": {
+            "type": "string"
+          },
+          "actionId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "actorId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "actorName": {
+            "type": "string"
+          },
+          "approvalInstanceId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "approvalInstanceNo": {
+            "type": "string"
+          },
+          "comment": {
+            "type": "string"
+          },
+          "decidedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "dwellSeconds": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "nodeKey": {
+            "type": "string"
+          },
+          "nodeName": {
+            "type": "string"
+          },
+          "nodeOrder": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "periodId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "syncedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceAccountingPeriodCapabilities": {
+        "properties": {
+          "capabilities": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceAccountingPeriodCapability"
+            },
+            "type": "array"
+          },
+          "downstreamGaps": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceAccountingPeriodDownstreamGap"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceAccountingPeriodCapability": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "basis": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "module": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceAccountingPeriodCloseInput": {
+        "properties": {
+          "expectedVersion": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "reason": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceAccountingPeriodDetail": {
+        "properties": {
+          "approvals": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceAccountingPeriodApprovalRow"
+            },
+            "type": "array"
+          },
+          "events": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceAccountingPeriodEventRow"
+            },
+            "type": "array"
+          },
+          "period": {
+            "$ref": "#/components/schemas/FinanceAccountingPeriodRow"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceAccountingPeriodDownstreamGap": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "group": {
+            "type": "string"
+          },
+          "module": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "ownerService": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceAccountingPeriodEventRow": {
+        "properties": {
+          "actorId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "approvalInstanceId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "approvalStatus": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "eventType": {
+            "enum": [
+              "CREATED",
+              "CLOSED",
+              "REOPEN_REQUESTED",
+              "REOPENED",
+              "UPDATED"
+            ],
+            "type": "string"
+          },
+          "eventTypeLabel": {
+            "type": "string"
+          },
+          "fromStatus": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "occurredAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "periodId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "toStatus": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceAccountingPeriodGenerateInput": {
+        "properties": {
+          "fiscalYear": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceAccountingPeriodGenerateResult": {
+        "properties": {
+          "calendarId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "created": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "fiscalYear": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "periods": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceAccountingPeriodRow"
+            },
+            "type": "array"
+          },
+          "skipped": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "skippedCodes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceAccountingPeriodInput": {
+        "properties": {
+          "baseCurrency": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "periodCode": {
+            "type": "string"
+          },
+          "periodEnd": {
+            "format": "date",
+            "type": "string"
+          },
+          "periodStart": {
+            "format": "date",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceAccountingPeriodOptions": {
+        "properties": {
+          "baseCurrencies": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "calendarIds": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "fiscalYears": {
+            "items": {
+              "format": "int32",
+              "type": "integer"
+            },
+            "type": "array"
+          },
+          "periodTypes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "statuses": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceAccountingPeriodPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceAccountingPeriodRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "summaryByStatus": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceAccountingPeriodSummary"
+            },
+            "type": "array"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceAccountingPeriodReopenInput": {
+        "properties": {
+          "expectedVersion": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "reason": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceAccountingPeriodReopenResult": {
+        "properties": {
+          "approvalInstanceId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "approvalInstanceNo": {
+            "nullable": true,
+            "type": "string"
+          },
+          "approvalStatus": {
+            "nullable": true,
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "outcome": {
+            "type": "string"
+          },
+          "period": {
+            "$ref": "#/components/schemas/FinanceAccountingPeriodRow"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceAccountingPeriodRow": {
+        "properties": {
+          "baseCurrency": {
+            "type": "string"
+          },
+          "calendarCode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "calendarId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "calendarName": {
+            "nullable": true,
+            "type": "string"
+          },
+          "closedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "closedBy": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "closedReason": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "fiscalPeriodNo": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "fiscalYear": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "periodCode": {
+            "type": "string"
+          },
+          "periodEnd": {
+            "format": "date",
+            "type": "string"
+          },
+          "periodLengthDays": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "periodStart": {
+            "format": "date",
+            "type": "string"
+          },
+          "periodType": {
+            "enum": [
+              "CALENDAR_MONTH",
+              "FISCAL_445",
+              "CUSTOM"
+            ],
+            "type": "string"
+          },
+          "periodTypeLabel": {
+            "type": "string"
+          },
+          "reopenApprovalInstanceId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "reopenCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "reopenReason": {
+            "type": "string"
+          },
+          "reopenedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "reopenedBy": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "OPEN",
+              "CLOSED"
+            ],
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "version": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceAccountingPeriodSummary": {
+        "properties": {
+          "count": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "status": {
+            "enum": [
+              "OPEN",
+              "CLOSED"
+            ],
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceAccountingPeriodUpdateInput": {
+        "properties": {
+          "note": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "FinanceAgingBucketAmount": {
         "properties": {
           "amount": {
@@ -15339,6 +15996,685 @@
         },
         "tags": [
           "account-subject-controller"
+        ]
+      }
+    },
+    "/finance/accounting-periods": {
+      "get": {
+        "operationId": "get_finance_accounting_periods",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "periodType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "calendarId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fiscalYear",
+            "required": false,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceAccountingPeriodPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "accounting-period-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_finance_accounting_periods",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinanceAccountingPeriodInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceAccountingPeriodRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "accounting-period-controller"
+        ]
+      }
+    },
+    "/finance/accounting-periods/calendars": {
+      "get": {
+        "operationId": "get_finance_accounting_periods_calendars",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/FinanceAccountingCalendarRow"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "accounting-period-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_finance_accounting_periods_calendars",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinanceAccountingCalendarInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceAccountingCalendarRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "accounting-period-controller"
+        ]
+      }
+    },
+    "/finance/accounting-periods/calendars/{id}": {
+      "get": {
+        "operationId": "get_finance_accounting_periods_calendars_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceAccountingCalendarDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "accounting-period-controller"
+        ]
+      },
+      "put": {
+        "operationId": "put_finance_accounting_periods_calendars_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinanceAccountingCalendarUpdateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceAccountingCalendarRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "accounting-period-controller"
+        ]
+      }
+    },
+    "/finance/accounting-periods/calendars/{id}/generate-periods": {
+      "post": {
+        "operationId": "post_finance_accounting_periods_calendars_id_generate_periods",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinanceAccountingPeriodGenerateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceAccountingPeriodGenerateResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "accounting-period-controller"
+        ]
+      }
+    },
+    "/finance/accounting-periods/capabilities": {
+      "get": {
+        "operationId": "get_finance_accounting_periods_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceAccountingPeriodCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "accounting-period-controller"
+        ]
+      }
+    },
+    "/finance/accounting-periods/options": {
+      "get": {
+        "operationId": "get_finance_accounting_periods_options",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceAccountingPeriodOptions"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "accounting-period-controller"
+        ]
+      }
+    },
+    "/finance/accounting-periods/{id}": {
+      "get": {
+        "operationId": "get_finance_accounting_periods_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceAccountingPeriodDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "accounting-period-controller"
+        ]
+      },
+      "put": {
+        "operationId": "put_finance_accounting_periods_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinanceAccountingPeriodUpdateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceAccountingPeriodRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "accounting-period-controller"
+        ]
+      }
+    },
+    "/finance/accounting-periods/{id}/approvals": {
+      "get": {
+        "operationId": "get_finance_accounting_periods_id_approvals",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/FinanceAccountingPeriodApprovalRow"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "accounting-period-controller"
+        ]
+      }
+    },
+    "/finance/accounting-periods/{id}/close": {
+      "post": {
+        "operationId": "post_finance_accounting_periods_id_close",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinanceAccountingPeriodCloseInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceAccountingPeriodRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "accounting-period-controller"
+        ]
+      }
+    },
+    "/finance/accounting-periods/{id}/events": {
+      "get": {
+        "operationId": "get_finance_accounting_periods_id_events",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/FinanceAccountingPeriodEventRow"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "accounting-period-controller"
+        ]
+      }
+    },
+    "/finance/accounting-periods/{id}/reopen": {
+      "post": {
+        "operationId": "post_finance_accounting_periods_id_reopen",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinanceAccountingPeriodReopenInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceAccountingPeriodReopenResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "accounting-period-controller"
         ]
       }
     },
