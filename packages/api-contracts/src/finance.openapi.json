@@ -2616,6 +2616,618 @@
         },
         "type": "object"
       },
+      "FinanceCostCalculationCapabilities": {
+        "properties": {
+          "capabilities": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceCostCalculationCapability"
+            },
+            "type": "array"
+          },
+          "downstreamGaps": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceCostCalculationDownstreamGap"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceCostCalculationCapability": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "basis": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "module": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceCostCalculationDownstreamGap": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "group": {
+            "type": "string"
+          },
+          "module": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "ownerService": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceCostCalculationEntryPage": {
+        "properties": {
+          "incompleteCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceCostCalculationEntryRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalCostAmount": {
+            "type": "number"
+          },
+          "totalQuantity": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceCostCalculationEntryRow": {
+        "properties": {
+          "businessType": {
+            "type": "string"
+          },
+          "businessTypeLabel": {
+            "type": "string"
+          },
+          "costAmount": {
+            "type": "number"
+          },
+          "coveredQuantity": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "flowKind": {
+            "type": "string"
+          },
+          "flowRefId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "flowRefType": {
+            "type": "string"
+          },
+          "flowTransactionId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "gapNote": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "issueQuantity": {
+            "type": "number"
+          },
+          "layerCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "occurredAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "runId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "shortfallQuantity": {
+            "type": "number"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "unitCost": {
+            "nullable": true,
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceCostCalculationLayerPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceCostCalculationLayerRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceCostCalculationLayerRow": {
+        "properties": {
+          "consumedAmount": {
+            "type": "number"
+          },
+          "consumedQuantity": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "layerAmount": {
+            "type": "number"
+          },
+          "layerIndex": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "layerQuantity": {
+            "type": "number"
+          },
+          "layerSourceService": {
+            "type": "string"
+          },
+          "lotRef": {
+            "type": "string"
+          },
+          "receivedDate": {
+            "format": "date",
+            "nullable": true,
+            "type": "string"
+          },
+          "runId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "unitCost": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceCostCalculationOptions": {
+        "properties": {
+          "businessTypes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "currencies": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "methods": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceCostValuationMethodOption"
+            },
+            "type": "array"
+          },
+          "reasons": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "statuses": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceCostCalculationRequest": {
+        "properties": {
+          "batchRef": {
+            "nullable": true,
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "note": {
+            "nullable": true,
+            "type": "string"
+          },
+          "periodFrom": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "periodTo": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "reason": {
+            "nullable": true,
+            "type": "string"
+          },
+          "scopeCode": {
+            "type": "string"
+          },
+          "scopeName": {
+            "type": "string"
+          },
+          "scopeRefId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "scopeType": {
+            "type": "string"
+          },
+          "valuationMethod": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceCostCalculationRunDetail": {
+        "properties": {
+          "entries": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceCostCalculationEntryRow"
+            },
+            "type": "array"
+          },
+          "layers": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceCostCalculationLayerRow"
+            },
+            "type": "array"
+          },
+          "run": {
+            "$ref": "#/components/schemas/FinanceCostCalculationRunRow"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceCostCalculationRunPage": {
+        "properties": {
+          "completedCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceCostCalculationRunRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceCostCalculationRunRow": {
+        "properties": {
+          "basisNote": {
+            "type": "string"
+          },
+          "completedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdBy": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "entryCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "flowSourceService": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "incompleteEntryCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "layerCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "layerSourceService": {
+            "type": "string"
+          },
+          "periodFrom": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "periodTo": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "recalculationReason": {
+            "type": "string"
+          },
+          "scopeCode": {
+            "type": "string"
+          },
+          "scopeName": {
+            "type": "string"
+          },
+          "scopeRefId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "scopeType": {
+            "type": "string"
+          },
+          "skuCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "sourceNote": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "supersededByRunId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "supersedesRunId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "totalCostAmount": {
+            "type": "number"
+          },
+          "totalCoveredQuantity": {
+            "type": "number"
+          },
+          "totalQuantity": {
+            "type": "number"
+          },
+          "totalShortfallQuantity": {
+            "type": "number"
+          },
+          "valuationMethod": {
+            "type": "string"
+          },
+          "valuationMethodConfigId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "valuationMethodLabel": {
+            "type": "string"
+          },
+          "valuationMethodVersion": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceCostCalculationVarianceComparison": {
+        "properties": {
+          "comparedSkuCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "fromRunId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "fromTotalCostAmount": {
+            "type": "number"
+          },
+          "fromTotalQuantity": {
+            "type": "number"
+          },
+          "fromValuationMethod": {
+            "type": "string"
+          },
+          "fromValuationMethodLabel": {
+            "type": "string"
+          },
+          "fromValuationMethodVersion": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "onlyInFromCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "onlyInToCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "periodFrom": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "periodTo": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceCostCalculationVarianceRow"
+            },
+            "type": "array"
+          },
+          "toRunId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "toTotalCostAmount": {
+            "type": "number"
+          },
+          "toTotalQuantity": {
+            "type": "number"
+          },
+          "toValuationMethod": {
+            "type": "string"
+          },
+          "toValuationMethodLabel": {
+            "type": "string"
+          },
+          "toValuationMethodVersion": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "totalCostAmountDifference": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceCostCalculationVarianceRow": {
+        "properties": {
+          "costAmountDifference": {
+            "type": "number"
+          },
+          "fromCostAmount": {
+            "type": "number"
+          },
+          "fromEntryCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "fromQuantity": {
+            "type": "number"
+          },
+          "onlyInFrom": {
+            "type": "boolean"
+          },
+          "onlyInTo": {
+            "type": "boolean"
+          },
+          "quantityDifference": {
+            "type": "number"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "toCostAmount": {
+            "type": "number"
+          },
+          "toEntryCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "toQuantity": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
       "FinanceCostCollectionBasis": {
         "nullable": true,
         "properties": {
@@ -17269,6 +17881,474 @@
         },
         "tags": [
           "cost-allocation-controller"
+        ]
+      }
+    },
+    "/finance/cost-calculation/capabilities": {
+      "get": {
+        "operationId": "get_finance_cost_calculation_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceCostCalculationCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "cost-calculation-controller"
+        ]
+      }
+    },
+    "/finance/cost-calculation/entries": {
+      "get": {
+        "operationId": "get_finance_cost_calculation_entries",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "runId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "skuId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "businessType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceCostCalculationEntryPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "cost-calculation-controller"
+        ]
+      }
+    },
+    "/finance/cost-calculation/layers": {
+      "get": {
+        "operationId": "get_finance_cost_calculation_layers",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "runId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "skuId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceCostCalculationLayerPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "cost-calculation-controller"
+        ]
+      }
+    },
+    "/finance/cost-calculation/options": {
+      "get": {
+        "operationId": "get_finance_cost_calculation_options",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceCostCalculationOptions"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "cost-calculation-controller"
+        ]
+      }
+    },
+    "/finance/cost-calculation/runs": {
+      "get": {
+        "operationId": "get_finance_cost_calculation_runs",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "scopeType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "scopeRefId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "valuationMethod",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceCostCalculationRunPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "cost-calculation-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_finance_cost_calculation_runs",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinanceCostCalculationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceCostCalculationRunRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "cost-calculation-controller"
+        ]
+      }
+    },
+    "/finance/cost-calculation/runs/compare": {
+      "get": {
+        "operationId": "get_finance_cost_calculation_runs_compare",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fromRunId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "toRunId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceCostCalculationVarianceComparison"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "cost-calculation-controller"
+        ]
+      }
+    },
+    "/finance/cost-calculation/runs/{id}": {
+      "get": {
+        "operationId": "get_finance_cost_calculation_runs_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceCostCalculationRunDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "cost-calculation-controller"
+        ]
+      }
+    },
+    "/finance/cost-calculation/runs/{id}/recalculate": {
+      "post": {
+        "operationId": "post_finance_cost_calculation_runs_id_recalculate",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceCostCalculationRunRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "cost-calculation-controller"
         ]
       }
     },

@@ -20,6 +20,61 @@ const services: readonly {
   fallback: string;
 }[] = [
   {
+    // 12.4.1.2 成本计算执行（finance 服务，卷 12「财务核算」L3 12.4.1 成本计算下的第二格）。
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 finance 那几条巨型 alternation 里并分支 ——
+    //   既有条目**一字未改、也不重排**。
+    //
+    // ---- 插入锚点选在**数组最开头**（本文件第一个元素之前）----
+    //   同批其它车道的插入点是「第一个 `identity/` 之前」「第一个 `warehouse/` 之前」
+    //   与「数组末尾」；本车道落在这里，与它们的插入点相距 10000 行以上，并入时 git 能干净求并。
+    //
+    // ---- 首 token「cost-calculation」的零命中核对结论 ----
+    //   发车前用 `grep -n "cost-calculation" apps/web/src/lib/api-proxy.ts` 实测：**零命中**（exit 1）。
+    //   本文件既有 services[] 正则里，本模块 **8 个形状逐一实测零命中**：
+    //     cost-calculation/capabilities / cost-calculation/options
+    //     cost-calculation/runs / cost-calculation/runs/compare
+    //     cost-calculation/runs/{uuid} / cost-calculation/runs/{uuid}/recalculate
+    //     cost-calculation/layers / cost-calculation/entries
+    //   既有 finance 那支是单行超长 alternation，其首 token 是 `receivables` / `receivable-aging` /
+    //   `payables` / `receipts` / `bad-debt` / `payment-plans` / `payment-orders` /
+    //   `payment-executions` / `write-offs` / `settlement` / `transactions` / `fund-analysis` /
+    //   `cost-collections` / `cost-valuation` / `deferred-settlement`，
+    //   **全不相同** —— 特别是 `cost-collections` 与 `cost-valuation`：
+    //   首 token 就不是 `cost-calculation`（`cost-col` / `cost-val` ≠ `cost-cal`），
+    //   既不会被它们吃掉，也不会吃掉它们 ⇒ 两个正则两两不相交。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   cost-calculation/capabilities            能力声明（上游真接通 / 下游缺口归谁）
+    //   cost-calculation/options                 筛选项 + 四个计价方法选项（复用 12.4.1.1 的那一份）
+    //   cost-calculation/runs                    批次列表（GET）/ 执行成本计算（POST）
+    //   cost-calculation/runs/{uuid}             批次明细（GET：表头 + 成本层 + 成本分录）
+    //   cost-calculation/runs/{uuid}/recalculate 按期间重算（POST，**另起批次**，旧批次不被改写）
+    //   cost-calculation/runs/compare            差异对比（GET，两次批次之间逐 SKU）
+    //   cost-calculation/layers                  成本层列表（GET，真分页 + 真筛选）
+    //   cost-calculation/entries                 成本分录列表（GET，真分页 + 真筛选 + 汇总）
+    //
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   cost-calculation                          —— 裸路径：后端**没有**「一条不存在的汇总列表接口」。
+    //   cost-calculation/{uuid}                   —— 顶层没有 id 段（批次按 /runs/{uuid} 定位）。
+    //   cost-calculation/runs/compare/{uuid}      —— 字面量段刻意不接 id 段。
+    //   cost-calculation/runs/{uuid}/not-a-shape  —— 多一层仍然 404。
+    //   cost-calculation/not-a-uuid               —— 非 UUID 段不应被 uuid 分支吃掉。
+    //   cost-calculation/variance                 —— 🔴 成本差异分析属 12.4.1.3，**未交付**：
+    //                                               本模块的「差异对比」是 runs/compare（两次批次之间）。
+    //   cost-calculation/cost-layers|cost-results —— 🔴 成本层与结转金额在 runs/layers/entries 上，
+    //                                               不另开这两个路径。
+    //
+    // id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`（不是 `[0-9a-f-]+`）：
+    // 后者会把 `compare` 这种非 UUID 形状也当成 id 放行。
+    // 字面量子路径（capabilities / options / layers / entries / runs / runs\/compare）排在
+    // {uuid} 段**之前**判别 —— alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    prefix: 'finance/',
+    env: 'FINANCE_URL',
+    fallback: 'http://127.0.0.1:8087',
+    pattern:
+      /^cost\-calculation\/(?:capabilities|options|layers|entries|runs(?:\/(?:compare|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/recalculate)?))?)$/,
+  },
+  {
     // 12.2.2.1 付款单与审批（finance 服务，卷 12「财务核算」L3 12.2.2 付款下的第一格）。
     //
     // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 finance 那条巨型 alternation 里并分支 ——
