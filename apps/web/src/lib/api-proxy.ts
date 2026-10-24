@@ -1503,6 +1503,67 @@ const services: readonly {
       /^(products(?:\/[0-9a-f-]+(?:\/(?:attributes|skus)(?:\/[0-9a-f-]+)?)?)?|attributes(?:\/(?:overview|category-rules|options(?:\/(?:lifecycle|order))?|[0-9a-f-]+(?:\/(?:options|category-rules))?))?|brands(?:\/(?:overview|candidates|listing-eligibility|[0-9a-f-]+(?:\/(?:listing-eligibility|enabled|authorizations(?:\/[0-9a-f-]+(?:\/enabled)?)?))?))?|parties(?:\/(?:overview|candidates|[0-9a-f-]+(?:\/(?:status|roles(?:\/[0-9a-f-]+)?|role-profiles|(?:supplier|customer|carrier)-profile|addresses(?:\/(?:defaults|candidates|[0-9a-f-]+(?:\/(?:usages|default|versions(?:\/[0-9]+)?))?))?|contacts(?:\/(?:default|candidates|[0-9a-f-]+(?:\/primary)?))?))?))?|categories(?:\/(?:overview|trees(?:\/[0-9a-f-]+(?:\/nodes)?)?|nodes\/[0-9a-f-]+(?:\/(?:move|enabled))?|spus\/[0-9a-f-]+|attribute-requirements(?:\/overview|\/[0-9a-f-]+(?:\/[0-9a-f-]+(?:\/enabled)?|\/(?:effective|entry-form-schema|validate))?)))|category-mappings(?:\/(?:overview|platform-sites|attribute-options|resolve|[0-9a-f-]+(?:\/(?:default|enabled|attributes(?:\/[0-9a-f-]+(?:\/enabled)?)?))?))?|records\/(research|compliance|assets)(?:\/[0-9a-f-]+)?|media(?:\/(?:overview|verify-sweep|references|tags|processing(?:\/(?:overview|recipes(?:\/[0-9a-f-]+(?:\/enabled)?)?|jobs(?:\/[0-9a-f-]+(?:\/(?:items|cancel))?)?|assets\/[0-9a-f-]+\/history)?)?)|[0-9a-f-]+(?:\/(?:versions|references(?:\/[0-9a-f-]+)?|integrity-checks|enabled))?|tags\/[0-9a-f-]+(?:\/enabled)?)?|skus(?:\/(?:capabilities|batch|export))?|unit-groups(?:\/(?:overview|convert|[0-9a-f-]+(?:\/(?:enabled|conversions(?:\/[0-9a-f-]+)?))?))?|unit-conversion(?:\/(?:units(?:\/[0-9a-f-]+)?|overview|skus\/[0-9a-f-]+(?:\/conversions)?|convert|snapshots))?|spec-axis(?:\/(?:overview|axes(?:\/[0-9a-f-]+(?:\/options)?)?|spus\/[0-9a-f-]+(?:\/axes(?:\/[0-9a-f-]+)?)?|category-rules))?|variant-combination(?:\/(?:overview|spus\/[0-9a-f-]+(?:\/(?:combinations|check|drafts(?:\/[0-9a-f-]+)?))?))?|sku-attribute-override\/skus\/[0-9a-f-]+(?:\/attribute-overrides\/[0-9a-f-]+(?:\/clear)?)?|titles(?:\/(?:overview|templates(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/enabled)?)?|keywords(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/enabled)?)?|generations(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/skus)?)?|records(?:\/export|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:select|deselect|reject))?)?))?|descriptions(?:\/(?:overview|templates(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:enabled|translation-coveragetranslations(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?))?)?|phrases(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/enabled)?)?|renders(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:skus|missing-variables))?)?|translations\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}|sections(?:\/export)?))?|bundles(?:\/(?:overview|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:status|effective|versions))?))?|versions(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:publish|close|components|component-check))?)?|components(?:\/(?:overview|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}))?|bundle-skus(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|boms(?:\/(?:overview|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:status|effective|versions))?))?|bom-versions(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:publish|close|copy|components|requirement))?)?|bom-components\/usage|bom-explosions(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|import-templates(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/file)?)?|import-field-mappings(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|import-jobs(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:mapping|prevalidate|execute|cancel|rows|errors|report(?:\/(?:issues|exports(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/file)?))?))?)?|supplier-quotes(?:\/(?:overview|options|effective(?:\/resolve)?|[0-9a-f-]+(?:\/tiers)?))?|role-profiles(?:\/(?:overview|options))?|translations(?:\/(?:overview|locales(?:\/(?:requirements|sync|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/enabled)?))?|spus\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/entries)?|skus\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/entries)?|entries(?:\/export|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/status)?)?|coverage|suggestions(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:adopt|reject))?)?|batches(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?))|duplicate-scans(?:\/(?:overview|[0-9a-f-]+(?:\/candidates)?)?)?|duplicate-candidates\/[0-9a-f-]+(?:\/(?:decision|merge-preview|merge)?)?|export-sources|export-jobs(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:file|cancel))?)?|zombie-candidates(?:\/(?:overview|options|rules(?:\/[A-Za-z0-9_]+)?|evidence|reference-stats|deactivate|records|deactivation-targets))?|completeness(?:\/(?:overview|options|gaps(?:\/summary)?|evaluations(?:\/[0-9a-f-]+)?|precheck\/(?:listing|customs)|customs\/skus\/[0-9a-f-]+|certifications\/skus\/[0-9a-f-]+(?:\/[0-9a-f-]+)?|(?:SPU|SKU)\/[0-9a-f-]+))?|customs-attributes(?:\/profiles|\/skus\/[0-9a-f-]+(?:\/(?:submit|review))?|\/declaration-ready)|sku-merges(?:\/overview|\/by-candidate\/[0-9a-f-]+|\/by-sku\/[0-9a-f-]+|\/[0-9a-f-]+)?|description-templates(?:\/(?:overview|options|templates(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:enabled|sections))?)?|renders(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?))?|kb(?:\/(?:overview|options|entries(?:\/[0-9a-f-]+(?:\/(?:enabled|translations(?:\/[0-9a-f-]+)?|translation-coverage|rule-bindings(?:\/[0-9a-f-]+)?|usages))?)?|translations\/[0-9a-f-]+|rule-versions(?:\/[0-9a-f-]+)?|review-tasks(?:\/[0-9a-f-]+)?|usages|hit-rates))?|customs-destination-versions(?:\/effective|\/requirements|\/skus\/[0-9a-f-]+|\/[0-9a-f-]+\/publish)|customs-declaration\/resolve|supply\/vendors(?:\/(?:options|overview)|\/[0-9a-f-]+(?:\/(?:profile|panorama|purchase-history|quotes|settlement-terms|deliveries(?:\/[0-9a-f-]+\/void)?|quality-inspections(?:\/[0-9a-f-]+\/void)?|qualifications(?:\/[0-9a-f-]+)?))?)?)$/,
   },
   {
+    // 12.7.1.2 银行对账（finance 服务，卷 12「财务核算」L3 12.7.1 资金账户下的第二格）。
+    //
+    // ⚠️ 本条目是**新增一条独立的 `services[]` 元素**，不是往既有 finance 那几条巨型 alternation 里并分支 ——
+    //   既有条目（`receivables` / `receipts` / `fund-analysis` / `transactions` / `settlement` …）
+    //   都是单行超长正则，多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    //
+    // ---- 插入锚点固定在「第 1505 行那条 `1.1.2.3 履约健康（trade 服务…）」元素的 `{` 之前** ----
+    //   同批其它三条车道（各自锚点）相距数百行 ⇒ git 能干净求并。
+    //
+    // ---- 首 token「bank-reconciliation」的零命中核对结论 ----
+    //   发车前用 `grep -n "bank-reconciliation" apps/web/src/lib/api-proxy.ts` 实测：
+    //   既有 225 条 services[] 正则里**没有任何一条**含 `bank-reconciliation` 这个串
+    //   （唯一命中的是 `fund-analysis` 那条注释里的一句「🔴 银行对账（12.7.1.2）未交付」），
+    //   所以首 token 既是独立字面量，也不会被既有分支的前缀吃掉。
+    //
+    //   🔴 **刻意不并进 `fund-analysis` 那条**：那是一条**封闭 alternation**
+    //   （`exposure/measure|exposure/snapshots|exposure|capabilities|options|cash-flow-trend|
+    //     currency-distribution|turnover-days|payment-concentration|liquidity-alerts|thresholds`），
+    //   共用首段会让两条元素的正则纠缠、埋下互相吃掉的隐患 ⇒ 本模块用**自己的**首段。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   bank-reconciliation/capabilities                     能力声明（上游真接通 / 下游缺口归谁）
+    //   bank-reconciliation/options                          筛选项（账户取自 12.7.1.1 真实档案 + 受控词表 + 本租户规则）
+    //   bank-reconciliation/sessions                         对账批次列表（GET）/ 建批次（POST）
+    //   bank-reconciliation/sessions/{uuid}                  批次详情
+    //   bank-reconciliation/sessions/{uuid}/import           导入银行 / 支付平台流水（CSV / JSON 真解析）
+    //   bank-reconciliation/sessions/{uuid}/match            跑自动匹配
+    //   bank-reconciliation/sessions/{uuid}/statement-lines  银行流水行
+    //   bank-reconciliation/sessions/{uuid}/system-lines     系统记录快照
+    //   bank-reconciliation/sessions/{uuid}/matches          匹配结果
+    //   bank-reconciliation/sessions/{uuid}/unmatched        未匹配清单
+    //   bank-reconciliation/sessions/{uuid}/unmatched/{uuid}/claim    人工认领到具体单据
+    //   bank-reconciliation/sessions/{uuid}/unmatched/{uuid}/exclude  说明后排除
+    //   bank-reconciliation/sessions/{uuid}/claims          认领 / 说明记录（append-only 举证）
+    //   bank-reconciliation/sessions/{uuid}/reconcile        生成对账报告并确认
+    //   bank-reconciliation/sessions/{uuid}/report           对账报告（余额调节表）
+    //   bank-reconciliation/sessions/{uuid}/events           事件流
+    //   bank-reconciliation/rules                           匹配规则列表（GET）/ 新建规则（POST）
+    //   bank-reconciliation/rules/{uuid}                    改匹配规则（PUT）
+    //
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   bank-reconciliation                        —— 裸路径：后端**没有**「一条不存在的汇总列表接口」。
+    //   bank-reconciliation/not-a-shape             —— 不是本模块的任何形状。
+    //   bank-reconciliation/sessions/not-a-uuid     —— 非 UUID 段不应被放行。
+    //   bank-reconciliation/sessions/{uuid}/delete  —— 本模块**不做物理删除**（银行流水是外部事实）。
+    //   bank-reconciliation/sessions/{uuid}/unmatched/{uuid}/unclaim —— 认领是**终态**，没有「撤销认领」。
+    //   bank-reconciliation/rules/{uuid}/delete     —— 内置规则不能删（删掉会让「默认怎么配」这件事消失）。
+    //   fund-analysis/bank-reconciliation           —— 🔴 那是别的形状（fund-analysis 的封闭 alternation），本模块**不**复用。
+    //
+    // id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`（不是 `[0-9a-f-]+`：
+    // 后者会把 `import` / `report` 这种非 UUID 形状也当成 id 放行）。
+    // 字面量子路径（import / match / statement-lines / system-lines / matches / unmatched /
+    // claims / reconcile / report / events）排在 {uuid} 段**之前**判别 ——
+    // alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    prefix: 'finance/',
+    env: 'FINANCE_URL',
+    fallback: 'http://127.0.0.1:8087',
+    pattern:
+      /^bank\-reconciliation\/(?:capabilities|options|rules(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|sessions(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:import|match|statement-lines|system-lines|matches|unmatched(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/(?:claim|exclude))?|claims|reconcile|report|events))?)?)$/,
+  },
+  {
     // 1.1.2.3 履约健康（trade 服务，卷 01「工作台与门户」L3 1.1.2 关键指标下的第三格）。
     //
     // ⚠️ 本条目是**新增一条独立的 `services[]` 元素**，不是往既有 trade 那条巨型 alternation 里并分支 ——
