@@ -38,6 +38,11 @@ export class ApiError extends Error {
  * 它与 trade 的 `/trade/b2b-orders/receivables`（9.7.1.1 批发订单的**交易侧**账期应收）
  * 是**两处不同的事实**：trade 那张是订单侧记的应收，finance 这张是财务侧确认的应收
  * （从发货确认导入而来，带汇率快照与核销状态）。两者命名空间不同，不要互相调用。
+ *
+ * <p>`platform` 是 **18 集成开放与智能自动化**的服务（端口 8089，数据库 starcon_platform）。
+ * 18.1.1.1 应用与凭证是它的第一条业务端点，模型在调 `platform/apps/...`。
+ * 它与 channel 的 `channel/platforms`（02 渠道与店铺里「电商平台」的目录）**是两回事**：
+ * 前者是「谁可以接入我们」，后者是「我们接入谁」。
  */
 const backends: readonly { prefix: string; route: string }[] = [
   { prefix: 'auth/', route: 'iam' },
@@ -48,6 +53,7 @@ const backends: readonly { prefix: string; route: string }[] = [
   { prefix: 'trade/', route: 'trade' },
   { prefix: 'crm/', route: 'crm' },
   { prefix: 'finance/', route: 'finance' },
+  { prefix: 'platform/', route: 'platform' },
 ];
 
 let workspaceBlocked = false;

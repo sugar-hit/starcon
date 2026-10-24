@@ -12061,6 +12061,62 @@ const services: readonly {
     pattern:
       /^vat\-ioss\/(?:capabilities|options|shops|statistics|tax\-rates|registrations(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|filing\-cycles(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|filing\-periods(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:draft|confirm|statistics))?)?|orders(?:\/sync|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?)$/,
   },
+  {
+    // 18.1.1.1 应用与凭证（platform 服务，卷 18「集成开放与智能自动化」L3 18.1.1 API 管理下的第一格）。
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有任何一条里并分支 ——
+    //   既有条目**一字未改、也不重排**。
+    //
+    // ---- 插入锚点选在**数组末尾**（最后一个 services[] 元素之后、收尾的 `];` 之前）----
+    //   同批其它车道的插入点是「数组最开头」与「第一个 identity/ 之前」；
+    //   本车道落在末尾，与它们的插入点相距 12000 行以上，并入时 git 能干净求并。
+    //
+    // ---- 首 token「apps」的零命中核对结论 ----
+    //   发车前用 `grep -n "platform/" apps/web/src/lib/api-proxy.ts` 实测：**既有条目零命中**
+    //   （本仓此前**没有任何** services[] 元素用 `platform/` 前缀 —— channel 那支用的是
+    //   `platforms`（02 渠道与店铺里「电商平台」的目录），它是 `channel/` 前缀下的**首 token**，
+    //   与本模块的 `apps` 首 token 完全不同）。
+    //   ⇒ 两条正则的**前缀就不同**（`platform/` vs `channel/` vs `catalog/` …），
+    //   resolve() 先按前缀过滤再测正则 ⇒ 天然互斥，不存在「既有两支吃掉本模块路径」的可能。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   platform/apps                          应用列表（GET）/ 注册应用（POST）
+    //   platform/apps/capabilities             能力声明（上游真接通 / 下游缺口归谁）
+    //   platform/apps/options                  筛选项（应用类型 / 状态 / 操作 / 配额窗口 / 资源码）
+    //   platform/apps/overview                 概览（几个数）
+    //   platform/apps/{uuid}                   应用档案详情
+    //   platform/apps/{uuid}/revoke            吊销应用（**一键吊销**全部凭证）
+    //   platform/apps/{uuid}/credentials       凭证列表（GET）/ 生成凭证（POST，明文只返回一次）
+    //   platform/apps/{uuid}/credentials/rotate 轮换凭证（新明文 + 旧摘要失效）
+    //   platform/apps/{uuid}/credentials/verify 凭证自检（凭证 / 授权范围 / IP 白名单 / 配额四个判定）
+    //   platform/apps/{uuid}/credentials/{uuid}/revoke 吊销单个凭证
+    //   platform/apps/{uuid}/scopes            授权范围列表（GET）/ 授权（POST，幂等）
+    //   platform/apps/{uuid}/scopes/{uuid}     撤销一条授权（DELETE）
+    //   platform/apps/{uuid}/ip-allowlist      IP 白名单列表（GET）/ 新增（POST）
+    //   platform/apps/{uuid}/ip-allowlist/{uuid} 删除一条白名单（DELETE）
+    //   platform/apps/{uuid}/quotas            配额配置列表（GET）/ 设置（POST，同窗口覆盖）
+    //   platform/apps/{uuid}/quota-status      额度判定（每个窗口类型一行）
+    //   platform/apps/{uuid}/audit-events      审计留痕（真分页，新到旧）
+    //
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   platform/app-quota-usages —— 🔴 那是**服务端到服务端**的用量回报路径（内部密钥），
+    //                               浏览器打不到；放行它等于让任意浏览器往别的租户写用量。
+    //   platform/apps/{uuid}/webhooks / platform/apps/{uuid}/call-logs
+    //                             —— 🔴 18.1.2 事件订阅 / 18.1.1.3 调用监控**全部未交付**；
+    //                               放行这些形状会让界面以为「已经能看到调用日志」。
+    //   platform/apps/not-a-uuid  —— 非 UUID 段不应被放行。
+    //   platform/apps/{uuid}/not-a-shape —— 多一层仍然 404。
+    //
+    // id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //   （不是 `[0-9a-f-]+`）：后者会把 `revoke` / `rotate` / `verify` 这种非 UUID 形状
+    //   也当成 id 放行。
+    // 字面量子路径（capabilities / options / overview）排在 {uuid} 段**之前**判别 ——
+    //   alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    prefix: 'platform/',
+    env: 'PLATFORM_URL',
+    fallback: 'http://127.0.0.1:8089',
+    pattern:
+      /^apps(?:\/(?:capabilities|options|overview)|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:revoke|credentials(?:\/(?:rotate|verify)|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/revoke)?|scopes(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|ip-allowlist(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|quotas|quota-status|audit-events))?)?$/,
+  },
 ];
 
 function resolve(path: string) {
