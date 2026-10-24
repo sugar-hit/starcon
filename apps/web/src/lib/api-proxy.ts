@@ -20,6 +20,48 @@ const services: readonly {
   fallback: string;
 }[] = [
   {
+    // 13.1.1.1 经营总览（reporting 服务，卷 13「利润与经营分析」L3 13.1.1 下的第一格）。
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 finance / trade 那几条巨型
+    //   alternation 里并分支 —— 既有条目**一字未改、也不重排**。
+    //
+    // ---- 插入锚点选在**数组最开头**（本文件第一个元素之前）----
+    //   同批其它车道的插入点是「数组末尾」（收尾的 `];` 之前）；本车道落在这里，
+    //   与它们的插入点相距 10000 行以上，并入时 git 能干净求并。
+    //
+    // ---- 首 token「reporting」的零命中核对结论 ----
+    //   发车前用脚本把本文件里**全部 234 个既有元素**（`prefix` + 正则）逐条抽出来，
+    //   对本模块的 8 条路径逐条跑「前缀闸门 + 正则」判定：
+    //     reporting/overview            reporting/overview/capabilities
+    //     reporting/overview/metrics    reporting/overview/trend
+    //     reporting/overview/drilldown  reporting/projection/events
+    //     reporting/projection/refresh  reporting/projection/rebuild
+    //   **零命中** —— 既有 8 个 prefix（channel/ trade/ finance/ catalog/ crm/ identity/
+    //   warehouse/ auth/）里**没有** `reporting/`，而 resolve() 先按 prefix 闸门筛，
+    //   所以别的服务的正则根本吃不到本模块的路径。
+    //   核对脚本留在 .tmp/ 下（不入库），命令与输出见本次提交正文。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   overview                  经营总览（指标卡 + 趋势 + 异常提示 + 数据更新时间戳）
+    //   overview/capabilities     能力声明
+    //   overview/metrics          指标口径目录（口径唯一的展示形态）
+    //   overview/trend            趋势（逐日逐币种）
+    //   overview/drilldown        下钻构成明细（哪个订单 / 哪个 SKU / 哪个活动）
+    //   projection/events         投影摄取（POST，事件 → 投影管道的主路径）
+    //   projection/refresh        从上游拉取并投影（POST，与推共用同一套幂等与口径）
+    //   projection/rebuild        清空投影并重建（POST）
+    //
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   reporting/                     —— 裸路径：后端**没有**「一条不存在的汇总列表接口」。
+    //   reporting/overview/{uuid}       —— 顶层没有 id 段（总览按查询参数定位，不是按 id）。
+    //   reporting/projection/{uuid}     —— 同上，投影摄取是批量端点，没有 id 段。
+    //   reporting/overview/unknown      —— 未实现的子路径仍然 404。
+    prefix: 'reporting/',
+    env: 'REPORTING_URL',
+    fallback: 'http://127.0.0.1:8088',
+    pattern:
+      /^(?:overview(?:\/(?:capabilities|metrics|trend|drilldown))?|projection(?:\/(?:events|refresh|rebuild))?)$/,
+  },
+  {
     // 12.4.1.3 成本差异分析（finance 服务，卷 12「财务核算」L3 12.4.1 成本计算下的第三格）。
     // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 finance 那几条巨型 alternation 里并分支 ——
     //   既有条目**一字未改、也不重排**。

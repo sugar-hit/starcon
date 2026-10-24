@@ -117,7 +117,7 @@ jobs:
       - run: ./deploy/scripts/catalog-dev.sh
       - name: Wait for all services
         run: |
-          for port in 8081 8082 8083 8084 8085 8086 8087; do
+          for port in 8081 8082 8083 8084 8085 8086 8087 8088; do
             ready=false
             for attempt in $(seq 1 150); do
               if curl --fail --silent "http://localhost:$port/v3/api-docs" >/dev/null; then ready=true; break; fi
@@ -144,7 +144,7 @@ jobs:
         if: failure()
         run: |
           docker compose --env-file deploy/.env.catalog.local -f deploy/docker/docker-compose.catalog.yml ps -a
-          docker compose --env-file deploy/.env.catalog.local -f deploy/docker/docker-compose.catalog.yml logs --no-color --tail 200 postgres identity catalog channel warehouse trade crm finance
+          docker compose --env-file deploy/.env.catalog.local -f deploy/docker/docker-compose.catalog.yml logs --no-color --tail 200 postgres identity catalog channel warehouse trade crm finance reporting
       - uses: actions/upload-artifact@v4
         if: always()
         with:

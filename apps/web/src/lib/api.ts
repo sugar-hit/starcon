@@ -40,6 +40,14 @@ export class ApiError extends Error {
  * （从发货确认导入而来，带汇率快照与核销状态）。两者命名空间不同，不要互相调用。
  */
 const backends: readonly { prefix: string; route: string }[] = [
+  // `reporting` 是 **13 利润与经营分析**的服务（端口 8088，数据库 starcon_reporting）。
+  // 13.1.1.1 经营总览（前端入口 `/analytics`）读的就是它。
+  // 它与 finance 的 `/finance/...` 是**两个不同的模块**：前者是投影读模型（口径唯一、可下钻），
+  // 后者是财务核算的写模型。命名空间不同，不要互相调用。
+  //
+  // ⚠️ **插入锚点选在数组最开头**（本文件第一个元素之前）：本文件是并行车道共同的累积型文件，
+  // 同批其它车道把新服务插在数组末尾；本车道落在开头，并入时 git 能干净求并。
+  { prefix: 'reporting/', route: 'reporting' },
   { prefix: 'auth/', route: 'iam' },
   { prefix: 'identity/', route: 'iam' },
   { prefix: 'catalog/', route: 'catalog' },

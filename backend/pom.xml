@@ -31,6 +31,7 @@
     <module>services/trade</module>
     <module>services/crm</module>
     <module>services/finance</module>
+    <module>services/reporting</module>
   </modules>
   <build>
     <plugins>

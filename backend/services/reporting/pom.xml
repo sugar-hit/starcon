@@ -1,0 +1,135 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>com.starcon</groupId>
+    <artifactId>backend</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+    <relativePath>../../pom.xml</relativePath>
+  </parent>
+  <!--
+    13 利润与经营分析的服务（蓝图 13 卷「后端归属」：reporting 拥有经营看板、销量/产品/利润/
+    库存分析、自定义报表与预警订阅）。端口 8088 接在 finance(8087) 之后。
+
+    依赖与 finance / crm / trade 完全一致：jOOQ 显式 SQL + Flyway + springdoc（契约 codegen 的输入）。
+    本次是**服务引导 + 第一条业务模块 13.1.1.1 经营总览**（迁移 V376）。
+
+    ⚠️ **reporting 是投影服务，不是写模型服务**（蓝图 13 卷首原文）：
+      「不产生业务事实、不做业务写入。报表是投影，可从事件重建；任何报表数字与业务系统冲突时，
+      以业务系统为准。」
+    ⇒ 本服务**没有任何业务事实的写入口**：唯一允许写的是自己的**投影表**（由事件摄取 /
+      上游拉取产生），并且投影随时可从零重建。
+
+    ⚠️ **版本号走全局唯一分配器**：reporting 是新服务，但迁移版本号不从头开始 ——
+      分配器给出 V376。与 crm 引导时用 V99、finance 引导时用 V338 同一纪律：跨服务并行提交时
+      撞号会让另一条车道的 Flyway 直接炸掉。
+  -->
+  <artifactId>reporting</artifactId>
+  <dependencies>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-jooq</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-validation</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.flywaydb</groupId>
+      <artifactId>flyway-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.flywaydb</groupId>
+      <artifactId>flyway-database-postgresql</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.postgresql</groupId>
+      <artifactId>postgresql</artifactId>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.springdoc</groupId>
+      <artifactId>springdoc-openapi-starter-webmvc-api</artifactId>
+      <version>2.8.13</version>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>postgresql</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.starcon</groupId>
+      <artifactId>tenancy</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+  </dependencies>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
+      </plugin>
+    </plugins>
+  </build>
+  <profiles>
+    <profile>
+      <id>jooq-codegen</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.jooq</groupId>
+            <artifactId>jooq-codegen-maven</artifactId>
+            <version>${jooq.version}</version>
+            <executions>
+              <execution>
+                <phase>generate-sources</phase>
+                <goals>
+                  <goal>generate</goal>
+                </goals>
+              </execution>
+            </executions>
+            <dependencies>
+              <dependency>
+                <groupId>org.postgresql</groupId>
+                <artifactId>postgresql</artifactId>
+                <version>${postgresql.version}</version>
+              </dependency>
+            </dependencies>
+            <configuration>
+              <jdbc>
+                <driver>org.postgresql.Driver</driver>
+                <url>${env.DB_URL}</url>
+                <user>${env.DB_MIGRATION_USER}</user>
+                <password>${env.DB_MIGRATION_PASSWORD}</password>
+              </jdbc>
+              <generator>
+                <database>
+                  <name>org.jooq.meta.postgres.PostgresDatabase</name>
+                  <inputSchema>public</inputSchema>
+                  <excludes>flyway_schema_history</excludes>
+                </database>
+                <target>
+                  <packageName>com.starcon.reporting.generated</packageName>
+                  <directory>target/generated-sources/jooq</directory>
+                </target>
+              </generator>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+</project>
