@@ -20,6 +20,64 @@ const services: readonly {
   fallback: string;
 }[] = [
   {
+    // 12.4.1.3 成本差异分析（finance 服务，卷 12「财务核算」L3 12.4.1 成本计算下的第三格）。
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 finance 那几条巨型 alternation 里并分支 ——
+    //   既有条目**一字未改、也不重排**。
+    //
+    // ---- 插入锚点选在**数组最开头**（本文件第一个元素之前）----
+    //   同批其它车道的插入点是「第一个 `identity/` 之前」「第一个 `warehouse/` 之前」
+    //   与「数组末尾」；本车道落在这里，与它们的插入点相距 10000 行以上，并入时 git 能干净求并。
+    //
+    // ---- 首 token「cost-variance」的零命中核对结论 ----
+    //   发车前用 `grep -n "cost-variance" apps/web/src/lib/api-proxy.ts` 实测：**零命中**（无输出）。
+    //   本文件既有 services[] 正则里，本模块 **10 个形状逐一实测零命中**：
+    //     cost-variance/capabilities / cost-variance/options
+    //     cost-variance/baselines / cost-variance/baselines/versions
+    //     cost-variance/baselines/compare
+    //     cost-variance/reports / cost-variance/reports/{uuid}
+    //     cost-variance/items / cost-variance/drivers / cost-variance/alerts
+    //   既有 finance 那支是单行超长 alternation，其首 token 是 `receivables` / `receivable-aging` /
+    //   `payables` / `receipts` / `bad-debt` / `payment-plans` / `payment-orders` /
+    //   `payment-executions` / `write-offs` / `settlement` / `transactions` / `fund-analysis` /
+    //   `cost-collections` / `cost-valuation` / `deferred-settlement` / `cost-calculation`，
+    //   **全不相同** —— 特别是 `cost-calculation` 与 `cost-valuation`：
+    //   首 token 就不是 `cost-variance`（`cost-c` / `cost-v` ≠ `cost-va`），
+    //   既不会被它们吃掉，也不会吃掉它们 ⇒ 两个正则两两不相交。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   cost-variance/capabilities            能力声明（上游真接通 / 下游缺口归谁）
+    //   cost-variance/options                 筛选项（基线类型 / 维度 / 币种 / 驱动因素 / 可比性 / 严重度）
+    //   cost-variance/baselines               基线列表（GET）/ 登记或切换基线（POST，**追加版本**）
+    //   cost-variance/baselines/versions      版本历史（新到旧）
+    //   cost-variance/baselines/compare       版本对比（切换前 / 切换后，逐字段给出差异）
+    //   cost-variance/reports                 报表列表（GET）/ 执行差异分析（POST）
+    //   cost-variance/reports/{uuid}          报表明细（GET：表头 + 按币种分组 + 驱动因素 + 异常提示）
+    //   cost-variance/items                   明细列表（GET，真分页 + 真筛选：逐 SKU × 币种 × 驱动因素）
+    //   cost-variance/drivers                 驱动因素列表（GET，真分页 + 真筛选：按币种分组 + 主因归因）
+    //   cost-variance/alerts                  异常提示列表（GET，真分页 + 真筛选）
+    //
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   cost-variance                         —— 裸路径：后端**没有**「一条不存在的汇总列表接口」。
+    //   cost-variance/{uuid}                  —— 顶层没有 id 段（报表按 /reports/{uuid} 定位）。
+    //   cost-variance/reports/{uuid}/not-a-shape —— 多一层仍然 404。
+    //   cost-variance/baselines/{uuid}        —— 基线按 维度 × 币种 × 版本 定位，**没有** id 段。
+    //   cost-variance/not-a-uuid              —— 非本模块的子路径。
+    //   cost-variance/profit                  —— 🔴 利润属 13（未交付）。
+    //   cost-calculation/variance             —— 🔴 那是 12.4.1.2 的形状（它的差异对比是 runs/compare）；
+    //                                               本模块用**自己的** `cost-variance` 前缀，不复用它。
+    //
+    // id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`（不是 `[0-9a-f-]+`）：
+    // 后者会把 `compare` 这种非 UUID 形状也当成 id 放行。
+    // 字面量子路径（capabilities / options / baselines / items / drivers / alerts /
+    // baselines\/versions / baselines\/compare）排在 {uuid} 段**之前**判别 ——
+    // alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    prefix: 'finance/',
+    env: 'FINANCE_URL',
+    fallback: 'http://127.0.0.1:8087',
+    pattern:
+      /^cost\-variance\/(?:capabilities|options|baselines(?:\/(?:versions|compare))?|reports(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|items|drivers|alerts)$/,
+  },
+  {
     // 12.4.1.2 成本计算执行（finance 服务，卷 12「财务核算」L3 12.4.1 成本计算下的第二格）。
     // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 finance 那几条巨型 alternation 里并分支 ——
     //   既有条目**一字未改、也不重排**。
