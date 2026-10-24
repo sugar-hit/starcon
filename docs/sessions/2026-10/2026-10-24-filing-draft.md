@@ -121,6 +121,12 @@ trade 的 `sales_order` **没有**辖区字段，也没有 `shop_id`；唯一能
 3. **税率版本快照**：底稿行上记的是 12.6.1.1 的税率版本 id + 生效区间；若 12.6.1.1 的传输模型将来补 `effectiveFrom` / `effectiveTo` 字段，本模块可以直接改用（当前是按 id 查表取，不动 12.6.1.1 的模型文件）。
 4. **可抵扣进项口径**：若 12.5.1.1 后续给出更明确的「进项税」科目口径（当前靠 `category` + `tax_treatment` 推导），本模块的 SQL 口径要跟着复核。
 5. **16.3.1.2 申报日历**（下游）：本模块**不建**任何日历表，提醒归它。
+6. **⚠️ 别人元素里的「12.6.1.2 未交付」注释已经过时**（第二轮发现，未改）：api-proxy 里有两处
+   **属于别的车道**的元素注释仍写着本模块「未交付」——
+   `period-close`（卷 01 车道）那条里的 `period-close/filings / period-close/declarations` 段，
+   以及 `tax-rates`（12.6.1.1 车道）那条里的 `tax-rates/filings` 段。
+   本轮**刻意没改**（硬要求：既有 225 条元素「一字未改」；且那是别人的车道文件，改了会撞车），
+   **建议由调度者在并入后统一收口**——否则白名单注释会自相矛盾。
 
 ## 第二轮修订（重派车道 · 只做 4 件事，实现未重写）
 
@@ -179,3 +185,73 @@ V364 低于已应用的 V367 ⇒ 启动直接报
 ### 4. 验证与并入预演
 
 见文末「第二轮验证结果」。
+
+## 第二轮验证结果（实测）
+
+### L0 编译闸
+
+| 命令                                        | 结果                                                                             |
+| ------------------------------------------- | -------------------------------------------------------------------------------- |
+| `cd backend && ./mvnw -q compile`            | **退出 0**（只有 JVM 的 `Restricted method` / `sun.misc.Unsafe` WARNING，与本模块无关） |
+| `pnpm typecheck`                            | **退出 0**，turbo **3/3 successful**（`@starcon/web` cache miss 实跑 `tsc --noEmit`）    |
+| `pnpm lint`                                 | **退出 0**，turbo **3/3 successful**（仅 catalog / orders / warehouse 的既有 `react-hooks/exhaustive-deps` warning，不在本模块） |
+
+### L1 模块闸（只跑本模块测试类）
+
+```
+cd backend && ./mvnw -pl services/finance -am test \
+  -Dtest='FilingDraft*' \
+  -Dsurefire.failIfNoSpecifiedTests=false -DfailIfNoSpecifiedTests=false
+```
+
+⇒ **Tests run: 25, Failures: 0, Errors: 0, Skipped: 0**，**BUILD SUCCESS**（Reactor：backend / tenancy / finance 全 SUCCESS）。
+
+- `FilingDraftIntegrationTest` —— **19 例**（真分页真筛选、多币种不相加、导出 CSV/JSON 真文件 + 留痕、
+  读不到 IOSS 留空而不是零、汇率不可得不按 1:1 兜底、辖区码不在受控码表直接被拒、
+  命中不到税率直接报错不退回最新一条、订单列表读不到整个取数失败、底稿不可改写 …）
+- `FilingDraftTenancyIntegrationTest` —— **6 例**（实跑 Testcontainers PostgreSQL 16）
+
+**多租户三条硬断言全部在跑并通过**：
+
+1. `断言1_两租户互不可见`
+2. `断言2_伪造租户上下文无效`（另含 `断言2_伪造租户头无效且行落在会话租户名下`）
+3. `断言3_连接池归还后不串租户`（把连接池压到 1）
+
+### 前端
+
+| 命令                                                                       | 结果                    |
+| -------------------------------------------------------------------------- | ----------------------- |
+| `pnpm vitest run apps/web/src/app/api`                                     | **233 文件 / 1315 例全绿**（改了 api-proxy.ts 必跑的全量 allowlist 回归） |
+| `pnpm vitest run apps/web/src/components/finance apps/web/src/app/finance/filing-draft` | **23 文件 / 310 例全绿** |
+
+本模块两个测试文件单跑：**22 例全绿**（`filing-draft-model.test.ts` 17 + `filing-draft-allowlist.test.ts` 5）。
+其中 allowlist 有一条 **`不误伤其余服务已放行的分支（求并，不是二选一）`** ——
+它正是 api-proxy 重新对齐后必须复验的那条：新增的 `filing-draft` 元素不得吃掉别的服务已放行的分支。
+
+### 并入预演（真实 merge）
+
+```
+git merge --no-commit --no-ff integration/module-dev   # 退出 0，零冲突
+git merge --abort && git status --porcelain            # 工作区干净，未留任何改动或合并提交
+```
+
+`git diff --name-only --diff-filter=U` 为空 ⇒ **零冲突**。
+合并结果核对：api-proxy 元素数 **226**、本模块那 1 条元素在位（pattern 行唯一命中）、
+台账里 `12.6.1.2` 行**唯一**且状态仍为「已交付」、证据列迁移版本号为 `V368__filing_draft.sql`。
+
+### PG 容器
+
+- 本车道 verify 期间并发存活的 `postgres:16-alpine` 最多 **7 个**（本批 4 条车道同时在跑）；
+  其中**本车道自己的 3 个** Testcontainers 容器。
+- 结束前**本车道的 3 个容器已被 ryuk 全部回收**（`docker inspect` → NOT FOUND），
+  `testcontainers/ryuk:0.12.0` 容器运行中；`docker ps` 里剩下的是其它车道仍在用的。
+
+### ⚠️ 一个会咬人的坑（已记录）
+
+改名后**第一次**跑 L1 模块闸时 25 例全部 `Failed to load ApplicationContext`，
+根因是 `relation "finance_filing_draft" already exists` —— **不是源码问题，是构建产物残留**：
+上一轮的 `target/classes/db/migration/V364__filing_draft.sql` 还在，
+`git mv` 只动了源码树、没动 `target/`，于是 Flyway 先跑 V364 建了表、再跑 V368 建同一批表 ⇒ 炸。
+
+⇒ `./mvnw -pl services/finance -am clean` 之后重跑即全绿。
+**教训：改迁移文件名后必须 clean 再验**，否则 stale `target/classes` 里的旧迁移会与新迁移同场建表。
