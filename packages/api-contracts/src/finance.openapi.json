@@ -2338,6 +2338,1243 @@
         },
         "type": "object"
       },
+      "FinanceBankReconAccount": {
+        "properties": {
+          "accountName": {
+            "type": "string"
+          },
+          "accountNo": {
+            "type": "string"
+          },
+          "accountType": {
+            "type": "string"
+          },
+          "accountTypeLabel": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "currentBalance": {
+            "type": "number"
+          },
+          "currentBalanceAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "legalEntityName": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceBankReconCapabilities": {
+        "properties": {
+          "capabilities": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceBankReconCapability"
+            },
+            "type": "array"
+          },
+          "downstreamGaps": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceBankReconDownstreamGap"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceBankReconCapability": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "basis": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "module": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceBankReconClaimInput": {
+        "properties": {
+          "documentId": {
+            "description": "单据 id（收款单 / 付款单 / 结算单必填）",
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "documentNo": {
+            "description": "单据号（认领到具体单据时必填）",
+            "nullable": true,
+            "type": "string"
+          },
+          "documentType": {
+            "description": "收款单 / 付款单 / 结算单 / 其它",
+            "enum": [
+              "RECEIPT",
+              "PAYMENT_ORDER",
+              "SETTLEMENT",
+              "OTHER"
+            ],
+            "type": "string"
+          },
+          "reason": {
+            "description": "认领理由",
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          }
+        },
+        "required": [
+          "documentType",
+          "reason"
+        ],
+        "type": "object"
+      },
+      "FinanceBankReconClaimPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceBankReconClaimRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceBankReconClaimRow": {
+        "properties": {
+          "action": {
+            "type": "string"
+          },
+          "actionLabel": {
+            "type": "string"
+          },
+          "claimedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "claimedBy": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "claimedDocumentId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "claimedDocumentNo": {
+            "nullable": true,
+            "type": "string"
+          },
+          "claimedDocumentType": {
+            "nullable": true,
+            "type": "string"
+          },
+          "claimedDocumentTypeLabel": {
+            "nullable": true,
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "sessionId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "unmatchedId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceBankReconDownstreamGap": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "group": {
+            "type": "string"
+          },
+          "module": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "ownerService": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceBankReconEventPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceBankReconEventRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceBankReconEventRow": {
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "eventType": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "occurredAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "operatorUserId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "payload": {
+            "type": "string"
+          },
+          "sessionId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceBankReconExcludeInput": {
+        "properties": {
+          "reason": {
+            "description": "排除理由",
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          }
+        },
+        "required": [
+          "reason"
+        ],
+        "type": "object"
+      },
+      "FinanceBankReconImportInput": {
+        "properties": {
+          "content": {
+            "description": "流水文件原文",
+            "maxLength": 2000000,
+            "minLength": 0,
+            "type": "string"
+          },
+          "format": {
+            "description": "CSV 或 JSON",
+            "enum": [
+              "CSV",
+              "JSON"
+            ],
+            "type": "string"
+          },
+          "statementClosingBalance": {
+            "description": "对账单期末余额（可空 = 不改）",
+            "nullable": true,
+            "type": "number"
+          },
+          "statementOpeningBalance": {
+            "description": "对账单期初余额（可空 = 不改）",
+            "nullable": true,
+            "type": "number"
+          }
+        },
+        "required": [
+          "content",
+          "format"
+        ],
+        "type": "object"
+      },
+      "FinanceBankReconImportResult": {
+        "properties": {
+          "importedCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "parsedCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "reconNo": {
+            "type": "string"
+          },
+          "sessionId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "skippedCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "statementLineCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceBankReconMatchPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceBankReconMatchRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceBankReconMatchResult": {
+        "properties": {
+          "matchedCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "reconNo": {
+            "type": "string"
+          },
+          "rulesApplied": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "sessionId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "statementLineCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "systemLineCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "unmatchedBankCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "unmatchedSystemCount": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceBankReconMatchRow": {
+        "properties": {
+          "amount": {
+            "type": "number"
+          },
+          "counterparty": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "dayDifference": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "direction": {
+            "type": "string"
+          },
+          "externalReference": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "matchBasis": {
+            "type": "string"
+          },
+          "matchedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "matchedBy": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "occurredAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "ruleCode": {
+            "type": "string"
+          },
+          "ruleType": {
+            "type": "string"
+          },
+          "ruleTypeLabel": {
+            "type": "string"
+          },
+          "sessionId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "statementLineId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "systemLineId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceBankReconOption": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceBankReconOptions": {
+        "properties": {
+          "accounts": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceBankReconAccount"
+            },
+            "type": "array"
+          },
+          "currencies": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "directions": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceBankReconOption"
+            },
+            "type": "array"
+          },
+          "documentTypes": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceBankReconOption"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "ruleTypes": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceBankReconOption"
+            },
+            "type": "array"
+          },
+          "sourceTypes": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceBankReconOption"
+            },
+            "type": "array"
+          },
+          "unmatchedStatuses": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceBankReconOption"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceBankReconReportRow": {
+        "properties": {
+          "adjustedBalance": {
+            "nullable": true,
+            "type": "number"
+          },
+          "bookBalanceAvailable": {
+            "type": "boolean"
+          },
+          "bookClosingBalance": {
+            "nullable": true,
+            "type": "number"
+          },
+          "claimedCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "difference": {
+            "nullable": true,
+            "type": "number"
+          },
+          "excludedCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "generatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "generatedBy": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "matchedAmount": {
+            "type": "number"
+          },
+          "matchedCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "periodEnd": {
+            "format": "date",
+            "type": "string"
+          },
+          "periodStart": {
+            "format": "date",
+            "type": "string"
+          },
+          "reconNo": {
+            "type": "string"
+          },
+          "sessionId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "statementClosingBalance": {
+            "type": "number"
+          },
+          "statementInAmount": {
+            "type": "number"
+          },
+          "statementLineCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "statementOpeningBalance": {
+            "type": "number"
+          },
+          "statementOutAmount": {
+            "type": "number"
+          },
+          "systemInAmount": {
+            "type": "number"
+          },
+          "systemLineCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "systemOutAmount": {
+            "type": "number"
+          },
+          "unmatchedBankCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "unmatchedBankInAmount": {
+            "type": "number"
+          },
+          "unmatchedBankOutAmount": {
+            "type": "number"
+          },
+          "unmatchedSystemCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "unmatchedSystemInAmount": {
+            "type": "number"
+          },
+          "unmatchedSystemOutAmount": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceBankReconRuleInput": {
+        "properties": {
+          "amountTolerance": {
+            "description": "金额容差",
+            "nullable": true,
+            "type": "number"
+          },
+          "counterpartyRequired": {
+            "description": "对手方是否必须完全一致",
+            "nullable": true,
+            "type": "boolean"
+          },
+          "dateWindowDays": {
+            "description": "日期窗口（天，1–31）",
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "enabled": {
+            "description": "是否启用",
+            "nullable": true,
+            "type": "boolean"
+          },
+          "note": {
+            "description": "备注",
+            "nullable": true,
+            "type": "string"
+          },
+          "priority": {
+            "description": "优先级（数字小的先试）",
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "ruleCode": {
+            "description": "规则编码（租户内唯一）",
+            "minLength": 1,
+            "pattern": "^[A-Z0-9_-]{1,48}$",
+            "type": "string"
+          },
+          "ruleName": {
+            "description": "规则名称",
+            "maxLength": 120,
+            "minLength": 0,
+            "type": "string"
+          },
+          "ruleType": {
+            "description": "受控词表：单号 / 对手方 / 金额日期窗口",
+            "enum": [
+              "REFERENCE_EXACT",
+              "COUNTERPARTY_AMOUNT",
+              "AMOUNT_DATE_WINDOW"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "ruleCode",
+          "ruleName",
+          "ruleType"
+        ],
+        "type": "object"
+      },
+      "FinanceBankReconRulePage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceBankReconRuleRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceBankReconRuleRow": {
+        "properties": {
+          "amountTolerance": {
+            "type": "number"
+          },
+          "builtin": {
+            "type": "boolean"
+          },
+          "counterpartyRequired": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "dateWindowDays": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "priority": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "ruleCode": {
+            "type": "string"
+          },
+          "ruleName": {
+            "type": "string"
+          },
+          "ruleType": {
+            "type": "string"
+          },
+          "ruleTypeLabel": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceBankReconSessionCreateInput": {
+        "properties": {
+          "accountId": {
+            "description": "12.7.1.1 的资金账户 id",
+            "format": "uuid",
+            "type": "string"
+          },
+          "note": {
+            "description": "备注",
+            "nullable": true,
+            "type": "string"
+          },
+          "periodEnd": {
+            "description": "期间截止日",
+            "format": "date",
+            "type": "string"
+          },
+          "periodStart": {
+            "description": "期间起始日",
+            "format": "date",
+            "type": "string"
+          },
+          "sourceSystem": {
+            "description": "流水来源系统（bank / paypal / stripe …）",
+            "nullable": true,
+            "type": "string"
+          },
+          "statementClosingBalance": {
+            "description": "银行对账单期末余额",
+            "nullable": true,
+            "type": "number"
+          },
+          "statementOpeningBalance": {
+            "description": "银行对账单期初余额",
+            "nullable": true,
+            "type": "number"
+          }
+        },
+        "required": [
+          "accountId",
+          "periodEnd",
+          "periodStart"
+        ],
+        "type": "object"
+      },
+      "FinanceBankReconSessionPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceBankReconSessionRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceBankReconSessionRow": {
+        "properties": {
+          "accountId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "accountName": {
+            "type": "string"
+          },
+          "accountNo": {
+            "type": "string"
+          },
+          "bookClosingBalance": {
+            "nullable": true,
+            "type": "number"
+          },
+          "bookOpeningBalance": {
+            "nullable": true,
+            "type": "number"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "matchedCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "periodEnd": {
+            "format": "date",
+            "type": "string"
+          },
+          "periodStart": {
+            "format": "date",
+            "type": "string"
+          },
+          "reconNo": {
+            "type": "string"
+          },
+          "reconciledAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "reconciledBy": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "sourceSystem": {
+            "type": "string"
+          },
+          "statementClosingBalance": {
+            "type": "number"
+          },
+          "statementLineCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "statementOpeningBalance": {
+            "type": "number"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "systemLineCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "unmatchedBankCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "unmatchedSystemCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "version": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceBankReconStatementLinePage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceBankReconStatementLineRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceBankReconStatementLineRow": {
+        "properties": {
+          "amount": {
+            "type": "number"
+          },
+          "bankReference": {
+            "type": "string"
+          },
+          "counterparty": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "direction": {
+            "type": "string"
+          },
+          "directionLabel": {
+            "type": "string"
+          },
+          "externalReference": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "importBatch": {
+            "type": "string"
+          },
+          "memo": {
+            "type": "string"
+          },
+          "occurredAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "sessionId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceBankReconSystemLinePage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceBankReconSystemLineRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceBankReconSystemLineRow": {
+        "properties": {
+          "amount": {
+            "type": "number"
+          },
+          "counterparty": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "direction": {
+            "type": "string"
+          },
+          "directionLabel": {
+            "type": "string"
+          },
+          "externalReference": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "memo": {
+            "type": "string"
+          },
+          "occurredAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "occurredPrecision": {
+            "type": "string"
+          },
+          "rawAmount": {
+            "type": "number"
+          },
+          "sessionId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "sourceId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "sourceLabel": {
+            "type": "string"
+          },
+          "sourceNo": {
+            "type": "string"
+          },
+          "sourceType": {
+            "type": "string"
+          },
+          "sourceTypeLabel": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceBankReconUnmatchedPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceBankReconUnmatchedRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceBankReconUnmatchedRow": {
+        "properties": {
+          "amount": {
+            "type": "number"
+          },
+          "claimReason": {
+            "nullable": true,
+            "type": "string"
+          },
+          "claimedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "claimedBy": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "claimedDocumentId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "claimedDocumentNo": {
+            "nullable": true,
+            "type": "string"
+          },
+          "claimedDocumentType": {
+            "nullable": true,
+            "type": "string"
+          },
+          "claimedDocumentTypeLabel": {
+            "nullable": true,
+            "type": "string"
+          },
+          "counterparty": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "direction": {
+            "type": "string"
+          },
+          "directionLabel": {
+            "type": "string"
+          },
+          "excludeReason": {
+            "nullable": true,
+            "type": "string"
+          },
+          "externalReference": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "memo": {
+            "type": "string"
+          },
+          "occurredAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "sessionId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "side": {
+            "type": "string"
+          },
+          "sideLabel": {
+            "type": "string"
+          },
+          "statementLineId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "systemLineId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "FinanceCollectionTaskCloseInput": {
         "properties": {
           "reason": {
@@ -21386,6 +22623,1036 @@
         },
         "tags": [
           "bad-debt-controller"
+        ]
+      }
+    },
+    "/finance/bank-reconciliation/capabilities": {
+      "get": {
+        "operationId": "get_finance_bank_reconciliation_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceBankReconCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "bank-reconciliation-controller"
+        ]
+      }
+    },
+    "/finance/bank-reconciliation/options": {
+      "get": {
+        "operationId": "get_finance_bank_reconciliation_options",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceBankReconOptions"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "bank-reconciliation-controller"
+        ]
+      }
+    },
+    "/finance/bank-reconciliation/rules": {
+      "get": {
+        "operationId": "get_finance_bank_reconciliation_rules",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceBankReconRulePage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "bank-reconciliation-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_finance_bank_reconciliation_rules",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinanceBankReconRuleInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceBankReconRuleRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "bank-reconciliation-controller"
+        ]
+      }
+    },
+    "/finance/bank-reconciliation/rules/{id}": {
+      "put": {
+        "operationId": "put_finance_bank_reconciliation_rules_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinanceBankReconRuleInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceBankReconRuleRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "bank-reconciliation-controller"
+        ]
+      }
+    },
+    "/finance/bank-reconciliation/sessions": {
+      "get": {
+        "operationId": "get_finance_bank_reconciliation_sessions",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "accountId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceBankReconSessionPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "bank-reconciliation-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_finance_bank_reconciliation_sessions",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinanceBankReconSessionCreateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceBankReconSessionRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "bank-reconciliation-controller"
+        ]
+      }
+    },
+    "/finance/bank-reconciliation/sessions/{id}": {
+      "get": {
+        "operationId": "get_finance_bank_reconciliation_sessions_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceBankReconSessionRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "bank-reconciliation-controller"
+        ]
+      }
+    },
+    "/finance/bank-reconciliation/sessions/{id}/claims": {
+      "get": {
+        "operationId": "get_finance_bank_reconciliation_sessions_id_claims",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "unmatchedId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceBankReconClaimPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "bank-reconciliation-controller"
+        ]
+      }
+    },
+    "/finance/bank-reconciliation/sessions/{id}/events": {
+      "get": {
+        "operationId": "get_finance_bank_reconciliation_sessions_id_events",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceBankReconEventPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "bank-reconciliation-controller"
+        ]
+      }
+    },
+    "/finance/bank-reconciliation/sessions/{id}/import": {
+      "post": {
+        "operationId": "post_finance_bank_reconciliation_sessions_id_import",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinanceBankReconImportInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceBankReconImportResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "bank-reconciliation-controller"
+        ]
+      }
+    },
+    "/finance/bank-reconciliation/sessions/{id}/match": {
+      "post": {
+        "operationId": "post_finance_bank_reconciliation_sessions_id_match",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceBankReconMatchResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "bank-reconciliation-controller"
+        ]
+      }
+    },
+    "/finance/bank-reconciliation/sessions/{id}/matches": {
+      "get": {
+        "operationId": "get_finance_bank_reconciliation_sessions_id_matches",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceBankReconMatchPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "bank-reconciliation-controller"
+        ]
+      }
+    },
+    "/finance/bank-reconciliation/sessions/{id}/reconcile": {
+      "post": {
+        "operationId": "post_finance_bank_reconciliation_sessions_id_reconcile",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceBankReconReportRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "bank-reconciliation-controller"
+        ]
+      }
+    },
+    "/finance/bank-reconciliation/sessions/{id}/report": {
+      "get": {
+        "operationId": "get_finance_bank_reconciliation_sessions_id_report",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceBankReconReportRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "bank-reconciliation-controller"
+        ]
+      }
+    },
+    "/finance/bank-reconciliation/sessions/{id}/statement-lines": {
+      "get": {
+        "operationId": "get_finance_bank_reconciliation_sessions_id_statement_lines",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceBankReconStatementLinePage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "bank-reconciliation-controller"
+        ]
+      }
+    },
+    "/finance/bank-reconciliation/sessions/{id}/system-lines": {
+      "get": {
+        "operationId": "get_finance_bank_reconciliation_sessions_id_system_lines",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceBankReconSystemLinePage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "bank-reconciliation-controller"
+        ]
+      }
+    },
+    "/finance/bank-reconciliation/sessions/{id}/unmatched": {
+      "get": {
+        "operationId": "get_finance_bank_reconciliation_sessions_id_unmatched",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "side",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceBankReconUnmatchedPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "bank-reconciliation-controller"
+        ]
+      }
+    },
+    "/finance/bank-reconciliation/sessions/{id}/unmatched/{unmatchedId}/claim": {
+      "post": {
+        "operationId": "post_finance_bank_reconciliation_sessions_id_unmatched_unmatchedId_claim",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "unmatchedId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinanceBankReconClaimInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceBankReconUnmatchedRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "bank-reconciliation-controller"
+        ]
+      }
+    },
+    "/finance/bank-reconciliation/sessions/{id}/unmatched/{unmatchedId}/exclude": {
+      "post": {
+        "operationId": "post_finance_bank_reconciliation_sessions_id_unmatched_unmatchedId_exclude",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "unmatchedId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinanceBankReconExcludeInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceBankReconUnmatchedRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "bank-reconciliation-controller"
         ]
       }
     },
