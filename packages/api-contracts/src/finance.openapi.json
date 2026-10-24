@@ -12349,6 +12349,649 @@
         },
         "type": "object"
       },
+      "FinanceTaxBindingInput": {
+        "properties": {
+          "effectiveFrom": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "jurisdictionCode": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "shopCode": {
+            "type": "string"
+          },
+          "shopId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "shopName": {
+            "type": "string"
+          },
+          "taxCode": {
+            "type": "string"
+          },
+          "taxType": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceTaxBindingPage": {
+        "properties": {
+          "activeCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceTaxBindingRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceTaxBindingRow": {
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "effectiveFrom": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "effectiveTo": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "jurisdictionCode": {
+            "type": "string"
+          },
+          "jurisdictionName": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "rate": {
+            "type": "number"
+          },
+          "shopCode": {
+            "type": "string"
+          },
+          "shopId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "shopName": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "supersedesId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "taxCode": {
+            "type": "string"
+          },
+          "taxType": {
+            "type": "string"
+          },
+          "taxTypeLabel": {
+            "type": "string"
+          },
+          "version": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceTaxJurisdictionOption": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "countryCode": {
+            "type": "string"
+          },
+          "defaultFilingCycle": {
+            "type": "string"
+          },
+          "derivationScope": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "region": {
+            "type": "string"
+          },
+          "requiresEpr": {
+            "type": "boolean"
+          },
+          "subdivisionCode": {
+            "type": "string"
+          },
+          "taxRegime": {
+            "type": "string"
+          },
+          "unusableReason": {
+            "type": "string"
+          },
+          "usableForTaxRate": {
+            "type": "boolean"
+          },
+          "vatRequired": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceTaxJurisdictionOptions": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceTaxJurisdictionOption"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "total": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceTaxRateCapabilities": {
+        "properties": {
+          "capabilities": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceTaxRateCapability"
+            },
+            "type": "array"
+          },
+          "downstreamGaps": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceTaxRateGap"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceTaxRateCapability": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "basis": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "module": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceTaxRateComparison": {
+        "properties": {
+          "differences": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceTaxRateDiff"
+            },
+            "type": "array"
+          },
+          "from": {
+            "$ref": "#/components/schemas/FinanceTaxRateRow"
+          },
+          "jurisdictionCode": {
+            "type": "string"
+          },
+          "jurisdictionName": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "rateChanged": {
+            "type": "boolean"
+          },
+          "taxType": {
+            "type": "string"
+          },
+          "to": {
+            "$ref": "#/components/schemas/FinanceTaxRateRow"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceTaxRateDiff": {
+        "properties": {
+          "changed": {
+            "type": "boolean"
+          },
+          "field": {
+            "type": "string"
+          },
+          "fieldLabel": {
+            "type": "string"
+          },
+          "fromValue": {
+            "type": "string"
+          },
+          "toValue": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceTaxRateGap": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "group": {
+            "type": "string"
+          },
+          "module": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "ownerService": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceTaxRateInput": {
+        "properties": {
+          "effectiveFrom": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "jurisdictionCode": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "rate": {
+            "type": "number"
+          },
+          "taxCode": {
+            "type": "string"
+          },
+          "taxType": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceTaxRateOptions": {
+        "properties": {
+          "statuses": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "taxCodes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "taxTypes": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceTaxRateTypeOption"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceTaxRatePage": {
+        "properties": {
+          "activeCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceTaxRateRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceTaxRateRow": {
+        "properties": {
+          "countryCode": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdBy": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "effectiveFrom": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "effectiveTo": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "jurisdictionCode": {
+            "type": "string"
+          },
+          "jurisdictionName": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "rate": {
+            "type": "number"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "supersedesId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "taxCode": {
+            "type": "string"
+          },
+          "taxType": {
+            "type": "string"
+          },
+          "taxTypeLabel": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "version": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceTaxRateTypeOption": {
+        "properties": {
+          "basis": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceTaxResolution": {
+        "properties": {
+          "asOf": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "bindingId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "bindingVersion": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "jurisdictionCode": {
+            "type": "string"
+          },
+          "jurisdictionName": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "rate": {
+            "type": "number"
+          },
+          "resolvedBy": {
+            "type": "string"
+          },
+          "resolvedByLabel": {
+            "type": "string"
+          },
+          "shopCode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "shopId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "taxCode": {
+            "type": "string"
+          },
+          "taxRateId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "taxType": {
+            "type": "string"
+          },
+          "taxTypeLabel": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceTaxShopOption": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "code": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "platformName": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceTaxShopOptions": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceTaxShopOption"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "total": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceTaxStateRateRule": {
+        "properties": {
+          "baseRate": {
+            "type": "number"
+          },
+          "effectiveFrom": {
+            "type": "string"
+          },
+          "effectiveTo": {
+            "nullable": true,
+            "type": "string"
+          },
+          "exemptionAmount": {
+            "type": "number"
+          },
+          "filingCycle": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "marketplaceFacilitator": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          },
+          "ruleVersion": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "stateCode": {
+            "type": "string"
+          },
+          "stateName": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "thresholdAmount": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceTaxStateRateRules": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceTaxStateRateRule"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "sourceModule": {
+            "type": "string"
+          },
+          "sourceService": {
+            "type": "string"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
       "FinanceTransactionBatchInput": {
         "properties": {
           "lines": {
@@ -24491,6 +25134,721 @@
         },
         "tags": [
           "supplier-reconciliation-controller"
+        ]
+      }
+    },
+    "/finance/tax-rates/binding-versions": {
+      "get": {
+        "operationId": "get_finance_tax_rates_binding_versions",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "shopId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "taxType",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "jurisdictionCode",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/FinanceTaxBindingRow"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "tax-rate-controller"
+        ]
+      }
+    },
+    "/finance/tax-rates/bindings": {
+      "get": {
+        "operationId": "get_finance_tax_rates_bindings",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "shopId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "taxType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "jurisdictionCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceTaxBindingPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "tax-rate-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_finance_tax_rates_bindings",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinanceTaxBindingInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceTaxBindingRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "tax-rate-controller"
+        ]
+      }
+    },
+    "/finance/tax-rates/capabilities": {
+      "get": {
+        "operationId": "get_finance_tax_rates_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceTaxRateCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "tax-rate-controller"
+        ]
+      }
+    },
+    "/finance/tax-rates/jurisdictions": {
+      "get": {
+        "operationId": "get_finance_tax_rates_jurisdictions",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceTaxJurisdictionOptions"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "tax-rate-controller"
+        ]
+      }
+    },
+    "/finance/tax-rates/options": {
+      "get": {
+        "operationId": "get_finance_tax_rates_options",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceTaxRateOptions"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "tax-rate-controller"
+        ]
+      }
+    },
+    "/finance/tax-rates/rate-compare": {
+      "get": {
+        "operationId": "get_finance_tax_rates_rate_compare",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "taxType",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "jurisdictionCode",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "taxCode",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fromVersion",
+            "required": true,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "toVersion",
+            "required": true,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceTaxRateComparison"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "tax-rate-controller"
+        ]
+      }
+    },
+    "/finance/tax-rates/rate-versions": {
+      "get": {
+        "operationId": "get_finance_tax_rates_rate_versions",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "taxType",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "jurisdictionCode",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "taxCode",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/FinanceTaxRateRow"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "tax-rate-controller"
+        ]
+      }
+    },
+    "/finance/tax-rates/rates": {
+      "get": {
+        "operationId": "get_finance_tax_rates_rates",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "taxType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "jurisdictionCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "taxCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceTaxRatePage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "tax-rate-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_finance_tax_rates_rates",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinanceTaxRateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceTaxRateRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "tax-rate-controller"
+        ]
+      }
+    },
+    "/finance/tax-rates/resolve": {
+      "get": {
+        "operationId": "get_finance_tax_rates_resolve",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "taxType",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "asOf",
+            "required": false,
+            "schema": {
+              "format": "date-time",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "shopId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "jurisdictionCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "taxCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceTaxResolution"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "tax-rate-controller"
+        ]
+      }
+    },
+    "/finance/tax-rates/shops": {
+      "get": {
+        "operationId": "get_finance_tax_rates_shops",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceTaxShopOptions"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "tax-rate-controller"
+        ]
+      }
+    },
+    "/finance/tax-rates/state-sales-tax": {
+      "get": {
+        "operationId": "get_finance_tax_rates_state_sales_tax",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "stateCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceTaxStateRateRules"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "tax-rate-controller"
         ]
       }
     },
