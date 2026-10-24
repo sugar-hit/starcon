@@ -20,6 +20,64 @@ const services: readonly {
   fallback: string;
 }[] = [
   {
+    // 12.4.1.3 成本差异分析（finance 服务，卷 12「财务核算」L3 12.4.1 成本计算下的第三格）。
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 finance 那几条巨型 alternation 里并分支 ——
+    //   既有条目**一字未改、也不重排**。
+    //
+    // ---- 插入锚点选在**数组最开头**（本文件第一个元素之前）----
+    //   同批其它车道的插入点是「第一个 `identity/` 之前」「第一个 `warehouse/` 之前」
+    //   与「数组末尾」；本车道落在这里，与它们的插入点相距 10000 行以上，并入时 git 能干净求并。
+    //
+    // ---- 首 token「cost-variance」的零命中核对结论 ----
+    //   发车前用 `grep -n "cost-variance" apps/web/src/lib/api-proxy.ts` 实测：**零命中**（无输出）。
+    //   本文件既有 services[] 正则里，本模块 **10 个形状逐一实测零命中**：
+    //     cost-variance/capabilities / cost-variance/options
+    //     cost-variance/baselines / cost-variance/baselines/versions
+    //     cost-variance/baselines/compare
+    //     cost-variance/reports / cost-variance/reports/{uuid}
+    //     cost-variance/items / cost-variance/drivers / cost-variance/alerts
+    //   既有 finance 那支是单行超长 alternation，其首 token 是 `receivables` / `receivable-aging` /
+    //   `payables` / `receipts` / `bad-debt` / `payment-plans` / `payment-orders` /
+    //   `payment-executions` / `write-offs` / `settlement` / `transactions` / `fund-analysis` /
+    //   `cost-collections` / `cost-valuation` / `deferred-settlement` / `cost-calculation`，
+    //   **全不相同** —— 特别是 `cost-calculation` 与 `cost-valuation`：
+    //   首 token 就不是 `cost-variance`（`cost-c` / `cost-v` ≠ `cost-va`），
+    //   既不会被它们吃掉，也不会吃掉它们 ⇒ 两个正则两两不相交。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   cost-variance/capabilities            能力声明（上游真接通 / 下游缺口归谁）
+    //   cost-variance/options                 筛选项（基线类型 / 维度 / 币种 / 驱动因素 / 可比性 / 严重度）
+    //   cost-variance/baselines               基线列表（GET）/ 登记或切换基线（POST，**追加版本**）
+    //   cost-variance/baselines/versions      版本历史（新到旧）
+    //   cost-variance/baselines/compare       版本对比（切换前 / 切换后，逐字段给出差异）
+    //   cost-variance/reports                 报表列表（GET）/ 执行差异分析（POST）
+    //   cost-variance/reports/{uuid}          报表明细（GET：表头 + 按币种分组 + 驱动因素 + 异常提示）
+    //   cost-variance/items                   明细列表（GET，真分页 + 真筛选：逐 SKU × 币种 × 驱动因素）
+    //   cost-variance/drivers                 驱动因素列表（GET，真分页 + 真筛选：按币种分组 + 主因归因）
+    //   cost-variance/alerts                  异常提示列表（GET，真分页 + 真筛选）
+    //
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   cost-variance                         —— 裸路径：后端**没有**「一条不存在的汇总列表接口」。
+    //   cost-variance/{uuid}                  —— 顶层没有 id 段（报表按 /reports/{uuid} 定位）。
+    //   cost-variance/reports/{uuid}/not-a-shape —— 多一层仍然 404。
+    //   cost-variance/baselines/{uuid}        —— 基线按 维度 × 币种 × 版本 定位，**没有** id 段。
+    //   cost-variance/not-a-uuid              —— 非本模块的子路径。
+    //   cost-variance/profit                  —— 🔴 利润属 13（未交付）。
+    //   cost-calculation/variance             —— 🔴 那是 12.4.1.2 的形状（它的差异对比是 runs/compare）；
+    //                                               本模块用**自己的** `cost-variance` 前缀，不复用它。
+    //
+    // id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`（不是 `[0-9a-f-]+`）：
+    // 后者会把 `compare` 这种非 UUID 形状也当成 id 放行。
+    // 字面量子路径（capabilities / options / baselines / items / drivers / alerts /
+    // baselines\/versions / baselines\/compare）排在 {uuid} 段**之前**判别 ——
+    // alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    prefix: 'finance/',
+    env: 'FINANCE_URL',
+    fallback: 'http://127.0.0.1:8087',
+    pattern:
+      /^cost\-variance\/(?:capabilities|options|baselines(?:\/(?:versions|compare))?|reports(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|items|drivers|alerts)$/,
+  },
+  {
     // 12.4.1.2 成本计算执行（finance 服务，卷 12「财务核算」L3 12.4.1 成本计算下的第二格）。
     // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 finance 那几条巨型 alternation 里并分支 ——
     //   既有条目**一字未改、也不重排**。
@@ -774,6 +832,49 @@ const services: readonly {
       /^transactions(?:\/(?:capabilities|options|batch|import|reconciliation|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}))?$/,
   },
   {
+    // 12.7.1.1 账户管理（finance 服务，卷 12「财务核算」L3 12.7 资金下的第一格）。
+    //
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 finance 那几条巨型 alternation 里
+    //   并分支 —— 既有条目是单行超长正则，多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    //   既有条目**一字未改、也不重排**。
+    //
+    // ---- 插入锚点选在 **`transactions` 那条之后**（即 `accounting-periods` 那条之前）----
+    //   与本批其它车道的插入点（数组最开头 / `identity/` 之前 / `warehouse/` 之前 / 数组末尾）
+    //   彼此相距 700 行以上 ⇒ 并入时 git 能干净求并。
+    //
+    // ---- 首 token「fund-accounts」的零命中核对结论（本车道实测）----
+    //   本文件既有 services[] 正则里**没有任何一条**含 `fund-accounts` 这个串
+    //   （同 L3 的 12.7.2.1 资金分析占的是 `fund-analysis`，首 token 不同 ⇒ 两个正则两两不相交，
+    //   不会互相吃掉对方的路径）；本模块的正则对既有 finance 各条**零误伤**。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   fund-accounts                     账户列表（GET）/ 建账户（POST）
+    //   fund-accounts/capabilities        能力声明（上游真接通 / 下游缺口归谁）
+    //   fund-accounts/options             筛选项（账户类型词表 + 真实币种 + identity 的法人清单）
+    //   fund-accounts/balances/summary    余额汇总（**按币种分组**；跨币种合计恒为 null）
+    //   fund-accounts/{uuid}              账户详情（GET）/ 改档案（PUT）
+    //   fund-accounts/{uuid}/balances     余额历史（GET）/ 登记余额（POST，追加一条）
+    //   fund-accounts/{uuid}/deactivate   停用账户（POST）
+    //   fund-accounts/{uuid}/activate     启用账户（POST）
+    //
+    // ⚠️ **刻意不放行**：
+    //   fund-accounts/{uuid}/delete       —— 资金凭据**不做物理删除**（删掉等于让「钱曾在这个账户里」
+    //                                         从未发生过）；停用走 /deactivate。
+    //   fund-accounts/reconciliation       —— 🔴 12.7.1.2 银行对账**未交付**（另一个模块）。
+    //   fund-accounts/not-a-uuid          —— 非 UUID 段不应被 uuid 分支吃掉。
+    //   fund-accounts/{uuid}/not-a-shape  —— 多一层仍然 404。
+    //
+    // id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`（不是 `[0-9a-f-]+`）：
+    // 后者会把 `balances` 这种非 UUID 形状也当成 id 放行。
+    // 字面量子路径（capabilities / options / balances\/summary）排在 {uuid} 段**之前**判别 ——
+    // alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    prefix: 'finance/',
+    env: 'FINANCE_URL',
+    fallback: 'http://127.0.0.1:8087',
+    pattern:
+      /^fund\-accounts(?:\/balances\/summary|\/(?:capabilities|options|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:balances|deactivate|activate))?))?$/,
+  },
+  {
     // 12.5.1.2 会计期间（finance 服务，卷 12「财务核算」L3 12.5.1 账簿与科目下的第二格）。
     //
     // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 finance 那几条巨型 alternation 里
@@ -825,6 +926,62 @@ const services: readonly {
     fallback: 'http://127.0.0.1:8087',
     pattern:
       /^accounting\-periods(?:\/(?:capabilities|options|calendars(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/generate\-periods)?)?|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:close|reopen|events|approvals))?))?$/,
+  },
+  {
+    // 12.5.1.3 关账（finance 服务，卷 12「财务核算」L3 12.5.1 会计科目与期间下的第三格）。
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 finance 那几条巨型 alternation 里并分支 ——
+    //   既有条目**一字未改、也不重排**。
+    //
+    // ---- 插入锚点选在**第一个 `prefix: 'identity/'` 元素之前** ----
+    //   同批其它车道的插入点是「数组最开头」「第一个 `prefix: 'warehouse/'` 之前」与「数组末尾」，
+    //   与本处互不重叠 ⇒ 并入时 git 能干净求并。
+    //
+    // ---- 首 token「period-close」的零命中核对结论 ----
+    //   发车前用 `grep -n "period-close" apps/web/src/lib/api-proxy.ts` 实测：**零命中**（exit 1）。
+    //   再把既有 services[] 的 **219 条正则**逐条抽出（脚本在 `.tmp/check-period-close.mjs`，
+    //   逐字符扫出正则字面量 —— 正则内部允许 `//` 行注释，用「第一个 / 到下一个 /」会漏解析），
+    //   对本模块 **10 个正向形状**与 **12 个负向形状**逐一实测：**全部零命中**。
+    //   既有 finance 那几支的首 token 是 `receivables` / `receivable-aging` / `payables` /
+    //   `receipts` / `settlement` / `transactions` / `vouchers` / `accounting-periods` /
+    //   `account-subjects` / `cost-calculation` / `payment-orders` / `payment-executions` /
+    //   `bad-debt` …，**全不相同** ⇒ 首 token 既是独立字面量，也不会被既有分支的前缀吃掉。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   period-close/capabilities                          能力声明（上游真接通 / 下游缺口归谁）
+    //   period-close/options                               筛选项 + 期间下拉
+    //   period-close/checklists                            清单列表（GET，真分页 + 真筛选）/ 跑清单（POST）
+    //   period-close/checklists/{uuid}                     清单详情（GET：四类检查项 + 按币种金额分组）
+    //   period-close/checklists/{uuid}/items               明细钻取（GET，真分页）
+    //   period-close/checklists/{uuid}/checks/{checkUuid}/carry-forward
+    //                                                      把阻断项下调为可结转未清项（POST，**必须写例外依据**）
+    //   period-close/executions                           关账执行记录列表（GET）/ 提交关账（POST）
+    //   period-close/executions/{uuid}                    关账执行详情（GET：执行记录 + 审批链路）
+    //   period-close/executions/{uuid}/sync-approval      同步审批结果（POST，批准后执行关账）
+    //
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   period-close/filings / period-close/declarations —— 🔴 属 12.6.1.2 申报，**未交付**
+    //   period-close/reports                             —— 🔴 属 12.5.2.2 报表，**未交付**
+    //   period-close/tax-rates                            —— 🔴 属 12.6.1.1 税率配置
+    //   period-close                                      —— 裸路径：后端**没有**「一条不存在的汇总列表接口」
+    //                                                      （本模块的集合级端点是 /checklists 与 /executions，
+    //                                                        顶层没有汇总列表 ⇒ 顶层组**不写成可选**）
+    //   period-close/{uuid}                               —— 顶层没有 id 段
+    //   period-close/checklists/{uuid}/not-a-shape        —— 多一层仍然 404
+    //   period-close/checklists/not-a-uuid                —— 非 UUID 段不应被 uuid 分支吃掉
+    //   period-close/executions/{uuid}/approve            —— 🔴 审批属 17 审批（identity），本模块**不提供**本地审批端点
+    //   period-close/executions/{uuid}/reject             —— 同上
+    //   period-close/batch                                —— 本模块**没有**批量关账端点
+    //
+    // id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`（不是 `[0-9a-f-]+`）：
+    // 后者会把 `carry-forward` 这种非 UUID 形状也当成 id 放行。
+    // 字面量子路径（capabilities / options / checklists / executions / items / checks）排在
+    // {uuid} 段**之前**判别 —— alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    // ⚠️ **顶层组不写成可选**（`period-close` 裸路径必须 404：本模块没有顶层汇总列表端点）。
+    prefix: 'finance/',
+    env: 'FINANCE_URL',
+    fallback: 'http://127.0.0.1:8087',
+    pattern:
+      /^period\-close\/(?:capabilities|options|checklists(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:items|checks\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/carry\-forward))?)?|executions(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/sync\-approval)?)?)$/,
   },
   {
     prefix: 'identity/',
@@ -8881,6 +9038,67 @@ const services: readonly {
       /^logistics-freight(?:\/capabilities|\/estimate|\/variance|\/actuals(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/void)?|\/rules(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:supersede|disable))?)?|\/surcharges(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/disable)?|\/head-freight(?:\/estimate|\/structures(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/disable)?)?))$/,
   },
   {
+    // 12.6.2.1 发票管理（finance 服务，卷 12「财务核算」L3 12.6.2 发票与贷项下的第一格）。
+    //
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 finance 那几条巨型 alternation 里并分支 ——
+    //   那一支是单行超长正则，多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。既有条目**一字未改、也不重排**。
+    //
+    // ---- 插入锚点 ----
+    //   本车道分配到的锚点 = 本文件第 9040 行那条元素（5.2.3.1 平台费用，catalog 服务）的 `{` 起始行**之前**。
+    //   同批另外三条车道的锚点分别在第 314 / 1505 / 4071 行 —— 与本车道相距足够远，
+    //   并入时 git 能干净求并。
+    //
+    // ---- 首 token「invoices」的零命中核对结论（本车道实测）----
+    //   发车前用 `grep -c "invoices" apps/web/src/lib/api-proxy.ts` 实测：**零命中**（输出 0）。
+    //   （单数 `invoice` 有 4 处命中，但**全是注释**，外加一条既有 `fulfillment/routing/...invoice-requests`
+    //   正则 —— 与本条正则的首 token `invoices` 不相交。）
+    //   既有 finance 那几支是单行超长 alternation，首 token 是 `receivables` / `receivable-aging` /
+    //   `payables` / `receipts` / `bad-debt` / `payment-plans` / `payment-orders` /
+    //   `payment-executions` / `write-offs` / `settlement` / `transactions` / `fund-analysis` /
+    //   `cost-collections` / `cost-valuation` / `deferred-settlement` / `cost-calculation` /
+    //   `cost-variance` / `tax-rates` / `supplier-reconciliation` / `period-close` 等，**全不相同** ⇒
+    //   本条正则与它们**两两不相交**（既不会互相吃掉，也不会被吃掉）。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   invoices                            发票列表（GET）/ 建一张草稿（POST）
+    //   invoices/capabilities               能力声明（上游真接通 / 职责切分 / 缺口归谁）
+    //   invoices/options                    筛选项（单据类型 / 状态 / 平台对接状态 / 币种 / 模板）
+    //   invoices/templates                  发票模板列表（GET）/ 登记模板（POST）
+    //   invoices/requests                   待开票需求（上游 9 订单，**只读**）
+    //   invoices/batch                      批量建单（从待开票需求生成草稿）
+    //   invoices/summary                    发票汇总（🔴 **按币种分组**，没有跨币种合计）
+    //   invoices/platform-submissions       平台提交记录（GET）/ 批量递交平台（POST）
+    //   invoices/platform-submissions/{uuid}/acknowledge  登记平台回执（POST）
+    //   invoices/{uuid}                     发票详情（GET：头 + 明细）
+    //   invoices/{uuid}/issue               开具（POST：草稿 → 已开具，分配正式编号）
+    //   invoices/{uuid}/void                作废（POST：🔴 原因必填）
+    //   invoices/{uuid}/reverse             红冲（POST：逐行带出生成成对的贷项通知单）
+    //   invoices/{uuid}/events              状态记录（GET，append-only 留痕）
+    //   invoices/{uuid}/platform-payload    平台开票报文（GET，金额是字符串）
+    //
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   invoices/{uuid}/update              —— 本模块**没有**「改发票」端点：已开具的发票不可改行，
+    //                                           要改只能作废后重开（或红冲）。
+    //   invoices/filings                    —— 🔴 12.6.1.2 VAT/IOSS 申报数据**未交付**：
+    //                                           放行会让界面以为「已经能出申报底稿」。
+    //   invoices/declarations               —— 🔴 同上（申报数据的另一个叫法）。
+    //   invoices/reports                    —— 🔴 12.5.2.2 财务报表**未交付**（在同服务另一条命名空间）。
+    //   invoices/vouchers                   —— 🔴 12.5.2.1 凭证**不归本模块**：发票不写凭证，
+    //                                           过账走凭证模块自己的接口。
+    //   invoices/platform-submissions/{uuid} —— 本模块**没有**「按 id 取单条提交记录」的端点
+    //                                           （只有清单与登记回执）。
+    //   invoices/templates/{uuid}           —— 模板没有单条详情端点（按查询参数定位）。
+    //   invoices/not-a-shape                —— 非本模块的子路径。
+    //
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //   （不是 `[0-9a-f-]+`）：后者会把 `events` 这种非 UUID 形状也当成 id 放行。
+    prefix: 'finance/',
+    env: 'FINANCE_URL',
+    fallback: 'http://127.0.0.1:8087',
+    pattern:
+      /^invoices(?:\/(?:capabilities|options|templates|requests|batch|summary|platform-submissions(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/acknowledge)?|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:issue|void|reverse|events|platform-payload))?))?$/,
+  },
+  {
     // 5.2.3.1 平台费用（catalog 服务，卷 05 定价与价目的 L3 锚点 5.2.3）。
     //
     // 蓝图：「维护平台侧费用的计算规则：佣金比例或阶梯、订阅费分摊、Referral Fee、交易费、
@@ -11348,6 +11566,74 @@ const services: readonly {
     fallback: 'http://127.0.0.1:8087',
     pattern:
       /^tax\-rates\/(?:binding-versions|rate-versions|rate-compare|capabilities|options|jurisdictions|state-sales-tax|shops|rates|resolve|bindings)$/,
+  },
+  {
+    // 16.3.2.1 VAT/IOSS（channel 服务，卷 16「合规与风控」L3 16.3.2 税务下的第一格）。
+    //
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 channel 那条巨型 alternation 里并分支 ——
+    //   那一支是单行超长正则，多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    //   既有条目**一字未改、也不重排**。
+    //
+    // ---- 插入锚点选在**数组末尾**（`tax-rates`（12.6.1.1，finance）那条之后）----
+    //   同批其它车道的插入点是「数组最开头」「第一个 `prefix: 'identity/'` 之前」
+    //   与「第一个 `prefix: 'warehouse/'` 之前」；本车道落在这里，与它们的插入点相距足够远，
+    //   并入时 git 能干净求并。
+    //
+    // ---- 首 token「vat-ioss」的零命中核对结论（本车道发车前实测）----
+    //   `grep -c "vat-ioss" apps/web/src/lib/api-proxy.ts` = **0**（exit 1），
+    //   本条是全文件第一次出现这个串 ⇒ 首 token 既是独立字面量，
+    //   也不会被既有分支的前缀吃掉。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   vat-ioss/capabilities                    能力声明（上游真读得到 / 下游缺口归谁 / 判定口径）
+    //   vat-ioss/options                         筛选项（分档 / 原因 / 申报状态 / 周期 / 辖区 / 币种）
+    //   vat-ioss/shops                           店铺目录（读 channel 自己的 shop 表）+ 是否落在 IOSS 覆盖范围内
+    //   vat-ioss/registrations                   IOSS 登记清单（GET）/ 登记（POST，含适用店铺与商品）
+    //   vat-ioss/registrations/{uuid}            单条登记详情（GET）/ 改登记（PUT，登记号与生效时刻不可改）
+    //   vat-ioss/filing-cycles                   申报周期配置（GET）/ 登记（POST）
+    //   vat-ioss/filing-cycles/{uuid}            改申报周期配置（PUT）
+    //   vat-ioss/filing-periods                  申报期清单（GET）/ 开一期申报（POST）
+    //   vat-ioss/filing-periods/{uuid}           单期申报详情（GET，含申报状态）
+    //   vat-ioss/filing-periods/{uuid}/draft     出底稿（POST：DRAFT → DRAFTED）
+    //   vat-ioss/filing-periods/{uuid}/confirm   确认（POST：DRAFTED → CONFIRMED）
+    //   vat-ioss/filing-periods/{uuid}/statistics 本期底稿统计（GET，**按分档 × 币种**分组）
+    //   vat-ioss/orders/sync                     从 9 订单拉真实订单 → 识别 IOSS → 落库（POST）
+    //   vat-ioss/orders                          IOSS 订单清单（GET，真分页 + 真筛选）
+    //   vat-ioss/orders/{uuid}                   单笔订单详情（GET：判定 + 行明细）
+    //   vat-ioss/statistics                      全量统计（GET，**按分档 × 币种**分组）
+    //   vat-ioss/tax-rates                       税率适用（GET，读 finance 12.6.1.1；读不到就说读不到）
+    //
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   vat-ioss                                  —— 裸路径：后端**没有**「一条汇总列表接口」，
+    //                                                 一切入口都带子路径。
+    //   vat-ioss/filings                          —— 🔴 12.6.1.2 VAT/IOSS 申报数据**未交付**
+    //                                                 （同批另一条车道）：放行会让界面以为「已经能出申报底稿」。
+    //   vat-ioss/filings/capabilities             —— 同上。
+    //   vat-ioss/calendar                         —— 🔴 16.3.1.2 申报日历**未交付**。
+    //   vat-ioss/calendar/capabilities            —— 同上。
+    //   vat-ioss/submit / vat-ioss/declarations   —— 🔴 本系统**不代用户向税务机构提交申报**；
+    //                                                 刻意没有提交入口（只保证数据完整可核）。
+    //   vat-ioss/not-a-uuid                       —— 非 UUID 段不应被 uuid 分支吃掉。
+    //   vat-ioss/orders/not-a-uuid                —— 同上。
+    //   vat-ioss/registrations/not-a-uuid         —— 同上。
+    //   vat-ioss/filing-cycles/not-a-uuid         —— 同上。
+    //   vat-ioss/filing-periods/not-a-uuid        —— 同上。
+    //   vat-ioss/filing-periods/{uuid}/not-a-shape —— 多一层仍然 404。
+    //   vat-ioss/orders/sync/{uuid}               —— 本模块的同步是**集合级**的，没有 id 段。
+    //   vat-ioss/sales-tax / vat-ioss/epr         —— 🔴 16.3.2.3 销售税与 16.3.2.2 EPR
+    //                                                 **各有自己的前缀**（channel/sales-tax、
+    //                                                 channel/epr-registrations），不是本模块的子路径。
+    //
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //   （不是 `[0-9a-f-]+`）：后者会把 `draft` / `confirm` / `sync` 这种非 UUID 形状也当成 id 放行。
+    //   字面量子路径（capabilities / options / shops / statistics / tax-rates / sync /
+    //   draft / confirm）排在 {uuid} 段**之前**判别 —— alternation 是首个命中即返回，
+    //   顺序反了会被通配支吃掉半截。
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^vat\-ioss\/(?:capabilities|options|shops|statistics|tax\-rates|registrations(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|filing\-cycles(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|filing\-periods(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:draft|confirm|statistics))?)?|orders(?:\/sync|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?)$/,
   },
 ];
 
