@@ -11130,6 +11130,58 @@ const services: readonly {
     pattern:
       /^supplier-reconciliation(?:\/(?:capabilities|options|import|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:lines|differences\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/(?:explanations|resolve)|differences|match|confirm|reject))?))?$/,
   },
+  {
+    // 12.6.1.1 税率配置（finance 服务，卷 12「财务核算」L3 12.6 税务下的第一格）。
+    //
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 finance 那几条巨型 alternation 里并分支 ——
+    //   那一支是单行超长正则，多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。既有条目**一字未改、也不重排**。
+    //
+    // ---- 插入锚点选在**数组末尾**（`supplier-reconciliation` 那条之后）----
+    //   与本批其它车道（数组最开头 / identity 之前 / warehouse 之前）的插入点
+    //   相距足够远 ⇒ 并入时 git 能干净求并。
+    //
+    // ---- 首 token「tax-rates」的零命中核对结论（本车道实测）----
+    //   本文件既有 **155** 条 services[] 正则（按 `pattern:` 逐条抽出实测）里，
+    //   没有任何一条含 `tax-rates` 这个串 —— 逐条用 `new RegExp(pat).test('tax-rates/...')`
+    //   实测过：对本模块下面 11 个正向 shape **零命中**。
+    //   反向也实测过：本条正则对其它车道已放行的前缀
+    //   （`cost-valuation` / `cost-collections` / `vouchers` / `receivables` / `transactions` /
+    //   `fund-analysis` / `payment-plans` / `deferred-settlement` / `supplier-reconciliation` /
+    //   `cost-allocations`）**零误伤**。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   tax-rates/capabilities      能力声明（上游真接通 / 职责切分 / 缺口归谁）
+    //   tax-rates/options           筛选项 + 四个税种选项（系统提供选项，不替用户决定税率）
+    //   tax-rates/jurisdictions     辖区选项（实时读 channel 16.3.1.1 受控辖区码表）
+    //   tax-rates/shops             店铺站点选项（实时读 channel 2.3.1.1 店铺目录）
+    //   tax-rates/rates             税率记录列表（GET）/ 登记或换税率（POST，追加新版本）
+    //   tax-rates/rate-versions     税率版本历史（新到旧）
+    //   tax-rates/rate-compare      版本对比（换税率前 / 后）
+    //   tax-rates/resolve           按生效时间取税率（订单日期 + 店铺站点 + 辖区 ⇒ 唯一命中）
+    //   tax-rates/bindings          店铺站点默认税率与税码绑定（GET）/ 绑定或换绑（POST）
+    //   tax-rates/binding-versions  绑定版本历史（新到旧）
+    //   tax-rates/state-sales-tax   州销售税规则（🔴 **归 channel 16.3.2.3**，本模块只读引用）
+    //
+    // ⚠️ **刻意不放行**：
+    //   tax-rates                       —— 裸路径：后端**没有**「一条不存在的汇总列表接口」
+    //                                      （列表在 /rates 与 /bindings 两处）。
+    //   tax-rates/filings               —— 🔴 12.6.1.2 VAT/IOSS 申报数据**未交付**：
+    //                                      放行会让界面以为「已经能出申报底稿」。
+    //   tax-rates/declarations          —— 🔴 同上（申报数据另一个叫法）。
+    //   tax-rates/reports               —— 🔴 12.5.2.2 财务报表**未交付**（在同服务另一条命名空间）。
+    //   tax-rates/rates/{uuid}          —— 本模块的税率记录**没有单条详情端点**
+    //                                      （按 税种 × 辖区 × 税码 + 版本定位）。
+    //   tax-rates/not-a-shape           —— 非本模块的子路径。
+    //
+    // ⚠️ 本模块**没有 id 段形状**：税率记录与绑定都靠查询参数定位
+    //   （税种 / 辖区 / 税码 / 店铺 / 时刻），所以正则里不需要 {uuid} 分支 ——
+    //   少一个通配支，就少一个「把非 UUID 段当 id 放行」的口子。
+    prefix: 'finance/',
+    env: 'FINANCE_URL',
+    fallback: 'http://127.0.0.1:8087',
+    pattern:
+      /^tax\-rates\/(?:binding-versions|rate-versions|rate-compare|capabilities|options|jurisdictions|state-sales-tax|shops|rates|resolve|bindings)$/,
+  },
 ];
 
 function resolve(path: string) {
