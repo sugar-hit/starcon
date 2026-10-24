@@ -8,6 +8,7 @@ export * from './contracts/trade';
 export * from './contracts/crm';
 export * from './contracts/finance';
 export * from './contracts/reporting';
+export * from './contracts/platform';
 
 // 重名的类型：显式指定一份，消除 export * 的歧义。
 export type { Dimension } from './contracts/warehouse';

@@ -1,0 +1,15 @@
+{
+  "components": {},
+  "info": {
+    "title": "OpenAPI definition",
+    "version": "v0"
+  },
+  "openapi": "3.0.1",
+  "paths": {},
+  "servers": [
+    {
+      "description": "Same-origin service base",
+      "url": "/"
+    }
+  ]
+}
