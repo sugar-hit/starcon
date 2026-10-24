@@ -283,7 +283,7 @@ class FilingDraftTenancyIntegrationTest {
       var row =
           sql.fetchOne(
               "select relrowsecurity, relforcerowsecurity from pg_class where relname = ?", table);
-      assertThat(row).as("V364 必须真的建出 " + table).isNotNull();
+      assertThat(row).as("V368 必须真的建出 " + table).isNotNull();
       assertThat(row.get(0, Boolean.class)).as(table + " 未启用 RLS").isTrue();
       assertThat(row.get(1, Boolean.class))
           .as(table + " 只有 FORCE 才挡得住「运行角色被误授 owner」")

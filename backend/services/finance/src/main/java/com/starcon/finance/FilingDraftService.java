@@ -115,7 +115,7 @@ public class FilingDraftService {
             "12.6.1.2",
             "申报底稿（按辖区 × 周期 × 币种分组的汇总快照）",
             true,
-            "finance_filing_draft + finance_filing_draft_line（V364，纯 CREATE TABLE）",
+            "finance_filing_draft + finance_filing_draft_line（V368，纯 CREATE TABLE）",
             "",
             "底稿头**没有任何金额列**，金额只在**按币种分组**的汇总行上 ⇒ 页面上不存在"
                 + "一个「跨币种总额」这种没有意义的数。底稿是不可改写的快照（DB 触发器钉死）："
