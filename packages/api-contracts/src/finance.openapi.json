@@ -23038,6 +23038,797 @@
           }
         },
         "type": "object"
+      },
+      "ReconciliationDiffActions": {
+        "properties": {
+          "adjustBlockReason": {
+            "type": "string"
+          },
+          "assignBlockReason": {
+            "type": "string"
+          },
+          "canAdjust": {
+            "type": "boolean"
+          },
+          "canAssign": {
+            "type": "boolean"
+          },
+          "canClaim": {
+            "type": "boolean"
+          },
+          "canClassify": {
+            "type": "boolean"
+          },
+          "canRecordAdjustment": {
+            "type": "boolean"
+          },
+          "canWriteOff": {
+            "type": "boolean"
+          },
+          "claimBlockReason": {
+            "type": "string"
+          },
+          "classifyBlockReason": {
+            "type": "string"
+          },
+          "recordAdjustmentBlockReason": {
+            "type": "string"
+          },
+          "writeOffBlockReason": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ReconciliationDiffAdjustmentInput": {
+        "properties": {
+          "adjustmentAmount": {
+            "exclusiveMinimum": false,
+            "minimum": 0.0001,
+            "type": "number"
+          },
+          "currency": {
+            "nullable": true,
+            "type": "string"
+          },
+          "direction": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "explanation": {
+            "nullable": true,
+            "type": "string"
+          },
+          "occurredOn": {
+            "format": "date",
+            "nullable": true,
+            "type": "string"
+          },
+          "voucherNo": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "adjustmentAmount",
+          "direction"
+        ],
+        "type": "object"
+      },
+      "ReconciliationDiffAdjustmentRow": {
+        "properties": {
+          "adjustmentAmount": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "direction": {
+            "type": "string"
+          },
+          "directionLabel": {
+            "type": "string"
+          },
+          "entryNo": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "explanation": {
+            "type": "string"
+          },
+          "handlingId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "occurredOn": {
+            "format": "date",
+            "nullable": true,
+            "type": "string"
+          },
+          "recordedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "recordedBy": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "voucherNo": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ReconciliationDiffAssignInput": {
+        "properties": {
+          "assigneeId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "reason": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "assigneeId"
+        ],
+        "type": "object"
+      },
+      "ReconciliationDiffAssigneeStat": {
+        "properties": {
+          "adjustedCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "assigneeId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "claimedCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "writtenOffCount": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ReconciliationDiffCapabilities": {
+        "properties": {
+          "capabilities": {
+            "items": {
+              "$ref": "#/components/schemas/ReconciliationDiffCapability"
+            },
+            "type": "array"
+          },
+          "gaps": {
+            "items": {
+              "$ref": "#/components/schemas/ReconciliationDiffGap"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "ReconciliationDiffCapability": {
+        "properties": {
+          "delivered": {
+            "type": "boolean"
+          },
+          "moduleId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ReconciliationDiffCategoryStat": {
+        "properties": {
+          "adjustedAmount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "category": {
+            "type": "string"
+          },
+          "categoryLabel": {
+            "type": "string"
+          },
+          "count": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "differenceAmount": {
+            "nullable": true,
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "ReconciliationDiffClaimInput": {
+        "properties": {
+          "assigneeId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "note": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ReconciliationDiffClassifyInput": {
+        "properties": {
+          "category": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "reason": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "category",
+          "reason"
+        ],
+        "type": "object"
+      },
+      "ReconciliationDiffCurrencySummary": {
+        "properties": {
+          "adjustedAmount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "adjustedCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "adjustmentCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "claimedCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "differenceAmount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "exchangeRateAvailable": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          },
+          "openCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "writtenOffCount": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ReconciliationDiffDecideInput": {
+        "properties": {
+          "conclusion": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "conclusion"
+        ],
+        "type": "object"
+      },
+      "ReconciliationDiffDetail": {
+        "properties": {
+          "actions": {
+            "$ref": "#/components/schemas/ReconciliationDiffActions"
+          },
+          "adjustments": {
+            "items": {
+              "$ref": "#/components/schemas/ReconciliationDiffAdjustmentRow"
+            },
+            "type": "array"
+          },
+          "categorySetAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "categorySetBy": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "claimedBy": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "difference": {
+            "$ref": "#/components/schemas/ReconciliationDiffRow"
+          },
+          "events": {
+            "items": {
+              "$ref": "#/components/schemas/ReconciliationDiffEventRow"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ReconciliationDiffEventPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ReconciliationDiffEventRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ReconciliationDiffEventRow": {
+        "properties": {
+          "actorId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "differenceId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "eventType": {
+            "type": "string"
+          },
+          "eventTypeLabel": {
+            "type": "string"
+          },
+          "fromStatus": {
+            "type": "string"
+          },
+          "handlingId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "occurredAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "toStatus": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ReconciliationDiffGap": {
+        "properties": {
+          "delivered": {
+            "type": "boolean"
+          },
+          "domain": {
+            "type": "string"
+          },
+          "moduleId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "owner": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ReconciliationDiffHandling": {
+        "properties": {
+          "assigneeId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "category": {
+            "nullable": true,
+            "type": "string"
+          },
+          "categoryLabel": {
+            "nullable": true,
+            "type": "string"
+          },
+          "categoryReason": {
+            "nullable": true,
+            "type": "string"
+          },
+          "categorySetAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "categorySetBy": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "claimedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "claimedBy": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "closedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "closedBy": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "conclusion": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "differenceId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "taskId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "version": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ReconciliationDiffOption": {
+        "properties": {
+          "label": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ReconciliationDiffOptions": {
+        "properties": {
+          "assignees": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "categories": {
+            "items": {
+              "$ref": "#/components/schemas/ReconciliationDiffOption"
+            },
+            "type": "array"
+          },
+          "currencies": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "differenceTypes": {
+            "items": {
+              "$ref": "#/components/schemas/ReconciliationDiffOption"
+            },
+            "type": "array"
+          },
+          "directions": {
+            "items": {
+              "$ref": "#/components/schemas/ReconciliationDiffOption"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "statuses": {
+            "items": {
+              "$ref": "#/components/schemas/ReconciliationDiffOption"
+            },
+            "type": "array"
+          },
+          "tasks": {
+            "items": {
+              "$ref": "#/components/schemas/ReconciliationDiffTask"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "ReconciliationDiffQueuePage": {
+        "properties": {
+          "assignees": {
+            "items": {
+              "$ref": "#/components/schemas/ReconciliationDiffAssigneeStat"
+            },
+            "type": "array"
+          },
+          "categories": {
+            "items": {
+              "$ref": "#/components/schemas/ReconciliationDiffCategoryStat"
+            },
+            "type": "array"
+          },
+          "currencies": {
+            "items": {
+              "$ref": "#/components/schemas/ReconciliationDiffCurrencySummary"
+            },
+            "type": "array"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ReconciliationDiffRow"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ReconciliationDiffRow": {
+        "properties": {
+          "adjustmentCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "assigneeId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "attribution": {
+            "type": "string"
+          },
+          "bookAmount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "bookLineId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "bookSource": {
+            "nullable": true,
+            "type": "string"
+          },
+          "category": {
+            "nullable": true,
+            "type": "string"
+          },
+          "categoryLabel": {
+            "nullable": true,
+            "type": "string"
+          },
+          "categoryReason": {
+            "nullable": true,
+            "type": "string"
+          },
+          "claimedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "closedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "conclusion": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "differenceAmount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "differenceId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "differenceType": {
+            "type": "string"
+          },
+          "differenceTypeLabel": {
+            "type": "string"
+          },
+          "direction": {
+            "type": "string"
+          },
+          "exchangeRateAvailable": {
+            "type": "boolean"
+          },
+          "externalAmount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "externalKind": {
+            "nullable": true,
+            "type": "string"
+          },
+          "externalLineId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "groupKey": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "handlingId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "occurredOn": {
+            "format": "date",
+            "nullable": true,
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "reference": {
+            "type": "string"
+          },
+          "side": {
+            "type": "string"
+          },
+          "sideLabel": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "taskId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "transactionType": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ReconciliationDiffTask": {
+        "properties": {
+          "accountNo": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "periodEnd": {
+            "type": "string"
+          },
+          "periodStart": {
+            "type": "string"
+          },
+          "taskNo": {
+            "type": "string"
+          }
+        },
+        "type": "object"
       }
     }
   },
@@ -37866,6 +38657,577 @@
         },
         "tags": [
           "receivable-controller"
+        ]
+      }
+    },
+    "/finance/reconciliation-differences": {
+      "get": {
+        "operationId": "get_finance_reconciliation_differences",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "taskId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "category",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "currency",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "assigneeId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "differenceType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReconciliationDiffQueuePage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "reconciliation-difference-controller"
+        ]
+      }
+    },
+    "/finance/reconciliation-differences/capabilities": {
+      "get": {
+        "operationId": "get_finance_reconciliation_differences_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReconciliationDiffCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "reconciliation-difference-controller"
+        ]
+      }
+    },
+    "/finance/reconciliation-differences/options": {
+      "get": {
+        "operationId": "get_finance_reconciliation_differences_options",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReconciliationDiffOptions"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "reconciliation-difference-controller"
+        ]
+      }
+    },
+    "/finance/reconciliation-differences/{id}": {
+      "get": {
+        "operationId": "get_finance_reconciliation_differences_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReconciliationDiffDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "reconciliation-difference-controller"
+        ]
+      }
+    },
+    "/finance/reconciliation-differences/{id}/adjust": {
+      "post": {
+        "operationId": "post_finance_reconciliation_differences_id_adjust",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReconciliationDiffDecideInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReconciliationDiffHandling"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "reconciliation-difference-controller"
+        ]
+      }
+    },
+    "/finance/reconciliation-differences/{id}/adjustments": {
+      "post": {
+        "operationId": "post_finance_reconciliation_differences_id_adjustments",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReconciliationDiffAdjustmentInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReconciliationDiffAdjustmentRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "reconciliation-difference-controller"
+        ]
+      }
+    },
+    "/finance/reconciliation-differences/{id}/assign": {
+      "post": {
+        "operationId": "post_finance_reconciliation_differences_id_assign",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReconciliationDiffAssignInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReconciliationDiffHandling"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "reconciliation-difference-controller"
+        ]
+      }
+    },
+    "/finance/reconciliation-differences/{id}/claim": {
+      "post": {
+        "operationId": "post_finance_reconciliation_differences_id_claim",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReconciliationDiffClaimInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReconciliationDiffHandling"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "reconciliation-difference-controller"
+        ]
+      }
+    },
+    "/finance/reconciliation-differences/{id}/classify": {
+      "post": {
+        "operationId": "post_finance_reconciliation_differences_id_classify",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReconciliationDiffClassifyInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReconciliationDiffHandling"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "reconciliation-difference-controller"
+        ]
+      }
+    },
+    "/finance/reconciliation-differences/{id}/events": {
+      "get": {
+        "operationId": "get_finance_reconciliation_differences_id_events",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReconciliationDiffEventPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "reconciliation-difference-controller"
+        ]
+      }
+    },
+    "/finance/reconciliation-differences/{id}/write-off": {
+      "post": {
+        "operationId": "post_finance_reconciliation_differences_id_write_off",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReconciliationDiffDecideInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReconciliationDiffHandling"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "reconciliation-difference-controller"
         ]
       }
     },
