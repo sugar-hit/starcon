@@ -1564,6 +1564,58 @@ const services: readonly {
       /^bank\-reconciliation\/(?:capabilities|options|rules(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|sessions(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:import|match|statement-lines|system-lines|matches|unmatched(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/(?:claim|exclude))?|claims|reconcile|report|events))?)?)$/,
   },
   {
+    // 12.3.2.1 对账任务（finance 服务，卷 12「财务核算」L3 12.3.2 对账下的第一格）。
+    //
+    // ⚠️ 本条目是**新增一条独立的 `services[]` 元素**，不是往既有 finance 那几条巨型 alternation 里并分支 ——
+    //   既有条目（`receivables` / `receipts` / `fund-analysis` / `transactions` / `settlement` …）
+    //   都是单行超长正则，多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    //
+    // ---- 插入锚点固定在「12.7.1.2 银行对账那条之后」** ----
+    //   既有 finance 那几条的首 token 是 `receivables` / `receivable-aging` / `payables` /
+    //   `receipts` / `fund-analysis` / `transactions` / `settlement` / `bank-reconciliation` …
+    //   **全不相同** ⇒ 本模块的正则与它们两两不相交，不会互相吃掉对方的路径。
+    //
+    // ---- 首 token「reconciliation-tasks」的零命中核对结论（本车道实测）----
+    //   发车前用 `grep -n "reconciliation-tasks" apps/web/src/lib/api-proxy.ts` 实测：
+    //   既有 services[] 正则里**没有任何一条**含 `reconciliation-tasks` 这个串
+    //   （既有含 `reconciliation` 的只有 `transactions/reconciliation` 与
+    //   `fund-accounts` 注释里的一句「银行对账未交付」，两者首 token 都对不上）。
+    //
+    // 🔴 **刻意不并进 `bank-reconciliation` 那条**：那是 12.7.1.2 银行对账的封闭 alternation，
+    //   共用首段会让两条元素的正则纠缠、埋下互相吃掉的隐患 ⇒ 本模块用**自己的**首段。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   reconciliation-tasks                  对账任务列表（GET）/ 建任务（POST）
+    //   reconciliation-tasks/capabilities     能力声明（上游真接通 / 缺口归谁）
+    //   reconciliation-tasks/options          筛选项（账户取自 12.7.1.1 真实档案 + 受控词表）
+    //   reconciliation-tasks/{uuid}           任务详情（GET）/ 改对账范围（PUT）
+    //   reconciliation-tasks/{uuid}/match     跑自动匹配（POST）
+    //   reconciliation-tasks/{uuid}/matches   匹配结果
+    //   reconciliation-tasks/{uuid}/differences 差异清单
+    //   reconciliation-tasks/{uuid}/events    事件流
+    //
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   reconciliation-tasks/{uuid}/differences/{uuid} —— 🔴 差异处理属 12.3.2.2（**未交付**）。
+    //   reconciliation-tasks/{uuid}/resolve / acknowledge / write-off —— 同上（12.3.2.2 的动作面）。
+    //   reconciliation-tasks/{uuid}/rerun —— 本模块**不做重跑**：匹配结果是一次性事实，
+    //                                               重跑 = 新建一个任务（DB 触发器也会 409）。
+    //   reconciliation-tasks/{uuid}/rules —— 匹配规则管理属 12.3.2.3（**未交付**，本模块不建规则表）。
+    //   reconciliation-tasks/not-a-uuid       —— 非 UUID 段不应被 uuid 分支吃掉。
+    //   reconciliation-tasks/{uuid}/not-a-shape —— 多一层仍然 404。
+    //   reconciliation-tasks/capabilities/{uuid} —— 字面量段刻意不接 id 段。
+    //   bank-reconciliation/reconciliation-tasks —— 🔴 那是别的形状，本模块**不**复用。
+    //
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //   （不是 `[0-9a-f-]+`）：后者会把 `match` / `matches` 这种非 UUID 形状也当成 id 放行。
+    //   字面量子路径（capabilities / options）排在 {uuid} 段**之前**判别 ——
+    //   alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    prefix: 'finance/',
+    env: 'FINANCE_URL',
+    fallback: 'http://127.0.0.1:8087',
+    pattern:
+      /^reconciliation\-tasks(?:\/(?:capabilities|options)|(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:matches|match|differences|events))?))?$/,
+  },
+  {
     // 1.1.2.3 履约健康（trade 服务，卷 01「工作台与门户」L3 1.1.2 关键指标下的第三格）。
     //
     // ⚠️ 本条目是**新增一条独立的 `services[]` 元素**，不是往既有 trade 那条巨型 alternation 里并分支 ——
