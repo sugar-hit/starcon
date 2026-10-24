@@ -1983,6 +1983,62 @@ const services: readonly {
       /^write\-off(?:\/(?:capabilities|options|pending|advance-balance|auto\-match(?:\/candidates)?|advance(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/release)?|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/reverse)?))?$/,
   },
   {
+    // 12.6.1.2 VAT/IOSS 申报数据（finance 服务，卷 12「财务核算」L3 12.6.1 税率配置下的第二格）。
+    //
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 finance 那几条巨型 alternation 里
+    //   并分支 —— 那些是单行超长正则，多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    //   既有条目**一字未改、也不重排**。
+    //
+    // ---- 插入锚点固定在**第一个 `prefix: 'warehouse/'` 元素之前** ----
+    //   同批其它车道的锚点分别是「数组最开头」「第一个 `prefix: 'identity/'` 之前」与「数组末尾」，
+    //   四处相距 600 行以上，git 能干净求并。
+    //
+    // ---- 首 token「filing-draft」的零命中核对结论 ----
+    //   发车前用 `grep -n "filing-draft" apps/web/src/lib/api-proxy.ts` 实测：**零命中**（exit 1）。
+    //   本文件既有 200+ 条 services[] 正则里**没有任何一条**含 `filing-draft` 这个串
+    //   （既有 finance 那几支的首 token 是 `receivables` / `receivable-aging` / `payables` /
+    //   `receipts` / `bad-debt` / `payment-plans` / `payment-orders` / `payment-executions` /
+    //   `write-offs` / `settlement` / `transactions` / `fund-analysis` / `cost-collections` /
+    //   `cost-valuation` / `deferred-settlement` / `tax-rates`，**全不相同**），
+    //   所以首 token 既是独立字面量，也不会被既有分支的前缀吃掉。
+    //
+    //   ⚠️ **刻意不用 `tax-return` / `tax-returns`**：`tax-registration/tax-returns` 这个形状已被
+    //   本文件注释标注为「12.6 税务（finance 服务在本仓尚未落地）**未交付**」的保留位，
+    //   用了会和 16 卷的税号模块撞语义。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   filing-draft/capabilities            能力声明（上游真接通 / 缺口归谁 / 产品边界）
+    //   filing-draft/options                 筛选项（申报线 / 周期 / 状态 / 币种 + 辖区受控码表）
+    //   filing-draft/drafts                  底稿列表（GET，真分页 + 真筛选）/ 生成底稿（POST）
+    //   filing-draft/drafts/{uuid}           底稿详情（GET：头 + 按币种分组的汇总 + 数据来源）
+    //   filing-draft/drafts/{uuid}/summary    汇总报表（GET，按币种分组）
+    //   filing-draft/drafts/{uuid}/export     导出申报文件（GET，CSV / JSON **真文件** + 导出留痕）
+    //   filing-draft/exports                 导出留痕列表（GET，真分页 + 真筛选）
+    //
+    // id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`（不是 `[0-9a-f-]+`）：
+    // 后者会把 `summary` / `export` 这种非 UUID 形状也当成 id 放行。
+    // 字面量子路径（capabilities / options / exports / drafts）排在 `{uuid}` 段**之前**判别 ——
+    // alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   filing-draft                        —— 裸路径：后端没有「一条不存在的汇总列表接口」。
+    //   filing-draft/{uuid}                 —— 顶层没有 id 段（底稿按 /drafts/{uuid} 定位）。
+    //   filing-draft/drafts/not-a-uuid      —— 非 UUID 段不应被 uuid 分支吃掉。
+    //   filing-draft/drafts/{uuid}/not-a-shape —— 多一层仍然 404。
+    //   filing-draft/capabilities/{uuid}    —— 字面量段刻意不接 id 段。
+    //   filing-draft/submit                 —— 🔴 「向税务机构提交申报」**本模块不做这个动作**，
+    //                                          也不假装提交成功（申报主体与责任在用户）。
+    //   filing-draft/reports                —— 🔴 财务报表（12.5.2.2）**未交付**。
+    //   filing-draft/invoices               —— 🔴 发票管理（12.6.2.1）**未交付**。
+    //   filing-draft/tax-rates              —— 🔴 税率配置（12.6.1.1）**不是本模块的路径**。
+    //   filing-draft/vat-ioss               —— 🔴 VAT/IOSS 事实（16.3.2.1）**是另一条车道**。
+    prefix: 'finance/',
+    env: 'FINANCE_URL',
+    fallback: 'http://127.0.0.1:8087',
+    pattern:
+      /^filing\-draft\/(?:capabilities|options|exports|drafts(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:summary|export))?)?)$/,
+  },
+  {
     // 1.1.3.1 库存风险（卷 01 工作台与门户）。纯**新增一条独立的 services[] 元素**：
     // 既有那条 `warehouse/` 巨型 alternation **一字未动、也不重排** ——
     // 本文件是多车道共用的累积型白名单，每条服务规则是一段超长单行正则，
