@@ -1769,6 +1769,44 @@ const services: readonly {
       /^notification\-inbox\/(?:capabilities|read\-state|read|unread|subscriptions)$/,
   },
   {
+    // 1.3.1.2 通知偏好（identity 服务，卷 01「工作台与门户」L3 1.3.1 消息与预警的第二格）。
+    //
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 identity 那条巨型 alternation 里并分支 ——
+    //   既有条目**一字未改、也不重排**（本文件是多车道共用的累积型白名单，
+    //   往同一条 alternation 里并分支会让多车道并入时 git 必然判冲突）。
+    //
+    // ---- 插入锚点：1.3.1.1「通知列表」那条元素**之后** ----
+    //   该元素的 pattern `/^notification\-inbox\/(?:capabilities|read\-state|read|unread|subscriptions)$/`
+    //   在本文件**全文唯一**，据此定位。两条同属 1.3.1 兄弟模块，挨着放便于日后核对。
+    //
+    // ---- 首 token「notification-preferences」的零命中核对结论（.tmp/zero-hit-check.mjs 实测）----
+    //   本模块的 3 个形状对既有 services[] 正则**逐条实测零命中**；
+    //   首 token 与 `notification-inbox` 只差一个连字符，**不会**互相吃掉：
+    //   `notification-inbox` 那支要求整段就是 `notification-inbox/...`，
+    //   而本模块的路径首段是 `notification-preferences`（`inbox` ≠ `preferences`）。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   notification-preferences              我的通知偏好（GET 读生效值 / PUT 保存 / DELETE 重置）
+    //   notification-preferences/capabilities  能力声明（渠道词表 + 不可关闭的底线清单 + 边界）
+    //   notification-preferences/resolve      解析某一类通知现在该走哪些渠道（POST，供 1.3.2.2 过滤）
+    //
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   notification-inbox/preferences     —— 🔴 1.3.1.1 自己那条元素里刻意不放行的形状：
+    //                                          本模块的路径是 `notification-preferences`，
+    //                                          不是 `notification-inbox/preferences`（那一支仍然 404）。
+    //   notification-preferences/push       —— 🔴 1.3.2.2 外部渠道推送**未交付**。
+    //   notification-preferences/rules      —— 🔴 1.3.2.1 预警规则**未交付**。
+    //   notification-preferences/{anything} —— 偏好是一个**整体资源**（一份配置），
+    //                                          没有「按 id 取一条偏好」的形状。
+    //
+    // ⚠️ 本模块**没有 id 段**：偏好是「一个人一份」的整体配置，没有路径参数。
+    prefix: 'identity/',
+    env: 'IDENTITY_URL',
+    fallback: 'http://127.0.0.1:8081',
+    pattern:
+      /^notification\-preferences(?:\/(?:capabilities|resolve))?$/,
+  },
+  {
     // 1.1.1.3 审批待办（identity 服务，卷 01「工作台与门户」L3 1.1.1 待办与待决策的第四格）。
     //
     // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 identity 那条巨型 alternation 里并分支 ——

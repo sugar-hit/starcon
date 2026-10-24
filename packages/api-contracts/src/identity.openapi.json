@@ -4918,6 +4918,232 @@
         },
         "type": "object"
       },
+      "NotificationPreferenceCapabilities": {
+        "properties": {
+          "baselineChannel": {
+            "type": "string"
+          },
+          "boundaries": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "channels": {
+            "items": {
+              "$ref": "#/components/schemas/NotificationPreferenceChannel"
+            },
+            "type": "array"
+          },
+          "defaultTimezone": {
+            "type": "string"
+          },
+          "maxWindows": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "module": {
+            "type": "string"
+          },
+          "quietHoursScope": {
+            "type": "string"
+          },
+          "types": {
+            "items": {
+              "$ref": "#/components/schemas/NotificationPreferenceTypeRule"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "NotificationPreferenceChannel": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "NotificationPreferenceChannelSetting": {
+        "nullable": true,
+        "properties": {
+          "channels": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "NotificationPreferenceInput": {
+        "properties": {
+          "timezone": {
+            "nullable": true,
+            "type": "string"
+          },
+          "types": {
+            "items": {
+              "$ref": "#/components/schemas/NotificationPreferenceChannelSetting"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "windows": {
+            "items": {
+              "nullable": true,
+              "type": "string"
+            },
+            "nullable": true,
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "NotificationPreferenceResolution": {
+        "properties": {
+          "channels": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "label": {
+            "type": "string"
+          },
+          "mandatory": {
+            "type": "boolean"
+          },
+          "quietNow": {
+            "type": "boolean"
+          },
+          "quietWindows": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "suppressedChannels": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "timezone": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "NotificationPreferenceResolveRequest": {
+        "properties": {
+          "type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "NotificationPreferenceTypeRule": {
+        "properties": {
+          "baselineChannel": {
+            "nullable": true,
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "mandatory": {
+            "type": "boolean"
+          },
+          "rule": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "NotificationPreferenceTypeSetting": {
+        "properties": {
+          "baselineChannel": {
+            "nullable": true,
+            "type": "string"
+          },
+          "channels": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "label": {
+            "type": "string"
+          },
+          "mandatory": {
+            "type": "boolean"
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "NotificationPreferenceView": {
+        "properties": {
+          "defaultTimezone": {
+            "type": "string"
+          },
+          "fallbackReasons": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "quietHoursScope": {
+            "type": "string"
+          },
+          "stored": {
+            "type": "boolean"
+          },
+          "timezone": {
+            "type": "string"
+          },
+          "timezoneSource": {
+            "type": "string"
+          },
+          "types": {
+            "items": {
+              "$ref": "#/components/schemas/NotificationPreferenceTypeSetting"
+            },
+            "type": "array"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "windows": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
       "NotificationReadEntry": {
         "properties": {
           "key": {
@@ -14509,6 +14735,177 @@
         },
         "tags": [
           "notification-inbox-controller"
+        ]
+      }
+    },
+    "/identity/notification-preferences": {
+      "delete": {
+        "operationId": "delete_identity_notification_preferences",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationPreferenceView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "notification-preference-controller"
+        ]
+      },
+      "get": {
+        "operationId": "get_identity_notification_preferences",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationPreferenceView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "notification-preference-controller"
+        ]
+      },
+      "put": {
+        "operationId": "put_identity_notification_preferences",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NotificationPreferenceInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationPreferenceView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "notification-preference-controller"
+        ]
+      }
+    },
+    "/identity/notification-preferences/capabilities": {
+      "get": {
+        "operationId": "get_identity_notification_preferences_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationPreferenceCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "notification-preference-controller"
+        ]
+      }
+    },
+    "/identity/notification-preferences/resolve": {
+      "post": {
+        "operationId": "post_identity_notification_preferences_resolve",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NotificationPreferenceResolveRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationPreferenceResolution"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "notification-preference-controller"
         ]
       }
     },
