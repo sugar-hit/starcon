@@ -5573,6 +5573,818 @@
         },
         "type": "object"
       },
+      "FinanceCostVarianceAlertPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceCostVarianceAlertRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceCostVarianceAlertRow": {
+        "properties": {
+          "amount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "code": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "currency": {
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "reportId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "severity": {
+            "type": "string"
+          },
+          "severityLabel": {
+            "type": "string"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceCostVarianceBaselineComparison": {
+        "properties": {
+          "changedFields": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "dimension": {
+            "type": "string"
+          },
+          "dimensionRefId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "fromEffectiveFrom": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "fromEffectiveTo": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "fromId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "fromStatus": {
+            "type": "string"
+          },
+          "fromUnitCost": {
+            "type": "number"
+          },
+          "fromVersion": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "toEffectiveFrom": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "toEffectiveTo": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "toId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "toStatus": {
+            "type": "string"
+          },
+          "toUnitCost": {
+            "type": "number"
+          },
+          "toVersion": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "unitCostDifference": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceCostVarianceBaselinePage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceCostVarianceBaselineRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceCostVarianceBaselineRequest": {
+        "properties": {
+          "baselineType": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "dimension": {
+            "type": "string"
+          },
+          "dimensionCode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "dimensionName": {
+            "nullable": true,
+            "type": "string"
+          },
+          "dimensionRefId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "effectiveFrom": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "note": {
+            "nullable": true,
+            "type": "string"
+          },
+          "unitCost": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceCostVarianceBaselineRow": {
+        "properties": {
+          "baselineType": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdBy": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "dimension": {
+            "type": "string"
+          },
+          "dimensionCode": {
+            "type": "string"
+          },
+          "dimensionName": {
+            "type": "string"
+          },
+          "dimensionRefId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "effectiveFrom": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "effectiveTo": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "supersedesId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "unitCost": {
+            "type": "number"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "version": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceCostVarianceCapabilities": {
+        "properties": {
+          "capabilities": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceCostVarianceCapability"
+            },
+            "type": "array"
+          },
+          "downstreamGaps": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceCostVarianceDownstreamGap"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceCostVarianceCapability": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "basis": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "module": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceCostVarianceCurrencyGroup": {
+        "properties": {
+          "actualCostAmount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "actualQuantity": {
+            "nullable": true,
+            "type": "number"
+          },
+          "alerts": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceCostVarianceAlertRow"
+            },
+            "type": "array"
+          },
+          "comparableSkuCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "drivers": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceCostVarianceDriverRow"
+            },
+            "type": "array"
+          },
+          "fxImpactAmount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "noBaselineSkuCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "primaryDriver": {
+            "nullable": true,
+            "type": "string"
+          },
+          "primaryDriverAmount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "primaryDriverLabel": {
+            "nullable": true,
+            "type": "string"
+          },
+          "skuCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "standardCostAmount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "totalVarianceAmount": {
+            "nullable": true,
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceCostVarianceDownstreamGap": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "group": {
+            "type": "string"
+          },
+          "module": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "ownerService": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceCostVarianceDriverPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceCostVarianceDriverRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceCostVarianceDriverRow": {
+        "properties": {
+          "actualCostAmount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "actualQuantity": {
+            "nullable": true,
+            "type": "number"
+          },
+          "amount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "basis": {
+            "type": "string"
+          },
+          "comparability": {
+            "type": "string"
+          },
+          "comparabilityLabel": {
+            "type": "string"
+          },
+          "comparableReason": {
+            "type": "string"
+          },
+          "contributionShare": {
+            "nullable": true,
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "driver": {
+            "type": "string"
+          },
+          "driverLabel": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "isPrimary": {
+            "type": "boolean"
+          },
+          "quantity": {
+            "nullable": true,
+            "type": "number"
+          },
+          "rank": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "reportId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "standardCostAmount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "standardQuantity": {
+            "nullable": true,
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceCostVarianceItemPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceCostVarianceItemRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceCostVarianceItemRow": {
+        "properties": {
+          "actualCostAmount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "actualQuantity": {
+            "nullable": true,
+            "type": "number"
+          },
+          "amount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "baselineId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "baselineUnitCost": {
+            "nullable": true,
+            "type": "number"
+          },
+          "baselineVersion": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "comparability": {
+            "type": "string"
+          },
+          "comparabilityLabel": {
+            "type": "string"
+          },
+          "comparableReason": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "driver": {
+            "type": "string"
+          },
+          "driverLabel": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "quantity": {
+            "nullable": true,
+            "type": "number"
+          },
+          "reportId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "standardCostAmount": {
+            "nullable": true,
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceCostVarianceOptions": {
+        "properties": {
+          "baselineTypes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "comparabilities": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "currencies": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "dimensions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "drivers": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "severities": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceCostVarianceReportDetail": {
+        "properties": {
+          "alertCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "currencyGroups": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceCostVarianceCurrencyGroup"
+            },
+            "type": "array"
+          },
+          "itemCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "report": {
+            "$ref": "#/components/schemas/FinanceCostVarianceReportRow"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceCostVarianceReportPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceCostVarianceReportRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceCostVarianceReportRequest": {
+        "properties": {
+          "baselineType": {
+            "type": "string"
+          },
+          "dimension": {
+            "nullable": true,
+            "type": "string"
+          },
+          "note": {
+            "nullable": true,
+            "type": "string"
+          },
+          "periodFrom": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "periodTo": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "reportingCurrency": {
+            "type": "string"
+          },
+          "scopeCode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "scopeName": {
+            "nullable": true,
+            "type": "string"
+          },
+          "scopeRefId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "scopeType": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceCostVarianceReportRow": {
+        "properties": {
+          "alertCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "basisNote": {
+            "type": "string"
+          },
+          "comparableSkuCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "costRunIds": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdBy": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "currencies": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "itemCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "noBaselineSkuCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "periodFrom": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "periodTo": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "reportingCurrency": {
+            "type": "string"
+          },
+          "runCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "scopeCode": {
+            "type": "string"
+          },
+          "scopeName": {
+            "type": "string"
+          },
+          "scopeRefId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "scopeType": {
+            "type": "string"
+          },
+          "skuCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "sourceNote": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "valuationMethod": {
+            "type": "string"
+          },
+          "valuationMethodVersion": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
       "FinanceDeferredSettlementBasisNote": {
         "properties": {
           "basisDifference": {
@@ -21794,6 +22606,745 @@
         },
         "tags": [
           "cost-valuation-controller"
+        ]
+      }
+    },
+    "/finance/cost-variance/alerts": {
+      "get": {
+        "operationId": "get_finance_cost_variance_alerts",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "reportId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "code",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "severity",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceCostVarianceAlertPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "cost-variance-controller"
+        ]
+      }
+    },
+    "/finance/cost-variance/baselines": {
+      "get": {
+        "operationId": "get_finance_cost_variance_baselines",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "baselineType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dimension",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dimensionRefId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "currency",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceCostVarianceBaselinePage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "cost-variance-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_finance_cost_variance_baselines",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinanceCostVarianceBaselineRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceCostVarianceBaselineRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "cost-variance-controller"
+        ]
+      }
+    },
+    "/finance/cost-variance/baselines/compare": {
+      "get": {
+        "operationId": "get_finance_cost_variance_baselines_compare",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "baselineType",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dimension",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dimensionKey",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "currency",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fromVersion",
+            "required": true,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "toVersion",
+            "required": true,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceCostVarianceBaselineComparison"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "cost-variance-controller"
+        ]
+      }
+    },
+    "/finance/cost-variance/baselines/versions": {
+      "get": {
+        "operationId": "get_finance_cost_variance_baselines_versions",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "baselineType",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dimension",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dimensionKey",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "currency",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/FinanceCostVarianceBaselineRow"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "cost-variance-controller"
+        ]
+      }
+    },
+    "/finance/cost-variance/capabilities": {
+      "get": {
+        "operationId": "get_finance_cost_variance_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceCostVarianceCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "cost-variance-controller"
+        ]
+      }
+    },
+    "/finance/cost-variance/drivers": {
+      "get": {
+        "operationId": "get_finance_cost_variance_drivers",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "reportId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "currency",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "driver",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceCostVarianceDriverPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "cost-variance-controller"
+        ]
+      }
+    },
+    "/finance/cost-variance/items": {
+      "get": {
+        "operationId": "get_finance_cost_variance_items",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "reportId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "skuId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "driver",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "currency",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "comparability",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceCostVarianceItemPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "cost-variance-controller"
+        ]
+      }
+    },
+    "/finance/cost-variance/options": {
+      "get": {
+        "operationId": "get_finance_cost_variance_options",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceCostVarianceOptions"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "cost-variance-controller"
+        ]
+      }
+    },
+    "/finance/cost-variance/reports": {
+      "get": {
+        "operationId": "get_finance_cost_variance_reports",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "scopeType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "scopeRefId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceCostVarianceReportPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "cost-variance-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_finance_cost_variance_reports",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinanceCostVarianceReportRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceCostVarianceReportDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "cost-variance-controller"
+        ]
+      }
+    },
+    "/finance/cost-variance/reports/{id}": {
+      "get": {
+        "operationId": "get_finance_cost_variance_reports_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceCostVarianceReportDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "cost-variance-controller"
         ]
       }
     },
