@@ -10295,6 +10295,63 @@ const services: readonly {
       /^tax\-registration(?:\/(?:capabilities|jurisdictions|shops|registrations|gaps|gap\-summary|coverage)|\/registrations\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})$/,
   },
   {
+    // 16.3.1.2 申报日历（channel 服务，卷 16「合规与风控」L3 16.3.1 税号与辖区下的第二格）。
+    // 纯**新增一条独立的 `services[]` 元素**：既有条目**一字未改、也不重排** —— 本文件是
+    // 多车道共用的**累积型**白名单，每条服务规则是一段超长单行正则，往既有那条巨型 alternation
+    // 里并分支会让多车道同时并入时 git 必然判冲突（结构性，retry 永远不会自愈）。
+    //
+    // ---- 插入锚点固定在 **`tax-registration` 那条元素之后**（16.3.1.1 税号与辖区）----
+    //   本模块是 16.3.1.1 的**兄弟模块**（同一 L3），紧跟其后语义也顺。
+    //   与本批其它车道（数组最开头 / identity 之前 / warehouse 之前 / 数组末尾）的插入点
+    //   相距足够远 ⇒ 并入时 git 能干净求并。
+    //
+    // ---- 首 token「filing-calendar」的零命中核对结论（本车道发车前实测）----
+    //   `grep -n "filing-calendar" apps/web/src/lib/api-proxy.ts` = **0 命中**（无输出）⇒
+    //   本条是全文件第一次出现这个串，首 token 既是独立字面量，
+    //   也不会被既有分支的前缀吃掉。
+    //   反向核对：本条正则对兄弟模块的前缀
+    //   （`tax-registration` / `vat-ioss` / `sales-tax` / `epr-registrations` / `sync-health`）
+    //   **零误伤** —— 它们的首 token 与 `filing-calendar` 完全不同。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   filing-calendar/capabilities        能力声明（上游真读得到 / 下游缺口归谁 / 判定口径）
+    //   filing-calendar/options             筛选项（辖区选项走 16.3.1.1 受控码表 + 责任人候选走 identity 成员目录）
+    //   filing-calendar/cycle-configs       申报周期配置清单（GET）/ 登记配置（POST）
+    //   filing-calendar/cycle-configs/{uuid} 改配置（PUT，含撤下 status=ARCHIVED）
+    //   filing-calendar/entries             申报日历清单（GET，真分页真筛选）/ 登记申报义务（POST）
+    //   filing-calendar/entries/generate    按周期配置批量生成当前申报期（POST）
+    //   filing-calendar/entries/readiness   刷新数据就绪投影（POST，读 12.6.1.2 的生效底稿）
+    //   filing-calendar/entries/{uuid}      单条详情（GET）/ 改条目（PUT）
+    //   filing-calendar/entries/{uuid}/advance 推进状态（POST，**已提交 / 已确认必须带凭据号**）
+    //   filing-calendar/reminders           到期提醒清单（GET，真分页真筛选 + 如实报总数）
+    //   filing-calendar/reminders/{uuid}/acknowledge 确认提醒已知悉（POST）
+    //
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   filing-calendar                          —— 裸路径：后端**没有**「一条汇总列表接口」。
+    //   filing-calendar/submit                   —— 🔴 本系统**不代用户向税务机构提交申报**
+    //                                                 （蓝图 12.6.1.2：「不替代税务申报动作」）。
+    //   filing-calendar/receipts                 —— 同上：系统**不代造受理号**。
+    //   filing-calendar/todos                    —— 🔴 下游 1.1.1.x 工作台待办**未接线**；
+    //                                                 要接待办请读 `/reminders`。
+    //   filing-calendar/entries/{uuid}/submit    —— 同上（没有「提交申报」这个动作）。
+    //   filing-calendar/entries/{uuid}/delete    —— 申报义务是事实，**不做物理删除**。
+    //   filing-calendar/not-a-uuid              —— 非 UUID 段不应被 uuid 分支吃掉。
+    //   filing-calendar/entries/not-a-uuid       —— 同上。
+    //   filing-calendar/reminders/{uuid}         —— 提醒按**集合**定位，没有单条查询形状。
+    //   filing-calendar/reminders/{uuid}/not-a-shape —— 多一层仍然 404。
+    //
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //   （不是 `[0-9a-f-]+`）：后者会把 `generate` / `readiness` / `advance` 这种非 UUID 形状
+    //   也当成 id 放行。
+    //   字面量子路径（capabilities / options / generate / readiness / advance / acknowledge）
+    //   排在 {uuid} 段**之前**判别 —— alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^filing\-calendar\/(?:capabilities|options|cycle\-configs(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|entries(?:\/generate|\/readiness|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/advance)?)?|reminders(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/acknowledge)?)$/,
+  },
+  {
     // 16.1.1.2 绩效指标监控（channel 服务）。纯**新增一条独立的 `services[]` 元素**：
     // 既有条目**一字未动、也不重排** —— 本文件是多车道共用的**累积型**白名单，
     // 每条服务规则是一段超长单行正则，往既有那条巨型 alternation 里并分支会让多车道

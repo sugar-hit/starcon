@@ -32442,6 +32442,669 @@
         },
         "type": "object"
       },
+      "FilingCalendarAdvanceInput": {
+        "properties": {
+          "note": {
+            "type": "string"
+          },
+          "reference": {
+            "type": "string"
+          },
+          "targetStatus": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FilingCalendarCapabilities": {
+        "properties": {
+          "dataReadinessSemantics": {
+            "type": "string"
+          },
+          "downstreamNote": {
+            "type": "string"
+          },
+          "filingCycles": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "gaps": {
+            "items": {
+              "$ref": "#/components/schemas/FilingCalendarCapabilityGap"
+            },
+            "type": "array"
+          },
+          "jurisdictionSemantics": {
+            "type": "string"
+          },
+          "ownerSemantics": {
+            "type": "string"
+          },
+          "reminderKinds": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "scopeNote": {
+            "type": "string"
+          },
+          "statusSemantics": {
+            "type": "string"
+          },
+          "statuses": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "taxTypes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "upstreamNote": {
+            "type": "string"
+          },
+          "upstreams": {
+            "items": {
+              "$ref": "#/components/schemas/FilingCalendarUpstream"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "FilingCalendarCapabilityGap": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "impact": {
+            "type": "string"
+          },
+          "moduleId": {
+            "type": "string"
+          },
+          "moduleName": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FilingCalendarCycleConfigInput": {
+        "properties": {
+          "dueHour": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "dueOffsetDays": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "dueTimezone": {
+            "type": "string"
+          },
+          "effectiveFrom": {
+            "type": "string"
+          },
+          "filingCycle": {
+            "type": "string"
+          },
+          "jurisdictionCode": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "periodAnchorDay": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "reminderLeadDays": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "status": {
+            "type": "string"
+          },
+          "taxType": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FilingCalendarCycleConfigPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/FilingCalendarCycleConfigView"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FilingCalendarCycleConfigView": {
+        "properties": {
+          "createdAt": {
+            "type": "string"
+          },
+          "dueHour": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "dueOffsetDays": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "dueTimezone": {
+            "type": "string"
+          },
+          "effectiveFrom": {
+            "type": "string"
+          },
+          "filingCycle": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "jurisdictionCode": {
+            "type": "string"
+          },
+          "jurisdictionName": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "periodAnchorDay": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "reminderLeadDays": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "status": {
+            "type": "string"
+          },
+          "taxType": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FilingCalendarEntryInput": {
+        "properties": {
+          "dueAt": {
+            "type": "string"
+          },
+          "filingCycle": {
+            "type": "string"
+          },
+          "jurisdictionCode": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "periodEnd": {
+            "type": "string"
+          },
+          "periodStart": {
+            "type": "string"
+          },
+          "reminderLeadDays": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "requiredData": {
+            "items": {
+              "$ref": "#/components/schemas/FilingCalendarRequiredData"
+            },
+            "type": "array"
+          },
+          "responsibleMembershipId": {
+            "type": "string"
+          },
+          "taxType": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FilingCalendarEntryPage": {
+        "properties": {
+          "dueSoonCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/FilingCalendarEntryView"
+            },
+            "type": "array"
+          },
+          "notSubmittedCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "notice": {
+            "type": "string"
+          },
+          "overdueCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FilingCalendarEntryView": {
+        "properties": {
+          "confirmationReference": {
+            "type": "string"
+          },
+          "confirmedAt": {
+            "type": "string"
+          },
+          "confirmedBy": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "dataReadinessAvailable": {
+            "type": "boolean"
+          },
+          "dataReadinessNote": {
+            "type": "string"
+          },
+          "dataReady": {
+            "type": "boolean"
+          },
+          "dataReadyCheckedAt": {
+            "type": "string"
+          },
+          "dataReadyDraftId": {
+            "type": "string"
+          },
+          "daysToDue": {
+            "description": "距截止还有几天；负数 = 已逾期",
+            "format": "int32",
+            "type": "integer"
+          },
+          "dueAt": {
+            "type": "string"
+          },
+          "dueTimezone": {
+            "type": "string"
+          },
+          "filingCycle": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "jurisdictionCode": {
+            "type": "string"
+          },
+          "jurisdictionName": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "overdue": {
+            "type": "boolean"
+          },
+          "periodEnd": {
+            "type": "string"
+          },
+          "periodStart": {
+            "type": "string"
+          },
+          "reminderLeadDays": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "requiredData": {
+            "items": {
+              "$ref": "#/components/schemas/FilingCalendarRequiredData"
+            },
+            "type": "array"
+          },
+          "responsibleAvailable": {
+            "type": "boolean"
+          },
+          "responsibleMembershipId": {
+            "type": "string"
+          },
+          "responsibleName": {
+            "type": "string"
+          },
+          "responsibleNote": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusAdvancedAt": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "submissionReference": {
+            "type": "string"
+          },
+          "submittedAt": {
+            "type": "string"
+          },
+          "submittedBy": {
+            "type": "string"
+          },
+          "taxType": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FilingCalendarGenerateResult": {
+        "properties": {
+          "created": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/FilingCalendarEntryView"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "skipped": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FilingCalendarJurisdiction": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "defaultFilingCycle": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "region": {
+            "type": "string"
+          },
+          "taxRegime": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FilingCalendarMember": {
+        "properties": {
+          "membershipId": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "username": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FilingCalendarMemberList": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/FilingCalendarMember"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FilingCalendarOptions": {
+        "properties": {
+          "filingCycles": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "jurisdictions": {
+            "items": {
+              "$ref": "#/components/schemas/FilingCalendarJurisdiction"
+            },
+            "type": "array"
+          },
+          "members": {
+            "$ref": "#/components/schemas/FilingCalendarMemberList"
+          },
+          "note": {
+            "type": "string"
+          },
+          "reminderKinds": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "statusLabels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "statuses": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "taxTypes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "FilingCalendarReminderPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/FilingCalendarReminderView"
+            },
+            "type": "array"
+          },
+          "notice": {
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "unacknowledgedCount": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FilingCalendarReminderView": {
+        "properties": {
+          "acknowledged": {
+            "type": "boolean"
+          },
+          "acknowledgedAt": {
+            "type": "string"
+          },
+          "acknowledgedBy": {
+            "type": "string"
+          },
+          "dueAt": {
+            "type": "string"
+          },
+          "dueTimezone": {
+            "type": "string"
+          },
+          "entryId": {
+            "type": "string"
+          },
+          "filingCycle": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "jurisdictionCode": {
+            "type": "string"
+          },
+          "jurisdictionName": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "kindLabel": {
+            "type": "string"
+          },
+          "periodEnd": {
+            "type": "string"
+          },
+          "periodStart": {
+            "type": "string"
+          },
+          "remindAt": {
+            "type": "string"
+          },
+          "responsibleAvailable": {
+            "type": "boolean"
+          },
+          "responsibleMembershipId": {
+            "type": "string"
+          },
+          "responsibleName": {
+            "type": "string"
+          },
+          "responsibleNote": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "taxType": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FilingCalendarRequiredData": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "source": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FilingCalendarUpstream": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "impact": {
+            "type": "string"
+          },
+          "moduleId": {
+            "type": "string"
+          },
+          "moduleName": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "ForecastAvailabilityLine": {
         "properties": {
           "coverable": {
@@ -97285,6 +97948,722 @@
         },
         "tags": [
           "epr-registration-controller"
+        ]
+      }
+    },
+    "/channel/filing-calendar/capabilities": {
+      "get": {
+        "operationId": "get_channel_filing_calendar_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FilingCalendarCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "filing-calendar-controller"
+        ]
+      }
+    },
+    "/channel/filing-calendar/cycle-configs": {
+      "get": {
+        "operationId": "get_channel_filing_calendar_cycle_configs",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "jurisdictionCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "taxType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "filingCycle",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FilingCalendarCycleConfigPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "filing-calendar-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_channel_filing_calendar_cycle_configs",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FilingCalendarCycleConfigInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FilingCalendarCycleConfigView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "filing-calendar-controller"
+        ]
+      }
+    },
+    "/channel/filing-calendar/cycle-configs/{id}": {
+      "put": {
+        "operationId": "put_channel_filing_calendar_cycle_configs_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FilingCalendarCycleConfigInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FilingCalendarCycleConfigView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "filing-calendar-controller"
+        ]
+      }
+    },
+    "/channel/filing-calendar/entries": {
+      "get": {
+        "operationId": "get_channel_filing_calendar_entries",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "jurisdictionCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "taxType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "filingCycle",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "responsibleMembershipId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dueWithinDays",
+            "required": false,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FilingCalendarEntryPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "filing-calendar-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_channel_filing_calendar_entries",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FilingCalendarEntryInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FilingCalendarEntryView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "filing-calendar-controller"
+        ]
+      }
+    },
+    "/channel/filing-calendar/entries/generate": {
+      "post": {
+        "operationId": "post_channel_filing_calendar_entries_generate",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "referenceDate",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FilingCalendarGenerateResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "filing-calendar-controller"
+        ]
+      }
+    },
+    "/channel/filing-calendar/entries/readiness": {
+      "post": {
+        "operationId": "post_channel_filing_calendar_entries_readiness",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "object"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "filing-calendar-controller"
+        ]
+      }
+    },
+    "/channel/filing-calendar/entries/{id}": {
+      "get": {
+        "operationId": "get_channel_filing_calendar_entries_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FilingCalendarEntryView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "filing-calendar-controller"
+        ]
+      },
+      "put": {
+        "operationId": "put_channel_filing_calendar_entries_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FilingCalendarEntryInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FilingCalendarEntryView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "filing-calendar-controller"
+        ]
+      }
+    },
+    "/channel/filing-calendar/entries/{id}/advance": {
+      "post": {
+        "operationId": "post_channel_filing_calendar_entries_id_advance",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FilingCalendarAdvanceInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FilingCalendarEntryView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "filing-calendar-controller"
+        ]
+      }
+    },
+    "/channel/filing-calendar/options": {
+      "get": {
+        "operationId": "get_channel_filing_calendar_options",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FilingCalendarOptions"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "filing-calendar-controller"
+        ]
+      }
+    },
+    "/channel/filing-calendar/reminders": {
+      "get": {
+        "operationId": "get_channel_filing_calendar_reminders",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "kind",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "jurisdictionCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "acknowledged",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "withinDays",
+            "required": false,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FilingCalendarReminderPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "filing-calendar-controller"
+        ]
+      }
+    },
+    "/channel/filing-calendar/reminders/{id}/acknowledge": {
+      "post": {
+        "operationId": "post_channel_filing_calendar_reminders_id_acknowledge",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FilingCalendarReminderView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "filing-calendar-controller"
         ]
       }
     },
