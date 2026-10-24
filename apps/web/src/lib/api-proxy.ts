@@ -719,6 +719,59 @@ const services: readonly {
       /^transactions(?:\/(?:capabilities|options|batch|import|reconciliation|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}))?$/,
   },
   {
+    // 12.5.1.2 会计期间（finance 服务，卷 12「财务核算」L3 12.5.1 账簿与科目下的第二格）。
+    //
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 finance 那几条巨型 alternation 里
+    //   并分支 —— 既有条目是单行超长正则，多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    //   既有条目**一字未改、也不重排**。
+    //
+    // ---- 插入锚点选在 **`prefix: 'identity/'` 那条元素之前**（即 `transactions` 那条之后）----
+    //   同批另外三条车道分别锚在「数组最开头」「第一个 `prefix: 'warehouse/'` 之前」「数组末尾」，
+    //   与本处互不重叠 ⇒ 并入时 git 能干净求并。
+    //
+    // ---- 首 token「accounting-periods」的零命中核对结论（本车道实测）----
+    //   本文件既有 **294** 条 services[] 正则（按 `pattern:` 逐条抽出实测）与本模块 **11** 个形状
+    //   **逐一零命中**（`grep -c 'accounting-periods' apps/web/src/lib/api-proxy.ts` → **0**）；
+    //   本模块的正则对其它车道已放行的前缀（`vouchers` / `receivables` / `settlement` /
+    //   `transactions` / `account-subjects` …）也**零命中**（首 token 完全不同，且本正则首尾都锚定）。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   accounting-periods                                期间列表（GET，真分页 + 真筛选 + 状态汇总）/ 登记自定义期间（POST）
+    //   accounting-periods/capabilities                   能力声明（自然月 / 4-4-5 / 关账 / 重开 / 下游缺口归谁）
+    //   accounting-periods/options                        筛选项（状态 / 期间类型 / 本位币 / 日历 / 财年）
+    //   accounting-periods/calendars                      会计日历清单（GET）/ 新建日历（POST）
+    //   accounting-periods/calendars/{uuid}               日历详情（GET）/ 改日历（PUT，**账期形状不可改**）
+    //   accounting-periods/calendars/{uuid}/generate-periods 按日历生成一个财年的期间（POST）
+    //   accounting-periods/{uuid}                         期间详情（GET：期间 + 关账记录 + 审批链路）/ 改备注（PUT）
+    //   accounting-periods/{uuid}/close                   关闭期间（POST，**必须写明关闭原因**）
+    //   accounting-periods/{uuid}/reopen                  重开期间（POST，**高风险：必须审批留痕**）
+    //   accounting-periods/{uuid}/events                  期间事件留痕（GET）＝ 蓝图输出里的「关账记录」
+    //   accounting-periods/{uuid}/approvals               期间审批链路（GET，identity 链路的本地镜像）
+    //
+    // 判别顺序：字面量子路径（capabilities / options / calendars）排在 {uuid} 段
+    // **之前** —— alternation 是首个命中即返回，顺序反了会被通配支吃掉半截
+    //（`calendars` 尤其危险：它不是 uuid 形状，放到 {uuid} 段之后会被吃掉）。
+    //
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //   （不是 `[0-9a-f-]+`）：后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   accounting-periods/{uuid}/delete       —— 🔴 期间是会计事实，**不可删**（错了只能关账或重开）
+    //   accounting-periods/{uuid}/checklist    —— 🔴 关账检查清单属 12.5.1.3，**未交付**
+    //   accounting-periods/{uuid}/lock         —— 🔴 关账锁定属 12.5.1.3，**未交付**
+    //   accounting-periods/{uuid}/approve      —— 🔴 审批属 17 审批（identity），本模块**不提供**本地审批端点
+    //   accounting-periods/batch               —— 本模块**没有**批量端点
+    //   accounting-periods/not-a-uuid          —— 非 UUID 段不应被 uuid 分支吃掉
+    //   accounting-periods/{uuid}/not-a-shape  —— 多一层仍然 404
+    //   accounting-periods/capabilities/{uuid} —— 字面量段刻意不接 id 段
+    //   accounting-periods/accounting-periods  —— 交替写错就会互相吃掉，必须反向钉住
+    prefix: 'finance/',
+    env: 'FINANCE_URL',
+    fallback: 'http://127.0.0.1:8087',
+    pattern:
+      /^accounting\-periods(?:\/(?:capabilities|options|calendars(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/generate\-periods)?)?|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:close|reopen|events|approvals))?))?$/,
+  },
+  {
     prefix: 'identity/',
     env: 'IDENTITY_URL',
     fallback: 'http://127.0.0.1:8081',
