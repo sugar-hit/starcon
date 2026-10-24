@@ -1,11 +1,1077 @@
 {
-  "components": {},
+  "components": {
+    "schemas": {
+      "Comparison": {
+        "properties": {
+          "changeAmount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "changeRate": {
+            "nullable": true,
+            "type": "number"
+          },
+          "comparable": {
+            "type": "boolean"
+          },
+          "from": {
+            "format": "date",
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "to": {
+            "format": "date",
+            "type": "string"
+          },
+          "values": {
+            "items": {
+              "$ref": "#/components/schemas/CurrencyValue"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "CurrencyValue": {
+        "properties": {
+          "currency": {
+            "type": "string"
+          },
+          "value": {
+            "nullable": true,
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "DrilldownPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/DrilldownRow"
+            },
+            "type": "array"
+          },
+          "metricCode": {
+            "type": "string"
+          },
+          "metricName": {
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "DrilldownRow": {
+        "properties": {
+          "bucketDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "quantity": {
+            "nullable": true,
+            "type": "number"
+          },
+          "referenceId": {
+            "type": "string"
+          },
+          "referenceLabel": {
+            "type": "string"
+          },
+          "sourceKind": {
+            "type": "string"
+          },
+          "value": {
+            "nullable": true,
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "MetricCard": {
+        "properties": {
+          "aggregation": {
+            "type": "string"
+          },
+          "availability": {
+            "type": "string"
+          },
+          "baseCurrency": {
+            "nullable": true,
+            "type": "string"
+          },
+          "baseRate": {
+            "nullable": true,
+            "type": "number"
+          },
+          "baseRateAsOf": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "baseTotal": {
+            "nullable": true,
+            "type": "number"
+          },
+          "description": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "metricCode": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "previousPeriod": {
+            "$ref": "#/components/schemas/Comparison"
+          },
+          "unit": {
+            "type": "string"
+          },
+          "values": {
+            "items": {
+              "$ref": "#/components/schemas/CurrencyValue"
+            },
+            "type": "array"
+          },
+          "yearOverYear": {
+            "$ref": "#/components/schemas/Comparison"
+          }
+        },
+        "type": "object"
+      },
+      "MetricDefinitionView": {
+        "properties": {
+          "aggregation": {
+            "type": "string"
+          },
+          "currencyAware": {
+            "type": "boolean"
+          },
+          "denominatorMetricCode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "metricCode": {
+            "type": "string"
+          },
+          "numeratorMetricCode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "unit": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "OverviewResponse": {
+        "properties": {
+          "cards": {
+            "items": {
+              "$ref": "#/components/schemas/MetricCard"
+            },
+            "type": "array"
+          },
+          "currencyNote": {
+            "type": "string"
+          },
+          "dataUpdatedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "dataUpdatedNote": {
+            "type": "string"
+          },
+          "from": {
+            "format": "date",
+            "type": "string"
+          },
+          "legalEntityId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "scopeType": {
+            "type": "string"
+          },
+          "shopId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "timezones": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "to": {
+            "format": "date",
+            "type": "string"
+          },
+          "trend": {
+            "items": {
+              "$ref": "#/components/schemas/TrendPoint"
+            },
+            "type": "array"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "ProjectionBatchResult": {
+        "properties": {
+          "appliedCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "drilldownCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "factCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "results": {
+            "items": {
+              "$ref": "#/components/schemas/ProjectionResult"
+            },
+            "type": "array"
+          },
+          "skippedCount": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ProjectionDrilldown": {
+        "properties": {
+          "bucketDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "legalEntityId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "metricCode": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "referenceId": {
+            "type": "string"
+          },
+          "referenceLabel": {
+            "type": "string"
+          },
+          "scopeType": {
+            "type": "string"
+          },
+          "shopId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "sourceKind": {
+            "type": "string"
+          },
+          "sourceReference": {
+            "type": "string"
+          },
+          "value": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "ProjectionEvent": {
+        "properties": {
+          "aggregateId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "aggregateVersion": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "drilldowns": {
+            "items": {
+              "$ref": "#/components/schemas/ProjectionDrilldown"
+            },
+            "type": "array"
+          },
+          "eventType": {
+            "type": "string"
+          },
+          "facts": {
+            "items": {
+              "$ref": "#/components/schemas/ProjectionFact"
+            },
+            "type": "array"
+          },
+          "occurredAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "sourceEventId": {
+            "type": "string"
+          },
+          "sourceService": {
+            "type": "string"
+          },
+          "timezone": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ProjectionFact": {
+        "properties": {
+          "bucketDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "legalEntityId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "metricCode": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "scopeType": {
+            "type": "string"
+          },
+          "shopId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "sourceReference": {
+            "type": "string"
+          },
+          "value": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "ProjectionResult": {
+        "properties": {
+          "appliedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "drilldownCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "eventType": {
+            "type": "string"
+          },
+          "factCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "outcome": {
+            "type": "string"
+          },
+          "sourceEventId": {
+            "type": "string"
+          },
+          "sourceService": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "RebuildResult": {
+        "properties": {
+          "clearedFacts": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "refreshed": {
+            "items": {
+              "$ref": "#/components/schemas/RefreshResult"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "RefreshResult": {
+        "properties": {
+          "appliedCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "eventCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "skippedCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "sourceService": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "stream": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ReportingOverviewCapabilities": {
+        "properties": {
+          "dataUpdatedAtVisible": {
+            "type": "boolean"
+          },
+          "drilldownAvailable": {
+            "type": "boolean"
+          },
+          "notDelivered": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "upstreamConnected": {
+            "type": "boolean"
+          },
+          "upstreamModules": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "TrendPoint": {
+        "properties": {
+          "currency": {
+            "type": "string"
+          },
+          "date": {
+            "format": "date",
+            "type": "string"
+          },
+          "metricCode": {
+            "type": "string"
+          },
+          "value": {
+            "nullable": true,
+            "type": "number"
+          }
+        },
+        "type": "object"
+      }
+    }
+  },
   "info": {
     "title": "OpenAPI definition",
     "version": "v0"
   },
   "openapi": "3.0.1",
-  "paths": {},
+  "paths": {
+    "/reporting/overview": {
+      "get": {
+        "description": "时间范围与维度选择都在这里。默认窗口是「最近 30 天」。维度取值 COMPANY / LEGAL_ENTITY / SHOP；给了 shopId / legalEntityId 时维度会跟着收窄。",
+        "operationId": "get_reporting_overview",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "scopeType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "legalEntityId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "shopId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "baseCurrency",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/OverviewResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "经营总览：指标卡 + 趋势 + 异常提示 + 数据更新时间戳",
+        "tags": [
+          "13.1.1.1 经营总览"
+        ]
+      }
+    },
+    "/reporting/overview/capabilities": {
+      "get": {
+        "description": "上游列表按**本服务真的读过的授权只读 API**列出（不是「蓝图上写着上游」）；notDelivered 列出的是**确实拿不到**的部分，每条都写清原因与影响。",
+        "operationId": "get_reporting_overview_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReportingOverviewCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "能力声明：哪些上游真接通、哪些还没交付、归谁",
+        "tags": [
+          "13.1.1.1 经营总览"
+        ]
+      }
+    },
+    "/reporting/overview/drilldown": {
+      "get": {
+        "operationId": "get_reporting_overview_drilldown",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "metricCode",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "scopeType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "legalEntityId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "shopId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DrilldownPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "下钻：构成明细（哪个订单 / 哪个 SKU / 哪个活动 / 哪张应收）",
+        "tags": [
+          "13.1.1.1 经营总览"
+        ]
+      }
+    },
+    "/reporting/overview/metrics": {
+      "get": {
+        "operationId": "get_reporting_overview_metrics",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/MetricDefinitionView"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "指标口径目录（口径唯一的展示形态）",
+        "tags": [
+          "13.1.1.1 经营总览"
+        ]
+      }
+    },
+    "/reporting/overview/trend": {
+      "get": {
+        "operationId": "get_reporting_overview_trend",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "metricCodes",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "scopeType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "legalEntityId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "shopId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/TrendPoint"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "趋势：逐日逐币种（没有事实的那一天没有点，不是 0）",
+        "tags": [
+          "13.1.1.1 经营总览"
+        ]
+      }
+    },
+    "/reporting/projection/events": {
+      "post": {
+        "description": "同一事件重复投递会被幂等跳过（reporting_projection_event 的唯一键），投影不会翻倍。事件体里**没有** tenantId：租户由已认证成员关系解析。",
+        "operationId": "post_reporting_projection_events",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "items": {
+                  "$ref": "#/components/schemas/ProjectionEvent"
+                },
+                "type": "array"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectionBatchResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "摄取一批规范化事件（投影主路径）",
+        "tags": [
+          "13.1.1.1 经营总览 · 投影摄取"
+        ]
+      }
+    },
+    "/reporting/projection/rebuild": {
+      "post": {
+        "description": "只清投影（事实 + 构成明细 + 游标），**不碰业务事实** —— 业务事实在上游服务那边。清空后重放同一批事件即可回到同一状态。⚠️ **事件账本不清**：账本是举证凭据，DB 层 REVOKE 了 UPDATE/DELETE，删不动；「这批事件投过了」这件事靠**重建纪元 +1** 抹掉（同一 source_event_id 在新纪元里是一条全新的账本行），所以旧账本原样留着当上一轮投过什么的证据。",
+        "operationId": "post_reporting_projection_rebuild",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "timezone",
+            "required": false,
+            "schema": {
+              "default": "UTC",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RebuildResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "清空投影并重新拉取（可重建性）",
+        "tags": [
+          "13.1.1.1 经营总览 · 投影摄取"
+        ]
+      }
+    },
+    "/reporting/projection/refresh": {
+      "post": {
+        "description": "来源取值：trade-orders / trade-returns / channel-ads / finance-receivables / finance-cost / finance-profit / warehouse-inventory / catalog-rates。任一来源读不到时**那一路失败**（503），不会用空集合冒充「上游没有数据」。",
+        "operationId": "post_reporting_projection_refresh",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sources",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "in": "query",
+            "name": "timezone",
+            "required": false,
+            "schema": {
+              "default": "UTC",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/RefreshResult"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "从上游拉取事实并投影（与推共用同一套幂等与口径）",
+        "tags": [
+          "13.1.1.1 经营总览 · 投影摄取"
+        ]
+      }
+    }
+  },
   "servers": [
     {
       "description": "Same-origin service base",

@@ -1,6 +1,31 @@
-import { DomainPlaceholder, getDomainSpec } from '@starcon/ui';
+import { AnalyticsOverviewWorkspace } from '@/components/analytics/overview-workspace';
 
+/**
+ * 13.1.1.1 经营总览（卷 13「利润与经营分析」L3 13.1.1 下的第一格）。
+ *
+ * <p>蓝图原文：「展示公司/法人/店铺维度的核心经营指标：销售额、订单量、销量、毛利额、毛利率、
+ * 广告花费、净利、退货率、库存总额、应收余额，支持时间对比与环比同比，显示数据更新时间。」
+ * 输入「报表投影数据；时间范围与维度选择；用户数据范围。」
+ * 输出「指标卡 + 趋势图 + 异常提示 + 下钻入口 + 数据更新时间戳。」
+ * 关系：上游 = 12 财务、9 订单、7 库存、14 广告；下游 = 13.2–13.5 各专题分析。
+ *
+ * <p>🔴 页面顶部那段话不是提示语，是这一页的设计前提：
+ *
+ * <ol>
+ *   <li><strong>数据更新时间必须常驻</strong>。卷 13 卷首加粗句「数据延迟要显示」——
+ *       用户看到的是 T-1 数据还是实时数据必须一目了然，所以「数据截至 X」常驻在页面顶部，
+ *       加载中与出错时也在（没投影过就写「尚未投影任何数据」）。</li>
+ *   <li><strong>报表是投影，不是事实</strong>。数字来自 reporting 服务的投影读模型，
+ *       与业务系统冲突时<strong>以业务系统为准</strong>。页面上不提供任何写业务事实的入口。</li>
+ *   <li><strong>每个数字都要能点进去</strong>。卷 13 卷首「可下钻」——
+ *       每个汇总数字都能钻到构成明细（哪个订单 / 哪个 SKU / 哪个活动）。</li>
+ *   <li><strong>「没有数据」与「数据是 0」分开说</strong>。销售额 0 与「这一格没算出来」
+ *       在页面上长得一模一样，含义却相反。</li>
+ * </ol>
+ *
+ * <p>与同卷的 13.1.1.2「多店对比」是一对：那边管「多店铺横向对比、找出掉队店铺」，
+ * 这一页管「当前这个范围（公司 / 法人 / 店铺）整体经营状况怎么样」。
+ */
 export default function AnalyticsPage() {
-  const spec = getDomainSpec('analytics');
-  return <>{spec && <DomainPlaceholder spec={spec} />}</>;
+  return <AnalyticsOverviewWorkspace />;
 }

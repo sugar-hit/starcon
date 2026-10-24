@@ -42,11 +42,12 @@
 --   reporting_metric_definition   —— 指标口径唯一表（每个租户一份标准口径）
 --   reporting_projection_event    —— 已消费事件账本（**幂等键**在这张表上）
 --   reporting_projection_cursor    —— 每条上游流的消费游标（**可重建**从这里回放）
+--   reporting_projection_epoch     —— 重建纪元（账本只追加 ⇒ 清空重建靠换纪元而不是删账本）
 --   reporting_metric_fact         —— 投影事实（流量型按贡献行存；存量型按日快照存）
 --   reporting_drilldown_fact       —— 构成明细（可下钻到订单 / SKU / 活动 / 应收 / 库存）
 --   reporting_currency_rate_snapshot —— 折算汇率快照（币种 → 本位币，含时点）
 --
---   六张表全部 tenant_id NOT NULL + ENABLE **与 FORCE** RLS isolation + GRANT reporting_app。
+--   七张表全部 tenant_id NOT NULL + ENABLE **与 FORCE** RLS isolation + GRANT reporting_app。
 --
 -- ---------------------------------------------------------------------------
 -- 2. 关键约束怎么落到数据层
@@ -64,8 +65,10 @@
 --       同一事件重投只会被跳过，投影不会翻倍。
 --
 --   * 「**投影可重建**」
---     ⇒ 清掉事实表 + 游标 + 账本后，按同一套规范化 envelope 重放即可回到同一状态。
---       游标记的是「读到哪了」，不是「数据在哪」—— 它只是加速重建的检查点。
+--     ⇒ 清掉事实表 + 构成明细 + 游标并把**纪元 +1**后，按同一套规范化 envelope 重放即可回到
+--       同一状态。游标记的是「读到哪了」，不是「数据在哪」—— 它只是加速重建的检查点。
+--       ⚠️ **账本行不删**（它是举证凭据，DB 层 REVOKE 了 UPDATE/DELETE）：换纪元就等于
+--       「同一批事件在下一轮重新投一遍」，旧账本原样留着作为上一轮投过什么的证据。
 --
 -- ===========================================================================
 
@@ -151,9 +154,12 @@ CREATE TABLE reporting_projection_event (
   -- 本次投影写了几条事实。
   fact_count int NOT NULL DEFAULT 0 CHECK(fact_count >= 0),
   note varchar(300) NOT NULL DEFAULT '',
+  -- **重建纪元**：同一个事件在纪元 N 与纪元 N+1 是两条不同的账本行
+  -- （清空重建靠这个把「已经投过」这件事从唯一键里摘出去，账本本身仍然只追加）。
+  epoch int NOT NULL DEFAULT 0 CHECK(epoch >= 0),
   UNIQUE(tenant_id, id),
-  -- **幂等键**：同一个上游事件只会被投影一次。
-  UNIQUE(tenant_id, source_service, source_event_id)
+  -- **幂等键**：同一个上游事件只会被投影一次（同一纪元内）。
+  UNIQUE(tenant_id, source_service, source_event_id, epoch)
 );
 
 -- ---------------------------------------------------------------------------
@@ -178,6 +184,29 @@ CREATE TABLE reporting_projection_cursor (
   updated_at timestamptz NOT NULL DEFAULT now(),
   UNIQUE(tenant_id, id),
   UNIQUE(tenant_id, source_service, stream)
+);
+
+-- ---------------------------------------------------------------------------
+-- 3b. reporting_projection_epoch —— 重建纪元
+-- ---------------------------------------------------------------------------
+--
+-- **为什么需要它**：事件账本 `reporting_projection_event` 在下面被 **REVOKE 了
+-- UPDATE/DELETE**（它是「举证凭据」，只能追加）。可是「报表是投影，**可从事件重建**」
+-- 意味着清空读模型之后要把同一批事件**再投一遍** —— 而账本里明明记着「这批事件投过了」。
+--
+-- ⇒ 抹不掉就不能重投 ⇒ **换个纪元**：同一个 `source_event_id` 在纪元 N 与纪元 N+1
+-- 是**两条不同的账本行**（唯一键含 epoch）。清空 = 清事实 + 清构成明细 + 清游标 +
+-- **纪元 +1**（账本原样留着，作为「上一轮投过什么」的证据）。
+--
+-- 一行 = 一个租户当前所处的纪元。
+CREATE TABLE reporting_projection_epoch (
+  id uuid PRIMARY KEY,
+  tenant_id uuid NOT NULL,
+  -- 纪元号：单调递增，每清空一次 +1。0 = 首轮。
+  epoch int NOT NULL DEFAULT 0 CHECK(epoch >= 0),
+  updated_at timestamptz NOT NULL DEFAULT now(),
+  UNIQUE(tenant_id, id),
+  UNIQUE(tenant_id, epoch)
 );
 
 -- ---------------------------------------------------------------------------
@@ -384,6 +413,7 @@ DECLARE tbl text;
 BEGIN
   FOREACH tbl IN ARRAY ARRAY[
     'reporting_metric_definition','reporting_projection_event','reporting_projection_cursor',
+    'reporting_projection_epoch',
     'reporting_metric_fact','reporting_drilldown_fact','reporting_currency_rate_snapshot'
   ] LOOP
     EXECUTE format('ALTER TABLE %I ENABLE ROW LEVEL SECURITY',tbl);
@@ -394,9 +424,11 @@ END $$;
 
 GRANT SELECT,INSERT,UPDATE,DELETE ON
   reporting_metric_definition, reporting_projection_event, reporting_projection_cursor,
+  reporting_projection_epoch,
   reporting_metric_fact, reporting_drilldown_fact, reporting_currency_rate_snapshot TO reporting_app;
 GRANT SELECT,INSERT,UPDATE,DELETE ON
   reporting_metric_definition, reporting_projection_event, reporting_projection_cursor,
+  reporting_projection_epoch,
   reporting_metric_fact, reporting_drilldown_fact, reporting_currency_rate_snapshot TO starcon_app;
 REVOKE ALL ON flyway_schema_history FROM reporting_app;
 
