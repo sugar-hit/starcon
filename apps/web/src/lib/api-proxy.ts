@@ -11290,6 +11290,74 @@ const services: readonly {
     pattern:
       /^tax\-rates\/(?:binding-versions|rate-versions|rate-compare|capabilities|options|jurisdictions|state-sales-tax|shops|rates|resolve|bindings)$/,
   },
+  {
+    // 16.3.2.1 VAT/IOSS（channel 服务，卷 16「合规与风控」L3 16.3.2 税务下的第一格）。
+    //
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 channel 那条巨型 alternation 里并分支 ——
+    //   那一支是单行超长正则，多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    //   既有条目**一字未改、也不重排**。
+    //
+    // ---- 插入锚点选在**数组末尾**（`tax-rates`（12.6.1.1，finance）那条之后）----
+    //   同批其它车道的插入点是「数组最开头」「第一个 `prefix: 'identity/'` 之前」
+    //   与「第一个 `prefix: 'warehouse/'` 之前」；本车道落在这里，与它们的插入点相距足够远，
+    //   并入时 git 能干净求并。
+    //
+    // ---- 首 token「vat-ioss」的零命中核对结论（本车道发车前实测）----
+    //   `grep -c "vat-ioss" apps/web/src/lib/api-proxy.ts` = **0**（exit 1），
+    //   本条是全文件第一次出现这个串 ⇒ 首 token 既是独立字面量，
+    //   也不会被既有分支的前缀吃掉。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   vat-ioss/capabilities                    能力声明（上游真读得到 / 下游缺口归谁 / 判定口径）
+    //   vat-ioss/options                         筛选项（分档 / 原因 / 申报状态 / 周期 / 辖区 / 币种）
+    //   vat-ioss/shops                           店铺目录（读 channel 自己的 shop 表）+ 是否落在 IOSS 覆盖范围内
+    //   vat-ioss/registrations                   IOSS 登记清单（GET）/ 登记（POST，含适用店铺与商品）
+    //   vat-ioss/registrations/{uuid}            单条登记详情（GET）/ 改登记（PUT，登记号与生效时刻不可改）
+    //   vat-ioss/filing-cycles                   申报周期配置（GET）/ 登记（POST）
+    //   vat-ioss/filing-cycles/{uuid}            改申报周期配置（PUT）
+    //   vat-ioss/filing-periods                  申报期清单（GET）/ 开一期申报（POST）
+    //   vat-ioss/filing-periods/{uuid}           单期申报详情（GET，含申报状态）
+    //   vat-ioss/filing-periods/{uuid}/draft     出底稿（POST：DRAFT → DRAFTED）
+    //   vat-ioss/filing-periods/{uuid}/confirm   确认（POST：DRAFTED → CONFIRMED）
+    //   vat-ioss/filing-periods/{uuid}/statistics 本期底稿统计（GET，**按分档 × 币种**分组）
+    //   vat-ioss/orders/sync                     从 9 订单拉真实订单 → 识别 IOSS → 落库（POST）
+    //   vat-ioss/orders                          IOSS 订单清单（GET，真分页 + 真筛选）
+    //   vat-ioss/orders/{uuid}                   单笔订单详情（GET：判定 + 行明细）
+    //   vat-ioss/statistics                      全量统计（GET，**按分档 × 币种**分组）
+    //   vat-ioss/tax-rates                       税率适用（GET，读 finance 12.6.1.1；读不到就说读不到）
+    //
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   vat-ioss                                  —— 裸路径：后端**没有**「一条汇总列表接口」，
+    //                                                 一切入口都带子路径。
+    //   vat-ioss/filings                          —— 🔴 12.6.1.2 VAT/IOSS 申报数据**未交付**
+    //                                                 （同批另一条车道）：放行会让界面以为「已经能出申报底稿」。
+    //   vat-ioss/filings/capabilities             —— 同上。
+    //   vat-ioss/calendar                         —— 🔴 16.3.1.2 申报日历**未交付**。
+    //   vat-ioss/calendar/capabilities            —— 同上。
+    //   vat-ioss/submit / vat-ioss/declarations   —— 🔴 本系统**不代用户向税务机构提交申报**；
+    //                                                 刻意没有提交入口（只保证数据完整可核）。
+    //   vat-ioss/not-a-uuid                       —— 非 UUID 段不应被 uuid 分支吃掉。
+    //   vat-ioss/orders/not-a-uuid                —— 同上。
+    //   vat-ioss/registrations/not-a-uuid         —— 同上。
+    //   vat-ioss/filing-cycles/not-a-uuid         —— 同上。
+    //   vat-ioss/filing-periods/not-a-uuid        —— 同上。
+    //   vat-ioss/filing-periods/{uuid}/not-a-shape —— 多一层仍然 404。
+    //   vat-ioss/orders/sync/{uuid}               —— 本模块的同步是**集合级**的，没有 id 段。
+    //   vat-ioss/sales-tax / vat-ioss/epr         —— 🔴 16.3.2.3 销售税与 16.3.2.2 EPR
+    //                                                 **各有自己的前缀**（channel/sales-tax、
+    //                                                 channel/epr-registrations），不是本模块的子路径。
+    //
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //   （不是 `[0-9a-f-]+`）：后者会把 `draft` / `confirm` / `sync` 这种非 UUID 形状也当成 id 放行。
+    //   字面量子路径（capabilities / options / shops / statistics / tax-rates / sync /
+    //   draft / confirm）排在 {uuid} 段**之前**判别 —— alternation 是首个命中即返回，
+    //   顺序反了会被通配支吃掉半截。
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^vat\-ioss\/(?:capabilities|options|shops|statistics|tax\-rates|registrations(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|filing\-cycles(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|filing\-periods(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:draft|confirm|statistics))?)?|orders(?:\/sync|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?)$/,
+  },
 ];
 
 function resolve(path: string) {
