@@ -16878,6 +16878,846 @@
         },
         "type": "object"
       },
+      "FinanceReconAccount": {
+        "properties": {
+          "accountName": {
+            "type": "string"
+          },
+          "accountNo": {
+            "type": "string"
+          },
+          "accountType": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "legalEntityName": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceReconCapabilities": {
+        "properties": {
+          "capabilities": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceReconCapability"
+            },
+            "type": "array"
+          },
+          "gaps": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceReconGap"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceReconCapability": {
+        "properties": {
+          "delivered": {
+            "type": "boolean"
+          },
+          "moduleId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceReconCurrencySummary": {
+        "properties": {
+          "bookAmount": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "differenceAmount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "differenceCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "exchangeRateAvailable": {
+            "type": "boolean"
+          },
+          "externalAmount": {
+            "type": "number"
+          },
+          "matchedGroupCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceReconDifferencePage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceReconDifferenceRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceReconDifferenceRow": {
+        "properties": {
+          "attribution": {
+            "type": "string"
+          },
+          "bookAmount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "bookLineId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "bookSource": {
+            "nullable": true,
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "differenceAmount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "differenceType": {
+            "type": "string"
+          },
+          "differenceTypeLabel": {
+            "type": "string"
+          },
+          "direction": {
+            "type": "string"
+          },
+          "exchangeRateAvailable": {
+            "type": "boolean"
+          },
+          "externalAmount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "externalKind": {
+            "nullable": true,
+            "type": "string"
+          },
+          "externalLineId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "groupKey": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "occurredOn": {
+            "format": "date",
+            "nullable": true,
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "reference": {
+            "type": "string"
+          },
+          "side": {
+            "type": "string"
+          },
+          "sideLabel": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "taskId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "transactionType": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceReconEventPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceReconEventRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceReconEventRow": {
+        "properties": {
+          "actorId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "eventType": {
+            "type": "string"
+          },
+          "eventTypeLabel": {
+            "type": "string"
+          },
+          "fromStatus": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "occurredAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "taskId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "toStatus": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceReconGap": {
+        "properties": {
+          "delivered": {
+            "type": "boolean"
+          },
+          "domain": {
+            "type": "string"
+          },
+          "moduleId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "owner": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceReconMatchPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceReconMatchRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceReconMatchRow": {
+        "properties": {
+          "bookAmount": {
+            "type": "number"
+          },
+          "bookLineId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "bookNo": {
+            "type": "string"
+          },
+          "bookOccurredOn": {
+            "format": "date",
+            "nullable": true,
+            "type": "string"
+          },
+          "bookReference": {
+            "type": "string"
+          },
+          "bookSource": {
+            "type": "string"
+          },
+          "bookSourceLabel": {
+            "type": "string"
+          },
+          "bookType": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "dayDifference": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "dimensionCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "direction": {
+            "type": "string"
+          },
+          "externalAmount": {
+            "type": "number"
+          },
+          "externalKind": {
+            "type": "string"
+          },
+          "externalKindLabel": {
+            "type": "string"
+          },
+          "externalLineId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "externalNo": {
+            "type": "string"
+          },
+          "externalOccurredOn": {
+            "format": "date",
+            "nullable": true,
+            "type": "string"
+          },
+          "externalReference": {
+            "type": "string"
+          },
+          "externalType": {
+            "type": "string"
+          },
+          "groupAmountDifference": {
+            "type": "number"
+          },
+          "groupBookAmount": {
+            "type": "number"
+          },
+          "groupExternalAmount": {
+            "type": "number"
+          },
+          "groupKey": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "groupNo": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "matchBasis": {
+            "type": "string"
+          },
+          "matchedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "matchedDimensions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "shape": {
+            "type": "string"
+          },
+          "shapeLabel": {
+            "type": "string"
+          },
+          "taskId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceReconMatchRunResult": {
+        "properties": {
+          "bookLineCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "differenceCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "differenceLineCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "externalLineCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "manyToManyCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "manyToOneCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "matchedAt": {
+            "type": "string"
+          },
+          "matchedGroupCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "matchedLineCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "oneToManyCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "oneToOneCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "taskId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "taskNo": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceReconOption": {
+        "properties": {
+          "label": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceReconOptions": {
+        "properties": {
+          "accounts": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceReconAccount"
+            },
+            "type": "array"
+          },
+          "bookSources": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceReconOption"
+            },
+            "type": "array"
+          },
+          "currencies": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "differenceTypes": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceReconOption"
+            },
+            "type": "array"
+          },
+          "directions": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceReconOption"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "shapes": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceReconOption"
+            },
+            "type": "array"
+          },
+          "statuses": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceReconOption"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceReconTaskCreateInput": {
+        "properties": {
+          "accountId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "amountTolerance": {
+            "exclusiveMinimum": false,
+            "minimum": 0,
+            "type": "number"
+          },
+          "bookSources": {
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "dateWindowDays": {
+            "format": "int32",
+            "maximum": 31,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "note": {
+            "nullable": true,
+            "type": "string"
+          },
+          "periodEnd": {
+            "format": "date",
+            "type": "string"
+          },
+          "periodStart": {
+            "format": "date",
+            "type": "string"
+          },
+          "shopId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "accountId",
+          "bookSources",
+          "periodEnd",
+          "periodStart"
+        ],
+        "type": "object"
+      },
+      "FinanceReconTaskDetail": {
+        "properties": {
+          "summary": {
+            "$ref": "#/components/schemas/FinanceReconTaskSummary"
+          },
+          "task": {
+            "$ref": "#/components/schemas/FinanceReconTaskRow"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceReconTaskPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceReconTaskRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceReconTaskRow": {
+        "properties": {
+          "accountId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "accountName": {
+            "type": "string"
+          },
+          "accountNo": {
+            "type": "string"
+          },
+          "amountTolerance": {
+            "type": "number"
+          },
+          "bookSources": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "dateWindowDays": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "differenceCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "externalLineCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "legalEntityName": {
+            "type": "string"
+          },
+          "matchedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "matchedGroupCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "matchedLineCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "periodEnd": {
+            "format": "date",
+            "type": "string"
+          },
+          "periodStart": {
+            "format": "date",
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "shopId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "shopName": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "taskNo": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "version": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceReconTaskSummary": {
+        "properties": {
+          "currencies": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceReconCurrencySummary"
+            },
+            "type": "array"
+          },
+          "differenceCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "externalLineCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "manyToManyCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "manyToOneCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "matchedGroupCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "matchedLineCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "oneToManyCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "oneToOneCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "topDifferences": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceReconDifferenceRow"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceReconTaskUpdateInput": {
+        "properties": {
+          "accountId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "amountTolerance": {
+            "exclusiveMinimum": false,
+            "minimum": 0,
+            "type": "number"
+          },
+          "bookSources": {
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "dateWindowDays": {
+            "format": "int32",
+            "maximum": 31,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "note": {
+            "nullable": true,
+            "type": "string"
+          },
+          "periodEnd": {
+            "format": "date",
+            "type": "string"
+          },
+          "periodStart": {
+            "format": "date",
+            "type": "string"
+          },
+          "shopId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "accountId",
+          "bookSources",
+          "periodEnd",
+          "periodStart"
+        ],
+        "type": "object"
+      },
       "FinanceReportBasis": {
         "properties": {
           "currencyPolicy": {
@@ -37026,6 +37866,540 @@
         },
         "tags": [
           "receivable-controller"
+        ]
+      }
+    },
+    "/finance/reconciliation-tasks": {
+      "get": {
+        "operationId": "get_finance_reconciliation_tasks",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "accountId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "shopId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceReconTaskPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "reconciliation-task-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_finance_reconciliation_tasks",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinanceReconTaskCreateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceReconTaskRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "reconciliation-task-controller"
+        ]
+      }
+    },
+    "/finance/reconciliation-tasks/capabilities": {
+      "get": {
+        "operationId": "get_finance_reconciliation_tasks_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceReconCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "reconciliation-task-controller"
+        ]
+      }
+    },
+    "/finance/reconciliation-tasks/options": {
+      "get": {
+        "operationId": "get_finance_reconciliation_tasks_options",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceReconOptions"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "reconciliation-task-controller"
+        ]
+      }
+    },
+    "/finance/reconciliation-tasks/{id}": {
+      "get": {
+        "operationId": "get_finance_reconciliation_tasks_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceReconTaskDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "reconciliation-task-controller"
+        ]
+      },
+      "put": {
+        "operationId": "put_finance_reconciliation_tasks_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinanceReconTaskUpdateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceReconTaskRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "reconciliation-task-controller"
+        ]
+      }
+    },
+    "/finance/reconciliation-tasks/{id}/differences": {
+      "get": {
+        "operationId": "get_finance_reconciliation_tasks_id_differences",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "differenceType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "currency",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "side",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceReconDifferencePage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "reconciliation-task-controller"
+        ]
+      }
+    },
+    "/finance/reconciliation-tasks/{id}/events": {
+      "get": {
+        "operationId": "get_finance_reconciliation_tasks_id_events",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceReconEventPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "reconciliation-task-controller"
+        ]
+      }
+    },
+    "/finance/reconciliation-tasks/{id}/match": {
+      "post": {
+        "operationId": "post_finance_reconciliation_tasks_id_match",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceReconMatchRunResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "reconciliation-task-controller"
+        ]
+      }
+    },
+    "/finance/reconciliation-tasks/{id}/matches": {
+      "get": {
+        "operationId": "get_finance_reconciliation_tasks_id_matches",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "shape",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "bookSource",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceReconMatchPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "reconciliation-task-controller"
         ]
       }
     },
