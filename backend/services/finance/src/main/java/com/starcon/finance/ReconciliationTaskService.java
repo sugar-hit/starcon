@@ -86,10 +86,13 @@ public class ReconciliationTaskService {
 
   private final DSLContext sql;
   private final ChannelShopPort shopPort;
+  private final ReconciliationMatchRuleService ruleService;
 
-  public ReconciliationTaskService(DSLContext sql, ChannelShopPort shopPort) {
+  public ReconciliationTaskService(
+      DSLContext sql, ChannelShopPort shopPort, ReconciliationMatchRuleService ruleService) {
     this.sql = sql;
     this.shopPort = shopPort;
+    this.ruleService = ruleService;
   }
 
   // ================================================================ 能力声明
@@ -571,7 +574,7 @@ public class ReconciliationTaskService {
       if (book.isEmpty()) {
         continue;
       }
-      var outcome = ReconciliationMatcher.match(external, book, windowDays, tolerance);
+      var outcome = matchWithRules(scope, external, book, windowDays, tolerance);
       for (var group : outcome.groups()) {
         groupNo++;
         for (var pair : group.pairs()) {
@@ -836,6 +839,28 @@ public class ReconciliationTaskService {
         now.toString(),
         "🔴 候选生成**完全不看金额**：必须对上订单号 / 日期 / 类型中的至少两个。"
             + "金额相等只是**成组**的必要条件（组内合计相等）。");
+  }
+
+  /**
+   * 跑匹配：**优先用 12.3.2.3 的规则集**（匹配键 / 容差 / 优先级 / 模糊兜底）。
+   *
+   * <p>🔴 **没有启用中的规则时退回任务自己的参数**（{@code date_window_days} /
+   * {@code amount_tolerance}）⇒ 12.3.2.1 的既有行为**逐位不变**。
+   *
+   * <p>规则集由 12.3.2.3 按**任务口径**（币种 / 账户 / 店铺）挑出并按优先级排序 ——
+   * 上游任务表**不用加 rule_id 列**（不改 12.3.2.1 的表）。
+   */
+  private ReconciliationMatcher.Outcome matchWithRules(
+      ReconScope scope,
+      List<ReconciliationMatcher.Item> external,
+      List<ReconciliationMatcher.Item> book,
+      int windowDays,
+      BigDecimal tolerance) {
+    var specs = ruleService.activeSpecs(scope.currency(), scope.accountId(), scope.shopId());
+    if (specs.isEmpty()) {
+      return ReconciliationMatcher.match(external, book, windowDays, tolerance);
+    }
+    return ReconciliationMatcher.match(external, book, specs);
   }
 
   // ================================================================ 匹配结果 / 差异 / 事件

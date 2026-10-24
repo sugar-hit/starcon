@@ -1616,6 +1616,60 @@ const services: readonly {
       /^reconciliation\-tasks(?:\/(?:capabilities|options)|(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:matches|match|differences|events))?))?$/,
   },
   {
+    // 12.3.2.3 自动匹配规则（finance 服务，卷 12「财务核算」L3 12.3.2 对账下的第三格）。
+    //
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 finance 那几条巨型 alternation 里并分支 ——
+    //   既有条目（`receivables` / `receipts` / `fund-analysis` / `transactions` / `settlement` /
+    //   `bank-reconciliation` / `reconciliation-tasks` …）都是单行超长正则，多车道同时并进去
+    //   git 必然判冲突（结构性，retry 不会自愈）。既有条目**一字未改、也不重排**。
+    //
+    // ---- 插入锚点固定在「12.3.2.1 对账任务那条之后」** ----
+    //   同 L3 的兄弟模块挨着放，语义上最清楚；本车道与别的车道插入点相距足够远，
+    //   并入时 git 能干净求并。
+    //
+    // ---- 首 token「reconciliation-match-rules」的零命中核对结论（本车道实测）----
+    //   发车前用 `node` 抽出本文件既有 **228 条** services[] 正则逐条实测：
+    //   本模块 9 个形状对既有正则**全部零命中**（NO HIT）。
+    //   既有含 `reconciliation` 的只有 `reconciliation-tasks`（12.3.2.1）——
+    //   首 token 就不是 `reconciliation-match-rules` ⇒ 两条正则**两两不相交**，
+    //   不会互相吃掉对方的路径。
+    //
+    // 🔴 **刻意不并进 `reconciliation-tasks` 那条**：那是 12.3.2.1 的封闭 alternation，
+    //   共用首段会让两条元素的正则纠缠、埋下互相吃掉的隐患 ⇒ 本模块用**自己的**首段。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   reconciliation-match-rules                    规则列表（GET）/ 建规则（POST）
+    //   reconciliation-match-rules/capabilities       能力声明（上游真接通 / 缺口归谁 / 硬约束口径）
+    //   reconciliation-match-rules/options            筛选项（账户取自 12.7.1.1 真实档案 + 受控词表）
+    //   reconciliation-match-rules/monitoring         匹配率监控（GET：匹配率 + 未匹配原因分布）
+    //   reconciliation-match-rules/{uuid}             规则详情（GET）/ 改规则（PUT）
+    //   reconciliation-match-rules/{uuid}/activate    启用规则（POST）
+    //   reconciliation-match-rules/{uuid}/deactivate  停用规则（POST）
+    //   reconciliation-match-rules/{uuid}/events      规则事件流（GET，append-only 举证）
+    //   reconciliation-match-rules/{uuid}/rate-snapshots 匹配率快照（GET 历史 / POST 记录一次）
+    //
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   reconciliation-match-rules/{uuid}/delete       —— 规则**不做物理删除**（停用即可，
+    //                                                    历史快照与事件流要引用它）。
+    //   reconciliation-match-rules/{uuid}/rules        —— 本模块没有「规则里再套规则」这个形状。
+    //   reconciliation-match-rules/{uuid}/preview      —— 本模块**不提供**「试跑匹配」：匹配是
+    //                                                    12.3.2.1 的动作，结果一次性不可改写。
+    //   reconciliation-match-rules/not-a-uuid          —— 非 UUID 段不应被 uuid 分支吃掉。
+    //   reconciliation-match-rules/{uuid}/not-a-shape  —— 多一层仍然 404。
+    //   reconciliation-match-rules/capabilities/{uuid} —— 字面量段刻意不接 id 段。
+    //   reconciliation-match-rule/capabilities         —— 单数前缀与后端路由不一致，必须 404。
+    //
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //   （不是 `[0-9a-f-]+`）：后者会把 `activate` / `events` 这种非 UUID 形状也当成 id 放行。
+    //   字面量子路径（capabilities / options / monitoring）排在 {uuid} 段**之前**判别 ——
+    //   alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    prefix: 'finance/',
+    env: 'FINANCE_URL',
+    fallback: 'http://127.0.0.1:8087',
+    pattern:
+      /^reconciliation\-match\-rules(?:\/(?:capabilities|options|monitoring)|(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:activate|deactivate|events|rate\-snapshots))?))?$/,
+  },
+  {
     // 1.1.2.3 履约健康（trade 服务，卷 01「工作台与门户」L3 1.1.2 关键指标下的第三格）。
     //
     // ⚠️ 本条目是**新增一条独立的 `services[]` 元素**，不是往既有 trade 那条巨型 alternation 里并分支 ——
