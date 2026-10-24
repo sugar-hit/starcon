@@ -1875,6 +1875,65 @@ const services: readonly {
       /^write\-off(?:\/(?:capabilities|options|pending|advance-balance|auto\-match(?:\/candidates)?|advance(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/release)?|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/reverse)?))?$/,
   },
   {
+    // 12.5.2.2 财务报表（finance 服务）。纯**新增一条独立的 services[] 元素**：
+    // 既有条目**一字未改、也不重排** —— 本文件是多车道共用的累积型白名单，
+    // 每条服务规则是一段超长单行正则，往同一条 alternation 里并分支会让
+    // 同批多车道并入时 git 必然判冲突（结构性，retry 不会自愈）。
+    //
+    // ---- 插入锚点固定在 services[] 里**第一个 `prefix: 'warehouse/'` 那条元素之前** ----
+    //   `warehouse/` 在本文件里出现多次（认准**第一个**）：本条插在它那条元素**之前**。
+    //   同批其它车道的锚点分别是「数组最开头」「第一个 `prefix: 'identity/'` 之前」「数组末尾」，
+    //   各自相距 600 行以上，git 能干净求并。
+    //
+    // ---- 首 token「financial-reports」的零命中核对结论（在本文件全文上实测）----
+    //   `grep -c "financial-reports" apps/web/src/lib/api-proxy.ts` ⇒ **0**：
+    //   本文件既有 200+ 条 services[] 正则里**没有任何一条**含 `financial-reports` 这个串
+    //   （既有的是 `vouchers` / `payables` / `write-off` / `cost-collections` 一族），
+    //   所以首 token 既是独立字面量，也不会被既有分支的前缀吃掉。
+    //
+    // ---- 与同服务其它 finance 条目的先后顺序**不影响正确性** ----
+    //   resolve() 对同一个 prefix 只返回 `{base: FINANCE_URL}`（同一个后端），
+    //   而各条 finance 条目的首 token 互不相同（`vouchers` / `payables` / `write-off` /
+    //   `financial-reports` …）、正则两两不相交 ⇒ 谁先谁后都命中同一条正确路由。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   financial-reports/capabilities            能力声明（哪些真接通 + 缺口归谁）
+    //   financial-reports/options                 筛选项（期间 / 币种 / 科目，全部来自真实数据）
+    //   financial-reports/templates               报表模板集合（GET 列表 / POST 登记）
+    //   financial-reports/templates/{uuid}        修改一条模板（PUT，乐观并发）
+    //   financial-reports/templates/{uuid}/disable 停用一条模板（**没有删除**）
+    //   financial-reports/balance-sheet           资产负债表
+    //   financial-reports/income-statement        利润表
+    //   financial-reports/cash-flow               现金流量表
+    //   financial-reports/trial-balance           科目余额表
+    //   financial-reports/general-ledger          明细账（逐笔展开一个科目）
+    //   financial-reports/drill                   钻取到凭证（= 报表行上的 drillPath）
+    //   financial-reports/export                  导出 CSV / JSON（真内容 + 一条留痕）
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   financial-reports                          —— 🔴 裸路径：本模块**没有**「一张报表」的集合端点，
+    //                                                 五张报表各自是独立端点，不存在裸资源
+    //   financial-reports/{uuid}                   —— 本模块的 id 段只出现在 templates 之下
+    //   financial-reports/templates/{uuid}/delete  —— 🔴 模板**不可删**：删掉会让「当时的报表口径」无法复现，
+    //                                                 改口径用「停用」
+    //   financial-reports/templates/{uuid}/enable  —— 反向动作没有端点（停用是单向的）
+    //   financial-reports/not-a-uuid               —— 非 UUID 段不应被 uuid 分支吃掉
+    //   financial-reports/templates/not-a-uuid     —— 同上
+    //   financial-reports/capabilities/{uuid}      —— 字面量段刻意不接 id 段
+    //   financial-reports/export/{uuid}            —— 导出是集合级动作，不按 id 取
+    //   financial-reports/drill/{uuid}             —— 钻取是集合级动作，不按 id 取
+    //   financial-reports/financial-reports        —— 交替写错就会互相吃掉，必须反向钉住
+    //   financial-reports/reports                  —— 同上（别把首 token 拼成别名）
+    //
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //   （不是 `[0-9a-f-]+`）：后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行。
+    prefix: 'finance/',
+    env: 'FINANCE_URL',
+    fallback: 'http://127.0.0.1:8087',
+    pattern:
+      /^financial\-reports\/(?:capabilities|options|templates(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/disable)?)?|balance\-sheet|income\-statement|cash\-flow|trial\-balance|general\-ledger|drill|export)$/,
+  },
+  {
     // 1.1.3.1 库存风险（卷 01 工作台与门户）。纯**新增一条独立的 services[] 元素**：
     // 既有那条 `warehouse/` 巨型 alternation **一字未动、也不重排** ——
     // 本文件是多车道共用的累积型白名单，每条服务规则是一段超长单行正则，
