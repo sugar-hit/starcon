@@ -10591,6 +10591,720 @@
         },
         "type": "object"
       },
+      "FinanceReportBasis": {
+        "properties": {
+          "currencyPolicy": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "draftPolicy": {
+            "type": "string"
+          },
+          "reportType": {
+            "type": "string"
+          },
+          "reportTypeLabel": {
+            "type": "string"
+          },
+          "reversalPolicy": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceReportCapabilities": {
+        "properties": {
+          "bases": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceReportBasis"
+            },
+            "type": "array"
+          },
+          "capabilities": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceReportCapability"
+            },
+            "type": "array"
+          },
+          "downstreamGaps": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceReportDownstreamGap"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceReportCapability": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "basis": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "module": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceReportCheck": {
+        "properties": {
+          "balanced": {
+            "type": "boolean"
+          },
+          "checkName": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "difference": {
+            "type": "number"
+          },
+          "leftValue": {
+            "type": "number"
+          },
+          "rightValue": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceReportCurrencyGroup": {
+        "properties": {
+          "checks": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceReportCheck"
+            },
+            "type": "array"
+          },
+          "comparisonTotals": {
+            "$ref": "#/components/schemas/FinanceReportTotals"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "ledgerEntries": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceReportLedgerEntry"
+            },
+            "type": "array"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceReportRow"
+            },
+            "type": "array"
+          },
+          "totals": {
+            "$ref": "#/components/schemas/FinanceReportTotals"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceReportDownstreamGap": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "group": {
+            "type": "string"
+          },
+          "module": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "ownerService": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceReportDrill": {
+        "properties": {
+          "creditTotal": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "debitTotal": {
+            "type": "number"
+          },
+          "entries": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceReportDrillEntry"
+            },
+            "type": "array"
+          },
+          "lineCode": {
+            "type": "string"
+          },
+          "lineCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "lineName": {
+            "type": "string"
+          },
+          "netTotal": {
+            "type": "number"
+          },
+          "periodLabel": {
+            "type": "string"
+          },
+          "reportType": {
+            "type": "string"
+          },
+          "reportTypeLabel": {
+            "type": "string"
+          },
+          "section": {
+            "type": "string"
+          },
+          "sectionLabel": {
+            "type": "string"
+          },
+          "subjectCode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "subjectName": {
+            "nullable": true,
+            "type": "string"
+          },
+          "voucherCount": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceReportDrillEntry": {
+        "properties": {
+          "amount": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "drillPath": {
+            "type": "string"
+          },
+          "lineId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "lineNo": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "lineType": {
+            "type": "string"
+          },
+          "lineTypeLabel": {
+            "type": "string"
+          },
+          "periodCode": {
+            "type": "string"
+          },
+          "subjectCode": {
+            "type": "string"
+          },
+          "subjectName": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "voucherDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "voucherId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "voucherNo": {
+            "type": "string"
+          },
+          "voucherStatus": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceReportLedgerEntry": {
+        "properties": {
+          "amount": {
+            "type": "number"
+          },
+          "counterpartSummary": {
+            "type": "string"
+          },
+          "creditAmount": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "debitAmount": {
+            "type": "number"
+          },
+          "drillPath": {
+            "type": "string"
+          },
+          "entryDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "lineId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "lineNo": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "lineType": {
+            "type": "string"
+          },
+          "lineTypeLabel": {
+            "type": "string"
+          },
+          "periodCode": {
+            "type": "string"
+          },
+          "rowKey": {
+            "type": "string"
+          },
+          "runningBalance": {
+            "type": "number"
+          },
+          "subjectCode": {
+            "type": "string"
+          },
+          "subjectName": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "voucherId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "voucherNo": {
+            "type": "string"
+          },
+          "voucherStatus": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceReportOptions": {
+        "properties": {
+          "currencies": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "periods": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceReportPeriodRef"
+            },
+            "type": "array"
+          },
+          "reportTypes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "subjects": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceReportSubjectRef"
+            },
+            "type": "array"
+          },
+          "templates": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceReportTemplateRow"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceReportPeriodRef": {
+        "properties": {
+          "baseCurrency": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "periodCode": {
+            "type": "string"
+          },
+          "periodEnd": {
+            "format": "date",
+            "type": "string"
+          },
+          "periodStart": {
+            "format": "date",
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceReportResult": {
+        "properties": {
+          "comparePeriodFromCode": {
+            "type": "string"
+          },
+          "comparePeriodLabel": {
+            "type": "string"
+          },
+          "comparePeriodToCode": {
+            "type": "string"
+          },
+          "currencyGroups": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceReportCurrencyGroup"
+            },
+            "type": "array"
+          },
+          "currencyScope": {
+            "type": "string"
+          },
+          "draftExcludedCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "lineCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "notice": {
+            "type": "string"
+          },
+          "periodFromCode": {
+            "type": "string"
+          },
+          "periodLabel": {
+            "type": "string"
+          },
+          "periodToCode": {
+            "type": "string"
+          },
+          "reportType": {
+            "type": "string"
+          },
+          "reportTypeLabel": {
+            "type": "string"
+          },
+          "reversedVoucherCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "voucherCount": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceReportRow": {
+        "properties": {
+          "balanceDirection": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string"
+          },
+          "closingBalance": {
+            "type": "number"
+          },
+          "closingCredit": {
+            "type": "number"
+          },
+          "closingDebit": {
+            "type": "number"
+          },
+          "comparisonClosingBalance": {
+            "type": "number"
+          },
+          "comparisonPeriodNet": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "deltaClosingBalance": {
+            "type": "number"
+          },
+          "deltaPeriodNet": {
+            "type": "number"
+          },
+          "drillPath": {
+            "type": "string"
+          },
+          "lineCode": {
+            "type": "string"
+          },
+          "lineCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "lineName": {
+            "type": "string"
+          },
+          "openingBalance": {
+            "type": "number"
+          },
+          "openingCredit": {
+            "type": "number"
+          },
+          "openingDebit": {
+            "type": "number"
+          },
+          "periodCredit": {
+            "type": "number"
+          },
+          "periodDebit": {
+            "type": "number"
+          },
+          "periodNet": {
+            "type": "number"
+          },
+          "rowKey": {
+            "type": "string"
+          },
+          "section": {
+            "type": "string"
+          },
+          "sectionLabel": {
+            "type": "string"
+          },
+          "subjectCode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "subjectName": {
+            "nullable": true,
+            "type": "string"
+          },
+          "totalRow": {
+            "type": "boolean"
+          },
+          "voucherCount": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceReportSubjectRef": {
+        "properties": {
+          "balanceDirection": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string"
+          },
+          "subjectCode": {
+            "type": "string"
+          },
+          "subjectName": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceReportTemplateInput": {
+        "properties": {
+          "cashFlowGroup": {
+            "nullable": true,
+            "type": "string"
+          },
+          "cashRole": {
+            "nullable": true,
+            "type": "string"
+          },
+          "enabled": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "expectedVersion": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "lineCode": {
+            "type": "string"
+          },
+          "lineName": {
+            "nullable": true,
+            "type": "string"
+          },
+          "note": {
+            "nullable": true,
+            "type": "string"
+          },
+          "reportType": {
+            "type": "string"
+          },
+          "section": {
+            "nullable": true,
+            "type": "string"
+          },
+          "sortOrder": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "subjectCode": {
+            "type": "string"
+          },
+          "subjectName": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceReportTemplateRow": {
+        "properties": {
+          "cashFlowGroup": {
+            "type": "string"
+          },
+          "cashFlowGroupLabel": {
+            "type": "string"
+          },
+          "cashRole": {
+            "type": "string"
+          },
+          "cashRoleLabel": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "lineCode": {
+            "type": "string"
+          },
+          "lineName": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "reportType": {
+            "type": "string"
+          },
+          "reportTypeLabel": {
+            "type": "string"
+          },
+          "section": {
+            "type": "string"
+          },
+          "sectionLabel": {
+            "type": "string"
+          },
+          "sortOrder": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "subjectCode": {
+            "type": "string"
+          },
+          "subjectName": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "version": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceReportTotals": {
+        "properties": {
+          "closingBalance": {
+            "type": "number"
+          },
+          "closingCredit": {
+            "type": "number"
+          },
+          "closingDebit": {
+            "type": "number"
+          },
+          "lineCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "openingBalance": {
+            "type": "number"
+          },
+          "openingCredit": {
+            "type": "number"
+          },
+          "openingDebit": {
+            "type": "number"
+          },
+          "periodCredit": {
+            "type": "number"
+          },
+          "periodDebit": {
+            "type": "number"
+          },
+          "periodNet": {
+            "type": "number"
+          },
+          "voucherCount": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
       "FinanceSettlementArrivalInput": {
         "properties": {
           "arrivedAt": {
@@ -18491,6 +19205,803 @@
         },
         "tags": [
           "deferred-settlement-controller"
+        ]
+      }
+    },
+    "/finance/financial-reports/balance-sheet": {
+      "get": {
+        "operationId": "get_finance_financial_reports_balance_sheet",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "periodFromId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "periodToId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "comparePeriodFromId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "comparePeriodToId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "currency",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceReportResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "financial-report-controller"
+        ]
+      }
+    },
+    "/finance/financial-reports/capabilities": {
+      "get": {
+        "operationId": "get_finance_financial_reports_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceReportCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "financial-report-controller"
+        ]
+      }
+    },
+    "/finance/financial-reports/cash-flow": {
+      "get": {
+        "operationId": "get_finance_financial_reports_cash_flow",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "periodFromId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "periodToId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "comparePeriodFromId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "comparePeriodToId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "currency",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceReportResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "financial-report-controller"
+        ]
+      }
+    },
+    "/finance/financial-reports/drill": {
+      "get": {
+        "operationId": "get_finance_financial_reports_drill",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "reportType",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "lineCode",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "subjectCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "currency",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "periodFromId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "periodToId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceReportDrill"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "financial-report-controller"
+        ]
+      }
+    },
+    "/finance/financial-reports/export": {
+      "get": {
+        "operationId": "get_finance_financial_reports_export",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "reportType",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "format",
+            "required": false,
+            "schema": {
+              "default": "CSV",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "periodFromId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "periodToId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "comparePeriodFromId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "comparePeriodToId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "currency",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "subjectCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "financial-report-controller"
+        ]
+      }
+    },
+    "/finance/financial-reports/general-ledger": {
+      "get": {
+        "operationId": "get_finance_financial_reports_general_ledger",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "periodFromId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "periodToId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "comparePeriodFromId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "comparePeriodToId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "currency",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "subjectCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceReportResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "financial-report-controller"
+        ]
+      }
+    },
+    "/finance/financial-reports/income-statement": {
+      "get": {
+        "operationId": "get_finance_financial_reports_income_statement",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "periodFromId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "periodToId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "comparePeriodFromId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "comparePeriodToId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "currency",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceReportResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "financial-report-controller"
+        ]
+      }
+    },
+    "/finance/financial-reports/options": {
+      "get": {
+        "operationId": "get_finance_financial_reports_options",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceReportOptions"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "financial-report-controller"
+        ]
+      }
+    },
+    "/finance/financial-reports/templates": {
+      "get": {
+        "operationId": "get_finance_financial_reports_templates",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "reportType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/FinanceReportTemplateRow"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "financial-report-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_finance_financial_reports_templates",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinanceReportTemplateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceReportTemplateRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "financial-report-controller"
+        ]
+      }
+    },
+    "/finance/financial-reports/templates/{id}": {
+      "put": {
+        "operationId": "put_finance_financial_reports_templates_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinanceReportTemplateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceReportTemplateRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "financial-report-controller"
+        ]
+      }
+    },
+    "/finance/financial-reports/templates/{id}/disable": {
+      "post": {
+        "operationId": "post_finance_financial_reports_templates_id_disable",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceReportTemplateRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "financial-report-controller"
+        ]
+      }
+    },
+    "/finance/financial-reports/trial-balance": {
+      "get": {
+        "operationId": "get_finance_financial_reports_trial_balance",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "periodFromId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "periodToId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "comparePeriodFromId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "comparePeriodToId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "currency",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceReportResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "financial-report-controller"
         ]
       }
     },
