@@ -885,6 +885,62 @@ const services: readonly {
       /^accounting\-periods(?:\/(?:capabilities|options|calendars(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/generate\-periods)?)?|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:close|reopen|events|approvals))?))?$/,
   },
   {
+    // 12.5.1.3 关账（finance 服务，卷 12「财务核算」L3 12.5.1 会计科目与期间下的第三格）。
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 finance 那几条巨型 alternation 里并分支 ——
+    //   既有条目**一字未改、也不重排**。
+    //
+    // ---- 插入锚点选在**第一个 `prefix: 'identity/'` 元素之前** ----
+    //   同批其它车道的插入点是「数组最开头」「第一个 `prefix: 'warehouse/'` 之前」与「数组末尾」，
+    //   与本处互不重叠 ⇒ 并入时 git 能干净求并。
+    //
+    // ---- 首 token「period-close」的零命中核对结论 ----
+    //   发车前用 `grep -n "period-close" apps/web/src/lib/api-proxy.ts` 实测：**零命中**（exit 1）。
+    //   再把既有 services[] 的 **219 条正则**逐条抽出（脚本在 `.tmp/check-period-close.mjs`，
+    //   逐字符扫出正则字面量 —— 正则内部允许 `//` 行注释，用「第一个 / 到下一个 /」会漏解析），
+    //   对本模块 **10 个正向形状**与 **12 个负向形状**逐一实测：**全部零命中**。
+    //   既有 finance 那几支的首 token 是 `receivables` / `receivable-aging` / `payables` /
+    //   `receipts` / `settlement` / `transactions` / `vouchers` / `accounting-periods` /
+    //   `account-subjects` / `cost-calculation` / `payment-orders` / `payment-executions` /
+    //   `bad-debt` …，**全不相同** ⇒ 首 token 既是独立字面量，也不会被既有分支的前缀吃掉。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   period-close/capabilities                          能力声明（上游真接通 / 下游缺口归谁）
+    //   period-close/options                               筛选项 + 期间下拉
+    //   period-close/checklists                            清单列表（GET，真分页 + 真筛选）/ 跑清单（POST）
+    //   period-close/checklists/{uuid}                     清单详情（GET：四类检查项 + 按币种金额分组）
+    //   period-close/checklists/{uuid}/items               明细钻取（GET，真分页）
+    //   period-close/checklists/{uuid}/checks/{checkUuid}/carry-forward
+    //                                                      把阻断项下调为可结转未清项（POST，**必须写例外依据**）
+    //   period-close/executions                           关账执行记录列表（GET）/ 提交关账（POST）
+    //   period-close/executions/{uuid}                    关账执行详情（GET：执行记录 + 审批链路）
+    //   period-close/executions/{uuid}/sync-approval      同步审批结果（POST，批准后执行关账）
+    //
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   period-close/filings / period-close/declarations —— 🔴 属 12.6.1.2 申报，**未交付**
+    //   period-close/reports                             —— 🔴 属 12.5.2.2 报表，**未交付**
+    //   period-close/tax-rates                            —— 🔴 属 12.6.1.1 税率配置
+    //   period-close                                      —— 裸路径：后端**没有**「一条不存在的汇总列表接口」
+    //                                                      （本模块的集合级端点是 /checklists 与 /executions，
+    //                                                        顶层没有汇总列表 ⇒ 顶层组**不写成可选**）
+    //   period-close/{uuid}                               —— 顶层没有 id 段
+    //   period-close/checklists/{uuid}/not-a-shape        —— 多一层仍然 404
+    //   period-close/checklists/not-a-uuid                —— 非 UUID 段不应被 uuid 分支吃掉
+    //   period-close/executions/{uuid}/approve            —— 🔴 审批属 17 审批（identity），本模块**不提供**本地审批端点
+    //   period-close/executions/{uuid}/reject             —— 同上
+    //   period-close/batch                                —— 本模块**没有**批量关账端点
+    //
+    // id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`（不是 `[0-9a-f-]+`）：
+    // 后者会把 `carry-forward` 这种非 UUID 形状也当成 id 放行。
+    // 字面量子路径（capabilities / options / checklists / executions / items / checks）排在
+    // {uuid} 段**之前**判别 —— alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    // ⚠️ **顶层组不写成可选**（`period-close` 裸路径必须 404：本模块没有顶层汇总列表端点）。
+    prefix: 'finance/',
+    env: 'FINANCE_URL',
+    fallback: 'http://127.0.0.1:8087',
+    pattern:
+      /^period\-close\/(?:capabilities|options|checklists(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:items|checks\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/carry\-forward))?)?|executions(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/sync\-approval)?)?)$/,
+  },
+  {
     prefix: 'identity/',
     env: 'IDENTITY_URL',
     fallback: 'http://127.0.0.1:8081',
