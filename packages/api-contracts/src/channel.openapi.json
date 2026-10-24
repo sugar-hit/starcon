@@ -74774,6 +74774,879 @@
         },
         "type": "object"
       },
+      "VatIossCapabilities": {
+        "properties": {
+          "classificationSemantics": {
+            "type": "string"
+          },
+          "currencySemantics": {
+            "type": "string"
+          },
+          "downstreamNote": {
+            "type": "string"
+          },
+          "filingCycles": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "filingScopes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "filingSemantics": {
+            "type": "string"
+          },
+          "filingStatuses": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "gaps": {
+            "items": {
+              "$ref": "#/components/schemas/VatIossCapabilityGap"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "reasonCodes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "scopeSemantics": {
+            "type": "string"
+          },
+          "taxTypes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "upstreamNote": {
+            "type": "string"
+          },
+          "upstreams": {
+            "items": {
+              "$ref": "#/components/schemas/VatIossUpstream"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "VatIossCapabilityGap": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "impact": {
+            "type": "string"
+          },
+          "moduleId": {
+            "type": "string"
+          },
+          "moduleName": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "VatIossFilingCycleInput": {
+        "properties": {
+          "deadlineDay": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "filingCycle": {
+            "type": "string"
+          },
+          "filingStartMonth": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "jurisdictionCode": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "VatIossFilingCyclePage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/VatIossFilingCycleView"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "VatIossFilingCycleView": {
+        "properties": {
+          "countryCode": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "deadlineDay": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "filingCycle": {
+            "type": "string"
+          },
+          "filingCycleLabel": {
+            "type": "string"
+          },
+          "filingStartMonth": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "id": {
+            "type": "string"
+          },
+          "jurisdictionCode": {
+            "type": "string"
+          },
+          "jurisdictionName": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "VatIossFilingPeriodInput": {
+        "properties": {
+          "jurisdictionCode": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "periodEnd": {
+            "type": "string"
+          },
+          "periodStart": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "VatIossFilingPeriodPage": {
+        "properties": {
+          "confirmedCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "draftCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "draftedCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/VatIossFilingPeriodView"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "VatIossFilingPeriodView": {
+        "properties": {
+          "confirmedAt": {
+            "type": "string"
+          },
+          "confirmedBy": {
+            "type": "string"
+          },
+          "countryCode": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "draftedAt": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "jurisdictionCode": {
+            "type": "string"
+          },
+          "jurisdictionName": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "periodEnd": {
+            "type": "string"
+          },
+          "periodStart": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "VatIossGoodsScope": {
+        "properties": {
+          "exciseGoods": {
+            "type": "boolean"
+          },
+          "goodsName": {
+            "type": "string"
+          },
+          "skuCode": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "VatIossJurisdictionOption": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "countryCode": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "region": {
+            "type": "string"
+          },
+          "taxRegime": {
+            "type": "string"
+          },
+          "vatRequired": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "VatIossOptions": {
+        "properties": {
+          "currencies": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "filingCycles": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "filingScopes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "filingStatuses": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "jurisdictions": {
+            "items": {
+              "$ref": "#/components/schemas/VatIossJurisdictionOption"
+            },
+            "type": "array"
+          },
+          "reasonCodes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "taxTypes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "VatIossOrderDetail": {
+        "properties": {
+          "lines": {
+            "items": {
+              "$ref": "#/components/schemas/VatIossOrderLineView"
+            },
+            "type": "array"
+          },
+          "order": {
+            "$ref": "#/components/schemas/VatIossOrderView"
+          }
+        },
+        "type": "object"
+      },
+      "VatIossOrderLineView": {
+        "properties": {
+          "exciseGoods": {
+            "type": "boolean"
+          },
+          "lineAmount": {
+            "type": "string"
+          },
+          "lineNo": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "quantity": {
+            "type": "string"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "taxAmount": {
+            "type": "string"
+          },
+          "taxRate": {
+            "type": "string"
+          },
+          "unitPrice": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "VatIossOrderPage": {
+        "properties": {
+          "generalVatCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "iossCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/VatIossOrderView"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "outOfScopeCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "unresolvedCount": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "VatIossOrderSyncResult": {
+        "properties": {
+          "classified": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "generalVatCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "iossCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "outOfScopeCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "pagesFetched": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "scanned": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "truncated": {
+            "type": "boolean"
+          },
+          "unresolvedCount": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "VatIossOrderView": {
+        "properties": {
+          "currency": {
+            "type": "string"
+          },
+          "customerType": {
+            "type": "string"
+          },
+          "destinationCountry": {
+            "type": "string"
+          },
+          "filingScope": {
+            "type": "string"
+          },
+          "filingScopeLabel": {
+            "type": "string"
+          },
+          "goodsAmount": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "jurisdictionCode": {
+            "type": "string"
+          },
+          "orderDate": {
+            "type": "string"
+          },
+          "orderSource": {
+            "type": "string"
+          },
+          "orderStatus": {
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "reasonCode": {
+            "type": "string"
+          },
+          "reasonDetail": {
+            "type": "string"
+          },
+          "reasonLabel": {
+            "type": "string"
+          },
+          "shippingAmount": {
+            "type": "string"
+          },
+          "shopCode": {
+            "type": "string"
+          },
+          "sourceOrderId": {
+            "type": "string"
+          },
+          "sourceOrderNo": {
+            "type": "string"
+          },
+          "sourceSalesOrderId": {
+            "type": "string"
+          },
+          "syncedAt": {
+            "type": "string"
+          },
+          "taxAmount": {
+            "type": "string"
+          },
+          "taxBase": {
+            "type": "string"
+          },
+          "taxRate": {
+            "description": "适用税率；空 = **读不到**，绝不是 0%",
+            "type": "string"
+          },
+          "taxRateSource": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "VatIossRegistrationInput": {
+        "properties": {
+          "effectiveFrom": {
+            "type": "string"
+          },
+          "effectiveTo": {
+            "type": "string"
+          },
+          "goodsScopes": {
+            "items": {
+              "$ref": "#/components/schemas/VatIossGoodsScope"
+            },
+            "type": "array"
+          },
+          "intermediaryName": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "registrationNo": {
+            "type": "string"
+          },
+          "shopScopes": {
+            "items": {
+              "$ref": "#/components/schemas/VatIossShopScope"
+            },
+            "type": "array"
+          },
+          "status": {
+            "type": "string"
+          },
+          "thresholdAmount": {
+            "type": "string"
+          },
+          "thresholdCurrency": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "VatIossRegistrationPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/VatIossRegistrationView"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "VatIossRegistrationView": {
+        "properties": {
+          "createdAt": {
+            "type": "string"
+          },
+          "current": {
+            "type": "boolean"
+          },
+          "effectiveFrom": {
+            "type": "string"
+          },
+          "effectiveTo": {
+            "type": "string"
+          },
+          "exciseSkuCodes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "goodsScopes": {
+            "items": {
+              "$ref": "#/components/schemas/VatIossGoodsScope"
+            },
+            "type": "array"
+          },
+          "id": {
+            "type": "string"
+          },
+          "intermediaryName": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "registrationNo": {
+            "type": "string"
+          },
+          "shopScopes": {
+            "items": {
+              "$ref": "#/components/schemas/VatIossShopScope"
+            },
+            "type": "array"
+          },
+          "status": {
+            "type": "string"
+          },
+          "thresholdAmount": {
+            "type": "string"
+          },
+          "thresholdCurrency": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "VatIossShopList": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/VatIossShopView"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "total": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "VatIossShopScope": {
+        "properties": {
+          "platformCode": {
+            "type": "string"
+          },
+          "shopCode": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "VatIossShopView": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "countryCodes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "inIossScope": {
+            "type": "boolean"
+          },
+          "iossRegistrationId": {
+            "type": "string"
+          },
+          "iossRegistrationNo": {
+            "type": "string"
+          },
+          "marketplaceCodes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "name": {
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "platformName": {
+            "type": "string"
+          },
+          "shopId": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "VatIossStatistics": {
+        "properties": {
+          "filingDraftAvailable": {
+            "type": "boolean"
+          },
+          "filingDraftImpact": {
+            "type": "string"
+          },
+          "filingDraftOwnerModule": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/VatIossStatisticsRow"
+            },
+            "type": "array"
+          },
+          "totalOrders": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "VatIossStatisticsRow": {
+        "properties": {
+          "currency": {
+            "type": "string"
+          },
+          "filingScope": {
+            "type": "string"
+          },
+          "filingScopeLabel": {
+            "type": "string"
+          },
+          "goodsAmount": {
+            "type": "string"
+          },
+          "orderCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "shippingAmount": {
+            "type": "string"
+          },
+          "taxAmount": {
+            "type": "string"
+          },
+          "taxBase": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "VatIossTaxRateView": {
+        "properties": {
+          "asOf": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "impact": {
+            "type": "string"
+          },
+          "jurisdictionCode": {
+            "type": "string"
+          },
+          "jurisdictionName": {
+            "type": "string"
+          },
+          "rate": {
+            "type": "string"
+          },
+          "resolvedBy": {
+            "type": "string"
+          },
+          "taxType": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "VatIossUpstream": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "impact": {
+            "type": "string"
+          },
+          "moduleId": {
+            "type": "string"
+          },
+          "moduleName": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "VerificationInput": {
         "properties": {
           "verification": {
@@ -131923,6 +132796,1032 @@
         },
         "tags": [
           "tax-registration-controller"
+        ]
+      }
+    },
+    "/channel/vat-ioss/capabilities": {
+      "get": {
+        "operationId": "get_channel_vat_ioss_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/VatIossCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "vat-ioss-controller"
+        ]
+      }
+    },
+    "/channel/vat-ioss/filing-cycles": {
+      "get": {
+        "operationId": "get_channel_vat_ioss_filing_cycles",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "jurisdictionCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/VatIossFilingCyclePage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "vat-ioss-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_channel_vat_ioss_filing_cycles",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VatIossFilingCycleInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/VatIossFilingCycleView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "vat-ioss-controller"
+        ]
+      }
+    },
+    "/channel/vat-ioss/filing-cycles/{id}": {
+      "put": {
+        "operationId": "put_channel_vat_ioss_filing_cycles_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VatIossFilingCycleInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/VatIossFilingCycleView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "vat-ioss-controller"
+        ]
+      }
+    },
+    "/channel/vat-ioss/filing-periods": {
+      "get": {
+        "operationId": "get_channel_vat_ioss_filing_periods",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "jurisdictionCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/VatIossFilingPeriodPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "vat-ioss-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_channel_vat_ioss_filing_periods",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VatIossFilingPeriodInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/VatIossFilingPeriodView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "vat-ioss-controller"
+        ]
+      }
+    },
+    "/channel/vat-ioss/filing-periods/{id}": {
+      "get": {
+        "operationId": "get_channel_vat_ioss_filing_periods_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/VatIossFilingPeriodView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "vat-ioss-controller"
+        ]
+      }
+    },
+    "/channel/vat-ioss/filing-periods/{id}/confirm": {
+      "post": {
+        "operationId": "post_channel_vat_ioss_filing_periods_id_confirm",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/VatIossFilingPeriodView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "vat-ioss-controller"
+        ]
+      }
+    },
+    "/channel/vat-ioss/filing-periods/{id}/draft": {
+      "post": {
+        "operationId": "post_channel_vat_ioss_filing_periods_id_draft",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/VatIossFilingPeriodView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "vat-ioss-controller"
+        ]
+      }
+    },
+    "/channel/vat-ioss/filing-periods/{id}/statistics": {
+      "get": {
+        "operationId": "get_channel_vat_ioss_filing_periods_id_statistics",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/VatIossStatistics"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "vat-ioss-controller"
+        ]
+      }
+    },
+    "/channel/vat-ioss/options": {
+      "get": {
+        "operationId": "get_channel_vat_ioss_options",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/VatIossOptions"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "vat-ioss-controller"
+        ]
+      }
+    },
+    "/channel/vat-ioss/orders": {
+      "get": {
+        "operationId": "get_channel_vat_ioss_orders",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "filingScope",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "reasonCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "currency",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "jurisdictionCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "shopCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dateFrom",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dateTo",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/VatIossOrderPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "vat-ioss-controller"
+        ]
+      }
+    },
+    "/channel/vat-ioss/orders/sync": {
+      "post": {
+        "operationId": "post_channel_vat_ioss_orders_sync",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "shopCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/VatIossOrderSyncResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "vat-ioss-controller"
+        ]
+      }
+    },
+    "/channel/vat-ioss/orders/{id}": {
+      "get": {
+        "operationId": "get_channel_vat_ioss_orders_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/VatIossOrderDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "vat-ioss-controller"
+        ]
+      }
+    },
+    "/channel/vat-ioss/registrations": {
+      "get": {
+        "operationId": "get_channel_vat_ioss_registrations",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/VatIossRegistrationPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "vat-ioss-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_channel_vat_ioss_registrations",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VatIossRegistrationInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/VatIossRegistrationView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "vat-ioss-controller"
+        ]
+      }
+    },
+    "/channel/vat-ioss/registrations/{id}": {
+      "get": {
+        "operationId": "get_channel_vat_ioss_registrations_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/VatIossRegistrationView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "vat-ioss-controller"
+        ]
+      },
+      "put": {
+        "operationId": "put_channel_vat_ioss_registrations_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VatIossRegistrationInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/VatIossRegistrationView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "vat-ioss-controller"
+        ]
+      }
+    },
+    "/channel/vat-ioss/shops": {
+      "get": {
+        "operationId": "get_channel_vat_ioss_shops",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "platformCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/VatIossShopList"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "vat-ioss-controller"
+        ]
+      }
+    },
+    "/channel/vat-ioss/statistics": {
+      "get": {
+        "operationId": "get_channel_vat_ioss_statistics",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "jurisdictionCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "filingScope",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "currency",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "shopCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dateFrom",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dateTo",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/VatIossStatistics"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "vat-ioss-controller"
+        ]
+      }
+    },
+    "/channel/vat-ioss/tax-rates": {
+      "get": {
+        "operationId": "get_channel_vat_ioss_tax_rates",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "jurisdictionCode",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "shopCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "asOf",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/VatIossTaxRateView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "vat-ioss-controller"
         ]
       }
     },
