@@ -774,6 +774,49 @@ const services: readonly {
       /^transactions(?:\/(?:capabilities|options|batch|import|reconciliation|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}))?$/,
   },
   {
+    // 12.7.1.1 账户管理（finance 服务，卷 12「财务核算」L3 12.7 资金下的第一格）。
+    //
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 finance 那几条巨型 alternation 里
+    //   并分支 —— 既有条目是单行超长正则，多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    //   既有条目**一字未改、也不重排**。
+    //
+    // ---- 插入锚点选在 **`transactions` 那条之后**（即 `accounting-periods` 那条之前）----
+    //   与本批其它车道的插入点（数组最开头 / `identity/` 之前 / `warehouse/` 之前 / 数组末尾）
+    //   彼此相距 700 行以上 ⇒ 并入时 git 能干净求并。
+    //
+    // ---- 首 token「fund-accounts」的零命中核对结论（本车道实测）----
+    //   本文件既有 services[] 正则里**没有任何一条**含 `fund-accounts` 这个串
+    //   （同 L3 的 12.7.2.1 资金分析占的是 `fund-analysis`，首 token 不同 ⇒ 两个正则两两不相交，
+    //   不会互相吃掉对方的路径）；本模块的正则对既有 finance 各条**零误伤**。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   fund-accounts                     账户列表（GET）/ 建账户（POST）
+    //   fund-accounts/capabilities        能力声明（上游真接通 / 下游缺口归谁）
+    //   fund-accounts/options             筛选项（账户类型词表 + 真实币种 + identity 的法人清单）
+    //   fund-accounts/balances/summary    余额汇总（**按币种分组**；跨币种合计恒为 null）
+    //   fund-accounts/{uuid}              账户详情（GET）/ 改档案（PUT）
+    //   fund-accounts/{uuid}/balances     余额历史（GET）/ 登记余额（POST，追加一条）
+    //   fund-accounts/{uuid}/deactivate   停用账户（POST）
+    //   fund-accounts/{uuid}/activate     启用账户（POST）
+    //
+    // ⚠️ **刻意不放行**：
+    //   fund-accounts/{uuid}/delete       —— 资金凭据**不做物理删除**（删掉等于让「钱曾在这个账户里」
+    //                                         从未发生过）；停用走 /deactivate。
+    //   fund-accounts/reconciliation       —— 🔴 12.7.1.2 银行对账**未交付**（另一个模块）。
+    //   fund-accounts/not-a-uuid          —— 非 UUID 段不应被 uuid 分支吃掉。
+    //   fund-accounts/{uuid}/not-a-shape  —— 多一层仍然 404。
+    //
+    // id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`（不是 `[0-9a-f-]+`）：
+    // 后者会把 `balances` 这种非 UUID 形状也当成 id 放行。
+    // 字面量子路径（capabilities / options / balances\/summary）排在 {uuid} 段**之前**判别 ——
+    // alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    prefix: 'finance/',
+    env: 'FINANCE_URL',
+    fallback: 'http://127.0.0.1:8087',
+    pattern:
+      /^fund\-accounts(?:\/balances\/summary|\/(?:capabilities|options|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:balances|deactivate|activate))?))?$/,
+  },
+  {
     // 12.5.1.2 会计期间（finance 服务，卷 12「财务核算」L3 12.5.1 账簿与科目下的第二格）。
     //
     // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 finance 那几条巨型 alternation 里

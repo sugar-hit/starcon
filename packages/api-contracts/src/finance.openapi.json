@@ -6102,6 +6102,458 @@
         },
         "type": "object"
       },
+      "FinanceFundAccountBalanceInput": {
+        "properties": {
+          "balanceAmount": {
+            "type": "number"
+          },
+          "changeSource": {
+            "enum": [
+              "INITIAL",
+              "SYNC",
+              "MANUAL"
+            ],
+            "type": "string"
+          },
+          "reason": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          },
+          "recordedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "sourceReference": {
+            "maxLength": 120,
+            "minLength": 0,
+            "type": "string"
+          },
+          "sourceSystem": {
+            "maxLength": 48,
+            "minLength": 0,
+            "type": "string"
+          }
+        },
+        "required": [
+          "balanceAmount",
+          "changeSource"
+        ],
+        "type": "object"
+      },
+      "FinanceFundAccountBalancePage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceFundAccountBalanceRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceFundAccountBalanceRow": {
+        "properties": {
+          "accountId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "balanceAmount": {
+            "type": "number"
+          },
+          "changeSource": {
+            "type": "string"
+          },
+          "changeSourceLabel": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "legalEntityCode": {
+            "type": "string"
+          },
+          "legalEntityId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "legalEntityName": {
+            "type": "string"
+          },
+          "operatorUserId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "previousAmount": {
+            "type": "number"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "recordedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "sourceReference": {
+            "type": "string"
+          },
+          "sourceSystem": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceFundAccountCapabilities": {
+        "properties": {
+          "capabilities": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceFundAccountCapability"
+            },
+            "type": "array"
+          },
+          "downstreamGaps": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceFundAccountDownstreamGap"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceFundAccountCapability": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "basis": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "module": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceFundAccountCreateInput": {
+        "properties": {
+          "accountHolder": {
+            "maxLength": 120,
+            "minLength": 0,
+            "type": "string"
+          },
+          "accountName": {
+            "maxLength": 120,
+            "minLength": 0,
+            "type": "string"
+          },
+          "accountNo": {
+            "pattern": "[A-Z0-9_-]{1,48}",
+            "type": "string"
+          },
+          "accountNumber": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "accountType": {
+            "enum": [
+              "BANK",
+              "PAYMENT_PLATFORM",
+              "PLATFORM_RESERVE"
+            ],
+            "type": "string"
+          },
+          "bankName": {
+            "maxLength": 120,
+            "minLength": 0,
+            "type": "string"
+          },
+          "currency": {
+            "minLength": 1,
+            "pattern": "[A-Z]{3}",
+            "type": "string"
+          },
+          "initialBalance": {
+            "type": "number"
+          },
+          "legalEntityId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          }
+        },
+        "required": [
+          "accountName",
+          "accountType",
+          "currency",
+          "legalEntityId"
+        ],
+        "type": "object"
+      },
+      "FinanceFundAccountDetail": {
+        "properties": {
+          "account": {
+            "$ref": "#/components/schemas/FinanceFundAccountRow"
+          },
+          "balanceTotal": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "recentBalances": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceFundAccountBalanceRow"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceFundAccountDownstreamGap": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "group": {
+            "type": "string"
+          },
+          "module": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "ownerService": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceFundAccountOption": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceFundAccountOptions": {
+        "properties": {
+          "accountTypes": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceFundAccountOption"
+            },
+            "type": "array"
+          },
+          "currencies": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "legalEntities": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceFundLegalEntityOption"
+            },
+            "type": "array"
+          },
+          "legalEntitiesAvailable": {
+            "type": "boolean"
+          },
+          "legalEntityNote": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceFundAccountPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceFundAccountRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceFundAccountRow": {
+        "properties": {
+          "accountHolder": {
+            "type": "string"
+          },
+          "accountName": {
+            "type": "string"
+          },
+          "accountNo": {
+            "type": "string"
+          },
+          "accountNumberMasked": {
+            "type": "string"
+          },
+          "accountNumberTail": {
+            "type": "string"
+          },
+          "accountType": {
+            "type": "string"
+          },
+          "accountTypeLabel": {
+            "type": "string"
+          },
+          "balanceRecordCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "bankName": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "currentBalance": {
+            "type": "number"
+          },
+          "currentBalanceAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "legalEntityCode": {
+            "type": "string"
+          },
+          "legalEntityId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "legalEntityName": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "version": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceFundAccountUpdateInput": {
+        "properties": {
+          "accountHolder": {
+            "maxLength": 120,
+            "minLength": 0,
+            "type": "string"
+          },
+          "accountName": {
+            "maxLength": 120,
+            "minLength": 0,
+            "type": "string"
+          },
+          "accountNumber": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "accountType": {
+            "enum": [
+              "BANK",
+              "PAYMENT_PLATFORM",
+              "PLATFORM_RESERVE"
+            ],
+            "type": "string"
+          },
+          "bankName": {
+            "maxLength": 120,
+            "minLength": 0,
+            "type": "string"
+          },
+          "legalEntityId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          }
+        },
+        "required": [
+          "accountName",
+          "accountType"
+        ],
+        "type": "object"
+      },
       "FinanceFundAnalysisCapabilities": {
         "properties": {
           "capabilities": {
@@ -6218,6 +6670,55 @@
           },
           "share": {
             "nullable": true,
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceFundCurrencyBalanceSummary": {
+        "properties": {
+          "conversionOwnerModule": {
+            "type": "string"
+          },
+          "crossCurrencyTotal": {
+            "nullable": true,
+            "type": "number"
+          },
+          "crossCurrencyTotalAvailable": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          },
+          "totals": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceFundCurrencyBalanceTotal"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceFundCurrencyBalanceTotal": {
+        "properties": {
+          "accountCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "activeAccountCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "byLegalEntity": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceFundLegalEntityBalance"
+            },
+            "type": "array"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "totalBalance": {
             "type": "number"
           }
         },
@@ -6559,6 +7060,49 @@
               "$ref": "#/components/schemas/FinanceFundFlowCurrencyTotal"
             },
             "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceFundLegalEntityBalance": {
+        "properties": {
+          "accountCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "legalEntityCode": {
+            "type": "string"
+          },
+          "legalEntityId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "legalEntityName": {
+            "type": "string"
+          },
+          "totalBalance": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceFundLegalEntityOption": {
+        "properties": {
+          "baseCurrency": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "legalName": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
           }
         },
         "type": "object"
@@ -23061,6 +23605,531 @@
         },
         "tags": [
           "financial-report-controller"
+        ]
+      }
+    },
+    "/finance/fund-accounts": {
+      "get": {
+        "operationId": "get_finance_fund_accounts",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "accountType",
+            "required": false,
+            "schema": {
+              "enum": [
+                "BANK",
+                "PAYMENT_PLATFORM",
+                "PLATFORM_RESERVE"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "currency",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "legalEntityId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "enum": [
+                "ACTIVE",
+                "INACTIVE"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "direction",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceFundAccountPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "fund-account-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_finance_fund_accounts",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinanceFundAccountCreateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceFundAccountRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "fund-account-controller"
+        ]
+      }
+    },
+    "/finance/fund-accounts/balances/summary": {
+      "get": {
+        "operationId": "get_finance_fund_accounts_balances_summary",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceFundCurrencyBalanceSummary"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "fund-account-controller"
+        ]
+      }
+    },
+    "/finance/fund-accounts/capabilities": {
+      "get": {
+        "operationId": "get_finance_fund_accounts_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceFundAccountCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "fund-account-controller"
+        ]
+      }
+    },
+    "/finance/fund-accounts/options": {
+      "get": {
+        "operationId": "get_finance_fund_accounts_options",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceFundAccountOptions"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "fund-account-controller"
+        ]
+      }
+    },
+    "/finance/fund-accounts/{id}": {
+      "get": {
+        "operationId": "get_finance_fund_accounts_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceFundAccountDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "fund-account-controller"
+        ]
+      },
+      "put": {
+        "operationId": "put_finance_fund_accounts_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinanceFundAccountUpdateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceFundAccountRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "fund-account-controller"
+        ]
+      }
+    },
+    "/finance/fund-accounts/{id}/activate": {
+      "post": {
+        "operationId": "post_finance_fund_accounts_id_activate",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceFundAccountRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "fund-account-controller"
+        ]
+      }
+    },
+    "/finance/fund-accounts/{id}/balances": {
+      "get": {
+        "operationId": "get_finance_fund_accounts_id_balances",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceFundAccountBalancePage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "fund-account-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_finance_fund_accounts_id_balances",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinanceFundAccountBalanceInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceFundAccountBalanceRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "fund-account-controller"
+        ]
+      }
+    },
+    "/finance/fund-accounts/{id}/deactivate": {
+      "post": {
+        "operationId": "post_finance_fund_accounts_id_deactivate",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceFundAccountRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "fund-account-controller"
         ]
       }
     },
