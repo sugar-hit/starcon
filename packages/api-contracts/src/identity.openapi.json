@@ -4897,6 +4897,121 @@
         },
         "type": "object"
       },
+      "NotificationInboxCapabilities": {
+        "properties": {
+          "boundaries": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "maxKeysPerRequest": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "types": {
+            "items": {
+              "$ref": "#/components/schemas/NotificationType"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "NotificationReadEntry": {
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "readAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "ref": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "NotificationReadRequest": {
+        "properties": {
+          "keys": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "NotificationReadResult": {
+        "properties": {
+          "affected": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "read": {
+            "items": {
+              "$ref": "#/components/schemas/NotificationReadEntry"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "NotificationReadState": {
+        "properties": {
+          "read": {
+            "items": {
+              "$ref": "#/components/schemas/NotificationReadEntry"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "NotificationSubscriptionRequest": {
+        "properties": {
+          "types": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "NotificationSubscriptions": {
+        "properties": {
+          "types": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "NotificationType": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "owner": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "NumberEntityView": {
         "properties": {
           "code": {
@@ -14170,6 +14285,230 @@
         },
         "tags": [
           "approval-inbox-controller"
+        ]
+      }
+    },
+    "/identity/notification-inbox/capabilities": {
+      "get": {
+        "operationId": "get_identity_notification_inbox_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationInboxCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "notification-inbox-controller"
+        ]
+      }
+    },
+    "/identity/notification-inbox/read": {
+      "post": {
+        "operationId": "post_identity_notification_inbox_read",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NotificationReadRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationReadResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "notification-inbox-controller"
+        ]
+      }
+    },
+    "/identity/notification-inbox/read-state": {
+      "post": {
+        "operationId": "post_identity_notification_inbox_read_state",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NotificationReadRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationReadState"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "notification-inbox-controller"
+        ]
+      }
+    },
+    "/identity/notification-inbox/subscriptions": {
+      "get": {
+        "operationId": "get_identity_notification_inbox_subscriptions",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationSubscriptions"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "notification-inbox-controller"
+        ]
+      },
+      "put": {
+        "operationId": "put_identity_notification_inbox_subscriptions",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NotificationSubscriptionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationSubscriptions"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "notification-inbox-controller"
+        ]
+      }
+    },
+    "/identity/notification-inbox/unread": {
+      "post": {
+        "operationId": "post_identity_notification_inbox_unread",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NotificationReadRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationReadResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "notification-inbox-controller"
         ]
       }
     },
