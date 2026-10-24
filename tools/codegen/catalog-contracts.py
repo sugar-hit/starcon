@@ -25,7 +25,7 @@ root=Path(__file__).resolve().parents[2]
 # load_specs() 会无条件读 backend/target/openapi/<service>.openapi.json，
 # 那个文件由该服务的 OpenApiContractTest 在测试阶段导出。
 # 少了任何一边，合并后 `pnpm contracts:generate` 会直接崩 —— 而且看起来像别人弄坏了你的东西。
-SERVICES=[('identity',8081),('catalog',8082),('channel',8083),('warehouse',8084),('trade',8085),('crm',8086),('finance',8087)]
+SERVICES=[('identity',8081),('catalog',8082),('channel',8083),('warehouse',8084),('trade',8085),('crm',8086),('finance',8087),('reporting',8088)]
 ALLOWLIST=Path(__file__).resolve().parent/'contract-collision-allowlist.json'
 BACKLOG='docs/backlog/2026-10/2026-10-10-contract-flat-overwrite-and-nav-gaps.md'
 
