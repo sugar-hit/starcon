@@ -1616,6 +1616,63 @@ const services: readonly {
       /^reconciliation\-tasks(?:\/(?:capabilities|options)|(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:matches|match|differences|events))?))?$/,
   },
   {
+    // 12.3.2.2 差异处理（finance 服务，卷 12「财务核算」L3 12.3.2 对账下的第二格）。
+    //
+    // ⚠️ 本条目是**新增一条独立的 `services[]` 元素**，不是往既有 finance 那几条巨型 alternation 里并分支 ——
+    //   那一支是单行超长正则，多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    //   既有条目**一字未改、也不重排**。
+    //
+    // ---- 插入锚点选在 **12.3.2.1 对账任务那条之后** ----
+    //   12.3.2.2 是 12.3.2.1 的直接下游（L3 12.3.2 对账），挨着放最说得清；
+    //   同批其它车道的锚点分别是「数组最开头」「第一个 `prefix: 'identity/'` 之前」
+    //   「第一个 `prefix: 'warehouse/'` 之前」「数组末尾」，与本处相距上万行 ⇒ git 能干净求并。
+    //
+    // ---- 首 token「reconciliation-differences」的零命中核对结论（本车道实测）----
+    //   发车前用 `.tmp/check-allowlist.mjs` 把本文件既有 **228** 条 services[] 正则**逐条抽出**，
+    //   对本模块下面 11 个正向 shape 与 7 个负向 shape **逐条实测**：
+    //   **既有正则对本模块的首 token 零命中**（`grep -c "reconciliation-differences"` = 0）。
+    //   🔴 尤其确认过它**不吃**兄弟模块 12.3.2.1 的 `reconciliation-tasks`：
+    //   两个首 token 在 `reconciliation-` 之后分岔（`tasks` vs `differences`），互不为前缀。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   reconciliation-differences                    差异处理队列（GET，真分页 + 真筛选 + 真搜索 + 按币种分组汇总）
+    //   reconciliation-differences/capabilities       能力声明（上游真接通 / 下游缺口归谁）
+    //   reconciliation-differences/options            筛选项（真实任务 / 币种 / 责任人 + 受控词表）
+    //   reconciliation-differences/{uuid}             单条差异的处理详情（GET）
+    //   reconciliation-differences/{uuid}/events      处理时间线（GET，真分页）
+    //   reconciliation-differences/{uuid}/claim       认领并指定责任人（POST）
+    //   reconciliation-differences/{uuid}/assign      改派责任人（POST）
+    //   reconciliation-differences/{uuid}/classify    分类归因（POST，人工分类 + 理由）
+    //   reconciliation-differences/{uuid}/adjustments 登记调整分录（POST，凭证或说明）
+    //   reconciliation-differences/{uuid}/adjust      判定「已调整」（POST，终态）
+    //   reconciliation-differences/{uuid}/write-off   判定「已核销」（POST，终态）
+    //
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   reconciliation-differences/not-a-uuid          —— 非 UUID 段不应被 uuid 分支吃掉。
+    //   reconciliation-differences/{uuid}/not-a-shape  —— 多一层仍然 404。
+    //   reconciliation-differences/capabilities/{uuid} —— 字面量段刻意不接 id 段。
+    //   reconciliation-differences/options/{uuid}      —— 同上。
+    //   reconciliation-differences/{uuid}/delete       —— 本模块**不做物理删除**
+    //                                                       （闭环记录删掉 = 差异凭空消失）。
+    //   reconciliation-differences/{uuid}/rerun        —— 没有「重跑」：闭环是终态，
+    //                                                       重新处理要另建一条对账任务。
+    //   reconciliation-difference/capabilities         —— 🔴 交替写错（少一个 s）就会互相吃掉，
+    //                                                       必须反向钉住。
+    //   reconciliation-tasks/{uuid}/differences/{uuid}  —— 🔴 那是 12.3.2.1 命名空间下的形状，
+    //                                                       12.3.2.2 **有自己的命名空间**，不共用。
+    //
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //   （不是 `[0-9a-f-]+`）：后者会把 `claim` / `classify` 这种非 UUID 形状也当成 id 放行。
+    //   字面量子路径（capabilities / options）排在 {uuid} 段**之前**判别 ——
+    //   alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    //   同理 `adjustments` 排在 `adjust` **之前**（`adjust` 是它的前缀，反了会被吃掉半截）。
+    prefix: 'finance/',
+    env: 'FINANCE_URL',
+    fallback: 'http://127.0.0.1:8087',
+    pattern:
+      /^reconciliation\-differences(?:\/(?:capabilities|options)|(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:adjustments|adjust|write-off|claim|assign|classify|events))?))?$/,
+  },
+  {
     // 1.1.2.3 履约健康（trade 服务，卷 01「工作台与门户」L3 1.1.2 关键指标下的第三格）。
     //
     // ⚠️ 本条目是**新增一条独立的 `services[]` 元素**，不是往既有 trade 那条巨型 alternation 里并分支 ——
