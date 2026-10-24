@@ -10044,6 +10044,781 @@
         },
         "type": "object"
       },
+      "FinancePeriodCloseApprovalRow": {
+        "properties": {
+          "action": {
+            "type": "string"
+          },
+          "actionId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "actorId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "actorName": {
+            "type": "string"
+          },
+          "approvalInstanceId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "approvalInstanceNo": {
+            "type": "string"
+          },
+          "comment": {
+            "type": "string"
+          },
+          "decidedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "dwellSeconds": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "executionId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "nodeKey": {
+            "type": "string"
+          },
+          "nodeName": {
+            "type": "string"
+          },
+          "nodeOrder": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "periodId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "syncedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinancePeriodCloseBlockingReason": {
+        "properties": {
+          "basis": {
+            "type": "string"
+          },
+          "checkCode": {
+            "enum": [
+              "UNRECONCILED_DIFFERENCE",
+              "UNCARRIED_COST",
+              "UNSETTLED_PAYMENT",
+              "UNPOSTED_VOUCHER"
+            ],
+            "type": "string"
+          },
+          "checkName": {
+            "type": "string"
+          },
+          "itemCount": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinancePeriodCloseCapabilities": {
+        "properties": {
+          "capabilities": {
+            "items": {
+              "$ref": "#/components/schemas/FinancePeriodCloseCapability"
+            },
+            "type": "array"
+          },
+          "downstreamGaps": {
+            "items": {
+              "$ref": "#/components/schemas/FinancePeriodCloseDownstreamGap"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "FinancePeriodCloseCapability": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "basis": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "module": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinancePeriodCloseCarryForwardInput": {
+        "properties": {
+          "exceptionBasis": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinancePeriodCloseCheckAmountRow": {
+        "properties": {
+          "amount": {
+            "type": "number"
+          },
+          "checkId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "checklistId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "itemCount": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinancePeriodCloseCheckItemPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/FinancePeriodCloseCheckItemRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinancePeriodCloseCheckItemRow": {
+        "properties": {
+          "amount": {
+            "type": "number"
+          },
+          "checkId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "checklistId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "classification": {
+            "enum": [
+              "BLOCKING",
+              "CARRYWARD"
+            ],
+            "type": "string"
+          },
+          "classificationLabel": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "dueDate": {
+            "format": "date",
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "periodId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "quantity": {
+            "nullable": true,
+            "type": "number"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "sourceId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "sourceModule": {
+            "type": "string"
+          },
+          "sourceNo": {
+            "type": "string"
+          },
+          "sourceType": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinancePeriodCloseCheckRow": {
+        "properties": {
+          "amounts": {
+            "items": {
+              "$ref": "#/components/schemas/FinancePeriodCloseCheckAmountRow"
+            },
+            "type": "array"
+          },
+          "checkCode": {
+            "enum": [
+              "UNRECONCILED_DIFFERENCE",
+              "UNCARRIED_COST",
+              "UNSETTLED_PAYMENT",
+              "UNPOSTED_VOUCHER"
+            ],
+            "type": "string"
+          },
+          "checkCodeLabel": {
+            "type": "string"
+          },
+          "checkName": {
+            "type": "string"
+          },
+          "checklistId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "classification": {
+            "enum": [
+              "BLOCKING",
+              "CARRYWARD"
+            ],
+            "type": "string"
+          },
+          "classificationBasis": {
+            "type": "string"
+          },
+          "classificationLabel": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "dataSource": {
+            "type": "string"
+          },
+          "exceptionAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "exceptionBasis": {
+            "type": "string"
+          },
+          "exceptionBy": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "itemCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "periodId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "result": {
+            "enum": [
+              "PASS",
+              "FAIL",
+              "NOT_DETERMINABLE"
+            ],
+            "type": "string"
+          },
+          "resultLabel": {
+            "type": "string"
+          },
+          "ruleClassification": {
+            "enum": [
+              "BLOCKING",
+              "CARRYWARD"
+            ],
+            "type": "string"
+          },
+          "ruleClassificationLabel": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinancePeriodCloseChecklistDetail": {
+        "properties": {
+          "amounts": {
+            "items": {
+              "$ref": "#/components/schemas/FinancePeriodCloseCheckAmountRow"
+            },
+            "type": "array"
+          },
+          "blockingCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "carryforwardCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "checkCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "checklist": {
+            "$ref": "#/components/schemas/FinancePeriodCloseChecklistRow"
+          },
+          "checks": {
+            "items": {
+              "$ref": "#/components/schemas/FinancePeriodCloseCheckRow"
+            },
+            "type": "array"
+          },
+          "currencyGroups": {
+            "items": {
+              "$ref": "#/components/schemas/FinancePeriodCloseCurrencyGroup"
+            },
+            "type": "array"
+          },
+          "notDeterminableCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "passedCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "periodLockNote": {
+            "type": "string"
+          },
+          "periodStatus": {
+            "type": "string"
+          },
+          "periodStatusLabel": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinancePeriodCloseChecklistInput": {
+        "properties": {
+          "note": {
+            "type": "string"
+          },
+          "periodId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinancePeriodCloseChecklistPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/FinancePeriodCloseChecklistRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinancePeriodCloseChecklistRow": {
+        "properties": {
+          "baseCurrency": {
+            "type": "string"
+          },
+          "checklistNo": {
+            "type": "string"
+          },
+          "completedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdBy": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "periodCode": {
+            "type": "string"
+          },
+          "periodEnd": {
+            "format": "date",
+            "type": "string"
+          },
+          "periodId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "periodStart": {
+            "format": "date",
+            "type": "string"
+          },
+          "runNo": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "startedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinancePeriodCloseCurrencyGroup": {
+        "properties": {
+          "amount": {
+            "type": "number"
+          },
+          "baseAmount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "conversionNote": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "exchangeRate": {
+            "nullable": true,
+            "type": "number"
+          },
+          "itemCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "rateEffectiveDate": {
+            "format": "date",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinancePeriodCloseDownstreamGap": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "group": {
+            "type": "string"
+          },
+          "module": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "ownerService": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinancePeriodCloseExecuteInput": {
+        "properties": {
+          "carryforwardBasis": {
+            "type": "string"
+          },
+          "checklistId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinancePeriodCloseExecutionDetail": {
+        "properties": {
+          "approvals": {
+            "items": {
+              "$ref": "#/components/schemas/FinancePeriodCloseApprovalRow"
+            },
+            "type": "array"
+          },
+          "checklist": {
+            "$ref": "#/components/schemas/FinancePeriodCloseChecklistDetail"
+          },
+          "execution": {
+            "$ref": "#/components/schemas/FinancePeriodCloseExecutionRow"
+          }
+        },
+        "type": "object"
+      },
+      "FinancePeriodCloseExecutionPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/FinancePeriodCloseExecutionRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinancePeriodCloseExecutionRow": {
+        "properties": {
+          "approvalInstanceId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "approvalInstanceNo": {
+            "type": "string"
+          },
+          "approvalStatus": {
+            "type": "string"
+          },
+          "blockingCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "carryforwardBasis": {
+            "type": "string"
+          },
+          "carryforwardCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "checklistId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "checklistNo": {
+            "type": "string"
+          },
+          "closeNo": {
+            "type": "string"
+          },
+          "closedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "closedBy": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdBy": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "lockNote": {
+            "type": "string"
+          },
+          "notDeterminableCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "periodCode": {
+            "type": "string"
+          },
+          "periodId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "periodLocked": {
+            "type": "boolean"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "PENDING_APPROVAL",
+              "APPROVED",
+              "REJECTED",
+              "CLOSED"
+            ],
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinancePeriodCloseOptionRef": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinancePeriodCloseOptions": {
+        "properties": {
+          "checkCodes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "currencies": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "periodStatuses": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "periods": {
+            "items": {
+              "$ref": "#/components/schemas/FinancePeriodCloseOptionRef"
+            },
+            "type": "array"
+          },
+          "statuses": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "FinancePeriodCloseSubmitResult": {
+        "properties": {
+          "blockingReasons": {
+            "items": {
+              "$ref": "#/components/schemas/FinancePeriodCloseBlockingReason"
+            },
+            "type": "array"
+          },
+          "executionId": {
+            "nullable": true,
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "outcome": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "FinancePrepaymentAllocationInput": {
         "properties": {
           "amount": {
@@ -24609,6 +25384,530 @@
         },
         "tags": [
           "payment-plan-controller"
+        ]
+      }
+    },
+    "/finance/period-close/capabilities": {
+      "get": {
+        "operationId": "get_finance_period_close_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinancePeriodCloseCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "period-close-controller"
+        ]
+      }
+    },
+    "/finance/period-close/checklists": {
+      "get": {
+        "operationId": "get_finance_period_close_checklists",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "periodId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinancePeriodCloseChecklistPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "period-close-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_finance_period_close_checklists",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinancePeriodCloseChecklistInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinancePeriodCloseChecklistDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "period-close-controller"
+        ]
+      }
+    },
+    "/finance/period-close/checklists/{id}": {
+      "get": {
+        "operationId": "get_finance_period_close_checklists_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinancePeriodCloseChecklistDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "period-close-controller"
+        ]
+      }
+    },
+    "/finance/period-close/checklists/{id}/checks/{checkId}/carry-forward": {
+      "post": {
+        "operationId": "post_finance_period_close_checklists_id_checks_checkId_carry_forward",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "checkId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinancePeriodCloseCarryForwardInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinancePeriodCloseCheckRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "period-close-controller"
+        ]
+      }
+    },
+    "/finance/period-close/checklists/{id}/items": {
+      "get": {
+        "operationId": "get_finance_period_close_checklists_id_items",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "checkId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinancePeriodCloseCheckItemPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "period-close-controller"
+        ]
+      }
+    },
+    "/finance/period-close/executions": {
+      "get": {
+        "operationId": "get_finance_period_close_executions",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "periodId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinancePeriodCloseExecutionPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "period-close-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_finance_period_close_executions",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinancePeriodCloseExecuteInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinancePeriodCloseSubmitResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "period-close-controller"
+        ]
+      }
+    },
+    "/finance/period-close/executions/{id}": {
+      "get": {
+        "operationId": "get_finance_period_close_executions_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinancePeriodCloseExecutionDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "period-close-controller"
+        ]
+      }
+    },
+    "/finance/period-close/executions/{id}/sync-approval": {
+      "post": {
+        "operationId": "post_finance_period_close_executions_id_sync_approval",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinancePeriodCloseExecutionDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "period-close-controller"
+        ]
+      }
+    },
+    "/finance/period-close/options": {
+      "get": {
+        "operationId": "get_finance_period_close_options",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinancePeriodCloseOptions"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "period-close-controller"
         ]
       }
     },
