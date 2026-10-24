@@ -11098,6 +11098,640 @@
         },
         "type": "object"
       },
+      "FinanceMatchRateCurrencyRow": {
+        "properties": {
+          "currency": {
+            "type": "string"
+          },
+          "matchRate": {
+            "nullable": true,
+            "type": "number"
+          },
+          "matchedLineCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalLineCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "unmatchedLineCount": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceMatchRateMonitoring": {
+        "properties": {
+          "currencies": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceMatchRateCurrencyRow"
+            },
+            "type": "array"
+          },
+          "matchRate": {
+            "nullable": true,
+            "type": "number"
+          },
+          "matchRateTarget": {
+            "nullable": true,
+            "type": "number"
+          },
+          "matchedLineCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "reasons": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceMatchRateReasonRow"
+            },
+            "type": "array"
+          },
+          "ruleId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "ruleNo": {
+            "type": "string"
+          },
+          "targetMet": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "taskId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "taskNo": {
+            "type": "string"
+          },
+          "totalLineCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "unmatchedLineCount": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceMatchRateReasonRow": {
+        "properties": {
+          "currency": {
+            "type": "string"
+          },
+          "lineCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "ratio": {
+            "type": "number"
+          },
+          "reasonLabel": {
+            "type": "string"
+          },
+          "reasonType": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceMatchRateSnapshotInput": {
+        "properties": {
+          "taskId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceMatchRateSnapshotPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceMatchRateSnapshotRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceMatchRateSnapshotRow": {
+        "properties": {
+          "amountTolerance": {
+            "type": "number"
+          },
+          "computedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "computedBy": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "dateWindowDays": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "exchangeRateTolerance": {
+            "type": "number"
+          },
+          "feeTolerance": {
+            "type": "number"
+          },
+          "fuzzyEnabled": {
+            "type": "boolean"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "matchKeys": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "matchRate": {
+            "nullable": true,
+            "type": "number"
+          },
+          "matchRateTarget": {
+            "type": "number"
+          },
+          "matchedGroupCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "matchedLineCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "minDimensionCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "ruleId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "ruleNo": {
+            "type": "string"
+          },
+          "targetMet": {
+            "type": "boolean"
+          },
+          "taskId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "totalLineCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "unmatchedLineCount": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceMatchRuleAccount": {
+        "properties": {
+          "accountName": {
+            "type": "string"
+          },
+          "accountNo": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "legalEntityName": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceMatchRuleCapabilities": {
+        "properties": {
+          "capabilities": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceMatchRuleCapability"
+            },
+            "type": "array"
+          },
+          "gaps": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceMatchRuleGap"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceMatchRuleCapability": {
+        "properties": {
+          "delivered": {
+            "type": "boolean"
+          },
+          "moduleId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceMatchRuleEventPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceMatchRuleEventRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceMatchRuleEventRow": {
+        "properties": {
+          "actorId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "eventType": {
+            "type": "string"
+          },
+          "eventTypeLabel": {
+            "type": "string"
+          },
+          "fromStatus": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "occurredAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "ruleId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "toStatus": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceMatchRuleGap": {
+        "properties": {
+          "delivered": {
+            "type": "boolean"
+          },
+          "domain": {
+            "type": "string"
+          },
+          "moduleId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "owner": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceMatchRuleInput": {
+        "properties": {
+          "accountId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "amountTolerance": {
+            "exclusiveMinimum": false,
+            "minimum": 0,
+            "type": "number"
+          },
+          "currency": {
+            "nullable": true,
+            "type": "string"
+          },
+          "dateWindowDays": {
+            "format": "int32",
+            "maximum": 31,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "exchangeRateTolerance": {
+            "exclusiveMinimum": false,
+            "minimum": 0,
+            "type": "number"
+          },
+          "feeTolerance": {
+            "exclusiveMinimum": false,
+            "minimum": 0,
+            "type": "number"
+          },
+          "fuzzyAmountTolerance": {
+            "exclusiveMinimum": false,
+            "minimum": 0,
+            "type": "number"
+          },
+          "fuzzyDateWindowDays": {
+            "format": "int32",
+            "maximum": 31,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "fuzzyEnabled": {
+            "type": "boolean"
+          },
+          "fuzzyReferencePrefixLength": {
+            "format": "int32",
+            "maximum": 32,
+            "minimum": 4,
+            "type": "integer"
+          },
+          "matchKeys": {
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "matchRateTarget": {
+            "exclusiveMaximum": false,
+            "exclusiveMinimum": false,
+            "maximum": 100,
+            "minimum": 0,
+            "type": "number"
+          },
+          "minDimensionCount": {
+            "format": "int32",
+            "maximum": 3,
+            "minimum": 2,
+            "type": "integer"
+          },
+          "note": {
+            "nullable": true,
+            "type": "string"
+          },
+          "priority": {
+            "format": "int32",
+            "maximum": 9999,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "ruleName": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "shopId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "matchKeys",
+          "ruleName"
+        ],
+        "type": "object"
+      },
+      "FinanceMatchRuleOption": {
+        "properties": {
+          "label": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceMatchRuleOptions": {
+        "properties": {
+          "accounts": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceMatchRuleAccount"
+            },
+            "type": "array"
+          },
+          "currencies": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "matchKeys": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceMatchRuleOption"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "reasons": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceMatchRuleOption"
+            },
+            "type": "array"
+          },
+          "statuses": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceMatchRuleOption"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceMatchRulePage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceMatchRuleRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceMatchRuleRow": {
+        "properties": {
+          "accountId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "activatedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "amountTolerance": {
+            "type": "number"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "currency": {
+            "nullable": true,
+            "type": "string"
+          },
+          "dateWindowDays": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "exchangeRateTolerance": {
+            "type": "number"
+          },
+          "feeTolerance": {
+            "type": "number"
+          },
+          "fuzzyAmountTolerance": {
+            "type": "number"
+          },
+          "fuzzyDateWindowDays": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "fuzzyEnabled": {
+            "type": "boolean"
+          },
+          "fuzzyReferencePrefixLength": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "matchKeys": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "matchRateTarget": {
+            "type": "number"
+          },
+          "minDimensionCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "priority": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "ruleName": {
+            "type": "string"
+          },
+          "ruleNo": {
+            "type": "string"
+          },
+          "shopId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "version": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
       "FinancePayableCapabilities": {
         "properties": {
           "capabilities": {
@@ -39228,6 +39862,552 @@
         },
         "tags": [
           "reconciliation-difference-controller"
+        ]
+      }
+    },
+    "/finance/reconciliation-match-rules": {
+      "get": {
+        "operationId": "get_finance_reconciliation_match_rules",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceMatchRulePage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "reconciliation-match-rule-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_finance_reconciliation_match_rules",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinanceMatchRuleInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceMatchRuleRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "reconciliation-match-rule-controller"
+        ]
+      }
+    },
+    "/finance/reconciliation-match-rules/capabilities": {
+      "get": {
+        "operationId": "get_finance_reconciliation_match_rules_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceMatchRuleCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "reconciliation-match-rule-controller"
+        ]
+      }
+    },
+    "/finance/reconciliation-match-rules/monitoring": {
+      "get": {
+        "operationId": "get_finance_reconciliation_match_rules_monitoring",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "taskId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceMatchRateMonitoring"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "reconciliation-match-rule-controller"
+        ]
+      }
+    },
+    "/finance/reconciliation-match-rules/options": {
+      "get": {
+        "operationId": "get_finance_reconciliation_match_rules_options",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceMatchRuleOptions"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "reconciliation-match-rule-controller"
+        ]
+      }
+    },
+    "/finance/reconciliation-match-rules/{id}": {
+      "get": {
+        "operationId": "get_finance_reconciliation_match_rules_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceMatchRuleRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "reconciliation-match-rule-controller"
+        ]
+      },
+      "put": {
+        "operationId": "put_finance_reconciliation_match_rules_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinanceMatchRuleInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceMatchRuleRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "reconciliation-match-rule-controller"
+        ]
+      }
+    },
+    "/finance/reconciliation-match-rules/{id}/activate": {
+      "post": {
+        "operationId": "post_finance_reconciliation_match_rules_id_activate",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceMatchRuleRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "reconciliation-match-rule-controller"
+        ]
+      }
+    },
+    "/finance/reconciliation-match-rules/{id}/deactivate": {
+      "post": {
+        "operationId": "post_finance_reconciliation_match_rules_id_deactivate",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceMatchRuleRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "reconciliation-match-rule-controller"
+        ]
+      }
+    },
+    "/finance/reconciliation-match-rules/{id}/events": {
+      "get": {
+        "operationId": "get_finance_reconciliation_match_rules_id_events",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceMatchRuleEventPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "reconciliation-match-rule-controller"
+        ]
+      }
+    },
+    "/finance/reconciliation-match-rules/{id}/rate-snapshots": {
+      "get": {
+        "operationId": "get_finance_reconciliation_match_rules_id_rate_snapshots",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceMatchRateSnapshotPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "reconciliation-match-rule-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_finance_reconciliation_match_rules_id_rate_snapshots",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinanceMatchRateSnapshotInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/FinanceMatchRateSnapshotRow"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "reconciliation-match-rule-controller"
         ]
       }
     },
