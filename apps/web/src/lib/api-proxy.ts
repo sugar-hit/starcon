@@ -9097,6 +9097,67 @@ const services: readonly {
       /^logistics-freight(?:\/capabilities|\/estimate|\/variance|\/actuals(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/void)?|\/rules(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:supersede|disable))?)?|\/surcharges(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/disable)?|\/head-freight(?:\/estimate|\/structures(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/disable)?)?))$/,
   },
   {
+    // 12.6.2.1 发票管理（finance 服务，卷 12「财务核算」L3 12.6.2 发票与贷项下的第一格）。
+    //
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 finance 那几条巨型 alternation 里并分支 ——
+    //   那一支是单行超长正则，多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。既有条目**一字未改、也不重排**。
+    //
+    // ---- 插入锚点 ----
+    //   本车道分配到的锚点 = 本文件第 9040 行那条元素（5.2.3.1 平台费用，catalog 服务）的 `{` 起始行**之前**。
+    //   同批另外三条车道的锚点分别在第 314 / 1505 / 4071 行 —— 与本车道相距足够远，
+    //   并入时 git 能干净求并。
+    //
+    // ---- 首 token「invoices」的零命中核对结论（本车道实测）----
+    //   发车前用 `grep -c "invoices" apps/web/src/lib/api-proxy.ts` 实测：**零命中**（输出 0）。
+    //   （单数 `invoice` 有 4 处命中，但**全是注释**，外加一条既有 `fulfillment/routing/...invoice-requests`
+    //   正则 —— 与本条正则的首 token `invoices` 不相交。）
+    //   既有 finance 那几支是单行超长 alternation，首 token 是 `receivables` / `receivable-aging` /
+    //   `payables` / `receipts` / `bad-debt` / `payment-plans` / `payment-orders` /
+    //   `payment-executions` / `write-offs` / `settlement` / `transactions` / `fund-analysis` /
+    //   `cost-collections` / `cost-valuation` / `deferred-settlement` / `cost-calculation` /
+    //   `cost-variance` / `tax-rates` / `supplier-reconciliation` / `period-close` 等，**全不相同** ⇒
+    //   本条正则与它们**两两不相交**（既不会互相吃掉，也不会被吃掉）。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   invoices                            发票列表（GET）/ 建一张草稿（POST）
+    //   invoices/capabilities               能力声明（上游真接通 / 职责切分 / 缺口归谁）
+    //   invoices/options                    筛选项（单据类型 / 状态 / 平台对接状态 / 币种 / 模板）
+    //   invoices/templates                  发票模板列表（GET）/ 登记模板（POST）
+    //   invoices/requests                   待开票需求（上游 9 订单，**只读**）
+    //   invoices/batch                      批量建单（从待开票需求生成草稿）
+    //   invoices/summary                    发票汇总（🔴 **按币种分组**，没有跨币种合计）
+    //   invoices/platform-submissions       平台提交记录（GET）/ 批量递交平台（POST）
+    //   invoices/platform-submissions/{uuid}/acknowledge  登记平台回执（POST）
+    //   invoices/{uuid}                     发票详情（GET：头 + 明细）
+    //   invoices/{uuid}/issue               开具（POST：草稿 → 已开具，分配正式编号）
+    //   invoices/{uuid}/void                作废（POST：🔴 原因必填）
+    //   invoices/{uuid}/reverse             红冲（POST：逐行带出生成成对的贷项通知单）
+    //   invoices/{uuid}/events              状态记录（GET，append-only 留痕）
+    //   invoices/{uuid}/platform-payload    平台开票报文（GET，金额是字符串）
+    //
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   invoices/{uuid}/update              —— 本模块**没有**「改发票」端点：已开具的发票不可改行，
+    //                                           要改只能作废后重开（或红冲）。
+    //   invoices/filings                    —— 🔴 12.6.1.2 VAT/IOSS 申报数据**未交付**：
+    //                                           放行会让界面以为「已经能出申报底稿」。
+    //   invoices/declarations               —— 🔴 同上（申报数据的另一个叫法）。
+    //   invoices/reports                    —— 🔴 12.5.2.2 财务报表**未交付**（在同服务另一条命名空间）。
+    //   invoices/vouchers                   —— 🔴 12.5.2.1 凭证**不归本模块**：发票不写凭证，
+    //                                           过账走凭证模块自己的接口。
+    //   invoices/platform-submissions/{uuid} —— 本模块**没有**「按 id 取单条提交记录」的端点
+    //                                           （只有清单与登记回执）。
+    //   invoices/templates/{uuid}           —— 模板没有单条详情端点（按查询参数定位）。
+    //   invoices/not-a-shape                —— 非本模块的子路径。
+    //
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //   （不是 `[0-9a-f-]+`）：后者会把 `events` 这种非 UUID 形状也当成 id 放行。
+    prefix: 'finance/',
+    env: 'FINANCE_URL',
+    fallback: 'http://127.0.0.1:8087',
+    pattern:
+      /^invoices(?:\/(?:capabilities|options|templates|requests|batch|summary|platform-submissions(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/acknowledge)?|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:issue|void|reverse|events|platform-payload))?))?$/,
+  },
+  {
     // 5.2.3.1 平台费用（catalog 服务，卷 05 定价与价目的 L3 锚点 5.2.3）。
     //
     // 蓝图：「维护平台侧费用的计算规则：佣金比例或阶梯、订阅费分摊、Referral Fee、交易费、

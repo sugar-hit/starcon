@@ -8770,6 +8770,1097 @@
         },
         "type": "object"
       },
+      "FinanceInvoiceBatchFailure": {
+        "properties": {
+          "reason": {
+            "type": "string"
+          },
+          "requestId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceInvoiceBatchInput": {
+        "properties": {
+          "issueDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "requestIds": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "templateId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceInvoiceBatchResult": {
+        "properties": {
+          "created": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceInvoiceRow"
+            },
+            "type": "array"
+          },
+          "failed": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceInvoiceBatchFailure"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceInvoiceCapabilities": {
+        "properties": {
+          "capabilities": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceInvoiceCapability"
+            },
+            "type": "array"
+          },
+          "countryCoverage": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceInvoiceCountryCoverage"
+            },
+            "type": "array"
+          },
+          "downstreamGaps": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceInvoiceGap"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceInvoiceCapability": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "basis": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "module": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceInvoiceCountryCoverage": {
+        "properties": {
+          "countryCode": {
+            "type": "string"
+          },
+          "jurisdictionCode": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "taxRateResolvable": {
+            "type": "boolean"
+          },
+          "templateConfigured": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceInvoiceCreateInput": {
+        "properties": {
+          "customerName": {
+            "type": "string"
+          },
+          "issueDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "lines": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceInvoiceLineInput"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "shopCode": {
+            "type": "string"
+          },
+          "shopId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "sourceOrderNo": {
+            "type": "string"
+          },
+          "sourceSettlementId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "templateId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceInvoiceCurrencySummary": {
+        "properties": {
+          "baseAmount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "creditNoteCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "exchangeRate": {
+            "nullable": true,
+            "type": "number"
+          },
+          "exchangeRateNote": {
+            "type": "string"
+          },
+          "invoiceCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "subtotal": {
+            "type": "number"
+          },
+          "tax": {
+            "type": "number"
+          },
+          "total": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceInvoiceDetail": {
+        "properties": {
+          "invoice": {
+            "$ref": "#/components/schemas/FinanceInvoiceRow"
+          },
+          "lines": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceInvoiceLineRow"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceInvoiceEventRow": {
+        "properties": {
+          "actorId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "detail": {
+            "additionalProperties": {
+              "type": "object"
+            },
+            "type": "object"
+          },
+          "eventType": {
+            "type": "string"
+          },
+          "eventTypeLabel": {
+            "type": "string"
+          },
+          "fromStatus": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "invoiceId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "occurredAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "toStatus": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceInvoiceGap": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "group": {
+            "type": "string"
+          },
+          "module": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "ownerService": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceInvoiceLineInput": {
+        "properties": {
+          "note": {
+            "type": "string"
+          },
+          "productName": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "taxCode": {
+            "type": "string"
+          },
+          "taxType": {
+            "type": "string"
+          },
+          "unitPrice": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceInvoiceLineRow": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "invoiceId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "lineAmount": {
+            "type": "number"
+          },
+          "lineNo": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "originalLineAmount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "originalLineId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "productName": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "taxAmount": {
+            "type": "number"
+          },
+          "taxCode": {
+            "type": "string"
+          },
+          "taxRate": {
+            "type": "number"
+          },
+          "taxRateId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "taxType": {
+            "type": "string"
+          },
+          "unitPrice": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceInvoicePage": {
+        "properties": {
+          "draftCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "issuedCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceInvoiceRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceInvoicePayloadLine": {
+        "properties": {
+          "lineAmount": {
+            "type": "string"
+          },
+          "lineNo": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "productName": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "string"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "taxAmount": {
+            "type": "string"
+          },
+          "taxCode": {
+            "type": "string"
+          },
+          "taxRate": {
+            "type": "string"
+          },
+          "taxType": {
+            "type": "string"
+          },
+          "unitPrice": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceInvoicePayloadTotals": {
+        "properties": {
+          "subtotal": {
+            "type": "string"
+          },
+          "tax": {
+            "type": "string"
+          },
+          "total": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceInvoicePlatformAcknowledgeInput": {
+        "properties": {
+          "message": {
+            "type": "string"
+          },
+          "platformRef": {
+            "type": "string"
+          },
+          "result": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceInvoicePlatformPayload": {
+        "properties": {
+          "countryCode": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "customerName": {
+            "type": "string"
+          },
+          "digest": {
+            "type": "string"
+          },
+          "documentType": {
+            "type": "string"
+          },
+          "invoiceNumber": {
+            "nullable": true,
+            "type": "string"
+          },
+          "issueDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "jurisdictionCode": {
+            "type": "string"
+          },
+          "jurisdictionName": {
+            "type": "string"
+          },
+          "lines": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceInvoicePayloadLine"
+            },
+            "type": "array"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "sourceOrderNo": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "totals": {
+            "$ref": "#/components/schemas/FinanceInvoicePayloadTotals"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceInvoicePlatformSubmissionPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceInvoicePlatformSubmissionRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceInvoicePlatformSubmissionRow": {
+        "properties": {
+          "acknowledgedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "attempts": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "errorMessage": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "invoiceId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "invoiceNumber": {
+            "type": "string"
+          },
+          "payloadDigest": {
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "platformRef": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "submittedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceInvoicePlatformSubmitFailure": {
+        "properties": {
+          "invoiceId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceInvoicePlatformSubmitInput": {
+        "properties": {
+          "invoiceIds": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "platformCode": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceInvoicePlatformSubmitResult": {
+        "properties": {
+          "failed": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceInvoicePlatformSubmitFailure"
+            },
+            "type": "array"
+          },
+          "submitted": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceInvoicePlatformSubmissionRow"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceInvoiceRequestLine": {
+        "properties": {
+          "lineAmount": {
+            "type": "number"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "unitPrice": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceInvoiceRequestPage": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceInvoiceRequestRow"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "sourceModule": {
+            "type": "string"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceInvoiceRequestRow": {
+        "properties": {
+          "amount": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "customerName": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "invoiceRequestedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "invoiceState": {
+            "type": "string"
+          },
+          "lines": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceInvoiceRequestLine"
+            },
+            "type": "array"
+          },
+          "orderId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "orderNo": {
+            "type": "string"
+          },
+          "receivableNo": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceInvoiceReverseInput": {
+        "properties": {
+          "lineNos": {
+            "items": {
+              "format": "int32",
+              "type": "integer"
+            },
+            "type": "array"
+          },
+          "reason": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceInvoiceRow": {
+        "properties": {
+          "countryCode": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdBy": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "customerName": {
+            "type": "string"
+          },
+          "documentType": {
+            "type": "string"
+          },
+          "documentTypeLabel": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "invoiceNumber": {
+            "nullable": true,
+            "type": "string"
+          },
+          "issueDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "issuedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "issuedBy": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "jurisdictionCode": {
+            "type": "string"
+          },
+          "jurisdictionName": {
+            "type": "string"
+          },
+          "originalInvoiceId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "originalInvoiceNumber": {
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "platformInvoiceRef": {
+            "type": "string"
+          },
+          "platformSyncStatus": {
+            "type": "string"
+          },
+          "platformSyncStatusLabel": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "reversalInvoiceId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "reversedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "reversedBy": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "shopCode": {
+            "type": "string"
+          },
+          "shopId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "sourceOrderNo": {
+            "type": "string"
+          },
+          "sourceReceivableId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "sourceSettlementId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "subtotalAmount": {
+            "type": "number"
+          },
+          "taxAmount": {
+            "type": "number"
+          },
+          "templateCode": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "totalAmount": {
+            "type": "number"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "voidedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "voidedBy": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceInvoiceSummary": {
+        "properties": {
+          "baseCurrency": {
+            "nullable": true,
+            "type": "string"
+          },
+          "byCurrency": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceInvoiceCurrencySummary"
+            },
+            "type": "array"
+          },
+          "creditNoteCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "draftCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "exchangeRateAvailable": {
+            "type": "boolean"
+          },
+          "invoiceCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "reversedCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "voidCount": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceInvoiceTemplateInput": {
+        "properties": {
+          "countryCode": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "documentType": {
+            "type": "string"
+          },
+          "effectiveFrom": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "jurisdictionCode": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "sequencePeriod": {
+            "type": "string"
+          },
+          "sequencePrefix": {
+            "type": "string"
+          },
+          "sequenceScope": {
+            "type": "string"
+          },
+          "taxCode": {
+            "type": "string"
+          },
+          "taxType": {
+            "type": "string"
+          },
+          "templateCode": {
+            "type": "string"
+          },
+          "templateName": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceInvoiceTemplatePage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceInvoiceTemplateRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceInvoiceTemplateRow": {
+        "properties": {
+          "countryCode": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdBy": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "documentType": {
+            "type": "string"
+          },
+          "documentTypeLabel": {
+            "type": "string"
+          },
+          "effectiveFrom": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "effectiveTo": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "jurisdictionCode": {
+            "type": "string"
+          },
+          "jurisdictionName": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "sequencePeriod": {
+            "type": "string"
+          },
+          "sequencePrefix": {
+            "type": "string"
+          },
+          "sequenceScope": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "taxCode": {
+            "type": "string"
+          },
+          "taxType": {
+            "type": "string"
+          },
+          "templateCode": {
+            "type": "string"
+          },
+          "templateName": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceInvoiceVoidInput": {
+        "properties": {
+          "reason": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "FinancePayableCapabilities": {
         "properties": {
           "capabilities": {
@@ -27977,6 +29068,890 @@
         },
         "tags": [
           "fund-analysis-controller"
+        ]
+      }
+    },
+    "/finance/invoices": {
+      "get": {
+        "operationId": "get_finance_invoices",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "documentType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "currency",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "templateCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "jurisdictionCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "platformCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sourceReceivableId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceInvoicePage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "invoice-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_finance_invoices",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinanceInvoiceCreateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceInvoiceRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "invoice-controller"
+        ]
+      }
+    },
+    "/finance/invoices/batch": {
+      "post": {
+        "operationId": "post_finance_invoices_batch",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinanceInvoiceBatchInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceInvoiceBatchResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "invoice-controller"
+        ]
+      }
+    },
+    "/finance/invoices/capabilities": {
+      "get": {
+        "operationId": "get_finance_invoices_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceInvoiceCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "invoice-controller"
+        ]
+      }
+    },
+    "/finance/invoices/options": {
+      "get": {
+        "operationId": "get_finance_invoices_options",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "object"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "invoice-controller"
+        ]
+      }
+    },
+    "/finance/invoices/platform-submissions": {
+      "get": {
+        "operationId": "get_finance_invoices_platform_submissions",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceInvoicePlatformSubmissionPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "invoice-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_finance_invoices_platform_submissions",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinanceInvoicePlatformSubmitInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceInvoicePlatformSubmitResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "invoice-controller"
+        ]
+      }
+    },
+    "/finance/invoices/platform-submissions/{id}/acknowledge": {
+      "post": {
+        "operationId": "post_finance_invoices_platform_submissions_id_acknowledge",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinanceInvoicePlatformAcknowledgeInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceInvoicePlatformSubmissionRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "invoice-controller"
+        ]
+      }
+    },
+    "/finance/invoices/requests": {
+      "get": {
+        "operationId": "get_finance_invoices_requests",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceInvoiceRequestPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "invoice-controller"
+        ]
+      }
+    },
+    "/finance/invoices/summary": {
+      "get": {
+        "operationId": "get_finance_invoices_summary",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "baseCurrency",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceInvoiceSummary"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "invoice-controller"
+        ]
+      }
+    },
+    "/finance/invoices/templates": {
+      "get": {
+        "operationId": "get_finance_invoices_templates",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "countryCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "platformCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "documentType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceInvoiceTemplatePage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "invoice-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_finance_invoices_templates",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinanceInvoiceTemplateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceInvoiceTemplateRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "invoice-controller"
+        ]
+      }
+    },
+    "/finance/invoices/{id}": {
+      "get": {
+        "operationId": "get_finance_invoices_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceInvoiceDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "invoice-controller"
+        ]
+      }
+    },
+    "/finance/invoices/{id}/events": {
+      "get": {
+        "operationId": "get_finance_invoices_id_events",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/FinanceInvoiceEventRow"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "invoice-controller"
+        ]
+      }
+    },
+    "/finance/invoices/{id}/issue": {
+      "post": {
+        "operationId": "post_finance_invoices_id_issue",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceInvoiceRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "invoice-controller"
+        ]
+      }
+    },
+    "/finance/invoices/{id}/platform-payload": {
+      "get": {
+        "operationId": "get_finance_invoices_id_platform_payload",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceInvoicePlatformPayload"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "invoice-controller"
+        ]
+      }
+    },
+    "/finance/invoices/{id}/reverse": {
+      "post": {
+        "operationId": "post_finance_invoices_id_reverse",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinanceInvoiceReverseInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceInvoiceRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "invoice-controller"
+        ]
+      }
+    },
+    "/finance/invoices/{id}/void": {
+      "post": {
+        "operationId": "post_finance_invoices_id_void",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinanceInvoiceVoidInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceInvoiceRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "invoice-controller"
         ]
       }
     },
