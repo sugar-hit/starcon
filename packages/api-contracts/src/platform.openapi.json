@@ -1,6 +1,835 @@
 {
   "components": {
     "schemas": {
+      "FinanceSoftwareAccountInput": {
+        "properties": {
+          "bookCode": {
+            "type": "string"
+          },
+          "companyName": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "fiscalStartMonth": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "remark": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "vendor": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceSoftwareAccountRow": {
+        "properties": {
+          "bookCode": {
+            "type": "string"
+          },
+          "companyName": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdBy": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "fiscalStartMonth": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "masterMapCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "remark": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "subjectMapCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "vendor": {
+            "type": "string"
+          },
+          "vendorLabel": {
+            "type": "string"
+          },
+          "voucherFileCount": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceSoftwareBalanceImportInput": {
+        "properties": {
+          "balances": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceSoftwareReconcileBalanceInput"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceSoftwareCapabilities": {
+        "properties": {
+          "capabilities": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceSoftwareCapability"
+            },
+            "type": "array"
+          },
+          "gaps": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceSoftwareGap"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceSoftwareCapability": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "evidence": {
+            "type": "string"
+          },
+          "moduleId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceSoftwareGap": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "moduleId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "relation": {
+            "type": "string"
+          },
+          "service": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceSoftwareMasterMapInput": {
+        "properties": {
+          "accountId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "externalCode": {
+            "type": "string"
+          },
+          "externalName": {
+            "type": "string"
+          },
+          "localCode": {
+            "type": "string"
+          },
+          "localName": {
+            "type": "string"
+          },
+          "masterType": {
+            "type": "string"
+          },
+          "remark": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceSoftwareMasterMapRow": {
+        "properties": {
+          "accountId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "accountName": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "externalCode": {
+            "type": "string"
+          },
+          "externalName": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "localCode": {
+            "type": "string"
+          },
+          "localName": {
+            "type": "string"
+          },
+          "masterType": {
+            "type": "string"
+          },
+          "masterTypeLabel": {
+            "type": "string"
+          },
+          "remark": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceSoftwareOverview": {
+        "properties": {
+          "accounts": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "activeAccounts": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "computedReconcileTasks": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "generatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "masterMaps": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "reconcileDiffs": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "reconcileTasks": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "subjectMaps": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "voucherFiles": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceSoftwarePeriodOption": {
+        "properties": {
+          "endDate": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "periodCode": {
+            "type": "string"
+          },
+          "periodName": {
+            "type": "string"
+          },
+          "startDate": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceSoftwarePushInput": {
+        "properties": {
+          "accountId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "dateFrom": {
+            "format": "date",
+            "type": "string"
+          },
+          "dateTo": {
+            "format": "date",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceSoftwarePushOutcome": {
+        "properties": {
+          "accountId": {
+            "type": "string"
+          },
+          "connected": {
+            "type": "boolean"
+          },
+          "externalReference": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "pushed": {
+            "type": "boolean"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "vendor": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceSoftwareReconcileBalanceInput": {
+        "properties": {
+          "currency": {
+            "type": "string"
+          },
+          "direction": {
+            "type": "string"
+          },
+          "externalBalance": {
+            "type": "number"
+          },
+          "externalSubjectCode": {
+            "type": "string"
+          },
+          "externalSubjectName": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceSoftwareReconcileBalanceRow": {
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "direction": {
+            "type": "string"
+          },
+          "directionLabel": {
+            "type": "string"
+          },
+          "externalBalance": {
+            "type": "number"
+          },
+          "externalSubjectCode": {
+            "type": "string"
+          },
+          "externalSubjectName": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "taskId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceSoftwareReconcileDetail": {
+        "properties": {
+          "balances": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceSoftwareReconcileBalanceRow"
+            },
+            "type": "array"
+          },
+          "diffs": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceSoftwareReconcileDiffRow"
+            },
+            "type": "array"
+          },
+          "task": {
+            "$ref": "#/components/schemas/FinanceSoftwareReconcileTaskRow"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceSoftwareReconcileDiffRow": {
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "difference": {
+            "type": "number"
+          },
+          "externalBalance": {
+            "type": "number"
+          },
+          "externalSubjectCode": {
+            "type": "string"
+          },
+          "externalSubjectName": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "localBalance": {
+            "type": "number"
+          },
+          "localSubjectCode": {
+            "type": "string"
+          },
+          "localSubjectName": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "reasonLabel": {
+            "type": "string"
+          },
+          "taskId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceSoftwareReconcileTaskInput": {
+        "properties": {
+          "accountId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "periodFromId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "periodToId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "remark": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceSoftwareReconcileTaskRow": {
+        "properties": {
+          "accountId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "accountName": {
+            "type": "string"
+          },
+          "computedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdBy": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "differenceCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "externalSubjectCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "localSubjectCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "matchedCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "periodFromId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "periodToId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "reconcileNo": {
+            "type": "string"
+          },
+          "remark": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "totalDifference": {
+            "type": "number"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceSoftwareSubjectMapInput": {
+        "properties": {
+          "accountId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "direction": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "externalSubjectCode": {
+            "type": "string"
+          },
+          "externalSubjectName": {
+            "type": "string"
+          },
+          "localSubjectCode": {
+            "type": "string"
+          },
+          "localSubjectName": {
+            "type": "string"
+          },
+          "remark": {
+            "type": "string"
+          },
+          "taxCode": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceSoftwareSubjectMapRow": {
+        "properties": {
+          "accountId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "accountName": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "direction": {
+            "type": "string"
+          },
+          "directionLabel": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "externalSubjectCode": {
+            "type": "string"
+          },
+          "externalSubjectName": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "localSubjectCode": {
+            "type": "string"
+          },
+          "localSubjectName": {
+            "type": "string"
+          },
+          "remark": {
+            "type": "string"
+          },
+          "taxCode": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceSoftwareVoucherExportInput": {
+        "properties": {
+          "accountId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "dateFrom": {
+            "format": "date",
+            "type": "string"
+          },
+          "dateTo": {
+            "format": "date",
+            "type": "string"
+          },
+          "format": {
+            "type": "string"
+          },
+          "remark": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceSoftwareVoucherExportResult": {
+        "properties": {
+          "content": {
+            "type": "string"
+          },
+          "contentBytes": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "contentSha256": {
+            "type": "string"
+          },
+          "contentType": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "dateFrom": {
+            "format": "date",
+            "type": "string"
+          },
+          "dateTo": {
+            "format": "date",
+            "type": "string"
+          },
+          "fileId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "fileNo": {
+            "type": "string"
+          },
+          "filename": {
+            "type": "string"
+          },
+          "format": {
+            "type": "string"
+          },
+          "lineCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalCredit": {
+            "type": "number"
+          },
+          "totalDebit": {
+            "type": "number"
+          },
+          "unmappedLineCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "voucherCount": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceSoftwareVoucherFileDetail": {
+        "properties": {
+          "content": {
+            "type": "string"
+          },
+          "contentType": {
+            "type": "string"
+          },
+          "file": {
+            "$ref": "#/components/schemas/FinanceSoftwareVoucherFileRow"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceSoftwareVoucherFileRow": {
+        "properties": {
+          "accountId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "accountName": {
+            "type": "string"
+          },
+          "contentBytes": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "contentSha256": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdBy": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "dateFrom": {
+            "format": "date",
+            "type": "string"
+          },
+          "dateTo": {
+            "format": "date",
+            "type": "string"
+          },
+          "fileNo": {
+            "type": "string"
+          },
+          "filename": {
+            "type": "string"
+          },
+          "format": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "lineCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalCredit": {
+            "type": "number"
+          },
+          "totalDebit": {
+            "type": "number"
+          },
+          "unmappedLineCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "voucherCount": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
       "IntegrationAppCapabilities": {
         "properties": {
           "capabilities": {
@@ -2635,6 +3464,930 @@
         },
         "tags": [
           "app-credential-controller"
+        ]
+      }
+    },
+    "/platform/finance-software/accounts": {
+      "get": {
+        "operationId": "get_platform_finance_software_accounts",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "vendor",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/FinanceSoftwareAccountRow"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "finance-software-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_platform_finance_software_accounts",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinanceSoftwareAccountInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceSoftwareAccountRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "finance-software-controller"
+        ]
+      }
+    },
+    "/platform/finance-software/accounts/{id}/disable": {
+      "post": {
+        "operationId": "post_platform_finance_software_accounts_id_disable",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceSoftwareAccountRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "finance-software-controller"
+        ]
+      }
+    },
+    "/platform/finance-software/capabilities": {
+      "get": {
+        "operationId": "get_platform_finance_software_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceSoftwareCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "finance-software-controller"
+        ]
+      }
+    },
+    "/platform/finance-software/currencies": {
+      "get": {
+        "operationId": "get_platform_finance_software_currencies",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "finance-software-controller"
+        ]
+      }
+    },
+    "/platform/finance-software/master-maps": {
+      "get": {
+        "operationId": "get_platform_finance_software_master_maps",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "accountId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "masterType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/FinanceSoftwareMasterMapRow"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "finance-software-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_platform_finance_software_master_maps",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinanceSoftwareMasterMapInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceSoftwareMasterMapRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "finance-software-controller"
+        ]
+      }
+    },
+    "/platform/finance-software/master-maps/{id}": {
+      "delete": {
+        "operationId": "delete_platform_finance_software_master_maps_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "finance-software-controller"
+        ]
+      }
+    },
+    "/platform/finance-software/overview": {
+      "get": {
+        "operationId": "get_platform_finance_software_overview",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceSoftwareOverview"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "finance-software-controller"
+        ]
+      }
+    },
+    "/platform/finance-software/periods": {
+      "get": {
+        "operationId": "get_platform_finance_software_periods",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/FinanceSoftwarePeriodOption"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "finance-software-controller"
+        ]
+      }
+    },
+    "/platform/finance-software/push": {
+      "post": {
+        "operationId": "post_platform_finance_software_push",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinanceSoftwarePushInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceSoftwarePushOutcome"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "finance-software-controller"
+        ]
+      }
+    },
+    "/platform/finance-software/reconcile-tasks": {
+      "get": {
+        "operationId": "get_platform_finance_software_reconcile_tasks",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "accountId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/FinanceSoftwareReconcileTaskRow"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "finance-software-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_platform_finance_software_reconcile_tasks",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinanceSoftwareReconcileTaskInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceSoftwareReconcileTaskRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "finance-software-controller"
+        ]
+      }
+    },
+    "/platform/finance-software/reconcile-tasks/{id}": {
+      "delete": {
+        "operationId": "delete_platform_finance_software_reconcile_tasks_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "finance-software-controller"
+        ]
+      },
+      "get": {
+        "operationId": "get_platform_finance_software_reconcile_tasks_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceSoftwareReconcileDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "finance-software-controller"
+        ]
+      }
+    },
+    "/platform/finance-software/reconcile-tasks/{id}/balances": {
+      "post": {
+        "operationId": "post_platform_finance_software_reconcile_tasks_id_balances",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinanceSoftwareBalanceImportInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "object"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "finance-software-controller"
+        ]
+      }
+    },
+    "/platform/finance-software/reconcile-tasks/{id}/compute": {
+      "post": {
+        "operationId": "post_platform_finance_software_reconcile_tasks_id_compute",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceSoftwareReconcileTaskRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "finance-software-controller"
+        ]
+      }
+    },
+    "/platform/finance-software/subject-maps": {
+      "get": {
+        "operationId": "get_platform_finance_software_subject_maps",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "accountId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/FinanceSoftwareSubjectMapRow"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "finance-software-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_platform_finance_software_subject_maps",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinanceSoftwareSubjectMapInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceSoftwareSubjectMapRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "finance-software-controller"
+        ]
+      }
+    },
+    "/platform/finance-software/subject-maps/{id}": {
+      "delete": {
+        "operationId": "delete_platform_finance_software_subject_maps_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "finance-software-controller"
+        ]
+      }
+    },
+    "/platform/finance-software/voucher-files": {
+      "get": {
+        "operationId": "get_platform_finance_software_voucher_files",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "accountId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/FinanceSoftwareVoucherFileRow"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "finance-software-controller"
+        ]
+      }
+    },
+    "/platform/finance-software/voucher-files/export": {
+      "post": {
+        "operationId": "post_platform_finance_software_voucher_files_export",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinanceSoftwareVoucherExportInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceSoftwareVoucherExportResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "finance-software-controller"
+        ]
+      }
+    },
+    "/platform/finance-software/voucher-files/{id}": {
+      "get": {
+        "operationId": "get_platform_finance_software_voucher_files_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceSoftwareVoucherFileDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "finance-software-controller"
         ]
       }
     },
