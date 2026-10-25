@@ -37,6 +37,147 @@
         },
         "type": "object"
       },
+      "ComparisonCapabilities": {
+        "properties": {
+          "comparisonAvailable": {
+            "type": "boolean"
+          },
+          "dataUpdatedAtVisible": {
+            "type": "boolean"
+          },
+          "notDelivered": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "rules": {
+            "items": {
+              "$ref": "#/components/schemas/RuleNote"
+            },
+            "type": "array"
+          },
+          "upstreamConnected": {
+            "type": "boolean"
+          },
+          "upstreamModules": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "ComparisonResponse": {
+        "properties": {
+          "baseCurrency": {
+            "type": "string"
+          },
+          "baseRates": {
+            "items": {
+              "$ref": "#/components/schemas/CurrencyRate"
+            },
+            "type": "array"
+          },
+          "caliberNotes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "dataUpdatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "dataUpdatedNote": {
+            "type": "string"
+          },
+          "emptyNote": {
+            "type": "string"
+          },
+          "emptyReason": {
+            "type": "string"
+          },
+          "from": {
+            "format": "date",
+            "type": "string"
+          },
+          "growthStores": {
+            "items": {
+              "$ref": "#/components/schemas/StoreFlag"
+            },
+            "type": "array"
+          },
+          "laggards": {
+            "items": {
+              "$ref": "#/components/schemas/StoreFlag"
+            },
+            "type": "array"
+          },
+          "metricDefinitions": {
+            "items": {
+              "$ref": "#/components/schemas/StoreMetricDefinitionView"
+            },
+            "type": "array"
+          },
+          "platformGroups": {
+            "items": {
+              "$ref": "#/components/schemas/PlatformGroup"
+            },
+            "type": "array"
+          },
+          "previousFrom": {
+            "format": "date",
+            "type": "string"
+          },
+          "previousTo": {
+            "format": "date",
+            "type": "string"
+          },
+          "rankings": {
+            "items": {
+              "$ref": "#/components/schemas/MetricRanking"
+            },
+            "type": "array"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/StoreComparisonRow"
+            },
+            "type": "array"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusNote": {
+            "type": "string"
+          },
+          "to": {
+            "format": "date",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CurrencyRate": {
+        "properties": {
+          "asOf": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "baseCurrency": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "rate": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
       "CurrencyValue": {
         "properties": {
           "currency": {
@@ -572,6 +713,29 @@
         },
         "type": "object"
       },
+      "MetricRanking": {
+        "properties": {
+          "displayName": {
+            "type": "string"
+          },
+          "entries": {
+            "items": {
+              "$ref": "#/components/schemas/RankingEntry"
+            },
+            "type": "array"
+          },
+          "metricCode": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "unit": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "OverviewResponse": {
         "properties": {
           "cards": {
@@ -627,6 +791,30 @@
           "warnings": {
             "items": {
               "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "PlatformGroup": {
+        "properties": {
+          "caliberNote": {
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "platformName": {
+            "type": "string"
+          },
+          "storeCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "stores": {
+            "items": {
+              "$ref": "#/components/schemas/StoreComparisonRow"
             },
             "type": "array"
           }
@@ -884,6 +1072,30 @@
         },
         "type": "object"
       },
+      "RankingEntry": {
+        "properties": {
+          "currency": {
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "rank": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "shopCode": {
+            "type": "string"
+          },
+          "shopName": {
+            "type": "string"
+          },
+          "value": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
       "RebuildResult": {
         "properties": {
           "clearedFacts": {
@@ -950,6 +1162,226 @@
               "type": "string"
             },
             "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "RuleNote": {
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "ruleCode": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "StoreComparisonRow": {
+        "properties": {
+          "attributionHints": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "classification": {
+            "type": "string"
+          },
+          "classificationNote": {
+            "type": "string"
+          },
+          "currencies": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "growthRank": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "metrics": {
+            "items": {
+              "$ref": "#/components/schemas/StoreMetricValue"
+            },
+            "type": "array"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "platformName": {
+            "type": "string"
+          },
+          "scaleRank": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "shopCode": {
+            "type": "string"
+          },
+          "shopName": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "StoreFlag": {
+        "properties": {
+          "platformCode": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "shopCode": {
+            "type": "string"
+          },
+          "shopName": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "StoreListResponse": {
+        "properties": {
+          "platforms": {
+            "items": {
+              "$ref": "#/components/schemas/StorePlatformOption"
+            },
+            "type": "array"
+          },
+          "stores": {
+            "items": {
+              "$ref": "#/components/schemas/StoreSummary"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "StoreMetricDefinitionView": {
+        "properties": {
+          "aggregation": {
+            "type": "string"
+          },
+          "baseMetricCode": {
+            "type": "string"
+          },
+          "currencyAware": {
+            "type": "boolean"
+          },
+          "denominatorMetricCode": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "metricCode": {
+            "type": "string"
+          },
+          "numeratorMetricCode": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "unit": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "StoreMetricValue": {
+        "properties": {
+          "availability": {
+            "type": "string"
+          },
+          "availabilityNote": {
+            "type": "string"
+          },
+          "baseCurrency": {
+            "type": "string"
+          },
+          "baseValue": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "metricCode": {
+            "type": "string"
+          },
+          "rank": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "value": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "StorePlatformOption": {
+        "properties": {
+          "platformCode": {
+            "type": "string"
+          },
+          "platformName": {
+            "type": "string"
+          },
+          "storeCount": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "StoreRefreshResult": {
+        "properties": {
+          "fetched": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "projected": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "source": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "StoreSummary": {
+        "properties": {
+          "hasFacts": {
+            "type": "boolean"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "platformName": {
+            "type": "string"
+          },
+          "shopCode": {
+            "type": "string"
+          },
+          "shopName": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
           }
         },
         "type": "object"
@@ -1995,6 +2427,237 @@
         "summary": "从上游拉取事实并投影（与推共用同一套幂等与口径）",
         "tags": [
           "13.1.1.1 经营总览 · 投影摄取"
+        ]
+      }
+    },
+    "/reporting/store-comparison": {
+      "get": {
+        "description": "时间范围默认「最近 30 天」。对比指标的选择由服务端的口径表决定（可用 metricCodes 之外的指标在 capabilities 里说明）。⚠️ **跨平台对比会标注口径差异**：矩阵里同时给出平台侧成交金额与还原口径成交金额，两者之差是「口径差异额」。⚠️ **不跨币种相加**：金额按币种分别列出，排名也在币种内做。",
+        "operationId": "get_reporting_store_comparison",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "platformCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "baseCurrency",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ComparisonResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "多店对比：对比矩阵 + 排名 + 差异归因提示 + 掉队/增长店铺",
+        "tags": [
+          "13.1.1.2 多店对比"
+        ]
+      }
+    },
+    "/reporting/store-comparison/capabilities": {
+      "get": {
+        "description": "notDelivered 列出的是**确实拿不到**的部分，每条都写清原因与影响 —— 把「拿不到」伪装成 0 比说清楚更糟。",
+        "operationId": "get_reporting_store_comparison_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ComparisonCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "能力声明：哪些上游真接通、哪些口径在店铺维度拿不到、判定规则是什么",
+        "tags": [
+          "13.1.1.2 多店对比"
+        ]
+      }
+    },
+    "/reporting/store-comparison/metrics": {
+      "get": {
+        "operationId": "get_reporting_store_comparison_metrics",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/StoreMetricDefinitionView"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "店铺对比指标口径目录（口径唯一的展示形态）",
+        "tags": [
+          "13.1.1.2 多店对比"
+        ]
+      }
+    },
+    "/reporting/store-comparison/refresh": {
+      "post": {
+        "description": "上游：channel 的店铺清单 / 广告活动 / 广告报表，trade 的平台单与售后单。⚠️ **广告指标是逐日拉的**（channel 的店铺分组没有日期桶），所以窗口长度有硬上限，超了直接 400（不悄悄截断）。⚠️ 上一等长窗口也会一起投影 —— 增长口径（窗口环比）要拿它当分母。",
+        "operationId": "post_reporting_store_comparison_refresh",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "timezone",
+            "required": false,
+            "schema": {
+              "default": "UTC",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/StoreRefreshResult"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "从上游拉取店铺维度事实并投影（写的是投影，不是业务事实）",
+        "tags": [
+          "13.1.1.2 多店对比"
+        ]
+      }
+    },
+    "/reporting/store-comparison/shops": {
+      "get": {
+        "description": "平台归属来自 channel 的广告活动 —— 没有任何广告活动的店铺平台留空，会被归到「未标注平台」组。",
+        "operationId": "get_reporting_store_comparison_shops",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/StoreListResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "店铺清单 + 平台清单（筛选器与「按平台分组」用）",
+        "tags": [
+          "13.1.1.2 多店对比"
         ]
       }
     }
