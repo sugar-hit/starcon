@@ -1226,6 +1226,48 @@ const services: readonly {
       /^(permissions|owner-transfer|legal-entities(?:\/[0-9a-f-]+)?|legal-entities\/(?:[0-9a-f-]+\/accounting-books|references)|(?:roles|members|departments|children)(?:\/[0-9a-f-]+)?|tenants(?:\/current)?|audit(?:\/(?:export|[0-9a-f-]+))?|operation-log(?:\/(?:export|trace\/[0-9a-zA-Z-]+|[0-9a-f-]+))?||approval-records(?:\/(?:statistics|capabilities|export|by-actor\/[0-9a-f-]+|[0-9a-f-]+))?|hierarchy-authorizations(?:\/check|\/[0-9a-f-]+(?:\/revoke)?)?|accounting-books(?:\/[0-9a-f-]+)?|business-parameters(?:\/(?:effective|history|overrides(?:\/[0-9a-f-]+)?|freezes(?:\/[^/]+\/[^/]+)?))?|numbering(?:\/(?:entities|preview|sequences|issued|rules(?:\/conflicts|\/[0-9a-f-]+(?:\/next)?)?))?|approval-flows(?:\/(?:document-types|registrations|active|positions(?:\/[0-9a-f-]+)?|[0-9a-f-]+(?:\/validation)?))?|approval-rules(?:\/(?:effective-policy|evaluate|[0-9a-f-]+(?:\/validation)?))?|my-approvals(?:\/(?:capabilities|batch|[0-9a-f-]+(?:\/(?:decide|transfer))?))?|approval-instances|onboardings(?:\/[0-9a-f-]+\/complete)?|department-leaders|departments\/[0-9a-f-]+\/(?:leader(?:\/(?:proxies|grants)(?:\/[0-9a-f-]+)?)?|approval-chain)|offboarding(?:\/[0-9a-f-]+(?:\/revert|\/responsibility-items(?:\/[0-9a-f-]+(?:\/transfer)?)?|\/reclaim-items(?:\/[0-9a-f-]+(?:\/reclaim)?)?)?)?|legal-entities\/(?:[0-9a-f-]+\/(?:accounting-books|ledger-books|default-book)|references)|accounting-books(?:\/[0-9a-f-]+(?:\/fact-assignments(?:\/[0-9a-f-]+)?)?)?)$/,
   },
   {
+    // 1.3.2.1 预警规则（identity 服务，卷 01 · L3 1.3.2 预警 → 1.3.2.1）。
+    //
+    // 本条目是**新增一条独立的 services[] 元素**，不是往既有 identity 分支的 alternation 里并分支
+    // —— 那些分支是一段超长单行正则，多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    //
+    // ---- 插入锚点固定在 `prefix: 'identity/'` 那条元素**之后** ----
+    //   （与 14.5.1.2 建联与样品同一条锚点，同族 identity 条目挨着放。）
+    //
+    // ⚠️ **基线的 identity/ 条目并不覆盖本模块**（那是逐条列出的路由白名单，
+    //   不是「identity/ 前缀下全放行」）：`alert-rules` 不在它的 alternation 里，
+    //   所以本模块的每一个形状在基线上都是 404。实测方式是**逐条编译并命中**的脚本
+    //   （与 resolve() 同构：先切掉 prefix 再 test），不是目测、不是 grep -c。
+    //
+    // 放行的形状（逐条列出，不放行「看起来像」但服务端不存在的形状）：
+    //   alert-rules                      —— 生效规则清单（GET）
+    //   alert-rules/capabilities         —— 能力声明：预置规则集 + 受控词表 + 引擎是否接通（GET）
+    //   alert-rules/hits                 —— 命中历史（GET，**只读**：写入归 18 系统引擎）
+    //   alert-rules/{uuid}               —— 单条规则的改与删（PUT / DELETE）
+    //   alert-rules/{uuid}/disable       —— 关闭（POST）
+    //   alert-rules/{uuid}/enable        —— 重新启用（POST）
+    //   alert-rules/{uuid}/reset         —— 恢复预置默认值（POST）
+    //
+    // **刻意不放行**：
+    //   alert-rules/not-a-uuid           —— 非 UUID 段不该被 uuid 分支吃掉
+    //   alert-rules/{uuid}/extra         —— 服务端没有这一层，多放一段会让不存在的路径看起来像已交付
+    //   alert-rules/capabilities/extra   —— 同上
+    //   alert-rules/hits/extra           —— 同上
+    //
+    // id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`（不是 `[0-9a-f-]+`）：
+    // 后者会把 `disable` / `enable` / `reset` 这种非 UUID 形状也当成 id 吃掉，
+    // 于是 `/{uuid}/disable` 永远匹配不上。
+    // 字面量子路径（capabilities / hits）排在 {uuid} 段**之前**判别 —— alternation 是首个命中即返回。
+    //
+    // ⚠️ 预置规则的 id 是**由规则码派生的确定性合成 id**（uuid v3 形状），
+    //   同样落在这个完整 UUID 形状里，不需要额外的正则分支。
+    prefix: 'identity/',
+    env: 'IDENTITY_URL',
+    fallback: 'http://127.0.0.1:8081',
+    pattern:
+      /^alert\-rules(?:\/capabilities|\/hits|(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:disable|enable|reset))?)?)$/,
+  },
+  {
     // 14.5.1.2 建联与样品（channel 服务，卷 14 广告与增长 / L3 14.5.1 达人管理下的第二格）。
     //
     // 本条目是**新增一条独立的 services[] 元素**，不是往既有 channel 分支的 alternation 里
