@@ -1,5 +1,6 @@
 package com.starcon.reporting;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
@@ -37,9 +38,9 @@ public final class ReportingStoreComparisonModels {
       String displayName,
       String unit,
       String aggregation,
-      String numeratorMetricCode,
-      String denominatorMetricCode,
-      String baseMetricCode,
+      @Schema(nullable = true) String numeratorMetricCode,
+      @Schema(nullable = true) String denominatorMetricCode,
+      @Schema(nullable = true) String baseMetricCode,
       boolean currencyAware,
       String description,
       String ownerModule) {}
@@ -52,13 +53,13 @@ public final class ReportingStoreComparisonModels {
   public record StoreMetricValue(
       String metricCode,
       String currency,
-      BigDecimal value,
+      @Schema(nullable = true) BigDecimal value,
       /** 折算到本位币后的值（给了本位币且有汇率时才有值）。 */
-      BigDecimal baseValue,
+      @Schema(nullable = true) BigDecimal baseValue,
       /** 折算用的本位币（没折算时为空串）。 */
       String baseCurrency,
       /** 该值在本次对比里的排名（1 = 最靠前）。null = 该指标不可比，没有排名。 */
-      Integer rank,
+      @Schema(nullable = true) Integer rank,
       /** 该值的可用性：AVAILABLE / NO_DATA / NOT_COMPARABLE。 */
       String availability,
       /** 不可比或没有数据的原因（availability != AVAILABLE 时必填）。 */
@@ -75,9 +76,9 @@ public final class ReportingStoreComparisonModels {
       /** 该店铺的指标取值（按指标码分组，一个指标多个币种就是多条）。 */
       List<StoreMetricValue> metrics,
       /** 规模排名（按平台侧成交金额，1 = 最大）。null = 没有可比数据。 */
-      Integer scaleRank,
+      @Schema(nullable = true) Integer scaleRank,
       /** 增长排名（按成交金额环比增长率，1 = 增长最快）。null = 没有可比数据。 */
-      Integer growthRank,
+      @Schema(nullable = true) Integer growthRank,
       /** 分类：GROWTH（增长店铺）/ LAGGARD（掉队店铺）/ STABLE（其余）/ UNCLASSIFIED（不可比）。 */
       String classification,
       /** 分类依据（为什么判成这一类）。 */
@@ -134,7 +135,7 @@ public final class ReportingStoreComparisonModels {
       /** 跨平台口径差异说明（蓝图标名「跨平台对比要处理口径差异」）。 */
       List<String> caliberNotes,
       /** 数据更新时间（最近一次投影落库时刻）—— 卷 13 卷首「数据延迟要显示」。 */
-      OffsetDateTime dataUpdatedAt,
+      @Schema(nullable = true) OffsetDateTime dataUpdatedAt,
       /** 数据更新时间的口径说明。 */
       String dataUpdatedNote,
       /** 本次对比整体状态：PROJECTED / NOT_PROJECTED / PARTIAL。 */
@@ -142,16 +143,17 @@ public final class ReportingStoreComparisonModels {
       /** 状态说明（为什么是这个状态）。 */
       String statusNote,
       /** 本位币（给了且折算成功时才有值）。 */
-      String baseCurrency,
+      @Schema(nullable = true) String baseCurrency,
       /** 本位币折算用的汇率与时点（每种币种一条；「今天的汇率变了不能让上月的报表变」）。 */
       List<CurrencyRate> baseRates,
       /** 空态原因：NO_STORES / NOT_PROJECTED / null。 */
-      String emptyReason,
+      @Schema(nullable = true) String emptyReason,
       /** 空态说明。 */
       String emptyNote) {}
 
   /** 一个币种对本位币的汇率与时点。 */
-  public record CurrencyRate(String currency, String baseCurrency, BigDecimal rate, OffsetDateTime asOf) {}
+  public record CurrencyRate(
+      String currency, String baseCurrency, BigDecimal rate, @Schema(nullable = true) OffsetDateTime asOf) {}
 
   // ==================================================================
   // 店铺清单

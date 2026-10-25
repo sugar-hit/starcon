@@ -72,6 +72,7 @@
       "ComparisonResponse": {
         "properties": {
           "baseCurrency": {
+            "nullable": true,
             "type": "string"
           },
           "baseRates": {
@@ -88,6 +89,7 @@
           },
           "dataUpdatedAt": {
             "format": "date-time",
+            "nullable": true,
             "type": "string"
           },
           "dataUpdatedNote": {
@@ -97,6 +99,7 @@
             "type": "string"
           },
           "emptyReason": {
+            "nullable": true,
             "type": "string"
           },
           "from": {
@@ -164,6 +167,7 @@
         "properties": {
           "asOf": {
             "format": "date-time",
+            "nullable": true,
             "type": "string"
           },
           "baseCurrency": {
@@ -1199,6 +1203,7 @@
           },
           "growthRank": {
             "format": "int32",
+            "nullable": true,
             "type": "integer"
           },
           "metrics": {
@@ -1215,6 +1220,7 @@
           },
           "scaleRank": {
             "format": "int32",
+            "nullable": true,
             "type": "integer"
           },
           "shopCode": {
@@ -1266,12 +1272,14 @@
             "type": "string"
           },
           "baseMetricCode": {
+            "nullable": true,
             "type": "string"
           },
           "currencyAware": {
             "type": "boolean"
           },
           "denominatorMetricCode": {
+            "nullable": true,
             "type": "string"
           },
           "description": {
@@ -1284,6 +1292,7 @@
             "type": "string"
           },
           "numeratorMetricCode": {
+            "nullable": true,
             "type": "string"
           },
           "ownerModule": {
@@ -1307,6 +1316,7 @@
             "type": "string"
           },
           "baseValue": {
+            "nullable": true,
             "type": "number"
           },
           "currency": {
@@ -1317,9 +1327,11 @@
           },
           "rank": {
             "format": "int32",
+            "nullable": true,
             "type": "integer"
           },
           "value": {
+            "nullable": true,
             "type": "number"
           }
         },
