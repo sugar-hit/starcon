@@ -301,6 +301,7 @@ public class ReportingMetricCardService {
     var previous =
         comparison(
             source.previousPeriod(),
+            values.size(),
             source.baseTotal(),
             baseCurrency,
             window.to(),
@@ -309,6 +310,7 @@ public class ReportingMetricCardService {
     var yearOverYear =
         comparison(
             source.yearOverYear(),
+            values.size(),
             source.baseTotal(),
             baseCurrency,
             window.to(),
@@ -470,6 +472,7 @@ public class ReportingMetricCardService {
    */
   private ReportingMetricCardModels.MetricCardComparison comparison(
       ReportingOverviewModels.Comparison source,
+      int valueCount,
       BigDecimal currentBaseTotal,
       String baseCurrency,
       LocalDate rateAsOf,
@@ -479,22 +482,39 @@ public class ReportingMetricCardService {
     var changeRate = source.changeRate();
     var changeAmount = source.changeAmount();
     var reason = source.note();
-    if (changeRate == null && currencyAware && baseCurrency != null && currentBaseTotal != null) {
-      var previousBase =
-          convertToBase(toAmounts(source.values()), baseCurrency, rateAsOf, tenantId);
-      if (previousBase == null) {
+    if (changeRate == null && currencyAware && valueCount > 1) {
+      // 多币种：13.1.1.1 不跨币种相加，所以它不给变化率。本模块按任务要求
+      // 「用汇率快照折算后再比」—— **折不出来就是不可判定**（不是按 1:1 算，也不是 0%）。
+      if (baseCurrency == null) {
         reason =
-            "对比期缺少汇率快照，折算不到同一本位币 —— 不可判定（没有汇率就不可判定，不是按 1:1 算）。";
-      } else if (previousBase.signum() == 0) {
-        reason = "对比期折算到本位币后为 0，变化率不可比（不显示成 0%）。";
+            "多币种指标没有单一的变化率：指定本位币后按汇率快照折算比较"
+                + "（不跨币种相加，不是按 1:1 算）。";
+      } else if (currentBaseTotal == null) {
+        reason =
+            "缺少汇率快照，折算不到同一本位币 —— 不可判定"
+                + "（没有汇率就不可判定，不是按 1:1 算）。";
       } else {
-        changeAmount = currentBaseTotal.subtract(previousBase).setScale(4, RoundingMode.HALF_UP);
-        changeRate =
-            changeAmount
-                .divide(previousBase.abs(), 6, RoundingMode.HALF_UP)
-                .multiply(BigDecimal.valueOf(100))
-                .setScale(2, RoundingMode.HALF_UP);
-        reason = "已按汇率快照折算到 " + baseCurrency + " 后比较（同一汇率基准）。";
+        var previousValues = toAmounts(source.values());
+        if (previousValues.isEmpty()) {
+          reason = "对比期没有事实数据，无法计算变化率（不可判定，不是 0%）。";
+        } else {
+          var previousBase = convertToBase(previousValues, baseCurrency, rateAsOf, tenantId);
+          if (previousBase == null) {
+            reason =
+                "对比期缺少汇率快照，折算不到同一本位币 —— 不可判定"
+                    + "（没有汇率就不可判定，不是按 1:1 算）。";
+          } else if (previousBase.signum() == 0) {
+            reason = "对比期折算到本位币后为 0，变化率不可比（不显示成 0%）。";
+          } else {
+            changeAmount = currentBaseTotal.subtract(previousBase).setScale(4, RoundingMode.HALF_UP);
+            changeRate =
+                changeAmount
+                    .divide(previousBase.abs(), 6, RoundingMode.HALF_UP)
+                    .multiply(BigDecimal.valueOf(100))
+                    .setScale(2, RoundingMode.HALF_UP);
+            reason = "已按汇率快照折算到 " + baseCurrency + " 后比较（同一汇率基准）。";
+          }
+        }
       }
     }
     return new ReportingMetricCardModels.MetricCardComparison(
