@@ -12303,6 +12303,68 @@ const services: readonly {
     pattern:
       /^apps(?:\/(?:capabilities|options|overview)|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:revoke|credentials(?:\/(?:rotate|verify)|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/revoke)?|scopes(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|ip-allowlist(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|quotas|quota-status|audit-events))?)?$/,
   },
+  {
+    // 18.2.1.1 财务软件（platform 服务，卷 18「集成开放与智能自动化」L3 18.2 外部系统对接下的第一格）。
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有任何一条里并分支 ——
+    //   既有条目**一字未改、也不重排**（18.1.1.1 那条 apps、18.4.2.1 那条 text 的正则逐字未动）。
+    //
+    // ---- 插入锚点选在**数组末尾**（18.1.1.1 那条之后、收尾的 `];` 之前）----
+    //   18.4.2.1 那条锚在 18.1.1.1 **之前**，本车道锚在**之后** —— 两个 hunk 各自独立，
+    //   并入时 git 能干净求并。
+    //
+    // ---- 首 token「finance-software」的零命中核对结论 ----
+    //   本模块与 18.1.1.1 / 18.4.2.1 同为 platform 服务，三条都是 `prefix: 'platform/'`：
+    //   resolve() 按 services[] 顺序逐条试，**前缀相同、正则不相交** ——
+    //     18.1.1.1 的正则是 `^apps…$`（首 token apps）；
+    //     18.4.2.1 的正则是 `^text\/…$`（首 token text）；
+    //     本条的正则是 `^finance\-software\/…$`（首 token finance-software）。
+    //   三者两两不相交 ⇒ 既有那两支**吃不到**本模块的路径，本模块也**吃不到**它们的路径。
+    //   ⚠️ 注意 `finance/` 前缀那一支是 **12 财务核算**服务（另一个 prefix），
+    //     与本模块的 `finance-software` 首 token 不同，不要混淆。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   platform/finance-software/capabilities                 能力声明（哪些真接通 / 哪些还没交付、归谁）
+    //   platform/finance-software/overview                     概览（几个数）
+    //   platform/finance-software/periods                      会计期间清单（读 12.5.2.1）
+    //   platform/finance-software/currencies                   可选币种（读 12.5.2.1 的真实取值）
+    //   platform/finance-software/accounts                     连接档案列表（GET，真筛选）/ 登记或修改（POST）
+    //   platform/finance-software/accounts/{uuid}/disable      停用一个连接档案（**不删**：历史要能复现）
+    //   platform/finance-software/subject-maps                 科目映射列表（GET）/ 登记或修改（POST）
+    //   platform/finance-software/subject-maps/{uuid}          删除一条科目映射（DELETE）
+    //   platform/finance-software/master-maps                  主数据映射列表（GET）/ 登记或修改（POST）
+    //   platform/finance-software/master-maps/{uuid}           删除一条主数据映射（DELETE）
+    //   platform/finance-software/voucher-files                凭证文件导出记录列表（GET）
+    //   platform/finance-software/voucher-files/{uuid}         凭证文件详情（GET，**含真内容**）
+    //   platform/finance-software/voucher-files/export         导出凭证文件（POST）
+    //   platform/finance-software/reconcile-tasks              核对任务列表（GET）/ 建核对任务（POST）
+    //   platform/finance-software/reconcile-tasks/{uuid}       核对详情（GET：任务 + 外部余额 + 差异）
+    //   platform/finance-software/reconcile-tasks/{uuid}/balances  导入外部余额（POST）
+    //   platform/finance-software/reconcile-tasks/{uuid}/compute   算核对差异（POST）
+    //   platform/finance-software/push                         直连推送凭证（POST，**适配器未接入时 409**）
+    //
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   platform/finance-software                        —— 裸路径：后端**没有**「一条不存在的汇总列表接口」。
+    //   platform/finance-software/voucher-files/download  —— 下载走的是**导出记录详情**（含真内容），
+    //                                                       没有单独的下载端点。
+    //   platform/finance-software/sync                    —— 🔴 **直连同步主数据**未交付：
+    //                                                       放行它会让界面以为「能一键把主数据推到金蝶」。
+    //   platform/finance-software/push-status             —— 推送未接入，没有「推送历史」这种形状
+    //                                                       （凭空放行会让界面以为有推送流水表）。
+    //   platform/finance-software/reconcile-tasks/{uuid}/push —— 推的是**凭证**，不是核对任务。
+    //   platform/finance-software/accounts/{uuid}/delete  —— 连接档案**不删**（法定凭证不可删），只有停用。
+    //   platform/finance-software/reconcile-tasks/not-a-uuid   —— 非 UUID 段不应被 uuid 分支吃掉。
+    //   platform/finance-software/subject-maps/{uuid}/binding  —— 科目映射没有「变量绑定」这一层。
+    //
+    // id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //   （不是 `[0-9a-f-]+`）：后者会把 `disable` / `export` 这种非 UUID 形状也当成 id 放行。
+    // 字面量子路径（capabilities / overview / periods / currencies）排在 {uuid} 段**之前**判别 ——
+    //   alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    prefix: 'platform/',
+    env: 'PLATFORM_URL',
+    fallback: 'http://127.0.0.1:8089',
+    pattern:
+      /^finance\-software\/(?:capabilities|overview|periods|currencies|accounts(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/disable)?|subject\-maps(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|master\-maps(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|voucher\-files(?:\/export|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|reconcile\-tasks(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:balances|compute))?)?|push)$/,
+  },
 ];
 
 function resolve(path: string) {

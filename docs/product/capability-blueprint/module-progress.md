@@ -6,9 +6,7 @@
 >
 > 状态词表只有三个值，统计逻辑依赖它，不要新增：
 > `已交付`（迁移 + API + 页面 + 测试齐全，无 TODO 残留）· `进行中`（部分交付、未收口，证据列写清缺哪一块）· `未开发`（未开工）。
-
 ## 总览
-
 | 指标 | 数量 |
 | --- | --- |
 | 模块总数 | 465 |
@@ -16,9 +14,7 @@
 | 进行中 | 0 |
 | **未开发** | **60** |
 | 完成率 | 87.1% |
-
 ## 分阶段进度（交付顺序看这里）
-
 | 阶段 | 已交付 | 进行中 | 未开发 | 合计 |
 | --- | --- | --- | --- | --- |
 | **D1–D2** | 80 | 0 | 0 | 80 |
@@ -27,11 +23,8 @@
 | **D5** | 52 | 0 | 0 | 52 |
 | **D6** | 75 | 0 | 3 | 78 |
 | **D7** | 98 | 0 | 57 | 155 |
-
 ## 分系统进度
-
 | 卷 | 系统 | 阶段 | 已交付 | 模块数 |
-| --- | --- | --- | --- | --- |
 | 01 | 工作台与门户系统 | D7 | 18 | 23 |
 | 02 | 渠道与店铺系统 | D1–D2 / D5 | 25 | 25 |
 | 03 | 商品主数据系统 | D1–D2 | 40 | 40 |
@@ -50,30 +43,22 @@
 | 16 | 合规与风控系统 | D7 | 23 | 23 |
 | 17 | 组织权限与系统设置系统 | D1–D2 / D4 / D6 / D7 | 29 | 29 |
 | 18 | 集成开放与智能自动化系统 | D7 | 2 | 24 |
-
 ## 判定「已交付」的标准
-
 一个模块标 `已交付` 当且仅当下面四件都成立，缺一件就是 `未开发` 或 `进行中`：
-
 1. **迁移** — `backend/services/<svc>/src/main/resources/db/migration/V*.sql` 里有真实表结构，
    带 `tenant_id NOT NULL` + RLS 策略，不是注释里的设计。
 2. **API** — 服务里有对应端点，走 jOOQ 显式 SQL，不是返回硬编码常量的桩。
 3. **页面** — `apps/web/src/app/**/page.tsx` 是真实工作区，不是 `DomainPlaceholder`。
 4. **测试** — `cd backend && ./mvnw verify` 绿；涉及租户隔离的必须实跑
    「两租户互不可见 / 伪造 tenant header 无效 / 连接池归还后不串租户」三条断言。
-
 **判定为 `未开发` 的典型形态**（见到就说明没做完，不许算进已交付）：
-
 - `DomainPlaceholder` 占位页
 - 硬编码数组 / 常量当数据源
 - 服务里 `TODO` + `throw new UnsupportedOperationException()`
 - 迁移文件存在但没有 RLS 策略
 - 前端有页面但后端没有对应端点（或反之）
-
 ## 跨期说明
-
 「阶段」列按**依赖就绪顺序**逐模块标注，不是卷归属。跨期卷的拆分如下：
-
 - **01 工作台与门户 → 全部 D7**：它是纯投影聚合层（蓝图原文「不写业务数据，只读投影」），
   聚合 09 订单 / 07 库存 / 02 渠道 / 12 财务 / 15 客户 / 17 审批的投影。
   这些数据源没落地之前建「我的待办」只能造假数据，所以整卷排到最后收口。
@@ -87,9 +72,7 @@
 - **11 售后与退货**：D4 交付售后单、退货授权与实收、退款换货；平台纠纷 / 客诉工单 / 分析排 D7。
 - **17 组织权限**：D1–D2 交付租户、法人、部门、成员、角色、页面权限、数据范围、审计；
   17.4 审批流随单据排 D4，17.6.1.1 账簿与本位币随财务排 D6，17.7 套餐与平台参数排 D7。
-
 ## 模块明细
-
 | 模块 ID | 模块名 | L3 锚点路由 | 阶段 | 状态 | 证据 |
 | --- | --- | --- | --- | --- | --- |
 | 1.1.1.1 | 我的待办 | /dashboard/todo | D7 | 已交付 | **卷 01 第一批**：本模块是**只读投影**（卷 01 卷首写死「不产生新的业务事实，只聚合各系统的投影」「不做：任何写业务数据的操作。工作台只读 + 跳转；一切状态变更回到归属系统完成」+ 蓝图 1.1.1.1 原文「**不写业务数据**，只读投影」）⇒ **不新建任何表、不占用 V370**（Flyway 版本号留给真正需要它的场景）、**不建后端微服务**、**不提供任何写端点**、**对后端零改动**。**迁移**：无（本模块只读六个既有服务的既有事实表）。**端点**：**零新增** —— 本模块是**纯前端聚合层**，读八个**既有**的只读投影端点（蓝图的八类待办 ↔ 八个上游端点一一对应，不多不少）：超期未发货 → `GET trade/fulfillment/timeliness/overdue`（09 订单，权限码 `trade.fulfillment.read`）·待审订单 → `GET trade/order-pending-review/queue`（09 订单，`trade.orders.read`）· 库存缺口 → `GET warehouse/inventory/stockout-alerts/stockouts`（07 库存，`warehouse.inventory.read`）· 待处理同步失败 → `GET channel/sync-failures`（02 渠道，`channel.sync.read`）· 待核对账差异 → `GET finance/supplier-reconciliation`（12 财务，`finance.suppliereconciliation.read`）· 待回复站内信 → `GET crm/message-inbox/messages`（15 客户，`crm.message.read`）· 待审批单据 → `GET identity/approval-todos`（17 审批，沿用 `identity.approval_inbox.read`）· 库存低于安全线 → `GET warehouse/inventory/safety-stock/alerts`（07 库存，`warehouse.inventory.read`）。八个上游系统与蓝图「上游 = 09 订单、07 库存、02 渠道、12 财务、15 客户、17 审批」逐条对上。**api-proxy**：**本车道未改 `api-proxy.ts`**（**k = 0**）—— 发车前用脚本把基线 **225** 条 services[] 正则**逐条编译并实测命中**（与 `resolve()` 同构：先切掉 prefix 再 test，不是目测、不是 `grep -c "prefix: '"`），实测上述八个形状**全部已在基线放行** ⇒ 无需新增元素，**元素数仍 = 225**，该文件**一字未改、未重排** ⇒ 并入集成头时在该文件上**零冲突面**（调度者分给本车道的第 314 行锚点因此未被占用）。**数据范围（法人/店铺/仓库/部门）**：**服务端判定，前端不掺和** —— 租户来自**已认证的成员关系**（`auth/session` → 各服务 `AccessService.require` → 身份服务 `/internal/access`），**不信任任何客户端租户头**（代理只转发会话 cookie 换来的 `Authorization`，`X-Tenant-Id` 根本不会被转发，有专门的反向断言钉住）；法人/店铺/仓库/部门的范围由**归属服务**在服务端判定（`AccessService.run` 绑定 `app.actor` / `app.department` / `app.grants` / `app.permission` 供 RLS 与行级范围使用）；**前端不把范围当成可信输入往下传**（不下发范围参数、不下发租户 id，只读各服务**已经按范围过滤好**的投影）；前端做的那一点是**展示** —— 按 `GrantPermissions.scopeMode` **逐字同式**的判据（取最宽的一条授权 ALL > DEPARTMENT > SELF，DEPARTMENT 需要会话带部门否则退化为 SELF）算出每个来源**实际生效**的数据范围并显示，⚠️ 该判定**只用于「要不要去读」和「怎么措辞」**，**不是授权** —— 服务端会独立地再判一次。**三件「判不了」与「没有」严格分开**：① 严重度判不了（风险分 `null` = 没评估过、审批节点没配时限、上游给了没见过的严重度词）落在独立 `UNKNOWN` 档并**排在 `LOW` 之前**；② 停留时长判不了（起点缺失/格式不认）是 `null` **不是 0**（0 会把「不知道停了多久」显示成「刚发生」）；③ 来源读不到逐类单列、**不计入总数**，也不冒充「0 条」；④ 另加第四件 —— **无权限**与**读不到**分开：无权限的来源**根本不发请求**（发了必然 403 且会把「无权限」说成「服务挂了」），标成「无权限 · 对你不开放」。**严重度按源分别推、不统一硬编码阈值**（各源判据不同：风险分 / 超期秒数 / 上游自带的 severity / 失败原因 / 优先级 / 未结差异条数；统一阈值会重算业务口径）⇒ 严重度**不可跨源直接比大小**，页面按档位展示。**已处置的不再是待办**：已审的单、已解决的预警、已重放的同步失败、已读的站内信、已发的站内信（OUTBOUND 不是「待回复」）、没有未结差异的对账单 —— 一律不进队列（上游默认口径外**显式再挡一次**，免得将来上游改了默认口径而这里悄悄把已处置的报成待办）。**紧急度排序**：严重度降序 → 停留时长降序 → 类型名 → 引用，**最后两级保证同一批数据两次刷新顺序不跳**（顺序乱跳会让人以为待办自己在动）；停留时长判不了的排在同级**之后**（「停了多久不知道」≠「停了很久」，把 `null` 当无穷大会把一批判不了的顶到最前）。**计数与清单同源**：概览的每个数字都由清单**同一份集合**算出。**页面** `/dashboard/todo/my-todos`（`apps/web/src/app/dashboard/todo/my-todos/page.tsx`）+ `apps/web/src/components/dashboard/my-todo-{model,workspace}.tsx`：数据源可达性区（八个来源逐条报「已接通 / 无权限 / 读不到」+ 归属系统 + 上游端点 + **实际生效的数据范围** + 当前工作空间名）+ 待办概览（总数 / **未读计数角标** / 最久停留 / 四档严重度 / **判不了严重度**条数 / 读不到来源数 / 无权限来源数）+ 按类型筛（八类各自条数，点一下就按这一类筛）+ 筛选（严重度 / 停留时长下限 / 关键字）+ 待办队列（按紧急度排序的卡片：类型 / 单据引用 / 严重度 / 停留时长 / 数据范围 / **下一步入口**（跳归属系统处理页并带定位参数，如 `/crm/messages?keyword=MSG-1`、`/inventory/stockout-alerts?skuId=…`）+ 真分页）；加载 / 错误 / 空三态齐全，**禁 mock**；上游取数被页数上限截断时**如实报出「只取回前 N 条（共 M 条）」**。🔴 **工作台不写业务数据**：页面上**没有认领 / 完成 / 转交**任何写动作，每张卡片只有一条出口（跳归属系统）。**不代兄弟模块实现**：1.1.1.2 异常订单队列（`/dashboard/todo`）与 1.1.1.3 审批待办（`/dashboard/todo/approvals`）各有自己的页面，本车道**不碰 `apps/web/src/app/dashboard/todo/page.tsx`**（那是 1.1.1.2 已交付的页面），只挂自己的同层子路由。**契约**：未重新生成（后端零改动 ⇒ 契约不变）。**测试** `my-todo-model.test.ts` **39 例**（八类一一对应 / 「判不了」不被当成「没有」三态 / 已处置的不再是待办 / 读不到与没有是两件事 / 紧急度排序四则 / 计数与清单同源 / 筛选五则 / 归一七则 / 数据范围八则：ALL>DEPARTMENT>SELF 取最宽、「能写不能读」不成立、无部门则 DEPARTMENT 退化为 SELF、八个来源逐个判定、会话读不到时全部判为不可读）+ `my-todo-allowlist.test.ts` **6 例**（真跑 proxy 断言 HTTP 状态码：前端源码里**反向抽取**的真实调用点逐条放行 / 八个上游端点逐条放行 / 查询串不影响放行判定 / **刻意不放行的形状仍然 404**（含 🔴 写形状：sync replay、message reply、alert acknowledge、recon resolve、approval decide）与 / 不误伤兄弟模块与六个上游系统其它车道已交付的形状 / **代理不转发伪造的 X-Tenant-Id 与 X-Internal-Key**，只转发会话 cookie 换来的 Authorization）。**验证** `./mvnw -q compile` exit 0、`pnpm typecheck` 3/3 通过、`pnpm vitest run apps/web/src/app/api` **237 文件 1336 例全绿**、本车道 5 个文件 eslint 无输出 · 2026-10-24 交付 |
@@ -540,7 +523,7 @@
 | 18.1.2.2 | 投递记录 | — | D7 | 未开发 | — |
 | 18.1.3.1 | 导入导出任务 | — | D7 | 未开发 | — |
 | 18.1.3.2 | 数据迁移 | — | D7 | 未开发 | — |
-| 18.2.1.1 | 财务软件 | — | D7 | 未开发 | — |
+| 18.2.1.1 | 财务软件 | — | D7 | 已交付 | **迁移** `backend/services/platform/src/main/resources/db/migration/V382__finance_software.sql` 七表（platform_finance_account 连接档案 / platform_finance_subject_map 科目映射 / platform_finance_master_map 主数据映射 / platform_finance_voucher_file 凭证文件导出记录 / platform_finance_reconcile_task 核对任务 / platform_finance_reconcile_balance 外部余额快照 / platform_finance_reconcile_diff 核对差异），全部 `tenant_id NOT NULL` + ENABLE **与 FORCE** RLS isolation + `GRANT platform_app` + 两个发号序列显式授权；**金额 / 余额 / 差额一律 `numeric(20,6)`（禁浮点）**，时间列一律 `timestamptz`，业务日期用 `date`。**权限码** `backend/services/identity/src/main/resources/db/migration/V382__platform_finance_permission.sql` 登记 `platform.finance.read / .create / .update / .export / .reconcile / .push` —— 「导出凭证文件」「算核对差异」「直连推送」是**三个独立的码**：能配科目映射的人不该顺手把法定凭证文件导出去。**端点 18 条**挂 `/platform/finance-software`：GET `/capabilities`（八维能力声明，逐条写明「有没有 / 依据是什么 / 缺了归谁」）/ `/overview` / `/accounts` / `/subject-maps` / `/master-maps` / `/voucher-files` / `/reconcile-tasks` / `/periods` / `/currencies` / `/voucher-files/{id}` / `/reconcile-tasks/{id}`；POST `/accounts` / `/accounts/{id}/disable` / `/subject-maps` / `/master-maps` / `/voucher-files/export` / `/reconcile-tasks` / `/reconcile-tasks/{id}/balances` / `/reconcile-tasks/{id}/compute` / `/push`；DELETE `/subject-maps/{id}` / `/master-maps/{id}` / `/reconcile-tasks/{id}`。🔴 **直连推送与直连同步未接入**：本仓不存在 kingdee / yonyou / sap / odoo 客户端 ⇒ `FinanceSoftwarePushPort` + `UnavailableFinanceSoftwarePushPort`（照 crm `UnavailablePlatformMessageSendPort` 先例）**如实答 409 且一次数据都不写** —— 一条返回成功结果的假通道会让「凭证已推给金蝶」在数据上看起来发生过，而现场一个凭证都没推出去。**「本系统管业务账、外部软件管法定账」是硬约束**：与外部软件的衔接方式就是**凭证文件 + 科目映射**（蓝图原话）—— 导出真读上游 12.5.2.1 **已过账**凭证（总账不用于出法定凭证：它把冲销轧差了）、套科目映射后生成**真文件内容**（CSV 带 UTF-8 BOM / SpreadsheetML / 通用 XML）、落 sha256 与字节数、**内容一并落库**（事后能原样取回当初那一份）；没配映射的行**标成 UNMAPPED 计入 `unmapped_line_count`**，绝不静默丢行。**余额核对差异是算出来的**：本地余额真读上游 12.5.2.2 试算平衡表（按科目余额方向取正负），外部余额来自导入的快照行（带方向），两者同口径后逐科目相减，四种差异原因 BALANCE_DIFF / ONLY_LOCAL / ONLY_EXTERNAL / CURRENCY_MISMATCH 各自落库；两边方向不同**如实标出而不是翻正抹平**；两边都是 0 **不是差异**；超上限与空区间都**报错不偷偷截断**。**跨服务只读**：`FinanceVoucherPort`（finance 8087）只转发调用方自己的 bearer、**不传租户号**、显式超时，取不到一律 **503**（是「读不到」不是「没有数据」），不建跨服务 FK、不抄凭证。**页面** `apps/web/src/app/integrations/connectors/finance-software/page.tsx`（工作区 `apps/web/src/components/integrations/finance-software-workspace.tsx` + 纯模型层 `finance-software-model.ts`）：连接档案 / 科目映射 / 主数据映射 / 凭证文件（可**查看真内容**与 sha256）/ 余额核对 / 能力声明六个页签，加载 / 空 / 错误三态齐全；🔴 未接入的能力**按能力声明如实显示且不提供按钮**（一个点了必然 409 的按钮会让运营以为「点一下就能推」），**不做本地兜底生成**。**api-proxy** `apps/web/src/lib/api-proxy.ts` 新增一条独立 `prefix: 'platform/'` 元素（纯新增 62 行 / **零删除**），首 token `finance-software` 与同服务既有 `apps` / `text` 两支**正则不相交**。**契约** `packages/api-contracts` codegen 重生成：24 个 `FinanceSoftware*` 类型 + 18 条路径，其余 8 个服务逐字节不变。**测试**：后端 `FinanceSoftwareIntegrationTest`（32 例）+ `FinanceSoftwareTenancyIntegrationTest`（7 例）= **39 例全过**（真 Testcontainers PostgreSQL 16，FORCE RLS，连接池压到 1 条）；前端 `finance-software-model.test.ts`（27 例）+ `finance-software-allowlist.test.ts`（5 例）= **32 例全过**；全量 allowlist 回归 251 文件 / 1416 例全过（未误伤兄弟车道）。多租户三条断言齐全：两租户互不可见（列表 + 按主键直查 + 事务外零行）/ 伪造 tenant header 无效（行仍写入但落在**会话租户**名下，不是只断言「看不见」）/ 连接池固定 1 条交替 5 轮不串租户（另加**凭证文件正文**也不串）。**接手时就地修掉三处映射错位**（上一位 worker 的主体代码在此之前**整模块不可用**）：`platform_finance_account` 的 INSERT 给 `created_by` 套了 `::timestamptz`（uuid 被 PG 拒 ⇒ 登记连接档案必然 409）、`platform_finance_reconcile_task` 的 INSERT 少一个占位符（12 列对 11 值 ⇒ 建核对任务必然 409）、余额核对的 ONLY_LOCAL 差异行把 `external_subject_code` 写成空串（迁移的 `CHECK(btrim(...) <> '')` 会拒 ⇒ 只要本地有一个没配映射的科目整次核对就在 DB 层炸）—— 第三处改为 `LOCAL:<本地科目编码>` 占位符（裸本地编码会与「对方恰好用同一个编码而我们没配映射」的外部科目撞唯一键）。**后续待办**：外部财务软件适配器（金蝶 / 用友 / SAP / Odoo）归 **18.2 卷级**，不在本车道 —— 适配器到位后 `/push` 立刻变成真的，页面上的「直连推送」按钮也会按能力声明自动出现。 |
 | 18.2.2.1 | 支付与资金 | — | D7 | 未开发 | — |
 | 18.2.3.1 | 其他对接 | — | D7 | 未开发 | — |
 | 18.3.1.1 | 规则列表 | — | D7 | 未开发 | — |
@@ -557,3 +540,5 @@
 | 18.4.3.2 | 效果评估 | — | D7 | 未开发 | — |
 | 18.5.1.1 | 模板管理 | — | D7 | 未开发 | — |
 | 18.5.2.1 | 投递记录 | — | D7 | 未开发 | — |
+| 13 | 利润与经营分析系统 | D7 | 2 | 23 |
+| 18 | 集成开放与智能自动化系统 | D7 | 3 | 24 |
