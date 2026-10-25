@@ -85,7 +85,7 @@ public final class AlertRuleModels {
    * @param upstreamModule 上游模块（预置规则有；自建规则为 null）
    */
   public record AlertRuleEffective(
-      @Schema(nullable = true) UUID id,
+      UUID id,
       String ruleCode,
       String origin,
       String displayName,

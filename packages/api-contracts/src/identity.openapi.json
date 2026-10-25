@@ -398,6 +398,425 @@
         },
         "type": "object"
       },
+      "AlertRuleCapabilities": {
+        "properties": {
+          "boundaries": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "dimensions": {
+            "items": {
+              "$ref": "#/components/schemas/AlertRuleCapabilityDimension"
+            },
+            "type": "array"
+          },
+          "engineAvailable": {
+            "type": "boolean"
+          },
+          "engineNote": {
+            "type": "string"
+          },
+          "engineOwnerModule": {
+            "type": "string"
+          },
+          "presets": {
+            "items": {
+              "$ref": "#/components/schemas/AlertRulePreset"
+            },
+            "type": "array"
+          },
+          "vocabulary": {
+            "$ref": "#/components/schemas/AlertRuleVocabulary"
+          }
+        },
+        "type": "object"
+      },
+      "AlertRuleCapabilityDimension": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "code": {
+            "type": "string"
+          },
+          "impact": {
+            "type": "string"
+          },
+          "missing": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "ownerModule": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AlertRuleEffective": {
+        "properties": {
+          "changeBasis": {
+            "type": "string"
+          },
+          "comparison": {
+            "type": "string"
+          },
+          "customized": {
+            "type": "boolean"
+          },
+          "description": {
+            "nullable": true,
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "metricCode": {
+            "type": "string"
+          },
+          "objectRef": {
+            "nullable": true,
+            "type": "string"
+          },
+          "objectScope": {
+            "type": "string"
+          },
+          "objectType": {
+            "type": "string"
+          },
+          "origin": {
+            "type": "string"
+          },
+          "ruleCode": {
+            "type": "string"
+          },
+          "threshold": {
+            "type": "string"
+          },
+          "timeWindow": {
+            "type": "string"
+          },
+          "timezone": {
+            "type": "string"
+          },
+          "timezoneSource": {
+            "type": "string"
+          },
+          "unit": {
+            "type": "string"
+          },
+          "unitLabel": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "upstreamModule": {
+            "nullable": true,
+            "type": "string"
+          },
+          "upstreamSystem": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AlertRuleHit": {
+        "properties": {
+          "baseValue": {
+            "nullable": true,
+            "type": "string"
+          },
+          "changeBasis": {
+            "type": "string"
+          },
+          "comparison": {
+            "type": "string"
+          },
+          "hitAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "metricCode": {
+            "type": "string"
+          },
+          "objectRef": {
+            "nullable": true,
+            "type": "string"
+          },
+          "objectType": {
+            "type": "string"
+          },
+          "observedValue": {
+            "nullable": true,
+            "type": "string"
+          },
+          "reason": {
+            "nullable": true,
+            "type": "string"
+          },
+          "resolution": {
+            "type": "string"
+          },
+          "ruleCode": {
+            "type": "string"
+          },
+          "threshold": {
+            "type": "string"
+          },
+          "timeWindow": {
+            "type": "string"
+          },
+          "timezone": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AlertRuleHitHistory": {
+        "properties": {
+          "engineAvailable": {
+            "type": "boolean"
+          },
+          "engineNote": {
+            "type": "string"
+          },
+          "engineOwnerModule": {
+            "type": "string"
+          },
+          "hits": {
+            "items": {
+              "$ref": "#/components/schemas/AlertRuleHit"
+            },
+            "type": "array"
+          },
+          "total": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AlertRuleList": {
+        "properties": {
+          "customCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "customizedCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "disabledCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "presetCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "rules": {
+            "items": {
+              "$ref": "#/components/schemas/AlertRuleEffective"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "AlertRuleMetric": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "code": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "ownerSystem": {
+            "type": "string"
+          },
+          "unavailableReason": {
+            "nullable": true,
+            "type": "string"
+          },
+          "unit": {
+            "type": "string"
+          },
+          "unitLabel": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AlertRulePreset": {
+        "properties": {
+          "changeBasis": {
+            "type": "string"
+          },
+          "comparison": {
+            "type": "string"
+          },
+          "defaultTimezone": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "metricAvailable": {
+            "type": "boolean"
+          },
+          "metricCode": {
+            "type": "string"
+          },
+          "metricUnavailableReason": {
+            "nullable": true,
+            "type": "string"
+          },
+          "objectScope": {
+            "type": "string"
+          },
+          "objectType": {
+            "type": "string"
+          },
+          "ruleCode": {
+            "type": "string"
+          },
+          "threshold": {
+            "type": "string"
+          },
+          "timeWindow": {
+            "type": "string"
+          },
+          "unit": {
+            "type": "string"
+          },
+          "unitLabel": {
+            "type": "string"
+          },
+          "upstreamEndpoint": {
+            "type": "string"
+          },
+          "upstreamModule": {
+            "type": "string"
+          },
+          "upstreamSystem": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AlertRuleSaveRequest": {
+        "properties": {
+          "changeBasis": {
+            "nullable": true,
+            "type": "string"
+          },
+          "comparison": {
+            "nullable": true,
+            "type": "string"
+          },
+          "metricCode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "name": {
+            "nullable": true,
+            "type": "string"
+          },
+          "objectRef": {
+            "nullable": true,
+            "type": "string"
+          },
+          "objectScope": {
+            "nullable": true,
+            "type": "string"
+          },
+          "objectType": {
+            "nullable": true,
+            "type": "string"
+          },
+          "threshold": {
+            "nullable": true,
+            "type": "string"
+          },
+          "timeWindow": {
+            "nullable": true,
+            "type": "string"
+          },
+          "timezone": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AlertRuleVocabulary": {
+        "properties": {
+          "changeBases": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "comparisons": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "metrics": {
+            "items": {
+              "$ref": "#/components/schemas/AlertRuleMetric"
+            },
+            "type": "array"
+          },
+          "objectScopes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "objectTypes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "timeWindows": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
       "ApprovalActionCount": {
         "properties": {
           "action": {
@@ -9767,6 +10186,352 @@
         },
         "tags": [
           "accounting-book-controller"
+        ]
+      }
+    },
+    "/identity/alert-rules": {
+      "get": {
+        "operationId": "get_identity_alert_rules",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AlertRuleList"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "alert-rule-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_identity_alert_rules",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AlertRuleSaveRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AlertRuleEffective"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "alert-rule-controller"
+        ]
+      }
+    },
+    "/identity/alert-rules/capabilities": {
+      "get": {
+        "operationId": "get_identity_alert_rules_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AlertRuleCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "alert-rule-controller"
+        ]
+      }
+    },
+    "/identity/alert-rules/hits": {
+      "get": {
+        "operationId": "get_identity_alert_rules_hits",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AlertRuleHitHistory"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "alert-rule-controller"
+        ]
+      }
+    },
+    "/identity/alert-rules/{id}": {
+      "delete": {
+        "operationId": "delete_identity_alert_rules_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "alert-rule-controller"
+        ]
+      },
+      "put": {
+        "operationId": "put_identity_alert_rules_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AlertRuleSaveRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AlertRuleEffective"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "alert-rule-controller"
+        ]
+      }
+    },
+    "/identity/alert-rules/{id}/disable": {
+      "post": {
+        "operationId": "post_identity_alert_rules_id_disable",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AlertRuleEffective"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "alert-rule-controller"
+        ]
+      }
+    },
+    "/identity/alert-rules/{id}/enable": {
+      "post": {
+        "operationId": "post_identity_alert_rules_id_enable",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AlertRuleEffective"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "alert-rule-controller"
+        ]
+      }
+    },
+    "/identity/alert-rules/{id}/reset": {
+      "post": {
+        "operationId": "post_identity_alert_rules_id_reset",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "alert-rule-controller"
         ]
       }
     },
