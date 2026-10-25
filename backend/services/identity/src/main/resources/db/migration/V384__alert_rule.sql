@@ -83,6 +83,12 @@
 --   time_window  : INSTANT / ROLLING_7D / ROLLING_30D / CALENDAR_MONTH
 --   threshold    : NUMERIC(19,6)，**禁浮点**
 --
+-- 另加一项 **change_basis**（NONE / PERIOD_OVER_PERIOD / YEAR_OVER_YEAR）：
+-- 蓝图自己的例子「某店铺销售额环比跌超 X%」不带比较基准就**没法表达** ——
+-- 「销售额」是金额，「跌超 20%」比的是**变化率**。五项是底线，
+-- 这一项是把蓝图例子落地的必要条件；它同时是「**无基期**」那条纪律的落点
+-- （环比 / 同比的基期没数据 ⇒ 引擎判**不可判定**，不是 0%、不是「持平」）。
+--
 -- CHECK 约束让**绕过服务层直连 SQL** 也一样写不进非法值；服务端另外再拒一次（400）。
 --
 -- 「对象类型与对象标识的关系」单独两列说清：
@@ -195,6 +201,16 @@ CREATE TABLE alert_rule (
   time_window varchar(24),
   -- 比较方向：LT / LE / GT / GE。
   comparison varchar(8),
+  -- 比较基准：NONE 直接比较 / PERIOD_OVER_PERIOD 环比 / YEAR_OVER_YEAR 同比。
+  --
+  -- ⚠️ **为什么在蓝图的五项之外再加这一项**：蓝图自己的例子「某店铺销售额环比跌超 X%」
+  -- 不带比较基准就**没法表达** —— 「销售额」是金额，「跌超 20%」比的是**变化率**。
+  -- 五项（对象类型 / 度量 / 阈值 / 时间窗 / 比较方向）全部钉死是**底线**，
+  -- 这一项是把蓝图例子落地的必要条件。
+  --
+  -- 它同时是「**无基期**」这条纪律的落点：环比 / 同比的基期没有数据时，
+  -- 引擎判**不可判定**（不是 0%、不是「持平」）。
+  change_basis varchar(24),
 
   -- ===== 对象范围与对象标识 =====
   -- ALL = 该类型的所有对象；SPECIFIC = 具体某个对象。
@@ -204,6 +220,10 @@ CREATE TABLE alert_rule (
 
   -- ===== 时间窗边界所按时区（IANA 区域 id）=====
   timezone varchar(64),
+  -- 时区来源：PRESET_DEFAULT（用预置默认）/ EXPLICIT（显式指定）/ ACCOUNT_LOCALE
+  -- （继承当前操作人的生效展示时区）。来源不透明的话，用户会以为时间窗按某个时区算，
+  -- 结果按另一个时区算 —— 所以来源本身也是一条数据。
+  timezone_source varchar(24),
 
   -- ENABLED 生效 / DISABLED 已关闭（蓝图明说「用户可改参数或关闭」）。
   status varchar(16) NOT NULL DEFAULT 'ENABLED',
@@ -255,6 +275,10 @@ CREATE TABLE alert_rule (
   CONSTRAINT alert_rule_time_window_chk
     CHECK (time_window IS NULL OR time_window IN ('INSTANT','ROLLING_7D','ROLLING_30D','CALENDAR_MONTH')),
 
+  -- 受控词表：比较基准。
+  CONSTRAINT alert_rule_change_basis_chk
+    CHECK (change_basis IS NULL OR change_basis IN ('NONE','PERIOD_OVER_PERIOD','YEAR_OVER_YEAR')),
+
   -- 阈值不能为负（负阈值会让「低于阈值」恒真，规则一建就疯狂误报）。
   CONSTRAINT alert_rule_threshold_chk
     CHECK (threshold IS NULL OR threshold >= 0),
@@ -262,6 +286,10 @@ CREATE TABLE alert_rule (
   -- 时区形状（真实合法性由服务层的 IANA 词表再挡一道）。
   CONSTRAINT alert_rule_timezone_chk
     CHECK (timezone IS NULL OR timezone ~ '^[A-Za-z][A-Za-z0-9_+-]*(/[A-Za-z0-9_+-]+)*$'),
+
+  -- 受控词表：时区来源。
+  CONSTRAINT alert_rule_timezone_source_chk
+    CHECK (timezone_source IS NULL OR timezone_source IN ('PRESET_DEFAULT','EXPLICIT','ACCOUNT_LOCALE')),
 
   -- 对象范围与对象标识的关系：三者必须自洽。
   CONSTRAINT alert_rule_object_scope_chk
@@ -281,8 +309,10 @@ CREATE TABLE alert_rule (
       AND threshold IS NOT NULL
       AND time_window IS NOT NULL
       AND comparison IS NOT NULL
+      AND change_basis IS NOT NULL
       AND object_scope IS NOT NULL
       AND timezone IS NOT NULL
+      AND timezone_source IS NOT NULL
     )),
 
   -- 预置覆盖行：要么至少覆盖了一项，要么就是「只关闭」—— 两者都不是都不许。
@@ -290,7 +320,8 @@ CREATE TABLE alert_rule (
     CHECK (origin = 'CUSTOM' OR status = 'DISABLED'
       OR name IS NOT NULL OR object_type IS NOT NULL OR metric_code IS NOT NULL
       OR threshold IS NOT NULL OR time_window IS NOT NULL OR comparison IS NOT NULL
-      OR object_scope IS NOT NULL OR object_ref IS NOT NULL OR timezone IS NOT NULL)
+      OR change_basis IS NOT NULL OR object_scope IS NOT NULL OR object_ref IS NOT NULL
+      OR timezone IS NOT NULL OR timezone_source IS NOT NULL)
 );
 
 -- 「这个租户的自定义规则清单」与「哪些预置规则被改过/关过」的主查询口径。
@@ -320,6 +351,7 @@ CREATE TABLE alert_rule_hit (
   -- 命中时生效的阈值（留快照，便于事后解释「为什么命中了」）。
   threshold numeric(19,6) NOT NULL,
   comparison varchar(8) NOT NULL,
+  change_basis varchar(24) NOT NULL,
   time_window varchar(24) NOT NULL,
   timezone varchar(64) NOT NULL,
 
@@ -360,6 +392,9 @@ CREATE TABLE alert_rule_hit (
 
   CONSTRAINT alert_rule_hit_comparison_chk
     CHECK (comparison IN ('LT','LE','GT','GE')),
+
+  CONSTRAINT alert_rule_hit_change_basis_chk
+    CHECK (change_basis IN ('NONE','PERIOD_OVER_PERIOD','YEAR_OVER_YEAR')),
 
   CONSTRAINT alert_rule_hit_time_window_chk
     CHECK (time_window IN ('INSTANT','ROLLING_7D','ROLLING_30D','CALENDAR_MONTH')),
