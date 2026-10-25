@@ -121,10 +121,14 @@ describe('草稿校验', () => {
     expect(validateDraft(noMetric, vocabulary)).toBe('请选择度量');
     const noThreshold = { ...noMetric, metricCode: 'SALES_AMOUNT' };
     expect(validateDraft(noThreshold, vocabulary)).toBe('阈值不能为空');
-    const noWindow = { ...noThreshold, threshold: '10' };
-    expect(validateDraft(noWindow, vocabulary)).toBe('时间窗不在受控词表里');
-    const noComparison = { ...noWindow, timeWindow: 'INSTANT' };
-    expect(validateDraft(noComparison, vocabulary)).toBe('比较方向不在受控词表里');
+    const noWindow = { ...noThreshold, threshold: '10', timeWindow: '' };
+    expect(validateDraft(noWindow, vocabulary)).toBe('请选择时间窗');
+    const noComparison = { ...noWindow, timeWindow: 'INSTANT', comparison: '' };
+    expect(validateDraft(noComparison, vocabulary)).toBe('请选择比较方向');
+    const noBasis = { ...noComparison, comparison: 'LT', changeBasis: '' };
+    expect(validateDraft(noBasis, vocabulary)).toBe('请选择比较基准');
+    const noScope = { ...noBasis, changeBasis: 'NONE', objectScope: '' };
+    expect(validateDraft(noScope, vocabulary)).toBe('请选择对象范围');
   });
 
   it('词表外的对象类型与度量被拒', () => {
@@ -136,6 +140,30 @@ describe('草稿校验', () => {
       threshold: '1',
     };
     expect(validateDraft(bad, vocabulary)).toBe('对象类型不在受控词表里');
+    const badMetric = { ...bad, objectType: 'SKU', metricCode: 'NOT_A_METRIC' };
+    expect(validateDraft(badMetric, vocabulary)).toBe('度量不在受控词表里');
+  });
+
+  it('词表外的时间窗 / 比较方向 / 比较基准 / 对象范围被拒', () => {
+    const base = {
+      ...emptyDraft(),
+      name: 'x',
+      objectType: 'SKU',
+      metricCode: 'SALES_AMOUNT',
+      threshold: '1',
+    };
+    expect(validateDraft({ ...base, timeWindow: 'LAST_QUARTER' }, vocabulary)).toBe(
+      '时间窗不在受控词表里',
+    );
+    expect(validateDraft({ ...base, comparison: 'APPROX' }, vocabulary)).toBe(
+      '比较方向不在受控词表里',
+    );
+    expect(validateDraft({ ...base, changeBasis: 'YOY' }, vocabulary)).toBe(
+      '比较基准不在受控词表里',
+    );
+    expect(validateDraft({ ...base, objectScope: 'SOME' }, vocabulary)).toBe(
+      '对象范围不在受控词表里',
+    );
   });
 
   it('对象范围与对象标识必须自洽', () => {
@@ -206,6 +234,34 @@ describe('措辞', () => {
     expect(scopePhrase(rule({ objectScope: 'SPECIFIC', objectRef: 'SKU-1' }))).toBe(
       '具体对象 SKU-1',
     );
+  });
+
+  it('百分比阈值带 % 后缀，不把单位标签拼成「百分比」', () => {
+    expect(
+      thresholdPhrase(
+        rule({
+          comparison: 'LT',
+          threshold: '20',
+          unit: 'PERCENT',
+          unitLabel: '百分比',
+          changeBasis: 'PERIOD_OVER_PERIOD',
+        }),
+      ),
+    ).toBe('低于基期 20%');
+  });
+
+  it('有比较基准时阈值比的是「与基期的差距」', () => {
+    expect(
+      thresholdPhrase(
+        rule({
+          comparison: 'GT',
+          threshold: '5',
+          unit: 'PERCENT',
+          unitLabel: '百分比',
+          changeBasis: 'YEAR_OVER_YEAR',
+        }),
+      ),
+    ).toBe('高于基期 5%');
   });
 
   it('未接通的度量被如实标出来', () => {

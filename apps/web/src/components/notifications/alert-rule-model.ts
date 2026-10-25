@@ -182,18 +182,14 @@ export function validateDraft(
   if (!isValidThresholdText(draft.threshold)) {
     return '阈值必须是十进制文本（不带正负号、不带科学计数法，最多 13 位整数 + 6 位小数）';
   }
-  if (!draft.timeWindow || !vocabulary?.timeWindows.includes(draft.timeWindow)) {
-    return '时间窗不在受控词表里';
-  }
-  if (!draft.comparison || !vocabulary?.comparisons.includes(draft.comparison)) {
-    return '比较方向不在受控词表里';
-  }
-  if (!draft.changeBasis || !vocabulary?.changeBases.includes(draft.changeBasis)) {
-    return '比较基准不在受控词表里';
-  }
-  if (!draft.objectScope || !vocabulary?.objectScopes.includes(draft.objectScope)) {
-    return '对象范围不在受控词表里';
-  }
+  if (!draft.timeWindow) return '请选择时间窗';
+  if (!vocabulary?.timeWindows.includes(draft.timeWindow)) return '时间窗不在受控词表里';
+  if (!draft.comparison) return '请选择比较方向';
+  if (!vocabulary?.comparisons.includes(draft.comparison)) return '比较方向不在受控词表里';
+  if (!draft.changeBasis) return '请选择比较基准';
+  if (!vocabulary?.changeBases.includes(draft.changeBasis)) return '比较基准不在受控词表里';
+  if (!draft.objectScope) return '请选择对象范围';
+  if (!vocabulary?.objectScopes.includes(draft.objectScope)) return '对象范围不在受控词表里';
   if (draft.objectScope === 'SPECIFIC' && !draft.objectRef.trim()) {
     return '对象范围是「具体某个对象」时必须给出对象标识';
   }
@@ -219,10 +215,41 @@ export function metricAvailable(
   return vocabulary?.metrics.find((metric) => metric.code === metricCode)?.available ?? true;
 }
 
-/** 阈值短语：「低于 14 天」。 */
+/**
+ * 单位码 → 阈值短语里数字后面的后缀（**含数字与单位之间的空格**）。
+ *
+ * <p>🔴 **不能拿服务端下发的 `unitLabel` 直接拼**：那是个**标签**（天数 / 金额 / 百分比），
+ * 拼在数字后面会读成「低于 14 天数」「低于 20 百分比」—— 不通顺，而且**看上去像**
+ * 阈值单位被写错了。这里按单位码取**量词形态**的后缀。
+ *
+ * <p>空格按中文习惯分开：量词是「 天」（数字与量词分开读），百分号是「%」（紧贴数字）。
+ *
+ * <p>金额与数量在契约里**没有具体量纲**（币种归 12 财务、计量单位归 07 库存），
+ * 所以如实写成「（金额）」「（数量）」，不编一个单位出来。
+ */
+export const UNIT_SUFFIXES: Record<string, string> = {
+  DAYS: ' 天',
+  PERCENT: '%',
+  CURRENCY: '（金额）',
+  QUANTITY: '（数量）',
+  COUNT: '（计数）',
+};
+
+/**
+ * 阈值短语：「低于 14 天」。
+ *
+ * <p>🔴 **有比较基准时阈值比的是「与基期的差距」**，不是绝对值：
+ * 「销售额环比低于基期 20%」= 比上一个等长周期低了 20% 以上，
+ * 也正是蓝图那句「某店铺销售额环比跌超 X%」的意思。
+ * 所以带比较基准时短语里点明「基期」，否则「低于 20%」会被读成「低于 20% 这个数」。
+ */
 export function thresholdPhrase(rule: AlertRuleEffective): string {
   const comparison = COMPARISON_LABELS[rule.comparison] ?? rule.comparison;
-  return `${comparison} ${rule.threshold} ${rule.unitLabel}`;
+  const suffix = UNIT_SUFFIXES[rule.unit] ?? `（${rule.unitLabel}）`;
+  if (rule.changeBasis && rule.changeBasis !== 'NONE') {
+    return `${comparison}基期 ${rule.threshold}${suffix}`;
+  }
+  return `${comparison} ${rule.threshold}${suffix}`;
 }
 
 /** 对象范围的短语。 */
