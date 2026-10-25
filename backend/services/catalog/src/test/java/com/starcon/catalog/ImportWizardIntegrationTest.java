@@ -11,8 +11,8 @@ import java.math.BigDecimal;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.sql.DriverManager;
+import java.time.Instant;
 import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -181,6 +181,18 @@ class ImportWizardIntegrationTest {
   String unique(String hint) {
     return hint
         + UUID.randomUUID().toString().replace("-", "").substring(0, 8).toUpperCase(Locale.ROOT);
+  }
+
+  /**
+   * 同源 DB 时钟：读一次**数据库自己的时钟**。
+   *
+   * <p>{@code import_job.created_at} 是 {@code DEFAULT now()}，而 {@code prevalidated_at} / {@code
+   * started_at} / {@code finished_at} 由触发器用 {@code now()} 写 —— 它们全都属于数据库的
+   * 时钟域。拿客户端墙钟去比它们，等于假设两台钟准得一模一样：差 1 毫秒就足以让「刚刚落库」 这类断言误判（2026-10-25 channel 模块就是这么打红的：expected
+   * YELLOW but was GREEN）。
+   */
+  Instant dbNow() {
+    return sql.fetchOne("select now()").get(0, OffsetDateTime.class).toInstant();
   }
 
   /** 建一个走标准列的模板。 */
@@ -886,7 +898,10 @@ class ImportWizardIntegrationTest {
   @Test
   void 任务时间戳是带时区写回的值() {
     UUID id = template(actorA, "SPU");
-    OffsetDateTime before = OffsetDateTime.now(ZoneOffset.UTC).minusSeconds(1);
+    // 落库时刻由数据库给（created_at DEFAULT now()，其余三个由触发器用 now() 写）
+    // ⇒ 基准也必须取**数据库自己的时钟**：拿客户端墙钟当基准等于假设两台钟一模一样，
+    // 差 1 毫秒就会把「刚刚落库」误判成「不是刚刚」。
+    var dbBefore = dbNow();
     var job =
         runImport(
             actorA,
@@ -894,14 +909,15 @@ class ImportWizardIntegrationTest {
             "CREATE",
             "商品编码,商品名称,商品描述,品牌,类目,状态\r\n" + unique("SPU-") + ",x,,,,\r\n",
             true);
-    assertThat(job.createdAt()).isAfterOrEqualTo(before.toInstant());
+    var dbAfter = dbNow();
+    // 落库时刻必须夹在「这次导入之前」与「这次导入之后」两个**数据库时钟**之间。
+    assertThat(job.createdAt()).isAfterOrEqualTo(dbBefore).isBeforeOrEqualTo(dbAfter);
     assertThat(job.prevalidatedAt()).as("预校验时刻要落库").isNotNull();
     assertThat(job.startedAt()).as("执行开始时刻要落库").isNotNull();
     assertThat(job.finishedAt()).as("执行结束时刻要落库").isNotNull();
     // 结束不早于开始：这就是「时区没有被二次偏移」的证据（-28800s 会让结束早于开始）
     assertThat(job.finishedAt()).isAfterOrEqualTo(job.startedAt());
-    assertThat(job.finishedAt())
-        .isBefore(OffsetDateTime.now(ZoneOffset.UTC).plusSeconds(30).toInstant());
+    assertThat(job.finishedAt()).isBeforeOrEqualTo(dbAfter);
   }
 
   // ================================================================ 端点
