@@ -294,7 +294,7 @@ public class AlertRuleService {
     Unit unit = AlertRuleCatalog.thresholdUnit(metric, changeBasis);
 
     return new AlertRuleEffective(
-        row != null ? row.id() : AlertRuleCatalog.presetRowId(preset.ruleCode()),
+        AlertRuleCatalog.presetRowId(preset.ruleCode()),
         preset.ruleCode(),
         "PRESET",
         displayName,
@@ -652,9 +652,27 @@ public class AlertRuleService {
     AlertRuleRules.guardThresholdReachability(
         metric, effectiveThreshold, effectiveComparison, effectiveChangeBasis);
 
+    // 这一轮改完之后，这一行还剩不剩「覆盖」：
+    // 全部清空 = 本租户不再覆盖任何一项（只剩「关掉了」这一种可能）。
+    boolean noOverride =
+        name == null
+            && objectType == null
+            && metricCode == null
+            && threshold == null
+            && timeWindow == null
+            && comparison == null
+            && changeBasis == null
+            && objectScope == null
+            && objectRef == null
+            && timezone == null;
+
     OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
     Row row;
     if (current == null) {
+      if (noOverride) {
+        // 什么也没改（改的正好是预置默认值）⇒ 本来就是预置状态，不用建行。
+        return effectiveOfPreset(preset, null);
+      }
       row =
           firstRow(
               sql.fetch(
@@ -684,6 +702,16 @@ public class AlertRuleService {
                   membershipId,
                   now,
                   now));
+    } else if (noOverride && "ENABLED".equals(current.status())) {
+      // 🔴 **覆盖清空后这行必须删掉，不能 UPDATE 成空行。**
+      //   数据库层的 CHECK（alert_rule_preset_meaningful_chk）不许存在
+      //   「既没覆盖任何一项、又是 ENABLED」的覆盖行 —— 那行没有任何意义。
+      //   先写成空行再删会在同一条语句里撞 CHECK（⇒ 409），所以在这里直接删。
+      sql.execute(
+          "delete from alert_rule where tenant_id = ?::uuid and id = ?::uuid",
+          tenantId,
+          current.id());
+      return effectiveOfPreset(preset, null);
     } else {
       row =
           firstRow(
@@ -712,12 +740,6 @@ public class AlertRuleService {
                   current.id()));
     }
 
-    // 覆盖清空后这行没有意义（只关不改除外）⇒ 删掉它，规则回到纯预置状态。
-    if (isEmptyOverride(row)) {
-      sql.execute(
-          "delete from alert_rule where tenant_id = ?::uuid and id = ?::uuid", tenantId, row.id());
-      return effectiveOfPreset(preset, null);
-    }
     return effectiveOfPreset(preset, row);
   }
 
@@ -756,7 +778,11 @@ public class AlertRuleService {
     }
     if (enabled) {
       Row current = resolved.row();
-      if (current != null && isEmptyOverride(current)) {
+      // 🔴 重新启用：若这行**没有别的覆盖**，它就该被删掉 ——
+      //   「既没覆盖任何一项、又是 ENABLED」的行没有意义，
+      //   而且数据库的 CHECK（alert_rule_preset_meaningful_chk）也不允许它存在
+      //   （先 UPDATE 成那样再删会撞 CHECK ⇒ 409，所以直接删）。
+      if (current != null && !hasOverrideColumns(current)) {
         sql.execute(
             "delete from alert_rule where tenant_id = ?::uuid and id = ?::uuid",
             tenantId,
@@ -965,11 +991,16 @@ public class AlertRuleService {
   }
 
   /**
-   * 把一个 id 解析成「库里的一行」或「一条还没被改过的预置规则」。
+   * 把一个 id 解析成「库里的一行」或「一条预置规则（可能带着它的覆盖行）」。
    *
    * <p>预置规则没被改过时库里没有行 ⇒ 没有行 id，所以给预置规则派了一个
    * <b>由规则码派生的确定性合成 id</b>（{@link AlertRuleCatalog#presetRowId}）。
-   * 两种 id 都能定位到同一条规则。
+   *
+   * <p>🔴 <b>预置规则的覆盖行用「规则码」定位，不是用行 id 定位。</b>
+   * 合成 id 永远不等于覆盖行的行 id（那是数据库生成的 uuid），如果按 id 去找，
+   * 第二次改同一条预置规则就会「找不到那一行」⇒ 走新建分支 ⇒ 撞
+   * {@code UNIQUE(tenant_id, rule_code)} ⇒ 409。
+   * 所以：合成 id → 规则码 → 覆盖行，三步定位。
    */
   private Resolved resolve(UUID tenantId, UUID id) {
     Row row = loadRow(tenantId, id);
@@ -978,24 +1009,31 @@ public class AlertRuleService {
     }
     String presetCode = AlertRuleCatalog.presetCodeOf(id);
     if (presetCode != null) {
-      return new Resolved(null, presetCode);
+      return new Resolved(loadRowByCode(tenantId, presetCode), presetCode);
     }
     throw new ResponseStatusException(HttpStatus.NOT_FOUND, "规则不存在");
   }
 
-  /** 这行覆盖是否已经空了（没覆盖任何一项、也没关闭）。 */
-  private boolean isEmptyOverride(Row row) {
-    return row.name() == null
-        && row.objectType() == null
-        && row.metricCode() == null
-        && row.threshold() == null
-        && row.timeWindow() == null
-        && row.comparison() == null
-        && row.changeBasis() == null
-        && row.objectScope() == null
-        && row.objectRef() == null
-        && row.timezone() == null
-        && "ENABLED".equals(row.status());
+  /** 按规则码读一行（租户内）。 */
+  private Row loadRowByCode(UUID tenantId, String ruleCode) {
+    for (Row row : loadRows(tenantId)) {
+      if (row.ruleCode().equals(ruleCode)) return row;
+    }
+    return null;
+  }
+
+  /** 这行覆盖是否还留着「覆盖」内容（**不看 status**：只关不改也是有效的一行）。 */
+  private boolean hasOverrideColumns(Row row) {
+    return row.name() != null
+        || row.objectType() != null
+        || row.metricCode() != null
+        || row.threshold() != null
+        || row.timeWindow() != null
+        || row.comparison() != null
+        || row.changeBasis() != null
+        || row.objectScope() != null
+        || row.objectRef() != null
+        || row.timezone() != null;
   }
 
   private static String blankToNull(String value) {

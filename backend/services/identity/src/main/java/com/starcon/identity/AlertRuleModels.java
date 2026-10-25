@@ -74,7 +74,8 @@ public final class AlertRuleModels {
   /**
    * 一条<b>生效</b>的规则（= 预置默认值 ⨯ 租户覆盖，或租户自建）。
    *
-   * @param id 租户覆盖行 / 自定义行的 id（预置规则**没被改过**时没有行 ⇒ id 为 null）
+   * @param id 规则定位 id：**预置规则**是由规则码派生的确定性合成 id（恒定 ——
+   *     不随「有没有被改过」而变）；**自定义规则**是行 id
    * @param ruleCode 规则码
    * @param origin PRESET（预置，可能已被本租户改过）/ CUSTOM（自建）
    * @param customized 是否被本租户改过（改了参数或关了）

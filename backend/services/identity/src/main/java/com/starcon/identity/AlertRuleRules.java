@@ -206,9 +206,20 @@ public final class AlertRuleRules {
     return value;
   }
 
-  /** 阈值 → 十进制文本（**不带科学计数法**，界面与契约都用这个形状）。 */
+  /**
+   * 阈值 → 十进制文本（**不带科学计数法**，界面与契约都用这个形状）。
+   *
+   * <p>🔴 <b>要去掉尾随零</b>：库里的列是 {@code NUMERIC(19,6)}，读回来是
+   * {@code 21.000000} —— 那不是另一个数，但界面上一会儿显示「21」、一会儿显示
+   * 「21.000000」，用户会以为阈值被改过。
+   * {@code stripTrailingZeros()} 把 {@code 21.000000} 收回 {@code 21}，
+   * 而 {@code 20.500000} 收回 {@code 20.5}（小数位是有效的，不动）。
+   */
   public static String thresholdText(BigDecimal value) {
-    return value == null ? null : value.toPlainString();
+    if (value == null) return null;
+    BigDecimal stripped = value.stripTrailingZeros();
+    if (stripped.signum() == 0) return "0";
+    return stripped.toPlainString();
   }
 
   // ==========================================================================
