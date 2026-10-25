@@ -249,7 +249,7 @@ public class ReportingStoreComparisonRefreshService {
       if (pageData.rows().size() < ReportingStoreComparisonPort.PAGE_SIZE) break;
       if (page >= MAX_ORDER_PAGES - 1) truncated = true;
     }
-    var projected = project(tenantId, facts);
+    var projected = project(tenantId, facts, timezone);
     return new ReportingStoreComparisonModels.StoreRefreshResult(
         "trade-platform-orders",
         fetched,
@@ -324,7 +324,7 @@ public class ReportingStoreComparisonRefreshService {
       }
       if (rows.rows().size() < ReportingTradePort.PAGE_SIZE) break;
     }
-    var projected = project(tenantId, facts);
+    var projected = project(tenantId, facts, timezone);
     return new ReportingStoreComparisonModels.StoreRefreshResult(
         "trade-returns",
         fetched,
@@ -384,7 +384,7 @@ public class ReportingStoreComparisonRefreshService {
         }
       }
     }
-    var projected = project(tenantId, facts);
+    var projected = project(tenantId, facts, timezone);
     return new ReportingStoreComparisonModels.StoreRefreshResult(
         "channel-ads",
         fetched,
@@ -409,8 +409,14 @@ public class ReportingStoreComparisonRefreshService {
       String sourceService,
       String sourceReference) {}
 
-  /** 事实 upsert（幂等：同一「店铺 + 指标 + 日 + 币种 + 来源 + 上游行」只留一条）。 */
-  private int project(java.util.UUID tenantId, List<Fact> facts) {
+  /**
+   * 事实 upsert（幂等：同一「店铺 + 指标 + 日 + 币种 + 来源 + 上游行」只留一条）。
+   *
+   * <p>⚠️ **timezone 列记的是「算这个 bucket_date 时用的那个时区」** —— bucket_date 是按
+   * {@code timezone} 分桶出来的，写死 'UTC' 会让「跨时区店铺汇总必须显示所用时区」这条
+   * 口径失真（行会说自己按 UTC 分桶，实际按的是别的东西）。
+   */
+  private int project(java.util.UUID tenantId, List<Fact> facts, ZoneId timezone) {
     if (facts.isEmpty()) return 0;
     return tenants.run(
         tenantId,
@@ -424,7 +430,7 @@ public class ReportingStoreComparisonRefreshService {
                 insert into reporting_store_metric_fact
                   (id,tenant_id,shop_code,metric_code,bucket_date,currency,value,quantity,
                    timezone,source_service,source_reference,updated_at)
-                values (?,?,?,?,?,?,?,?,'UTC',?,?,now())
+                values (?,?,?,?,?,?,?,?,?,?,?,now())
                 on conflict (tenant_id, shop_code, metric_code, bucket_date, currency,
                              source_service, source_reference)
                 do update set value = excluded.value,
@@ -439,6 +445,7 @@ public class ReportingStoreComparisonRefreshService {
                 fact.currency(),
                 fact.value(),
                 fact.quantity(),
+                timezone.getId(),
                 fact.sourceService(),
                 fact.sourceReference());
             count++;
