@@ -366,11 +366,13 @@ export function exportSummary(result: {
   lineCount: number;
   unmappedLineCount: number;
 }): string {
-  const base = `${result.voucherCount} 张凭证 / ${result.lineCount} 行分录`;
+  // ⚠️ 局部变量**刻意不叫 base**：模块顶层的 `base` 是路径前缀，
+  //   同名遮蔽会让「从源码反查调用点」的那条守卫抽到假路径。
+  const counts = `${result.voucherCount} 张凭证 / ${result.lineCount} 行分录`;
   if (result.unmappedLineCount > 0) {
-    return `${base}，其中 ${result.unmappedLineCount} 行未配科目映射`;
+    return `${counts}，其中 ${result.unmappedLineCount} 行未配科目映射`;
   }
-  return `${base}，全部已映射`;
+  return `${counts}，全部已映射`;
 }
 
 /** 未映射行数的语气：有未映射行是黄的（文件不完整），没有是绿的。 */
