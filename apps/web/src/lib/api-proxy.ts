@@ -139,6 +139,50 @@ const services: readonly {
     pattern: /^store-comparison(?:\/(?:capabilities|metrics|shops|refresh))?$/,
   },
   {
+    // 1.1.2.1 核心指标卡（reporting 服务，卷 01「工作台与门户」L3 1.1.2 关键指标下的第一格）。
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往 13.1.1.1 / 13.4.2.2 / 13.1.1.2 那三条
+    //   reporting/ 正则里并分支 —— 那三条**一字未改、也不重排**（它们分别只放行
+    //   overview / projection、expense-variance、store-comparison 三个命名空间）。
+    //
+    // ---- 插入锚点选在**那三条 reporting/ 之后**（数组靠前那一段）----
+    //   同批其它车道（1.3.2.1，identity 服务）插在 `identity/` 那条元素附近；
+    //   本车道落在数组开头这一段，两个锚点相隔很远，并入时 git 能干净求并。
+    //
+    // ---- 首 token「metric-cards」的零命中核对结论 ----
+    //   发车前用脚本（`.tmp/api-proxy-zero-hit.mjs`，不入库）把本文件里**全部 240 个既有元素**
+    //   （`prefix` + 正则）逐条抽出来，按 `resolve()` 的**同构口径**实测
+    //   （`path.startsWith(prefix)` 收窄服务 → 再测 `pattern.test(path.slice(prefix.length))`）：
+    //     reporting/metric-cards               零命中
+    //     reporting/metric-cards/capabilities  零命中
+    //     reporting/metric-cards/unknown-sub   零命中
+    //     reporting/metric-cards/refresh       零命中
+    //     reporting/metric-cards/{uuid}        零命中
+    //   **零命中** —— 本文件里 `prefix === 'reporting/'` 的既有元素恰好 **3 条**，
+    //   它们的正则都是**按命名空间精确匹配**的
+    //   （`overview|overview/capabilities|overview/metrics|overview/trend|overview/drilldown|
+    //     projection|projection/events|projection/refresh|projection/rebuild` /
+    //     `expense-variance/...` / `store-comparison/...`），
+    //   **不覆盖 `metric-cards`**；而别的 prefix 下的正则根本吃不到本模块的路径
+    //   （`resolve()` 先按 prefix 闸门筛）。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**，契约 `reporting.openapi.json` 里就这两条）：
+    //   metric-cards            核心指标卡（指标值 + 环比 + 同比 + 趋势箭头 + 下钻链接 + 口径说明）
+    //   metric-cards/capabilities 能力声明（逐个指标报上游 / 口径归属 / 下钻目标是否可用）
+    //
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   reporting/metric-cards/{uuid}      —— 顶层没有 id 段（卡片按查询参数定位，不是按 id）。
+    //   reporting/metric-cards/refresh     —— 🔴 本模块**没有写端点**：卷 01 卷首写死
+    //                                          「工作台只读 + 跳转」，刷新由用户点页面上的刷新按钮。
+    //   reporting/metric-cards/unknown-sub —— 多一层仍然 404。
+    //   reporting/metric-cards              —— 放行的是**裸路径**本身（这是 @GetMapping 在类根上的），
+    //                                          别与上面这条「刻意不放行」清单里的裸路径混淆：
+    //                                          刻意不放行的是**别的服务**下的 `reporting/` 裸路径。
+    prefix: 'reporting/',
+    env: 'REPORTING_URL',
+    fallback: 'http://127.0.0.1:8088',
+    pattern: /^metric-cards(?:\/capabilities)?$/,
+  },
+  {
     // 12.4.1.3 成本差异分析（finance 服务，卷 12「财务核算」L3 12.4.1 成本计算下的第三格）。
     // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 finance 那几条巨型 alternation 里并分支 ——
     //   既有条目**一字未改、也不重排**。
