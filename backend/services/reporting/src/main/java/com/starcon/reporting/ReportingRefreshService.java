@@ -61,6 +61,7 @@ public class ReportingRefreshService {
   private final ReportingWarehousePort warehouse;
   private final ReportingCatalogPort catalog;
   private final ReportingProjectionService projection;
+  private final ReportingExpenseRefreshService expenseRefresh;
 
   public ReportingRefreshService(
       ReportingTradePort trade,
@@ -68,13 +69,15 @@ public class ReportingRefreshService {
       ReportingFinancePort finance,
       ReportingWarehousePort warehouse,
       ReportingCatalogPort catalog,
-      ReportingProjectionService projection) {
+      ReportingProjectionService projection,
+      ReportingExpenseRefreshService expenseRefresh) {
     this.trade = trade;
     this.channel = channel;
     this.finance = finance;
     this.warehouse = warehouse;
     this.catalog = catalog;
     this.projection = projection;
+    this.expenseRefresh = expenseRefresh;
   }
 
   /**
@@ -82,7 +85,10 @@ public class ReportingRefreshService {
    *
    * @param sources 要刷新的来源（空 ⇒ 全部）。取值：{@code trade-orders} / {@code trade-returns} /
    *     {@code channel-ads} / {@code finance-receivables} / {@code finance-cost} /
-   *     {@code finance-profit} / {@code warehouse-inventory} / {@code catalog-rates}。
+   *     {@code finance-profit} / {@code warehouse-inventory} / {@code catalog-rates}，
+   *     以及 13.4.2.2 费用差异的五路（{@code catalog-expense-platform} /
+   *     {@code catalog-expense-freight} / {@code catalog-expense-head-freight} /
+   *     {@code finance-expense-settlement} / {@code channel-expense-ad-budget}）。
    * @param timezone 分桶所用时区（跨时区店铺汇总必须显示所用时区）。
    */
   public List<ReportingProjectionModels.RefreshResult> refresh(
@@ -102,10 +108,22 @@ public class ReportingRefreshService {
                 "finance-cost",
                 "finance-profit",
                 "warehouse-inventory",
-                "catalog-rates")
+                "catalog-rates",
+                "catalog-expense-platform",
+                "catalog-expense-freight",
+                "catalog-expense-head-freight",
+                "finance-expense-settlement",
+                "channel-expense-ad-budget")
             : sources;
     var results = new ArrayList<ReportingProjectionModels.RefreshResult>();
+    // ⚠️ 费用差异的五路上游由**它自己的拉取适配器**处理（ReportingExpenseRefreshService），
+    //   但投影仍然交给**同一个**投影器 ⇒ 幂等 / 口径 / 重建三条纪律仍然只有一处实现。
+    var expenseSources = new ArrayList<String>();
     for (var source : wanted) {
+      if (ReportingExpenseRefreshService.SOURCES.contains(source)) {
+        expenseSources.add(source);
+        continue;
+      }
       try {
         results.add(switch (source) {
           case "trade-orders" -> refreshTradeOrders(tenantId, bearer, from, to, timezone);
@@ -127,6 +145,10 @@ public class ReportingRefreshService {
             new ReportingProjectionModels.RefreshResult(
                 source, source, 0, 0, 0, "FAILED", e.getReason() == null ? "上游读不到" : e.getReason()));
       }
+    }
+    if (!expenseSources.isEmpty()) {
+      // ⚠️ 费用差异这一组由它自己的适配器跑（内部逐路 try/catch，一路上游读不到不影响其它路）。
+      results.addAll(expenseRefresh.refresh(tenantId, bearer, from, to, expenseSources, timezone));
     }
     return results;
   }

@@ -2,6 +2,7 @@ package com.starcon.reporting;
 
 import com.starcon.tenancy.Ids;
 import com.starcon.tenancy.TenantTransactions;
+import com.starcon.reporting.ReportingProjectionModels.ProjectionExpenseFact;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -80,13 +81,54 @@ public class ReportingProjectionService {
           .formatted(ZERO_UUID, ZERO_UUID);
 
   /**
+   * 预计费用 upsert（13.4.2.2）。
+   *
+   * <p>⚠️ **预计与实际是两张表**：把「规则算出来的数」和「真的发生的数」写进同一张表，
+   * 就再也答不出「这个月是规则定错了，还是平台多扣了」。
+   *
+   * <p>⚠️ 维度列**全部 NOT NULL DEFAULT ''**，所以冲突目标可以逐列列出，
+   * 不用 coalesce 把 NULL 归一（见 V379 的说明：PostgreSQL 的 UNIQUE 把 NULL 视为互不相等）。
+   */
+  private static final String EXPENSE_ESTIMATE_UPSERT =
+      """
+      insert into reporting_expense_estimate_fact
+        (id,tenant_id,fee_type,fee_sub_type,platform_code,site_code,channel_code,carrier_code,
+         shipping_method_code,shop_code,sku_code,period_start,period_end,currency,
+         estimated_amount,base_amount,base_quantity,source_service,source_reference,updated_at)
+      values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,now())
+      on conflict (tenant_id,fee_type,fee_sub_type,platform_code,site_code,channel_code,carrier_code,
+          shipping_method_code,shop_code,sku_code,period_start,period_end,currency,
+          source_service,source_reference)
+      do update set estimated_amount = excluded.estimated_amount,
+                    base_amount = excluded.base_amount,
+                    base_quantity = excluded.base_quantity,
+                    updated_at = now()
+      """;
+
+  /** 实际费用 upsert（13.4.2.2）。允许负数（冲回）与 0（平台这笔确实没收钱）。 */
+  private static final String EXPENSE_ACTUAL_UPSERT =
+      """
+      insert into reporting_expense_actual_fact
+        (id,tenant_id,fee_type,fee_sub_type,platform_code,site_code,channel_code,carrier_code,
+         shipping_method_code,shop_code,sku_code,period_start,period_end,currency,
+         actual_amount,base_amount,base_quantity,source_service,source_reference,updated_at)
+      values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,now())
+      on conflict (tenant_id,fee_type,fee_sub_type,platform_code,site_code,channel_code,carrier_code,
+          shipping_method_code,shop_code,sku_code,period_start,period_end,currency,
+          source_service,source_reference)
+      do update set actual_amount = excluded.actual_amount,
+                    base_amount = excluded.base_amount,
+                    base_quantity = excluded.base_quantity,
+                    updated_at = now()
+      """;
+
+  /**
    * 事件账本写入：幂等键冲突 ⇒ 什么都不做（调用方据此判定「重复事件」）。
    *
    * <p>⚠️ {@code fact_count} 在**插入时**就写好（事件体里已经知道有几条事实）——
    * 账本是 append-only（DB 层 REVOKE 了 UPDATE/DELETE），事后 UPDATE 会直接 403。
    */
-  private static final String EVENT_INSERT =
-      """
+  private static final String EVENT_INSERT =      """
       insert into reporting_projection_event
         (id,tenant_id,source_service,source_event_id,event_type,aggregate_id,aggregate_version,
          occurred_at,applied_at,fact_count,note,epoch)
@@ -295,13 +337,69 @@ public class ReportingProjectionService {
           drill.sourceReference() == null ? "" : drill.sourceReference());
       drilldownCount++;
     }
+    // 费用事实（13.4.2.2）：预计与实际**分别**落到两张表。
+    int expenseCount = 0;
+    var expenseFacts =
+        event.expenseFacts() == null ? List.<ProjectionExpenseFact>of() : event.expenseFacts();
+    for (var expense : expenseFacts) {
+      var amount = expense.amount() == null ? BigDecimal.ZERO : expense.amount();
+      var baseAmount = expense.baseAmount() == null ? BigDecimal.ZERO : expense.baseAmount();
+      var baseQuantity = expense.baseQuantity() == null ? BigDecimal.ZERO : expense.baseQuantity();
+      var reference = expense.sourceReference() == null ? "" : expense.sourceReference();
+      if ("ESTIMATE".equals(expense.factKind())) {
+        sql.execute(
+            EXPENSE_ESTIMATE_UPSERT,
+            Ids.next(),
+            currentTenant(),
+            expense.feeType(),
+            expense.feeSubType() == null ? "" : expense.feeSubType(),
+            expense.platformCode() == null ? "" : expense.platformCode(),
+            expense.siteCode() == null ? "" : expense.siteCode(),
+            expense.channelCode() == null ? "" : expense.channelCode(),
+            expense.carrierCode() == null ? "" : expense.carrierCode(),
+            expense.shippingMethodCode() == null ? "" : expense.shippingMethodCode(),
+            expense.shopCode() == null ? "" : expense.shopCode(),
+            expense.skuCode() == null ? "" : expense.skuCode(),
+            expense.periodStart(),
+            expense.periodEnd(),
+            expense.currency(),
+            amount,
+            baseAmount,
+            baseQuantity,
+            event.sourceService(),
+            reference);
+      } else {
+        sql.execute(
+            EXPENSE_ACTUAL_UPSERT,
+            Ids.next(),
+            currentTenant(),
+            expense.feeType(),
+            expense.feeSubType() == null ? "" : expense.feeSubType(),
+            expense.platformCode() == null ? "" : expense.platformCode(),
+            expense.siteCode() == null ? "" : expense.siteCode(),
+            expense.channelCode() == null ? "" : expense.channelCode(),
+            expense.carrierCode() == null ? "" : expense.carrierCode(),
+            expense.shippingMethodCode() == null ? "" : expense.shippingMethodCode(),
+            expense.shopCode() == null ? "" : expense.shopCode(),
+            expense.skuCode() == null ? "" : expense.skuCode(),
+            expense.periodStart(),
+            expense.periodEnd(),
+            expense.currency(),
+            amount,
+            baseAmount,
+            baseQuantity,
+            event.sourceService(),
+            reference);
+      }
+      expenseCount++;
+    }
     bumpCursor(event.sourceService(), streamOf(event), event, 1, 0);
     return new ReportingProjectionModels.ProjectionResult(
         event.sourceService(),
         event.sourceEventId(),
         event.eventType(),
         "APPLIED",
-        written,
+        written + expenseCount,
         drilldownCount,
         OffsetDateTime.now(),
         "");
@@ -367,6 +465,30 @@ public class ReportingProjectionService {
         throw new IllegalArgumentException("currency 必须是 ISO 4217 alpha-3 大写字母");
       if (!List.of("COMPANY", "LEGAL_ENTITY", "SHOP").contains(fact.scopeType()))
         throw new IllegalArgumentException("scopeType 必须是 COMPANY / LEGAL_ENTITY / SHOP");
+    }
+    for (var expense :
+        event.expenseFacts() == null
+            ? List.<ReportingProjectionModels.ProjectionExpenseFact>of()
+            : event.expenseFacts()) {
+      if (!List.of("ESTIMATE", "ACTUAL").contains(expense.factKind())) {
+        throw new IllegalArgumentException("factKind 必须是 ESTIMATE / ACTUAL，收到：" + expense.factKind());
+      }
+      if (!List.of("PLATFORM_FEE", "LOGISTICS_FEE", "AD_FEE", "HEAD_FREIGHT")
+          .contains(expense.feeType())) {
+        throw new IllegalArgumentException("feeType 不合法：" + expense.feeType());
+      }
+      if (expense.periodStart() == null || expense.periodEnd() == null) {
+        throw new IllegalArgumentException("费用事实的期间不能为空");
+      }
+      if (expense.periodEnd().isBefore(expense.periodStart())) {
+        throw new IllegalArgumentException("费用事实的期间不能倒过来");
+      }
+      if (expense.currency() == null || !expense.currency().matches("^[A-Z]{3}$")) {
+        throw new IllegalArgumentException("currency 必须是 ISO 4217 alpha-3 大写字母");
+      }
+      if (expense.amount() == null) {
+        throw new IllegalArgumentException("费用事实的金额不能为空");
+      }
     }
   }
 
@@ -445,6 +567,10 @@ public class ReportingProjectionService {
               sql.execute("delete from reporting_metric_fact where tenant_id = ?", tenantId);
           sql.execute("delete from reporting_drilldown_fact where tenant_id = ?", tenantId);
           sql.execute("delete from reporting_projection_cursor where tenant_id = ?", tenantId);
+          // ⚠️ 费用事实（13.4.2.2）**也要清**：重建的语义是「回到零，重放同一批事件」，
+          // 留着旧费用事实会让重建后的差异表把两批数据算在一起。
+          sql.execute("delete from reporting_expense_estimate_fact where tenant_id = ?", tenantId);
+          sql.execute("delete from reporting_expense_actual_fact where tenant_id = ?", tenantId);
           // 纪元 +1：旧账本留着（举证凭据），但不再挡住新一轮的重投。
           var next = currentEpoch() + 1;
           sql.execute(EPOCH_UPSERT, Ids.next(), currentTenant(), next);
