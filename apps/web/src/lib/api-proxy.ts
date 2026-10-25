@@ -12104,6 +12104,73 @@ const services: readonly {
       /^vat\-ioss\/(?:capabilities|options|shops|statistics|tax\-rates|registrations(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|filing\-cycles(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|filing\-periods(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:draft|confirm|statistics))?)?|orders(?:\/sync|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?)$/,
   },
   {
+    // 18.4.2.1 文本与翻译（platform 服务，卷 18「集成开放与智能自动化」L3 18.4.2 AI 能力下的第一格）。
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有任何一条里并分支 ——
+    //   既有条目**一字未改、也不重排**（18.1.1.1 那条 apps 的正则**逐字未动**）。
+    //
+    // ---- 插入锚点选在**18.1.1.1 那条之前**（同服务相邻、数组末尾之前约 56 行）----
+    //   同批其它车道的插入点是「数组最开头」与「数组最末尾」；本车道落在 18.1.1.1 之前，
+    //   与「数组最开头」相距 12000 行以上，与「数组最末尾」相距 56 行 ——
+    //   两个 hunk 各自独立，并入时 git 能干净求并。
+    //
+    // ---- 首 token「text」的零命中核对结论 ----
+    //   本模块与 18.1.1.1 同为 platform 服务，两条都是 `prefix: 'platform/'`：
+    //   resolve() 按 services[] 顺序逐条试，**前缀相同、正则不相交** ——
+    //     18.1.1.1 的正则是 `^apps(?:\/…)?$`，首 token 是 `apps`；
+    //     本条的正则是 `^text\/…$`，首 token 是 `text`。
+    //   两者两两不相交 ⇒ 既有那支**吃不到**本模块的路径，本模块也**吃不到** apps 的路径。
+    //   （既有 236 条 services[] 正则里没有以 `text` 开头的首 token：channel 的 `platforms`
+    //     是 `channel/` 前缀下「电商平台目录」的**首 token**，与本模块无关。）
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   platform/text/capabilities            能力声明（哪些真接通 / 哪些还没交付、归谁）
+    //   platform/text/overview                概览（几个数）
+    //   platform/text/glossary                术语表列表（GET）/ 登记或修改（POST）
+    //   platform/text/glossary/{uuid}         删除一条术语（DELETE）
+    //   platform/text/banned-terms            违禁词表列表（GET）/ 登记或修改（POST）
+    //   platform/text/banned-terms/{uuid}     删除一条违禁词（DELETE）
+    //   platform/text/rules                   长度与字符集规则列表（GET）/ 登记或修改（POST）
+    //   platform/text/rules/{uuid}            删除一条规则（DELETE）
+    //   platform/text/templates               客服回复模板列表（GET）/ 登记或修改（POST）
+    //   platform/text/templates/{uuid}        删除一个模板（DELETE）
+    //   platform/text/templates/{uuid}/binding 变量绑定（把模板渲染成一封可发出去的回复）
+    //   platform/text/tasks                   翻译任务列表（GET，真分页 + 真筛选）/ 建任务（POST）
+    //   platform/text/tasks/{uuid}            任务详情（GET：任务 + 当前草稿 + 历史版本 + 检查结论）
+    //   platform/text/tasks/{uuid}/generate   走 AI 通道生成（POST，**AI 未接入时 409**）
+    //   platform/text/tasks/{uuid}/drafts     人工录入 / 编辑译文（POST，追加新版本）
+    //   platform/text/tasks/{uuid}/confirm    人工确认（POST，**发布的硬门槛**）
+    //   platform/text/tasks/{uuid}/publish    发布（POST，必须已确认且无 FAIL 检查）
+    //   platform/text/tasks/{uuid}/reject     驳回（POST，终态）
+    //   platform/text/published               已发布的文案（GET，**下游可取的那一份**）
+    //   platform/text/locales                 可选目标语言（GET，读 3.4.3 多语言）
+    //   platform/text/source-candidates       可拿来翻译的上游源文本（GET，读 3.4.3 / 4.2.1.1）
+    //
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   platform/text                          —— 裸路径：后端**没有**「一条不存在的汇总列表接口」。
+    //   platform/text/generate                 —— 生成是**按任务**走的（tasks/{uuid}/generate），
+    //                                               没有「裸生成」这种形状。
+    //   platform/text/tasks/{uuid}/publish-all —— 后端没有批量发布。
+    //   platform/text/tasks/{uuid}/auto        —— 🔴 自动发布属 18.4.2.1 的**红线**：
+    //                                               「翻译结果必须人工确认后发布」——
+    //                                               放行它等于让界面以为可以不确认就发。
+    //   platform/text/tasks/{uuid}/not-a-shape —— 多一层仍然 404。
+    //   platform/text/tasks/not-a-uuid        —— 非 UUID 段不应被 uuid 分支吃掉。
+    //   platform/text/glossary/{uuid}/binding —— 变量绑定只属于**模板**，术语表没有这层。
+    //   platform/text/ai-settings              —— 🔴 18.4.3.1 使用与配额**未交付**；
+    //                                               放行它会让界面以为「能配 AI 供应商」。
+    //
+    // id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //   （不是 `[0-9a-f-]+`）：后者会把 `confirm` / `publish` 这种非 UUID 形状也当成 id 放行。
+    // 字面量子路径（capabilities / overview / glossary / banned-terms / rules / templates /
+    //   tasks / published / locales / source-candidates）排在 {uuid} 段**之前**判别 ——
+    //   alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    prefix: 'platform/',
+    env: 'PLATFORM_URL',
+    fallback: 'http://127.0.0.1:8089',
+    pattern:
+      /^text\/(?:capabilities|overview|published|locales|source\-candidates|glossary(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|banned\-terms(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|rules(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|templates(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/binding)?)?|tasks(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:generate|drafts|confirm|publish|reject))?)?)$/,
+  },
+  {
     // 18.1.1.1 应用与凭证（platform 服务，卷 18「集成开放与智能自动化」L3 18.1.1 API 管理下的第一格）。
     // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有任何一条里并分支 ——
     //   既有条目**一字未改、也不重排**。

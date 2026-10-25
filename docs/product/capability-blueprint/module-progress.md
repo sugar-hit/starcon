@@ -12,10 +12,10 @@
 | 指标 | 数量 |
 | --- | --- |
 | 模块总数 | 465 |
-| 已交付 | 402 |
+| 已交付 | 403 |
 | 进行中 | 0 |
-| **未开发** | **63** |
-| 完成率 | 86.5% |
+| **未开发** | **62** |
+| 完成率 | 86.7% |
 
 ## 分阶段进度（交付顺序看这里）
 
@@ -26,7 +26,7 @@
 | **D4** | 60 | 0 | 0 | 60 |
 | **D5** | 52 | 0 | 0 | 52 |
 | **D6** | 75 | 0 | 3 | 78 |
-| **D7** | 95 | 0 | 60 | 155 |
+| **D7** | 96 | 0 | 59 | 155 |
 
 ## 分系统进度
 
@@ -49,7 +49,7 @@
 | 15 | 客户与客服系统 | D7 | 18 | 24 |
 | 16 | 合规与风控系统 | D7 | 23 | 23 |
 | 17 | 组织权限与系统设置系统 | D1–D2 / D4 / D6 / D7 | 29 | 29 |
-| 18 | 集成开放与智能自动化系统 | D7 | 1 | 24 |
+| 18 | 集成开放与智能自动化系统 | D7 | 2 | 24 |
 
 ## 判定「已交付」的标准
 
@@ -550,7 +550,7 @@
 | 18.3.3.1 | 自动审批 | — | D7 | 未开发 | — |
 | 18.4.1.1 | 对话助手 | — | D7 | 未开发 | — |
 | 18.4.1.2 | 智能查询 | — | D7 | 未开发 | — |
-| 18.4.2.1 | 文本与翻译 | — | D7 | 未开发 | — |
+| 18.4.2.1 | 文本与翻译 | — | D7 | 已交付 | **迁移** `backend/services/platform/src/main/resources/db/migration/V380__text_translation.sql` 七表（platform_text_glossary 术语表 / platform_text_banned_term 违禁词表 / platform_text_rule 长度与字符集规则 / platform_text_template 客服话术模板 / platform_text_task 翻译任务 / platform_text_draft 译文草稿版本 / platform_text_check 确定性检查结论），全部 `tenant_id NOT NULL` + ENABLE **与 FORCE** RLS isolation + `GRANT platform_app` + 发号序列显式授权；版本按调度器预分配取 V380。**「人工确认后发布」落到数据层**：状态机 PENDING → DRAFTED → CONFIRMED → PUBLISHED（另有终态 REJECTED），三条 DB CHECK 把「状态与事实一致」钉死（CONFIRMED/PUBLISHED 必须有 confirmed_at、PUBLISHED 必须有 published_at、有草稿的三个状态必须挂 current_draft_id、被驳回必须写原因）—— 跳步在**数据库层**就写不进去，不依赖服务层记得检查。**置信度是四个可解释维度的加权**（术语覆盖率 0.35 / 占位符完整率 0.25 / 校验通过率 0.30 / 长度合规率 0.10），四列分开存 `numeric(5,4)`（禁浮点）；🔴 **某维度不适用时按剩余维度重新归一**（NULL ≠ 0.0000：没有术语可保护的任务，术语覆盖率**没有信息量**，算成 0 是在惩罚一件本来就不该扣分的事）。**系统零预置行**：术语 / 违禁词 / 长度规则全是**租户数据**，不替用户默认一套词表；内置的只有**语言层面的合规红线**（绝对化用语 / 功效宣称 / 虚假承诺 / 导流联系方式 / 诱导好评 —— 是**规则**不是数据源，照 crm ReplyWordingChecker 的纪律）。**权限码** `backend/services/identity/src/main/resources/db/migration/V380__platform_text_permission.sql` 补上 identity 侧**从来没注册过**的 `platform.text.read / .create / .update / .confirm / .publish / .reject`（端点用 `access.require(bearer, "platform.text." + 权限)` 强制鉴权，但没有角色可能持有 ⇒ 真实环境恒 403）；「人工确认」「发布」「驳回」是**三个独立的码** —— 能改文案的人不该顺手把「已确认」也点了，门槛才真的拦得住人；存量 OWNER 用 `LIKE 'platform.text.%'` 补权（新建租户由 create_child 自动拿到，存量租户不会）。**端点 22 个**挂 `/platform/text`：GET `/capabilities`（九维能力声明，逐条写明「有没有 / 依据是什么 / 缺了归谁」· 🔴 **AI 自动翻译那一维如实答「没有」**，归 18.4 卷）/ GET `/overview` / GET |
 | 18.4.2.2 | 选品与需求预测 | — | D7 | 未开发 | — |
 | 18.4.2.3 | 异常诊断 | — | D7 | 未开发 | — |
 | 18.4.3.1 | 使用与配额 | — | D7 | 未开发 | — |
