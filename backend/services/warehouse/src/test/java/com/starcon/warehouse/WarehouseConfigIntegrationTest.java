@@ -59,6 +59,17 @@ class WarehouseConfigIntegrationTest {
           // 改仓库地址与改作业参数是两种风险面。
           "warehouse.facilities.config");
 
+  // ================================================================ 慢模式开关（默认关闭）
+  //
+  // 只为「变慢也不会红」这一件事存在。正常 CI 上两者都是 0，不产生任何等待：
+  //
+  //   slowMillis    在「写入」与「读取留痕」之间停这么久：验证慢环境下断言不飘。
+  //   staleTxMillis 在写入事务**之内**、写入**之前**停这么久：事务起点被钉在很久以前，
+  //                 DB 的 now()（= 留痕时刻）也就停在很久以前 —— 这是 2026-10-25
+  //                 那次真实失败的形态（机器挂起 15 分钟，写入落在挂起前就已开启的事务里）。
+  static final long SLOW_MILLIS = Long.getLong("starcon.warehouse.config.slowMillis", 0L);
+  static final long STALE_TX_MILLIS = Long.getLong("starcon.warehouse.config.staleTxMillis", 0L);
+
   static UUID idFor(UUID tenant, int ordinal) {
     return UUID.nameUUIDFromBytes(
         ("starcon-warehouse-config-" + tenant + "-" + ordinal).getBytes());
@@ -215,6 +226,57 @@ class WarehouseConfigIntegrationTest {
                 whOf(tenant),
                 new WarehouseConfigInput(lot, serial, strategy, new BigDecimal(ratio), split, ""),
                 actor.userId()));
+  }
+
+  /**
+   * 一次写入，连同**客户端与服务端各自的时钟**。
+   *
+   * <p>{@code before} 是本次写入之前捕获的客户端时刻；服务端两个时钟在**同一个事务**里读：
+   * {@code now()} 是本次写入所在事务的时刻（PG 的 transaction_timestamp），
+   * {@code clock_timestamp()} 是服务端此刻的墙上时刻。留痕的 changed_at 取的是前者，
+   * 所以「留痕时刻是不是服务端给的」这件事只能在服务端自己的时钟域里回答 ——
+   * 拿客户端墙钟去比它，等于拿两台机器的钟表对表，环境一卡就误判。
+   */
+  record Written(
+      WarehouseConfigSaved saved,
+      OffsetDateTime before,
+      OffsetDateTime txNow,
+      OffsetDateTime wallNow) {}
+
+  Written write(
+      UUID tenant, boolean lot, boolean serial, String strategy, String ratio, boolean split) {
+    AccessService.Access actor = actorFor(tenant);
+    return access.run(
+        actor,
+        "warehouse.facilities.config",
+        () -> {
+          // 慢模式：先让事务开着停这么久，事务起点就被钉在很久以前 ——
+          // 这才是「写入落在早就开着的事务里」的真实形态。
+          pause(STALE_TX_MILLIS);
+          var before = OffsetDateTime.now().minusSeconds(5);
+          var saved =
+              service.update(
+                  whOf(tenant),
+                  new WarehouseConfigInput(lot, serial, strategy, new BigDecimal(ratio), split, ""),
+                  actor.userId());
+          var clock = sql.fetchOne("select now() as tx_now, clock_timestamp() as wall_now");
+          return new Written(
+              saved,
+              before,
+              clock.get("tx_now", OffsetDateTime.class),
+              clock.get("wall_now", OffsetDateTime.class));
+        });
+  }
+
+  /** 慢模式专用：开关为 0 时不产生任何等待，正常 CI 不受影响。 */
+  static void pause(long millis) {
+    if (millis <= 0) return;
+    try {
+      Thread.sleep(millis);
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+      throw new IllegalStateException("慢模式等待被打断", e);
+    }
   }
 
   // ================================================================ 配置读与默认值
@@ -972,12 +1034,51 @@ class WarehouseConfigIntegrationTest {
 
   @Test
   void 留痕时刻是真实的_不是客户端传的() {
-    var before = OffsetDateTime.now().minusSeconds(5);
-    save(a, false, false, "WAVE", "0", false);
-    var change =
-        asA("read", () -> service.changes(whOf(a), new ChangeQuery(null, null, 0, 1)))
-            .rows()
-            .get(0);
-    assertThat(change.changedAt()).isAfter(before);
+    // 先落一个**确定不同**的配置：这样本次写入必然产生留痕，
+    // 断言的对象是「本次写入的那一行」，而不是「重查出来的第一行」。
+    // 后者取决于排序与表里恰好有哪些行 —— 那是别人的账，测不出这一次的写入。
+    save(a, false, false, "ORDER", "0", false);
+
+    var written = write(a, false, false, "WAVE", "0", false);
+    var before = written.before();
+    pause(SLOW_MILLIS);
+
+    // 前置断言：本次写入没写留痕，后面就没有断言对象 —— 明确失败并说清原因，
+    // 而不是让 rows().get(0) 抛一个语义不明的异常。
+    assertThat(written.saved().changes())
+        .as("本次写入必须产生留痕行：只改了 pickingStrategy（ORDER→WAVE），其余字段没动")
+        .hasSize(1);
+    var change = written.saved().changes().get(0);
+    assertThat(change.fieldName()).isEqualTo("pickingStrategy");
+
+    // 留痕时刻由**服务端**给出：它逐字等于服务端本次写入所在事务的时刻（DB 的 now()）。
+    // 客户端根本没有这个字段可传 —— 「不是客户端传的」在这里被逐字证明。
+    assertThat(change.changedAt())
+        .as("留痕时刻必须等于服务端本次写入事务的时刻")
+        .isEqualTo(written.txNow());
+
+    // 不是未来，也不是被硬编码的常量：留痕时刻落在服务端此刻之内。
+    assertThat(change.changedAt())
+        .as("留痕时刻不能晚于服务端此刻")
+        .isBeforeOrEqualTo(written.wallNow());
+
+    // 服务端此刻与客户端此刻同处「当下」：留痕记的是刚刚发生的事。
+    // 这里比的是**服务端墙上时刻**而不是留痕时刻：留痕时刻取的是事务起点，
+    // 那可能因为环境卡顿而很旧（机器挂起、IO 阻塞），拿它去卡 5 秒窗口
+    // 是拿环境噪声当失败 —— 2026-10-25 那次红的就是它。
+    assertThat(written.wallNow())
+        .as("服务端此刻的墙上时刻")
+        .isAfter(before)
+        .isBefore(OffsetDateTime.now().plusSeconds(5));
+
+    // 同一行在变更历史里查得到，且时刻一致 —— 按 id 认人，不按位置取第一行。
+    var rows =
+        asA("read", () -> service.changes(whOf(a), new ChangeQuery(null, null, 0, 50))).rows();
+    assertThat(rows).as("本次写入的那一行必须在变更历史里查得到").extracting(ConfigChange::id)
+        .contains(change.id());
+    var stored = rows.stream().filter(c -> c.id().equals(change.id())).findFirst().orElseThrow();
+    assertThat(stored.changedAt())
+        .as("库里存下的留痕时刻必须与写入时返回的一致")
+        .isEqualTo(change.changedAt());
   }
 }
