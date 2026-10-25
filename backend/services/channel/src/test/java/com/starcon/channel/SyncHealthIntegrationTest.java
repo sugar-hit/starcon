@@ -12,6 +12,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
@@ -26,6 +27,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
+import org.testcontainers.containers.Container;
 import org.testcontainers.containers.PostgreSQLContainer;
 
 /**
@@ -46,6 +48,10 @@ import org.testcontainers.containers.PostgreSQLContainer;
  *   <li><b>需处理项只给真实存在的</b>，落点必须是**真实路由**；</li>
  *   <li><b>本模块只读</b>：没有任何写端点（PUT / POST 一律 405）。</li>
  * </ol>
+ *
+ * <p>🔴 <b>本类所有时间基准一律取数据库自己的时钟</b>（{@link #dbNow()}）：服务端判定时刻取的是
+ * {@code select now()}（PG 的 transaction_timestamp），测试若拿客户端墙钟播种，等于假设两台钟准得
+ * 一模一样 —— 差 1 毫秒就足以让「偏旧 25 小时」被截断成 24 小时而判绿。
  */
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -59,6 +65,17 @@ class SyncHealthIntegrationTest {
 
   static final UUID AMAZON = UUID.fromString("11111111-1111-1111-1111-111111111101");
   static final UUID SHOPIFY = UUID.fromString("11111111-1111-1111-1111-111111111102");
+
+  // ================================================================ 时钟错位开关（默认关闭）
+  //
+  // 只为「两台钟错开也必须绿」这一件事存在。正常 CI 上是 0，不产生任何等待：
+  //
+  //   dbClockSkewSeconds 把**数据库容器自己的墙上时钟**整体拨动 N 秒（正数 = 拨快）。
+  //                  PG 的 now() 取的是容器的系统时钟 ⇒ 拨动它就是真的拨动服务端判定用的那个钟，
+  //                  不是模拟。用来证明「客户端墙钟与数据库时钟的相对位置」不再影响结论。
+  //                  date -s 需要 CAP_SYS_TIME ⇒ 只有开关打开时才把容器提权。
+  static final long DB_CLOCK_SKEW_SECONDS =
+      Long.getLong("starcon.channel.sync.dbClockSkewSeconds", 0L);
 
   static final String ALL_SCOPE_GRANTS =
       "[{\"permissions\":[\"channel.operation.read\",\"channel.operation.create\","
@@ -90,7 +107,12 @@ class SyncHealthIntegrationTest {
   }
 
   static {
+    if (DB_CLOCK_SKEW_SECONDS != 0L) {
+      // date -s 要 CAP_SYS_TIME —— 只有开了「时钟错位」开关才提权，正常 CI 不受影响。
+      pg.withCreateContainerCmdModifier(cmd -> cmd.getHostConfig().withPrivileged(true));
+    }
     pg.start();
+    skewDbClock();
     try {
       try (var c = DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
           var s = c.createStatement()) {
@@ -129,6 +151,47 @@ class SyncHealthIntegrationTest {
     List<AccessService.Grant> grants = List.of(grant("ALL", allPermissions));
     actors.put(bearer, actor(user, tenant, grants));
     who = actors.get(bearer);
+  }
+
+  @AfterAll
+  static void 还原数据库时钟() {
+    restoreDbClock();
+  }
+
+  /**
+   * 把**数据库容器自己的墙上时钟**整体拨动 {@link #DB_CLOCK_SKEW_SECONDS} 秒（0 = 不拨）。
+   *
+   * <p>PG 的 {@code now()} 取的是容器的系统时钟，所以拨动它就是真的拨动服务端判定用的那个钟 ——
+   * 这不是模拟一个「相对位置」，是真的让客户端墙钟与数据库时钟错开。
+   */
+  static void skewDbClock() {
+    if (DB_CLOCK_SKEW_SECONDS == 0L) {
+      return;
+    }
+    setContainerClock(Instant.now().getEpochSecond() + DB_CLOCK_SKEW_SECONDS);
+  }
+
+  /** 把数据库容器的墙上钟拨回真实时间（跑完还原，别影响同一个 JVM 里的其它用例）。 */
+  static void restoreDbClock() {
+    if (DB_CLOCK_SKEW_SECONDS == 0L) {
+      return;
+    }
+    setContainerClock(Instant.now().getEpochSecond());
+  }
+
+  private static void setContainerClock(long epochSeconds) {
+    try {
+      Container.ExecResult result = pg.execInContainer("date", "-u", "-s", "@" + epochSeconds);
+      if (result.getExitCode() != 0) {
+        throw new IllegalStateException(
+            "拨动数据库容器时钟失败：" + result.getStdout() + " / " + result.getStderr());
+      }
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+      throw new IllegalStateException("拨动数据库容器时钟被打断", e);
+    } catch (java.io.IOException e) {
+      throw new IllegalStateException("拨动数据库容器时钟失败", e);
+    }
   }
 
   UUID tenant;
@@ -200,6 +263,29 @@ class SyncHealthIntegrationTest {
       }
       try (ResultSet rs = s.executeQuery()) {
         return rs.next() ? rs.getLong(1) : 0L;
+      }
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  /**
+   * 🔴 <b>同源 DB 时钟</b>：服务端判定时刻取的是 {@code select now()}（PG 的 transaction_timestamp）。
+   *
+   * <p>测试要播种「多久没同步」就必须用**同一个钟**算基准。拿客户端墙钟当基准，等于假设
+   * 两台钟准得一模一样：数据库的钟哪怕只慢 1 毫秒，25 小时的偏旧就被截断成 24 小时
+   * （{@code 24 > 24} 不成立）⇒ 判成绿。2026-10-25 的全量验证就是这么红的
+   * （expected YELLOW but was GREEN）—— 成败取决于两台钟的相对位置，不是被测行为。
+   *
+   * <p>播种基准与判定时刻都取这一个钟 ⇒ 两钟相对位置怎么变都不影响结论。
+   */
+  OffsetDateTime dbNow() {
+    try (Connection c =
+            DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
+        PreparedStatement s = c.prepareStatement("select now()")) {
+      try (ResultSet rs = s.executeQuery()) {
+        rs.next();
+        return rs.getObject(1, OffsetDateTime.class).withOffsetSameInstant(ZoneOffset.UTC);
       }
     } catch (SQLException e) {
       throw new RuntimeException(e);
@@ -314,7 +400,7 @@ class SyncHealthIntegrationTest {
         UUID.randomUUID(),
         tenant,
         UUID.randomUUID(),
-        published ? OffsetDateTime.now(ZoneOffset.UTC) : null);
+        published ? dbNow() : null);
   }
 
   /** 读一张卡片。 */
@@ -334,7 +420,7 @@ class SyncHealthIntegrationTest {
   @Test
   @DisplayName("1.5.1.1 规则：连接状态 EXPIRED ⇒ 红，且带逐条依据")
   void expiredConnectionIsRed() {
-    UUID connection = seedConnection("EXPIRED", false, OffsetDateTime.now(ZoneOffset.UTC));
+    UUID connection = seedConnection("EXPIRED", false, dbNow());
     seedShop(connection, "RED-SHOP");
     var card = card(connection);
     assertThat(card.severity()).isEqualTo("RED");
@@ -345,28 +431,28 @@ class SyncHealthIntegrationTest {
   @Test
   @DisplayName("1.5.1.1 规则：连接状态 REVOKED ⇒ 红")
   void revokedConnectionIsRed() {
-    UUID connection = seedConnection("REVOKED", false, OffsetDateTime.now(ZoneOffset.UTC));
+    UUID connection = seedConnection("REVOKED", false, dbNow());
     assertThat(card(connection).severity()).isEqualTo("RED");
   }
 
   @Test
   @DisplayName("1.5.1.1 规则：连接状态 EXPIRING ⇒ 黄")
   void expiringConnectionIsYellow() {
-    UUID connection = seedConnection("EXPIRING", false, OffsetDateTime.now(ZoneOffset.UTC));
+    UUID connection = seedConnection("EXPIRING", false, dbNow());
     assertThat(card(connection).severity()).isEqualTo("YELLOW");
   }
 
   @Test
   @DisplayName("1.5.1.1 规则：连接状态 PAUSED ⇒ 黄")
   void pausedConnectionIsYellow() {
-    UUID connection = seedConnection("PAUSED", false, OffsetDateTime.now(ZoneOffset.UTC));
+    UUID connection = seedConnection("PAUSED", false, dbNow());
     assertThat(card(connection).severity()).isEqualTo("YELLOW");
   }
 
   @Test
   @DisplayName("1.5.1.1 规则：sync_paused=true ⇒ 黄")
   void syncPausedIsYellow() {
-    UUID connection = seedConnection("ACTIVE", true, OffsetDateTime.now(ZoneOffset.UTC));
+    UUID connection = seedConnection("ACTIVE", true, dbNow());
     assertThat(card(connection).severity()).isEqualTo("YELLOW");
     assertThat(card(connection).reasons()).extracting(SyncHealthModels.SyncHealthReason::code)
         .contains("SYNC_PAUSED");
@@ -387,26 +473,38 @@ class SyncHealthIntegrationTest {
   @Test
   @DisplayName("1.5.1.1 规则：同步停滞超过预警线 ⇒ 黄，超过红线 ⇒ 红")
   void staleSyncEscalates() {
-    OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
-    UUID warning = seedConnection("ACTIVE", false, now.minusHours(25));
-    UUID critical = seedConnection("ACTIVE", false, now.minusHours(73));
+    // 基准取**数据库自己的时钟**（与服务端判定同一个钟），不是客户端墙钟。
+    // 两台钟只要差 1 毫秒，25 小时的偏旧就被截断成 24 小时（24 > 24 不成立）⇒ 判绿 ——
+    // 2026-10-25 的全量验证就是这么红的（expected YELLOW but was GREEN）：
+    // 成败取决于两台钟的相对位置，不是被测行为。
+    var base = dbNow();
+    // 播种的偏旧时长与阈值**拉开余量**：预警线 24 小时、红线 72 小时，这里分别播种
+    // 30 小时与 90 小时 —— 不踩截断边界，两钟再错也还在同一档。
+    UUID warning = seedConnection("ACTIVE", false, base.minusHours(30));
+    UUID critical = seedConnection("ACTIVE", false, base.minusHours(90));
 
     var warningCard = card(warning);
     assertThat(warningCard.severity()).isEqualTo("YELLOW");
     assertThat(warningCard.reasons()).extracting(SyncHealthModels.SyncHealthReason::code)
         .contains("SYNC_STALE_WARNING");
+    assertThat(warningCard.staleHours())
+        .as("偏旧小时数必须真的越过预警线，且还没到红线")
+        .isGreaterThan(SyncHealthRules.STALE_SYNC_WARN_HOURS)
+        .isLessThanOrEqualTo(SyncHealthRules.STALE_SYNC_CRITICAL_HOURS);
 
     var criticalCard = card(critical);
     assertThat(criticalCard.severity()).isEqualTo("RED");
     assertThat(criticalCard.reasons()).extracting(SyncHealthModels.SyncHealthReason::code)
         .contains("SYNC_STALE_CRITICAL");
-    assertThat(criticalCard.staleHours()).isGreaterThanOrEqualTo(73L);
+    assertThat(criticalCard.staleHours())
+        .as("偏旧小时数必须真的越过红线")
+        .isGreaterThan(SyncHealthRules.STALE_SYNC_CRITICAL_HOURS);
   }
 
   @Test
   @DisplayName("1.5.1.1 规则：最近一次运行 FAILED ⇒ 红，PARTIAL ⇒ 黄")
   void lastRunStatusDecides() {
-    OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
+    OffsetDateTime now = dbNow();
     UUID failedConnection = seedConnection("ACTIVE", false, now.minusHours(1));
     UUID failedCursor = seedCursor(failedConnection, "ORDER");
     seedRun(failedCursor, "FAILED", now.minusHours(2), now.minusHours(1), 60000);
@@ -430,7 +528,7 @@ class SyncHealthIntegrationTest {
   @Test
   @DisplayName("1.5.1.1 规则：一切正常 ⇒ 绿，且给一条 ALL_CLEAR 依据")
   void healthyConnectionIsGreen() {
-    OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
+    OffsetDateTime now = dbNow();
     UUID connection = seedConnection("ACTIVE", false, now.minusHours(1));
     UUID cursor = seedCursor(connection, "ORDER");
     seedRun(cursor, "SUCCEEDED", now.minusHours(2), now.minusHours(1), 1234);
@@ -448,7 +546,7 @@ class SyncHealthIntegrationTest {
   @Test
   @DisplayName("1.5.1.1 限流命中真的按 reason='RATE_LIMITED' 统计，且限流是黄不是红")
   void rateLimitedIsCountedByReason() {
-    OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
+    OffsetDateTime now = dbNow();
     UUID connection = seedConnection("ACTIVE", false, now.minusHours(1));
     UUID cursor = seedCursor(connection, "ORDER");
     UUID run = seedRun(cursor, "SUCCEEDED", now.minusHours(2), now.minusHours(1), 1000);
@@ -477,7 +575,7 @@ class SyncHealthIntegrationTest {
   @Test
   @DisplayName("1.5.1.1 授权失效失败 ⇒ 红（与限流分开）")
   void authorizationExpiredIsRed() {
-    OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
+    OffsetDateTime now = dbNow();
     UUID connection = seedConnection("ACTIVE", false, now.minusHours(1));
     UUID cursor = seedCursor(connection, "ORDER");
     UUID run = seedRun(cursor, "FAILED", now.minusHours(2), now.minusHours(1), 1000);
@@ -492,7 +590,7 @@ class SyncHealthIntegrationTest {
   @Test
   @DisplayName("1.5.1.1 失败计数：近窗口与累计两个口径分开报")
   void failureCountHasTwoWindows() {
-    OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
+    OffsetDateTime now = dbNow();
     UUID connection = seedConnection("ACTIVE", false, now.minusHours(1));
     UUID cursor = seedCursor(connection, "ORDER");
     UUID run = seedRun(cursor, "SUCCEEDED", now.minusHours(2), now.minusHours(1), 1000);
@@ -563,7 +661,7 @@ class SyncHealthIntegrationTest {
   @DisplayName("1.5.1.1 没有连接的平台进 platformsWithoutConnection，不是绿卡片")
   void platformWithoutConnectionIsNotAHealthyCard() {
     // 租户只有一条 Amazon 连接；Shopify 一条都没有
-    UUID connection = seedConnection("ACTIVE", false, OffsetDateTime.now(ZoneOffset.UTC));
+    UUID connection = seedConnection("ACTIVE", false, dbNow());
 
     var summary = as("channel.sync.read", () -> service.summary());
     assertThat(summary.platformsWithoutConnection())
@@ -633,7 +731,7 @@ class SyncHealthIntegrationTest {
   @Test
   @DisplayName("1.5.1.1 连接级声明值为空时，来源标 RUN_FINISHED（不谎称「从来没有同步过」）")
   void runFinishedIsUsedWhenDeclaredIsNull() {
-    OffsetDateTime finished = OffsetDateTime.now(ZoneOffset.UTC).minusHours(2);
+    OffsetDateTime finished = dbNow().minusHours(2);
     UUID connection = seedConnection("ACTIVE", false, null);
     UUID cursor = seedCursor(connection, "ORDER");
     seedRun(cursor, "SUCCEEDED", finished.minusMinutes(1), finished, 10);
@@ -654,7 +752,7 @@ class SyncHealthIntegrationTest {
   @Test
   @DisplayName("1.5.1.1 需处理项只给真实存在的待处理项，落点是真实路由")
   void pendingItemsPointToRealRoutes() {
-    OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
+    OffsetDateTime now = dbNow();
     UUID connection = seedConnection("EXPIRED", false, now.minusHours(1));
     UUID cursor = seedCursor(connection, "ORDER");
     UUID run = seedRun(cursor, "FAILED", now.minusHours(2), now.minusHours(1), 10);
@@ -699,7 +797,7 @@ class SyncHealthIntegrationTest {
   @DisplayName("1.5.1.1 总览的连接总数是真实总数，且装载上限被如实标记（不拿前 N 条冒充全量）")
   void summaryReportsRealTotalAndTruncationFlag() {
     for (int i = 0; i < 3; i++) {
-      seedConnection("ACTIVE", false, OffsetDateTime.now(ZoneOffset.UTC));
+      seedConnection("ACTIVE", false, dbNow());
     }
     var summary = as("channel.sync.read", () -> service.summary());
     assertThat(summary.totalConnections()).isEqualTo(3);
@@ -729,7 +827,7 @@ class SyncHealthIntegrationTest {
   @DisplayName("1.5.1.1 卡片列表是真分页（page / size 真的生效）")
   void connectionListIsReallyPaginated() {
     for (int i = 0; i < 5; i++) {
-      seedConnection("ACTIVE", false, OffsetDateTime.now(ZoneOffset.UTC));
+      seedConnection("ACTIVE", false, dbNow());
     }
     var first = as("channel.sync.read", () -> service.connections(null, null, null, 0, 2));
     assertThat(first.items()).hasSize(2);
@@ -749,7 +847,7 @@ class SyncHealthIntegrationTest {
   @Test
   @DisplayName("1.5.1.1 卡片列表是真筛选（平台码 / 状态 / 关键字）")
   void connectionListIsReallyFiltered() {
-    UUID amazon = seedConnection("EXPIRED", false, OffsetDateTime.now(ZoneOffset.UTC));
+    UUID amazon = seedConnection("EXPIRED", false, dbNow());
     seedConnectionOn(SHOPIFY, "ACTIVE", "shopify-acct");
 
     var byPlatform = as("channel.sync.read", () -> service.connections("SHOPIFY", null, null, 0, 50));
@@ -767,7 +865,7 @@ class SyncHealthIntegrationTest {
   @Test
   @DisplayName("1.5.1.1 单条卡片与不存在的 id")
   void singleCardAndNotFound() throws Exception {
-    UUID connection = seedConnection("ACTIVE", false, OffsetDateTime.now(ZoneOffset.UTC));
+    UUID connection = seedConnection("ACTIVE", false, dbNow());
     http.perform(get("/channel/sync-health/connections/" + connection).header("Authorization", bearer))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.connectionId").value(connection.toString()));

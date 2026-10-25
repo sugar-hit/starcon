@@ -777,7 +777,9 @@ class ApprovalFlowIntegrationTest extends IdentityIntegrationTestBase {
     var token = login();
     tag = suffix();
     var role = roleId(token, "APPROVER" + tag);
-    var before = OffsetDateTime.now(java.time.ZoneOffset.UTC).minusSeconds(2);
+    // 落库时刻由数据库给（created_at DEFAULT now()）⇒ 基准也必须取**数据库自己的时钟**。
+    // 拿客户端墙钟当基准等于假设两台钟一模一样：差 1 毫秒就会把「刚刚写入」误判成「不是刚刚」。
+    var dbBefore = dbNow();
 
     UUID id =
         UUID.fromString(
@@ -797,10 +799,12 @@ class ApprovalFlowIntegrationTest extends IdentityIntegrationTestBase {
     var created = detail(token, id).get("flow");
     assertThat(created.get("version").asLong()).isZero();
     assertThat(created.get("status").asText()).isEqualTo("DRAFT");
-    // timestamptz 写回值必须落在「请求前后两个墙钟之间」：用 LocalDateTime 绑会静默偏 -28800 秒。
-    assertThat(OffsetDateTime.parse(created.get("createdAt").asText()))
-        .isAfter(before)
-        .isBefore(OffsetDateTime.now(java.time.ZoneOffset.UTC).plusSeconds(5));
+    // timestamptz 写回值必须落在「请求前后两个**数据库时钟**之间」：用 LocalDateTime 绑会静默偏 -28800 秒。
+    // 两端都取数据库自己的时钟 —— 落库时刻本来就在数据库的时钟域里，拿客户端墙钟去比它
+    // 等于拿两台机器的钟表对表，环境一卡就误判（2026-10-25 全量验证就是这么打红的）。
+    assertThat(OffsetDateTime.parse(created.get("createdAt").asText()).toInstant())
+        .isAfterOrEqualTo(dbBefore)
+        .isBeforeOrEqualTo(dbNow());
 
     request(
         token,

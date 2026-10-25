@@ -6,6 +6,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.sql.DriverManager;
+import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -65,6 +67,19 @@ abstract class IdentityIntegrationTestBase {
 
   static PostgreSQLContainer<?> pg() {
     return pg;
+  }
+
+  /**
+   * 同源 DB 时钟：读一次**数据库自己的时钟**。
+   *
+   * <p>落库时刻若是 {@code DEFAULT now()}（PG 的 transaction_timestamp），它就属于数据库的时钟域。
+   * 拿客户端墙钟去比它，等于假设两台钟准得一模一样 —— 差 1 毫秒就足以让「写回值落在刚刚」 这类断言误判（2026-10-25 channel 模块就是这么打红的：expected
+   * YELLOW but was GREEN）。
+   *
+   * <p>要证明「这一行是在这次请求里写的」，就得在**同一个钟域**里比：请求前后各读一次数据库 时钟，把落库时刻夹在中间。这样客户端墙钟与数据库时钟的相对位置完全不影响结论。
+   */
+  Instant dbNow() {
+    return sql.fetchOne("select now()").get(0, OffsetDateTime.class).toInstant();
   }
 
   // 不使用 @AfterAll 停容器。
