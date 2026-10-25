@@ -102,6 +102,43 @@ const services: readonly {
     pattern: /^expense-variance\/(?:capabilities|variance|trend|recommendations|by-sku|refresh)$/,
   },
   {
+    // 13.1.1.2 多店对比（reporting 服务，卷 13「利润与经营分析」L3 13.1.1 经营看板下的第二格）。
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往 13.1.1.1 / 13.4.2.2 那两条 reporting/ 正则里
+    //   并分支 —— 那两条**一字未改、也不重排**（它们分别只放行 overview / projection 与 expense-variance
+    //   两个命名空间）。
+    //
+    // ---- 插入锚点选在**13.4.2.2 那条 reporting/ 之后**（数组最前面那一段）----
+    //   同批其它车道的插入点是「数组末尾」（收尾的 `];` 之前）；本车道落在开头这一段，
+    //   与它们的插入点相距 10000 行以上，并入时 git 能干净求并。
+    //
+    // ---- 首 token「store-comparison」的零命中核对结论 ----
+    //   发车前把本文件里**全部既有元素**（prefix + 正则）逐条抽出来，对本模块的 5 条路径
+    //   逐条跑「前缀闸门 + 正则」判定：
+    //     store-comparison
+    //     store-comparison/capabilities
+    //     store-comparison/metrics
+    //     store-comparison/shops
+    //     store-comparison/refresh
+    //   **零命中** —— 既有两条 reporting/ 正则（overview / projection 与 expense-variance）
+    //   都吃不到本模块的路径；resolve() 先按 prefix 闸门筛，所以别的服务的正则也根本够不着。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   （裸路径）      对比矩阵 + 排名 + 差异归因提示 + 掉队/增长店铺
+    //   capabilities   能力声明（哪些上游真接通、店铺维度确实拿不到什么）
+    //   metrics        店铺对比的指标口径目录（口径唯一的展示形态）
+    //   shops          店铺清单 + 平台清单（筛选器与「按平台分组」用）
+    //   refresh        刷新店铺维度投影（POST，写的是投影不是业务事实）
+    //
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   store-comparison/{uuid}      —— 顶层没有 id 段（对比矩阵按查询参数定位，不是按 id）。
+    //   store-comparison/not-a-shape —— 多一层仍然 404。
+    //   store-comparison/alerts      —— 店铺级预警未交付（卷 13 的预警是另一格）。
+    prefix: 'reporting/',
+    env: 'REPORTING_URL',
+    fallback: 'http://127.0.0.1:8088',
+    pattern: /^store-comparison(?:\/(?:capabilities|metrics|shops|refresh))?$/,
+  },
+  {
     // 12.4.1.3 成本差异分析（finance 服务，卷 12「财务核算」L3 12.4.1 成本计算下的第三格）。
     // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 finance 那几条巨型 alternation 里并分支 ——
     //   既有条目**一字未改、也不重排**。
