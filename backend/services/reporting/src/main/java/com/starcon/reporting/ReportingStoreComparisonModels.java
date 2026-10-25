@@ -24,8 +24,15 @@ public final class ReportingStoreComparisonModels {
   // 指标口径目录
   // ==================================================================
 
-  /** 一个指标的口径定义（口径唯一的展示形态）。 */
-  public record MetricDefinitionView(
+  /**
+   * 一个指标的口径定义（口径唯一的展示形态）。
+   *
+   * <p>⚠️ **名字必须带 {@code Store} 前缀**：13.1.1.1 的 {@code ReportingOverviewModels} 里
+   * 已经有同名 {@code MetricDefinitionView}。SpringDoc 用**简单类名**当 schema 名，
+   * 同名时只能加序号消歧（{@code MetricDefinitionView1}）—— 那个序号取决于**发现顺序**，
+   * 换个服务先启动就换一个名，生成出来的契约跟着漂。所以这里用一个**不重名**的名字。
+   */
+  public record StoreMetricDefinitionView(
       String metricCode,
       String displayName,
       String unit,
@@ -123,7 +130,7 @@ public final class ReportingStoreComparisonModels {
       /** 增长店铺。 */
       List<StoreFlag> growthStores,
       /** 本次对比用到的指标口径（页面上原样显示）。 */
-      List<MetricDefinitionView> metricDefinitions,
+      List<StoreMetricDefinitionView> metricDefinitions,
       /** 跨平台口径差异说明（蓝图标名「跨平台对比要处理口径差异」）。 */
       List<String> caliberNotes,
       /** 数据更新时间（最近一次投影落库时刻）—— 卷 13 卷首「数据延迟要显示」。 */
@@ -162,10 +169,17 @@ public final class ReportingStoreComparisonModels {
       OffsetDateTime updatedAt) {}
 
   /** 店铺清单 + 平台清单。 */
-  public record StoreListResponse(List<StoreSummary> stores, List<PlatformOption> platforms) {}
+  public record StoreListResponse(List<StoreSummary> stores, List<StorePlatformOption> platforms) {}
 
-  /** 一个平台。 */
-  public record PlatformOption(String platformCode, String platformName, int storeCount) {}
+  /**
+   * 一个平台（在店铺对比里的下拉项）。
+   *
+   * <p>⚠️ **名字必须带 {@code Store} 前缀**：channel 服务里已经有一个 {@code PlatformOption}
+   * （{@code {id, code, name}}），字段不同 ⇒ 跨服务同名 DTO 会被 codegen 的碰撞闸**中止**
+   * （生成物直接写不出来，且要求人工去改 allowlist）。这里用一个**不重名**的名字，
+   * 免得整个契约生成流程被一条类型名卡住。
+   */
+  public record StorePlatformOption(String platformCode, String platformName, int storeCount) {}
 
   // ==================================================================
   // 能力声明

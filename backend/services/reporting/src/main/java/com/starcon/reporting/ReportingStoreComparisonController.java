@@ -75,7 +75,7 @@ public class ReportingStoreComparisonController {
 
   @GetMapping("/metrics")
   @Operation(summary = "店铺对比指标口径目录（口径唯一的展示形态）")
-  public List<ReportingStoreComparisonModels.MetricDefinitionView> metrics(
+  public List<ReportingStoreComparisonModels.StoreMetricDefinitionView> metrics(
       @RequestHeader(value = "Authorization", defaultValue = "") String auth) {
     return call(
         auth,

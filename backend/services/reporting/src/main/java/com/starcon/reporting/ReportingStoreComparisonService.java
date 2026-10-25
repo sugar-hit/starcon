@@ -59,7 +59,7 @@ public class ReportingStoreComparisonService {
   // ==========================================================================
 
   /** 读该租户的**店铺对比指标口径目录**（口径唯一的展示形态）。 */
-  public List<ReportingStoreComparisonModels.MetricDefinitionView> metricDefinitions(
+  public List<ReportingStoreComparisonModels.StoreMetricDefinitionView> metricDefinitions(
       java.util.UUID tenantId) {
     return tenants.run(
         tenantId,
@@ -76,10 +76,10 @@ public class ReportingStoreComparisonService {
                    order by metric_code
                   """,
                   tenantId);
-          var out = new ArrayList<ReportingStoreComparisonModels.MetricDefinitionView>();
+          var out = new ArrayList<ReportingStoreComparisonModels.StoreMetricDefinitionView>();
           for (var row : rows) {
             out.add(
-                new ReportingStoreComparisonModels.MetricDefinitionView(
+                new ReportingStoreComparisonModels.StoreMetricDefinitionView(
                     row.get(0, String.class),
                     row.get(1, String.class),
                     row.get(2, String.class),
@@ -96,12 +96,12 @@ public class ReportingStoreComparisonService {
   }
 
   /** 口径定义 → 出参视图。 */
-  private List<ReportingStoreComparisonModels.MetricDefinitionView> definitionViews(
+  private List<ReportingStoreComparisonModels.StoreMetricDefinitionView> definitionViews(
       Map<String, Definition> definitions) {
-    var out = new ArrayList<ReportingStoreComparisonModels.MetricDefinitionView>();
+    var out = new ArrayList<ReportingStoreComparisonModels.StoreMetricDefinitionView>();
     for (var definition : definitions.values()) {
       out.add(
-          new ReportingStoreComparisonModels.MetricDefinitionView(
+          new ReportingStoreComparisonModels.StoreMetricDefinitionView(
               definition.metricCode(),
               definition.displayName(),
               definition.unit(),
@@ -155,10 +155,10 @@ public class ReportingStoreComparisonService {
             counts[0]++;
             if (row.get(3, String.class) != null) platformNames.put(platformCode, row.get(3, String.class));
           }
-          var platforms = new ArrayList<ReportingStoreComparisonModels.PlatformOption>();
+          var platforms = new ArrayList<ReportingStoreComparisonModels.StorePlatformOption>();
           for (var entry : platformCounts.entrySet()) {
             platforms.add(
-                new ReportingStoreComparisonModels.PlatformOption(
+                new ReportingStoreComparisonModels.StorePlatformOption(
                     entry.getKey(),
                     platformNames.getOrDefault(entry.getKey(), ""),
                     entry.getValue()[0]));
