@@ -303,7 +303,11 @@ public class FinanceSoftwareService {
       sql.execute(
           "insert into platform_finance_account(id,tenant_id,name,vendor,book_code,company_name,"
               + " currency,fiscal_start_month,status,remark,created_by,created_at,updated_at)"
-              + " values(?,?,?,?,?,?,?,?,?,?,?::timestamptz,?::timestamptz,?::timestamptz)",
+              // 🔴 三个时间列里只有 created_at / updated_at 才是 timestamptz ——
+              //   created_by 是 uuid，给它套 ::timestamptz 会被 PG 拒掉
+              //   （cannot cast type uuid to timestamp with time zone），
+              //   于是「登记连接档案」这一格整个不可用。
+              + " values(?,?,?,?,?,?,?,?,?,?,?,?::timestamptz,?::timestamptz)",
           id,
           currentTenant(),
           name,
@@ -1200,7 +1204,9 @@ public class FinanceSoftwareService {
     sql.execute(
         "insert into platform_finance_reconcile_task(id,tenant_id,account_id,reconcile_no,"
             + " period_from_id,period_to_id,currency,status,remark,created_by,created_at,updated_at)"
-            + " values(?,?,?,?,?,?,?,'DRAFT',?,?::timestamptz,?::timestamptz)",
+            // 🔴 12 列对 12 个值：'DRAFT' 之后依次是 remark / created_by / 两个时间列。
+            //   少一个占位符 ⇒ PG 直接报「INSERT has more target columns than expressions」。
+            + " values(?,?,?,?,?,?,?,'DRAFT',?,?,?::timestamptz,?::timestamptz)",
         id,
         tenant,
         account.id(),
@@ -1468,7 +1474,14 @@ public class FinanceSoftwareService {
       var local = entry.getValue();
       // 🔴 本地余额是 0 且外部没这一行 ⇒ 两边都是 0，**不是差异**（同上：别让噪声淹没差异）。
       if (local.balance().signum() == 0) continue;
-      var externalCode = "";
+      // 🔴 外部科目编码**不能是空串**：迁移里
+      //   `CHECK(btrim(external_subject_code) <> '')` 会把空串拒掉，
+      //   而且 `UNIQUE(tenant_id, task_id, external_subject_code)` 也要求它非空。
+      //   「本地有、外部没有」这一行在外部那边**根本没有对应科目**，
+      //   所以这里用**带前缀的占位符**（而不是裸的本地科目编码）：
+      //   裸本地编码会与「对方系统里恰好用同一个编码、而我们没配映射」的外部科目
+      //   撞唯一键 ⇒ 整个核对在 DB 层炸掉。占位符带前缀 ⇒ 不可能与真实外部编码相撞。
+      var externalCode = "LOCAL:" + entry.getKey();
       for (var row : subjectMaps(task.accountId(), null)) {
         if (row.enabled() && row.localSubjectCode().equals(entry.getKey())) {
           externalCode = row.externalSubjectCode();
