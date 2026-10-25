@@ -30,7 +30,7 @@
  * **已存在的路由**。
  */
 import type { LucideIcon } from 'lucide-react';
-import { Boxes, ClipboardList, HeartPulse, LayoutGrid, Search } from 'lucide-react';
+import { Boxes, ClipboardList, Gauge, HeartPulse, LayoutGrid, Search } from 'lucide-react';
 
 /**
  * 工作台分区（蓝图 1.1 的三段结构）。
@@ -137,6 +137,16 @@ export const WORKBENCH_CARDS: readonly WorkbenchCard[] = [
     defaultVisible: true,
     icon: HeartPulse,
     module: '1.1.2.3 履约健康',
+  },
+  {
+    key: 'metric.core-metric-cards',
+    label: '核心指标卡',
+    description: '销售额、订单量、销量、毛利、库存总额、回款、在途金额，每张卡带环比与同比。',
+    href: '/dashboard/metric-cards',
+    tab: 'overview',
+    defaultVisible: true,
+    icon: Gauge,
+    module: '1.1.2.1 核心指标卡',
   },
   {
     key: 'nav.global-search',

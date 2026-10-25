@@ -683,6 +683,284 @@
         },
         "type": "object"
       },
+      "MetricCardAmount": {
+        "nullable": true,
+        "properties": {
+          "currency": {
+            "type": "string"
+          },
+          "value": {
+            "nullable": true,
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "MetricCardCapability": {
+        "properties": {
+          "aggregation": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "caliber": {
+            "type": "string"
+          },
+          "currencyAware": {
+            "type": "boolean"
+          },
+          "denominatorMetricCode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "drilldownAvailable": {
+            "type": "boolean"
+          },
+          "drilldownTargetName": {
+            "nullable": true,
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "metricCode": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "numeratorMetricCode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "sourceKind": {
+            "type": "string"
+          },
+          "sourceTables": {
+            "type": "string"
+          },
+          "unavailableReason": {
+            "type": "string"
+          },
+          "unit": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "MetricCardComparison": {
+        "properties": {
+          "changeAmount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "changeRate": {
+            "nullable": true,
+            "type": "number"
+          },
+          "comparable": {
+            "type": "boolean"
+          },
+          "from": {
+            "format": "date",
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "to": {
+            "format": "date",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "MetricCardDrilldown": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "detailPath": {
+            "nullable": true,
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "reportName": {
+            "nullable": true,
+            "type": "string"
+          },
+          "reportPath": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "MetricCardEntry": {
+        "properties": {
+          "caliber": {
+            "type": "string"
+          },
+          "currencyAware": {
+            "type": "boolean"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "drilldown": {
+            "$ref": "#/components/schemas/MetricCardDrilldown"
+          },
+          "headline": {
+            "$ref": "#/components/schemas/MetricCardAmount"
+          },
+          "key": {
+            "type": "string"
+          },
+          "metricCode": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "previousPeriod": {
+            "$ref": "#/components/schemas/MetricCardComparison"
+          },
+          "status": {
+            "type": "string"
+          },
+          "trend": {
+            "type": "string"
+          },
+          "trendBasis": {
+            "type": "string"
+          },
+          "unit": {
+            "type": "string"
+          },
+          "values": {
+            "items": {
+              "$ref": "#/components/schemas/MetricCardAmount"
+            },
+            "type": "array"
+          },
+          "yearOverYear": {
+            "$ref": "#/components/schemas/MetricCardComparison"
+          }
+        },
+        "type": "object"
+      },
+      "MetricCardsCapabilities": {
+        "properties": {
+          "dataUpdatedAtVisible": {
+            "type": "boolean"
+          },
+          "drilldownAvailable": {
+            "type": "boolean"
+          },
+          "metrics": {
+            "items": {
+              "$ref": "#/components/schemas/MetricCardCapability"
+            },
+            "type": "array"
+          },
+          "notDelivered": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "notes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "upstreamConnected": {
+            "type": "boolean"
+          },
+          "upstreamModules": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "MetricCardsResponse": {
+        "properties": {
+          "asOfDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "baseCurrency": {
+            "nullable": true,
+            "type": "string"
+          },
+          "cards": {
+            "items": {
+              "$ref": "#/components/schemas/MetricCardEntry"
+            },
+            "type": "array"
+          },
+          "currencyNote": {
+            "type": "string"
+          },
+          "dataUpdatedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "dataUpdatedNote": {
+            "type": "string"
+          },
+          "from": {
+            "format": "date",
+            "type": "string"
+          },
+          "timezone": {
+            "type": "string"
+          },
+          "timezoneSource": {
+            "type": "string"
+          },
+          "timezones": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "to": {
+            "format": "date",
+            "type": "string"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "windowPreset": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "MetricDefinitionView": {
         "properties": {
           "aggregation": {
@@ -1912,6 +2190,107 @@
         "summary": "费用差异表 + 偏差趋势 + 规则调优建议",
         "tags": [
           "13.4.2.2 费用差异"
+        ]
+      }
+    },
+    "/reporting/metric-cards": {
+      "get": {
+        "description": "时间口径由 window 选：TODAY（今日）/ YESTERDAY（昨日）/ THIS_MONTH（本月）/ CUSTOM（自定义区间）。「今日 / 昨日 / 本月」的边界按**本租户时区**算（取自本租户投影事实的分桶时区），不写死 UTC。baseCurrency 给了且有汇率快照才折算本位币合计 —— 没有汇率就是不可判定，不是按 1:1 算。工作台不下发租户号与范围参数：范围由服务端判定。",
+        "operationId": "get_reporting_metric_cards",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "window",
+            "required": false,
+            "schema": {
+              "default": "TODAY",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "baseCurrency",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/MetricCardsResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "核心指标卡：指标值 + 环比 + 同比 + 趋势箭头 + 下钻链接 + 口径说明",
+        "tags": [
+          "1.1.2.1 核心指标卡"
+        ]
+      }
+    },
+    "/reporting/metric-cards/capabilities": {
+      "get": {
+        "description": "每个指标一条：是否有上游、算法（分子 / 分母引用）、来源表、口径归属模块、单位与币种、下钻目标是否可用。**接不通的指标不给公式也不给分母** —— 给了就是编一个出来。",
+        "operationId": "get_reporting_metric_cards_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/MetricCardsCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "能力声明：逐个指标报上游、口径、归属与下钻目标",
+        "tags": [
+          "1.1.2.1 核心指标卡"
         ]
       }
     },
