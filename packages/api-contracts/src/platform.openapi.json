@@ -737,6 +737,874 @@
           }
         },
         "type": "object"
+      },
+      "TextBannedTermInput": {
+        "properties": {
+          "category": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string"
+          },
+          "targetLocale": {
+            "type": "string"
+          },
+          "term": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "TextBannedTermRow": {
+        "properties": {
+          "category": {
+            "type": "string"
+          },
+          "categoryLabel": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string"
+          },
+          "targetLocale": {
+            "type": "string"
+          },
+          "term": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "TextCapabilities": {
+        "properties": {
+          "capabilities": {
+            "items": {
+              "$ref": "#/components/schemas/TextCapability"
+            },
+            "type": "array"
+          },
+          "gaps": {
+            "items": {
+              "$ref": "#/components/schemas/TextGap"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "TextCapability": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "evidence": {
+            "type": "string"
+          },
+          "moduleId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "TextCheckRow": {
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "draftId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "matchedItem": {
+            "type": "string"
+          },
+          "ruleCode": {
+            "type": "string"
+          },
+          "ruleLabel": {
+            "type": "string"
+          },
+          "taskId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "verdict": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "TextConfidence": {
+        "properties": {
+          "checkPassRate": {
+            "type": "number"
+          },
+          "explanation": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "lengthCompliance": {
+            "type": "number"
+          },
+          "placeholderIntegrity": {
+            "type": "number"
+          },
+          "termCoverage": {
+            "type": "number"
+          },
+          "total": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "TextDraftInput": {
+        "properties": {
+          "targetText": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "TextDraftRow": {
+        "properties": {
+          "checkFailed": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "checkTotal": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "checkWarned": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "confidence": {
+            "type": "number"
+          },
+          "confidenceCheckPassRate": {
+            "type": "number"
+          },
+          "confidenceLengthCompliance": {
+            "type": "number"
+          },
+          "confidencePlaceholderIntegrity": {
+            "type": "number"
+          },
+          "confidenceTermCoverage": {
+            "type": "number"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "editedBy": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "origin": {
+            "type": "string"
+          },
+          "targetText": {
+            "type": "string"
+          },
+          "taskId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "version": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "TextGap": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "moduleId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "relation": {
+            "type": "string"
+          },
+          "service": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "TextGenerationOutcome": {
+        "properties": {
+          "connected": {
+            "type": "boolean"
+          },
+          "generated": {
+            "type": "boolean"
+          },
+          "model": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "TextGlossaryInput": {
+        "properties": {
+          "caseSensitive": {
+            "type": "boolean"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          },
+          "sourceTerm": {
+            "type": "string"
+          },
+          "targetLocale": {
+            "type": "string"
+          },
+          "targetTerm": {
+            "type": "string"
+          },
+          "termType": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "TextGlossaryRow": {
+        "properties": {
+          "caseSensitive": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "sourceTerm": {
+            "type": "string"
+          },
+          "targetLocale": {
+            "type": "string"
+          },
+          "targetTerm": {
+            "type": "string"
+          },
+          "termType": {
+            "type": "string"
+          },
+          "termTypeLabel": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "TextLocaleOption": {
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "locale": {
+            "type": "string"
+          },
+          "localeName": {
+            "type": "string"
+          },
+          "pendingCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "translationCount": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "TextLocaleView": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/TextLocaleOption"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "TextOverview": {
+        "properties": {
+          "bannedTerms": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "confirmed": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "drafted": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "drafts": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "generatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "glossary": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "pending": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "published": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "rejected": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "rules": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "templates": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "TextRuleInput": {
+        "properties": {
+          "contentType": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "maxLength": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "minLength": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "requireCharset": {
+            "type": "string"
+          },
+          "targetLocale": {
+            "type": "string"
+          },
+          "terminologyStrict": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "TextRuleRow": {
+        "properties": {
+          "contentType": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "maxLength": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "minLength": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "requireCharset": {
+            "type": "string"
+          },
+          "requireCharsetLabel": {
+            "type": "string"
+          },
+          "targetLocale": {
+            "type": "string"
+          },
+          "terminologyStrict": {
+            "type": "boolean"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "TextSourceCandidate": {
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "locale": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "refId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "refLabel": {
+            "type": "string"
+          },
+          "refType": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "TextSourceCandidateView": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/TextSourceCandidate"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "TextTaskDetail": {
+        "properties": {
+          "checks": {
+            "items": {
+              "$ref": "#/components/schemas/TextCheckRow"
+            },
+            "type": "array"
+          },
+          "confidence": {
+            "$ref": "#/components/schemas/TextConfidence"
+          },
+          "draft": {
+            "$ref": "#/components/schemas/TextDraftRow"
+          },
+          "history": {
+            "items": {
+              "$ref": "#/components/schemas/TextDraftRow"
+            },
+            "type": "array"
+          },
+          "task": {
+            "$ref": "#/components/schemas/TextTaskRow"
+          },
+          "violations": {
+            "items": {
+              "$ref": "#/components/schemas/TextViolation"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "TextTaskInput": {
+        "properties": {
+          "contentType": {
+            "type": "string"
+          },
+          "sourceLocale": {
+            "type": "string"
+          },
+          "sourceText": {
+            "type": "string"
+          },
+          "styleRequirement": {
+            "type": "string"
+          },
+          "targetLocale": {
+            "type": "string"
+          },
+          "templateId": {
+            "type": "string"
+          },
+          "upstreamRefId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "upstreamRefType": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "TextTaskPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/TextTaskRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalPages": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "TextTaskRow": {
+        "properties": {
+          "checkFailed": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "checkTotal": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "checkWarned": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "confidence": {
+            "type": "number"
+          },
+          "confidenceCheckPassRate": {
+            "type": "number"
+          },
+          "confidenceLengthCompliance": {
+            "type": "number"
+          },
+          "confidencePlaceholderIntegrity": {
+            "type": "number"
+          },
+          "confidenceTermCoverage": {
+            "type": "number"
+          },
+          "confirmedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "confirmedBy": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "contentType": {
+            "type": "string"
+          },
+          "contentTypeLabel": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "currentDraftId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "currentDraftText": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "publishedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "rejectReason": {
+            "type": "string"
+          },
+          "sourceLocale": {
+            "type": "string"
+          },
+          "sourceText": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "styleRequirement": {
+            "type": "string"
+          },
+          "targetLocale": {
+            "type": "string"
+          },
+          "taskNo": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "upstreamRefId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "upstreamRefType": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "TextTemplateBinding": {
+        "properties": {
+          "body": {
+            "type": "string"
+          },
+          "missing": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "templateCode": {
+            "type": "string"
+          },
+          "templateId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "unknown": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "variables": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "TextTemplateInput": {
+        "properties": {
+          "body": {
+            "type": "string"
+          },
+          "contentType": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          },
+          "targetLocale": {
+            "type": "string"
+          },
+          "templateCode": {
+            "type": "string"
+          },
+          "templateName": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "TextTemplateRow": {
+        "properties": {
+          "body": {
+            "type": "string"
+          },
+          "contentType": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "targetLocale": {
+            "type": "string"
+          },
+          "templateCode": {
+            "type": "string"
+          },
+          "templateName": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "variables": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "TextViolation": {
+        "properties": {
+          "detail": {
+            "type": "string"
+          },
+          "matchedItem": {
+            "type": "string"
+          },
+          "ruleCode": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string"
+          },
+          "suggestion": {
+            "type": "string"
+          }
+        },
+        "type": "object"
       }
     }
   },
@@ -1767,6 +2635,1160 @@
         },
         "tags": [
           "app-credential-controller"
+        ]
+      }
+    },
+    "/platform/text/banned-terms": {
+      "get": {
+        "operationId": "get_platform_text_banned_terms",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "category",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "severity",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "locale",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "enabled",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/TextBannedTermRow"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "text-translation-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_platform_text_banned_terms",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TextBannedTermInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TextBannedTermRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "text-translation-controller"
+        ]
+      }
+    },
+    "/platform/text/banned-terms/{id}": {
+      "delete": {
+        "operationId": "delete_platform_text_banned_terms_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "text-translation-controller"
+        ]
+      }
+    },
+    "/platform/text/capabilities": {
+      "get": {
+        "operationId": "get_platform_text_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TextCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "text-translation-controller"
+        ]
+      }
+    },
+    "/platform/text/glossary": {
+      "get": {
+        "operationId": "get_platform_text_glossary",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "termType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "locale",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "enabled",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/TextGlossaryRow"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "text-translation-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_platform_text_glossary",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TextGlossaryInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TextGlossaryRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "text-translation-controller"
+        ]
+      }
+    },
+    "/platform/text/glossary/{id}": {
+      "delete": {
+        "operationId": "delete_platform_text_glossary_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "text-translation-controller"
+        ]
+      }
+    },
+    "/platform/text/locales": {
+      "get": {
+        "operationId": "get_platform_text_locales",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TextLocaleView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "text-translation-controller"
+        ]
+      }
+    },
+    "/platform/text/overview": {
+      "get": {
+        "operationId": "get_platform_text_overview",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TextOverview"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "text-translation-controller"
+        ]
+      }
+    },
+    "/platform/text/published": {
+      "get": {
+        "operationId": "get_platform_text_published",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "contentType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/TextTaskRow"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "text-translation-controller"
+        ]
+      }
+    },
+    "/platform/text/rules": {
+      "get": {
+        "operationId": "get_platform_text_rules",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "contentType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "locale",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/TextRuleRow"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "text-translation-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_platform_text_rules",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TextRuleInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TextRuleRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "text-translation-controller"
+        ]
+      }
+    },
+    "/platform/text/rules/{id}": {
+      "delete": {
+        "operationId": "delete_platform_text_rules_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "text-translation-controller"
+        ]
+      }
+    },
+    "/platform/text/source-candidates": {
+      "get": {
+        "operationId": "get_platform_text_source_candidates",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "refType",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "refId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TextSourceCandidateView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "text-translation-controller"
+        ]
+      }
+    },
+    "/platform/text/tasks": {
+      "get": {
+        "operationId": "get_platform_text_tasks",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "contentType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "targetLocale",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TextTaskPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "text-translation-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_platform_text_tasks",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TextTaskInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TextTaskRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "text-translation-controller"
+        ]
+      }
+    },
+    "/platform/text/tasks/{taskId}": {
+      "get": {
+        "operationId": "get_platform_text_tasks_taskId",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "taskId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TextTaskDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "text-translation-controller"
+        ]
+      }
+    },
+    "/platform/text/tasks/{taskId}/confirm": {
+      "post": {
+        "operationId": "post_platform_text_tasks_taskId_confirm",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "taskId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TextTaskDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "text-translation-controller"
+        ]
+      }
+    },
+    "/platform/text/tasks/{taskId}/drafts": {
+      "post": {
+        "operationId": "post_platform_text_tasks_taskId_drafts",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "taskId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TextDraftInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TextTaskDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "text-translation-controller"
+        ]
+      }
+    },
+    "/platform/text/tasks/{taskId}/generate": {
+      "post": {
+        "operationId": "post_platform_text_tasks_taskId_generate",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "taskId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TextGenerationOutcome"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "text-translation-controller"
+        ]
+      }
+    },
+    "/platform/text/tasks/{taskId}/publish": {
+      "post": {
+        "operationId": "post_platform_text_tasks_taskId_publish",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "taskId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TextTaskDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "text-translation-controller"
+        ]
+      }
+    },
+    "/platform/text/tasks/{taskId}/reject": {
+      "post": {
+        "operationId": "post_platform_text_tasks_taskId_reject",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "taskId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "reason",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TextTaskDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "text-translation-controller"
+        ]
+      }
+    },
+    "/platform/text/templates": {
+      "get": {
+        "operationId": "get_platform_text_templates",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "contentType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "locale",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "enabled",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/TextTemplateRow"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "text-translation-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_platform_text_templates",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TextTemplateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TextTemplateRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "text-translation-controller"
+        ]
+      }
+    },
+    "/platform/text/templates/{id}": {
+      "delete": {
+        "operationId": "delete_platform_text_templates_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "text-translation-controller"
+        ]
+      }
+    },
+    "/platform/text/templates/{templateId}/binding": {
+      "get": {
+        "operationId": "get_platform_text_templates_templateId_binding",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "templateId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "values",
+            "required": true,
+            "schema": {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "type": "object"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TextTemplateBinding"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "text-translation-controller"
         ]
       }
     }
