@@ -8,7 +8,6 @@ import java.math.BigDecimal;
 import java.net.InetSocketAddress;
 import java.sql.DriverManager;
 import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
@@ -140,14 +139,35 @@ class AnomalyOrderTenancyIntegrationTest {
 
   // ------------------------------------------------------------ 夹具
 
-  static final OffsetDateTime NOW =
-      OffsetDateTime.now(ZoneOffset.UTC).truncatedTo(ChronoUnit.SECONDS);
-  static final OffsetDateTime H72 = NOW.minusHours(72);
+  // ------------------------------------------------------------ 时间基准
+  //
+  // 🔴 基准**每个用例重新取一次**（@BeforeEach），不写在 static 初始化里。
+  //
+  // 根因：服务端判「这张单进不进异常队列」用的是数据库时钟（PG 的 now()），
+  // 而基准若固定在**类加载那一刻**，它与判定时刻之间的差会随机器负载漂移：
+  // 机器一慢（Testcontainers 起容器 + 其它模块抢 CPU），这个差能到十几分钟，
+  // 落在阈值/断言边界上的结论就翻了 —— 而被测行为一个字都没改。
+  // 同一个类里的 AnomalyOrderIntegrationTest 就是这么红的（2026-10-26 的 L2 批次闸：
+  // 实际 260106 秒 vs 期望 [259080, 259320]）。
+
+  /** 本用例的时间基准：取**数据库自己的时钟**（与服务端判超时同一个钟），截断到秒。 */
+  OffsetDateTime base;
+
+  /** 基准往前推 72 小时（= 服务端的超时阈值 24 小时的两倍还多，踩不到边界）。 */
+  OffsetDateTime h72;
+
+  /** 🔴 <b>同源 DB 时钟</b>：读一次**数据库自己的时钟**。 */
+  OffsetDateTime dbNow() {
+    return sql.fetchOne("select now() as t").get("t", OffsetDateTime.class);
+  }
 
   @BeforeEach
   void seed() throws Exception {
     actorA = actors.get("Bearer tenant-a");
     actorB = actors.get("Bearer tenant-b");
+    // 时间基准：每个用例重新取一次数据库时钟（见上面「时间基准」的说明）。
+    base = dbNow().truncatedTo(ChronoUnit.SECONDS);
+    h72 = base.minusHours(72);
     try (var c = DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
         var s = c.createStatement()) {
       s.execute(
@@ -172,24 +192,24 @@ class AnomalyOrderTenancyIntegrationTest {
                   + "shipping_amount,other_amount,grand_total_amount,version,created_at,updated_at)"
                   + " values(?,?,?,'AMAZON',?,'USD','PREPAID','SUBMITTED',?::timestamptz,"
                   + "100.0000,0,0,0,0,100.0000,0,?::timestamptz,?::timestamptz)",
-              orderId, tenant, orderNo, "EXT-" + orderNo, H72, H72, H72);
+              orderId, tenant, orderNo, "EXT-" + orderNo, h72, h72, h72);
           sql.execute(
               "insert into sales_order_line(id,tenant_id,order_id,line_no,sku_id,sku_code,sku_name,"
                   + "quantity,unit_price,discount_amount,tax_amount,line_amount,note,created_at)"
                   + " values(?,?,?,1,?,'SKU-1','商品',1,100.0000,0,0,100.0000,'',?::timestamptz)",
-              UUID.randomUUID(), tenant, orderId, UUID.randomUUID(), H72);
+              UUID.randomUUID(), tenant, orderId, UUID.randomUUID(), h72);
           sql.execute(
               "insert into sales_order_party_snapshot(id,tenant_id,order_id,customer_party_id,"
                   + "customer_code,customer_name,customer_type,customer_default_currency,created_at)"
                   + " values(?,?,?,?,'C-1','收件人','INDIVIDUAL','',?::timestamptz)",
-              UUID.randomUUID(), tenant, orderId, UUID.randomUUID(), H72);
+              UUID.randomUUID(), tenant, orderId, UUID.randomUUID(), h72);
           sql.execute(
               "insert into order_address_snapshot(id,tenant_id,order_id,address_role,recipient_name,"
                   + "recipient_phone,recipient_email,company_name,country_code,province,city,"
                   + "district,postcode,address_line1,address_line2,tax_id,note,created_at)"
                   + " values(?,?,?,'SHIPPING','收件人','+1-213-555-0100','buyer@example.com','',"
                   + "'US','CA','LOS ANGELES','','90001','100 Main St','','','',?::timestamptz)",
-              UUID.randomUUID(), tenant, orderId, H72);
+              UUID.randomUUID(), tenant, orderId, h72);
           UUID recordId = UUID.randomUUID();
           sql.execute(
               "insert into shipment_record(id,tenant_id,record_no,source_handover_id,"
@@ -199,7 +219,7 @@ class AnomalyOrderTenancyIntegrationTest {
                   + " values(?,?,'SR-1',?::uuid,?::uuid,?::uuid,?::uuid,'DHL','DHL','WB-1',"
                   + "?::timestamptz,1,?,?,'SHOP-1',?::timestamptz,?::timestamptz,?::timestamptz)",
               recordId, tenant, UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(),
-              UUID.randomUUID(), H72, orderId, orderNo, H72, H72, H72);
+              UUID.randomUUID(), h72, orderId, orderNo, h72, h72, h72);
           sql.execute(
               "insert into shipment_writeback_task(id,tenant_id,task_no,source_record_id,"
                   + "source_record_no,sales_order_no,carrier_code,master_waybill_no,shipped_at,"
@@ -208,8 +228,8 @@ class AnomalyOrderTenancyIntegrationTest {
                   + " values(?,?,'PB-1',?,'SR-1',?,'DHL','WB-1',?::timestamptz,'AMAZON','SHOP-1',"
                   + "?::uuid,'EXT-'||?,'idem-'||?,'{}'::jsonb,'PENDING','NOT_REQUIRED',0,5,"
                   + "?::timestamptz,?::timestamptz,?::timestamptz)",
-              UUID.randomUUID(), tenant, recordId, orderNo, H72, UUID.randomUUID(), orderNo, orderNo,
-              H72, H72, H72);
+              UUID.randomUUID(), tenant, recordId, orderNo, h72, UUID.randomUUID(), orderNo, orderNo,
+              h72, h72, h72);
           return orderId;
         });
   }
