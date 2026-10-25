@@ -44,6 +44,8 @@ public final class ReportingProjectionModels {
    * @param timezone 分桶所用时区（跨时区店铺汇总必须显示所用时区）
    * @param facts 事实贡献行
    * @param drilldowns 构成明细（可下钻）
+   * @param expenseFacts 费用事实贡献行（13.4.2.2 费用差异：预计费用与实际费用**各一张表**，
+   *     所以这里是**两种**行，用 {@code factKind} 区分）
    */
   public record ProjectionEvent(
       String sourceService,
@@ -54,7 +56,73 @@ public final class ReportingProjectionModels {
       OffsetDateTime occurredAt,
       String timezone,
       List<ProjectionFact> facts,
-      List<ProjectionDrilldown> drilldowns) {}
+      List<ProjectionDrilldown> drilldowns,
+      List<ProjectionExpenseFact> expenseFacts) {
+
+    /**
+     * 不带费用事实的构造（**13.1.1.1 时期的事件一律走这里**）。
+     *
+     * <p>⚠️ 保留这个重载是有意的：envelope 加字段不该让**既有的调用点**全部改一遍 ——
+     * 改一遍就意味着「这个模块的事件形状变了」这件事散落在十几个文件里。
+     */
+    public ProjectionEvent(
+        String sourceService,
+        String sourceEventId,
+        String eventType,
+        @Schema(nullable = true) UUID aggregateId,
+        long aggregateVersion,
+        OffsetDateTime occurredAt,
+        String timezone,
+        List<ProjectionFact> facts,
+        List<ProjectionDrilldown> drilldowns) {
+      this(
+          sourceService,
+          sourceEventId,
+          eventType,
+          aggregateId,
+          aggregateVersion,
+          occurredAt,
+          timezone,
+          facts,
+          drilldowns,
+          List.of());
+    }
+  }
+
+  /**
+   * 一条费用事实贡献（13.4.2.2）。
+   *
+   * <p>⚠️ **预计与实际是两种行**（{@code factKind}）：把「规则算出来的数」和
+   * 「真的发生的数」写进同一张表，就再也答不出「这个月是规则定错了，还是平台多扣了」。
+   *
+   * @param factKind {@code ESTIMATE}（预计费用）/ {@code ACTUAL}（实际费用）
+   * @param feeType 费用类型（PLATFORM_FEE / LOGISTICS_FEE / AD_FEE / HEAD_FREIGHT）
+   * @param feeSubType 上游口径子类型（空串 = 上游没给）
+   * @param periodStart 期间起
+   * @param periodEnd 期间止（逐日事实两列相同；窗口型事实不同）
+   * @param amount 这一侧的金额（预计侧 = 测算值；实际侧 = 发生额，可负）
+   * @param baseAmount 销售额 / 货值基数（没有基数时为 0）
+   * @param baseQuantity 数量基数（没有基数时为 0）
+   * @param sourceReference 上游行标识（与上游行一起构成事实的幂等键）
+   */
+  public record ProjectionExpenseFact(
+      String factKind,
+      String feeType,
+      String feeSubType,
+      String platformCode,
+      String siteCode,
+      String channelCode,
+      String carrierCode,
+      String shippingMethodCode,
+      String shopCode,
+      String skuCode,
+      LocalDate periodStart,
+      LocalDate periodEnd,
+      String currency,
+      BigDecimal amount,
+      BigDecimal baseAmount,
+      BigDecimal baseQuantity,
+      String sourceReference) {}
 
   /**
    * 一条事实贡献。
@@ -162,6 +230,13 @@ public final class ReportingProjectionModels {
     public static final String PROFIT_FACT = "ProfitFactRecorded";
     /** 汇率观测（带时点）。 */
     public static final String CURRENCY_RATE = "CurrencyRateObserved";
+    /**
+     * 费用事实（13.4.2.2 费用差异：预计费用 / 实际费用）。
+     *
+     * <p>⚠️ 预计与实际**在同一个事件里**落地：它们的幂等键共用「上游那一行」，
+     * 分开成两个事件会让「同一行的预计与实际」在重建时错位。
+     */
+    public static final String EXPENSE_FACT = "ExpenseFactRecorded";
 
     /** 全部事件类型（能力声明与校验用）。 */
     public static final List<String> ALL =
@@ -173,6 +248,7 @@ public final class ReportingProjectionModels {
             RECEIVABLE_SNAPSHOT,
             INVENTORY_SNAPSHOT,
             PROFIT_FACT,
-            CURRENCY_RATE);
+            CURRENCY_RATE,
+            EXPENSE_FACT);
   }
 }

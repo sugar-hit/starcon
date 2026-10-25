@@ -107,6 +107,379 @@
         },
         "type": "object"
       },
+      "ExpenseSkuVariancePage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ExpenseSkuVarianceRow"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ExpenseSkuVarianceRow": {
+        "properties": {
+          "actualAmount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "comparable": {
+            "type": "boolean"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "estimatedAmount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "feeSubType": {
+            "type": "string"
+          },
+          "feeType": {
+            "type": "string"
+          },
+          "feeTypeLabel": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "periodEnd": {
+            "format": "date",
+            "type": "string"
+          },
+          "periodStart": {
+            "format": "date",
+            "type": "string"
+          },
+          "sampleCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "scopeLabel": {
+            "type": "string"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "varianceAmount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "varianceRate": {
+            "nullable": true,
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "ExpenseVarianceCapabilities": {
+        "properties": {
+          "feeTypes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "notDelivered": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "recommendationMinSamples": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "recommendationThreshold": {
+            "type": "number"
+          },
+          "upstreamConnected": {
+            "type": "boolean"
+          },
+          "upstreamModules": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "ExpenseVarianceRecommendation": {
+        "properties": {
+          "actualTotal": {
+            "nullable": true,
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "currentRate": {
+            "nullable": true,
+            "type": "number"
+          },
+          "direction": {
+            "type": "string"
+          },
+          "estimatedTotal": {
+            "nullable": true,
+            "type": "number"
+          },
+          "feeSubType": {
+            "type": "string"
+          },
+          "feeType": {
+            "type": "string"
+          },
+          "feeTypeLabel": {
+            "type": "string"
+          },
+          "impliedRate": {
+            "nullable": true,
+            "type": "number"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "sampleCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "scopeLabel": {
+            "type": "string"
+          },
+          "suggestedRate": {
+            "nullable": true,
+            "type": "number"
+          },
+          "suggestion": {
+            "type": "string"
+          },
+          "varianceAmount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "varianceRate": {
+            "nullable": true,
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "ExpenseVarianceResponse": {
+        "properties": {
+          "caliberNote": {
+            "type": "string"
+          },
+          "dataUpdatedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "dataUpdatedNote": {
+            "type": "string"
+          },
+          "from": {
+            "format": "date",
+            "type": "string"
+          },
+          "granularity": {
+            "type": "string"
+          },
+          "recommendations": {
+            "items": {
+              "$ref": "#/components/schemas/ExpenseVarianceRecommendation"
+            },
+            "type": "array"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/ExpenseVarianceRow"
+            },
+            "type": "array"
+          },
+          "to": {
+            "format": "date",
+            "type": "string"
+          },
+          "trend": {
+            "items": {
+              "$ref": "#/components/schemas/ExpenseVarianceTrendPoint"
+            },
+            "type": "array"
+          },
+          "unmatchedActuals": {
+            "items": {
+              "$ref": "#/components/schemas/UnmatchedActualRow"
+            },
+            "type": "array"
+          },
+          "varianceSignNote": {
+            "type": "string"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "ExpenseVarianceRow": {
+        "properties": {
+          "actualAmount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "actualCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "actualSource": {
+            "type": "string"
+          },
+          "baseAmount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "carrierCode": {
+            "type": "string"
+          },
+          "channelCode": {
+            "type": "string"
+          },
+          "comparable": {
+            "type": "boolean"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "estimateCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "estimatedAmount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "feeSubType": {
+            "type": "string"
+          },
+          "feeType": {
+            "type": "string"
+          },
+          "feeTypeLabel": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "periodEnd": {
+            "format": "date",
+            "type": "string"
+          },
+          "periodStart": {
+            "format": "date",
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "scopeLabel": {
+            "type": "string"
+          },
+          "shippingMethodCode": {
+            "type": "string"
+          },
+          "shopCode": {
+            "type": "string"
+          },
+          "siteCode": {
+            "type": "string"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "varianceAmount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "varianceRate": {
+            "nullable": true,
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "ExpenseVarianceTrendPoint": {
+        "properties": {
+          "actualAmount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "estimatedAmount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "feeSubType": {
+            "type": "string"
+          },
+          "feeType": {
+            "type": "string"
+          },
+          "feeTypeLabel": {
+            "type": "string"
+          },
+          "periodEnd": {
+            "format": "date",
+            "type": "string"
+          },
+          "periodStart": {
+            "format": "date",
+            "type": "string"
+          },
+          "scopeLabel": {
+            "type": "string"
+          },
+          "varianceAmount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "varianceRate": {
+            "nullable": true,
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
       "MetricCard": {
         "properties": {
           "aggregation": {
@@ -356,6 +729,12 @@
           "eventType": {
             "type": "string"
           },
+          "expenseFacts": {
+            "items": {
+              "$ref": "#/components/schemas/ProjectionExpenseFact"
+            },
+            "type": "array"
+          },
           "facts": {
             "items": {
               "$ref": "#/components/schemas/ProjectionFact"
@@ -373,6 +752,64 @@
             "type": "string"
           },
           "timezone": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ProjectionExpenseFact": {
+        "properties": {
+          "amount": {
+            "type": "number"
+          },
+          "baseAmount": {
+            "type": "number"
+          },
+          "baseQuantity": {
+            "type": "number"
+          },
+          "carrierCode": {
+            "type": "string"
+          },
+          "channelCode": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "factKind": {
+            "type": "string"
+          },
+          "feeSubType": {
+            "type": "string"
+          },
+          "feeType": {
+            "type": "string"
+          },
+          "periodEnd": {
+            "format": "date",
+            "type": "string"
+          },
+          "periodStart": {
+            "format": "date",
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "shippingMethodCode": {
+            "type": "string"
+          },
+          "shopCode": {
+            "type": "string"
+          },
+          "siteCode": {
+            "type": "string"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "sourceReference": {
             "type": "string"
           }
         },
@@ -535,6 +972,40 @@
           }
         },
         "type": "object"
+      },
+      "UnmatchedActualRow": {
+        "properties": {
+          "actualAmount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "actualCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "actualSource": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "feeSubType": {
+            "type": "string"
+          },
+          "feeType": {
+            "type": "string"
+          },
+          "feeTypeLabel": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "scopeLabel": {
+            "type": "string"
+          }
+        },
+        "type": "object"
       }
     }
   },
@@ -544,6 +1015,462 @@
   },
   "openapi": "3.0.1",
   "paths": {
+    "/reporting/expense-variance/by-sku": {
+      "get": {
+        "description": "只覆盖**两侧都有事实**的 SKU —— 目前只有**头程分摊**两侧都带 sku_code。",
+        "operationId": "get_reporting_expense_variance_by_sku",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "feeType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExpenseSkuVariancePage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "SKU 级差异：按 SKU 与期间展示差异率（真分页 + 真计数）",
+        "tags": [
+          "13.4.2.2 费用差异"
+        ]
+      }
+    },
+    "/reporting/expense-variance/capabilities": {
+      "get": {
+        "description": "notDelivered 列出的是**确实算不出差异**的部分，每条都写清原因与影响 —— 「算不出来」与「差异是 0」在页面上长得一样，含义却相反。",
+        "operationId": "get_reporting_expense_variance_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExpenseVarianceCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "能力声明：哪些上游真接通、哪些确实拿不到、归谁",
+        "tags": [
+          "13.4.2.2 费用差异"
+        ]
+      }
+    },
+    "/reporting/expense-variance/recommendations": {
+      "get": {
+        "description": "只给**系统性**偏差：差异率绝对值 ≥ 阈值且可比样本 ≥ 最少组数。没有销售额 / 数量基数时反推不出费率，只给定性建议。",
+        "operationId": "get_reporting_expense_variance_recommendations",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "feeType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "platformCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "shopCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "skuCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ExpenseVarianceRecommendation"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "规则调优建议：系统性高估 / 低估",
+        "tags": [
+          "13.4.2.2 费用差异"
+        ]
+      }
+    },
+    "/reporting/expense-variance/refresh": {
+      "post": {
+        "description": "与 POST /reporting/projection/refresh 是同一条管道（同一套幂等键与重建逻辑），这里只跑本模块的五路上游。权限是 reporting.projection.write —— **本模块没有任何「创建业务事实」的权限**。",
+        "operationId": "post_reporting_expense_variance_refresh",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sources",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "in": "query",
+            "name": "timezone",
+            "required": false,
+            "schema": {
+              "default": "UTC",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/RefreshResult"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "刷新费用事实（从上游拉取 → 投影）",
+        "tags": [
+          "13.4.2.2 费用差异"
+        ]
+      }
+    },
+    "/reporting/expense-variance/trend": {
+      "get": {
+        "operationId": "get_reporting_expense_variance_trend",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "granularity",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "feeType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "platformCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "shopCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "skuCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ExpenseVarianceTrendPoint"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "偏差趋势：按期间粒度给出差异率（没有可比行的期间没有点，不是 0%）",
+        "tags": [
+          "13.4.2.2 费用差异"
+        ]
+      }
+    },
+    "/reporting/expense-variance/variance": {
+      "get": {
+        "description": "差异 = 实际 − 预计：差异为负 ⇒ 预计高估（规则配高了）；差异为正 ⇒ 预计低估（规则配低了）。默认窗口是「最近 30 天」。granularity 决定趋势的期间粒度：DAY / WEEK / MONTH。",
+        "operationId": "get_reporting_expense_variance_variance",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "granularity",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "feeType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "platformCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "shopCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "skuCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExpenseVarianceResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "费用差异表 + 偏差趋势 + 规则调优建议",
+        "tags": [
+          "13.4.2.2 费用差异"
+        ]
+      }
+    },
     "/reporting/overview": {
       "get": {
         "description": "时间范围与维度选择都在这里。默认窗口是「最近 30 天」。维度取值 COMPANY / LEGAL_ENTITY / SHOP；给了 shopId / legalEntityId 时维度会跟着收窄。",

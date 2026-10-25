@@ -62,6 +62,46 @@ const services: readonly {
       /^(?:overview(?:\/(?:capabilities|metrics|trend|drilldown))?|projection(?:\/(?:events|refresh|rebuild))?)$/,
   },
   {
+    // 13.4.2.2 费用差异（reporting 服务，卷 13「利润与经营分析」L3 13.4.2 成本拆解下的第二格）。
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往 13.1.1.1 那条 reporting/ 正则里并分支 ——
+    //   13.1.1.1 的条目**一字未改、也不重排**（那条正则只放行 overview / projection 两个命名空间）。
+    //
+    // ---- 插入锚点选在**13.1.1.1 那条 reporting/ 之后**（数组最前面那一段）----
+    //   同批其它车道的插入点是「数组末尾」（收尾的 `];` 之前）；本车道落在开头这一段，
+    //   与它们的插入点相距 10000 行以上，并入时 git 能干净求并。
+    //
+    // ---- 首 token「expense-variance」的零命中核对结论 ----
+    //   发车前用脚本把本文件里**全部 228 个既有元素**（`prefix` + 正则）逐条抽出来，
+    //   对本模块的 7 条路径逐条跑「前缀闸门 + 正则」判定：
+    //     expense-variance/capabilities
+    //     expense-variance/variance
+    //     expense-variance/trend
+    //     expense-variance/recommendations
+    //     expense-variance/by-sku
+    //     expense-variance/refresh
+    //     expense-variance
+    //   **零命中** —— 既有 228 条正则里没有任何一条会吃掉本模块的路径，
+    //   而 resolve() 先按 prefix 闸门筛，所以别的服务的正则根本吃不到本模块的路径。
+    //   核对脚本留在 .tmp/ 下（不入库），命令与输出见本次提交正文。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   capabilities       能力声明（哪些上游真接通、哪些确实算不出差异）
+    //   variance           差异表 + 有实际无预计 + 偏差趋势 + 规则调优建议
+    //   trend              偏差趋势（单独取一条线）
+    //   recommendations    规则调优建议（单独取一份清单）
+    //   by-sku             SKU 级差异（真分页 + 真计数）
+    //   refresh            刷新费用事实（POST，与 projection/refresh 同一条管道）
+    //
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   expense-variance             —— 裸路径：后端**没有**「一条不存在的汇总列表接口」。
+    //   expense-variance/{uuid}      —— 顶层没有 id 段（差异表按查询参数定位，不是按 id）。
+    //   expense-variance/not-a-shape —— 多一层仍然 404。
+    prefix: 'reporting/',
+    env: 'REPORTING_URL',
+    fallback: 'http://127.0.0.1:8088',
+    pattern: /^expense-variance\/(?:capabilities|variance|trend|recommendations|by-sku|refresh)$/,
+  },
+  {
     // 12.4.1.3 成本差异分析（finance 服务，卷 12「财务核算」L3 12.4.1 成本计算下的第三格）。
     // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 finance 那几条巨型 alternation 里并分支 ——
     //   既有条目**一字未改、也不重排**。
