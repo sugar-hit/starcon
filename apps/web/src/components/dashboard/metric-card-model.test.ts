@@ -129,6 +129,49 @@ describe('数值展示：算不出来不是 0', () => {
   it('主值带币种', () => {
     expect(headlineText(card())).toContain('USD');
   });
+
+  it('多币种折不出本位币合计时显示「按币种分列」，不是「—」也不是随便挑一个币种', () => {
+    expect(
+      headlineText(
+        card({
+          values: [
+            { currency: 'USD', value: 1000 },
+            { currency: 'EUR', value: 200 },
+          ],
+          headline: null,
+        }),
+      ),
+    ).toBe('按币种分列');
+  });
+});
+
+describe('金额 / 数量的展示：十进制精确，不走浮点', () => {
+  it('金额固定两位小数并带千分位', () => {
+    expect(formatValue(1234567.891, 'CURRENCY')).toBe('1,234,567.89');
+    expect(formatValue(0, 'CURRENCY')).toBe('0.00');
+  });
+
+  it('数量最多六位小数、去掉多余的尾随零', () => {
+    expect(formatValue(300, 'QUANTITY')).toBe('300');
+    expect(formatValue(1.5, 'QUANTITY')).toBe('1.5');
+    expect(formatValue(0.000001, 'QUANTITY')).toBe('0.000001');
+  });
+
+  it('计数是整数，带千分位', () => {
+    expect(formatValue(1234, 'COUNT')).toBe('1,234');
+    expect(formatValue(12.7, 'COUNT')).toBe('13');
+  });
+
+  it('HALF_UP 在十进制字面串上做：1.005 进位、1.004 不进位', () => {
+    // ⚠️ 这正是浮点会翻车的地方：1.005 的二进制浮点其实略小于 1.005，
+    //   直接按 double 四舍五入会得到 1.00；这里按**十进制字面串**处理，得到 1.01。
+    expect(formatValue(1.005, 'CURRENCY')).toBe('1.01');
+    expect(formatValue(1.004, 'CURRENCY')).toBe('1.00');
+  });
+
+  it('负数按远离零进位', () => {
+    expect(formatValue(-1234.565, 'CURRENCY')).toBe('-1,234.57');
+  });
 });
 
 describe('环比 / 同比：不可判定显示「—」，不是 0%', () => {
@@ -161,7 +204,7 @@ describe('环比 / 同比：不可判定显示「—」，不是 0%', () => {
     ).toBe('+12.35%');
   });
 
-  it('不可比时整行写「不可判定」', () => {
+  it('基期没数据显示「无同期基期」，不是 0% 也不是「不可判定」这种空话', () => {
     expect(
       comparisonLine({
         label: '环比',
@@ -170,9 +213,29 @@ describe('环比 / 同比：不可判定显示「—」，不是 0%', () => {
         changeRate: null,
         changeAmount: null,
         comparable: false,
-        reason: '对比期没有事实数据',
+        reason: '对比期没有事实数据，无法计算变化率（不可判定，不是 0%）。',
       }),
-    ).toBe('不可判定');
+    ).toBe('无同期基期');
+  });
+
+  it('其它不可判定原因各有各的短标签（不是一律「不可判定」）', () => {
+    const label = (reason: string) =>
+      comparisonLine({
+        label: '环比',
+        from: 'a',
+        to: 'b',
+        changeRate: null,
+        changeAmount: null,
+        comparable: false,
+        reason,
+      });
+    expect(label('对比期取值为 0，变化率不可比（不显示成 0%）。')).toBe('基期为 0');
+    expect(label('缺少汇率快照，折算不到同一本位币 —— 不可判定（没有汇率就不可判定，不是按 1:1 算）。')).toBe(
+      '缺汇率快照',
+    );
+    expect(label('多币种指标没有单一的变化率：指定本位币后按汇率快照折算比较。')).toBe('多币种不可比');
+    expect(label('对比期或本期缺少这个币种的数据，无法计算变化率。')).toBe('基期缺该币种');
+    expect(label('说不清的原因')).toBe('不可判定');
   });
 
   it('可比时写变化率与对比期', () => {

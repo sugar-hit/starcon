@@ -218,6 +218,12 @@ export function MetricCardWorkspace() {
       >
         {loading ? (
           <EmptyState title="正在读取指标…" description="投影读模型可能要跑一次聚合。" />
+        ) : error && !cards ? (
+          <EmptyState
+            icon={<TriangleAlert className="h-6 w-6" />}
+            title={emptyState(false, [], false).title}
+            description={emptyState(false, [], false).description}
+          />
         ) : !cards || cards.cards.length === 0 ? (
           <EmptyState
             icon={<TriangleAlert className="h-6 w-6" />}
@@ -410,7 +416,11 @@ function MetricCardView({
       </div>
 
       {unavailable ? (
-        <p className="text-copy-12 text-muted-foreground mt-2">{card.note || '未接通'}</p>
+        <div className="text-copy-12 text-muted-foreground mt-2 space-y-1">
+          <p>{card.note || '未接通'}</p>
+          {/* 🔴 未接通的指标必须写清「归谁」—— 否则运营以为这是系统坏了，而不是口径没接通。 */}
+          {card.ownerModule && <p>口径归属：{card.ownerModule}</p>}
+        </div>
       ) : (
         <div className="mt-2 space-y-1">
           <div className="text-copy-12 text-muted-foreground flex items-center gap-1">

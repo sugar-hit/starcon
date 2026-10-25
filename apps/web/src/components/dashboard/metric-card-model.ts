@@ -212,23 +212,118 @@ export function unitLabel(unit: string): string {
  *
  * <p>⚠️ `null` ⇒ 「—」（**不是 0**）。后端把「算不出来」给成 null，
  * 这里原样显示「—」，并在 tooltip 里给出原因。
+ *
+ * <p>🔴 **展示层走十进制字面串，不走浮点运算**：金额是 numeric(19,4)、数量是 numeric(19,6)，
+ * 而 JS 的 `number` 是二进制浮点 —— 拿它做乘法/除法会出 `0.1 + 0.2 === 0.30000000000000004`
+ * 这种尾巴。所以本模块**不做任何算术**（数值、变化率、趋势箭头全部由后端算好），
+ * 展示时把 number 还原成它的**十进制字面串**，再用 {@link BigInt} 在**缩放整数**上做
+ * 四舍五入与千分位分组 —— 全程不碰浮点。
+ *
+ * <p>⚠️ 精度天花板在**契约**上（`value: number`）：JSON 把 `1234.5650` 解析成双精度浮点后，
+ * 前端拿到的是 `1234.565` 这个 double。后端用 BigDecimal 算出的十进制语义由它自己的
+ * `setScale` 保证；前端只保证**不把这个语义再弄坏**（不再乘除、不再二次舍入）。
  */
 export function formatValue(value: number | null | undefined, unit: string): string {
   if (value === null || value === undefined || !Number.isFinite(value)) return '—';
-  if (unit === 'CURRENCY') {
-    return value.toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  }
-  if (unit === 'QUANTITY') {
-    return value.toLocaleString('zh-CN', { maximumFractionDigits: 6 });
-  }
-  return value.toLocaleString('zh-CN', { maximumFractionDigits: 2 });
+  if (unit === 'CURRENCY') return formatDecimal(value, CURRENCY_SCALE, CURRENCY_SCALE, false);
+  if (unit === 'QUANTITY') return formatDecimal(value, QUANTITY_SCALE, 0, true);
+  return formatDecimal(value, 0, 0, false);
 }
 
-/** 主值展示串（带单位与币种）。 */
+/** 金额展示精度（后端 numeric(19,4) ⇒ 展示 2 位小数）。 */
+export const CURRENCY_SCALE = 2;
+
+/** 数量展示精度（后端 numeric(19,6) ⇒ 展示最多 6 位小数）。 */
+export const QUANTITY_SCALE = 6;
+
+/**
+ * 把一个 number 还原成**十进制字面串**（**不做任何算术**）。
+ *
+ * <p>{@code String(number)} 给的是该 double 的**最短往返表示** —— 也就是后端
+ * {@code BigDecimal} 写进 JSON 的那串十进制（`1234.5650` ⇒ `"1234.565"`）。
+ */
+function decimalText(value: number): string | null {
+  if (!Number.isFinite(value)) return null;
+  const text = String(value);
+  // 科学计数法（|value| >= 1e21）在这个模块的量级里不会出现；
+  // 真出现了就老实返回 null —— 宁可显示「—」，也不给一个悄悄错的串。
+  if (text.includes('e') || text.includes('E')) return null;
+  return text;
+}
+
+/**
+ * 十进制字面串 → 缩放整数（{@code scale} 位小数），**HALF_UP** 四舍五入。
+ *
+ * <p>全程 BigInt 整数运算，不碰浮点。
+ */
+function toScaled(text: string, scale: number): bigint | null {
+  const match = /^([+-]?)(\d+)(?:\.(\d*))?$/.exec(text);
+  if (!match) return null;
+  const negative = match[1] === '-';
+  const integer = match[2] ?? '0';
+  const raw = match[3] ?? '';
+  const kept = raw.padEnd(scale, '0').slice(0, scale);
+  // 第 scale+1 位：≥5 就进位（HALF_UP，**远离零**）。
+  const nextDigit = scale < raw.length ? raw.charCodeAt(scale) - 48 : 0;
+  const base = BigInt(integer) * 10n ** BigInt(scale) + BigInt(kept || '0');
+  const rounded = nextDigit >= 5 ? base + 1n : base;
+  return negative ? -rounded : rounded;
+}
+
+/** 千分位分组（**字符串操作**，不经过浮点）。 */
+function groupThousands(text: string): string {
+  return text.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+}
+
+/**
+ * 缩放整数 → 展示串。
+ *
+ * @param scale 隐含小数位数
+ * @param minFractionDigits 至少保留的小数位数（金额固定 2 位）
+ * @param trimFraction 是否去掉多余的尾随零（数量用）
+ */
+function formatScaled(scaled: bigint, scale: number, minFractionDigits: number, trimFraction: boolean): string {
+  const negative = scaled < 0n;
+  const abs = negative ? -scaled : scaled;
+  const divisor = 10n ** BigInt(scale);
+  const integerText = groupThousands((abs / divisor).toString());
+  // scale 为 0（计数）时**没有**小数部分 —— 不能让 `abs % 1n` 的 0 变成 "0.0"。
+  let fractionText = scale === 0 ? '' : (abs % divisor).toString().padStart(scale, '0');
+  if (trimFraction) fractionText = fractionText.replace(/0+$/, '');
+  while (fractionText.length < minFractionDigits) fractionText += '0';
+  const body = fractionText ? `${integerText}.${fractionText}` : integerText;
+  return negative ? `-${body}` : body;
+}
+
+/** 十进制精确的展示格式化（见 {@link formatValue} 的说明）。 */
+export function formatDecimal(
+  value: number | null | undefined,
+  scale: number,
+  minFractionDigits: number,
+  trimFraction: boolean,
+): string {
+  if (value === null || value === undefined || !Number.isFinite(value)) return '—';
+  const text = decimalText(value);
+  if (text === null) return '—';
+  const scaled = toScaled(text, scale);
+  if (scaled === null) return '—';
+  return formatScaled(scaled, scale, minFractionDigits, trimFraction);
+}
+
+/**
+ * 主值展示串（带单位与币种）。
+ *
+ * <p>🔴 **多币种没有主值时显示「按币种分列」，不是「—」也不是随便挑一个币种充数**：
+ * 本位币合计要么由后端按汇率快照折算出来（{@code headline}），要么没有。
+ */
 export function headlineText(card: MetricCardEntry): string {
   if (card.status === 'NOT_CONNECTED') return '未接通';
   const headline = card.headline;
-  if (!headline || headline.value === null) return '—';
+  if (!headline || headline.value === null) {
+    // 多币种且折不出本位币合计 ⇒ 按币种分列（界面上永远没有跨币种的「总计」）。
+    if (currencyRows(card).length > 1) return '按币种分列';
+    return '—';
+  }
   const currency = headline.currency ? ` ${headline.currency}` : '';
   return `${formatValue(headline.value, card.unit)}${currency}`;
 }
@@ -237,7 +332,7 @@ export function headlineText(card: MetricCardEntry): string {
 export function changeRateText(comparison: MetricCardComparison | null | undefined): string {
   if (!comparison || comparison.changeRate === null) return '—';
   const sign = comparison.changeRate > 0 ? '+' : '';
-  return `${sign}${comparison.changeRate.toFixed(2)}%`;
+  return `${sign}${formatDecimal(comparison.changeRate, 2, 2, false)}%`;
 }
 
 /** 趋势箭头的语义标签。 */
@@ -335,11 +430,33 @@ export function caliberTooltip(card: MetricCardEntry): string {
   return lines.join('\n');
 }
 
+/**
+ * 环比 / 同比那一行的**短标签**。
+ *
+ * <p>🔴 **「基期没数据」显示「无同期基期」，不是 0%、不是「持平」、也不是「-100%」**。
+ * 后端把不可判定的原因写在 {@code reason} 里，这里按原因分类给出人能读懂的短标签 ——
+ * 原因原文仍然完整出现在 tooltip 里。
+ */
+export function comparisonLabel(comparison: MetricCardComparison | null | undefined): string {
+  if (!comparison) return '—';
+  if (comparison.comparable && comparison.changeRate !== null) {
+    const sign = comparison.changeRate > 0 ? '+' : '';
+    return `${sign}${formatDecimal(comparison.changeRate, 2, 2, false)}%`;
+  }
+  const reason = comparison.reason ?? '';
+  if (reason.includes('对比期没有事实数据')) return '无同期基期';
+  if (reason.includes('缺少这个币种')) return '基期缺该币种';
+  if (reason.includes('为 0')) return '基期为 0';
+  if (reason.includes('缺少汇率快照')) return '缺汇率快照';
+  if (reason.includes('多币种')) return '多币种不可比';
+  return '不可判定';
+}
+
 /** 卡片上那一行的对比文案（环比 / 同比）。 */
 export function comparisonLine(comparison: MetricCardComparison | null | undefined): string {
   if (!comparison) return '';
-  if (!comparison.comparable) return '不可判定';
-  return `${changeRateText(comparison)}（${comparison.from} → ${comparison.to}）`;
+  if (!comparison.comparable) return comparisonLabel(comparison);
+  return `${comparisonLabel(comparison)}（${comparison.from} → ${comparison.to}）`;
 }
 
 /** 每个币种一行（多币种时主值给不出时的兜底展示）。 */
