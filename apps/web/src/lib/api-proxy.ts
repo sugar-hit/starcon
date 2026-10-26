@@ -12707,6 +12707,8 @@ const services: readonly {
     // 末尾**刻意不带 `?`**：带了 `?` 就等于放行裸路径 `service-task-status`。
     pattern:
       /^service\-task\-status(?:\/(?:capabilities|options|summary|alerts|tasks(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?))$/,
+  },
+  {
     // 13.2.2.2 SKU/SPU/Listing（reporting 服务，卷 13「利润与经营分析」L3 13.2 销量分析下的第二格）。
     // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 reporting/ 正则里并分支 ——
     //   既有条目**一字未改、也不重排**。
