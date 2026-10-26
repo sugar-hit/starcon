@@ -846,12 +846,26 @@ public class ReportingTargetAttainmentService {
         out.put(targetKey(target), ActualSource.none());
         continue;
       }
+      // ⚠️ **归属对象标识要归一成 uuid 的规范小写形式**再查事实：
+      //   事实行的 dimension_id 落库后取回的是 uuid 的小写文本，
+      //   而目标里的 owner_id 是**用户写进来的字符串**（可能是大写）。
+      //   不归一就会「大写 UUID 查不到自己的事实」—— 那会被误读成「没有事实」。
+      var ownerKey = normalizeUuid(target.ownerId());
       var source =
           new ActualSource(
               true,
-              live.contains(key(target.ownerId(), productMetric, null)),
-              daily.getOrDefault(key(target.ownerId(), productMetric, target.currency()), Map.of()));
+              live.contains(key(ownerKey, productMetric, null)),
+              daily.getOrDefault(key(ownerKey, productMetric, target.currency()), Map.of()));
       out.put(targetKey(target), source);
+    }
+  }
+
+  /** uuid 的规范小写文本（不是 uuid 就原样返回）。 */
+  private static String normalizeUuid(String raw) {
+    try {
+      return UUID.fromString(raw).toString();
+    } catch (RuntimeException ignored) {
+      return raw;
     }
   }
 
