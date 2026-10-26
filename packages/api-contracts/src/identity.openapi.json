@@ -4573,6 +4573,489 @@
         ],
         "type": "object"
       },
+      "ExternalChannel": {
+        "properties": {
+          "cardEnabled": {
+            "type": "boolean"
+          },
+          "channelCode": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdBy": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "credentialNote": {
+            "nullable": true,
+            "type": "string"
+          },
+          "credentialResolvable": {
+            "type": "boolean"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "linkEnabled": {
+            "type": "boolean"
+          },
+          "secretRef": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ExternalChannelInput": {
+        "properties": {
+          "cardEnabled": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "channelCode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "displayName": {
+            "nullable": true,
+            "type": "string"
+          },
+          "linkEnabled": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "secretRef": {
+            "nullable": true,
+            "type": "string"
+          },
+          "status": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ExternalChannelList": {
+        "properties": {
+          "channels": {
+            "items": {
+              "$ref": "#/components/schemas/ExternalChannel"
+            },
+            "type": "array"
+          },
+          "enabledCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ExternalChannelOption": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "connected": {
+            "type": "boolean"
+          },
+          "label": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "unavailableReason": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ExternalDelivery": {
+        "properties": {
+          "alertMessage": {
+            "nullable": true,
+            "type": "string"
+          },
+          "alertState": {
+            "type": "string"
+          },
+          "alertedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "attemptCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "body": {
+            "nullable": true,
+            "type": "string"
+          },
+          "cardStyle": {
+            "type": "string"
+          },
+          "channelCode": {
+            "type": "string"
+          },
+          "channelId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "channelName": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "deliveredAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "failureCode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "failureMessage": {
+            "nullable": true,
+            "type": "string"
+          },
+          "firstAttemptAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "lastAttemptAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "linkUrl": {
+            "nullable": true,
+            "type": "string"
+          },
+          "maxAttempts": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "nextAttemptAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "notificationRef": {
+            "type": "string"
+          },
+          "notificationType": {
+            "type": "string"
+          },
+          "recipientMembershipId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "sourceKind": {
+            "type": "string"
+          },
+          "sourceRef": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ExternalDeliveryList": {
+        "properties": {
+          "deliveries": {
+            "items": {
+              "$ref": "#/components/schemas/ExternalDelivery"
+            },
+            "type": "array"
+          },
+          "limit": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "offset": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ExternalPushCandidate": {
+        "properties": {
+          "body": {
+            "nullable": true,
+            "type": "string"
+          },
+          "linkUrl": {
+            "nullable": true,
+            "type": "string"
+          },
+          "notificationRef": {
+            "type": "string"
+          },
+          "notificationType": {
+            "nullable": true,
+            "type": "string"
+          },
+          "objectRef": {
+            "nullable": true,
+            "type": "string"
+          },
+          "objectType": {
+            "nullable": true,
+            "type": "string"
+          },
+          "occurredAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "sourceKind": {
+            "type": "string"
+          },
+          "sourceRef": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ExternalPushCandidates": {
+        "properties": {
+          "candidates": {
+            "items": {
+              "$ref": "#/components/schemas/ExternalPushCandidate"
+            },
+            "type": "array"
+          },
+          "sourceNote": {
+            "type": "string"
+          },
+          "total": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ExternalPushCapabilities": {
+        "properties": {
+          "boundaries": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "cardStyles": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "channels": {
+            "items": {
+              "$ref": "#/components/schemas/ExternalChannelOption"
+            },
+            "type": "array"
+          },
+          "deliveryAvailable": {
+            "type": "boolean"
+          },
+          "deliveryNote": {
+            "type": "string"
+          },
+          "deliveryOwnerModule": {
+            "type": "string"
+          },
+          "dimensions": {
+            "items": {
+              "$ref": "#/components/schemas/ExternalPushCapabilityDimension"
+            },
+            "type": "array"
+          },
+          "module": {
+            "type": "string"
+          },
+          "secretManagerAvailable": {
+            "type": "boolean"
+          },
+          "secretManagerNote": {
+            "type": "string"
+          },
+          "secretManagerOwnerModule": {
+            "type": "string"
+          },
+          "templateAvailable": {
+            "type": "boolean"
+          },
+          "templateNote": {
+            "type": "string"
+          },
+          "templateOwnerModule": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ExternalPushCapabilityDimension": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "code": {
+            "type": "string"
+          },
+          "impact": {
+            "type": "string"
+          },
+          "missing": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "ownerModule": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ExternalPushRequest": {
+        "properties": {
+          "alertHitId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "body": {
+            "nullable": true,
+            "type": "string"
+          },
+          "cardStyle": {
+            "nullable": true,
+            "type": "string"
+          },
+          "channelIds": {
+            "items": {
+              "format": "uuid",
+              "nullable": true,
+              "type": "string"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "linkUrl": {
+            "nullable": true,
+            "type": "string"
+          },
+          "notificationRef": {
+            "nullable": true,
+            "type": "string"
+          },
+          "notificationType": {
+            "nullable": true,
+            "type": "string"
+          },
+          "recipientMembershipId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "sourceKind": {
+            "nullable": true,
+            "type": "string"
+          },
+          "title": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ExternalPushResult": {
+        "properties": {
+          "accepted": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "deferred": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "deliveries": {
+            "items": {
+              "$ref": "#/components/schemas/ExternalDelivery"
+            },
+            "type": "array"
+          },
+          "failed": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ExternalRetrySweep": {
+        "properties": {
+          "deferred": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "delivered": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "failed": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "retried": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "scanned": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
       "FactAssignmentInput": {
         "properties": {
           "amount": {
@@ -13950,6 +14433,500 @@
         },
         "tags": [
           "dictionary-controller"
+        ]
+      }
+    },
+    "/identity/external-channel-push/candidates": {
+      "get": {
+        "operationId": "get_identity_external_channel_push_candidates",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExternalPushCandidates"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "external-push-controller"
+        ]
+      }
+    },
+    "/identity/external-channel-push/capabilities": {
+      "get": {
+        "operationId": "get_identity_external_channel_push_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExternalPushCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "external-push-controller"
+        ]
+      }
+    },
+    "/identity/external-channel-push/channels": {
+      "get": {
+        "operationId": "get_identity_external_channel_push_channels",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExternalChannelList"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "external-push-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_identity_external_channel_push_channels",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExternalChannelInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExternalChannel"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "external-push-controller"
+        ]
+      }
+    },
+    "/identity/external-channel-push/channels/{id}": {
+      "delete": {
+        "operationId": "delete_identity_external_channel_push_channels_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "external-push-controller"
+        ]
+      },
+      "put": {
+        "operationId": "put_identity_external_channel_push_channels_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExternalChannelInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExternalChannel"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "external-push-controller"
+        ]
+      }
+    },
+    "/identity/external-channel-push/deliveries": {
+      "get": {
+        "operationId": "get_identity_external_channel_push_deliveries",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "channelId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sourceKind",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "notificationType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "recipientMembershipId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "alertState",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExternalDeliveryList"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "external-push-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_identity_external_channel_push_deliveries",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExternalPushRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExternalPushResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "external-push-controller"
+        ]
+      }
+    },
+    "/identity/external-channel-push/deliveries/retry-due": {
+      "post": {
+        "operationId": "post_identity_external_channel_push_deliveries_retry_due",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExternalRetrySweep"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "external-push-controller"
+        ]
+      }
+    },
+    "/identity/external-channel-push/deliveries/{id}/acknowledge-alert": {
+      "post": {
+        "operationId": "post_identity_external_channel_push_deliveries_id_acknowledge_alert",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExternalDelivery"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "external-push-controller"
+        ]
+      }
+    },
+    "/identity/external-channel-push/deliveries/{id}/retry": {
+      "post": {
+        "operationId": "post_identity_external_channel_push_deliveries_id_retry",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExternalDelivery"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "external-push-controller"
         ]
       }
     },
