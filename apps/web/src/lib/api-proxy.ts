@@ -183,6 +183,55 @@ const services: readonly {
     pattern: /^metric-cards(?:\/capabilities)?$/,
   },
   {
+    // 1.1.2.2 店铺概览（reporting 服务，卷 01「工作台与门户」L3 1.1.2 关键指标下的第二格）。
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往 13.1.1.1 / 13.4.2.2 / 13.1.1.2 /
+    //   1.1.2.1 那四条 reporting/ 正则里并分支 —— 那四条**一字未改、也不重排**
+    //   （它们分别只放行 overview / projection、expense-variance、store-comparison、metric-cards
+    //   四个命名空间）。
+    //
+    // ---- 插入锚点选在**那四条 reporting/ 之后**（数组靠前那一段）----
+    //   同批其它车道插在 `identity/`、`warehouse/`、`crm/` 那几条附近或数组末尾；
+    //   本车道落在数组开头这一段，锚点与它们的插入点相隔很远，并入时 git 能干净求并。
+    //
+    // ---- 首 token「store-overview」的零命中核对结论（实测，非目测）----
+    //   发车前用脚本（`.tmp/api-proxy-zero-hit.mjs`，不入库）把本文件里**全部 231 条既有元素**
+    //   （`prefix` + 正则）逐条抽出来，按 `resolve()` 的**同构口径**实测
+    //   （`path.startsWith(prefix)` 收窄服务 → 再测 `pattern.test(path.slice(prefix.length))`）：
+    //     reporting/store-overview               零命中
+    //     reporting/store-overview/capabilities  零命中
+    //     reporting/store-overview/shops         零命中
+    //     reporting/store-overview/unknown-sub   零命中
+    //     reporting/store-overview/refresh       零命中
+    //     reporting/store-overview/{uuid}        零命中
+    //   **零命中** —— 本文件里 `prefix === 'reporting/'` 的既有元素恰好 **4 条**，
+    //   它们的正则都是**按命名空间精确匹配**的
+    //   （`overview|overview/capabilities|overview/metrics|overview/trend|overview/drilldown|
+    //     projection|projection/events|projection/refresh|projection/rebuild` /
+    //     `expense-variance/...` / `store-comparison/...` / `metric-cards/...`），
+    //   **不覆盖 `store-overview`**；而别的 prefix 下的正则根本吃不到本模块的路径
+    //   （`resolve()` 先按 prefix 闸门筛）。
+    //   同一支脚本同时反向核对了 **23 条别的车道已交付的形状**
+    //   （13.1.1.1 / 13.4.2.2 / 13.1.1.2 / 1.1.2.1 / 1.1.2.3）**全部仍然命中** ——
+    //   本条新元素不会遮蔽它们。
+    //   另外 grep 口径：既有全文里 `store-overview` 这个串出现次数 = **0**。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**，契约 `reporting.openapi.json` 里就这三条）：
+    //   store-overview            店铺概览（按店铺横向对比当期表现 + 识别掉队店铺）
+    //   store-overview/capabilities 能力声明（五个维度逐条报指标码 / 接不接得通 / 口径归谁）
+    //   store-overview/shops      可见店铺集合（平台筛选器用）+ 每个店铺在这个窗口有没有事实
+    //
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   reporting/store-overview/{uuid}      —— 顶层没有 id 段（概览按查询参数定位，不是按 id）。
+    //   reporting/store-overview/refresh     —— 🔴 本模块**没有写端点**：卷 01 卷首写死
+    //                                          「工作台只读 + 跳转」，店铺维度投影的刷新是
+    //                                          13.1.1.2 多店对比的职责（`/reporting/store-comparison/refresh`）。
+    //   reporting/store-overview/unknown-sub —— 多一层仍然 404。
+    prefix: 'reporting/',
+    env: 'REPORTING_URL',
+    fallback: 'http://127.0.0.1:8088',
+    pattern: /^store-overview(?:\/(?:capabilities|shops))?$/,
+  },
+  {
     // 12.4.1.3 成本差异分析（finance 服务，卷 12「财务核算」L3 12.4.1 成本计算下的第三格）。
     // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 finance 那几条巨型 alternation 里并分支 ——
     //   既有条目**一字未改、也不重排**。
