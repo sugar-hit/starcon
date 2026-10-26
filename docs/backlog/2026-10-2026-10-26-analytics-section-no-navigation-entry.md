@@ -19,13 +19,13 @@ grep -rn "'/analytics" apps/web/src --include=*.ts --include=*.tsx | grep -vE "p
 
 ⇒ 三个**已交付**的分析页在界面上互相不可达，用户只能手敲 URL：
 
-| 路由 | 模块 | 状态 |
-| --- | --- | --- |
-| `/analytics` | 13.1.1.1 经营总览 | 已交付（batch 早期） |
-| `/analytics/dashboard/store-comparison` | 13.1.1.2 多店对比 | 已交付（batch-104） |
-| `/analytics/profit/expense-variance` | 13.4.2.2 费用差异 | 已交付（batch-104） |
-| `/analytics/sales` | 13.2.1.1 销量趋势 | 已交付（lane `feat/13-2-1-1`，待并入） |
-| `/analytics/sales/products` | 13.2.2.2 SKU/SPU/Listing | 在途（lane `feat/13-2-2-2`） |
+| 路由                                    | 模块                     | 状态                              |
+| --------------------------------------- | ------------------------ | --------------------------------- |
+| `/analytics`                            | 13.1.1.1 经营总览        | 已交付（batch 早期）              |
+| `/analytics/dashboard/store-comparison` | 13.1.1.2 多店对比        | 已交付（batch-104）               |
+| `/analytics/profit/expense-variance`    | 13.4.2.2 费用差异        | 已交付（batch-104）               |
+| `/analytics/sales`                      | 13.2.1.1 销量趋势        | 已交付（batch-105，已并入集成头） |
+| `/analytics/sales/products`             | 13.2.2.2 SKU/SPU/Listing | 已交付（batch-105，已并入集成头） |
 
 `apps/web/src/lib/identity-navigation.ts` 是**身份/权限**导航，与业务功能导航不是一回事，
 不能顺手改它来「接线」——那会把权限模型和功能目录混在一起。
