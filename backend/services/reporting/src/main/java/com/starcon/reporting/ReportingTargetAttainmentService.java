@@ -16,7 +16,9 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import org.jooq.DSLContext;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 /**
  * 13.1.2.2 达成追踪的**读模型**（蓝图「输入」句：13.1.2.1 目标；实际值投影；时间进度）。
@@ -513,7 +515,7 @@ public class ReportingTargetAttainmentService {
           }
           if (evaluatedOn != null && !evaluatedOn.isBlank()) {
             where.append(" and evaluated_on = ?");
-            params.add(LocalDate.parse(evaluatedOn.trim()));
+            params.add(parseDate(evaluatedOn));
           }
           var total =
               sql.fetchOne("select count(*) from reporting_target_attainment" + where, params.toArray())
@@ -1456,6 +1458,16 @@ public class ReportingTargetAttainmentService {
   /** 目标的唯一键（同一租户内）。 */
   private static String targetKey(TargetRow target) {
     return target.id().toString();
+  }
+
+  /** 日期参数（**格式不对要 400，不是 500**）。 */
+  private static LocalDate parseDate(String raw) {
+    try {
+      return LocalDate.parse(raw.trim());
+    } catch (RuntimeException e) {
+      throw new ResponseStatusException(
+          HttpStatus.BAD_REQUEST, "评估日必须是 ISO 日期（yyyy-MM-dd），收到：" + raw);
+    }
   }
 
   /** 事实行的键。 */

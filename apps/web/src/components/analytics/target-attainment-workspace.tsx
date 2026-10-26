@@ -122,10 +122,7 @@ export function AnalyticsTargetAttainmentWorkspace() {
       if (metricCode) params.set('metricCode', metricCode);
       if (currency) params.set('currency', currency);
       if (status) params.set('status', status);
-      await api(
-        `reporting/target-attainment/evaluate?${params.toString()}`,
-        'POST',
-      );
+      await api(`reporting/target-attainment/evaluate?${params.toString()}`, 'POST', {});
       await load();
     } catch (e) {
       setError(e instanceof Error ? e.message : '评估落快照失败，请重试');
