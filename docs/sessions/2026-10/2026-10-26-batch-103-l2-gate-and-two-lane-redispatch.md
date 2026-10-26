@@ -20,7 +20,7 @@
 | 节流闸 | 距上批 **595 分钟** ≥ 阈值 **100 分钟**（降档后）⇒ 放行 |
 | 调度闸 | 初检 `free`（`stale=false`）⇒ `gate acquire` **成功**（退出码 0）⇒ 全程持闸 |
 | 本轮回收 | **0 条** —— `merge-ready` 回「没有待并入的车道」（212 条车道：210 `merged` / 2 `running`）；**真正被回收的是 11:07 那一轮崩在派发前的 2 条车道** |
-| 本轮派发 | ✅ **2 条** —— `1.3.2.2` 外部渠道推送（`V385`）/ `1.1.2.2` 店铺概览（`V386`），**重派**，不是新排 |
+| 本轮派发 | ✅ **2 条** —— `1.3.2.2` 外部渠道推送（`V385`）/ `1.1.2.2` 店铺概览（`V386`），**重派**，不是新排<br>**🔁 结局：两条都在本轮收尾后交付并 `land` 成功（状态 `ready`），等待下一轮并入 + L2** —— 详见第十二节 |
 | 静态预检 | ①`ADD COLUMN` 无 `DEFAULT` **本批零命中**、②`SET NOT NULL` **本批零命中**、③`ADD CONSTRAINT … CHECK` **本批零命中**（全仓扫描的 113/42/28 处命中**全部在 V3–V371 的存量迁移里**，本批未新增任何迁移）；集成头最大迁移版本 **V384**，`V385`/`V386` 未被占用 ✅ |
 | **L2 批次闸** | ✅ **绿**（后端 10 个模块全绿 · 前端 5 项全绿）—— 详见第五节 |
 | 收尾三件套 | ① 说明已写、② commit `本文件所在 commit（`docs(batch-103):`）`、③ push `✅ 已 push` |
@@ -508,7 +508,89 @@ Expected size: 3 but was: 2 in:
 
 ---
 
-## 十二、文件清单
+## 十二、两条车道的交付报告（17:05–17:10 陆续落地，**待下一轮并入 + L2**）
+
+> 两条车道都在本轮收尾之后完成，状态均为 **`ready`**（`land` 已成功）。
+> **本轮没有再跑 L2** —— 本轮的 L2 已经在第五节判绿并据此 push 了；
+> 下一轮 tick 会 `merge-ready` 并入这两条、跑那一次全量 L2、再 push。
+
+### 12.1 模块 1.3.2.2 外部渠道推送（identity，迁移 `V385`）—— ✅ 已交付待并入
+
+车道分支 `feat/1-3-2-2`，head **`f94d7d49`**，**6 个 commit**：
+
+| 件 | 落地位置 |
+| --- | --- |
+| **迁移** | `identity V385__external_channel_push.sql` —— `external_push_channel`（渠道登记）+ `external_push_delivery`（投递记录）；RLS **ENABLE 且 FORCE** + 租户守卫触发器 + GRANT + 权限码登记 |
+| **端点** | 10 个形状挂在 `/identity/external-channel-push`（capabilities / channels / candidates / deliveries / retry-due / retry / acknowledge-alert） |
+| **页面** | `/notifications/push` + `components/notifications/external-channel-push-{model,workspace}.tsx` —— 真实工作区，三态齐全 |
+| **测试** | `ExternalChannelPushIntegrationTest` 14 + `ExternalChannelPushTenancyIntegrationTest` 6 + 前端 model 25 + allowlist 5 |
+
+**关键设计决策**：
+
+- 🔴 **「凭据不落库」做成数据层 CHECK，不只是注释**：`secret_ref` 只接受
+  `secret://` / `vault://` / `external-secrets://` / `k8s://`；
+  `https://`（Webhook 地址本体）**服务层与 V385 约束双拒** ⇒ 直连 SQL 也写不进去。
+- **两个端口 + 如实答「未接通」的实现**（`UnavailableExternalChannelDeliveryPort`、
+  `UnavailableSecretReferencePort`），照抄本仓 `Unavailable*Port` 先例。
+- **四个投递状态而不是两个**：`DEFERRED`（免打扰时段）**不等于** `FAILED` ——
+  混在一起会同时丢掉「什么时候会重试」和误报。
+- **预警落在本表自己的列上** —— 刻意**不写** `operation_log`（每张事实表只有一个写入所有者）。
+
+**验证（真实输出）**：L0 `compile` exit=0 · L1 `Tests run: 20, Failures: 0, Errors: 0` ·
+前端 30 例 · **全量 allowlist 回归 255 文件 / 1439 例**（改了共享 `api-proxy.ts` 必跑）·
+typecheck 3/3 · lint 3/3（新文件零告警）· 本车道同时存活 PG 容器**最多 2 个**、结束前**已全部被 ryuk 回收**。
+
+### 12.2 模块 1.1.2.2 店铺概览（reporting，**无迁移**）—— ✅ 已交付待并入
+
+车道分支 `feat/1-1-2-2`，head **`9330f7da`**，**2 个 commit**（后端保全 commit + 前端收尾 commit）。
+
+**五个维度逐条结论**（本模块核心验收项）：
+
+| 维度 | 店铺级指标码 | available | ownerModule |
+| --- | --- | --- | --- |
+| 销售额 | `STORE_GMV_PLATFORM` / `STORE_GMV_RESTORED` / `STORE_CALIBER_GAP` —— **三口径并列** | ✅ | 9.1.1.1 平台单列表（trade） |
+| 订单量 | `STORE_ORDER_COUNT` | ✅ | 9.1.1.1（trade） |
+| 利润率 | **无** | 🔴 false | 13.2 利润分析（未交付）/ 12.4.1.2 成本计算（finance） |
+| 库存天数 | **无** | 🔴 false | 7.1.1.1 库存总览（warehouse）/ 13.5.1.1 库存分析 |
+| 广告花费 | `STORE_AD_SPEND` | ✅ | 14.3.1.1 活动报表（channel） |
+
+**落地**：**迁移无**（卷 01 是只读投影层，不产生新业务事实 ⇒ 不建表、不占版本号）·
+端点 3 个 GET 挂 `/reporting/store-overview`（`/capabilities`、`/shops`）·
+页面 `/dashboard/store-overview`（workspace + model + page）·
+测试 `StoreOverviewIntegrationTest` 11 + `StoreOverviewTenancyIntegrationTest` 3 + 前端 model 33 + allowlist 6。
+
+**验证（真实输出）**：L0 compile exit=0 · **L1 `Tests run: 14, Failures: 0, Errors: 0`**
+（**独立复跑**，调度者刻意没复跑以免与兄弟车道抢 PG 额度 —— 续跑 worker 自己确认了原 worker 的说法，
+且**后端代码一行未改**）· typecheck 3/3 · lint 3/3 · **全量 allowlist 回归 255 文件 / 1440 例** ·
+dashboard+api 269 文件 / 1802 例 · api-proxy 零命中脚本核对 231 → 232 条、**纯新增 +49/−0** ·
+同时存活 PG 容器 **0**。
+
+### 12.3 顺带修掉的一处「API 对着已上线模块说它没上线」
+
+调度者核对 1.3.2.2 的交付时发现：`identity` 两个 capabilities 响应里
+仍有 **5 条**「XX 未交付」声明，而这 5 条指的模块（1.3.1.2 / 1.3.2.1 / **本车道的 1.3.2.2**）
+**全部已交付** ⇒ 用户从接口读到的���假话（前端把 boundaries 直接渲染成提示）。
+
+修法（**在 1.3.2.2 车道分支上**，commit `f94d7d49`，随本车道一起并入）：
+把 5 条声明改成「**已交付 + 职责分界**」——既保留模块 ID（前端据此指路），又不再谎报未上线。
+`boundaries` 列表的语义本来就是「相邻模块的边界说明」，改的只是每条的状态标记。
+验证：identity L1 定向复跑 **52 例全绿**（NotificationPreference 20 + NotificationInbox 12 + ExternalChannelPush 14 + 6）。
+
+⚠️ **同类问题全仓还有约 300 处**（调度者扫过九个服务的全部 java 源文件）⇒
+已登记为跨模块 TODO：`docs/backlog/2026-10-2026-10-26-undelivered-claims-stale-after-sibling-delivery.md`
+（含扫描判据与三个处置方案）。**本次只修被本次交付直接证伪的那 5 处**，其余留作专门的巡检任务。
+
+### 12.4 一个刻意不做的动作
+
+`packages/ui/src/lib/task-pages.ts` 的导航条目**没有加**。
+理由：① 它的 `implemented` 标记由 `nav-routes.test.ts` 对照真实文件系统校验，
+**不要求每个真实页面都有条目**；② 同族的 1.3.1.1 `/notifications` 与 1.3.2.1 `/notifications/rules`
+**同样没有登记** ⇒ 本车道与兄弟保持一致；③ 该文件是共享累积文件，多车道并发改它会撞。
+⇒ 记为待办，不在本车道里硬塞。
+
+---
+
+## 十三、文件清单
 
 **本轮调度者写入集成头的文件**：
 
@@ -529,3 +611,8 @@ Expected size: 3 but was: 2 in:
 
 - `feat/1-1-2-2` → `96772517 feat(reporting): 1.1.2.2 店铺概览 —— 后端骨架、五个维度口径目录、读模型与租户隔离测试`
   （**6 个文件 / 2178 行，内容零改动**；原 worker 会话 16:45 传输层崩溃后由调度者代为 commit 保全，见第十一节）
+
+**本轮新增的跨模块 TODO**：
+
+- `docs/backlog/2026-10-2026-10-26-undelivered-claims-stale-after-sibling-delivery.md`
+  （「XX 未交付」声明在兄弟模块交付后没人回改 —— 全仓约 300 处，含扫描判据与三个处置方案）
