@@ -12,6 +12,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -67,7 +68,24 @@ class LogisticsExceptionIntegrationTest {
 
   /** 夹具 pin 住的时间点。 */
   static final OffsetDateTime STALLED_AT = OffsetDateTime.parse("2026-09-20T08:00:00Z");
-  static final OffsetDateTime RECENT_AT = OffsetDateTime.parse("2026-10-19T08:00:00Z");
+  /**
+   * 「未命中票」的最后一次轨迹时刻。
+   *
+   * ⚠️ **必须相对当前时刻算，不能写死绝对日期。**
+   *
+   * 它的语义是「**昨天**」—— 相对于「现在」才是「昨天」。本条规则是「停滞超过 7 天」
+   * （threshold = 7 × 24 × 60 分钟），所以这张票必须**稳稳落在阈值之内**。
+   *
+   * 早先这里是写死的 `2026-10-19T08:00:00Z`（写这条夹具那天的「昨天」）：
+   * **2026-10-26T08:00:00Z**（= 北京时间 16:00）那一刻它就攒够 7 天，
+   * 于是「未命中票」变成了命中票 ⇒ `candidateCount` 从 1 变 2 ⇒
+   * 「只有满足阈值的票进候选池」这条断言**每天都会自己红**，
+   * 而被测的业务逻辑一行没改 —— 这是**夹具的日期脆弱性**，不是回归。
+   *
+   * 相对当前时刻算之后，这条断言才真正在测「阈值」本身。
+   * （与 2026-10-26 的 `cd9e125e`「消除集中度空桶断言的『周一才红』日期脆弱性」同一类问题。）
+   */
+  static final OffsetDateTime RECENT_AT = OffsetDateTime.now(ZoneOffset.UTC).minusDays(1);
   static final OffsetDateTime FUTURE_AT = OffsetDateTime.parse("2099-01-01T00:00:00Z");
 
   static final List<String> allPermissions =
