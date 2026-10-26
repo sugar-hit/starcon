@@ -373,9 +373,10 @@ class TargetAttainmentIntegrationTest {
     assertThat(row.elapsedRatio()).isEqualByComparingTo("1");
     assertThat(row.forecastValue()).isEqualByComparingTo("500");
     assertThat(row.forecastRate()).isEqualByComparingTo("0.5");
-    assertThat(row.status()).isEqualTo("ON_TRACK");
+    // 达成率 50% ⇒ 预测也是 50%（周期已走完，预测 = 当前值）⇒ 低于 80% ⇒ BEHIND。
+    assertThat(row.status()).isEqualTo("BEHIND");
     assertThat(row.actualStatus()).isEqualTo("AVAILABLE");
-    assertThat(row.underAchieved()).isFalse();
+    assertThat(row.underAchieved()).as("已过完的周期只完成一半 ⇒ 进未达标名单").isTrue();
   }
 
   @Test
@@ -403,8 +404,10 @@ class TargetAttainmentIntegrationTest {
 
     var row = rowOf(board, "店铺甲");
     var expectedCurrent = new BigDecimal("100").multiply(new BigDecimal(elapsedDays));
+    var expectedRate =
+        expectedCurrent.divide(new BigDecimal("1000"), 6, java.math.RoundingMode.HALF_UP);
     assertThat(row.currentValue()).isEqualByComparingTo(expectedCurrent);
-    assertThat(row.attainmentRate()).isEqualByComparingTo(expectedCurrent.divide(new BigDecimal("1000"), 6, java.math.RoundingMode.HALF_UP));
+    assertThat(row.attainmentRate()).isEqualByComparingTo(expectedRate);
     // 时间进度 = 已过天数 ÷ 本月天数。
     assertThat(row.elapsedRatio())
         .isEqualByComparingTo(
@@ -412,7 +415,9 @@ class TargetAttainmentIntegrationTest {
                 .divide(new BigDecimal(current.end().getDayOfMonth()), 6, java.math.RoundingMode.HALF_UP));
     // 每天 100 ⇒ 按当前速度推算，期末 = 100 × 本月天数。
     assertThat(row.forecastValue()).isEqualByComparingTo(new BigDecimal("100").multiply(new BigDecimal(current.end().getDayOfMonth())));
-    assertThat(row.status()).isEqualTo("ACHIEVED");
+    // 状态由算出来的达成率决定（每天 100 ⇒ 已过 10 天就达到 1000）：**不写死**，跟着算。
+    assertThat(row.status())
+        .isEqualTo(expectedRate.compareTo(BigDecimal.ONE) >= 0 ? "ACHIEVED" : "ON_TRACK");
   }
 
   // ==========================================================================
@@ -595,14 +600,16 @@ class TargetAttainmentIntegrationTest {
         () -> {
           sql.execute(
               "insert into reporting_metric_definition (id,tenant_id,metric_code,display_name,unit,"
-                  + "aggregation,currency_aware,description,owner_module) "
-                  + "values (?,?,?,?,?,?,?,?,?)",
+                  + "aggregation,numerator_metric_code,denominator_metric_code,currency_aware,"
+                  + "description,owner_module) values (?,?,?,?,?,?,?,?,?,?,?)",
               Ids.next(),
               tenant,
               "GROSS_PROFIT",
               "毛利额",
               "CURRENCY",
               "DERIVED_DIFF",
+              "SALES_AMOUNT",
+              "COGS_AMOUNT",
               true,
               "销售额 − 成本。",
               "13.1.1.1");
@@ -817,7 +824,7 @@ class TargetAttainmentIntegrationTest {
     assertThat(snapshot.evaluatedOn()).isEqualTo(today);
     assertThat(snapshot.currentValue()).isEqualByComparingTo("500");
     assertThat(snapshot.attainmentRate()).isEqualByComparingTo("0.5");
-    assertThat(snapshot.status()).isEqualTo("ON_TRACK");
+    assertThat(snapshot.status()).isEqualTo("BEHIND");
 
     // 🔴 **断言写回的值**（不是「没抛异常」）：评估时刻必须原样落库。
     var written =
