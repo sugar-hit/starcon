@@ -9723,6 +9723,69 @@ const services: readonly {
       /^platform-fees(?:\/capabilities|\/directory|\/estimate|\/variance|\/actuals(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/void)?|\/rules(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/tiers)?)?)$/,
   },
   {
+    // 1.3.2.2 外部渠道推送（identity 服务，卷 01「工作台与门户」L3 1.3.2 预警订阅下的第二格）。
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 identity 支里并分支 ——
+    //   既有条目**一字未改、也不重排**。
+    //
+    // ---- 插入锚点选在「5.2.3.1 平台费用」那条元素之后** ----
+    //   同批兄弟车道 1.3.2.1（预警规则）插在 `prefix: 'identity/'` 那条元素**之后**（约第 1234 行），
+    //   本车道落在本处（约第 9724 行），两者相距 8000 行以上 ⇒ 并入时 git 能干净求并。
+    //   本文件**不在** merge-union 驱动器的覆盖范围内（.gitattributes 只给
+    //   `packages/api-contracts/src/**` 与 `module-progress.md` 配了驱动）⇒ 它走**普通 git merge**，
+    //   所以插入点必须彼此错开。
+    //
+    // ---- 首 token「external-channel-push」的零命中核对结论（.tmp/api-proxy-zero-hit.mjs 实测）----
+    //   发车前用脚本把本文件里**全部 231 个既有元素**（prefix + 正则）逐条抽出来，
+    //   按 `resolve()` 的**同构口径**实测（先切掉 prefix 再 test）：
+    //     external-channel-push
+    //     external-channel-push/capabilities
+    //     external-channel-push/channels
+    //     external-channel-push/channels/{uuid}
+    //     external-channel-push/candidates
+    //     external-channel-push/deliveries
+    //     external-channel-push/deliveries/retry-due
+    //     external-channel-push/deliveries/{uuid}/retry
+    //     external-channel-push/deliveries/{uuid}/acknowledge-alert
+    //   **零命中** —— 既有 231 条正则对本模块的形状**全部零命中**；
+    //   反向核对（既有已交付形状：identity/roles、identity/alert-rules、
+    //   identity/notification-inbox、identity/notification-preferences、
+    //   identity/user-preferences、identity/tenants/current、identity/children、
+    //   identity/members、catalog/products）对本模块的正则也**全部零命中**。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**，契约 identity.openapi.json 里就这些）：
+    //   external-channel-push/capabilities         能力声明（渠道词表 + secret manager /
+    //                                               投递通道 / 模板管理三个「通没接通」）
+    //   external-channel-push/channels              渠道清单（GET）/ 登记渠道（POST）
+    //   external-channel-push/channels/{uuid}       改渠道（PUT）/ 删渠道（DELETE）
+    //   external-channel-push/candidates            可推送候选（1.3.2.1 的真命中）
+    //   external-channel-push/deliveries            投递记录清单（GET）/ 发起推送（POST）
+    //   external-channel-push/deliveries/retry-due  到期扫描（POST，**自动重试**的入口）
+    //   external-channel-push/deliveries/{uuid}/retry             手工重试（POST）
+    //   external-channel-push/deliveries/{uuid}/acknowledge-alert  确认告警（POST）
+    //
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   external-channel-push                        —— 裸路径：本模块**没有**裸路径资源。
+    //   external-channel-push/templates               —— 🔴 18.5.1.1 模板管理**未交付**，
+    //                                                      本模块**不造模板表**顶替它。
+    //   external-channel-push/channels/not-a-uuid     —— 非 UUID 段不该被 uuid 分支吃掉。
+    //   external-channel-push/channels/{uuid}/extra   —— 服务端没有这一层。
+    //   external-channel-push/deliveries/not-a-uuid/retry —— 同上。
+    //   external-channel-push/deliveries/{uuid}/delete —— 服务端没有删除投递记录的端点
+    //                                                      （投递记录是「投过没有」的事实，不可删）。
+    //   external-channel-push/deliveries/{uuid}/retry/extra —— 多一层仍然 404。
+    //
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`（不是 `[0-9a-f-]+`）：
+    //   后者会把 `retry` / `retry-due` 这种非 UUID 形状也当成 id 吃掉，
+    //   `deliveries/retry-due` 就永远匹配不上。
+    // ⚠️ 字面量子路径（capabilities / channels / candidates / deliveries / retry-due）
+    //   排在 {uuid} 段**之前**判别 —— alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    prefix: 'identity/',
+    env: 'IDENTITY_URL',
+    fallback: 'http://127.0.0.1:8081',
+    pattern:
+      /^external\-channel\-push\/(?:capabilities|channels(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|candidates|deliveries(?:\/retry\-due|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:retry|acknowledge\-alert))?)?)$/,
+  },
+  {
     // 6.4.2.1 质检单（trade 服务，卷 06「采购与供应」的 L3 锚点 6.4.2「来料质检」）。
     //
     // 蓝图：「来料/成品质检：抽样比例、检验项（外观、功能、规格、包装、认证标识）、检验结果记录、
