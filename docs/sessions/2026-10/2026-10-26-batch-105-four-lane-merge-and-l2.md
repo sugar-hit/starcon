@@ -314,9 +314,61 @@ RETURNS bigint LANGUAGE sql IMMUTABLE AS $$
 > 也就是说，**本批 4 条车道自己的后端代码在这一跑里尚未被验证过**。
 > 第 2 跑必须把这六个模块全部跑到，才是真正对 batch-105 的验收。
 
-### 第 2 跑
+### 第 2 跑（2026-10-27 02:36）——🔴 **前端全绿，后端又冒出一个**早于本批的**抖动
 
-见下方「第 2 跑」小节（本轮修复落地后补记）。
+两条修复车道落地并入后重跑（`7b8838a0` api-proxy + `0ac6dab9` identity）：
+
+| 步骤                  | 命令                                                         | 结果                                                                                       |
+| --------------------- | ------------------------------------------------------------ | ------------------------------------------------------------------------------------------ |
+| 后端全量              | `cd backend && ./mvnw verify`                                | 🔴 **exit 1** —— **跑到了第 6/11 个模块**（warehouse），**越过了第 1 跑的失败点 identity** |
+| 前端类型检查          | `pnpm typecheck`                                             | ✅ **exit 0** —— **TS1117 消失**                                                           |
+| 前端 lint             | `pnpm lint`                                                  | ✅ **exit 0**                                                                              |
+| 前端单测              | `pnpm test`                                                  | ✅ **exit 0** —— **654 文件 / 9141 例全过**（第 1 跑是 1 failed / 9140 passed）            |
+| Next production build | `NEXT_TELEMETRY_DISABLED=1 pnpm --filter @starcon/web build` | ✅ **exit 0** —— `✓ Compiled successfully`                                                 |
+| 台账校验              | `node tools/module-progress/sync.mjs --check`                | ✅ **exit 0**                                                                              |
+
+**⇒ 缺陷 ①（api-proxy.ts）已完全修复并验证**：
+typecheck 的 TS1117 消失、channel 的 `service-task-status` 白名单回来了（allowlist 全部通过）、
+Next build 恢复、9141 个前端用例全绿。
+修复车道自己的证据：`pnpm vitest run apps/web/src/app/api` → **260 文件 / 1468 例全绿**；
+用 TypeScript 编译器真实求值数组复核 → 修复前 **247** 个元素（channel 那条被吞）→ 修复后 **248** 个元素，
+每个元素恰好一份 `prefix`/`env`/`fallback`/`pattern`。
+
+**⇒ 缺陷 ②（identity 超时断言）已修复**：L2 第 2 跑**越过了 identity**（第 1 跑就是在这里 fail-fast 停的）。
+
+**⇒ 第 1 跑没验到的模块，这跑验到了**：identity ✓、catalog ✓、channel ✓、warehouse ✓（1672 例，1 失败）。
+**但 trade / crm / reporting 仍然没跑到** —— Maven fail-fast 在 warehouse 又停了。
+
+**第 2 跑的唯一红点：warehouse `StockOwnershipIntegrationTest.货权漂移能被检出且不自动改存量`**
+
+```
+[ERROR] com.starcon.warehouse.StockOwnershipIntegrationTest.货权漂移能被检出且不自动改存量
+java.lang.AssertionError: Expected size: 1 but was: 0 in: []
+```
+
+- **与本批无关**：本批只动 `reporting` / `channel` / `apps/web`，**`backend/services/warehouse` 零改动**；
+  该测试与生产代码最后一次改动都是 `c23cc3bc feat(warehouse): 7.7.1.1 货主与所有权`（远早于本批）。
+- **隔离复跑 3 次全绿**（`Tests run: 40, Failures: 0` × 3）⇒ **抖动，不是逻辑回归**。
+- **它之所以第 1 跑没暴露**：第 1 跑在 identity 就 fail-fast 停了，**warehouse 根本没跑到** ——
+  这是组批协议的又一处价值：**第一次真正跑到这一层，才把潜伏的抖动照出来**。
+
+**两条抖动其实是同一族**：一个（identity）断言跨了「JVM 钟域 vs PG 钟域」，一个（warehouse）
+货权档的 `effective_from` 写在 JVM 钟域、而解析判定用 PG 的 `now()`。
+
+**宿主钟与容器钟的偏差（两种测法，结论不同 —— 值得记一笔）**：
+
+| 测法                                                       | 测得偏差                                                          | 能否解释本次红                                           |
+| ---------------------------------------------------------- | ----------------------------------------------------------------- | -------------------------------------------------------- |
+| 调度者：另起一个**全新**容器与宿主对拍                     | 容器钟**领先**宿主 **+48 ~ +67 ms**（15 次 / 45 秒）              | ❌ 方向相反，解释不了                                    |
+| 修复车道：在**真正的 Testcontainers 容器内**、并在加载下测 | 容器钟**落后**宿主 **0.35~1.0 ms**（空载）/**1.9~4.2 ms**（加载） | ✅ 且**在加载下复现了失败**（resolve 返回 NULL 3/60 次） |
+
+⇒ **偏移量与容器「活多久」有关** —— 刚起的容器时钟刚被同步过，偏差看起来很大；
+跑了几十分钟的容器偏差缩到**毫秒级**，而毫秒级偏差正好够把一个 `<=` 边界翻掉。
+⇒ **教训：测时钟偏差必须在「真实的那个容器、真实的时间点」上测**，另起一个容器测出来的数不能拿来解释既有失败。
+
+### 第 3 跑
+
+见下方「第 3 跑」小节（warehouse 修复落地后补记）。
 
 ## 后续待办
 
