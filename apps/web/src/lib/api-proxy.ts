@@ -12563,6 +12563,57 @@ const services: readonly {
     pattern:
       /^finance\-software\/(?:capabilities|overview|periods|currencies|accounts(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/disable)?|subject\-maps(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|master\-maps(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|voucher\-files(?:\/export|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|reconcile\-tasks(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:balances|compute))?)?|push)$/,
   },
+  {
+    // 1.5.2.1 服务与任务状态（channel 服务，卷 01「工作台与门户」L3 1.5.2「服务与任务状态」）。
+    //
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 channel 分支的 alternation 里
+    //   并分支 —— 那一支是单行超长正则，多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    //   既有条目**一字未改、也不重排**。
+    //
+    // ---- 插入锚点选在**数组末尾**（`platform/finance-software` 那条之后）----
+    //   与同批其它车道的插入点相距足够远 ⇒ 并入时 git 能干净求并。
+    //
+    // ---- 首 token「service-task-status」的零命中核对结论 ----
+    //   本文件既有 **243 条** services[] 正则（按 `pattern:` 逐条抽出实测）里
+    //   **没有任何一条**能命中 `service-task-status` 开头的形状：
+    //   既有的 `service-tickets`（客服工单）、`service-ticket-process` 首 token 全不相同，
+    //   其余 243 条与本模块无公共前缀。
+    //   逐条用 `new RegExp(pat).test('…')` 实测过：既有全部正则对本模块的 **6 个正形状**
+    //   **零命中**，本模块的 **6 个负向形状**对既有正则**也零命中**。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   service-task-status/capabilities  能力声明（规则表 · 阈值 · 逐张表的来源清单 · 失败分类）
+    //   service-task-status/options       筛选项（来源取自注册表，触发来源取自真实数据）
+    //   service-task-status/summary       总览（任务状态分布 · 停滞 / 失败计数 · 失败分类计数）
+    //   service-task-status/tasks         任务状态列表（GET，真分页 + 真筛选）
+    //   service-task-status/tasks/{uuid}  单条任务（GET）
+    //   service-task-status/alerts        提示清单（GET；**停滞与失败是两个独立列表**）
+    //
+    // ⚠️ **本模块是只读的**：卷 01 的边界写死「工作台只读 + 跳转；一切状态变更回到
+    //   归属系统完成」。所以这里**一个写形状都不放行** —— 放行一个不存在的写入口
+    //   比 404 更糟（界面会以为「重跑同步 / 取消任务」在这儿能做）。
+    //
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //   （不是 `[0-9a-f-]+`：后者会把 `tasks` 这种非 UUID 形状也当成 id 放行）。
+    //   字面量子路径（capabilities / options / summary / tasks / alerts）排在 {uuid} 段
+    //   **之前**判别 —— alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   service-task-status                     —— 裸路径：后端没有「一条汇总列表接口」
+    //   service-task-status/overview            —— 汇总段只有下面那五个子路径
+    //   service-task-status/stats               —— 同上
+    //   service-task-status/tasks/not-a-uuid     —— 非 UUID 段不应被 uuid 分支吃掉
+    //   service-task-status/tasks/{uuid}/extra   —— tasks 段下只有列表与单条详情
+    //   service-task-status/tasks/{uuid}/retry   —— 🔴 「重跑同步」没有归属系统的写端点，
+    //                                                 工作台不写业务数据 ⇒ 这个形状不存在
+    //   service-task-status/tasks/{uuid}/cancel  —— 同上，「取消任务」归归属系统
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    // 末尾**刻意不带 `?`**：带了 `?` 就等于放行裸路径 `service-task-status`。
+    pattern:
+      /^service\-task\-status(?:\/(?:capabilities|options|summary|alerts|tasks(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?))$/,
+  },
 ];
 
 function resolve(path: string) {
