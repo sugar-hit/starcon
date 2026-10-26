@@ -457,7 +457,58 @@ Expected size: 3 but was: 2 in:
 
 ---
 
-## 十一、文件清单
+## 十一、🔴 车道崩溃与保全（16:45 → 16:55，本轮收尾后追加）
+
+> ⚠️ 本节是**收尾三件套做完之后**发生的追加记录（说明已 commit 并 push 之后）。
+
+### 11.1 事件
+
+**16:45**，`1.1.2.2` 店铺概览车道的 worker 会话**因传输层崩溃**挂掉：
+
+```
+[failed] net::ERR_HTTP2_PING_FAILED
+```
+
+崩溃点在**前端构建阶段** —— 但更严重的问题是：它写的 **6 个后端文件当时全是 untracked**
+（`StoreOverviewCatalog/Models/Service/Controller` + 2 个集成测试，共 **2178 行**），
+**再���次 `git gc` 就彻底没了**。这是本轮之前那个「11:07 崩在派发前」的同一类事故，
+只是这次崩在**写了一半**的位置上。
+
+### 11.2 处置（三步）
+
+| 步 | 动作 | 结果 |
+| --- | --- | --- |
+| ① **取证** | 读 worker 的会话输出 + `lanes.json` + worktree `git status` | 确认：**只有后端做完**（原 worker 自报 L1 14 例全绿、Testcontainers PG16），前端一行没写；代码里**没有** `TODO` / `UnsupportedOperationException` / mock 残留 |
+| ② **保全** | 调度者把这 6 个文件**原样** commit 到本车道分支 `feat/1-1-2-2`（`96772517`，**内容零改动**，commit 正文写明是代为保存及崩溃原因） | ✅ 工作从「一次 `git gc` 就没了」变成**已在分支上**，可被合并、可被续跑任务接手 |
+| ③ **续跑** | 重新派发续跑任务（`bg_e4a12eab`），任务书里写明：后端已 commit、**必须自己复跑 L1 确认**（调度者故意没复跑，避免与兄弟车道抢 PG 额度）、剩余清单（前端 + api-proxy + 契约 + 台账 + 会话日志 + land） | ✅ 已派出 |
+
+同时给车道续了心跳，note 里记清「崩在哪、保全在哪、剩什么」——
+**下一轮 tick 看到心跳新鲜就不会把它当孤儿回收掉**，成果也不会白丢。
+
+### 11.3 为什么调度者「代为 commit」而不是原样丢掉
+
+协议说「代码由子任务完成，调度者不写业务代码」—— 本次**没有写任何业务代码**，
+只是把**已经写好的**代码 commit 到**车道自己的分支**上，**不碰集成头**。
+这是保全动作，不是开发动作；集成分支上的代码**一行都没被调度者改过**。
+
+### 11.4 兄弟车道状态（同一时刻核对）
+
+`1.3.2.2` 外部渠道推送**活着**：worktree 里已有 **12 个文件**（含 `V385__external_channel_push.sql`、
+`ExternalChannelDeliveryPort` / `UnavailableExternalChannelDeliveryPort` /
+`SecretReferencePort` / `UnavailableSecretReferencePort` 四个端口类、3 个测试类），
+正是任务书要求的「**未接通就如实答未接通**」范式。
+
+### 11.5 本节的教训（写给下一轮）
+
+🔴 **worker 崩溃的代价随「写到哪一步」放大**：
+崩在派发前 = 丢一个车道名额；崩在写完一半 = 丢半份代码。
+⇒ **worker 应当更早提交**：每完成一个 atomic 单元（迁移 / 后端 / 前端）就 commit 一次，
+而不是全部做完再一次性 commit。**未提交的工作在本仓没有第二次生命** ——
+调度者能做的只是事后捞一次，捞不回来就是净损失。
+
+---
+
+## 十二、文件清单
 
 **本轮调度者写入集成头的文件**：
 
@@ -469,3 +520,12 @@ Expected size: 3 but was: 2 in:
 - `.dev-agent/wait-l2-r104.sh`（L2 完成等待器）
 - `.dev-agent/taskbooks/r104-1.3.2.2.md`、`.dev-agent/taskbooks/r104-1.1.2.2.md`（本轮两条车道的任务书）
 - `.dev-agent/l2/l2-r104-*.log`、`.dev-agent/l2/fe-r104-*.log`、`.dev-agent/l2/l2-r104-driver.log`
+- `.dev-agent/supplement-r104.sh` / `.dev-agent/supplement2-r104.sh`
+  （**补验驱动**：STEP A 隔离复跑 warehouse → STEP B 补跑五个模块；
+  STEP C 隔离复跑 trade 两个类 → STEP D 一服务一 session 跑 crm/finance/reporting/platform）
+- `.dev-agent/iso-rerun-r104.sh`（隔离复跑脚本，round-104 实际执行由上面两个补验脚本承载）
+
+**车道分支上由调度者代为保全的提交**：
+
+- `feat/1-1-2-2` → `96772517 feat(reporting): 1.1.2.2 店铺概览 —— 后端骨架、五个维度口径目录、读模型与租户隔离测试`
+  （**6 个文件 / 2178 行，内容零改动**；原 worker 会话 16:45 传输层崩溃后由调度者代为 commit 保全，见第十一节）
