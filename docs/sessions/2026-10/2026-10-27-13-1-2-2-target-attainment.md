@@ -115,3 +115,10 @@
   `upsertSnapshot` 里把绑定值先取成局部变量 —— **SQL 的列顺序与绑定值顺序能逐行对读**。
 - **不要用文本计数核对 `services[]` 元素数**：本轮用 **TypeScript 编译器**解析
   `services` 变量的真实数组字面量（`.tmp/api-proxy-zero-hit.mjs`），才敢说「248 → 249，只 +1」。
+- **白名单要按后端的真实形状逐条对齐**：本模块 5 条端点**全在子路径下**（没有裸路径），
+  所以正则写成 `/^target-attainment\/(?:capabilities|board|ranking|snapshots|evaluate)$/` ——
+  刻意**不放行**裸路径 `reporting/target-attainment`（后端没有这条映射）。
+  第一版写成了 `(?:\/...)?`（裸路径也放行），被前端的白名单双向断言当场抓住。
+- **契约重新生成后要核对「是不是纯超集」**：本轮用集合差核过 ——
+  path 45 → 50（只多我那 5 条）、schema 100 → 113（只多我那 13 个），
+  **一个既有的 path / schema 都没少**（diff 里的 `-89` 行只是 codegen 重排路径顺序）。
