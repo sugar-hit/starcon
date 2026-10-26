@@ -893,7 +893,11 @@ class FulfillmentRequestIntegrationTest {
                     new FulfillmentRequestRetryInput(
                         read(reserved.requestId()).processVersion(), "重新下发"),
                     user));
-    assertThat(resumed.deadlineAt()).isAfter(OffsetDateTime.now().minusMinutes(1));
+    // 恢复后的截止时刻由 **DB 时钟**（clock_timestamp()）给 ⇒ 判「还没超时」也必须用同一个钟：
+    // 服务端判超时的口径就是 deadline_at < clock_timestamp()，本来就在 DB 的时钟域里。
+    // 拿客户端墙钟去比等于假设两台钟一模一样 —— 两钟差一分钟以上，这一句就会误判
+    //（2026-10-25 channel 模块就是这么打红的：expected YELLOW but was GREEN）。
+    assertThat(resumed.deadlineAt()).isAfter(dbNow());
     assertThat(read(reserved.requestId()).overdue())
         .as("恢复后不应立刻就是超时态")
         .isFalse();
@@ -1289,6 +1293,9 @@ class FulfillmentRequestIntegrationTest {
    */
   @Test
   void 时间写回正确_时区不偏移() throws Exception {
+    // requested_at / deadline_at 都由 **DB 时钟**（clock_timestamp()）给 ⇒ 判据必须在同一个
+    // 时钟域里算：拿客户端墙钟去比等于假设两台钟一模一样，数据库的钟慢 30 秒就会误判。
+    var dbBefore = dbNow();
     var created =
         asA(
             () ->
@@ -1298,6 +1305,7 @@ class FulfillmentRequestIntegrationTest {
                         "WH-CN-SH", ENT, "US", "CN-EAST", new BigDecimal("1.000000"), null, "USD",
                         "idem-t", 60, 60, 60, 60, ""),
                     user));
+    var dbAfter = dbNow();
     assertThat(created.requestedAt()).isNotNull();
     assertThat(created.deadlineAt()).isEqualTo(created.requestedAt().plusSeconds(60));
 
@@ -1317,8 +1325,11 @@ class FulfillmentRequestIntegrationTest {
                         .get("deadline_at", OffsetDateTime.class));
     assertThat(dbRequested).isEqualTo(created.requestedAt());
     assertThat(dbDeadline).isEqualTo(created.deadlineAt());
-    // 真正的判据：截止时刻比「此刻」晚 60 秒，不是早 8 小时
-    assertThat(dbDeadline).isAfter(OffsetDateTime.now().plusSeconds(30));
+    // 落库时刻必须夹在「建单之前」与「建单之后」两个**数据库时钟**之间 ——
+    // 这才是「写回值是服务端给的、且落在这次调用里」的准确说法。
+    assertThat(dbRequested).isAfterOrEqualTo(dbBefore).isBeforeOrEqualTo(dbAfter);
+    // 真正的判据：截止时刻比「此刻」晚 60 秒，不是早 8 小时。
+    assertThat(dbDeadline).isEqualTo(dbRequested.plusSeconds(60)).isAfter(dbAfter);
     assertThat(read(created.requestId()).overdue())
         .as("刚建单的单子不该是超时态（时区偏了 8 小时的话这里会挂）")
         .isFalse();

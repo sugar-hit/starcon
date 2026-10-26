@@ -190,12 +190,33 @@ class OAuthAuthorizationIntegrationTest {
     oauth.requirePkce = false;
   }
 
+  /**
+   * 收尾：停掉本地授权服务器、身份服务与测试容器。
+   *
+   * <p><b>这里原本有一句 {@code drop schema public cascade; create schema public;}（清干净 schema），现已删除。</b>
+   *
+   * <p><b>为什么原来要 drop：</b>担心把测试写脏的表留在容器里，污染同一次运行中的其它用例。
+   *
+   * <p><b>为什么现在不需要了：</b>这个 {@link PostgreSQLContainer} 是本测试类私有的（仓库内没有任何其它测试引用本类），
+   * 并且紧接着的 {@code pg.stop()} 会直接销毁整个容器 —— schema 里的东西随容器一起消失，不存在残留。
+   * 更何况原来的顺序还是<b>坏顺序</b>：drop 发生在 {@code oauth.close()} / {@code identity.stop()} <b>之前</b>，
+   * 若此刻还有 in-flight 请求打在 channel app 上，会撞上「schema 已被删」而报错；先停服务比先删 schema 安全。
+   *
+   * <p><b>为什么不能改成别的重置方式（逐表 drop / TRUNCATE / 其它「一个事务里拿下整个 schema」的写法）：</b>
+   * channel 的 schema 已经长到锁表装不下了。PostgreSQL 的锁表大小 = {@code max_locks_per_transaction (64) ×
+   * max_connections (100)} = <b>6400</b> 个锁位；而 {@code DROP SCHEMA ... CASCADE} 必须在<b>一个事务</b>里对 schema
+   * 里<b>每一个对象</b>各拿一个锁，channel 现在约 <b>380 表 + 859 索引 + 371 触发器 + 16 序列 ≈ 1600 个对象</b>，
+   * 加上测试自己起的 app 连接持有的锁，已经逼近上限。V352（16.3.2.3 销售税）新增 6 表 + 11 索引 + 10 触发器 = 27
+   * 个对象，恰好把这条语句推过了临界点，于是报 {@code PSQL ERROR: out of shared memory}（提示 {@code You might need
+   * to increase max_locks_per_transaction}）。换任何等价的重置写法都躲不掉 —— 病根是「一个事务里拿下整个
+   * schema」这个动作本身，不是 drop 的语法。
+   *
+   * <p><b>提醒：</b>channel 服务<b>每加一个迁移</b>，这个对象数就更大一分。往 {@code max_locks_per_transaction}
+   * 上调只是把阈值往后推，schema 继续长下去还会再撞，而且会掩盖「这条语句本来就多余」这个事实。
+   * <b>不要</b>在任何测试里再写 {@code drop schema public cascade} 这类「一把 drop 整个 schema」的语句。
+   */
   @AfterAll
   static void stop() throws Exception {
-    try (var c = DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
-        var s = c.createStatement()) {
-      s.execute("drop schema public cascade; create schema public;");
-    }
     oauth.close();
     identity.stop(0);
     pg.stop();

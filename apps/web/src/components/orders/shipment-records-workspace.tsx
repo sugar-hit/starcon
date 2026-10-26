@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AlertTriangle, Filter, PackageCheck, RefreshCw, Truck } from 'lucide-react';
 import {
   Button,
@@ -85,8 +85,50 @@ import {
   trackingSeverity,
   trackingStatusLabel,
 } from './shipment-records-model';
+import { ListPreferenceBar } from '../common/list-preference-bar';
+import { useListPreferences } from '../../lib/use-list-preferences';
+import type { ListColumn } from '../../lib/list-preferences-model';
 
 const PAGE_SIZE = 50;
+
+/**
+ * 1.4.1.2 列表与表格偏好 —— 发货记录表的**列定义**。
+ *
+ * <p>最后一列是「明细」按钮（每行一个出口），不进偏好：它是这张表的入口，不该被关掉。
+ */
+const RECORD_COLUMNS: ListColumn[] = [
+  { key: 'recordNo', label: '记录号' },
+  { key: 'carrier', label: '承运商' },
+  { key: 'waybill', label: '运单号' },
+  { key: 'shippedAt', label: '发货时间' },
+  { key: 'sla', label: '时限判定' },
+  { key: 'tracking', label: '轨迹' },
+  { key: 'buyerVisible', label: '买家可见' },
+  { key: 'callback', label: '平台回传' },
+  { key: 'status', label: '状态' },
+];
+
+/** 排序键就是**后端排序白名单里的 token**（见 trade 的 ShipmentRecordService.orderBy）。 */
+const RECORD_SORTS: ListColumn[] = [
+  { key: 'SHIPPED_AT_DESC', label: '发货时间（新→旧）' },
+  { key: 'SHIPPED_AT_ASC', label: '发货时间（旧→新）' },
+  { key: 'RECORD_NO_ASC', label: '记录号（小→大）' },
+  { key: 'CARRIER_CODE_ASC', label: '承运商代码（小→大）' },
+  { key: 'PARCEL_COUNT_DESC', label: '包裹数（多→少）' },
+  { key: 'WEIGHT_DESC', label: '毛重（重→轻）' },
+];
+
+/**
+ * 可以被记住的筛选条件：**只有枚举与编号**。
+ *
+ * <p>「关键字」是自由文本（可能含 PII），刻意**不**进白名单。
+ */
+const PERSISTABLE_FILTERS = [
+  'groupBy',
+  'carrierCode',
+  'trackingStatus',
+  'platformCallbackStatus',
+] as const;
 
 const GROUP_BY_OPTIONS = [
   { value: 'CARRIER', label: '按承运商' },
@@ -188,6 +230,33 @@ export function ShipmentRecordsWorkspace() {
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
 
+  // 1.4.1.2 列表与表格偏好：这一页记「列显示 + 排序 + 每页条数 + 分组维度/承运商/轨迹/回传状态」。
+  const prefs = useListPreferences({
+    pageKey: 'orders.shipment-records',
+    columns: RECORD_COLUMNS,
+    sortOptions: RECORD_SORTS,
+    pageSize: PAGE_SIZE,
+    pageSizeOptions: [10, 20, 50, 100],
+    filters: { groupBy: 'CARRIER' },
+    persistableFilterKeys: PERSISTABLE_FILTERS,
+  });
+  const columnVisible = (key: string) => prefs.state.columns.includes(key);
+  /** 恢复出来的视图状态只在「恢复完成」那一刻应用一次，之后由用户自己的操作驱动。 */
+  const restored = useRef(false);
+  useEffect(() => {
+    if (!prefs.ready || restored.current) return;
+    restored.current = true;
+    const restoredFilters = prefs.state.filters;
+    setGroupBy(restoredFilters.groupBy ?? 'CARRIER');
+    setCarrierCode(restoredFilters.carrierCode ?? '');
+    setTrackingStatus(restoredFilters.trackingStatus ?? '');
+    setPlatformCallbackStatus(restoredFilters.platformCallbackStatus ?? '');
+  }, [prefs.ready, prefs.state.filters]);
+  // 每页条数变了以后，原来的页码可能已经越界 —— 回到第一页，而不是停在空白页上。
+  useEffect(() => {
+    setPageIndex(0);
+  }, [prefs.state.pageSize]);
+
   const load = useCallback(async () => {
     setLoading(true);
     setError('');
@@ -201,7 +270,8 @@ export function ShipmentRecordsWorkspace() {
           platformCallbackStatus,
           keyword,
           page: pageIndex,
-          size: PAGE_SIZE,
+          size: prefs.state.pageSize,
+          sort: prefs.state.sortKey,
         }),
         fetchShipmentPerformance({ carrierCode, trackingStatus, platformCallbackStatus, keyword }),
       ]);
@@ -214,7 +284,16 @@ export function ShipmentRecordsWorkspace() {
     } finally {
       setLoading(false);
     }
-  }, [groupBy, carrierCode, trackingStatus, platformCallbackStatus, keyword, pageIndex]);
+  }, [
+    groupBy,
+    carrierCode,
+    trackingStatus,
+    platformCallbackStatus,
+    keyword,
+    pageIndex,
+    prefs.state.pageSize,
+    prefs.state.sortKey,
+  ]);
 
   useEffect(() => {
     void load();
@@ -380,11 +459,19 @@ export function ShipmentRecordsWorkspace() {
             onChange={(value) => {
               setGroupBy(value);
               setPageIndex(0);
+              prefs.setFilter('groupBy', value);
             }}
             options={GROUP_BY_OPTIONS}
           />
           <FormField id="shipment-records-carrier" label="承运商代码">
-            <Input value={carrierCode} placeholder="留空为全部" onChange={(e) => setCarrierCode(e.target.value)} />
+            <Input
+              value={carrierCode}
+              placeholder="留空为全部"
+              onChange={(e) => {
+                setCarrierCode(e.target.value);
+                prefs.setFilter('carrierCode', e.target.value);
+              }}
+            />
           </FormField>
           <SelectField
             id="shipment-records-tracking"
@@ -393,6 +480,7 @@ export function ShipmentRecordsWorkspace() {
             onChange={(value) => {
               setTrackingStatus(value);
               setPageIndex(0);
+              prefs.setFilter('trackingStatus', value);
             }}
             options={TRACKING_OPTIONS}
           />
@@ -403,6 +491,7 @@ export function ShipmentRecordsWorkspace() {
             onChange={(value) => {
               setPlatformCallbackStatus(value);
               setPageIndex(0);
+              prefs.setFilter('platformCallbackStatus', value);
             }}
             options={CALLBACK_OPTIONS}
           />
@@ -452,6 +541,12 @@ export function ShipmentRecordsWorkspace() {
       </SectionCard>
 
       <SectionCard title="发货记录清单" extra={<Truck className="h-4 w-4" />}>
+        <ListPreferenceBar
+          columns={RECORD_COLUMNS}
+          sortOptions={RECORD_SORTS}
+          pageSizeOptions={[10, 20, 50, 100]}
+          prefs={prefs}
+        />
         <div className="flex flex-wrap items-end gap-3">
           <FormField id="shipment-records-keyword" label="关键字（记录号 / 运单号 / 订单号 / 交接单号）">
             <Input
@@ -477,15 +572,15 @@ export function ShipmentRecordsWorkspace() {
             <table className="mt-4 w-full text-sm">
               <thead>
                 <tr className="border-b text-left">
-                  <th className="py-2">记录号</th>
-                  <th className="py-2">承运商</th>
-                  <th className="py-2">运单号</th>
-                  <th className="py-2">发货时间</th>
-                  <th className="py-2">时限判定</th>
-                  <th className="py-2">轨迹</th>
-                  <th className="py-2">买家可见</th>
-                  <th className="py-2">平台回传</th>
-                  <th className="py-2">状态</th>
+                  {columnVisible('recordNo') && <th className="py-2">记录号</th>}
+                  {columnVisible('carrier') && <th className="py-2">承运商</th>}
+                  {columnVisible('waybill') && <th className="py-2">运单号</th>}
+                  {columnVisible('shippedAt') && <th className="py-2">发货时间</th>}
+                  {columnVisible('sla') && <th className="py-2">时限判定</th>}
+                  {columnVisible('tracking') && <th className="py-2">轨迹</th>}
+                  {columnVisible('buyerVisible') && <th className="py-2">买家可见</th>}
+                  {columnVisible('callback') && <th className="py-2">平台回传</th>}
+                  {columnVisible('status') && <th className="py-2">状态</th>}
                   <th className="py-2" />
                 </tr>
               </thead>
@@ -494,30 +589,48 @@ export function ShipmentRecordsWorkspace() {
                   const verdict = slaVerdict(row.slaDeadlineAt, row.lateAgainstSla);
                   return (
                     <tr key={row.id} className="border-b">
-                      <td className="py-2">
-                        <div>{row.recordNo}</div>
-                        <div className="text-xs text-muted-foreground">
-                          {row.salesOrderNo || '（无订单快照）'}
-                        </div>
-                      </td>
-                      <td className="py-2">{row.carrierName || row.carrierCode}</td>
-                      <td className="py-2">{row.masterWaybillNo}</td>
-                      <td className="py-2">{moment(row.shippedAt)}</td>
-                      <td className="py-2">
-                        <Badge severity={verdict.severity}>{verdict.label}</Badge>
-                      </td>
-                      <td className="py-2">
-                        <Badge severity={trackingSeverity(row.trackingStatus)}>
-                          {trackingStatusLabel(row.trackingStatus)}
-                        </Badge>
-                      </td>
-                      <td className="py-2">{buyerVisibleLabel(row.buyerVisibleStatus)}</td>
-                      <td className="py-2">
-                        <Badge severity={callbackSeverity(row.platformCallbackStatus)}>
-                          {platformCallbackLabel(row.platformCallbackStatus)}
-                        </Badge>
-                      </td>
-                      <td className="py-2">{shipmentRecordStatusLabel(row.status)}</td>
+                      {columnVisible('recordNo') && (
+                        <td className="py-2">
+                          <div>{row.recordNo}</div>
+                          <div className="text-xs text-muted-foreground">
+                            {row.salesOrderNo || '（无订单快照）'}
+                          </div>
+                        </td>
+                      )}
+                      {columnVisible('carrier') && (
+                        <td className="py-2">{row.carrierName || row.carrierCode}</td>
+                      )}
+                      {columnVisible('waybill') && (
+                        <td className="py-2">{row.masterWaybillNo}</td>
+                      )}
+                      {columnVisible('shippedAt') && (
+                        <td className="py-2">{moment(row.shippedAt)}</td>
+                      )}
+                      {columnVisible('sla') && (
+                        <td className="py-2">
+                          <Badge severity={verdict.severity}>{verdict.label}</Badge>
+                        </td>
+                      )}
+                      {columnVisible('tracking') && (
+                        <td className="py-2">
+                          <Badge severity={trackingSeverity(row.trackingStatus)}>
+                            {trackingStatusLabel(row.trackingStatus)}
+                          </Badge>
+                        </td>
+                      )}
+                      {columnVisible('buyerVisible') && (
+                        <td className="py-2">{buyerVisibleLabel(row.buyerVisibleStatus)}</td>
+                      )}
+                      {columnVisible('callback') && (
+                        <td className="py-2">
+                          <Badge severity={callbackSeverity(row.platformCallbackStatus)}>
+                            {platformCallbackLabel(row.platformCallbackStatus)}
+                          </Badge>
+                        </td>
+                      )}
+                      {columnVisible('status') && (
+                        <td className="py-2">{shipmentRecordStatusLabel(row.status)}</td>
+                      )}
                       <td className="py-2">
                         <Button size="sm" onClick={() => void openDetail(row.id)} disabled={busy}>
                           明细

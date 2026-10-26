@@ -18,7 +18,17 @@ root=Path(__file__).resolve().parents[2]
 # services/trade 的 OpenApiContractTest 负责，与前四个服务同一套写法。
 # crm 是 15 客户与客服的服务（V99 / 15.4.2.1 起有真实端点），端口 8086 排在 trade 之后；
 # 契约导出由 services/crm 的 OpenApiContractTest 负责，同一套写法。
-SERVICES=[('identity',8081),('catalog',8082),('channel',8083),('warehouse',8084),('trade',8085),('crm',8086)]
+# finance 是 12 财务核算的服务（V338 / 12.1.1.1 应收单管理起有真实端点），端口 8087 排在 crm 之后；
+# 契约导出由 services/finance 的 OpenApiContractTest 负责，同一套写法。
+# reporting 是 13 利润与经营分析的服务（V376），端口 8088 排在 finance 之后；
+# platform 是 18 集成开放与智能自动化的服务（V377），端口 8089 排在 reporting 之后；
+# 两者的契约导出都由各自服务的 OpenApiContractTest 负责，同一套写法。
+#
+# ⚠️ **加一条 SERVICES 必须与该服务的 OpenApiContractTest 在同一个 commit 里**：
+# load_specs() 会无条件读 backend/target/openapi/<service>.openapi.json，
+# 那个文件由该服务的 OpenApiContractTest 在测试阶段导出。
+# 少了任何一边，合并后 `pnpm contracts:generate` 会直接崩 —— 而且看起来像别人弄坏了你的东西。
+SERVICES=[('identity',8081),('catalog',8082),('channel',8083),('warehouse',8084),('trade',8085),('crm',8086),('finance',8087),('reporting',8088),('platform',8089)]
 ALLOWLIST=Path(__file__).resolve().parent/'contract-collision-allowlist.json'
 BACKLOG='docs/backlog/2026-10/2026-10-10-contract-flat-overwrite-and-nav-gaps.md'
 

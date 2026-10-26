@@ -35,6 +35,7 @@ import type { Access, LoginResult } from '../../../../../packages/api-contracts/
 import { api, ApiError, blockWorkspaceRequests } from '@/lib/api';
 import { loginDestination } from '@/lib/identity-navigation';
 import { Field, control } from '../common/fields';
+import { GlobalSearchProvider } from '../dashboard/global-search-workspace';
 import { LoginScene } from './login-scene';
 
 type Identity = { session: Access; reload: () => Promise<void> };
@@ -565,21 +566,35 @@ export function IdentityShell({ children }: { children: React.ReactNode }) {
   );
   return (
     <Context.Provider value={{ session, reload }}>
-      <AppShell key={`${session.userId}:${session.tenantId}:${epoch}`} account={account}>
-        {error && (
-          <p role="alert" className="text-destructive">
-            {error}
-          </p>
+      {/*
+        1.2.1.1 全局搜索框：⌘K 面板里的业务检索。
+        Provider 用 render prop 把「结果分组 / 状态行 / 输入回调」交给 AppShell ——
+        注入内容要进 AppShell（父组件），状态在 Provider（子组件）里，
+        所以只能这样接，不能用 Context（Context 只向下传）。
+      */}
+      <GlobalSearchProvider>
+        {(commandPalette) => (
+          <AppShell
+            key={`${session.userId}:${session.tenantId}:${epoch}`}
+            account={account}
+            commandPalette={commandPalette}
+          >
+            {error && (
+              <p role="alert" className="text-destructive">
+                {error}
+              </p>
+            )}
+            {pathname === '/login' ? (
+              <div className="p-6">
+                <p>你已登录 {session.tenantName}</p>
+                <Link href="/">进入工作台</Link>
+              </div>
+            ) : (
+              children
+            )}
+          </AppShell>
         )}
-        {pathname === '/login' ? (
-          <div className="p-6">
-            <p>你已登录 {session.tenantName}</p>
-            <Link href="/">进入工作台</Link>
-          </div>
-        ) : (
-          children
-        )}
-      </AppShell>
+      </GlobalSearchProvider>
     </Context.Provider>
   );
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { RefreshCw } from 'lucide-react';
 import { Button, EmptyState, Input, Notice, PageHeader, SectionCard, StatCard } from '@starcon/ui';
 import type {
@@ -9,6 +9,9 @@ import type {
   OutboundTimelinessRow,
 } from '../../../../../packages/api-contracts/src/index';
 import { useIdentity } from '../iam/identity-shell';
+import { ListPreferenceBar } from '../common/list-preference-bar';
+import { useListPreferences } from '../../lib/use-list-preferences';
+import type { ListColumn } from '../../lib/list-preferences-model';
 import {
   bucketText,
   defaultFilters,
@@ -25,6 +28,26 @@ import {
   thresholdText,
   type TimelinessFilters,
 } from './warehouse-outbound-timeliness-model';
+
+/**
+ * 1.4.1.2 列表与表格偏好 —— 超时明细表的**列定义**。
+ */
+const OVERDUE_COLUMNS: ListColumn[] = [
+  { key: 'orderCode', label: '出库单' },
+  { key: 'warehouse', label: '仓库' },
+  { key: 'stage', label: '环节' },
+  { key: 'actual', label: '实际' },
+  { key: 'threshold', label: '阈值' },
+  { key: 'excess', label: '超出' },
+  { key: 'occurredAt', label: '发生时刻' },
+];
+
+/**
+ * 可以被记住的筛选条件：**只有日期与编号**。
+ *
+ * <p>统计区间与仓库 id 都是安全 token；这一页没有自由文本筛选。
+ */
+const PERSISTABLE_FILTERS = ['from', 'to', 'warehouseId'] as const;
 
 /**
  * 8.5.3.1 出库时效工作区。
@@ -55,6 +78,31 @@ export function WarehouseOutboundTimelinessWorkspace() {
   const [caps, setCaps] = useState<OutboundTimelinessCapabilities | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+
+  // 1.4.1.2 列表与表格偏好：这一页记「列显示 + 统计区间 + 仓库」。
+  // 这一页的每页条数由后端固定（20），所以没有「每页条数」这一项。
+  const prefs = useListPreferences({
+    pageKey: 'warehouse.outbound-timeliness',
+    columns: OVERDUE_COLUMNS,
+    pageSize: 20,
+    pageSizeOptions: [],
+    persistableFilterKeys: PERSISTABLE_FILTERS,
+  });
+  const columnVisible = (key: string) => prefs.state.columns.includes(key);
+  /** 恢复出来的视图状态只在「恢复完成」那一刻应用一次，之后由用户自己的操作驱动。 */
+  const restored = useRef(false);
+  useEffect(() => {
+    if (!prefs.ready || restored.current) return;
+    restored.current = true;
+    const restoredFilters = prefs.state.filters;
+    setFilters((current) => ({
+      ...current,
+      from: restoredFilters.from ?? '',
+      to: restoredFilters.to ?? '',
+      warehouseId: restoredFilters.warehouseId ?? '',
+      page: 0,
+    }));
+  }, [prefs.ready, prefs.state.filters]);
 
   const load = useCallback(async () => {
     if (!readable) {
@@ -137,7 +185,10 @@ export function WarehouseOutboundTimelinessWorkspace() {
             <Input
               type="date"
               value={filters.from}
-              onChange={(e) => setFilters((f) => ({ ...f, from: e.target.value, page: 0 }))}
+              onChange={(e) => {
+                setFilters((f) => ({ ...f, from: e.target.value, page: 0 }));
+                prefs.setFilter('from', e.target.value);
+              }}
             />
           </label>
           <label className="text-sm">
@@ -145,7 +196,10 @@ export function WarehouseOutboundTimelinessWorkspace() {
             <Input
               type="date"
               value={filters.to}
-              onChange={(e) => setFilters((f) => ({ ...f, to: e.target.value, page: 0 }))}
+              onChange={(e) => {
+                setFilters((f) => ({ ...f, to: e.target.value, page: 0 }));
+                prefs.setFilter('to', e.target.value);
+              }}
             />
           </label>
           <label className="text-sm">
@@ -153,7 +207,10 @@ export function WarehouseOutboundTimelinessWorkspace() {
             <Input
               value={filters.warehouseId}
               placeholder="留空看全租户"
-              onChange={(e) => setFilters((f) => ({ ...f, warehouseId: e.target.value, page: 0 }))}
+              onChange={(e) => {
+                setFilters((f) => ({ ...f, warehouseId: e.target.value, page: 0 }));
+                prefs.setFilter('warehouseId', e.target.value);
+              }}
             />
           </label>
           <div className="text-muted-foreground flex items-end text-sm">
@@ -301,6 +358,7 @@ export function WarehouseOutboundTimelinessWorkspace() {
           </SectionCard>
 
           <SectionCard title="超时明细">
+            <ListPreferenceBar columns={OVERDUE_COLUMNS} pageSizeOptions={[]} prefs={prefs} />
             <div className="text-muted-foreground mb-3 flex items-center justify-between text-sm">
               <span>
                 共 {overdueTotal} 条 · 第 {page + 1} 页
@@ -331,13 +389,13 @@ export function WarehouseOutboundTimelinessWorkspace() {
                 <table className="w-full text-sm">
                   <thead className="text-muted-foreground text-left">
                     <tr>
-                      <th className="py-2 pr-3">出库单</th>
-                      <th className="py-2 pr-3">仓库</th>
-                      <th className="py-2 pr-3">环节</th>
-                      <th className="py-2 pr-3">实际</th>
-                      <th className="py-2 pr-3">阈值</th>
-                      <th className="py-2 pr-3">超出</th>
-                      <th className="py-2 pr-3">发生时刻</th>
+                      {columnVisible('orderCode') && <th className="py-2 pr-3">出库单</th>}
+                      {columnVisible('warehouse') && <th className="py-2 pr-3">仓库</th>}
+                      {columnVisible('stage') && <th className="py-2 pr-3">环节</th>}
+                      {columnVisible('actual') && <th className="py-2 pr-3">实际</th>}
+                      {columnVisible('threshold') && <th className="py-2 pr-3">阈值</th>}
+                      {columnVisible('excess') && <th className="py-2 pr-3">超出</th>}
+                      {columnVisible('occurredAt') && <th className="py-2 pr-3">发生时刻</th>}
                     </tr>
                   </thead>
                   <tbody>
@@ -346,23 +404,35 @@ export function WarehouseOutboundTimelinessWorkspace() {
                         key={`${d.outboundOrderId}-${d.stageCode}`}
                         className="border-border border-t"
                       >
-                        <td className="py-2 pr-3">{d.orderCode}</td>
-                        <td className="py-2 pr-3">{d.warehouseCode}</td>
-                        <td className="py-2 pr-3">{d.stageLabel}</td>
-                        <td className="py-2 pr-3">{minutesText(d.actualMinutes)}</td>
-                        <td className="py-2 pr-3">
-                          {thresholdText({
-                            stageCode: d.stageCode,
-                            stageLabel: d.stageLabel,
-                            thresholdMinutes: d.thresholdMinutes,
-                            source: d.thresholdSource,
-                            sourceLabel: d.thresholdSource,
-                            enabled: null,
-                            note: null,
-                          })}
-                        </td>
-                        <td className="py-2 pr-3">{minutesText(d.excessMinutes)}</td>
-                        <td className="py-2 pr-3">{d.occurredAt ?? '—'}</td>
+                        {columnVisible('orderCode') && (
+                          <td className="py-2 pr-3">{d.orderCode}</td>
+                        )}
+                        {columnVisible('warehouse') && (
+                          <td className="py-2 pr-3">{d.warehouseCode}</td>
+                        )}
+                        {columnVisible('stage') && <td className="py-2 pr-3">{d.stageLabel}</td>}
+                        {columnVisible('actual') && (
+                          <td className="py-2 pr-3">{minutesText(d.actualMinutes)}</td>
+                        )}
+                        {columnVisible('threshold') && (
+                          <td className="py-2 pr-3">
+                            {thresholdText({
+                              stageCode: d.stageCode,
+                              stageLabel: d.stageLabel,
+                              thresholdMinutes: d.thresholdMinutes,
+                              source: d.thresholdSource,
+                              sourceLabel: d.thresholdSource,
+                              enabled: null,
+                              note: null,
+                            })}
+                          </td>
+                        )}
+                        {columnVisible('excess') && (
+                          <td className="py-2 pr-3">{minutesText(d.excessMinutes)}</td>
+                        )}
+                        {columnVisible('occurredAt') && (
+                          <td className="py-2 pr-3">{d.occurredAt ?? '—'}</td>
+                        )}
                       </tr>
                     ))}
                   </tbody>

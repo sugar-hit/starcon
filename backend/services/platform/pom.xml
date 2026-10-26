@@ -1,0 +1,143 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>com.starcon</groupId>
+    <artifactId>backend</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+    <relativePath>../../pom.xml</relativePath>
+  </parent>
+  <!--
+    18 集成开放与智能自动化的服务（蓝图 18 卷「后端归属」：platform 拥有开放平台
+    18.1、外部系统对接 18.2、业务规则引擎 18.3 与 AI 治理 18.4）。端口 8089 接在
+    reporting(8088) 之后。
+
+    依赖与 reporting / finance 完全一致：jOOQ 显式 SQL + Flyway + springdoc（契约 codegen 的输入）。
+    本次是**服务引导**（迁移 V377），第一条业务模块 18.1.1.1 应用与凭证随第二个 commit 落地。
+
+    ⚠️ **版本号走全局唯一分配器**：platform 是新服务，但迁移版本号不从头开始 ——
+      分配器给出 V377。与 crm 引导时用 V99、finance 引导时用 V338、reporting 引导时用 V376
+      同一纪律：跨服务并行提交时撞号会让另一条车道的 Flyway 直接炸掉。
+
+    ⚠️ **对外凭证摘要用 spring-security-crypto 的 BCryptPasswordEncoder**（与 identity 的
+      密码摘要同一形状，见 identity LocalBootstrap / IdentityController）：明文 Secret 只在
+      生成时返回一次，库里只存摘要。
+  -->
+  <artifactId>platform</artifactId>
+  <dependencies>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-jooq</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-validation</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.flywaydb</groupId>
+      <artifactId>flyway-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.flywaydb</groupId>
+      <artifactId>flyway-database-postgresql</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.postgresql</groupId>
+      <artifactId>postgresql</artifactId>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.springdoc</groupId>
+      <artifactId>springdoc-openapi-starter-webmvc-api</artifactId>
+      <version>2.8.13</version>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>postgresql</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <!--
+      BCrypt 摘要：对外 API Secret 的摘要与 identity 的密码摘要同一形状。
+      只引 crypto 这一件（不是整个 spring-security）—— 本服务不需要过滤器链、
+      不需要认证机制，租户与权限的判定全部走 AccessService 向 identity 确认。
+    -->
+    <dependency>
+      <groupId>org.springframework.security</groupId>
+      <artifactId>spring-security-crypto</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.starcon</groupId>
+      <artifactId>tenancy</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+  </dependencies>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
+      </plugin>
+    </plugins>
+  </build>
+  <profiles>
+    <profile>
+      <id>jooq-codegen</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.jooq</groupId>
+            <artifactId>jooq-codegen-maven</artifactId>
+            <version>${jooq.version}</version>
+            <executions>
+              <execution>
+                <phase>generate-sources</phase>
+                <goals>
+                  <goal>generate</goal>
+                </goals>
+              </execution>
+            </executions>
+            <dependencies>
+              <dependency>
+                <groupId>org.postgresql</groupId>
+                <artifactId>postgresql</artifactId>
+                <version>${postgresql.version}</version>
+              </dependency>
+            </dependencies>
+            <configuration>
+              <jdbc>
+                <driver>org.postgresql.Driver</driver>
+                <url>${env.DB_URL}</url>
+                <user>${env.DB_MIGRATION_USER}</user>
+                <password>${env.DB_MIGRATION_PASSWORD}</password>
+              </jdbc>
+              <generator>
+                <database>
+                  <name>org.jooq.meta.postgres.PostgresDatabase</name>
+                  <inputSchema>public</inputSchema>
+                  <excludes>flyway_schema_history</excludes>
+                </database>
+                <target>
+                  <packageName>com.starcon.platform.generated</packageName>
+                  <directory>target/generated-sources/jooq</directory>
+                </target>
+              </generator>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+</project>

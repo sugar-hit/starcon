@@ -89,6 +89,127 @@
         },
         "type": "object"
       },
+      "AccountLocaleCapabilities": {
+        "properties": {
+          "boundaries": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "defaultLocale": {
+            "type": "string"
+          },
+          "defaultTimezone": {
+            "type": "string"
+          },
+          "dimensions": {
+            "items": {
+              "$ref": "#/components/schemas/AccountLocaleCapabilityDimension"
+            },
+            "type": "array"
+          },
+          "displayConvention": {
+            "$ref": "#/components/schemas/AccountLocaleDisplayConvention"
+          },
+          "module": {
+            "type": "string"
+          },
+          "plannedLocales": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "supportedLocales": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "AccountLocaleCapabilityDimension": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "key": {
+            "type": "string"
+          },
+          "missing": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "ownerModule": {
+            "nullable": true,
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AccountLocaleDisplayConvention": {
+        "properties": {
+          "locale": {
+            "type": "string"
+          },
+          "options": {
+            "additionalProperties": {
+              "type": "object"
+            },
+            "type": "object"
+          }
+        },
+        "type": "object"
+      },
+      "AccountLocaleInput": {
+        "properties": {
+          "locale": {
+            "nullable": true,
+            "type": "string"
+          },
+          "timezone": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AccountLocaleView": {
+        "properties": {
+          "defaultLocale": {
+            "type": "string"
+          },
+          "defaultTimezone": {
+            "type": "string"
+          },
+          "fallbackReason": {
+            "nullable": true,
+            "type": "string"
+          },
+          "locale": {
+            "type": "string"
+          },
+          "stored": {
+            "type": "boolean"
+          },
+          "timezone": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "AccountingBookInput": {
         "properties": {
           "amountRounding": {
@@ -2034,6 +2155,279 @@
         },
         "type": "object"
       },
+      "ApprovalTodoAction": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "reason": {
+            "nullable": true,
+            "type": "string"
+          },
+          "target": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ApprovalTodoBucket": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "count": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ApprovalTodoCapabilities": {
+        "properties": {
+          "actions": {
+            "items": {
+              "$ref": "#/components/schemas/ApprovalTodoAction"
+            },
+            "type": "array"
+          },
+          "dataSource": {
+            "type": "string"
+          },
+          "filters": {
+            "items": {
+              "$ref": "#/components/schemas/ApprovalTodoFilterCapability"
+            },
+            "type": "array"
+          },
+          "module": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ApprovalTodoFilterCapability": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "key": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "reason": {
+            "nullable": true,
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ApprovalTodoItem": {
+        "properties": {
+          "amount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "amountThresholdCurrency": {
+            "nullable": true,
+            "type": "string"
+          },
+          "amountThresholdMax": {
+            "nullable": true,
+            "type": "number"
+          },
+          "amountThresholdMin": {
+            "nullable": true,
+            "type": "number"
+          },
+          "amountThresholdName": {
+            "nullable": true,
+            "type": "string"
+          },
+          "applicantId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "applicantName": {
+            "nullable": true,
+            "type": "string"
+          },
+          "approverType": {
+            "type": "string"
+          },
+          "currencyCode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "currentNodeKey": {
+            "type": "string"
+          },
+          "currentNodeName": {
+            "type": "string"
+          },
+          "currentNodeOrder": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "currentStageIndex": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "documentTypeCode": {
+            "type": "string"
+          },
+          "documentTypeName": {
+            "type": "string"
+          },
+          "dwellSeconds": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "flowName": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "instanceNo": {
+            "type": "string"
+          },
+          "nodeEnteredAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "overdueSeconds": {
+            "format": "int64",
+            "nullable": true,
+            "type": "integer"
+          },
+          "sourceReferenceId": {
+            "type": "string"
+          },
+          "sourceSystem": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "subjectTitle": {
+            "type": "string"
+          },
+          "submittedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "timeoutSeconds": {
+            "format": "int64",
+            "nullable": true,
+            "type": "integer"
+          },
+          "totalSeconds": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ApprovalTodoPage": {
+        "properties": {
+          "amountBranches": {
+            "items": {
+              "$ref": "#/components/schemas/ApprovalTodoBucket"
+            },
+            "type": "array"
+          },
+          "businessDomains": {
+            "items": {
+              "$ref": "#/components/schemas/ApprovalTodoBucket"
+            },
+            "type": "array"
+          },
+          "capabilities": {
+            "$ref": "#/components/schemas/ApprovalTodoCapabilities"
+          },
+          "currencies": {
+            "items": {
+              "$ref": "#/components/schemas/ApprovalTodoBucket"
+            },
+            "type": "array"
+          },
+          "documentTypes": {
+            "items": {
+              "$ref": "#/components/schemas/ApprovalTodoBucket"
+            },
+            "type": "array"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ApprovalTodoItem"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/ApprovalTodoSummary"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ApprovalTodoSummary": {
+        "properties": {
+          "filteredTotal": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "longestDwellSeconds": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "overdueTotal": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "pendingTotal": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "unconfiguredTimeoutTotal": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
       "ApprovalTransferInput": {
         "properties": {
           "comment": {
@@ -2910,6 +3304,235 @@
         },
         "type": "object"
       },
+      "DefaultContextCapabilities": {
+        "properties": {
+          "boundaries": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "rules": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "sources": {
+            "items": {
+              "$ref": "#/components/schemas/DefaultContextSourceStatus"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "DefaultContextInput": {
+        "properties": {
+          "legalEntityId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "shopId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "warehouseId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "DefaultContextLegalEntityOption": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "DefaultContextOptions": {
+        "properties": {
+          "legalEntities": {
+            "items": {
+              "$ref": "#/components/schemas/DefaultContextLegalEntityOption"
+            },
+            "type": "array"
+          },
+          "shops": {
+            "items": {
+              "$ref": "#/components/schemas/DefaultContextShopOption"
+            },
+            "type": "array"
+          },
+          "sources": {
+            "items": {
+              "$ref": "#/components/schemas/DefaultContextSourceStatus"
+            },
+            "type": "array"
+          },
+          "warehouses": {
+            "items": {
+              "$ref": "#/components/schemas/DefaultContextWarehouseOption"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "DefaultContextSelection": {
+        "nullable": true,
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "DefaultContextShopOption": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "platformName": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "DefaultContextSourceStatus": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "dimension": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "nullable": true,
+            "type": "string"
+          },
+          "reason": {
+            "nullable": true,
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "DefaultContextStaleSelection": {
+        "properties": {
+          "dimension": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "DefaultContextView": {
+        "properties": {
+          "legalEntity": {
+            "$ref": "#/components/schemas/DefaultContextSelection"
+          },
+          "note": {
+            "nullable": true,
+            "type": "string"
+          },
+          "shop": {
+            "$ref": "#/components/schemas/DefaultContextSelection"
+          },
+          "sources": {
+            "items": {
+              "$ref": "#/components/schemas/DefaultContextSourceStatus"
+            },
+            "type": "array"
+          },
+          "stale": {
+            "items": {
+              "$ref": "#/components/schemas/DefaultContextStaleSelection"
+            },
+            "type": "array"
+          },
+          "stored": {
+            "type": "boolean"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "warehouse": {
+            "$ref": "#/components/schemas/DefaultContextSelection"
+          }
+        },
+        "type": "object"
+      },
+      "DefaultContextWarehouseOption": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "defaultWarehouse": {
+            "type": "boolean"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "DepartmentInput": {
         "properties": {
           "code": {
@@ -3367,6 +3990,170 @@
         },
         "type": "object"
       },
+      "EffectiveShortcut": {
+        "properties": {
+          "icon": {
+            "nullable": true,
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "overridden": {
+            "type": "boolean"
+          },
+          "pageCode": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "position": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "source": {
+            "type": "string"
+          },
+          "sourceTemplateCode": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "EffectiveShortcutSet": {
+        "properties": {
+          "entries": {
+            "items": {
+              "$ref": "#/components/schemas/EffectiveShortcut"
+            },
+            "type": "array"
+          },
+          "hiddenByPermission": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "mergeRules": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "overrideCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "removedByOverride": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "templateCount": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "EntitlementCheckView": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "blocked": {
+            "type": "boolean"
+          },
+          "entitlementCode": {
+            "type": "string"
+          },
+          "entitlementKind": {
+            "nullable": true,
+            "type": "string"
+          },
+          "impact": {
+            "type": "string"
+          },
+          "limitValue": {
+            "nullable": true,
+            "type": "number"
+          },
+          "overLimitAction": {
+            "nullable": true,
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "period": {
+            "nullable": true,
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string"
+          },
+          "tenantId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "unlimited": {
+            "type": "boolean"
+          },
+          "usageValue": {
+            "nullable": true,
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "EntitlementInput": {
+        "properties": {
+          "entitlementCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "entitlementKind": {
+            "pattern": "SHOP_COUNT|SKU_COUNT|ORDER_VOLUME|USER_COUNT|API_CALL|AI_USAGE",
+            "type": "string"
+          },
+          "limitValue": {
+            "type": "number"
+          },
+          "overLimitAction": {
+            "pattern": "BLOCK|DEGRADE|ALLOW",
+            "type": "string"
+          },
+          "period": {
+            "pattern": "DAY|MONTH|YEAR|TOTAL",
+            "type": "string"
+          },
+          "sortOrder": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "unit": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string"
+          },
+          "unlimited": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "entitlementCode",
+          "entitlementKind",
+          "overLimitAction",
+          "period"
+        ],
+        "type": "object"
+      },
       "FactAssignmentInput": {
         "properties": {
           "amount": {
@@ -3435,6 +4222,57 @@
           "id": {
             "format": "uuid",
             "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "GlobalSearchRecentEntry": {
+        "properties": {
+          "domain": {
+            "nullable": true,
+            "type": "string"
+          },
+          "keyword": {
+            "type": "string"
+          },
+          "primaryRef": {
+            "nullable": true,
+            "type": "string"
+          },
+          "searchedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "GlobalSearchRecentInput": {
+        "properties": {
+          "domain": {
+            "nullable": true,
+            "type": "string"
+          },
+          "keyword": {
+            "type": "string"
+          },
+          "primaryRef": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "GlobalSearchRecentList": {
+        "properties": {
+          "entries": {
+            "items": {
+              "$ref": "#/components/schemas/GlobalSearchRecentEntry"
+            },
+            "type": "array"
+          },
+          "limit": {
+            "format": "int32",
+            "type": "integer"
           }
         },
         "type": "object"
@@ -4054,6 +4892,347 @@
           },
           "tenantId": {
             "format": "uuid",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "NotificationInboxCapabilities": {
+        "properties": {
+          "boundaries": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "maxKeysPerRequest": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "types": {
+            "items": {
+              "$ref": "#/components/schemas/NotificationType"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "NotificationPreferenceCapabilities": {
+        "properties": {
+          "baselineChannel": {
+            "type": "string"
+          },
+          "boundaries": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "channels": {
+            "items": {
+              "$ref": "#/components/schemas/NotificationPreferenceChannel"
+            },
+            "type": "array"
+          },
+          "defaultTimezone": {
+            "type": "string"
+          },
+          "maxWindows": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "module": {
+            "type": "string"
+          },
+          "quietHoursScope": {
+            "type": "string"
+          },
+          "types": {
+            "items": {
+              "$ref": "#/components/schemas/NotificationPreferenceTypeRule"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "NotificationPreferenceChannel": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "NotificationPreferenceChannelSetting": {
+        "nullable": true,
+        "properties": {
+          "channels": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "NotificationPreferenceInput": {
+        "properties": {
+          "timezone": {
+            "nullable": true,
+            "type": "string"
+          },
+          "types": {
+            "items": {
+              "$ref": "#/components/schemas/NotificationPreferenceChannelSetting"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "windows": {
+            "items": {
+              "nullable": true,
+              "type": "string"
+            },
+            "nullable": true,
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "NotificationPreferenceResolution": {
+        "properties": {
+          "channels": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "label": {
+            "type": "string"
+          },
+          "mandatory": {
+            "type": "boolean"
+          },
+          "quietNow": {
+            "type": "boolean"
+          },
+          "quietWindows": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "suppressedChannels": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "timezone": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "NotificationPreferenceResolveRequest": {
+        "properties": {
+          "type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "NotificationPreferenceTypeRule": {
+        "properties": {
+          "baselineChannel": {
+            "nullable": true,
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "mandatory": {
+            "type": "boolean"
+          },
+          "rule": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "NotificationPreferenceTypeSetting": {
+        "properties": {
+          "baselineChannel": {
+            "nullable": true,
+            "type": "string"
+          },
+          "channels": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "label": {
+            "type": "string"
+          },
+          "mandatory": {
+            "type": "boolean"
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "NotificationPreferenceView": {
+        "properties": {
+          "defaultTimezone": {
+            "type": "string"
+          },
+          "fallbackReasons": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "quietHoursScope": {
+            "type": "string"
+          },
+          "stored": {
+            "type": "boolean"
+          },
+          "timezone": {
+            "type": "string"
+          },
+          "timezoneSource": {
+            "type": "string"
+          },
+          "types": {
+            "items": {
+              "$ref": "#/components/schemas/NotificationPreferenceTypeSetting"
+            },
+            "type": "array"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "windows": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "NotificationReadEntry": {
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "readAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "ref": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "NotificationReadRequest": {
+        "properties": {
+          "keys": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "NotificationReadResult": {
+        "properties": {
+          "affected": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "read": {
+            "items": {
+              "$ref": "#/components/schemas/NotificationReadEntry"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "NotificationReadState": {
+        "properties": {
+          "read": {
+            "items": {
+              "$ref": "#/components/schemas/NotificationReadEntry"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "NotificationSubscriptionRequest": {
+        "properties": {
+          "types": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "NotificationSubscriptions": {
+        "properties": {
+          "types": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "NotificationType": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "owner": {
+            "type": "string"
+          },
+          "source": {
             "type": "string"
           }
         },
@@ -5212,6 +6391,76 @@
         ],
         "type": "object"
       },
+      "PageFavoriteInput": {
+        "properties": {
+          "href": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "pageCode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "system": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PageFavoriteItem": {
+        "properties": {
+          "href": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "order": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "pageCode": {
+            "type": "string"
+          },
+          "system": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PageFavoriteMove": {
+        "properties": {
+          "href": {
+            "type": "string"
+          },
+          "toIndex": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "PageFavoriteSet": {
+        "properties": {
+          "hiddenByPermission": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/PageFavoriteItem"
+            },
+            "type": "array"
+          },
+          "total": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
       "PermissionView": {
         "properties": {
           "action": {
@@ -5225,6 +6474,1080 @@
           },
           "pageName": {
             "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PlanDetailView": {
+        "properties": {
+          "entitlements": {
+            "items": {
+              "$ref": "#/components/schemas/PlanEntitlementView"
+            },
+            "type": "array"
+          },
+          "plan": {
+            "$ref": "#/components/schemas/PlanView"
+          }
+        },
+        "type": "object"
+      },
+      "PlanEntitlementView": {
+        "properties": {
+          "entitlementCode": {
+            "type": "string"
+          },
+          "entitlementKind": {
+            "type": "string"
+          },
+          "limitValue": {
+            "type": "number"
+          },
+          "overLimitAction": {
+            "type": "string"
+          },
+          "period": {
+            "type": "string"
+          },
+          "planCode": {
+            "type": "string"
+          },
+          "sortOrder": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "unit": {
+            "type": "string"
+          },
+          "unlimited": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "PlanInput": {
+        "properties": {
+          "code": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "description": {
+            "maxLength": 300,
+            "minLength": 0,
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 100,
+            "minLength": 0,
+            "type": "string"
+          },
+          "sortOrder": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "tierLevel": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "trialDays": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "code",
+          "name"
+        ],
+        "type": "object"
+      },
+      "PlanUpdateInput": {
+        "properties": {
+          "description": {
+            "maxLength": 300,
+            "minLength": 0,
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 100,
+            "minLength": 0,
+            "type": "string"
+          },
+          "sortOrder": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "status": {
+            "pattern": "ACTIVE|RETIRED",
+            "type": "string"
+          },
+          "tierLevel": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "trialDays": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "name",
+          "status"
+        ],
+        "type": "object"
+      },
+      "PlanView": {
+        "properties": {
+          "blockedActionCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "code": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "entitlementCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "sortOrder": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "status": {
+            "type": "string"
+          },
+          "tierLevel": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "trialDays": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PlatformFlagCapabilities": {
+        "properties": {
+          "dimensions": {
+            "items": {
+              "$ref": "#/components/schemas/PlatformFlagCapabilityDimension"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "PlatformFlagCapabilityDimension": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "description": {
+            "type": "string"
+          },
+          "dimension": {
+            "type": "string"
+          },
+          "impact": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PlatformFlagDefinitionView": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "defaultEnabled": {
+            "type": "boolean"
+          },
+          "defaultRolloutPercent": {
+            "type": "number"
+          },
+          "description": {
+            "type": "string"
+          },
+          "flagKind": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "sortOrder": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PlatformFlagEffectiveLayer": {
+        "properties": {
+          "announcementActive": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "announcementBody": {
+            "nullable": true,
+            "type": "string"
+          },
+          "announcementFrom": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "announcementTitle": {
+            "nullable": true,
+            "type": "string"
+          },
+          "announcementTo": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "rateLimitPerMinute": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "rolloutBasisPoints": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "rolloutBucket": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "PlatformFlagEvaluationView": {
+        "properties": {
+          "definitionId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "effectiveLayer": {
+            "$ref": "#/components/schemas/PlatformFlagEffectiveLayer"
+          },
+          "flagCode": {
+            "type": "string"
+          },
+          "flagKind": {
+            "type": "string"
+          },
+          "flagName": {
+            "type": "string"
+          },
+          "platformLayer": {
+            "$ref": "#/components/schemas/PlatformFlagPlatformLayer"
+          },
+          "tenantId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "tenantLayer": {
+            "$ref": "#/components/schemas/PlatformFlagTenantLayer"
+          }
+        },
+        "type": "object"
+      },
+      "PlatformFlagExceptionInput": {
+        "properties": {
+          "flagCode": {
+            "minLength": 1,
+            "pattern": "[A-Z][A-Z0-9_]{1,63}",
+            "type": "string"
+          },
+          "reason": {
+            "maxLength": 300,
+            "minLength": 0,
+            "type": "string"
+          },
+          "tenantId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "flagCode",
+          "reason",
+          "tenantId"
+        ],
+        "type": "object"
+      },
+      "PlatformFlagExceptionView": {
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "effect": {
+            "type": "string"
+          },
+          "flagCode": {
+            "type": "string"
+          },
+          "flagKind": {
+            "type": "string"
+          },
+          "flagName": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "tenantId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PlatformFlagHistoryView": {
+        "properties": {
+          "action": {
+            "type": "string"
+          },
+          "afterAnnouncementFrom": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "afterAnnouncementTitle": {
+            "nullable": true,
+            "type": "string"
+          },
+          "afterAnnouncementTo": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "afterEnabled": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "afterRateLimitPerMinute": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "afterRolloutPercent": {
+            "nullable": true,
+            "type": "number"
+          },
+          "beforeAnnouncementFrom": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "beforeAnnouncementTitle": {
+            "nullable": true,
+            "type": "string"
+          },
+          "beforeAnnouncementTo": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "beforeEnabled": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "beforeRateLimitPerMinute": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "beforeRolloutPercent": {
+            "nullable": true,
+            "type": "number"
+          },
+          "changedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "flagCode": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "operatorName": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PlatformFlagPlatformLayer": {
+        "properties": {
+          "announcementBody": {
+            "nullable": true,
+            "type": "string"
+          },
+          "announcementFrom": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "announcementTitle": {
+            "nullable": true,
+            "type": "string"
+          },
+          "announcementTo": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "configured": {
+            "type": "boolean"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "flagKind": {
+            "type": "string"
+          },
+          "rateLimitPerMinute": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "rolloutPercent": {
+            "type": "number"
+          },
+          "rolloutSalt": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PlatformFlagSettingInput": {
+        "properties": {
+          "announcementBody": {
+            "nullable": true,
+            "type": "string"
+          },
+          "announcementFrom": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "announcementTitle": {
+            "maxLength": 200,
+            "minLength": 0,
+            "nullable": true,
+            "type": "string"
+          },
+          "announcementTo": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "note": {
+            "maxLength": 300,
+            "minLength": 0,
+            "type": "string"
+          },
+          "rateLimitPerMinute": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "rolloutPercent": {
+            "type": "number"
+          },
+          "rolloutSalt": {
+            "maxLength": 64,
+            "minLength": 0,
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "enabled",
+          "rolloutPercent"
+        ],
+        "type": "object"
+      },
+      "PlatformFlagSettingView": {
+        "properties": {
+          "announcementBody": {
+            "nullable": true,
+            "type": "string"
+          },
+          "announcementFrom": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "announcementTitle": {
+            "nullable": true,
+            "type": "string"
+          },
+          "announcementTo": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "configured": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "definitionId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "flagCode": {
+            "type": "string"
+          },
+          "flagKind": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "rateLimitPerMinute": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "rolloutPercent": {
+            "type": "number"
+          },
+          "rolloutSalt": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "version": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "PlatformFlagTenantLayer": {
+        "properties": {
+          "applicable": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "effect": {
+            "nullable": true,
+            "type": "string"
+          },
+          "exceptionId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "present": {
+            "type": "boolean"
+          },
+          "reason": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PlatformOpsAlertPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/PlatformOpsAlertView"
+            },
+            "type": "array"
+          },
+          "limit": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "offset": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "PlatformOpsAlertView": {
+        "properties": {
+          "acknowledgedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "alertCode": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "metricCode": {
+            "type": "string"
+          },
+          "observedValue": {
+            "type": "number"
+          },
+          "raisedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "resolvedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "serviceCode": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "tenantId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "thresholdValue": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "PlatformOpsCapabilities": {
+        "properties": {
+          "dimensions": {
+            "items": {
+              "$ref": "#/components/schemas/PlatformOpsCapabilityDimension"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "PlatformOpsCapabilityDimension": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "description": {
+            "type": "string"
+          },
+          "dimension": {
+            "type": "string"
+          },
+          "impact": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PlatformOpsIngestResult": {
+        "properties": {
+          "alertCode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "alertId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "alertStatus": {
+            "nullable": true,
+            "type": "string"
+          },
+          "metricId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "severity": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PlatformOpsMetricInput": {
+        "properties": {
+          "metricCode": {
+            "maxLength": 40,
+            "minLength": 0,
+            "type": "string"
+          },
+          "sampleValue": {
+            "exclusiveMinimum": false,
+            "minimum": 0,
+            "type": "number"
+          },
+          "serviceCode": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string"
+          },
+          "source": {
+            "maxLength": 16,
+            "minLength": 0,
+            "nullable": true,
+            "type": "string"
+          },
+          "tenantId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "unit": {
+            "maxLength": 16,
+            "minLength": 0,
+            "type": "string"
+          },
+          "windowEnd": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "windowStart": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "metricCode",
+          "sampleValue",
+          "serviceCode",
+          "tenantId",
+          "unit",
+          "windowEnd",
+          "windowStart"
+        ],
+        "type": "object"
+      },
+      "PlatformOpsMetricPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/PlatformOpsMetricView"
+            },
+            "type": "array"
+          },
+          "limit": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "offset": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "PlatformOpsMetricView": {
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "metricCode": {
+            "type": "string"
+          },
+          "sampleValue": {
+            "type": "number"
+          },
+          "serviceCode": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "tenantId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "unit": {
+            "type": "string"
+          },
+          "windowEnd": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "windowStart": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PlatformOpsOverviewView": {
+        "properties": {
+          "avgAvailability": {
+            "nullable": true,
+            "type": "number"
+          },
+          "avgErrorRate": {
+            "nullable": true,
+            "type": "number"
+          },
+          "avgLatencyMs": {
+            "nullable": true,
+            "type": "number"
+          },
+          "avgStorageUtilization": {
+            "nullable": true,
+            "type": "number"
+          },
+          "criticalAlertCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "generatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "maxErrorRate": {
+            "nullable": true,
+            "type": "number"
+          },
+          "offlineTenantCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "onlineTenantCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "openAlertCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "tenantCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "tenantWithSamples": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalCostEstimate": {
+            "nullable": true,
+            "type": "number"
+          },
+          "totalQueueDepth": {
+            "nullable": true,
+            "type": "number"
+          },
+          "totalTaskBacklog": {
+            "nullable": true,
+            "type": "number"
+          },
+          "unknownTenantCount": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "PlatformOpsTenantHealthView": {
+        "properties": {
+          "availability": {
+            "nullable": true,
+            "type": "number"
+          },
+          "costEstimate": {
+            "nullable": true,
+            "type": "number"
+          },
+          "criticalAlertCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "errorRate": {
+            "nullable": true,
+            "type": "number"
+          },
+          "lastSampleAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "latencyMs": {
+            "nullable": true,
+            "type": "number"
+          },
+          "online": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "openAlertCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "queueDepth": {
+            "nullable": true,
+            "type": "number"
+          },
+          "storageUtilization": {
+            "nullable": true,
+            "type": "number"
+          },
+          "taskBacklog": {
+            "nullable": true,
+            "type": "number"
+          },
+          "tenantCode": {
+            "type": "string"
+          },
+          "tenantId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "tenantName": {
+            "type": "string"
+          },
+          "tenantStatus": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PlatformOpsThresholdInput": {
+        "properties": {
+          "comparison": {
+            "minLength": 1,
+            "pattern": "GT|LT",
+            "type": "string"
+          },
+          "criticalThreshold": {
+            "exclusiveMinimum": false,
+            "minimum": 0,
+            "type": "number"
+          },
+          "enabled": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "warnThreshold": {
+            "exclusiveMinimum": false,
+            "minimum": 0,
+            "type": "number"
+          }
+        },
+        "required": [
+          "comparison",
+          "criticalThreshold",
+          "warnThreshold"
+        ],
+        "type": "object"
+      },
+      "PlatformOpsThresholdView": {
+        "properties": {
+          "comparison": {
+            "type": "string"
+          },
+          "criticalThreshold": {
+            "type": "number"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "metricCode": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "warnThreshold": {
+            "type": "number"
           }
         },
         "type": "object"
@@ -5548,6 +7871,713 @@
         },
         "type": "object"
       },
+      "SaasCapabilitiesView": {
+        "properties": {
+          "boundaryNote": {
+            "type": "string"
+          },
+          "dimensions": {
+            "items": {
+              "$ref": "#/components/schemas/SaasCapabilityDimension"
+            },
+            "type": "array"
+          },
+          "entitlementKinds": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "financeNote": {
+            "type": "string"
+          },
+          "meteringNote": {
+            "type": "string"
+          },
+          "overLimitActions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "periods": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "planStatuses": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "subscriptionStatuses": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "SaasCapabilityDimension": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "description": {
+            "type": "string"
+          },
+          "dimension": {
+            "type": "string"
+          },
+          "impact": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SaasOptionsView": {
+        "properties": {
+          "entitlementKinds": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "overLimitActions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "periods": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "planStatuses": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "plans": {
+            "items": {
+              "$ref": "#/components/schemas/SaasPlanOption"
+            },
+            "type": "array"
+          },
+          "subscriptionStatuses": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "SaasPlanOption": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SaasUsageInput": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "entitlementCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "impact": {
+            "maxLength": 300,
+            "minLength": 0,
+            "nullable": true,
+            "type": "string"
+          },
+          "measuredAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "note": {
+            "maxLength": 300,
+            "minLength": 0,
+            "nullable": true,
+            "type": "string"
+          },
+          "ownerModule": {
+            "maxLength": 32,
+            "minLength": 0,
+            "nullable": true,
+            "type": "string"
+          },
+          "periodEnd": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "periodStart": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "sourceSystem": {
+            "maxLength": 32,
+            "minLength": 0,
+            "nullable": true,
+            "type": "string"
+          },
+          "subscriptionId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "tenantId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "usageValue": {
+            "nullable": true,
+            "type": "number"
+          }
+        },
+        "required": [
+          "available",
+          "entitlementCode",
+          "tenantId"
+        ],
+        "type": "object"
+      },
+      "ShortcutCapabilities": {
+        "properties": {
+          "boundaries": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "effectiveSet": {
+            "type": "boolean"
+          },
+          "favoritesList": {
+            "type": "boolean"
+          },
+          "favoritesOwnerModule": {
+            "type": "string"
+          },
+          "mergeRules": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "permissionScopedEntries": {
+            "type": "boolean"
+          },
+          "personalOverride": {
+            "type": "boolean"
+          },
+          "templateManagement": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "ShortcutEntry": {
+        "properties": {
+          "icon": {
+            "nullable": true,
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "pageCode": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "position": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ShortcutOverride": {
+        "properties": {
+          "action": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "icon": {
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "label": {
+            "nullable": true,
+            "type": "string"
+          },
+          "pageCode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "path": {
+            "nullable": true,
+            "type": "string"
+          },
+          "position": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "targetKey": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ShortcutOverrideInput": {
+        "properties": {
+          "action": {
+            "type": "string"
+          },
+          "icon": {
+            "nullable": true,
+            "type": "string"
+          },
+          "label": {
+            "nullable": true,
+            "type": "string"
+          },
+          "pageCode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "path": {
+            "nullable": true,
+            "type": "string"
+          },
+          "position": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "targetKey": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ShortcutTemplate": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdBy": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "departmentId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "entries": {
+            "items": {
+              "$ref": "#/components/schemas/ShortcutEntry"
+            },
+            "type": "array"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "priority": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "roleId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "scopeType": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ShortcutTemplateInput": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "departmentId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "description": {
+            "nullable": true,
+            "type": "string"
+          },
+          "entries": {
+            "items": {
+              "$ref": "#/components/schemas/ShortcutEntry"
+            },
+            "type": "array"
+          },
+          "name": {
+            "type": "string"
+          },
+          "priority": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "roleId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "scopeType": {
+            "type": "string"
+          },
+          "status": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ShortcutTemplateList": {
+        "properties": {
+          "limit": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "offset": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "templates": {
+            "items": {
+              "$ref": "#/components/schemas/ShortcutTemplate"
+            },
+            "type": "array"
+          },
+          "total": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "SubscriptionDetailView": {
+        "properties": {
+          "events": {
+            "items": {
+              "$ref": "#/components/schemas/SubscriptionEventView"
+            },
+            "type": "array"
+          },
+          "subscription": {
+            "$ref": "#/components/schemas/SubscriptionView"
+          },
+          "usage": {
+            "items": {
+              "$ref": "#/components/schemas/UsageView"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "SubscriptionEventView": {
+        "properties": {
+          "action": {
+            "type": "string"
+          },
+          "actorName": {
+            "nullable": true,
+            "type": "string"
+          },
+          "fromStatus": {
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "occurredAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "subscriptionId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "toStatus": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SubscriptionInput": {
+        "properties": {
+          "expiresAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          },
+          "planCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "startedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "status": {
+            "pattern": "TRIAL|ACTIVE",
+            "type": "string"
+          },
+          "tenantId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "trialEnd": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "trialStart": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "planCode",
+          "status",
+          "tenantId"
+        ],
+        "type": "object"
+      },
+      "SubscriptionStatusInput": {
+        "properties": {
+          "expiresAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "reason": {
+            "maxLength": 300,
+            "minLength": 0,
+            "type": "string"
+          },
+          "startedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "status": {
+            "pattern": "TRIAL|ACTIVE|EXPIRED|SUSPENDED|CANCELLED",
+            "type": "string"
+          }
+        },
+        "required": [
+          "reason",
+          "status"
+        ],
+        "type": "object"
+      },
+      "SubscriptionUpdateInput": {
+        "properties": {
+          "expiresAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          },
+          "planCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "reason": {
+            "maxLength": 300,
+            "minLength": 0,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SubscriptionView": {
+        "properties": {
+          "blockedCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "cancelledAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "effectiveStatus": {
+            "type": "string"
+          },
+          "expiresAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "planCode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "planName": {
+            "nullable": true,
+            "type": "string"
+          },
+          "startedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "status": {
+            "nullable": true,
+            "type": "string"
+          },
+          "suspendReason": {
+            "type": "string"
+          },
+          "tenantCode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "tenantId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "tenantName": {
+            "nullable": true,
+            "type": "string"
+          },
+          "trialEnd": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "trialStart": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "usageAvailableCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "usageMissingCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "version": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
       "SwitchMembership": {
         "properties": {
           "membershipId": {
@@ -5648,6 +8678,673 @@
           },
           "tenantId": {
             "format": "uuid",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "UsageBillingRow": {
+        "properties": {
+          "collectedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "entitlementCode": {
+            "type": "string"
+          },
+          "entitlementKind": {
+            "type": "string"
+          },
+          "entitlementLimit": {
+            "type": "number"
+          },
+          "entitlementPeriod": {
+            "type": "string"
+          },
+          "entitlementUnit": {
+            "type": "string"
+          },
+          "entitlementUnlimited": {
+            "type": "boolean"
+          },
+          "measuredAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "overLimit": {
+            "type": "boolean"
+          },
+          "overLimitAction": {
+            "type": "string"
+          },
+          "periodEnd": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "periodStart": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "periodType": {
+            "nullable": true,
+            "type": "string"
+          },
+          "planCode": {
+            "type": "string"
+          },
+          "planName": {
+            "type": "string"
+          },
+          "quantity": {
+            "nullable": true,
+            "type": "number"
+          },
+          "sourceSystem": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string"
+          },
+          "stateNote": {
+            "type": "string"
+          },
+          "subscriptionStatus": {
+            "type": "string"
+          },
+          "tenantCode": {
+            "type": "string"
+          },
+          "tenantId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "tenantName": {
+            "type": "string"
+          },
+          "utilization": {
+            "nullable": true,
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "UsageCapabilitiesView": {
+        "properties": {
+          "billingStates": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "boundaryNote": {
+            "type": "string"
+          },
+          "caliberNote": {
+            "type": "string"
+          },
+          "coverageStates": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "dimensions": {
+            "items": {
+              "$ref": "#/components/schemas/UsageCapabilityDimension"
+            },
+            "type": "array"
+          },
+          "entitlementKinds": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "moneyNote": {
+            "type": "string"
+          },
+          "periods": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "UsageCapabilityDimension": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "description": {
+            "type": "string"
+          },
+          "dimension": {
+            "type": "string"
+          },
+          "impact": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "UsageCapacityRow": {
+        "properties": {
+          "entitlementKind": {
+            "type": "string"
+          },
+          "headroom": {
+            "type": "number"
+          },
+          "latestPeriodStart": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "licensedTotal": {
+            "type": "number"
+          },
+          "measuredTenantCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "subscribedTenantCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "unlimitedTenantCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "unmeasuredTenantCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "usedTotal": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "UsageCollectionRequest": {
+        "properties": {
+          "asOf": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "periodType": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "tenantId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "periodType"
+        ],
+        "type": "object"
+      },
+      "UsageCollectionRow": {
+        "properties": {
+          "collectionId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "dimensionCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "finishedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "measuredCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "periodEnd": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "periodStart": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "periodType": {
+            "type": "string"
+          },
+          "sourceSystems": {
+            "type": "string"
+          },
+          "startedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "subscriptionId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "tenantCode": {
+            "type": "string"
+          },
+          "tenantId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "tenantName": {
+            "type": "string"
+          },
+          "unmeasuredCount": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "UsageCollectionRun": {
+        "properties": {
+          "asOf": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "measuredDimensionCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "periodType": {
+            "type": "string"
+          },
+          "tenantCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "tenants": {
+            "items": {
+              "$ref": "#/components/schemas/UsageCollectionTenantResult"
+            },
+            "type": "array"
+          },
+          "unmeasuredDimensionCount": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "UsageCollectionTenantResult": {
+        "properties": {
+          "collectionId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "dimensionCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "measuredCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "measuredKinds": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "planCode": {
+            "type": "string"
+          },
+          "sourceSystems": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "status": {
+            "type": "string"
+          },
+          "subscriptionId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "tenantId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "unmeasuredCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "unmeasuredKinds": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "UsageCoverageRow": {
+        "properties": {
+          "entitlementKind": {
+            "type": "string"
+          },
+          "measuredTenantCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "registeredTenantCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "state": {
+            "type": "string"
+          },
+          "stateNote": {
+            "type": "string"
+          },
+          "subscribedTenantCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "wiredSourceSystems": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "UsageOptionsView": {
+        "properties": {
+          "billingStates": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "coverageStates": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "entitlementKinds": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "periods": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "UsageReportRow": {
+        "properties": {
+          "collectedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "entitlementCode": {
+            "type": "string"
+          },
+          "entitlementKind": {
+            "type": "string"
+          },
+          "entitlementLimit": {
+            "nullable": true,
+            "type": "number"
+          },
+          "entitlementPeriod": {
+            "type": "string"
+          },
+          "entitlementUnit": {
+            "type": "string"
+          },
+          "entitlementUnlimited": {
+            "type": "boolean"
+          },
+          "measuredAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "overLimit": {
+            "type": "boolean"
+          },
+          "overLimitAction": {
+            "type": "string"
+          },
+          "periodEnd": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "periodStart": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "periodType": {
+            "type": "string"
+          },
+          "planCode": {
+            "type": "string"
+          },
+          "planName": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "sourceSystem": {
+            "type": "string"
+          },
+          "subscriptionId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "subscriptionStatus": {
+            "type": "string"
+          },
+          "tenantCode": {
+            "type": "string"
+          },
+          "tenantId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "tenantName": {
+            "type": "string"
+          },
+          "utilization": {
+            "nullable": true,
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "UsageTrendPoint": {
+        "properties": {
+          "collectedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "entitlementKind": {
+            "type": "string"
+          },
+          "periodEnd": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "periodStart": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "periodType": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "sourceSystems": {
+            "type": "string"
+          },
+          "tenantCode": {
+            "type": "string"
+          },
+          "tenantId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "tenantName": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "UsageView": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "entitlementCode": {
+            "type": "string"
+          },
+          "entitlementKind": {
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "impact": {
+            "type": "string"
+          },
+          "limitValue": {
+            "nullable": true,
+            "type": "number"
+          },
+          "measuredAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "overLimitAction": {
+            "nullable": true,
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "period": {
+            "nullable": true,
+            "type": "string"
+          },
+          "periodEnd": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "periodStart": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "sourceSystem": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string"
+          },
+          "subscriptionId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "unlimited": {
+            "type": "boolean"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "usageValue": {
+            "nullable": true,
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "UserPreferenceInput": {
+        "properties": {
+          "preference": {
+            "additionalProperties": {
+              "type": "object"
+            },
+            "type": "object"
+          }
+        },
+        "type": "object"
+      },
+      "UserPreferenceList": {
+        "properties": {
+          "entries": {
+            "items": {
+              "$ref": "#/components/schemas/UserPreferenceView"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "UserPreferenceView": {
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "pageKey": {
+            "type": "string"
+          },
+          "preference": {
+            "additionalProperties": {
+              "type": "object"
+            },
+            "type": "object"
+          },
+          "stored": {
+            "type": "boolean"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "nullable": true,
             "type": "string"
           }
         },
@@ -7464,6 +11161,132 @@
         ]
       }
     },
+    "/identity/approval-todos": {
+      "get": {
+        "operationId": "get_identity_approval_todos",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "documentTypeCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sourceSystem",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "currencyCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "amountBranchName",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "minAmount",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "in": "query",
+            "name": "maxAmount",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "in": "query",
+            "name": "minDwellSeconds",
+            "required": false,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "overdueOnly",
+            "required": false,
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "required": false,
+            "schema": {
+              "default": "WAITING",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApprovalTodoPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "approval-todo-controller"
+        ]
+      }
+    },
     "/identity/audit": {
       "get": {
         "operationId": "get_identity_audit",
@@ -8190,6 +12013,160 @@
         },
         "tags": [
           "administration-controller"
+        ]
+      }
+    },
+    "/identity/default-context": {
+      "delete": {
+        "operationId": "delete_identity_default_context",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "default-context-controller"
+        ]
+      },
+      "get": {
+        "operationId": "get_identity_default_context",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultContextView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "default-context-controller"
+        ]
+      },
+      "put": {
+        "operationId": "put_identity_default_context",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DefaultContextInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultContextView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "default-context-controller"
+        ]
+      }
+    },
+    "/identity/default-context/capabilities": {
+      "get": {
+        "operationId": "get_identity_default_context_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultContextCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "default-context-controller"
+        ]
+      }
+    },
+    "/identity/default-context/options": {
+      "get": {
+        "operationId": "get_identity_default_context_options",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultContextOptions"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "default-context-controller"
         ]
       }
     },
@@ -9208,6 +13185,108 @@
         },
         "tags": [
           "dictionary-controller"
+        ]
+      }
+    },
+    "/identity/global-search/recent": {
+      "delete": {
+        "operationId": "delete_identity_global_search_recent",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "global-search-recent-controller"
+        ]
+      },
+      "get": {
+        "operationId": "get_identity_global_search_recent",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 10,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/GlobalSearchRecentList"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "global-search-recent-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_identity_global_search_recent",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GlobalSearchRecentInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/GlobalSearchRecentEntry"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "global-search-recent-controller"
         ]
       }
     },
@@ -10432,6 +14511,401 @@
         },
         "tags": [
           "approval-inbox-controller"
+        ]
+      }
+    },
+    "/identity/notification-inbox/capabilities": {
+      "get": {
+        "operationId": "get_identity_notification_inbox_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationInboxCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "notification-inbox-controller"
+        ]
+      }
+    },
+    "/identity/notification-inbox/read": {
+      "post": {
+        "operationId": "post_identity_notification_inbox_read",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NotificationReadRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationReadResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "notification-inbox-controller"
+        ]
+      }
+    },
+    "/identity/notification-inbox/read-state": {
+      "post": {
+        "operationId": "post_identity_notification_inbox_read_state",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NotificationReadRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationReadState"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "notification-inbox-controller"
+        ]
+      }
+    },
+    "/identity/notification-inbox/subscriptions": {
+      "get": {
+        "operationId": "get_identity_notification_inbox_subscriptions",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationSubscriptions"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "notification-inbox-controller"
+        ]
+      },
+      "put": {
+        "operationId": "put_identity_notification_inbox_subscriptions",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NotificationSubscriptionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationSubscriptions"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "notification-inbox-controller"
+        ]
+      }
+    },
+    "/identity/notification-inbox/unread": {
+      "post": {
+        "operationId": "post_identity_notification_inbox_unread",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NotificationReadRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationReadResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "notification-inbox-controller"
+        ]
+      }
+    },
+    "/identity/notification-preferences": {
+      "delete": {
+        "operationId": "delete_identity_notification_preferences",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationPreferenceView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "notification-preference-controller"
+        ]
+      },
+      "get": {
+        "operationId": "get_identity_notification_preferences",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationPreferenceView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "notification-preference-controller"
+        ]
+      },
+      "put": {
+        "operationId": "put_identity_notification_preferences",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NotificationPreferenceInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationPreferenceView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "notification-preference-controller"
+        ]
+      }
+    },
+    "/identity/notification-preferences/capabilities": {
+      "get": {
+        "operationId": "get_identity_notification_preferences_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationPreferenceCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "notification-preference-controller"
+        ]
+      }
+    },
+    "/identity/notification-preferences/resolve": {
+      "post": {
+        "operationId": "post_identity_notification_preferences_resolve",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NotificationPreferenceResolveRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationPreferenceResolution"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "notification-preference-controller"
         ]
       }
     },
@@ -11687,6 +16161,185 @@
         ]
       }
     },
+    "/identity/page-favorites": {
+      "delete": {
+        "operationId": "delete_identity_page_favorites",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "href",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageFavoriteSet"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "page-favorite-controller"
+        ]
+      },
+      "get": {
+        "operationId": "get_identity_page_favorites",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageFavoriteSet"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "page-favorite-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_identity_page_favorites",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PageFavoriteInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageFavoriteSet"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "page-favorite-controller"
+        ]
+      }
+    },
+    "/identity/page-favorites/hidden": {
+      "delete": {
+        "operationId": "delete_identity_page_favorites_hidden",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageFavoriteSet"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "page-favorite-controller"
+        ]
+      }
+    },
+    "/identity/page-favorites/order": {
+      "put": {
+        "operationId": "put_identity_page_favorites_order",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PageFavoriteMove"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageFavoriteSet"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "page-favorite-controller"
+        ]
+      }
+    },
     "/identity/permissions": {
       "get": {
         "operationId": "get_identity_permissions",
@@ -11718,6 +16371,996 @@
         },
         "tags": [
           "administration-controller"
+        ]
+      }
+    },
+    "/identity/platform-flags/capabilities": {
+      "get": {
+        "operationId": "get_identity_platform_flags_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformFlagCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "platform-flag-controller"
+        ]
+      }
+    },
+    "/identity/platform-flags/definitions": {
+      "get": {
+        "operationId": "get_identity_platform_flags_definitions",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/PlatformFlagDefinitionView"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "platform-flag-controller"
+        ]
+      }
+    },
+    "/identity/platform-flags/evaluate": {
+      "get": {
+        "operationId": "get_identity_platform_flags_evaluate",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "tenantId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/PlatformFlagEvaluationView"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "platform-flag-controller"
+        ]
+      }
+    },
+    "/identity/platform-flags/evaluate-batch": {
+      "get": {
+        "operationId": "get_identity_platform_flags_evaluate_batch",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keys",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "tenantId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/PlatformFlagEvaluationView"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "platform-flag-controller"
+        ]
+      }
+    },
+    "/identity/platform-flags/exceptions": {
+      "get": {
+        "operationId": "get_identity_platform_flags_exceptions",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "tenantId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/PlatformFlagExceptionView"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "platform-flag-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_identity_platform_flags_exceptions",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlatformFlagExceptionInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "format": "uuid",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "platform-flag-controller"
+        ]
+      }
+    },
+    "/identity/platform-flags/exceptions/{id}": {
+      "delete": {
+        "operationId": "delete_identity_platform_flags_exceptions_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "tenantId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "platform-flag-controller"
+        ]
+      }
+    },
+    "/identity/platform-flags/history": {
+      "get": {
+        "operationId": "get_identity_platform_flags_history",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "flagCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/PlatformFlagHistoryView"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "platform-flag-controller"
+        ]
+      }
+    },
+    "/identity/platform-flags/settings": {
+      "get": {
+        "operationId": "get_identity_platform_flags_settings",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/PlatformFlagSettingView"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "platform-flag-controller"
+        ]
+      }
+    },
+    "/identity/platform-flags/settings/{code}": {
+      "get": {
+        "operationId": "get_identity_platform_flags_settings_code",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "code",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformFlagSettingView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "platform-flag-controller"
+        ]
+      },
+      "put": {
+        "operationId": "put_identity_platform_flags_settings_code",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "code",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlatformFlagSettingInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "platform-flag-controller"
+        ]
+      }
+    },
+    "/identity/platform-ops/alerts": {
+      "get": {
+        "operationId": "get_identity_platform_ops_alerts",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "severity",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "tenantId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformOpsAlertPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "platform-ops-controller"
+        ]
+      }
+    },
+    "/identity/platform-ops/alerts/{alertId}/acknowledge": {
+      "post": {
+        "operationId": "post_identity_platform_ops_alerts_alertId_acknowledge",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "alertId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformOpsAlertView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "platform-ops-controller"
+        ]
+      }
+    },
+    "/identity/platform-ops/alerts/{alertId}/resolve": {
+      "post": {
+        "operationId": "post_identity_platform_ops_alerts_alertId_resolve",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "alertId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformOpsAlertView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "platform-ops-controller"
+        ]
+      }
+    },
+    "/identity/platform-ops/capabilities": {
+      "get": {
+        "operationId": "get_identity_platform_ops_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformOpsCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "platform-ops-controller"
+        ]
+      }
+    },
+    "/identity/platform-ops/ingest/metrics": {
+      "post": {
+        "operationId": "post_identity_platform_ops_ingest_metrics",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Internal-Key",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "items": {
+                  "$ref": "#/components/schemas/PlatformOpsMetricInput"
+                },
+                "type": "array"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/PlatformOpsIngestResult"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "platform-ops-controller"
+        ]
+      }
+    },
+    "/identity/platform-ops/metrics": {
+      "get": {
+        "operationId": "get_identity_platform_ops_metrics",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "tenantId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "serviceCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "metricCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformOpsMetricPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "platform-ops-controller"
+        ]
+      }
+    },
+    "/identity/platform-ops/overview": {
+      "get": {
+        "operationId": "get_identity_platform_ops_overview",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformOpsOverviewView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "platform-ops-controller"
+        ]
+      }
+    },
+    "/identity/platform-ops/roles": {
+      "post": {
+        "operationId": "post_identity_platform_ops_roles",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Internal-Key",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "roleCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "object"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "platform-ops-controller"
+        ]
+      }
+    },
+    "/identity/platform-ops/self/metrics": {
+      "get": {
+        "operationId": "get_identity_platform_ops_self_metrics",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/PlatformOpsMetricView"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "platform-ops-controller"
+        ]
+      }
+    },
+    "/identity/platform-ops/tenants": {
+      "get": {
+        "operationId": "get_identity_platform_ops_tenants",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/PlatformOpsTenantHealthView"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "platform-ops-controller"
+        ]
+      }
+    },
+    "/identity/platform-ops/thresholds": {
+      "get": {
+        "operationId": "get_identity_platform_ops_thresholds",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/PlatformOpsThresholdView"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "platform-ops-controller"
+        ]
+      }
+    },
+    "/identity/platform-ops/thresholds/{metricCode}": {
+      "put": {
+        "operationId": "put_identity_platform_ops_thresholds_metricCode",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "metricCode",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlatformOpsThresholdInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformOpsThresholdView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "platform-ops-controller"
         ]
       }
     },
@@ -11954,6 +17597,1598 @@
         ]
       }
     },
+    "/identity/saas-plans/capabilities": {
+      "get": {
+        "operationId": "get_identity_saas_plans_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SaasCapabilitiesView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "saas-plan-controller"
+        ]
+      }
+    },
+    "/identity/saas-plans/entitlement-check": {
+      "get": {
+        "operationId": "get_identity_saas_plans_entitlement_check",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "tenantId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "entitlementCode",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntitlementCheckView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "saas-plan-controller"
+        ]
+      }
+    },
+    "/identity/saas-plans/options": {
+      "get": {
+        "operationId": "get_identity_saas_plans_options",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SaasOptionsView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "saas-plan-controller"
+        ]
+      }
+    },
+    "/identity/saas-plans/plans": {
+      "get": {
+        "operationId": "get_identity_saas_plans_plans",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/PlanView"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "saas-plan-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_identity_saas_plans_plans",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlanInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "format": "uuid",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "saas-plan-controller"
+        ]
+      }
+    },
+    "/identity/saas-plans/plans/{code}": {
+      "get": {
+        "operationId": "get_identity_saas_plans_plans_code",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "code",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlanDetailView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "saas-plan-controller"
+        ]
+      },
+      "put": {
+        "operationId": "put_identity_saas_plans_plans_code",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "code",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlanUpdateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "saas-plan-controller"
+        ]
+      }
+    },
+    "/identity/saas-plans/plans/{code}/entitlements": {
+      "post": {
+        "operationId": "post_identity_saas_plans_plans_code_entitlements",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "code",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EntitlementInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "saas-plan-controller"
+        ]
+      }
+    },
+    "/identity/saas-plans/plans/{code}/entitlements/{entitlementCode}": {
+      "delete": {
+        "operationId": "delete_identity_saas_plans_plans_code_entitlements_entitlementCode",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "code",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "entitlementCode",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "saas-plan-controller"
+        ]
+      },
+      "put": {
+        "operationId": "put_identity_saas_plans_plans_code_entitlements_entitlementCode",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "code",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "entitlementCode",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EntitlementInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "saas-plan-controller"
+        ]
+      }
+    },
+    "/identity/saas-plans/subscriptions": {
+      "get": {
+        "operationId": "get_identity_saas_plans_subscriptions",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/SubscriptionView"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "saas-plan-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_identity_saas_plans_subscriptions",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubscriptionInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "format": "uuid",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "saas-plan-controller"
+        ]
+      }
+    },
+    "/identity/saas-plans/subscriptions/expire-due": {
+      "post": {
+        "operationId": "post_identity_saas_plans_subscriptions_expire_due",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "object"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "saas-plan-controller"
+        ]
+      }
+    },
+    "/identity/saas-plans/subscriptions/{id}": {
+      "get": {
+        "operationId": "get_identity_saas_plans_subscriptions_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubscriptionDetailView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "saas-plan-controller"
+        ]
+      },
+      "put": {
+        "operationId": "put_identity_saas_plans_subscriptions_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubscriptionUpdateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "saas-plan-controller"
+        ]
+      }
+    },
+    "/identity/saas-plans/subscriptions/{id}/events": {
+      "get": {
+        "operationId": "get_identity_saas_plans_subscriptions_id_events",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/SubscriptionEventView"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "saas-plan-controller"
+        ]
+      }
+    },
+    "/identity/saas-plans/subscriptions/{id}/status": {
+      "post": {
+        "operationId": "post_identity_saas_plans_subscriptions_id_status",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubscriptionStatusInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "saas-plan-controller"
+        ]
+      }
+    },
+    "/identity/saas-plans/usage": {
+      "get": {
+        "operationId": "get_identity_saas_plans_usage",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "tenantId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/UsageView"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "saas-plan-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_identity_saas_plans_usage",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaasUsageInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "format": "uuid",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "saas-plan-controller"
+        ]
+      }
+    },
+    "/identity/saas-platform/roles": {
+      "post": {
+        "operationId": "post_identity_saas_platform_roles",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Internal-Key",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "roleCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "object"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "saas-plan-controller"
+        ]
+      }
+    },
+    "/identity/saas-usage/billing-basis": {
+      "get": {
+        "operationId": "get_identity_saas_usage_billing_basis",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "tenantId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "kind",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "periodType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/UsageBillingRow"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "saas-usage-controller"
+        ]
+      }
+    },
+    "/identity/saas-usage/capabilities": {
+      "get": {
+        "operationId": "get_identity_saas_usage_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/UsageCapabilitiesView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "saas-usage-controller"
+        ]
+      }
+    },
+    "/identity/saas-usage/capacity": {
+      "get": {
+        "operationId": "get_identity_saas_usage_capacity",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "periodType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/UsageCapacityRow"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "saas-usage-controller"
+        ]
+      }
+    },
+    "/identity/saas-usage/collections": {
+      "get": {
+        "operationId": "get_identity_saas_usage_collections",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "tenantId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/UsageCollectionRow"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "saas-usage-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_identity_saas_usage_collections",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UsageCollectionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/UsageCollectionRun"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "saas-usage-controller"
+        ]
+      }
+    },
+    "/identity/saas-usage/coverage": {
+      "get": {
+        "operationId": "get_identity_saas_usage_coverage",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/UsageCoverageRow"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "saas-usage-controller"
+        ]
+      }
+    },
+    "/identity/saas-usage/options": {
+      "get": {
+        "operationId": "get_identity_saas_usage_options",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/UsageOptionsView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "saas-usage-controller"
+        ]
+      }
+    },
+    "/identity/saas-usage/report": {
+      "get": {
+        "operationId": "get_identity_saas_usage_report",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "tenantId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "kind",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "periodType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/UsageReportRow"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "saas-usage-controller"
+        ]
+      }
+    },
+    "/identity/saas-usage/trend": {
+      "get": {
+        "operationId": "get_identity_saas_usage_trend",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "tenantId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "kind",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "periodType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/UsageTrendPoint"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "saas-usage-controller"
+        ]
+      }
+    },
+    "/identity/shortcut-templates": {
+      "get": {
+        "operationId": "get_identity_shortcut_templates",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "scopeType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShortcutTemplateList"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "shortcut-template-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_identity_shortcut_templates",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ShortcutTemplateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShortcutTemplate"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "shortcut-template-controller"
+        ]
+      }
+    },
+    "/identity/shortcut-templates/capabilities": {
+      "get": {
+        "operationId": "get_identity_shortcut_templates_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShortcutCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "shortcut-template-controller"
+        ]
+      }
+    },
+    "/identity/shortcut-templates/effective": {
+      "get": {
+        "operationId": "get_identity_shortcut_templates_effective",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/EffectiveShortcutSet"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "shortcut-template-controller"
+        ]
+      }
+    },
+    "/identity/shortcut-templates/overrides": {
+      "get": {
+        "operationId": "get_identity_shortcut_templates_overrides",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ShortcutOverride"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "shortcut-template-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_identity_shortcut_templates_overrides",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ShortcutOverrideInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShortcutOverride"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "shortcut-template-controller"
+        ]
+      }
+    },
+    "/identity/shortcut-templates/overrides/{id}": {
+      "delete": {
+        "operationId": "delete_identity_shortcut_templates_overrides_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "shortcut-template-controller"
+        ]
+      }
+    },
+    "/identity/shortcut-templates/{id}": {
+      "delete": {
+        "operationId": "delete_identity_shortcut_templates_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "shortcut-template-controller"
+        ]
+      },
+      "get": {
+        "operationId": "get_identity_shortcut_templates_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShortcutTemplate"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "shortcut-template-controller"
+        ]
+      },
+      "put": {
+        "operationId": "put_identity_shortcut_templates_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ShortcutTemplateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShortcutTemplate"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "shortcut-template-controller"
+        ]
+      }
+    },
     "/identity/tenants": {
       "get": {
         "operationId": "get_identity_tenants",
@@ -12048,6 +19283,298 @@
         },
         "tags": [
           "administration-controller"
+        ]
+      }
+    },
+    "/identity/user-locale": {
+      "delete": {
+        "operationId": "delete_identity_user_locale",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "account-locale-controller"
+        ]
+      },
+      "get": {
+        "operationId": "get_identity_user_locale",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccountLocaleView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "account-locale-controller"
+        ]
+      },
+      "put": {
+        "operationId": "put_identity_user_locale",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AccountLocaleInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccountLocaleView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "account-locale-controller"
+        ]
+      }
+    },
+    "/identity/user-locale/capabilities": {
+      "get": {
+        "operationId": "get_identity_user_locale_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccountLocaleCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "account-locale-controller"
+        ]
+      }
+    },
+    "/identity/user-preferences": {
+      "delete": {
+        "operationId": "delete_identity_user_preferences",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "user-preference-controller"
+        ]
+      },
+      "get": {
+        "operationId": "get_identity_user_preferences",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserPreferenceList"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "user-preference-controller"
+        ]
+      }
+    },
+    "/identity/user-preferences/{pageKey}": {
+      "delete": {
+        "operationId": "delete_identity_user_preferences_pageKey",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "pageKey",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "user-preference-controller"
+        ]
+      },
+      "get": {
+        "operationId": "get_identity_user_preferences_pageKey",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "pageKey",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserPreferenceView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "user-preference-controller"
+        ]
+      },
+      "put": {
+        "operationId": "put_identity_user_preferences_pageKey",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "pageKey",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserPreferenceInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserPreferenceView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "user-preference-controller"
         ]
       }
     },

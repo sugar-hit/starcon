@@ -1,0 +1,5555 @@
+{
+  "components": {
+    "schemas": {
+      "FinanceSoftwareAccountInput": {
+        "properties": {
+          "bookCode": {
+            "type": "string"
+          },
+          "companyName": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "fiscalStartMonth": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "remark": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "vendor": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceSoftwareAccountRow": {
+        "properties": {
+          "bookCode": {
+            "type": "string"
+          },
+          "companyName": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdBy": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "fiscalStartMonth": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "masterMapCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "remark": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "subjectMapCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "vendor": {
+            "type": "string"
+          },
+          "vendorLabel": {
+            "type": "string"
+          },
+          "voucherFileCount": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceSoftwareBalanceImportInput": {
+        "properties": {
+          "balances": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceSoftwareReconcileBalanceInput"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceSoftwareCapabilities": {
+        "properties": {
+          "capabilities": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceSoftwareCapability"
+            },
+            "type": "array"
+          },
+          "gaps": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceSoftwareGap"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceSoftwareCapability": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "evidence": {
+            "type": "string"
+          },
+          "moduleId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceSoftwareGap": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "moduleId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "relation": {
+            "type": "string"
+          },
+          "service": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceSoftwareMasterMapInput": {
+        "properties": {
+          "accountId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "externalCode": {
+            "type": "string"
+          },
+          "externalName": {
+            "type": "string"
+          },
+          "localCode": {
+            "type": "string"
+          },
+          "localName": {
+            "type": "string"
+          },
+          "masterType": {
+            "type": "string"
+          },
+          "remark": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceSoftwareMasterMapRow": {
+        "properties": {
+          "accountId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "accountName": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "externalCode": {
+            "type": "string"
+          },
+          "externalName": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "localCode": {
+            "type": "string"
+          },
+          "localName": {
+            "type": "string"
+          },
+          "masterType": {
+            "type": "string"
+          },
+          "masterTypeLabel": {
+            "type": "string"
+          },
+          "remark": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceSoftwareOverview": {
+        "properties": {
+          "accounts": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "activeAccounts": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "computedReconcileTasks": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "generatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "masterMaps": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "reconcileDiffs": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "reconcileTasks": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "subjectMaps": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "voucherFiles": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceSoftwarePeriodOption": {
+        "properties": {
+          "endDate": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "periodCode": {
+            "type": "string"
+          },
+          "periodName": {
+            "type": "string"
+          },
+          "startDate": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceSoftwarePushInput": {
+        "properties": {
+          "accountId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "dateFrom": {
+            "format": "date",
+            "type": "string"
+          },
+          "dateTo": {
+            "format": "date",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceSoftwarePushOutcome": {
+        "properties": {
+          "accountId": {
+            "type": "string"
+          },
+          "connected": {
+            "type": "boolean"
+          },
+          "externalReference": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "pushed": {
+            "type": "boolean"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "vendor": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceSoftwareReconcileBalanceInput": {
+        "properties": {
+          "currency": {
+            "type": "string"
+          },
+          "direction": {
+            "type": "string"
+          },
+          "externalBalance": {
+            "type": "number"
+          },
+          "externalSubjectCode": {
+            "type": "string"
+          },
+          "externalSubjectName": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceSoftwareReconcileBalanceRow": {
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "direction": {
+            "type": "string"
+          },
+          "directionLabel": {
+            "type": "string"
+          },
+          "externalBalance": {
+            "type": "number"
+          },
+          "externalSubjectCode": {
+            "type": "string"
+          },
+          "externalSubjectName": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "taskId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceSoftwareReconcileDetail": {
+        "properties": {
+          "balances": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceSoftwareReconcileBalanceRow"
+            },
+            "type": "array"
+          },
+          "diffs": {
+            "items": {
+              "$ref": "#/components/schemas/FinanceSoftwareReconcileDiffRow"
+            },
+            "type": "array"
+          },
+          "task": {
+            "$ref": "#/components/schemas/FinanceSoftwareReconcileTaskRow"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceSoftwareReconcileDiffRow": {
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "difference": {
+            "type": "number"
+          },
+          "externalBalance": {
+            "type": "number"
+          },
+          "externalSubjectCode": {
+            "type": "string"
+          },
+          "externalSubjectName": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "localBalance": {
+            "type": "number"
+          },
+          "localSubjectCode": {
+            "type": "string"
+          },
+          "localSubjectName": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "reasonLabel": {
+            "type": "string"
+          },
+          "taskId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceSoftwareReconcileTaskInput": {
+        "properties": {
+          "accountId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "periodFromId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "periodToId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "remark": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceSoftwareReconcileTaskRow": {
+        "properties": {
+          "accountId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "accountName": {
+            "type": "string"
+          },
+          "computedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdBy": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "differenceCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "externalSubjectCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "localSubjectCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "matchedCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "periodFromId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "periodToId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "reconcileNo": {
+            "type": "string"
+          },
+          "remark": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "totalDifference": {
+            "type": "number"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceSoftwareSubjectMapInput": {
+        "properties": {
+          "accountId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "direction": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "externalSubjectCode": {
+            "type": "string"
+          },
+          "externalSubjectName": {
+            "type": "string"
+          },
+          "localSubjectCode": {
+            "type": "string"
+          },
+          "localSubjectName": {
+            "type": "string"
+          },
+          "remark": {
+            "type": "string"
+          },
+          "taxCode": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceSoftwareSubjectMapRow": {
+        "properties": {
+          "accountId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "accountName": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "direction": {
+            "type": "string"
+          },
+          "directionLabel": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "externalSubjectCode": {
+            "type": "string"
+          },
+          "externalSubjectName": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "localSubjectCode": {
+            "type": "string"
+          },
+          "localSubjectName": {
+            "type": "string"
+          },
+          "remark": {
+            "type": "string"
+          },
+          "taxCode": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceSoftwareVoucherExportInput": {
+        "properties": {
+          "accountId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "dateFrom": {
+            "format": "date",
+            "type": "string"
+          },
+          "dateTo": {
+            "format": "date",
+            "type": "string"
+          },
+          "format": {
+            "type": "string"
+          },
+          "remark": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceSoftwareVoucherExportResult": {
+        "properties": {
+          "content": {
+            "type": "string"
+          },
+          "contentBytes": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "contentSha256": {
+            "type": "string"
+          },
+          "contentType": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "dateFrom": {
+            "format": "date",
+            "type": "string"
+          },
+          "dateTo": {
+            "format": "date",
+            "type": "string"
+          },
+          "fileId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "fileNo": {
+            "type": "string"
+          },
+          "filename": {
+            "type": "string"
+          },
+          "format": {
+            "type": "string"
+          },
+          "lineCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalCredit": {
+            "type": "number"
+          },
+          "totalDebit": {
+            "type": "number"
+          },
+          "unmappedLineCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "voucherCount": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceSoftwareVoucherFileDetail": {
+        "properties": {
+          "content": {
+            "type": "string"
+          },
+          "contentType": {
+            "type": "string"
+          },
+          "file": {
+            "$ref": "#/components/schemas/FinanceSoftwareVoucherFileRow"
+          }
+        },
+        "type": "object"
+      },
+      "FinanceSoftwareVoucherFileRow": {
+        "properties": {
+          "accountId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "accountName": {
+            "type": "string"
+          },
+          "contentBytes": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "contentSha256": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdBy": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "dateFrom": {
+            "format": "date",
+            "type": "string"
+          },
+          "dateTo": {
+            "format": "date",
+            "type": "string"
+          },
+          "fileNo": {
+            "type": "string"
+          },
+          "filename": {
+            "type": "string"
+          },
+          "format": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "lineCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalCredit": {
+            "type": "number"
+          },
+          "totalDebit": {
+            "type": "number"
+          },
+          "unmappedLineCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "voucherCount": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "IntegrationAppCapabilities": {
+        "properties": {
+          "capabilities": {
+            "items": {
+              "$ref": "#/components/schemas/IntegrationAppCapability"
+            },
+            "type": "array"
+          },
+          "downstreamGaps": {
+            "items": {
+              "$ref": "#/components/schemas/IntegrationAppGap"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "IntegrationAppCapability": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "basis": {
+            "type": "string"
+          },
+          "impact": {
+            "type": "string"
+          },
+          "module": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IntegrationAppDetail": {
+        "properties": {
+          "app": {
+            "$ref": "#/components/schemas/IntegrationAppRow"
+          },
+          "credentials": {
+            "items": {
+              "$ref": "#/components/schemas/IntegrationCredentialRow"
+            },
+            "type": "array"
+          },
+          "ipAllowlist": {
+            "items": {
+              "$ref": "#/components/schemas/IntegrationIpAllowlistRow"
+            },
+            "type": "array"
+          },
+          "quotaStatus": {
+            "items": {
+              "$ref": "#/components/schemas/IntegrationQuotaStatusRow"
+            },
+            "type": "array"
+          },
+          "quotas": {
+            "items": {
+              "$ref": "#/components/schemas/IntegrationQuotaRow"
+            },
+            "type": "array"
+          },
+          "scopes": {
+            "items": {
+              "$ref": "#/components/schemas/IntegrationScopeRow"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "IntegrationAppGap": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "group": {
+            "type": "string"
+          },
+          "module": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "ownerService": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IntegrationAppInput": {
+        "properties": {
+          "appCode": {
+            "type": "string"
+          },
+          "appName": {
+            "type": "string"
+          },
+          "appType": {
+            "type": "string"
+          },
+          "contactEmail": {
+            "type": "string"
+          },
+          "contactName": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IntegrationAppOption": {
+        "properties": {
+          "basis": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IntegrationAppOptions": {
+        "properties": {
+          "appTypes": {
+            "items": {
+              "$ref": "#/components/schemas/IntegrationAppOption"
+            },
+            "type": "array"
+          },
+          "quotaWindows": {
+            "items": {
+              "$ref": "#/components/schemas/IntegrationAppOption"
+            },
+            "type": "array"
+          },
+          "scopeActions": {
+            "items": {
+              "$ref": "#/components/schemas/IntegrationAppOption"
+            },
+            "type": "array"
+          },
+          "scopeResources": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "statuses": {
+            "items": {
+              "$ref": "#/components/schemas/IntegrationAppOption"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "IntegrationAppOverview": {
+        "properties": {
+          "activeApps": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "activeCredentials": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "appsWithIpAllowlist": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "appsWithQuota": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "generatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "revokedApps": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalApps": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "IntegrationAppPage": {
+        "properties": {
+          "activeCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/IntegrationAppRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "revokedCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "IntegrationAppRow": {
+        "properties": {
+          "activeCredentialCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "appCode": {
+            "type": "string"
+          },
+          "appName": {
+            "type": "string"
+          },
+          "appType": {
+            "type": "string"
+          },
+          "appTypeLabel": {
+            "type": "string"
+          },
+          "contactEmail": {
+            "type": "string"
+          },
+          "contactName": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "ipAllowlistCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "ownerUserId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "quotaCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "revokeReason": {
+            "type": "string"
+          },
+          "revokedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "scopeCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IntegrationAuditEventPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/IntegrationAuditEventRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "IntegrationAuditEventRow": {
+        "properties": {
+          "actorKind": {
+            "type": "string"
+          },
+          "actorUserId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "appId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "credentialId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "eventType": {
+            "type": "string"
+          },
+          "eventTypeLabel": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IntegrationCredentialIssued": {
+        "properties": {
+          "apiKey": {
+            "type": "string"
+          },
+          "credential": {
+            "$ref": "#/components/schemas/IntegrationCredentialRow"
+          },
+          "notice": {
+            "type": "string"
+          },
+          "secret": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IntegrationCredentialRow": {
+        "properties": {
+          "apiKeyPrefix": {
+            "type": "string"
+          },
+          "appId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "expiresAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "issuedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "lastUsedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "revokeReason": {
+            "type": "string"
+          },
+          "revokedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "rotatedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "rotatedFromId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "secretHint": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "version": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "IntegrationCredentialVerifyInput": {
+        "properties": {
+          "actionCode": {
+            "type": "string"
+          },
+          "apiKey": {
+            "type": "string"
+          },
+          "clientIp": {
+            "type": "string"
+          },
+          "resourceCode": {
+            "type": "string"
+          },
+          "secret": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IntegrationCredentialVerifyResult": {
+        "properties": {
+          "appStatus": {
+            "type": "string"
+          },
+          "conclusion": {
+            "type": "string"
+          },
+          "credentialMatched": {
+            "type": "boolean"
+          },
+          "credentialStatus": {
+            "type": "string"
+          },
+          "ipAllowed": {
+            "type": "boolean"
+          },
+          "ipChecked": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          },
+          "quotaExceeded": {
+            "type": "boolean"
+          },
+          "quotaStatus": {
+            "items": {
+              "$ref": "#/components/schemas/IntegrationQuotaStatusRow"
+            },
+            "type": "array"
+          },
+          "scopeChecked": {
+            "type": "boolean"
+          },
+          "scopeGranted": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "IntegrationIpAllowlistInput": {
+        "properties": {
+          "cidr": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IntegrationIpAllowlistRow": {
+        "properties": {
+          "appId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "cidr": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdBy": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IntegrationQuotaInput": {
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "limitCount": {
+            "type": "number"
+          },
+          "windowType": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IntegrationQuotaRow": {
+        "properties": {
+          "appId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "limitCount": {
+            "type": "number"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "windowType": {
+            "type": "string"
+          },
+          "windowTypeLabel": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IntegrationQuotaStatusRow": {
+        "properties": {
+          "configured": {
+            "type": "boolean"
+          },
+          "decision": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "exceeded": {
+            "type": "boolean"
+          },
+          "limitCount": {
+            "type": "number"
+          },
+          "note": {
+            "type": "string"
+          },
+          "remainingCount": {
+            "type": "number"
+          },
+          "usedCount": {
+            "type": "number"
+          },
+          "windowEndsAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "windowStartedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "windowType": {
+            "type": "string"
+          },
+          "windowTypeLabel": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IntegrationQuotaUsageInput": {
+        "properties": {
+          "appId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "count": {
+            "type": "number"
+          },
+          "tenantId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "windowType": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IntegrationQuotaUsageResult": {
+        "properties": {
+          "appId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "exceeded": {
+            "type": "boolean"
+          },
+          "limitCount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "usedCount": {
+            "type": "number"
+          },
+          "windowStartedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "windowType": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IntegrationScopeInput": {
+        "properties": {
+          "actionCode": {
+            "type": "string"
+          },
+          "resourceCode": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IntegrationScopeRow": {
+        "properties": {
+          "actionCode": {
+            "type": "string"
+          },
+          "actionCodeLabel": {
+            "type": "string"
+          },
+          "appId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "grantedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "grantedBy": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "resourceCode": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "TextBannedTermInput": {
+        "properties": {
+          "category": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string"
+          },
+          "targetLocale": {
+            "type": "string"
+          },
+          "term": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "TextBannedTermRow": {
+        "properties": {
+          "category": {
+            "type": "string"
+          },
+          "categoryLabel": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string"
+          },
+          "targetLocale": {
+            "type": "string"
+          },
+          "term": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "TextCapabilities": {
+        "properties": {
+          "capabilities": {
+            "items": {
+              "$ref": "#/components/schemas/TextCapability"
+            },
+            "type": "array"
+          },
+          "gaps": {
+            "items": {
+              "$ref": "#/components/schemas/TextGap"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "TextCapability": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "evidence": {
+            "type": "string"
+          },
+          "moduleId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "TextCheckRow": {
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "draftId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "matchedItem": {
+            "type": "string"
+          },
+          "ruleCode": {
+            "type": "string"
+          },
+          "ruleLabel": {
+            "type": "string"
+          },
+          "taskId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "verdict": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "TextConfidence": {
+        "properties": {
+          "checkPassRate": {
+            "type": "number"
+          },
+          "explanation": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "lengthCompliance": {
+            "type": "number"
+          },
+          "placeholderIntegrity": {
+            "type": "number"
+          },
+          "termCoverage": {
+            "type": "number"
+          },
+          "total": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "TextDraftInput": {
+        "properties": {
+          "targetText": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "TextDraftRow": {
+        "properties": {
+          "checkFailed": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "checkTotal": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "checkWarned": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "confidence": {
+            "type": "number"
+          },
+          "confidenceCheckPassRate": {
+            "type": "number"
+          },
+          "confidenceLengthCompliance": {
+            "type": "number"
+          },
+          "confidencePlaceholderIntegrity": {
+            "type": "number"
+          },
+          "confidenceTermCoverage": {
+            "type": "number"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "editedBy": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "origin": {
+            "type": "string"
+          },
+          "targetText": {
+            "type": "string"
+          },
+          "taskId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "version": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "TextGap": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "moduleId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "relation": {
+            "type": "string"
+          },
+          "service": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "TextGenerationOutcome": {
+        "properties": {
+          "connected": {
+            "type": "boolean"
+          },
+          "generated": {
+            "type": "boolean"
+          },
+          "model": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "TextGlossaryInput": {
+        "properties": {
+          "caseSensitive": {
+            "type": "boolean"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          },
+          "sourceTerm": {
+            "type": "string"
+          },
+          "targetLocale": {
+            "type": "string"
+          },
+          "targetTerm": {
+            "type": "string"
+          },
+          "termType": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "TextGlossaryRow": {
+        "properties": {
+          "caseSensitive": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "sourceTerm": {
+            "type": "string"
+          },
+          "targetLocale": {
+            "type": "string"
+          },
+          "targetTerm": {
+            "type": "string"
+          },
+          "termType": {
+            "type": "string"
+          },
+          "termTypeLabel": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "TextLocaleOption": {
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "locale": {
+            "type": "string"
+          },
+          "localeName": {
+            "type": "string"
+          },
+          "pendingCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "translationCount": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "TextLocaleView": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/TextLocaleOption"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "TextOverview": {
+        "properties": {
+          "bannedTerms": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "confirmed": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "drafted": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "drafts": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "generatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "glossary": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "pending": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "published": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "rejected": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "rules": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "templates": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "TextRuleInput": {
+        "properties": {
+          "contentType": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "maxLength": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "minLength": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "requireCharset": {
+            "type": "string"
+          },
+          "targetLocale": {
+            "type": "string"
+          },
+          "terminologyStrict": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "TextRuleRow": {
+        "properties": {
+          "contentType": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "maxLength": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "minLength": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "requireCharset": {
+            "type": "string"
+          },
+          "requireCharsetLabel": {
+            "type": "string"
+          },
+          "targetLocale": {
+            "type": "string"
+          },
+          "terminologyStrict": {
+            "type": "boolean"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "TextSourceCandidate": {
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "locale": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "refId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "refLabel": {
+            "type": "string"
+          },
+          "refType": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "TextSourceCandidateView": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/TextSourceCandidate"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "TextTaskDetail": {
+        "properties": {
+          "checks": {
+            "items": {
+              "$ref": "#/components/schemas/TextCheckRow"
+            },
+            "type": "array"
+          },
+          "confidence": {
+            "$ref": "#/components/schemas/TextConfidence"
+          },
+          "draft": {
+            "$ref": "#/components/schemas/TextDraftRow"
+          },
+          "history": {
+            "items": {
+              "$ref": "#/components/schemas/TextDraftRow"
+            },
+            "type": "array"
+          },
+          "task": {
+            "$ref": "#/components/schemas/TextTaskRow"
+          },
+          "violations": {
+            "items": {
+              "$ref": "#/components/schemas/TextViolation"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "TextTaskInput": {
+        "properties": {
+          "contentType": {
+            "type": "string"
+          },
+          "sourceLocale": {
+            "type": "string"
+          },
+          "sourceText": {
+            "type": "string"
+          },
+          "styleRequirement": {
+            "type": "string"
+          },
+          "targetLocale": {
+            "type": "string"
+          },
+          "templateId": {
+            "type": "string"
+          },
+          "upstreamRefId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "upstreamRefType": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "TextTaskPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/TextTaskRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalPages": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "TextTaskRow": {
+        "properties": {
+          "checkFailed": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "checkTotal": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "checkWarned": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "confidence": {
+            "type": "number"
+          },
+          "confidenceCheckPassRate": {
+            "type": "number"
+          },
+          "confidenceLengthCompliance": {
+            "type": "number"
+          },
+          "confidencePlaceholderIntegrity": {
+            "type": "number"
+          },
+          "confidenceTermCoverage": {
+            "type": "number"
+          },
+          "confirmedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "confirmedBy": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "contentType": {
+            "type": "string"
+          },
+          "contentTypeLabel": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "currentDraftId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "currentDraftText": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "publishedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "rejectReason": {
+            "type": "string"
+          },
+          "sourceLocale": {
+            "type": "string"
+          },
+          "sourceText": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "styleRequirement": {
+            "type": "string"
+          },
+          "targetLocale": {
+            "type": "string"
+          },
+          "taskNo": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "upstreamRefId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "upstreamRefType": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "TextTemplateBinding": {
+        "properties": {
+          "body": {
+            "type": "string"
+          },
+          "missing": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "templateCode": {
+            "type": "string"
+          },
+          "templateId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "unknown": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "variables": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "TextTemplateInput": {
+        "properties": {
+          "body": {
+            "type": "string"
+          },
+          "contentType": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          },
+          "targetLocale": {
+            "type": "string"
+          },
+          "templateCode": {
+            "type": "string"
+          },
+          "templateName": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "TextTemplateRow": {
+        "properties": {
+          "body": {
+            "type": "string"
+          },
+          "contentType": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "targetLocale": {
+            "type": "string"
+          },
+          "templateCode": {
+            "type": "string"
+          },
+          "templateName": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "variables": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "TextViolation": {
+        "properties": {
+          "detail": {
+            "type": "string"
+          },
+          "matchedItem": {
+            "type": "string"
+          },
+          "ruleCode": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string"
+          },
+          "suggestion": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "title": "OpenAPI definition",
+    "version": "v0"
+  },
+  "openapi": "3.0.1",
+  "paths": {
+    "/platform/app-quota-usages": {
+      "post": {
+        "operationId": "post_platform_app_quota_usages",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Internal-Key",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IntegrationQuotaUsageInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntegrationQuotaUsageResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "app-credential-controller"
+        ]
+      }
+    },
+    "/platform/apps": {
+      "get": {
+        "operationId": "get_platform_apps",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "appType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntegrationAppPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "app-credential-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_platform_apps",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IntegrationAppInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntegrationAppRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "app-credential-controller"
+        ]
+      }
+    },
+    "/platform/apps/capabilities": {
+      "get": {
+        "operationId": "get_platform_apps_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntegrationAppCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "app-credential-controller"
+        ]
+      }
+    },
+    "/platform/apps/options": {
+      "get": {
+        "operationId": "get_platform_apps_options",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntegrationAppOptions"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "app-credential-controller"
+        ]
+      }
+    },
+    "/platform/apps/overview": {
+      "get": {
+        "operationId": "get_platform_apps_overview",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntegrationAppOverview"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "app-credential-controller"
+        ]
+      }
+    },
+    "/platform/apps/{appId}": {
+      "get": {
+        "operationId": "get_platform_apps_appId",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "appId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntegrationAppDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "app-credential-controller"
+        ]
+      }
+    },
+    "/platform/apps/{appId}/audit-events": {
+      "get": {
+        "operationId": "get_platform_apps_appId_audit_events",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "appId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntegrationAuditEventPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "app-credential-controller"
+        ]
+      }
+    },
+    "/platform/apps/{appId}/credentials": {
+      "get": {
+        "operationId": "get_platform_apps_appId_credentials",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "appId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/IntegrationCredentialRow"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "app-credential-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_platform_apps_appId_credentials",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "appId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntegrationCredentialIssued"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "app-credential-controller"
+        ]
+      }
+    },
+    "/platform/apps/{appId}/credentials/rotate": {
+      "post": {
+        "operationId": "post_platform_apps_appId_credentials_rotate",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "appId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntegrationCredentialIssued"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "app-credential-controller"
+        ]
+      }
+    },
+    "/platform/apps/{appId}/credentials/verify": {
+      "post": {
+        "operationId": "post_platform_apps_appId_credentials_verify",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "appId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IntegrationCredentialVerifyInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntegrationCredentialVerifyResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "app-credential-controller"
+        ]
+      }
+    },
+    "/platform/apps/{appId}/credentials/{credentialId}/revoke": {
+      "post": {
+        "operationId": "post_platform_apps_appId_credentials_credentialId_revoke",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "appId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "credentialId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "reason",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntegrationCredentialRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "app-credential-controller"
+        ]
+      }
+    },
+    "/platform/apps/{appId}/ip-allowlist": {
+      "get": {
+        "operationId": "get_platform_apps_appId_ip_allowlist",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "appId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/IntegrationIpAllowlistRow"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "app-credential-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_platform_apps_appId_ip_allowlist",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "appId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IntegrationIpAllowlistInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntegrationIpAllowlistRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "app-credential-controller"
+        ]
+      }
+    },
+    "/platform/apps/{appId}/ip-allowlist/{entryId}": {
+      "delete": {
+        "operationId": "delete_platform_apps_appId_ip_allowlist_entryId",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "appId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "entryId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "app-credential-controller"
+        ]
+      }
+    },
+    "/platform/apps/{appId}/quota-status": {
+      "get": {
+        "operationId": "get_platform_apps_appId_quota_status",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "appId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/IntegrationQuotaStatusRow"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "app-credential-controller"
+        ]
+      }
+    },
+    "/platform/apps/{appId}/quotas": {
+      "get": {
+        "operationId": "get_platform_apps_appId_quotas",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "appId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/IntegrationQuotaRow"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "app-credential-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_platform_apps_appId_quotas",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "appId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IntegrationQuotaInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntegrationQuotaRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "app-credential-controller"
+        ]
+      }
+    },
+    "/platform/apps/{appId}/revoke": {
+      "post": {
+        "operationId": "post_platform_apps_appId_revoke",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "appId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "reason",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntegrationAppRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "app-credential-controller"
+        ]
+      }
+    },
+    "/platform/apps/{appId}/scopes": {
+      "get": {
+        "operationId": "get_platform_apps_appId_scopes",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "appId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/IntegrationScopeRow"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "app-credential-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_platform_apps_appId_scopes",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "appId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IntegrationScopeInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntegrationScopeRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "app-credential-controller"
+        ]
+      }
+    },
+    "/platform/apps/{appId}/scopes/{scopeId}": {
+      "delete": {
+        "operationId": "delete_platform_apps_appId_scopes_scopeId",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "appId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "scopeId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "app-credential-controller"
+        ]
+      }
+    },
+    "/platform/finance-software/accounts": {
+      "get": {
+        "operationId": "get_platform_finance_software_accounts",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "vendor",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/FinanceSoftwareAccountRow"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "finance-software-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_platform_finance_software_accounts",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinanceSoftwareAccountInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceSoftwareAccountRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "finance-software-controller"
+        ]
+      }
+    },
+    "/platform/finance-software/accounts/{id}/disable": {
+      "post": {
+        "operationId": "post_platform_finance_software_accounts_id_disable",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceSoftwareAccountRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "finance-software-controller"
+        ]
+      }
+    },
+    "/platform/finance-software/capabilities": {
+      "get": {
+        "operationId": "get_platform_finance_software_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceSoftwareCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "finance-software-controller"
+        ]
+      }
+    },
+    "/platform/finance-software/currencies": {
+      "get": {
+        "operationId": "get_platform_finance_software_currencies",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "finance-software-controller"
+        ]
+      }
+    },
+    "/platform/finance-software/master-maps": {
+      "get": {
+        "operationId": "get_platform_finance_software_master_maps",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "accountId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "masterType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/FinanceSoftwareMasterMapRow"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "finance-software-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_platform_finance_software_master_maps",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinanceSoftwareMasterMapInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceSoftwareMasterMapRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "finance-software-controller"
+        ]
+      }
+    },
+    "/platform/finance-software/master-maps/{id}": {
+      "delete": {
+        "operationId": "delete_platform_finance_software_master_maps_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "finance-software-controller"
+        ]
+      }
+    },
+    "/platform/finance-software/overview": {
+      "get": {
+        "operationId": "get_platform_finance_software_overview",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceSoftwareOverview"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "finance-software-controller"
+        ]
+      }
+    },
+    "/platform/finance-software/periods": {
+      "get": {
+        "operationId": "get_platform_finance_software_periods",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/FinanceSoftwarePeriodOption"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "finance-software-controller"
+        ]
+      }
+    },
+    "/platform/finance-software/push": {
+      "post": {
+        "operationId": "post_platform_finance_software_push",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinanceSoftwarePushInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceSoftwarePushOutcome"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "finance-software-controller"
+        ]
+      }
+    },
+    "/platform/finance-software/reconcile-tasks": {
+      "get": {
+        "operationId": "get_platform_finance_software_reconcile_tasks",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "accountId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/FinanceSoftwareReconcileTaskRow"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "finance-software-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_platform_finance_software_reconcile_tasks",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinanceSoftwareReconcileTaskInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceSoftwareReconcileTaskRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "finance-software-controller"
+        ]
+      }
+    },
+    "/platform/finance-software/reconcile-tasks/{id}": {
+      "delete": {
+        "operationId": "delete_platform_finance_software_reconcile_tasks_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "finance-software-controller"
+        ]
+      },
+      "get": {
+        "operationId": "get_platform_finance_software_reconcile_tasks_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceSoftwareReconcileDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "finance-software-controller"
+        ]
+      }
+    },
+    "/platform/finance-software/reconcile-tasks/{id}/balances": {
+      "post": {
+        "operationId": "post_platform_finance_software_reconcile_tasks_id_balances",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinanceSoftwareBalanceImportInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "object"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "finance-software-controller"
+        ]
+      }
+    },
+    "/platform/finance-software/reconcile-tasks/{id}/compute": {
+      "post": {
+        "operationId": "post_platform_finance_software_reconcile_tasks_id_compute",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceSoftwareReconcileTaskRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "finance-software-controller"
+        ]
+      }
+    },
+    "/platform/finance-software/subject-maps": {
+      "get": {
+        "operationId": "get_platform_finance_software_subject_maps",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "accountId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/FinanceSoftwareSubjectMapRow"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "finance-software-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_platform_finance_software_subject_maps",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinanceSoftwareSubjectMapInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceSoftwareSubjectMapRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "finance-software-controller"
+        ]
+      }
+    },
+    "/platform/finance-software/subject-maps/{id}": {
+      "delete": {
+        "operationId": "delete_platform_finance_software_subject_maps_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "finance-software-controller"
+        ]
+      }
+    },
+    "/platform/finance-software/voucher-files": {
+      "get": {
+        "operationId": "get_platform_finance_software_voucher_files",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "accountId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/FinanceSoftwareVoucherFileRow"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "finance-software-controller"
+        ]
+      }
+    },
+    "/platform/finance-software/voucher-files/export": {
+      "post": {
+        "operationId": "post_platform_finance_software_voucher_files_export",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinanceSoftwareVoucherExportInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceSoftwareVoucherExportResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "finance-software-controller"
+        ]
+      }
+    },
+    "/platform/finance-software/voucher-files/{id}": {
+      "get": {
+        "operationId": "get_platform_finance_software_voucher_files_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceSoftwareVoucherFileDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "finance-software-controller"
+        ]
+      }
+    },
+    "/platform/text/banned-terms": {
+      "get": {
+        "operationId": "get_platform_text_banned_terms",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "category",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "severity",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "locale",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "enabled",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/TextBannedTermRow"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "text-translation-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_platform_text_banned_terms",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TextBannedTermInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TextBannedTermRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "text-translation-controller"
+        ]
+      }
+    },
+    "/platform/text/banned-terms/{id}": {
+      "delete": {
+        "operationId": "delete_platform_text_banned_terms_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "text-translation-controller"
+        ]
+      }
+    },
+    "/platform/text/capabilities": {
+      "get": {
+        "operationId": "get_platform_text_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TextCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "text-translation-controller"
+        ]
+      }
+    },
+    "/platform/text/glossary": {
+      "get": {
+        "operationId": "get_platform_text_glossary",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "termType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "locale",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "enabled",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/TextGlossaryRow"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "text-translation-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_platform_text_glossary",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TextGlossaryInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TextGlossaryRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "text-translation-controller"
+        ]
+      }
+    },
+    "/platform/text/glossary/{id}": {
+      "delete": {
+        "operationId": "delete_platform_text_glossary_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "text-translation-controller"
+        ]
+      }
+    },
+    "/platform/text/locales": {
+      "get": {
+        "operationId": "get_platform_text_locales",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TextLocaleView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "text-translation-controller"
+        ]
+      }
+    },
+    "/platform/text/overview": {
+      "get": {
+        "operationId": "get_platform_text_overview",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TextOverview"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "text-translation-controller"
+        ]
+      }
+    },
+    "/platform/text/published": {
+      "get": {
+        "operationId": "get_platform_text_published",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "contentType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/TextTaskRow"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "text-translation-controller"
+        ]
+      }
+    },
+    "/platform/text/rules": {
+      "get": {
+        "operationId": "get_platform_text_rules",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "contentType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "locale",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/TextRuleRow"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "text-translation-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_platform_text_rules",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TextRuleInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TextRuleRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "text-translation-controller"
+        ]
+      }
+    },
+    "/platform/text/rules/{id}": {
+      "delete": {
+        "operationId": "delete_platform_text_rules_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "text-translation-controller"
+        ]
+      }
+    },
+    "/platform/text/source-candidates": {
+      "get": {
+        "operationId": "get_platform_text_source_candidates",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "refType",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "refId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TextSourceCandidateView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "text-translation-controller"
+        ]
+      }
+    },
+    "/platform/text/tasks": {
+      "get": {
+        "operationId": "get_platform_text_tasks",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "contentType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "targetLocale",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TextTaskPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "text-translation-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_platform_text_tasks",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TextTaskInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TextTaskRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "text-translation-controller"
+        ]
+      }
+    },
+    "/platform/text/tasks/{taskId}": {
+      "get": {
+        "operationId": "get_platform_text_tasks_taskId",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "taskId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TextTaskDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "text-translation-controller"
+        ]
+      }
+    },
+    "/platform/text/tasks/{taskId}/confirm": {
+      "post": {
+        "operationId": "post_platform_text_tasks_taskId_confirm",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "taskId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TextTaskDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "text-translation-controller"
+        ]
+      }
+    },
+    "/platform/text/tasks/{taskId}/drafts": {
+      "post": {
+        "operationId": "post_platform_text_tasks_taskId_drafts",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "taskId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TextDraftInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TextTaskDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "text-translation-controller"
+        ]
+      }
+    },
+    "/platform/text/tasks/{taskId}/generate": {
+      "post": {
+        "operationId": "post_platform_text_tasks_taskId_generate",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "taskId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TextGenerationOutcome"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "text-translation-controller"
+        ]
+      }
+    },
+    "/platform/text/tasks/{taskId}/publish": {
+      "post": {
+        "operationId": "post_platform_text_tasks_taskId_publish",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "taskId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TextTaskDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "text-translation-controller"
+        ]
+      }
+    },
+    "/platform/text/tasks/{taskId}/reject": {
+      "post": {
+        "operationId": "post_platform_text_tasks_taskId_reject",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "taskId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "reason",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TextTaskDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "text-translation-controller"
+        ]
+      }
+    },
+    "/platform/text/templates": {
+      "get": {
+        "operationId": "get_platform_text_templates",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "contentType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "locale",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "enabled",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/TextTemplateRow"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "text-translation-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_platform_text_templates",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TextTemplateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TextTemplateRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "text-translation-controller"
+        ]
+      }
+    },
+    "/platform/text/templates/{id}": {
+      "delete": {
+        "operationId": "delete_platform_text_templates_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "text-translation-controller"
+        ]
+      }
+    },
+    "/platform/text/templates/{templateId}/binding": {
+      "get": {
+        "operationId": "get_platform_text_templates_templateId_binding",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "templateId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "values",
+            "required": true,
+            "schema": {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "type": "object"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TextTemplateBinding"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "text-translation-controller"
+        ]
+      }
+    }
+  },
+  "servers": [
+    {
+      "description": "Same-origin service base",
+      "url": "/"
+    }
+  ]
+}

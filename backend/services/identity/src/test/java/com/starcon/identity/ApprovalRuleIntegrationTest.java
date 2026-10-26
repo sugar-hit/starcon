@@ -8,7 +8,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import java.math.BigDecimal;
 import java.sql.DriverManager;
 import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -793,7 +792,9 @@ class ApprovalRuleIntegrationTest extends IdentityIntegrationTestBase {
     var token = login();
     tag = suffix();
     UUID flow = activeFlow(token, "CREDIT_NOTE", "贷项审批流 " + tag);
-    var before = OffsetDateTime.now(ZoneOffset.UTC).minusSeconds(2);
+    // 落库时刻由数据库给（created_at DEFAULT now()）⇒ 基准也必须取**数据库自己的时钟**。
+    // 拿客户端墙钟当基准等于假设两台钟一模一样：差 1 毫秒就会把「刚刚写入」误判成「不是刚刚」。
+    var dbBefore = dbNow();
 
     var exemptRule = exempt("小额免审 " + tag, 1, "USD", "1000.500000");
     UUID id =
@@ -814,10 +815,12 @@ class ApprovalRuleIntegrationTest extends IdentityIntegrationTestBase {
     var created = detail(token, id).get("ruleSet");
     assertThat(created.get("version").asLong()).isZero();
     assertThat(created.get("status").asText()).isEqualTo("DRAFT");
-    // timestamptz 写回值必须落在请求前后的两个墙钟之间：用 LocalDateTime 绑会静默偏 -28800 秒。
-    assertThat(OffsetDateTime.parse(created.get("createdAt").asText()))
-        .isAfter(before)
-        .isBefore(OffsetDateTime.now(ZoneOffset.UTC).plusSeconds(5));
+    // timestamptz 写回值必须落在请求前后的两个**数据库时钟**之间：用 LocalDateTime 绑会静默偏 -28800 秒。
+    // 两端都取数据库自己的时钟 —— 落库时刻本来就在数据库的时钟域里，拿客户端墙钟去比它
+    // 等于拿两台机器的钟表对表，环境一卡就误判（2026-10-25 全量验证就是这么打红的）。
+    assertThat(OffsetDateTime.parse(created.get("createdAt").asText()).toInstant())
+        .isAfterOrEqualTo(dbBefore)
+        .isBeforeOrEqualTo(dbNow());
 
     // 金额按 numeric(19,6) 原样写回，不做浮点也不截断小数位。
     var stored = ruleNamed(detail(token, id).get("rules"), "小额免审 " + tag);

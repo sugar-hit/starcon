@@ -39,6 +39,16 @@ const destinations = [
     '维护状态枚举、原因码、分类标签与单位类型，被引用的字典项只能停用不能删除',
   ],
   [
+    'platform-flags',
+    '平台参数与开关',
+    '平台级功能开关、灰度放量、限流阈值与公告；按租户禁用只能收紧，租户不可覆盖平台开关',
+  ],
+  [
+    'platform-ops',
+    '平台运维视图',
+    '跨租户技术指标看板：在线状态、错误率、任务积压、队列深度、容量占用与告警；只看技术指标，不含租户业务数据',
+  ],
+  [
     'numbering-rules',
     '编号规则',
     '配置单据编号规则（前缀 + 日期 + 序号 + 后缀），序号按实体与日期重置，支持多级嵌套与预览',
@@ -89,6 +99,15 @@ function visible(session: Access, key: string) {
     return hasPermission(session, 'identity.business_parameter.read');
   // 17.5.2.1 数据字典同样是独立页面权限码，不走 canManage 的页面映射。
   if (key === 'dictionary') return hasPermission(session, 'identity.dictionary.read');
+  // 17.7.2.1 平台参数与开关同样是独立页面权限码。
+  // 它与租户级的 business-parameters **不是一回事**：平台开关全平台唯一，
+  // 租户参数是租户自己的业务参数 —— 两个入口都挂在同一个 /org 导航下，
+  // 名字混起来会让人以为「租户参数能盖掉平台开关」。
+  if (key === 'platform-flags') return hasPermission(session, 'identity.platform_flag.read');
+  // 17.7.2.2 平台运维视图同样是独立页面权限码。
+  // 它与租户级的「操作日志」不是一回事：操作日志是**本租户**的技术排障流水，
+  // 平台运维视图是**跨租户**的技术指标看板 —— 后者要平台运营角色才看得到。
+  if (key === 'platform-ops') return hasPermission(session, 'identity.platform_ops.read');
   // 层级授权是独立页面（不在 AdministrationPanel 的四类管理里），走自己的页面权限码。
   // 17.2.2.2 把内联 filter 抽成 visible() 时漏了这条，hierarchy 会落到 canManage 兜底 ——
   // 而 AdministrationKind 里根本没有 'hierarchy'，于是有 tenant.hierarchy.read 的人反而看不到入口。
@@ -283,6 +302,20 @@ export function IdentityWorkspace({
                 </p>
               </Link>
             )}
+            {/* 1.4.1.2 列表与表格偏好（路由 /settings/profile）。
+                刻意**不挂页面权限码**：这一页里的每一行都是「我自己的」偏好，
+                读不到别人的也改不了别人的 —— 边界是数据归属（tenant_id + membership_id + RLS），
+                不是功能开关。挂一个权限码只会让管理员新建角色时忘了勾，
+                于是普通成员的列表页偏好静默失效。 */}
+            <Link
+              href="/settings/profile"
+              className="bg-card hover:border-brand rounded-lg border p-5"
+            >
+              <h2 className="font-semibold">列表与表格偏好</h2>
+              <p className="text-muted-foreground mt-2 text-sm">
+                记住各列表页的列显示、排序、每页条数与筛选条件，下次进入该页自动恢复
+              </p>
+            </Link>
           </div>
           <p className="text-muted-foreground text-sm">
             用户账号可加入多个租户。成员停用仅影响该租户；父子租户之间不会自动获得数据访问权。
