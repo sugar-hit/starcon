@@ -12707,6 +12707,44 @@ const services: readonly {
     // 末尾**刻意不带 `?`**：带了 `?` 就等于放行裸路径 `service-task-status`。
     pattern:
       /^service\-task\-status(?:\/(?:capabilities|options|summary|alerts|tasks(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?))$/,
+    // 13.2.2.2 SKU/SPU/Listing（reporting 服务，卷 13「利润与经营分析」L3 13.2 销量分析下的第二格）。
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 reporting/ 正则里并分支 ——
+    //   既有条目**一字未改、也不重排**。
+    //
+    // ---- 插入锚点选在**数组末尾**（收尾的 `];` 之前、紧跟最后一条既有元素之后）----
+    //   同批其它车道（13.2.1.1）的插入点在「13.1.1.2 多店对比」那条元素之后（数组最前面那一段），
+    //   两个锚点相距 10000 行以上，并入时 git 能干净求并。
+    //
+    // ---- 首 token「product-sales」的零命中核对结论 ----
+    //   本模块与 13.1.1.1 / 13.4.2.2 / 13.1.1.2 / 13.1.2.x 同为 reporting 服务，
+    //   都是 `prefix: 'reporting/'`：resolve() 按 services[] 顺序逐条试，
+    //   **前缀相同、正则不相交** —— 既有那几条的首 token 分别是
+    //   overview / expense-variance / store-comparison / metric-cards / store-overview，
+    //   没有一条能吃下 `product-sales…`；本条的首 token 是 `product-sales`，
+    //   也吃不到它们的路径。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   product-sales                  商品销量报表（SKU / SPU / Listing 三层；裸路径是 @GetMapping 在类根上的）
+    //   product-sales/capabilities     能力声明（真读过哪些上游 / 确实拿不到什么）
+    //   product-sales/metrics          商品维度指标口径目录（口径唯一的展示形态）
+    //   product-sales/spu-summary      SPU 汇总（多平台多 SKU 合并看）
+    //   product-sales/variants         变体销量分布
+    //   product-sales/drilldown        层级钻取（哪张订单的哪一行、哪个 SKU）
+    //   product-sales/refresh          投影刷新（POST，写的是投影不是业务事实）
+    //
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   reporting/product-sales/{uuid}       —— 顶层没有 id 段（报表按查询参数定位，不是按 id）。
+    //   reporting/product-sales/unknown      —— 未实现的子路径仍然 404。
+    //   reporting/product-sales/breakdown    —— 蓝图里的「层级钻取」是 drilldown，不是 breakdown。
+    //   reporting/product-sales/{uuid}/variants —— 变体分布是按 SPU 编码查的，不是按 uuid 段。
+    //
+    // 字面量子路径（capabilities / metrics / spu-summary / variants / drilldown / refresh）
+    // 排在可选段**之前**判别 —— alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    prefix: 'reporting/',
+    env: 'REPORTING_URL',
+    fallback: 'http://127.0.0.1:8088',
+    pattern:
+      /^product\-sales(?:\/(?:capabilities|metrics|spu\-summary|variants|drilldown|refresh))?$/,
   },
 ];
 

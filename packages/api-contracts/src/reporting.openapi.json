@@ -163,6 +163,17 @@
         },
         "type": "object"
       },
+      "CurrencyAmount": {
+        "properties": {
+          "amount": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "CurrencyRate": {
         "properties": {
           "asOf": {
@@ -1099,6 +1110,400 @@
               "$ref": "#/components/schemas/StoreComparisonRow"
             },
             "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "ProductDrilldownResponse": {
+        "properties": {
+          "caliberNotes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "dataUpdatedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "dataUpdatedNote": {
+            "type": "string"
+          },
+          "dimensionId": {
+            "type": "string"
+          },
+          "dimensionKey": {
+            "type": "string"
+          },
+          "dimensionName": {
+            "type": "string"
+          },
+          "dimensionType": {
+            "type": "string"
+          },
+          "emptyNote": {
+            "type": "string"
+          },
+          "emptyReason": {
+            "nullable": true,
+            "type": "string"
+          },
+          "from": {
+            "format": "date",
+            "type": "string"
+          },
+          "metricCode": {
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/ProductDrilldownRow"
+            },
+            "type": "array"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "skuCodes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusNote": {
+            "type": "string"
+          },
+          "to": {
+            "format": "date",
+            "type": "string"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ProductDrilldownRow": {
+        "properties": {
+          "bucketDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "occurredAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "orderNo": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "referenceId": {
+            "type": "string"
+          },
+          "referenceLabel": {
+            "type": "string"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "sourceKind": {
+            "type": "string"
+          },
+          "timezone": {
+            "type": "string"
+          },
+          "value": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "ProductMetricDefinitionView": {
+        "properties": {
+          "aggregation": {
+            "type": "string"
+          },
+          "currencyAware": {
+            "type": "boolean"
+          },
+          "currencyScope": {
+            "type": "string"
+          },
+          "denominatorDimensionType": {
+            "nullable": true,
+            "type": "string"
+          },
+          "denominatorMetricCode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "metricCode": {
+            "type": "string"
+          },
+          "numeratorDimensionType": {
+            "nullable": true,
+            "type": "string"
+          },
+          "numeratorMetricCode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "unit": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ProductMetricValue": {
+        "properties": {
+          "availability": {
+            "type": "string"
+          },
+          "availabilityNote": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "metricCode": {
+            "type": "string"
+          },
+          "value": {
+            "nullable": true,
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "ProductRefreshResult": {
+        "properties": {
+          "fetched": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "projected": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "source": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ProductRow": {
+        "properties": {
+          "attributionNote": {
+            "type": "string"
+          },
+          "attributionStatus": {
+            "type": "string"
+          },
+          "currencies": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "dimensionId": {
+            "type": "string"
+          },
+          "dimensionKey": {
+            "type": "string"
+          },
+          "dimensionName": {
+            "type": "string"
+          },
+          "dimensionType": {
+            "type": "string"
+          },
+          "listingCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "metrics": {
+            "items": {
+              "$ref": "#/components/schemas/ProductMetricValue"
+            },
+            "type": "array"
+          },
+          "parentDimensionKey": {
+            "type": "string"
+          },
+          "parentDimensionName": {
+            "type": "string"
+          },
+          "parentDimensionType": {
+            "type": "string"
+          },
+          "platformCodes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "skuCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "variantSignature": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ProductRuleNote": {
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "ruleCode": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ProductSalesCapabilities": {
+        "properties": {
+          "dataUpdatedAtVisible": {
+            "type": "boolean"
+          },
+          "notDelivered": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "reportAvailable": {
+            "type": "boolean"
+          },
+          "rules": {
+            "items": {
+              "$ref": "#/components/schemas/ProductRuleNote"
+            },
+            "type": "array"
+          },
+          "upstreamConnected": {
+            "type": "boolean"
+          },
+          "upstreamModules": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "ProductSalesResponse": {
+        "properties": {
+          "caliberNotes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "dataUpdatedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "dataUpdatedNote": {
+            "type": "string"
+          },
+          "emptyNote": {
+            "type": "string"
+          },
+          "emptyReason": {
+            "nullable": true,
+            "type": "string"
+          },
+          "from": {
+            "format": "date",
+            "type": "string"
+          },
+          "level": {
+            "type": "string"
+          },
+          "mergeSpu": {
+            "type": "boolean"
+          },
+          "metricDefinitions": {
+            "items": {
+              "$ref": "#/components/schemas/ProductMetricDefinitionView"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/ProductRow"
+            },
+            "type": "array"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusNote": {
+            "type": "string"
+          },
+          "timezones": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "to": {
+            "format": "date",
+            "type": "string"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "unattributed": {
+            "$ref": "#/components/schemas/UnattributedSummary"
           }
         },
         "type": "object"
@@ -2075,6 +2480,155 @@
             "type": "array"
           },
           "unit": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SpuSummaryResponse": {
+        "properties": {
+          "caliberNotes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "dataUpdatedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "dataUpdatedNote": {
+            "type": "string"
+          },
+          "emptyNote": {
+            "type": "string"
+          },
+          "emptyReason": {
+            "nullable": true,
+            "type": "string"
+          },
+          "from": {
+            "format": "date",
+            "type": "string"
+          },
+          "metricDefinitions": {
+            "items": {
+              "$ref": "#/components/schemas/ProductMetricDefinitionView"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/SpuSummaryRow"
+            },
+            "type": "array"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusNote": {
+            "type": "string"
+          },
+          "timezones": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "to": {
+            "format": "date",
+            "type": "string"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "SpuSummaryRow": {
+        "properties": {
+          "currencies": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "listingCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "metrics": {
+            "items": {
+              "$ref": "#/components/schemas/ProductMetricValue"
+            },
+            "type": "array"
+          },
+          "platformCodes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "skuCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "spuId": {
+            "type": "string"
+          },
+          "spuKey": {
+            "type": "string"
+          },
+          "spuName": {
+            "type": "string"
+          },
+          "variants": {
+            "items": {
+              "$ref": "#/components/schemas/SpuVariantSummary"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "SpuVariantSummary": {
+        "properties": {
+          "listingCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "metrics": {
+            "items": {
+              "$ref": "#/components/schemas/ProductMetricValue"
+            },
+            "type": "array"
+          },
+          "platformCodes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "skuId": {
+            "type": "string"
+          },
+          "skuKey": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "variantSignature": {
             "type": "string"
           }
         },
@@ -3124,6 +3678,30 @@
         },
         "type": "object"
       },
+      "UnattributedSummary": {
+        "properties": {
+          "amounts": {
+            "items": {
+              "$ref": "#/components/schemas/CurrencyAmount"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "orderCount": {
+            "type": "number"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "skuCount": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
       "UnmatchedActualRow": {
         "properties": {
           "actualAmount": {
@@ -3153,6 +3731,131 @@
             "type": "string"
           },
           "scopeLabel": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "VariantDistributionResponse": {
+        "properties": {
+          "caliberNotes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "dataUpdatedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "dataUpdatedNote": {
+            "type": "string"
+          },
+          "emptyNote": {
+            "type": "string"
+          },
+          "emptyReason": {
+            "nullable": true,
+            "type": "string"
+          },
+          "from": {
+            "format": "date",
+            "type": "string"
+          },
+          "metricDefinitions": {
+            "items": {
+              "$ref": "#/components/schemas/ProductMetricDefinitionView"
+            },
+            "type": "array"
+          },
+          "shareTotal": {
+            "type": "number"
+          },
+          "spuId": {
+            "type": "string"
+          },
+          "spuKey": {
+            "type": "string"
+          },
+          "spuName": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusNote": {
+            "type": "string"
+          },
+          "timezones": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "to": {
+            "format": "date",
+            "type": "string"
+          },
+          "totalQuantity": {
+            "type": "number"
+          },
+          "variants": {
+            "items": {
+              "$ref": "#/components/schemas/VariantRow"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "VariantRow": {
+        "properties": {
+          "amounts": {
+            "items": {
+              "$ref": "#/components/schemas/CurrencyAmount"
+            },
+            "type": "array"
+          },
+          "listingCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "metrics": {
+            "items": {
+              "$ref": "#/components/schemas/ProductMetricValue"
+            },
+            "type": "array"
+          },
+          "orderCount": {
+            "type": "number"
+          },
+          "platformCodes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "share": {
+            "nullable": true,
+            "type": "number"
+          },
+          "shareNote": {
+            "type": "string"
+          },
+          "skuId": {
+            "type": "string"
+          },
+          "skuKey": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "variantSignature": {
             "type": "string"
           }
         },
@@ -4067,6 +4770,476 @@
         "summary": "趋势：逐日逐币种（没有事实的那一天没有点，不是 0）",
         "tags": [
           "13.1.1.1 经营总览"
+        ]
+      }
+    },
+    "/reporting/product-sales": {
+      "get": {
+        "description": "时间范围默认「最近 30 天」。维度层级由 level 决定（SKU / SPU / LISTING），「是否合并 SPU」由 mergeSpu 决定（true ⇒ 按 SPU 合并看）。⚠️ **绝不跨币种相加**：成交金额按币种分别列出；只有件数与单数给跨币种合计。⚠️ **Listing 层的销量只归「可唯一归属」的那部分**：同一款内部 SKU 挂在多个 Listing 上时，它的销量归不了任何 Listing，单列在「无法唯一归属」里。",
+        "operationId": "get_reporting_product_sales",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "level",
+            "required": false,
+            "schema": {
+              "default": "SKU",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "mergeSpu",
+            "required": false,
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "currency",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "spuKey",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "listingKey",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductSalesResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "商品销量报表：SKU / SPU / Listing 三层 + 层级钻取",
+        "tags": [
+          "13.2.2.2 SKU/SPU/Listing"
+        ]
+      }
+    },
+    "/reporting/product-sales/capabilities": {
+      "get": {
+        "description": "notDelivered 列出的是**确实拿不到**的部分，每条都写清原因与影响 —— 把「拿不到」伪装成 0 比说清楚更糟。",
+        "operationId": "get_reporting_product_sales_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductSalesCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "能力声明：哪些上游真接通、哪些口径在商品维度拿不到、判定规则是什么",
+        "tags": [
+          "13.2.2.2 SKU/SPU/Listing"
+        ]
+      }
+    },
+    "/reporting/product-sales/drilldown": {
+      "get": {
+        "description": "卷 13 卷首加粗句「可下钻」的落点：每个汇总数字都能钻到构成明细。构成明细记着**哪张订单的哪一行**贡献了这笔数字（订单号 + 行序号）。",
+        "operationId": "get_reporting_product_sales_drilldown",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "level",
+            "required": false,
+            "schema": {
+              "default": "SKU",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dimensionKey",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "metricCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductDrilldownResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "层级钻取：某个维度、某个指标的构成明细（哪个订单、哪个 SKU）",
+        "tags": [
+          "13.2.2.2 SKU/SPU/Listing"
+        ]
+      }
+    },
+    "/reporting/product-sales/metrics": {
+      "get": {
+        "operationId": "get_reporting_product_sales_metrics",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ProductMetricDefinitionView"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "商品维度指标口径目录（口径唯一的展示形态）",
+        "tags": [
+          "13.2.2.2 SKU/SPU/Listing"
+        ]
+      }
+    },
+    "/reporting/product-sales/refresh": {
+      "post": {
+        "description": "上游：catalog 的 SKU 列表（SKU → SPU 归属）、channel 的 Listing 列表（平台商品 ↔ 内部 SKU 绑定）、trade 的销售订单与订单明细（销量与金额）。⚠️ **订单明细逐单取**（销量与 SKU 下钻只存在于明细里），所以有张数上限，触到上限时如实报「已截断」，不悄悄少算。",
+        "operationId": "post_reporting_product_sales_refresh",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "timezone",
+            "required": false,
+            "schema": {
+              "default": "UTC",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ProductRefreshResult"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "从上游拉取商品维度事实并投影（写的是投影，不是业务事实）",
+        "tags": [
+          "13.2.2.2 SKU/SPU/Listing"
+        ]
+      }
+    },
+    "/reporting/product-sales/spu-summary": {
+      "get": {
+        "description": "🔴 **SPU 口径是跨平台经营的基本单位**（蓝图关系句）：一行 SPU = 名下所有平台、所有 SKU 的销量之和，不按平台拆 —— 只按平台 SKU 看会误判商品整体表现。金额按币种分别列出，绝不跨币种相加。",
+        "operationId": "get_reporting_product_sales_spu_summary",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SpuSummaryResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "SPU 汇总：多平台多 SKU 合并看",
+        "tags": [
+          "13.2.2.2 SKU/SPU/Listing"
+        ]
+      }
+    },
+    "/reporting/product-sales/variants": {
+      "get": {
+        "description": "占比 = 该变体销量 ÷ 所属 SPU 的销量（口径写在商品维度口径表里，服务端按定义求值）。分母为 0 时算不出来（不是 0%）。金额按币种分别列出，绝不跨币种相加。",
+        "operationId": "get_reporting_product_sales_variants",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "spuKey",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/VariantDistributionResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "变体销量分布：某个 SPU 名下各变体的销量与占比",
+        "tags": [
+          "13.2.2.2 SKU/SPU/Listing"
         ]
       }
     },
