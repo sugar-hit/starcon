@@ -70936,6 +70936,613 @@
         },
         "type": "object"
       },
+      "ServiceTaskStatusAlert": {
+        "properties": {
+          "detail": {
+            "type": "string"
+          },
+          "failureClass": {
+            "nullable": true,
+            "type": "string"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string"
+          },
+          "sourceKey": {
+            "type": "string"
+          },
+          "sourceLabel": {
+            "type": "string"
+          },
+          "targetAvailable": {
+            "type": "boolean"
+          },
+          "targetHint": {
+            "nullable": true,
+            "type": "string"
+          },
+          "targetModule": {
+            "type": "string"
+          },
+          "targetNote": {
+            "type": "string"
+          },
+          "targetRoute": {
+            "nullable": true,
+            "type": "string"
+          },
+          "taskId": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ServiceTaskStatusAlertList": {
+        "properties": {
+          "failed": {
+            "items": {
+              "$ref": "#/components/schemas/ServiceTaskStatusAlert"
+            },
+            "type": "array"
+          },
+          "failedTotal": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "stalled": {
+            "items": {
+              "$ref": "#/components/schemas/ServiceTaskStatusAlert"
+            },
+            "type": "array"
+          },
+          "stalledTotal": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "truncated": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "ServiceTaskStatusCapabilities": {
+        "properties": {
+          "dataAsOf": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "downstreamNote": {
+            "type": "string"
+          },
+          "failureClassSemantics": {
+            "type": "string"
+          },
+          "failureClasses": {
+            "items": {
+              "$ref": "#/components/schemas/ServiceTaskStatusFailureClassDoc"
+            },
+            "type": "array"
+          },
+          "gaps": {
+            "items": {
+              "$ref": "#/components/schemas/ServiceTaskStatusCapabilityGap"
+            },
+            "type": "array"
+          },
+          "readFailureSemantics": {
+            "type": "string"
+          },
+          "rules": {
+            "items": {
+              "$ref": "#/components/schemas/ServiceTaskStatusRuleDoc"
+            },
+            "type": "array"
+          },
+          "severityLevels": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "sources": {
+            "items": {
+              "$ref": "#/components/schemas/ServiceTaskStatusSourceDoc"
+            },
+            "type": "array"
+          },
+          "stallSemantics": {
+            "type": "string"
+          },
+          "thresholds": {
+            "$ref": "#/components/schemas/ServiceTaskStatusThresholds"
+          },
+          "upstreamNote": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ServiceTaskStatusCapabilityGap": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "impact": {
+            "type": "string"
+          },
+          "module": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ServiceTaskStatusFailureClassCount": {
+        "properties": {
+          "byReason": {
+            "items": {
+              "$ref": "#/components/schemas/ServiceTaskStatusFailureReasonCount"
+            },
+            "type": "array"
+          },
+          "failureClass": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "totalCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "windowCount": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ServiceTaskStatusFailureClassDoc": {
+        "properties": {
+          "actionHint": {
+            "type": "string"
+          },
+          "failureClass": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "meaning": {
+            "type": "string"
+          },
+          "reasons": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "ServiceTaskStatusFailureReasonCount": {
+        "properties": {
+          "failureClass": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "totalCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "windowCount": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ServiceTaskStatusOptions": {
+        "properties": {
+          "failureClasses": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "severities": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "sources": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "states": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "triggerSources": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "ServiceTaskStatusReason": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ServiceTaskStatusRuleDoc": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "condition": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ServiceTaskStatusSourceDoc": {
+        "properties": {
+          "canonicalStates": {
+            "type": "string"
+          },
+          "durationColumn": {
+            "nullable": true,
+            "type": "string"
+          },
+          "failureClassNote": {
+            "type": "string"
+          },
+          "finishColumn": {
+            "nullable": true,
+            "type": "string"
+          },
+          "inFlightValues": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "ownerModuleName": {
+            "type": "string"
+          },
+          "sourceKey": {
+            "type": "string"
+          },
+          "stallNote": {
+            "type": "string"
+          },
+          "stallSupported": {
+            "type": "boolean"
+          },
+          "startColumn": {
+            "nullable": true,
+            "type": "string"
+          },
+          "stateColumn": {
+            "type": "string"
+          },
+          "stateValues": {
+            "type": "string"
+          },
+          "table": {
+            "type": "string"
+          },
+          "timingNote": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ServiceTaskStatusSourceStat": {
+        "properties": {
+          "failed": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "partial": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "running": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "sourceKey": {
+            "type": "string"
+          },
+          "sourceLabel": {
+            "type": "string"
+          },
+          "stallUndeterminable": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "stalled": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ServiceTaskStatusSummary": {
+        "properties": {
+          "businessFailureTotal": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "dataAsOf": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "failedCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "failedRecordTotal": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "failureByClass": {
+            "items": {
+              "$ref": "#/components/schemas/ServiceTaskStatusFailureClassCount"
+            },
+            "type": "array"
+          },
+          "gaps": {
+            "items": {
+              "$ref": "#/components/schemas/ServiceTaskStatusCapabilityGap"
+            },
+            "type": "array"
+          },
+          "partialCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "runningCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "sources": {
+            "items": {
+              "$ref": "#/components/schemas/ServiceTaskStatusSourceStat"
+            },
+            "type": "array"
+          },
+          "stallUndeterminableCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "stalledCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "systemFailureTotal": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalTasks": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ServiceTaskStatusTaskCard": {
+        "properties": {
+          "detail": {
+            "type": "string"
+          },
+          "durationMs": {
+            "format": "int64",
+            "nullable": true,
+            "type": "integer"
+          },
+          "failed": {
+            "type": "boolean"
+          },
+          "failureClass": {
+            "type": "string"
+          },
+          "failureClassNote": {
+            "type": "string"
+          },
+          "finishedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "inFlight": {
+            "type": "boolean"
+          },
+          "occurredAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "rawState": {
+            "type": "string"
+          },
+          "reasons": {
+            "items": {
+              "$ref": "#/components/schemas/ServiceTaskStatusReason"
+            },
+            "type": "array"
+          },
+          "severity": {
+            "type": "string"
+          },
+          "sourceKey": {
+            "type": "string"
+          },
+          "sourceLabel": {
+            "type": "string"
+          },
+          "stallDeterminable": {
+            "type": "boolean"
+          },
+          "stallMinutes": {
+            "format": "int64",
+            "nullable": true,
+            "type": "integer"
+          },
+          "stallSeverity": {
+            "nullable": true,
+            "type": "string"
+          },
+          "stalled": {
+            "type": "boolean"
+          },
+          "startedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "state": {
+            "type": "string"
+          },
+          "targetAvailable": {
+            "type": "boolean"
+          },
+          "targetHint": {
+            "nullable": true,
+            "type": "string"
+          },
+          "targetModule": {
+            "type": "string"
+          },
+          "targetNote": {
+            "type": "string"
+          },
+          "targetRoute": {
+            "nullable": true,
+            "type": "string"
+          },
+          "taskId": {
+            "type": "string"
+          },
+          "timingNote": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "triggerSource": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ServiceTaskStatusTaskPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ServiceTaskStatusTaskCard"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ServiceTaskStatusThresholds": {
+        "properties": {
+          "failureWindowHours": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "maxPageSize": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "stallCriticalMinutes": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "stallWarnMinutes": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
       "SetLabelStatusRequest": {
         "properties": {
           "status": {
@@ -131625,6 +132232,268 @@
         },
         "tags": [
           "sales-tax-controller"
+        ]
+      }
+    },
+    "/channel/service-task-status/alerts": {
+      "get": {
+        "operationId": "get_channel_service_task_status_alerts",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceTaskStatusAlertList"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "service-task-status-controller"
+        ]
+      }
+    },
+    "/channel/service-task-status/capabilities": {
+      "get": {
+        "operationId": "get_channel_service_task_status_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceTaskStatusCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "service-task-status-controller"
+        ]
+      }
+    },
+    "/channel/service-task-status/options": {
+      "get": {
+        "operationId": "get_channel_service_task_status_options",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceTaskStatusOptions"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "service-task-status-controller"
+        ]
+      }
+    },
+    "/channel/service-task-status/summary": {
+      "get": {
+        "operationId": "get_channel_service_task_status_summary",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceTaskStatusSummary"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "service-task-status-controller"
+        ]
+      }
+    },
+    "/channel/service-task-status/tasks": {
+      "get": {
+        "operationId": "get_channel_service_task_status_tasks",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sourceKey",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "state",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "triggerSource",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "stalled",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "failed",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceTaskStatusTaskPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "service-task-status-controller"
+        ]
+      }
+    },
+    "/channel/service-task-status/tasks/{id}": {
+      "get": {
+        "operationId": "get_channel_service_task_status_tasks_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceTaskStatusTaskCard"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "service-task-status-controller"
         ]
       }
     },
