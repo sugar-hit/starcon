@@ -195,7 +195,6 @@ const services: readonly {
     //   逐条取出 `prefix` 与 `pattern`，按 `resolve()` 的**同构口径**实测
     //   （`path.startsWith(prefix)` 收窄服务 → 再测 `pattern.test(path.slice(prefix.length))`），
     //   对本模块的 5 条路径逐条判定：
-    //     target-attainment              零命中
     //     target-attainment/capabilities 零命中
     //     target-attainment/board        零命中
     //     target-attainment/ranking      零命中
@@ -207,21 +206,20 @@ const services: readonly {
     //   而别的 prefix 下的正则根本吃不到本模块的路径（`resolve()` 先按 prefix 闸门筛）。
     //
     // 形状逐个列出（**只放行本模块真实实现的路径**，契约 `reporting.openapi.json` 里就这几条）：
-    //   target-attainment               达成追踪看板（达成率表 + 预测 + 未达标高亮 + 排名 + 预警）
     //   target-attainment/capabilities  能力声明（哪些实际值拿得到、判定规则是什么）
-    //   target-attainment/board         达成追踪看板
+    //   target-attainment/board         达成追踪看板（达成率表 + 预测 + 未达标高亮 + 排名 + 预警）
     //   target-attainment/ranking       排名（人员 / 产品维度）
     //   target-attainment/snapshots     已落快照清单（真分页 + 真计数）
     //   target-attainment/evaluate      评估并落快照（POST，写的是派生读模型不是业务事实）
     //
     // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
-    //   target-attainment/{uuid}      —— 顶层没有 id 段（达成追踪按查询参数定位，不是按 id）。
-    //   target-attainment/unknown-sub —— 多一层仍然 404。
+    //   reporting/target-attainment        —— 裸路径：后端**没有**「一条不存在的汇总列表接口」。
+    //   target-attainment/{uuid}            —— 顶层没有 id 段（达成追踪按查询参数定位，不是按 id）。
+    //   target-attainment/unknown-sub       —— 多一层仍然 404。
     prefix: 'reporting/',
     env: 'REPORTING_URL',
     fallback: 'http://127.0.0.1:8088',
-    pattern:
-      /^target-attainment(?:\/(?:capabilities|board|ranking|snapshots|evaluate))?$/,
+    pattern: /^target-attainment\/(?:capabilities|board|ranking|snapshots|evaluate)$/,
   },
   {
     // 1.1.2.1 核心指标卡（reporting 服务，卷 01「工作台与门户」L3 1.1.2 关键指标下的第一格）。
