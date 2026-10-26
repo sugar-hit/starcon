@@ -139,6 +139,47 @@ const services: readonly {
     pattern: /^store-comparison(?:\/(?:capabilities|metrics|shops|refresh))?$/,
   },
   {
+    // 13.2.1.1 销量趋势（reporting 服务，卷 13「利润与经营分析」L3 13.2 销量分析下的第一格）。
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往 13.1.1.1 / 13.4.2.2 / 13.1.1.2 那几条
+    //   reporting/ 正则里并分支 —— 那几条**一字未改、也不重排**（它们分别只放行
+    //   overview / projection、expense-variance、store-comparison 三个命名空间）。
+    //
+    // ---- 插入锚点选在**13.1.1.2 那条 reporting/ 之后**（数组最前面那一段）----
+    //   同批其它车道（13.2.2.2）插在**数组末尾**（收尾的 `];` 之前）；
+    //   本车道落在开头这一段，两个锚点相隔 10000 行以上，并入时 git 能干净求并。
+    //
+    // ---- 首 token「sales-trend」的零命中核对结论 ----
+    //   发车前用脚本（`.tmp/api-proxy-zero-hit.mjs`，不入库）把本文件里**全部 234 个既有元素**
+    //   （`prefix` + 正则）逐条抽出来，按 `resolve()` 的**同构口径**实测
+    //   （`path.startsWith(prefix)` 收窄服务 → 再测 `pattern.test(path.slice(prefix.length))`），
+    //   对本模块的 6 条路径逐条判定：
+    //     sales-trend                sales-trend/capabilities
+    //     sales-trend/comparison     sales-trend/events
+    //     sales-trend/metrics        sales-trend/refresh
+    //   **零命中** —— 既有 `prefix === 'reporting/'` 的几条正则都是**按命名空间精确匹配**的
+    //   （overview / projection、expense-variance、store-comparison、metric-cards、
+    //   store-overview），**不覆盖 `sales-trend`**；而别的 prefix 下的正则根本吃不到本模块的路径
+    //   （`resolve()` 先按 prefix 闸门筛）。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**，契约 `reporting.openapi.json` 里就这几条）：
+    //   sales-trend            销量趋势（趋势点列 + 环比 / 同比 + 异常标注）
+    //   sales-trend/comparison 多维对比（同比 / 环比 / 店铺间 / 产品间）
+    //   sales-trend/events     异常日期标注（大促 / 秒杀 / 缺货 / 断货）
+    //   sales-trend/capabilities 能力声明（哪些上游真接通、哪些口径确实拿不到）
+    //   sales-trend/metrics    指标口径目录（口径唯一的展示形态）
+    //   sales-trend/refresh    刷新销量趋势投影（POST，写的是投影不是业务事实）
+    //
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   sales-trend/{uuid}      —— 顶层没有 id 段（趋势按查询参数定位，不是按 id）。
+    //   sales-trend/anomalies   —— 异常清单随趋势响应一起返回，没有独立端点。
+    //   sales-trend/alerts      —— 销量预警未交付（卷 13 的预警订阅是另一格）。
+    prefix: 'reporting/',
+    env: 'REPORTING_URL',
+    fallback: 'http://127.0.0.1:8088',
+    pattern:
+      /^sales-trend(?:\/(?:capabilities|comparison|events|metrics|refresh))?$/,
+  },
+  {
     // 1.1.2.1 核心指标卡（reporting 服务，卷 01「工作台与门户」L3 1.1.2 关键指标下的第一格）。
     // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往 13.1.1.1 / 13.4.2.2 / 13.1.1.2 那三条
     //   reporting/ 正则里并分支 —— 那三条**一字未改、也不重排**（它们分别只放行
