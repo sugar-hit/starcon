@@ -12,8 +12,6 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.time.Instant;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -250,9 +248,16 @@ class AccessSecurityTenancyIntegrationTest {
                     + "','"
                     + a
                     + "','file://./.starcon-secrets/t1','file://./.starcon-secrets/t1/token','OAUTH2',"
-                    + "'orders.read','"
-                    + OffsetDateTime.now(ZoneOffset.UTC)
-                    + "','ACTIVE') returning id::text"));
+                    + "'orders.read',"
+                    // ⚠️ authorized_at 必须用**数据库的** now()，不能用 Java 墙钟：
+                    //    约束 credential_window 是 CHECK(authorized_at <= now() + interval '5 minutes')，
+                    //    而 PG 的 now() = transaction_timestamp()（**事务开始时刻**）。
+                    //    Java 墙钟是「语句执行时刻」，两者在长事务里会分叉 —— 机器负载高时
+                    //    本类曾跑到 919s/3 例，事务一旦跨过 5 分钟，墙钟值就会超出
+                    //    「事务开始 + 5 分钟」而违约（2026-10-26 r102 L2 实测假红）。
+                    //    用 DB 的 now() ⇒ 与约束同一时间基准，与机器负载彻底解耦。
+                    + "now(),"
+                    + "'ACTIVE') returning id::text"));
     as(
         actorA,
         "channel.connection.read",

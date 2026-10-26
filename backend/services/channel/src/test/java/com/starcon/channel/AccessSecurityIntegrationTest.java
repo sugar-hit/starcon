@@ -216,7 +216,12 @@ class AccessSecurityIntegrationTest {
             + "','"
             + tenant
             + "','file://./.starcon-secrets/t1','file://./.starcon-secrets/t1/token','OAUTH2',"
-            + "'orders.read','" + OffsetDateTime.now(ZoneOffset.UTC) + "','ACTIVE')");
+            + "'orders.read',"
+            // ⚠️ authorized_at 用**数据库的** now()，不用 Java 墙钟：
+            //    约束 credential_window 是 CHECK(authorized_at <= now() + interval '5 minutes')，
+            //    而 PG 的 now() = transaction_timestamp()（事务开始时刻）。长事务里
+            //    「墙钟」与「事务开始」会分叉，机器负载高时必然违约（2026-10-26 r102 L2 实测假红）。
+            + "now(),'ACTIVE')");
     return id;
   }
 
