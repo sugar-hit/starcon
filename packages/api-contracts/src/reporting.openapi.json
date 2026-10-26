@@ -2033,6 +2033,457 @@
         },
         "type": "object"
       },
+      "TargetBaselineView": {
+        "properties": {
+          "currency": {
+            "nullable": true,
+            "type": "string"
+          },
+          "from": {
+            "format": "date",
+            "nullable": true,
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "scope": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "to": {
+            "format": "date",
+            "nullable": true,
+            "type": "string"
+          },
+          "value": {
+            "nullable": true,
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "TargetBucketView": {
+        "properties": {
+          "bucketEnd": {
+            "format": "date",
+            "type": "string"
+          },
+          "bucketStart": {
+            "format": "date",
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "granularity": {
+            "type": "string"
+          },
+          "targetValue": {
+            "type": "number"
+          },
+          "weight": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "TargetCaliberView": {
+        "properties": {
+          "aggregation": {
+            "type": "string"
+          },
+          "caliberNote": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "metricCode": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "unit": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "TargetCapabilities": {
+        "properties": {
+          "baselineConnected": {
+            "type": "boolean"
+          },
+          "notDelivered": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "notes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "upstreamConnected": {
+            "type": "boolean"
+          },
+          "upstreamModules": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "TargetCurrencyTotal": {
+        "properties": {
+          "count": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "total": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "TargetCurrentPeriod": {
+        "properties": {
+          "asOfDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "from": {
+            "format": "date",
+            "type": "string"
+          },
+          "granularity": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "timezone": {
+            "type": "string"
+          },
+          "timezoneSource": {
+            "type": "string"
+          },
+          "to": {
+            "format": "date",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "TargetDecompositionPreview": {
+        "properties": {
+          "bucketSum": {
+            "type": "number"
+          },
+          "buckets": {
+            "items": {
+              "$ref": "#/components/schemas/TargetBucketView"
+            },
+            "type": "array"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "decompositionMethod": {
+            "type": "string"
+          },
+          "granularity": {
+            "type": "string"
+          },
+          "reconciled": {
+            "type": "boolean"
+          },
+          "remainderNote": {
+            "type": "string"
+          },
+          "targetValue": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "TargetInput": {
+        "properties": {
+          "currency": {
+            "minLength": 1,
+            "pattern": "[A-Z]{3}",
+            "type": "string"
+          },
+          "decompositionMethod": {
+            "minLength": 1,
+            "pattern": "EVEN|WEIGHTED",
+            "type": "string"
+          },
+          "granularity": {
+            "minLength": 1,
+            "pattern": "MONTHLY|WEEKLY",
+            "type": "string"
+          },
+          "metricCode": {
+            "maxLength": 48,
+            "minLength": 1,
+            "type": "string"
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "nullable": true,
+            "type": "string"
+          },
+          "ownerId": {
+            "maxLength": 160,
+            "minLength": 1,
+            "type": "string"
+          },
+          "periodEnd": {
+            "format": "date",
+            "type": "string"
+          },
+          "periodStart": {
+            "format": "date",
+            "type": "string"
+          },
+          "scopeType": {
+            "minLength": 1,
+            "pattern": "DEPARTMENT|MEMBER|SHOP|PRODUCT",
+            "type": "string"
+          },
+          "status": {
+            "nullable": true,
+            "pattern": "ACTIVE|ARCHIVED",
+            "type": "string"
+          },
+          "targetValue": {
+            "type": "number"
+          },
+          "weights": {
+            "items": {
+              "nullable": true,
+              "type": "number"
+            },
+            "nullable": true,
+            "type": "array"
+          }
+        },
+        "required": [
+          "currency",
+          "decompositionMethod",
+          "granularity",
+          "metricCode",
+          "ownerId",
+          "periodEnd",
+          "periodStart",
+          "scopeType",
+          "targetValue"
+        ],
+        "type": "object"
+      },
+      "TargetListResponse": {
+        "properties": {
+          "currencyTotals": {
+            "items": {
+              "$ref": "#/components/schemas/TargetCurrencyTotal"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "targets": {
+            "items": {
+              "$ref": "#/components/schemas/TargetView"
+            },
+            "type": "array"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "TargetMetricView": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "calipers": {
+            "items": {
+              "$ref": "#/components/schemas/TargetCaliberView"
+            },
+            "type": "array"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "scopeType": {
+            "type": "string"
+          },
+          "unavailableReason": {
+            "type": "string"
+          },
+          "unit": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "TargetOwnerList": {
+        "properties": {
+          "note": {
+            "type": "string"
+          },
+          "owners": {
+            "items": {
+              "$ref": "#/components/schemas/TargetOwnerView"
+            },
+            "type": "array"
+          },
+          "scopeType": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "TargetOwnerView": {
+        "properties": {
+          "detail": {
+            "type": "string"
+          },
+          "ownerCode": {
+            "type": "string"
+          },
+          "ownerId": {
+            "type": "string"
+          },
+          "ownerName": {
+            "type": "string"
+          },
+          "ownerType": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "TargetView": {
+        "properties": {
+          "baseline": {
+            "$ref": "#/components/schemas/TargetBaselineView"
+          },
+          "bucketCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "bucketSum": {
+            "type": "number"
+          },
+          "buckets": {
+            "items": {
+              "$ref": "#/components/schemas/TargetBucketView"
+            },
+            "type": "array"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "decompositionMethod": {
+            "type": "string"
+          },
+          "granularity": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "metricCode": {
+            "type": "string"
+          },
+          "metricDisplayName": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "ownerCode": {
+            "type": "string"
+          },
+          "ownerId": {
+            "type": "string"
+          },
+          "ownerName": {
+            "type": "string"
+          },
+          "periodEnd": {
+            "format": "date",
+            "type": "string"
+          },
+          "periodStart": {
+            "format": "date",
+            "type": "string"
+          },
+          "reconciled": {
+            "type": "boolean"
+          },
+          "scopeType": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "targetValue": {
+            "type": "number"
+          },
+          "unit": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "TrendPoint": {
         "properties": {
           "currency": {
@@ -3578,6 +4029,555 @@
         "summary": "可见店铺集合（筛选器用）+ 每个店铺在这个窗口里有没有事实",
         "tags": [
           "1.1.2.2 店铺概览"
+        ]
+      }
+    },
+    "/reporting/targets": {
+      "get": {
+        "description": "⚠️ **合计按币种分列**：不同币种的目标**绝不相加**。⚠️ 分解项合计与目标值是否一致由 reconciled 字段说明（数据层另有延迟约束触发器兜底）。",
+        "operationId": "get_reporting_targets",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "scopeType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "metricCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "ownerId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TargetListResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "目标清单（真分页 + 真计数）：目标记录 + 分解计划概括 + 按币种合计",
+        "tags": [
+          "13.1.2.1 目标设定"
+        ]
+      },
+      "post": {
+        "description": "目标 = **已登记的口径码 + 目标值 + 币种 + 周期 + 归属对象**。⚠️ 归属对象由服务端回查权威来源并取**快照**（组织改名后历史目标仍认得出是谁）。⚠️ 周期必须与分解粒度对齐（按月 ⇒ 起是 1 日、止是月末日；按周 ⇒ 周一 / 周日）。⚠️ 同一归属对象 + 指标 + 币种 + 周期只能有一个目标（重复会 409）。",
+        "operationId": "post_reporting_targets",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TargetInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TargetView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "设定一个目标（同时写下分解计划）",
+        "tags": [
+          "13.1.2.1 目标设定"
+        ]
+      }
+    },
+    "/reporting/targets/capabilities": {
+      "get": {
+        "description": "notDelivered 列出的是**确实拿不到**的部分，每条都写清原因与归属模块 —— 把「拿不到」伪装成 0 比说清楚更糟。",
+        "operationId": "get_reporting_targets_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TargetCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "能力声明：归属对象从哪来、历史基线的边界在哪、蓝图点名的指标里哪些口径没登记",
+        "tags": [
+          "13.1.2.1 目标设定"
+        ]
+      }
+    },
+    "/reporting/targets/current-period": {
+      "get": {
+        "description": "时区取自本租户投影事实上的分桶时区；本租户还没有投影事实时暂按 UTC，并在 timezoneSource 里说清楚。",
+        "operationId": "get_reporting_targets_current_period",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "granularity",
+            "required": false,
+            "schema": {
+              "default": "MONTHLY",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TargetCurrentPeriod"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "当前周期边界（**按本租户时区算**，不写死 UTC）",
+        "tags": [
+          "13.1.2.1 目标设定"
+        ]
+      }
+    },
+    "/reporting/targets/decomposition": {
+      "get": {
+        "description": "⚠️ **分解项合计精确等于目标值**：均分时差额归最后一个分解项；按权重时用最大余额法补齐。预览与真正落库走**同一套计算**，所以页面上看到的与存进去的逐分一致。",
+        "operationId": "get_reporting_targets_decomposition",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "periodStart",
+            "required": true,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "periodEnd",
+            "required": true,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "granularity",
+            "required": false,
+            "schema": {
+              "default": "MONTHLY",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "method",
+            "required": false,
+            "schema": {
+              "default": "EVEN",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "currency",
+            "required": false,
+            "schema": {
+              "default": "USD",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "targetValue",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "in": "query",
+            "name": "weights",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TargetDecompositionPreview"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "分解预览（不落库）：给定周期与目标值，算出分解到月 / 周的分解计划",
+        "tags": [
+          "13.1.2.1 目标设定"
+        ]
+      }
+    },
+    "/reporting/targets/metrics": {
+      "get": {
+        "description": "⚠️ **销售额在店铺维度是三个并列口径**（平台侧 / 还原口径 / 口径差异额）—— 取其一改名叫「销售额」就是抹掉口径差异。⚠️ **广告 ROI 与库存周转**在没有登记口径码的维度上如实报「未登记」，本模块不自己造公式。",
+        "operationId": "get_reporting_targets_metrics",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "scopeType",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/TargetMetricView"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "蓝图点名的目标指标清单（按归属维度）：可引用哪些口径码、哪些没登记",
+        "tags": [
+          "13.1.2.1 目标设定"
+        ]
+      }
+    },
+    "/reporting/targets/owners": {
+      "get": {
+        "description": "部门与人员来自 identity，产品来自 catalog，店铺来自本服务自己的店铺档案投影 —— 组织本体不在本服务，**本模块不造一张组织表顶替**。",
+        "operationId": "get_reporting_targets_owners",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "scopeType",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TargetOwnerList"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "归属对象清单（部门 / 人员 / 店铺 / 产品）",
+        "tags": [
+          "13.1.2.1 目标设定"
+        ]
+      }
+    },
+    "/reporting/targets/{id}": {
+      "delete": {
+        "operationId": "delete_reporting_targets_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "summary": "删除一个目标（分解计划随外键级联删除）",
+        "tags": [
+          "13.1.2.1 目标设定"
+        ]
+      },
+      "get": {
+        "description": "⚠️ **「没有基线」与「基线为 0」是两件事**：取不到时 baseline.value 为 null、baseline.status = NO_DATA，并写明原因。",
+        "operationId": "get_reporting_targets_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TargetView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "目标详情（含完整分解计划与历史基线快照）",
+        "tags": [
+          "13.1.2.1 目标设定"
+        ]
+      },
+      "put": {
+        "description": "⚠️ 归属对象没变时沿用原快照（不去打扰上游）；变了才重新回查权威来源取快照。",
+        "operationId": "put_reporting_targets_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TargetInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TargetView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "修改一个目标（目标值 / 周期 / 归属对象 / 分解方式都可改，分解计划随之重写）",
+        "tags": [
+          "13.1.2.1 目标设定"
+        ]
+      }
+    },
+    "/reporting/targets/{id}/baseline": {
+      "post": {
+        "description": "基线窗口 = 目标周期的去年同期。⚠️ 店铺维度取该**店铺自己**的历史事实；部门 / 人员 / 产品维度的历史事实**尚未投影到 reporting**，那里给的是**租户级参考值**（baseline.scope = TENANT），并写明它不是该归属对象自己的历史。",
+        "operationId": "post_reporting_targets_id_baseline",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TargetView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "重新读一次历史基线（事实投影进来之后，基线会变）",
+        "tags": [
+          "13.1.2.1 目标设定"
         ]
       }
     }

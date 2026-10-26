@@ -232,6 +232,59 @@ const services: readonly {
     pattern: /^store-overview(?:\/(?:capabilities|shops))?$/,
   },
   {
+    // 13.1.2.1 目标设定（reporting 服务，卷 13「利润与经营分析」L3 13.1.2 目标管理下的第一格）。
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有那几条 reporting/ 正则里并分支 ——
+    //   既有条目**一字未改、也不重排**（它们分别只放行 overview / projection、expense-variance、
+    //   store-comparison、metric-cards、store-overview 五个命名空间）。
+    //
+    // ---- 插入锚点选在**那几条 reporting/ 之后**（数组靠前那一段）----
+    //   同批其它车道插在 identity/、warehouse/、crm/ 那几条附近或数组末尾；
+    //   本车道落在数组开头这一段，锚点与它们的插入点相隔很远，并入时 git 能干净求并。
+    //
+    // ---- 首 token「targets」的零命中核对结论（实测，非目测）----
+    //   发车前用脚本（`.tmp/api-proxy-zero-hit.mjs`，不入库）把本文件里**全部 244 条既有元素**
+    //   （`prefix` + 正则）逐条抽出来，按 `resolve()` 的**同构口径**实测
+    //   （`path.startsWith(prefix)` 收窄服务 → 再测 `pattern.test(path.slice(prefix.length))`）：
+    //     reporting/targets                                       零命中
+    //     reporting/targets/capabilities                          零命中
+    //     reporting/targets/current-period                         零命中
+    //     reporting/targets/decomposition                          零命中
+    //     reporting/targets/metrics                                零命中
+    //     reporting/targets/owners                                 零命中
+    //     reporting/targets/{uuid}                                 零命中
+    //     reporting/targets/{uuid}/baseline                        零命中
+    //   **零命中** —— 本文件里 `prefix === 'reporting/'` 的既有元素恰好 **5 条**，
+    //   它们的正则都是**按命名空间精确匹配**的，**不覆盖 `targets`**；
+    //   而别的 prefix 下的正则根本吃不到本模块的路径（`resolve()` 先按 prefix 闸门筛）。
+    //   同一支脚本同时反向核对了 **24 条别的车道已交付的 reporting 形状**
+    //   （13.1.1.1 / 13.4.2.2 / 13.1.1.2 / 1.1.2.1 / 1.1.2.3）**全部仍然命中** ——
+    //   本条新元素不会遮蔽它们。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**，契约 `reporting.openapi.json` 里就这 8 条）：
+    //   targets                目标清单（真分页 + 真计数 + 按币种合计）
+    //   targets/capabilities   能力声明（归属对象来源 / 历史基线边界 / 哪些口径没登记）
+    //   targets/metrics        蓝图点名的目标指标清单（按归属维度，可引用哪些口径码）
+    //   targets/owners         归属对象清单（部门 / 人员 / 店铺 / 产品）
+    //   targets/current-period 当前周期边界（**按本租户时区算**，不写死 UTC）
+    //   targets/decomposition  分解预览（不落库）：分解到月 / 周，合计精确等于目标值
+    //   targets/{uuid}         目标详情（含完整分解计划与历史基线快照）；也是 PUT / DELETE 的落点
+    //   targets/{uuid}/baseline 重新读一次历史基线（POST）
+    //
+    // ⚠️ **id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //   （不是 `[0-9a-f-]+`：后者会把字面量子路径也吃掉）。
+    //
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   reporting/targets/not-a-shape        —— 不存在的子路径仍然 404。
+    //   reporting/targets/capabilities/extra —— 多一层仍然 404。
+    //   reporting/targets/{uuid}/unknown      —— 目标 id 下只有 baseline 一个子路径。
+    //   reporting/targets/tracking           —— 🔴 13.1.2.2 达成追踪未交付（那是下游另一格）。
+    prefix: 'reporting/',
+    env: 'REPORTING_URL',
+    fallback: 'http://127.0.0.1:8088',
+    pattern:
+      /^targets(?:\/(?:capabilities|current-period|decomposition|metrics|owners)|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/baseline)?)?$/,
+  },
+  {
     // 12.4.1.3 成本差异分析（finance 服务，卷 12「财务核算」L3 12.4.1 成本计算下的第三格）。
     // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 finance 那几条巨型 alternation 里并分支 ——
     //   既有条目**一字未改、也不重排**。
