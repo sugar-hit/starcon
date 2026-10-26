@@ -1615,6 +1615,363 @@
         },
         "type": "object"
       },
+      "StoreOverviewCaliber": {
+        "properties": {
+          "aggregation": {
+            "type": "string"
+          },
+          "denominatorMetricCode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "metricCode": {
+            "type": "string"
+          },
+          "numeratorMetricCode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "registered": {
+            "type": "boolean"
+          },
+          "unit": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "StoreOverviewCapabilities": {
+        "properties": {
+          "dimensions": {
+            "items": {
+              "$ref": "#/components/schemas/StoreOverviewDimensionCapability"
+            },
+            "type": "array"
+          },
+          "notDelivered": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "notes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "rules": {
+            "items": {
+              "$ref": "#/components/schemas/StoreOverviewRule"
+            },
+            "type": "array"
+          },
+          "upstreamConnected": {
+            "type": "boolean"
+          },
+          "upstreamModules": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "StoreOverviewDimension": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "caliber": {
+            "type": "string"
+          },
+          "currencyAware": {
+            "type": "boolean"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusNote": {
+            "type": "string"
+          },
+          "unit": {
+            "type": "string"
+          },
+          "values": {
+            "items": {
+              "$ref": "#/components/schemas/StoreOverviewMetricValue"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "StoreOverviewDimensionCapability": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "caliber": {
+            "type": "string"
+          },
+          "calibers": {
+            "items": {
+              "$ref": "#/components/schemas/StoreOverviewCaliber"
+            },
+            "type": "array"
+          },
+          "currencyAware": {
+            "type": "boolean"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "sourceKind": {
+            "type": "string"
+          },
+          "unavailableReason": {
+            "type": "string"
+          },
+          "unit": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "StoreOverviewLaggard": {
+        "properties": {
+          "platformCode": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "shopCode": {
+            "type": "string"
+          },
+          "shopName": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "StoreOverviewMetricValue": {
+        "properties": {
+          "availability": {
+            "type": "string"
+          },
+          "availabilityNote": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "metricCode": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "unit": {
+            "type": "string"
+          },
+          "value": {
+            "nullable": true,
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "StoreOverviewResponse": {
+        "properties": {
+          "asOfDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "caliberNotes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "dataUpdatedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "dataUpdatedNote": {
+            "type": "string"
+          },
+          "emptyNote": {
+            "type": "string"
+          },
+          "emptyReason": {
+            "nullable": true,
+            "type": "string"
+          },
+          "from": {
+            "format": "date",
+            "type": "string"
+          },
+          "laggards": {
+            "items": {
+              "$ref": "#/components/schemas/StoreOverviewLaggard"
+            },
+            "type": "array"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/StoreOverviewRow"
+            },
+            "type": "array"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusNote": {
+            "type": "string"
+          },
+          "timezone": {
+            "type": "string"
+          },
+          "timezoneSource": {
+            "type": "string"
+          },
+          "to": {
+            "format": "date",
+            "type": "string"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "windowPreset": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "StoreOverviewRow": {
+        "properties": {
+          "analysisPath": {
+            "nullable": true,
+            "type": "string"
+          },
+          "analysisTargetName": {
+            "type": "string"
+          },
+          "classification": {
+            "type": "string"
+          },
+          "classificationNote": {
+            "type": "string"
+          },
+          "currencies": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "dimensions": {
+            "items": {
+              "$ref": "#/components/schemas/StoreOverviewDimension"
+            },
+            "type": "array"
+          },
+          "hasFactsInWindow": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          },
+          "ordersPath": {
+            "nullable": true,
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "platformName": {
+            "type": "string"
+          },
+          "shopCode": {
+            "type": "string"
+          },
+          "shopName": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "StoreOverviewRule": {
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "ruleCode": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "StoreOverviewShop": {
+        "properties": {
+          "hasFactsInWindow": {
+            "type": "boolean"
+          },
+          "lastFactAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "platformName": {
+            "type": "string"
+          },
+          "shopCode": {
+            "type": "string"
+          },
+          "shopName": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "StorePlatformOption": {
         "properties": {
           "platformCode": {
@@ -3049,6 +3406,178 @@
         "summary": "店铺清单 + 平台清单（筛选器与「按平台分组」用）",
         "tags": [
           "13.1.1.2 多店对比"
+        ]
+      }
+    },
+    "/reporting/store-overview": {
+      "get": {
+        "description": "时间窗口由 window 选：TODAY（今日）/ YESTERDAY（昨日）/ THIS_MONTH（本月）/ CUSTOM（自定义区间）；「今日 / 昨日 / 本月」的边界按**本租户时区**算（取自本租户店铺投影事实的分桶时区），不写死 UTC。🔴 **不跨币种相加**：涉币维度按币种分列，界面上没有跨币种的「总计」。🔴 掉队判定与 13.1.1.2 多店对比**完全同源**（环比增长率 ≤ −20%）。工作台不下发租户号与范围参数：范围由服务端判定。",
+        "operationId": "get_reporting_store_overview",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "window",
+            "required": false,
+            "schema": {
+              "default": "TODAY",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "platformCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/StoreOverviewResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "店铺概览：按店铺横向对比当期表现 + 识别掉队店铺",
+        "tags": [
+          "1.1.2.2 店铺概览"
+        ]
+      }
+    },
+    "/reporting/store-overview/capabilities": {
+      "get": {
+        "description": "蓝图 1.1.2.2 点名的五个维度：销售额、订单量、利润率、库存天数、广告花费。🔴 **「销售额」不是一个数**：店铺级成交金额分成平台侧口径与还原口径两个，外加两者的口径差异额 —— 本模块三者并列呈现，只取其一等于抹掉口径差异。🔴 **接不通的维度不给公式也不给分母** —— 给了就是编一个出来。",
+        "operationId": "get_reporting_store_overview_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/StoreOverviewCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "能力声明：五个维度逐条报出指标码 / 接不接得通 / 口径归谁",
+        "tags": [
+          "1.1.2.2 店铺概览"
+        ]
+      }
+    },
+    "/reporting/store-overview/shops": {
+      "get": {
+        "description": "店铺归属来自 channel 的店铺清单（经 13.1.1.2 的刷新链路投影到 reporting）。🔴 可见范围由 **RLS 按会话租户**决定，租户不来自任何请求参数。",
+        "operationId": "get_reporting_store_overview_shops",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "window",
+            "required": false,
+            "schema": {
+              "default": "TODAY",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "platformCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/StoreOverviewShop"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "可见店铺集合（筛选器用）+ 每个店铺在这个窗口里有没有事实",
+        "tags": [
+          "1.1.2.2 店铺概览"
         ]
       }
     }

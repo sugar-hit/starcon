@@ -30,7 +30,7 @@
  * **已存在的路由**。
  */
 import type { LucideIcon } from 'lucide-react';
-import { Boxes, ClipboardList, Gauge, HeartPulse, LayoutGrid, Search } from 'lucide-react';
+import { Boxes, ClipboardList, Gauge, HeartPulse, LayoutGrid, Search, Store } from 'lucide-react';
 
 /**
  * 工作台分区（蓝图 1.1 的三段结构）。
@@ -147,6 +147,19 @@ export const WORKBENCH_CARDS: readonly WorkbenchCard[] = [
     defaultVisible: true,
     icon: Gauge,
     module: '1.1.2.1 核心指标卡',
+  },
+  {
+    // 🔴 本条目是**新增一条**，1.1.2.1 那条**一字未改、也不重排**（累积型固件清单）。
+    // 插入锚点选在 1.1.2.1 之后 —— 1.1.2 下的两格挨在一起，其余条目相对次序不变。
+    key: 'metric.store-overview',
+    label: '店铺概览',
+    description:
+      '按店铺横向对比当期表现：销售额（平台侧 / 我方还原 / 口径差三个口径并列）、订单量、利润率、库存天数、广告花费，并识别掉队店铺。',
+    href: '/dashboard/store-overview',
+    tab: 'overview',
+    defaultVisible: true,
+    icon: Store,
+    module: '1.1.2.2 店铺概览',
   },
   {
     key: 'nav.global-search',
