@@ -1675,6 +1675,322 @@
         },
         "type": "object"
       },
+      "PerformanceAdCampaignRow": {
+        "properties": {
+          "campaignId": {
+            "type": "string"
+          },
+          "campaignLabel": {
+            "type": "string"
+          },
+          "clicks": {
+            "nullable": true,
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "impressions": {
+            "nullable": true,
+            "type": "number"
+          },
+          "note": {
+            "type": "string"
+          },
+          "orders": {
+            "nullable": true,
+            "type": "number"
+          },
+          "platformName": {
+            "type": "string"
+          },
+          "sales": {
+            "nullable": true,
+            "type": "number"
+          },
+          "shopName": {
+            "type": "string"
+          },
+          "spend": {
+            "nullable": true,
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "PerformanceCompetitorRow": {
+        "properties": {
+          "currency": {
+            "type": "string"
+          },
+          "hijackerPrice": {
+            "nullable": true,
+            "type": "number"
+          },
+          "note": {
+            "type": "string"
+          },
+          "observedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "priceGap": {
+            "nullable": true,
+            "type": "number"
+          },
+          "priceGapRatio": {
+            "nullable": true,
+            "type": "number"
+          },
+          "referencePrice": {
+            "nullable": true,
+            "type": "number"
+          },
+          "sellerId": {
+            "type": "string"
+          },
+          "sellerKind": {
+            "type": "string"
+          },
+          "sellerName": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PerformanceCurrencyValue": {
+        "properties": {
+          "amount": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PerformanceMetric": {
+        "properties": {
+          "availability": {
+            "type": "string"
+          },
+          "availabilityNote": {
+            "type": "string"
+          },
+          "baselineValue": {
+            "nullable": true,
+            "type": "number"
+          },
+          "change": {
+            "nullable": true,
+            "type": "number"
+          },
+          "changeRate": {
+            "nullable": true,
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "metricCode": {
+            "type": "string"
+          },
+          "sourceNote": {
+            "type": "string"
+          },
+          "unit": {
+            "type": "string"
+          },
+          "value": {
+            "nullable": true,
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "PerformanceMetricDefinitionView": {
+        "properties": {
+          "aggregation": {
+            "type": "string"
+          },
+          "availabilityNote": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "currencyAware": {
+            "type": "boolean"
+          },
+          "currencyScope": {
+            "type": "string"
+          },
+          "denominatorMetricCode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "metricCode": {
+            "type": "string"
+          },
+          "numeratorMetricCode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "unit": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PerformanceRanking": {
+        "properties": {
+          "availability": {
+            "type": "string"
+          },
+          "availabilityNote": {
+            "type": "string"
+          },
+          "peerAverage": {
+            "nullable": true,
+            "type": "number"
+          },
+          "peerMedian": {
+            "nullable": true,
+            "type": "number"
+          },
+          "peerScope": {
+            "type": "string"
+          },
+          "percentile": {
+            "nullable": true,
+            "type": "number"
+          },
+          "rank": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "rankMetricCode": {
+            "type": "string"
+          },
+          "rankMetricDisplayName": {
+            "type": "string"
+          },
+          "total": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "PerformanceRuleNote": {
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "ruleCode": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PerformanceSection": {
+        "properties": {
+          "adCampaigns": {
+            "items": {
+              "$ref": "#/components/schemas/PerformanceAdCampaignRow"
+            },
+            "type": "array"
+          },
+          "availability": {
+            "type": "string"
+          },
+          "availabilityNote": {
+            "type": "string"
+          },
+          "competitors": {
+            "items": {
+              "$ref": "#/components/schemas/PerformanceCompetitorRow"
+            },
+            "type": "array"
+          },
+          "description": {
+            "type": "string"
+          },
+          "metrics": {
+            "items": {
+              "$ref": "#/components/schemas/PerformanceMetric"
+            },
+            "type": "array"
+          },
+          "sectionCode": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PerformanceTrendPoint": {
+        "properties": {
+          "clicks": {
+            "nullable": true,
+            "type": "number"
+          },
+          "cogsAmounts": {
+            "items": {
+              "$ref": "#/components/schemas/PerformanceCurrencyValue"
+            },
+            "type": "array"
+          },
+          "date": {
+            "format": "date",
+            "type": "string"
+          },
+          "grossProfitAmounts": {
+            "items": {
+              "$ref": "#/components/schemas/PerformanceCurrencyValue"
+            },
+            "type": "array"
+          },
+          "impressions": {
+            "nullable": true,
+            "type": "number"
+          },
+          "returnedQuantity": {
+            "nullable": true,
+            "type": "number"
+          },
+          "salesAmounts": {
+            "items": {
+              "$ref": "#/components/schemas/PerformanceCurrencyValue"
+            },
+            "type": "array"
+          },
+          "salesQuantity": {
+            "nullable": true,
+            "type": "number"
+          },
+          "sessions": {
+            "nullable": true,
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
       "PlatformGroup": {
         "properties": {
           "caliberNote": {
@@ -1884,6 +2200,176 @@
           "value": {
             "nullable": true,
             "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "ProductPerformanceCapabilities": {
+        "properties": {
+          "analysisAvailable": {
+            "type": "boolean"
+          },
+          "dataUpdatedAtVisible": {
+            "type": "boolean"
+          },
+          "notDelivered": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "rules": {
+            "items": {
+              "$ref": "#/components/schemas/PerformanceRuleNote"
+            },
+            "type": "array"
+          },
+          "upstreamConnected": {
+            "type": "boolean"
+          },
+          "upstreamModules": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "ProductPerformanceRefreshResult": {
+        "properties": {
+          "fetched": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "projected": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "source": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ProductPerformanceResponse": {
+        "properties": {
+          "baselineFrom": {
+            "format": "date",
+            "type": "string"
+          },
+          "baselineTo": {
+            "format": "date",
+            "type": "string"
+          },
+          "baselineType": {
+            "type": "string"
+          },
+          "caliberNotes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "dataUpdatedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "dataUpdatedNote": {
+            "type": "string"
+          },
+          "dimensionId": {
+            "type": "string"
+          },
+          "dimensionKey": {
+            "type": "string"
+          },
+          "dimensionName": {
+            "type": "string"
+          },
+          "dimensionType": {
+            "type": "string"
+          },
+          "emptyNote": {
+            "type": "string"
+          },
+          "emptyReason": {
+            "nullable": true,
+            "type": "string"
+          },
+          "from": {
+            "format": "date",
+            "type": "string"
+          },
+          "listingCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "listingIds": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "metricDefinitions": {
+            "items": {
+              "$ref": "#/components/schemas/PerformanceMetricDefinitionView"
+            },
+            "type": "array"
+          },
+          "platformCodes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "ranking": {
+            "$ref": "#/components/schemas/PerformanceRanking"
+          },
+          "sections": {
+            "items": {
+              "$ref": "#/components/schemas/PerformanceSection"
+            },
+            "type": "array"
+          },
+          "skuCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "skuIds": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusNote": {
+            "type": "string"
+          },
+          "timezones": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "to": {
+            "format": "date",
+            "type": "string"
+          },
+          "trend": {
+            "items": {
+              "$ref": "#/components/schemas/PerformanceTrendPoint"
+            },
+            "type": "array"
           }
         },
         "type": "object"
@@ -6461,6 +6947,249 @@
         "summary": "趋势：逐日逐币种（没有事实的那一天没有点，不是 0）",
         "tags": [
           "13.1.1.1 经营总览"
+        ]
+      }
+    },
+    "/reporting/product-performance": {
+      "get": {
+        "description": "🔴 **一次性拉齐**：一次调用返回全部指标 + 趋势 + 排名分位 + 环比基线 —— 页面滚动看完，不用来回跳，也不做瀑布式串行请求。⚠️ **绝不跨币种相加**：金额按币种分别列出；只有件数与次数给跨币种合计。⚠️ **「算不出来」与「等于 0」分开**：分母为 0 或没有事实时是「不可比」/「没有数据」，不是 0。基线默认「上一个等长周期」（可显式给 baselineFrom / baselineTo）。",
+        "operationId": "get_reporting_product_performance",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "baselineFrom",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "baselineTo",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dimensionType",
+            "required": false,
+            "schema": {
+              "default": "SKU",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dimensionKey",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "currency",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductPerformanceResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "单产品 360 度分析：销量 / 销售额 / 毛利 / 流量 / 转化 / 退货 / 库存 / 库龄 / 广告 / 竞品",
+        "tags": [
+          "13.3.1.1 产品表现分析"
+        ]
+      }
+    },
+    "/reporting/product-performance/capabilities": {
+      "get": {
+        "description": "notDelivered 列出的是**确实拿不到**的部分，每条都写清原因与归属模块 —— 把「拿不到」伪装成 0 比说清楚更糟。",
+        "operationId": "get_reporting_product_performance_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductPerformanceCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "能力声明：哪些上游真接通、哪些指标本轮不可用（归谁管）、判定规则是什么",
+        "tags": [
+          "13.3.1.1 产品表现分析"
+        ]
+      }
+    },
+    "/reporting/product-performance/metrics": {
+      "get": {
+        "operationId": "get_reporting_product_performance_metrics",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/PerformanceMetricDefinitionView"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "360 度指标口径目录（口径唯一的展示形态）",
+        "tags": [
+          "13.3.1.1 产品表现分析"
+        ]
+      }
+    },
+    "/reporting/product-performance/refresh": {
+      "post": {
+        "description": "上游：channel 的平台表现 / 跟卖记录 / 广告活动报表与投放商品、trade 的售后单与明细、finance 的成本分录与批次、warehouse 的库存余额与库龄。🔴 **基线窗口与当期窗口一起刷**：一次刷新就能看到环比 —— 只刷当期窗口的话，环比那一列永远是「没有数据」。",
+        "operationId": "post_reporting_product_performance_refresh",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "baselineFrom",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "baselineTo",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "timezone",
+            "required": false,
+            "schema": {
+              "default": "UTC",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ProductPerformanceRefreshResult"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "从上游拉取 360 度事实并投影（写的是投影，不是业务事实）",
+        "tags": [
+          "13.3.1.1 产品表现分析"
         ]
       }
     },
