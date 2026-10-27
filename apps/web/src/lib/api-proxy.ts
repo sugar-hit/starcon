@@ -416,6 +416,65 @@ const services: readonly {
     pattern: /^store\-site(?:\/(?:capabilities|drilldown|metrics|refresh))?$/,
   },
   {
+    // 13.2.1.2 分时与分周模式（reporting 服务，卷 13「利润与经营分析」L3 13.2 销量分析下的第二格）。
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有那几条 reporting/ 正则里并分支 ——
+    //   既有条目**一字未改、也不重排**（它们分别只放行 overview / projection、expense-variance、
+    //   store-comparison、sales-trend、metric-cards、store-overview、targets、store-site、
+    //   product-sales 九个命名空间）。
+    //
+    // ---- 插入锚点选在**store-site 那条之后**（数组靠前那一段，紧邻 13.2.2.1）----
+    //   同批其它车道的插入点是「数组末尾」（收尾的 `];` 之前，13.2.2.2 的 product-sales 就在那里）
+    //   与「第一个 identity/ 之前」「第一个 warehouse/ 之前」；
+    //   本车道落在数组开头这一段，与「数组末尾」那个锚点相距 12000 行以上 ⇒ git 能干净求并。
+    //
+    // ---- 首 token「time-pattern」的零命中核对结论（实测，非目测）----
+    //   发车前用脚本（`.tmp/api-proxy-zero-hit.mjs`，不入库）把本文件里**全部 246 条既有元素**
+    //   （`prefix` + 正则）逐条抽出来，按 `resolve()` 的**同构口径**实测
+    //   （`path.startsWith(prefix)` 收窄服务 → 再测 `pattern.test(path.slice(prefix.length))`）：
+    //     reporting/time-pattern                              零命中
+    //     reporting/time-pattern/capabilities                 零命中
+    //     reporting/time-pattern/metrics                      零命中
+    //     reporting/time-pattern/shops                        零命中
+    //     reporting/time-pattern/slots                        零命中
+    //     reporting/time-pattern/slots/{uuid}                 零命中
+    //     reporting/time-pattern/refresh                      零命中
+    //   **零命中** —— 本文件里 `prefix === 'reporting/'` 的既有元素的首 token 分别是
+    //   overview / projection / expense-variance / store-comparison / sales-trend /
+    //   metric-cards / store-overview / targets / store-site / product-sales，
+    //   **没有一条能吃下 `time-pattern`**；而别的 prefix 下的正则根本够不着本模块的路径
+    //   （`resolve()` 先按 prefix 闸门筛）。
+    //   ⚠️ 反向核对：另外 **44 条**别的车道已交付的 reporting 形状
+    //   （13.1.1.1 / 13.4.2.2 / 13.1.1.2 / 13.2.1.1 / 13.2.2.2 / 13.1.2.x / 13.2.2.1）
+    //   **全部仍然命中** —— 本条新元素不会遮蔽它们。
+    //   另外核对了本模块**不得**出现在别的服务前缀下：trade/ catalog/ channel/ finance/
+    //   warehouse/ crm/ identity/ platform/ 下的 time-pattern **全部零命中**。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**，契约 `reporting.openapi.json` 里就这 7 条）：
+    //   time-pattern              热力图 + 小时/星期分布 + 时段判定 + 高峰时段排序（裸路径是 @GetMapping 在类根上的）
+    //   time-pattern/capabilities 能力声明（时区怎么定、汇总按哪个口径、高峰低谷怎么判、哪些确实拿不到）
+    //   time-pattern/metrics      分时指标口径目录（口径唯一的展示形态）
+    //   time-pattern/shops        店铺时区档案（每个店铺按哪个时区统计；定不了的也列出来并写清原因）
+    //   time-pattern/slots        时段配置清单（租户自己的数据：高峰/平峰/低谷的区间与判定阈值）
+    //   time-pattern/slots/{uuid} 单条时段配置的改 / 删（PUT / DELETE）
+    //   time-pattern/refresh      刷新分时投影（POST，写的是投影不是业务事实）
+    //
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   reporting/time-pattern/{uuid}       —— 顶层没有 id 段（报表按查询参数定位，不是按 id）。
+    //   reporting/time-pattern/heatmap       —— 热力图随主响应一起给出，没有独立端点。
+    //   reporting/time-pattern/peak-ranking  —— 高峰排序随主响应一起给出，没有独立端点。
+    //   reporting/time-pattern/not-a-shape   —— 多一层仍然 404。
+    //
+    // id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //   （不是 `[0-9a-f-]+`）：后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行。
+    // 字面量子路径（capabilities / metrics / shops / slots / refresh）排在 {uuid} 段
+    //   **之前**判别 —— alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    prefix: 'reporting/',
+    env: 'REPORTING_URL',
+    fallback: 'http://127.0.0.1:8088',
+    pattern:
+      /^time\-pattern(?:\/(?:capabilities|metrics|shops|slots(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|refresh))?$/,
+  },
+  {
     // 12.4.1.3 成本差异分析（finance 服务，卷 12「财务核算」L3 12.4.1 成本计算下的第三格）。
     // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 finance 那几条巨型 alternation 里并分支 ——
     //   既有条目**一字未改、也不重排**。
