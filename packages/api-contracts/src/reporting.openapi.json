@@ -3184,6 +3184,516 @@
         },
         "type": "object"
       },
+      "StoreSiteCapabilities": {
+        "properties": {
+          "breakdownAvailable": {
+            "type": "boolean"
+          },
+          "channelShareAvailable": {
+            "type": "boolean"
+          },
+          "contributionAvailable": {
+            "type": "boolean"
+          },
+          "dataUpdatedAtVisible": {
+            "type": "boolean"
+          },
+          "dimensions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "drilldownAvailable": {
+            "type": "boolean"
+          },
+          "metrics": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "notDelivered": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "rules": {
+            "items": {
+              "$ref": "#/components/schemas/StoreSiteRuleNote"
+            },
+            "type": "array"
+          },
+          "storeAgeAvailable": {
+            "type": "boolean"
+          },
+          "upstreamConnected": {
+            "type": "boolean"
+          },
+          "upstreamModules": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "StoreSiteChannelShare": {
+        "properties": {
+          "metrics": {
+            "items": {
+              "$ref": "#/components/schemas/StoreSiteMetricValue"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "platformName": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "StoreSiteCoverage": {
+        "properties": {
+          "detailCoveragePercent": {
+            "nullable": true,
+            "type": "number"
+          },
+          "note": {
+            "type": "string"
+          },
+          "orderCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "orderCountWithDetail": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "truncated": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "StoreSiteDrilldownResponse": {
+        "properties": {
+          "dataUpdatedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "dataUpdatedNote": {
+            "type": "string"
+          },
+          "dimensionKey": {
+            "type": "string"
+          },
+          "emptyNote": {
+            "type": "string"
+          },
+          "emptyReason": {
+            "nullable": true,
+            "type": "string"
+          },
+          "from": {
+            "format": "date",
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/StoreSiteDrilldownRow"
+            },
+            "type": "array"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusNote": {
+            "type": "string"
+          },
+          "timezone": {
+            "type": "string"
+          },
+          "to": {
+            "format": "date",
+            "type": "string"
+          },
+          "totalRows": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "StoreSiteDrilldownRow": {
+        "properties": {
+          "currency": {
+            "type": "string"
+          },
+          "metricCode": {
+            "type": "string"
+          },
+          "occurredAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "orderNo": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "referenceId": {
+            "type": "string"
+          },
+          "referenceLabel": {
+            "type": "string"
+          },
+          "shopCode": {
+            "type": "string"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "sourceKind": {
+            "type": "string"
+          },
+          "value": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "StoreSiteMetricDefinitionView": {
+        "properties": {
+          "aggregation": {
+            "type": "string"
+          },
+          "baseMetricCode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "currencyAware": {
+            "type": "boolean"
+          },
+          "description": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "metricCode": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "unit": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "StoreSiteMetricValue": {
+        "properties": {
+          "availability": {
+            "type": "string"
+          },
+          "availabilityNote": {
+            "type": "string"
+          },
+          "baseValue": {
+            "nullable": true,
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "delta": {
+            "nullable": true,
+            "type": "number"
+          },
+          "metricCode": {
+            "type": "string"
+          },
+          "value": {
+            "nullable": true,
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "StoreSiteNewVsExisting": {
+        "properties": {
+          "existingShopCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "existingStoreMetrics": {
+            "items": {
+              "$ref": "#/components/schemas/StoreSiteMetricValue"
+            },
+            "type": "array"
+          },
+          "newShopCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "newStoreContribution": {
+            "items": {
+              "$ref": "#/components/schemas/StoreSiteMetricValue"
+            },
+            "type": "array"
+          },
+          "newStoreMetrics": {
+            "items": {
+              "$ref": "#/components/schemas/StoreSiteMetricValue"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "StoreSiteRefreshResult": {
+        "properties": {
+          "fetched": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "projected": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "source": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "StoreSiteResponse": {
+        "properties": {
+          "baseFrom": {
+            "format": "date",
+            "type": "string"
+          },
+          "baseTo": {
+            "format": "date",
+            "type": "string"
+          },
+          "caliberNotes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "channelShares": {
+            "items": {
+              "$ref": "#/components/schemas/StoreSiteChannelShare"
+            },
+            "type": "array"
+          },
+          "coverage": {
+            "$ref": "#/components/schemas/StoreSiteCoverage"
+          },
+          "dataUpdatedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "dataUpdatedNote": {
+            "type": "string"
+          },
+          "dimension": {
+            "type": "string"
+          },
+          "dimensionLabel": {
+            "type": "string"
+          },
+          "emptyNote": {
+            "type": "string"
+          },
+          "emptyReason": {
+            "nullable": true,
+            "type": "string"
+          },
+          "metricDefinitions": {
+            "items": {
+              "$ref": "#/components/schemas/StoreSiteMetricDefinitionView"
+            },
+            "type": "array"
+          },
+          "newVsExisting": {
+            "$ref": "#/components/schemas/StoreSiteNewVsExisting"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "requestedFrom": {
+            "format": "date",
+            "type": "string"
+          },
+          "requestedTo": {
+            "format": "date",
+            "type": "string"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/StoreSiteRow"
+            },
+            "type": "array"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusNote": {
+            "type": "string"
+          },
+          "timezone": {
+            "type": "string"
+          },
+          "totalRows": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "unattributed": {
+            "$ref": "#/components/schemas/StoreSiteUnattributed"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "StoreSiteRow": {
+        "properties": {
+          "dimensionKey": {
+            "type": "string"
+          },
+          "dimensionLabel": {
+            "type": "string"
+          },
+          "existingShopCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "metrics": {
+            "items": {
+              "$ref": "#/components/schemas/StoreSiteMetricValue"
+            },
+            "type": "array"
+          },
+          "newShopCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "platformName": {
+            "type": "string"
+          },
+          "shopCode": {
+            "type": "string"
+          },
+          "shopName": {
+            "type": "string"
+          },
+          "siteCode": {
+            "type": "string"
+          },
+          "siteName": {
+            "type": "string"
+          },
+          "storeAge": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "StoreSiteRuleNote": {
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "ruleCode": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "StoreSiteUnattributed": {
+        "properties": {
+          "metrics": {
+            "items": {
+              "$ref": "#/components/schemas/StoreSiteMetricValue"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "shopCodes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "shopCount": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
       "StoreSummary": {
         "properties": {
           "hasFacts": {
@@ -6218,6 +6728,304 @@
         "summary": "可见店铺集合（筛选器用）+ 每个店铺在这个窗口里有没有事实",
         "tags": [
           "1.1.2.2 店铺概览"
+        ]
+      }
+    },
+    "/reporting/store-site": {
+      "get": {
+        "description": "时间范围默认「最近 30 天」。维度由 dimension 决定（SHOP / SITE / PLATFORM）。🔴 **绝不跨币种相加**：成交金额按币种分别列出；只有件数与单数给跨币种合计。🔴 **站点维度有归属边界**：订单不带站点，启用多个站点的店铺其销量归不了任何站点，本模块单列「无法唯一归属」，不摊给任何站点。🔴 **增长贡献度** = 该维度的增量 ÷ 全部维度的增量之和 —— 它回答的是「哪个店带来了增量」。",
+        "operationId": "get_reporting_store_site",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dimension",
+            "required": false,
+            "schema": {
+              "default": "SHOP",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/StoreSiteResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "店铺 / 站点 / 平台维度拆解：销量与销售额 + 占比 + 增长贡献 + 新老店 + 渠道占比",
+        "tags": [
+          "13.2.2.1 店铺与站点"
+        ]
+      }
+    },
+    "/reporting/store-site/capabilities": {
+      "get": {
+        "description": "notDelivered 列出的是**确实拿不到**的部分，每条都写清原因与影响 —— 把「拿不到」伪装成 0 比说清楚更糟。",
+        "operationId": "get_reporting_store_site_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/StoreSiteCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "能力声明：哪些上游真接通、哪些口径在店铺/站点维度拿不到、判定规则是什么",
+        "tags": [
+          "13.2.2.1 店铺与站点"
+        ]
+      }
+    },
+    "/reporting/store-site/drilldown": {
+      "get": {
+        "description": "卷 13 卷首加粗句「可下钻」的落点：每个汇总数字都能钻到构成明细。维度对象由 dimension + dimensionKey 定位（SHOP 维度 ⇒ dimensionKey 就是店铺码）。",
+        "operationId": "get_reporting_store_site_drilldown",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dimension",
+            "required": false,
+            "schema": {
+              "default": "SHOP",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dimensionKey",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "metricCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/StoreSiteDrilldownResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "构成明细下钻：某个维度对象、某个指标的构成明细（哪张订单、哪张订单的哪一行）",
+        "tags": [
+          "13.2.2.1 店铺与站点"
+        ]
+      }
+    },
+    "/reporting/store-site/metrics": {
+      "get": {
+        "operationId": "get_reporting_store_site_metrics",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/StoreSiteMetricDefinitionView"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "店铺/站点维度的指标口径目录（口径唯一的展示形态）",
+        "tags": [
+          "13.2.2.1 店铺与站点"
+        ]
+      }
+    },
+    "/reporting/store-site/refresh": {
+      "post": {
+        "description": "上游：channel 的平台与站点目录（站点币种 / 时区 / 国家）、channel 的店铺清单与店铺详情（该店铺启用哪些站点）、trade 的销售订单与订单明细（金额 / 销量 / 订单数）与平台单（销售订单 → 店铺归属）。⚠️ 一次刷新会投影**当前窗口 + 上一等长窗口**（基期），否则增长贡献度永远算不出来。",
+        "operationId": "post_reporting_store_site_refresh",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/StoreSiteRefreshResult"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "从上游拉取店铺/站点档案与店铺维度事实并投影（写的是投影，不是业务事实）",
+        "tags": [
+          "13.2.2.1 店铺与站点"
         ]
       }
     },
