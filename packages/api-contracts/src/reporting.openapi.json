@@ -4754,6 +4754,602 @@
         },
         "type": "object"
       },
+      "TimePatternAmount": {
+        "properties": {
+          "currency": {
+            "type": "string"
+          },
+          "value": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "TimePatternCapabilities": {
+        "properties": {
+          "alignments": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "defaultAlignment": {
+            "type": "string"
+          },
+          "heatmap": {
+            "type": "boolean"
+          },
+          "notDelivered": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "peakRanking": {
+            "type": "boolean"
+          },
+          "rules": {
+            "items": {
+              "$ref": "#/components/schemas/TimePatternRuleNote"
+            },
+            "type": "array"
+          },
+          "slotConfigurable": {
+            "type": "boolean"
+          },
+          "summaryCaliberNote": {
+            "type": "string"
+          },
+          "timezoneAware": {
+            "type": "boolean"
+          },
+          "upstreamModules": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "TimePatternCell": {
+        "properties": {
+          "hour": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "hourLabel": {
+            "type": "string"
+          },
+          "orderCount": {
+            "type": "number"
+          },
+          "orderShare": {
+            "type": "number"
+          },
+          "p90Peak": {
+            "type": "boolean"
+          },
+          "salesAmounts": {
+            "items": {
+              "$ref": "#/components/schemas/TimePatternAmount"
+            },
+            "type": "array"
+          },
+          "unitSold": {
+            "type": "number"
+          },
+          "weekday": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "weekdayLabel": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "TimePatternCoverage": {
+        "properties": {
+          "expectedDays": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "projectedDays": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "projectedOrderCount": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "TimePatternHourBucket": {
+        "properties": {
+          "hour": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "hourLabel": {
+            "type": "string"
+          },
+          "orderCount": {
+            "type": "number"
+          },
+          "orderShare": {
+            "type": "number"
+          },
+          "p90Peak": {
+            "type": "boolean"
+          },
+          "salesAmounts": {
+            "items": {
+              "$ref": "#/components/schemas/TimePatternAmount"
+            },
+            "type": "array"
+          },
+          "unitSold": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "TimePatternMetricDefinitionView": {
+        "properties": {
+          "aggregation": {
+            "type": "string"
+          },
+          "baseMetricCode": {
+            "type": "string"
+          },
+          "currencyAware": {
+            "type": "boolean"
+          },
+          "description": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "metricCode": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "referencedFrom": {
+            "type": "string"
+          },
+          "unit": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "TimePatternPeakRank": {
+        "properties": {
+          "currency": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "level": {
+            "type": "string"
+          },
+          "levelLabel": {
+            "type": "string"
+          },
+          "metricCode": {
+            "type": "string"
+          },
+          "metricLabel": {
+            "type": "string"
+          },
+          "metricValue": {
+            "type": "number"
+          },
+          "orderShare": {
+            "type": "number"
+          },
+          "qualified": {
+            "type": "boolean"
+          },
+          "rank": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "slotCode": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "TimePatternRefreshResult": {
+        "properties": {
+          "fetched": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "projected": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "source": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "TimePatternResponse": {
+        "properties": {
+          "alignment": {
+            "type": "string"
+          },
+          "alignmentLabel": {
+            "type": "string"
+          },
+          "alignmentNote": {
+            "type": "string"
+          },
+          "coverage": {
+            "$ref": "#/components/schemas/TimePatternCoverage"
+          },
+          "dataUpdatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "dataUpdatedNote": {
+            "type": "string"
+          },
+          "emptyNote": {
+            "type": "string"
+          },
+          "emptyReason": {
+            "type": "string"
+          },
+          "from": {
+            "format": "date",
+            "type": "string"
+          },
+          "heatmap": {
+            "items": {
+              "$ref": "#/components/schemas/TimePatternCell"
+            },
+            "type": "array"
+          },
+          "hourDistribution": {
+            "items": {
+              "$ref": "#/components/schemas/TimePatternHourBucket"
+            },
+            "type": "array"
+          },
+          "metricDefinitions": {
+            "items": {
+              "$ref": "#/components/schemas/TimePatternMetricDefinitionView"
+            },
+            "type": "array"
+          },
+          "p90OrderCount": {
+            "type": "number"
+          },
+          "peakRanking": {
+            "items": {
+              "$ref": "#/components/schemas/TimePatternPeakRank"
+            },
+            "type": "array"
+          },
+          "rankingMetricCode": {
+            "type": "string"
+          },
+          "rankingMetricLabel": {
+            "type": "string"
+          },
+          "requestedFrom": {
+            "format": "date",
+            "type": "string"
+          },
+          "requestedTo": {
+            "format": "date",
+            "type": "string"
+          },
+          "shopCodes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "shops": {
+            "items": {
+              "$ref": "#/components/schemas/TimePatternShopView"
+            },
+            "type": "array"
+          },
+          "slots": {
+            "items": {
+              "$ref": "#/components/schemas/TimePatternSlotView"
+            },
+            "type": "array"
+          },
+          "status": {
+            "type": "string"
+          },
+          "to": {
+            "format": "date",
+            "type": "string"
+          },
+          "unattributed": {
+            "$ref": "#/components/schemas/TimePatternUnattributed"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "weekdayDistribution": {
+            "items": {
+              "$ref": "#/components/schemas/TimePatternWeekdayBucket"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "TimePatternRuleNote": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "TimePatternShopView": {
+        "properties": {
+          "shopCode": {
+            "type": "string"
+          },
+          "shopName": {
+            "type": "string"
+          },
+          "shopTimezone": {
+            "type": "string"
+          },
+          "timezoneReason": {
+            "type": "string"
+          },
+          "timezoneStatus": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "TimePatternSlotConfigView": {
+        "properties": {
+          "boundaryNote": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "endHour": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "id": {
+            "type": "string"
+          },
+          "level": {
+            "type": "string"
+          },
+          "levelLabel": {
+            "type": "string"
+          },
+          "qualifyBasis": {
+            "type": "string"
+          },
+          "qualifyComparison": {
+            "type": "string"
+          },
+          "qualifyThreshold": {
+            "type": "number"
+          },
+          "slotCode": {
+            "type": "string"
+          },
+          "sortOrder": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "startHour": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "TimePatternSlotReplaceRequest": {
+        "properties": {
+          "slots": {
+            "items": {
+              "$ref": "#/components/schemas/TimePatternSlotRequest"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "TimePatternSlotRequest": {
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "endHour": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "level": {
+            "type": "string"
+          },
+          "qualifyBasis": {
+            "type": "string"
+          },
+          "qualifyComparison": {
+            "type": "string"
+          },
+          "qualifyThreshold": {
+            "type": "number"
+          },
+          "slotCode": {
+            "type": "string"
+          },
+          "sortOrder": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "startHour": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "TimePatternSlotView": {
+        "properties": {
+          "displayName": {
+            "type": "string"
+          },
+          "endHour": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "level": {
+            "type": "string"
+          },
+          "levelLabel": {
+            "type": "string"
+          },
+          "orderCount": {
+            "type": "number"
+          },
+          "orderShare": {
+            "type": "number"
+          },
+          "qualified": {
+            "type": "boolean"
+          },
+          "qualifyBasis": {
+            "type": "string"
+          },
+          "qualifyComparison": {
+            "type": "string"
+          },
+          "qualifyThreshold": {
+            "type": "number"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "salesAmounts": {
+            "items": {
+              "$ref": "#/components/schemas/TimePatternAmount"
+            },
+            "type": "array"
+          },
+          "slotCode": {
+            "type": "string"
+          },
+          "startHour": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "unitSold": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "TimePatternUnattributed": {
+        "properties": {
+          "orderCount": {
+            "type": "number"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "salesAmounts": {
+            "items": {
+              "$ref": "#/components/schemas/TimePatternAmount"
+            },
+            "type": "array"
+          },
+          "shopCodes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "unitSold": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "TimePatternWeekdayBucket": {
+        "properties": {
+          "orderCount": {
+            "type": "number"
+          },
+          "orderShare": {
+            "type": "number"
+          },
+          "salesAmounts": {
+            "items": {
+              "$ref": "#/components/schemas/TimePatternAmount"
+            },
+            "type": "array"
+          },
+          "unitSold": {
+            "type": "number"
+          },
+          "weekday": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "weekdayLabel": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "TrendPoint": {
         "properties": {
           "currency": {
@@ -8505,6 +9101,445 @@
         "summary": "重新读一次历史基线（事实投影进来之后，基线会变）",
         "tags": [
           "13.1.2.1 目标设定"
+        ]
+      }
+    },
+    "/reporting/time-pattern": {
+      "get": {
+        "description": "时间范围默认「最近 30 天」（**按 DB 的 now() 算**，不是 JVM 墙钟）。🔴 **alignment 决定跨店铺汇总对齐的是哪一个槽位**：LOCAL_TIME（默认，店铺本地时间对齐，回答「买家什么时候下单」）与 UTC_SLOT（UTC 槽位对齐，回答「仓内同一绝对时刻的压力」）**结果不同** —— 响应里 always 回带当前口径与理由。⚠️ 金额按币种分别列出，**不跨币种相加**。",
+        "operationId": "get_reporting_time_pattern",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "alignment",
+            "required": false,
+            "schema": {
+              "default": "LOCAL_TIME",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "shopCodes",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "rankingMetric",
+            "required": false,
+            "schema": {
+              "default": "ORDER_COUNT",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TimePatternResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "分时与分周模式：热力图 + 小时 / 星期分布 + 时段判定 + 高峰时段排序",
+        "tags": [
+          "13.2.1.2 分时与分周模式"
+        ]
+      }
+    },
+    "/reporting/time-pattern/capabilities": {
+      "get": {
+        "description": "notDelivered 列出的是**确实拿不到**的部分，每条都写清原因与影响 —— 把「拿不到」伪装成 0 比说清楚更糟。",
+        "operationId": "get_reporting_time_pattern_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TimePatternCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "能力声明：时区怎么定、汇总按哪个口径、高峰低谷怎么判、哪些确实拿不到",
+        "tags": [
+          "13.2.1.2 分时与分周模式"
+        ]
+      }
+    },
+    "/reporting/time-pattern/metrics": {
+      "get": {
+        "operationId": "get_reporting_time_pattern_metrics",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/TimePatternMetricDefinitionView"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "分时指标口径目录（口径唯一的展示形态）",
+        "tags": [
+          "13.2.1.2 分时与分周模式"
+        ]
+      }
+    },
+    "/reporting/time-pattern/refresh": {
+      "post": {
+        "description": "上游：trade 的销售订单与订单明细、trade 的平台单（店铺归属）、channel 的平台 / 站点目录与店铺（**店铺时区**）。⚠️ 店铺**定不了时区**的订单会落库但**不进任何本地桶**，并在报表里单列 —— 不摊给任何时段。⚠️ 订单明细要逐单取（有上限），超出的部分**未计入销量**，刷新结果里会报出截断。",
+        "operationId": "post_reporting_time_pattern_refresh",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/TimePatternRefreshResult"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "从上游拉取出单事实并投影（写的是投影，不是业务事实）",
+        "tags": [
+          "13.2.1.2 分时与分周模式"
+        ]
+      }
+    },
+    "/reporting/time-pattern/shops": {
+      "get": {
+        "description": "🔴 店铺**没有**自己的时区字段：时区来自 channel 的**站点**参数（shop_marketplace → marketplace.default_timezone）。启用多个站点且时区不一致、或没启用站点的店铺**定不了时区** —— 它们的订单不进任何本地小时 / 星期桶。",
+        "operationId": "get_reporting_time_pattern_shops",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/TimePatternShopView"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "店铺时区档案（每个店铺按哪个时区统计；定不了的也列出来并写清原因）",
+        "tags": [
+          "13.2.1.2 分时与分周模式"
+        ]
+      }
+    },
+    "/reporting/time-pattern/slots": {
+      "get": {
+        "description": "🔴 区间是**左闭右开** `[startHour, endHour)`：startHour 含、endHour 不含；endHour = 24 表示到当天 23:59。⚠️ 启用时段必须**完整覆盖 0..24 小时**（不留空洞）且**互不重叠** —— 这是数据层的约束（延迟约束触发器），改坏了写不进来。",
+        "operationId": "get_reporting_time_pattern_slots",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/TimePatternSlotConfigView"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "时段配置清单（租户自己的数据：高峰 / 平峰 / 低谷的区间与判定阈值）",
+        "tags": [
+          "13.2.1.2 分时与分周模式"
+        ]
+      },
+      "post": {
+        "description": "「某个小时属于哪个时段」「高峰低谷怎么判」**全部读这张表** —— 改了配置，判定立刻跟着改（没有写死的常量）。",
+        "operationId": "post_reporting_time_pattern_slots",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TimePatternSlotRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TimePatternSlotConfigView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "新建一个时段配置",
+        "tags": [
+          "13.2.1.2 分时与分周模式"
+        ]
+      },
+      "put": {
+        "description": "请求体是**完整的时段集合**。服务端在一个事务里先校验（互不重叠 + 完整覆盖 0..24），再整体替换 —— 校验不过则**整体回滚**，旧配置原样保留。",
+        "operationId": "put_reporting_time_pattern_slots",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TimePatternSlotReplaceRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/TimePatternSlotConfigView"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "整体替换时段配置（一次成型，避免逐条改时中间态留空洞）",
+        "tags": [
+          "13.2.1.2 分时与分周模式"
+        ]
+      }
+    },
+    "/reporting/time-pattern/slots/{id}": {
+      "delete": {
+        "description": "⚠️ 删掉之后启用时段若不再完整覆盖 0..24 小时（留了空洞），**整个删除会被拒**（数据层约束）—— 请先扩宽相邻时段或用整体替换。",
+        "operationId": "delete_reporting_time_pattern_slots_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "summary": "删一个时段配置",
+        "tags": [
+          "13.2.1.2 分时与分周模式"
+        ]
+      },
+      "put": {
+        "description": "⚠️ 区间不可重叠、不留空洞 ⇒ **改一个时段往往要连带改相邻时段**；整体调整请用 `PUT /reporting/time-pattern/slots`（一次成型）。",
+        "operationId": "put_reporting_time_pattern_slots_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TimePatternSlotRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TimePatternSlotConfigView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "改一个时段配置",
+        "tags": [
+          "13.2.1.2 分时与分周模式"
         ]
       }
     }
