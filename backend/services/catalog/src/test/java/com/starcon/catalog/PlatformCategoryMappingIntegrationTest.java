@@ -10,9 +10,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.sun.net.httpserver.HttpServer;
 import java.net.InetSocketAddress;
 import java.sql.DriverManager;
-import java.time.Duration;
 import java.time.OffsetDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.*;
 import org.jooq.DSLContext;
 import org.junit.jupiter.api.*;
@@ -837,6 +835,34 @@ class PlatformCategoryMappingIntegrationTest {
 
   // ------------------------------------------------------------ timestamptz 往返
 
+  /**
+   * DB 自己的时钟（语句时刻）。
+   *
+   * <p>🔴 参照时刻一律从这里取，**不碰 JVM 墙钟**。{@code platform_category_mapping.created_at} 是
+   * {@code DEFAULT now()}（V145），属于数据库的时钟域；拿客户端墙钟去比它，等于假设两台钟准得一模一样
+   * —— 容器被负载挤压、线程停顿十几分钟时，两次读数之间就隔着一段真实停顿，断言必然假红。
+   */
+  OffsetDateTime dbNow() {
+    return tx(actor, () -> sql.fetchOne("select clock_timestamp()").get(0, OffsetDateTime.class));
+  }
+
+  /**
+   * 守卫：写回的时刻必须落在「插入前 DB 时钟」与「读取后 DB 时钟」之间。
+   *
+   * <p>🔴 两端**同源**（都是 DB 时钟），这是这条守卫不再假红的原因：容器停顿只会把区间撑宽，
+   * 不会把一个本来正确的时刻挤出区间。而真发生「timestamptz 当 LocalDateTime 绑定 ⇒ 偏 −28800s」时，
+   * 偏移是 8 小时量级，一定落在区间外 ⇒ 照样当场抓住。
+   *
+   * <p>区间宽度在健康跑法下只有毫秒级（两次 DB 往返），比旧写法的「±5 分钟」**严**得多；
+   * 这不是把容差放宽换来的稳定性。
+   */
+  void assertWithinDbClockWindow(
+      OffsetDateTime dbBefore, OffsetDateTime value, OffsetDateTime dbAfter) {
+    assertThat(value)
+        .as("created_at 写回值必须落在 DB 自己时钟的前后区间内，偏 8 小时即为时区静默漂移")
+        .isBetween(dbBefore, dbAfter);
+  }
+
   @Test
   void timestampsRoundTripWithoutTheSilentEightHourShift() throws Exception {
     UUID internalTree = tree(actor, "INTERNAL", null);
@@ -844,7 +870,13 @@ class PlatformCategoryMappingIntegrationTest {
     UUID amazonTree = tree(actor, "PLATFORM", "AMAZON");
     UUID amazonShirt = category(actor, amazonTree, null, "Amazon 男士上装");
 
-    OffsetDateTime before = OffsetDateTime.now().truncatedTo(ChronoUnit.SECONDS);
+    // 🔴 参照时刻**同源**：前后两个基准都取自 DB 自己的时钟，不再取 JVM 墙钟。
+    // 旧写法拿 JVM 墙钟（OffsetDateTime.now()）去比 PG 写下的 now()，那是**跨时钟域**比较：
+    // 两个读数之间只要隔着一次容器停顿（负载挤压时可达十几分钟），守卫就把「停顿」
+    // 当成「时区漂移」误报 —— round 113 的 L2 全量里就红过这一条（同一份 HEAD 的第 1 跑是绿的，
+    // 空闲机器上隔离复跑 14/14 全绿 ⇒ 负载型假红）。
+    // 改成同钟域之后：停顿只会把区间撑宽，不会让守卫误判；而真偏 8 小时照样被抓住。
+    OffsetDateTime dbBefore = dbNow();
     PlatformCategoryMappingRow row = save(mappingInput(shirt, "AMAZON", siteA(), amazonShirt, true));
 
     // 断言写回的值，而不是只断言「没抛异常」。
@@ -857,9 +889,8 @@ class PlatformCategoryMappingIntegrationTest {
                 sql.fetchOne("select created_at from platform_category_mapping where id=?", row.id())
                     .get("created_at", OffsetDateTime.class));
     assertThat(dbCreated).isNotNull();
-    assertThat(Math.abs(Duration.between(before, dbCreated).toMinutes()))
-        .as("created_at 写回值必须落在测试时刻附近，偏 8 小时即为时区静默漂移")
-        .isLessThan(5);
+    OffsetDateTime dbAfter = dbNow();
+    assertWithinDbClockWindow(dbBefore, dbCreated, dbAfter);
 
     OffsetDateTime dtoCreated = OffsetDateTime.parse(row.createdAt());
     assertThat(dtoCreated.toInstant()).isEqualTo(dbCreated.toInstant());
@@ -880,6 +911,30 @@ class PlatformCategoryMappingIntegrationTest {
     String secondUpdated = tx(actor, () -> mappings.detail(row.id())).mapping().updatedAt();
     assertThat(OffsetDateTime.parse(secondUpdated))
         .isAfter(OffsetDateTime.parse(firstUpdated));
+  }
+
+  /**
+   * 守卫的力度自证：人为把写回值偏 8 小时（＝把 timestamptz 当 LocalDateTime 绑定的症状），
+   * 守卫必须当场拒绝。
+   *
+   * <p>没有这一条，「把 5 分钟容差放大到 30 分钟」也能让全量跑变绿 —— 那等于把守卫废了。
+   * 这里的基准时刻是**写死的常量**，不依赖任何真实时钟，因此它自己不会假红。
+   */
+  @Test
+  void theTimestampGuardStillRejectsTheEightHourShift() {
+    OffsetDateTime base = OffsetDateTime.parse("2026-01-01T00:00:00Z");
+    OffsetDateTime after = base.plusSeconds(1);
+
+    // 落在区间内的值放行。
+    assertWithinDbClockWindow(base, base, after);
+    assertWithinDbClockWindow(base, base.plusSeconds(1), after);
+
+    // 偏 8 小时（写入侧把 timestamptz 当 LocalDateTime 落库、或读取侧这样绑定，
+    // 症状都是这个量级的偏移）⇒ 守卫必须拒绝。
+    assertThatThrownBy(() -> assertWithinDbClockWindow(base, base.plusHours(8), after))
+        .isInstanceOf(AssertionError.class);
+    assertThatThrownBy(() -> assertWithinDbClockWindow(base, base.minusHours(8), after))
+        .isInstanceOf(AssertionError.class);
   }
 
   // ------------------------------------------------------------ 租户隔离三断言
