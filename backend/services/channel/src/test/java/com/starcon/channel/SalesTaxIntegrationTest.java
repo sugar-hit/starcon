@@ -180,11 +180,8 @@ class SalesTaxIntegrationTest {
     }
   }
 
-  @AfterAll
-  static void stopStubs() {
-    if (identity != null) identity.stop(0);
-    if (finance != null) finance.stop(0);
-  }
+
+
 
   @BeforeEach
   void freshTenant() {
@@ -832,24 +829,88 @@ class SalesTaxIntegrationTest {
   // 六、时间字段与 HTTP 层
   // ==================================================================
 
+  /**
+   * DB 自己的时钟（<b>语句时刻</b>）。
+   *
+   * <p>🔴 参照时刻一律从这里取，**不碰宿主 JVM 墙钟**。{@code sales_tax_facilitator_report.parsed_at}
+   * 由服务层用 {@code dbNow()}（{@code select now()}）打戳 ⇒ 属于**数据库的时钟域**；
+   * 拿客户端墙钟去比它，是**跨钟域比较**：Docker Desktop 的 Linux VM 钟一旦落后 macOS 宿主钟
+   * （VM 被挂起/负载挤压时就会发生），断言必然假红 —— L2 round 115 的 channel 全量里就红过这一条
+   * （实测偏差 <b>924s</b>，紧邻的日志是 {@code HikariPool ... clock leap detected (housekeeper
+   * delta=15m54s961ms)}，日志时间线里对应一段 <b>925.540s</b> 的空档）。
+   *
+   * <p>{@code clock_timestamp()} 是**语句时刻**（DB 钟），{@code now()} 是**事务开始时刻**。
+   */
+  OffsetDateTime dbNow() {
+    String raw = scalarAsTenant(tenant, "select clock_timestamp()");
+    return raw == null ? null : OffsetDateTime.parse(raw.replace(' ', 'T'));
+  }
+
+  /**
+   * 守卫：写回的时刻必须落在「写入前 DB 时钟」与「写入后 DB 时钟」之间。
+   *
+   * <p>🔴 两端**同源**（都是 DB 时钟）⇒ 容器停顿 / 两台钟错位只会把区间撑宽，
+   * 不会把一个本来正确的时刻挤出区间；而真发生「timestamptz 当 LocalDateTime 绑定 ⇒ 偏 −28800s」时，
+   * 偏移是 8 小时量级，一定落在区间外 ⇒ 守卫照样当场抓住。
+   *
+   * <p>区间宽度在健康跑法下只有两次 DB 往返（毫秒级），比旧的「±5 分钟」**严**得多 ——
+   * 这不是把容差放宽换来的稳定性。
+   */
+  void assertWithinDbClockWindow(OffsetDateTime dbBefore, OffsetDateTime value, OffsetDateTime dbAfter) {
+    assertThat(value.toInstant())
+        .as("parsed_at 写回值必须落在 DB 自己时钟的前后区间内，偏 8 小时即为时区静默漂移")
+        .isAfterOrEqualTo(dbBefore.toInstant())
+        .isBeforeOrEqualTo(dbAfter.toInstant());
+  }
+
   @Test
   @DisplayName("16.3.2.3 timestamptz：写回的值必须原样（不是只断言没抛异常）")
   void timestamptzRoundTrips() {
+    // 🔴 参照时刻**同源**：前后两个基准都取自 DB 自己的时钟，不再取 JVM 墙钟。
+    // 旧写法拿 JVM 墙钟（Instant.now()）去比 PG 打下的 parsed_at，那是**跨钟域比较**：
+    // 两台钟（宿主 macOS / Docker Linux VM）只要错开 >5 分钟，守卫就把「错位」误报成
+    // 「时区静默漂移」⇒ L2 round 115 的 channel 全量里红过这一条（实测偏差 924s）。
+    // 改成同钟域之后：错位/停顿只会把区间撑宽，不会让守卫误判；真偏 8 小时照样被抓住。
+    OffsetDateTime dbBefore = dbNow();
     SalesTaxFacilitatorImportResult result =
         importCsv("amz-2026-02", "state_code,tax_collected,currency\nUS-CA,700,USD\n");
+    OffsetDateTime dbAfter = dbNow();
     String parsedAt =
         scalarAsTenant(
             tenant,
-            "select extract(epoch from parsed_at)::bigint from sales_tax_facilitator_report"
+            "select parsed_at from sales_tax_facilitator_report"
                 + " where id = '"
                 + result.report().id()
                 + "'");
     assertThat(parsedAt).isNotNull();
-    long stored = Long.parseLong(parsedAt);
-    // 与 DB 的 now() 相差在 5 分钟内（不是 −28800s 那种静默偏移）
-    assertThat(Math.abs(stored - java.time.Instant.now().getEpochSecond()))
-        .as("parsed_at 必须是真正的时刻，不是偏了 8 小时的本地时间")
-        .isLessThan(300L);
+    OffsetDateTime stored = OffsetDateTime.parse(parsedAt.replace(' ', 'T'));
+    // 🔴 timestamptz 往返不偏 −28800s：断言**写回的值**，而不是只断言「没抛异常」。
+    assertWithinDbClockWindow(dbBefore, stored, dbAfter);
+  }
+
+  /**
+   * 守卫的力度自证：人为把写回值偏 8 小时（＝把 timestamptz 当 LocalDateTime 绑定的症状），
+   * 守卫必须当场拒绝。
+   *
+   * <p>没有这一条，「把 5 分钟容差放大到 30 分钟」也能让全量跑变绿 —— 那等于把守卫废了。
+   * 这里的基准时刻取自 DB 钟，判定里没有任何宿主墙钟依赖，因此它自己不会假红。
+   */
+  @Test
+  @DisplayName("16.3.2.3 parsed_at 时刻守卫仍能当场抓住真偏 8 小时（守卫自证：没被放松）")
+  void theTimestampGuardStillRejectsTheEightHourShift() {
+    OffsetDateTime dbBefore = dbNow();
+    OffsetDateTime dbAfter = dbNow();
+    OffsetDateTime real = dbAfter;
+
+    // 正常的写回值必须通过守卫。
+    assertThatCode(() -> assertWithinDbClockWindow(dbBefore, real, dbAfter))
+        .doesNotThrowAnyException();
+
+    // 🔴 真偏 8 小时（两个方向）必须当场被拒 —— 守卫没被放松。
+    assertThatThrownBy(() -> assertWithinDbClockWindow(dbBefore, real.minusHours(8), dbAfter))
+        .isInstanceOf(AssertionError.class);
+    assertThatThrownBy(() -> assertWithinDbClockWindow(dbBefore, real.plusHours(8), dbAfter))
+        .isInstanceOf(AssertionError.class);
   }
 
   @Test
