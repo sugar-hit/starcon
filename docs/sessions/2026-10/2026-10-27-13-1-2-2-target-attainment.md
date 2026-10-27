@@ -83,16 +83,44 @@
 
 ## 验证
 
-- L0 编译闸：`./mvnw -q -pl services/reporting -am compile` → 绿；`pnpm typecheck` → 绿；`pnpm lint` → 绿。
+> ⚠️ **2026-10-27 续做轮（上一轮会话被网络中断，主体代码已提交但 L1 没跑完）**：
+> 下面带「续做轮实跑」标记的条目是**本轮真跑出来的输出**，不是上一轮的计划。
+
+- L0 编译闸：`./mvnw -q compile` → **exit 0**；`pnpm typecheck` → **exit 0**（3/3 成功）；
+  `pnpm lint` → **exit 0**（只剩与本模块无关的既有 warning）。
 - 契约导出：`OpenApiContractTest`（**不碰数据库**，不启容器）→ `backend/target/openapi/reporting.openapi.json`，
   再 `python3 tools/codegen/catalog-contracts.py --spec-dir backend/target/openapi`。
-- 白名单核对：`.tmp/api-proxy-zero-hit.mjs`（**用 TypeScript 编译器真实求值数组**，不是文本计数）→
-  元素数 **248 → 249**（只 +1）；本模块 6 条路径在既有元素上**零命中**；
-  其它车道已登记的 reporting/ 分支**全部仍在**。
-- L1 模块闸：`./mvnw -pl services/reporting -am test -Dtest='TargetAttainment*' ...`
-  + `pnpm vitest run apps/web/src/components/analytics/target-attainment-model.test.ts
-  apps/web/src/app/api/reporting/target-attainment-allowlist.test.ts`
-  （**本轮由调度者统一放行后跑** —— L2 批量闸在途时并发跑 L1 会因容器争用产生假红）。
+- **续做轮实跑 · 白名单核对**：`.tmp/allowlist-verify.mjs`（**用 TypeScript 编译器真实求值数组**，不是文本计数）→
+  元素数 **248（基线 f06fe10）→ 249**（只 +1）；**基线与 HEAD 逐条集合差：新增 1 条、被删 0 条**；
+  本模块 5 条路径全部放行、3 条刻意不放行的形状全部 404；
+  其它车道已登记的 reporting/ 分支
+  （overview / projection / expense-variance / store-comparison / sales-trend / metric-cards /
+  store-overview / product-sales / targets）**全部仍在**。
+- **续做轮实跑 · 契约纯超集核对**：JSON 层面集合差 —— path **45 → 50**（只多本模块那 5 条）、
+  schema **100 → 113**（只多本模块那 13 个），**被删的 path / schema 均为 0**。
+- **续做轮实跑 · L1 模块闸**：
+  `./mvnw -pl services/reporting -am test -Dtest='TargetAttainment*' -Dsurefire.failIfNoSpecifiedTests=false -DfailIfNoSpecifiedTests=false`
+  ⇒ **19 例全绿**（`TargetAttainmentTenancyIntegrationTest` 4 + `TargetAttainmentIntegrationTest` 15，
+  Failures 0 / Errors 0）BUILD SUCCESS。**首跑是红的**（1 例 Error），
+  归因与修复见下面「踩坑记录」新增的一条。
+- **续做轮实跑 · 前端模块闸**：
+  `pnpm vitest run apps/web/src/components/analytics/target-attainment-model.test.ts
+  apps/web/src/app/api/reporting/target-attainment-allowlist.test.ts` ⇒ **24 例全绿**（2 文件）。
+- **续做轮实跑 · 全量 allowlist 回归**（改了共享白名单文件必须跑）：
+  `pnpm vitest run apps/web/src/app/api` ⇒ **261 文件 / 1473 例全绿**。
+- **续做轮实跑 · 容器**：verify 期间同时存活的 PG 容器 = **1**（用例自带的 Testcontainers PG16）；
+  结束后由用例自己的 `@AfterAll` 停掉，复查 `docker ps` **无 `postgres:16-alpine` 残留**
+  （当时在跑的都是无关的 `crewhub` / `langfuse` 容器），无泄漏。
+
+### 续做轮补了什么
+
+1. **修掉 L1 首跑的那 1 例 Error**（`TargetAttainmentIntegrationTest.产品维度_毛利额没有等价口径_如实报不可得`）：
+   **是夹具缺口，不是实现缺口** —— 见下面「踩坑记录」新增条目。改动只落在
+   `TargetAttainmentIntegrationTest.java`（新增 `seedCogsCaliber()` 夹具 + 在该用例里先播种分母口径），
+   **生产代码一行未动**。
+2. **会话日志补记 L1 实跑结果与本轮补的内容**（本节 + 「踩坑记录」新增一条）。
+3. **台账 `module-progress.md` 未再改动** —— 上一轮已把 13.1.2.2 那一行改成「已交付」，
+   本轮复核：整个文件的 diff 是 **1 行增 / 1 行删**（只有 13.1.2.2 那一行），没碰别的行。
 
 ## 后续待办
 
@@ -122,3 +150,15 @@
 - **契约重新生成后要核对「是不是纯超集」**：本轮用集合差核过 ——
   path 45 → 50（只多我那 5 条）、schema 100 → 113（只多我那 13 个），
   **一个既有的 path / schema 都没少**（diff 里的 `-89` 行只是 codegen 重排路径顺序）。
+- **「派生型口径」的分子 / 分母必须**先**登记 —— 续做轮 L1 首跑的红就在这儿（2026-10-27）：
+  用例要验「毛利额在商品维度没有等价口径 ⇒ 如实报不可得」，就得先落一个 `GROSS_PROFIT` 口径码；
+  但 V376 的触发器 `guard_reporting_metric_definition_ref` 会在 `DERIVED_DIFF` / `DERIVED_RATIO`
+  落库前检查**分子与分母指标码是否已定义** ——「毛利额 = 成交金额 − 成本」里的「成本」必须先有自己的口径，
+  否则报 `指标 GROSS_PROFIT 的分母指标 COGS_AMOUNT 尚未定义，口径不成立`。
+  **看到这个错不要去改触发器，也不要改实现去绕开它** —— 它挡的正是「凭空捏出一个派生口径」。
+  正确做法是**把夹具补齐**：先播种 `COGS_AMOUNT`（SUM 型，分子分母留空），再落 `GROSS_PROFIT`。
+  ⇒ 本轮补了 `seedCogsCaliber()` 夹具，**生产代码一行未动**，改完 L1 19 例全绿。
+- **白名单核对脚本要连基线一起跑**：只看 HEAD 的数组元素数（249）说不出「是不是只 +1」。
+  续做轮把基线 `f06fe10` 的 `api-proxy.ts` 也抽出来逐条求值，做**集合差**：
+  新增 1 条、**被删 0 条** —— 这一条才是「没删掉别人已交付的路由」的真凭据
+  （被删一条的症状是页面 404，而 typecheck / lint / vitest / Playwright **全部全绿**）。
