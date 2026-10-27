@@ -63,7 +63,8 @@ import org.testcontainers.containers.PostgreSQLContainer;
 @Import(TrackingQueryIntegrationTest.TestAdapters.class)
 class TrackingQueryIntegrationTest {
 
-  static final PostgreSQLContainer<?> pg = new PostgreSQLContainer<>("postgres:16-alpine");
+  static final PostgreSQLContainer<?> pg =
+      new PostgreSQLContainer<>("postgres:16-alpine").withUrlParam("sslmode", "disable");
   static final UUID a = UUID.randomUUID();
   static final UUID b = UUID.randomUUID();
   static final UUID user = UUID.randomUUID();

@@ -57,7 +57,8 @@ import org.testcontainers.containers.PostgreSQLContainer;
 @AutoConfigureMockMvc
 class SyncHealthIntegrationTest {
 
-  static final PostgreSQLContainer<?> pg = new PostgreSQLContainer<>("postgres:16-alpine");
+  static final PostgreSQLContainer<?> pg =
+      new PostgreSQLContainer<>("postgres:16-alpine").withUrlParam("sslmode", "disable");
   static final UUID user = UUID.randomUUID();
   static HttpServer identity;
   static final Map<String, AccessService.Access> actors = new ConcurrentHashMap<>();
@@ -156,7 +157,10 @@ class SyncHealthIntegrationTest {
   @AfterAll
   static void 还原数据库时钟() {
     restoreDbClock();
+    pg.stop();
   }
+
+
 
   /**
    * 把**数据库容器自己的墙上时钟**整体拨动 {@link #DB_CLOCK_SKEW_SECONDS} 秒（0 = 不拨）。
