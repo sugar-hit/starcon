@@ -368,6 +368,54 @@ const services: readonly {
       /^targets(?:\/(?:capabilities|current-period|decomposition|metrics|owners)|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/baseline)?)?$/,
   },
   {
+    // 13.2.2.1 店铺与站点（reporting 服务，卷 13「利润与经营分析」L3 13.2.2 维度拆解下的第一格）。
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有那几条 reporting/ 正则里并分支 ——
+    //   既有条目**一字未改、也不重排**（它们分别只放行 overview / projection、expense-variance、
+    //   store-comparison、sales-trend、metric-cards、store-overview、targets、product-sales
+    //   八个命名空间）。
+    //
+    // ---- 插入锚点选在**targets 那条之后**（数组靠前那一段）----
+    //   同批其它车道插在 identity/、warehouse/、crm/ 那几条附近或数组末尾；
+    //   本车道落在数组开头这一段，锚点与它们的插入点相隔很远，并入时 git 能干净求并。
+    //
+    // ---- 首 token「store-site」的零命中核对结论（实测，非目测）----
+    //   发车前用脚本（`.tmp/api-proxy-zero-hit.mjs`，不入库）把本文件里**全部 341 条既有元素**
+    //   （`prefix` + 正则）逐条抽出来，按 `resolve()` 的**同构口径**实测
+    //   （`path.startsWith(prefix)` 收窄服务 → 再测 `pattern.test(path.slice(prefix.length))`）：
+    //     reporting/store-site               零命中
+    //     reporting/store-site/capabilities  零命中
+    //     reporting/store-site/drilldown     零命中
+    //     reporting/store-site/metrics       零命中
+    //     reporting/store-site/refresh       零命中
+    //   **零命中** —— 本文件里 `prefix === 'reporting/'` 的既有元素恰好 **8 条**，
+    //   它们的正则都是**按命名空间精确匹配**的，**不覆盖 `store-site`**；
+    //   而别的 prefix 下的正则根本吃不到本模块的路径（`resolve()` 先按 prefix 闸门筛）。
+    //   ⚠️ 特别核对过两个**同前缀**的老邻居：`store-comparison` 与 `store-overview` ——
+    //   它们的首 token 是 `store-c` / `store-o`，与 `store-site` **两两不相交**。
+    //   同一支脚本同时反向核对了 **42 条别的车道已交付的 reporting 形状**
+    //   （13.1.1.1 / 13.4.2.2 / 13.1.1.2 / 13.2.1.1 / 1.1.2.1 / 1.1.2.2 / 13.1.2.1 / 13.2.2.2）
+    //   **全部仍然命中** —— 本条新元素不会遮蔽它们。
+    //   另外核对了本模块**不得**出现在别的服务前缀下：trade/ store-site、catalog/ store-site、
+    //   channel/ store-site **全部零命中**。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**，契约 `reporting.openapi.json` 里就这 5 条）：
+    //   store-site            店铺 / 站点 / 平台维度拆解（分组报表 + 占比 + 增长贡献 + 新老店 + 渠道占比）
+    //   store-site/capabilities 能力声明（哪些上游真接通、站点归属边界、判定规则）
+    //   store-site/metrics    指标口径目录（口径唯一的展示形态）
+    //   store-site/drilldown  构成明细下钻（哪张订单、哪张订单的哪一行）
+    //   store-site/refresh    刷新店铺/站点投影（POST，写的是投影不是业务事实）
+    //
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   reporting/store-site/{uuid}        —— 顶层没有 id 段（报表按查询参数定位，不是按 id）。
+    //   reporting/store-site/unknown-sub   —— 多一层仍然 404。
+    //   reporting/store-site/shops         —— 🔴 店铺清单随报表的行一起给出，没有独立端点。
+    //   reporting/store-site/channels      —— 🔴 渠道占比随响应里的 channelShares 给出。
+    prefix: 'reporting/',
+    env: 'REPORTING_URL',
+    fallback: 'http://127.0.0.1:8088',
+    pattern: /^store\-site(?:\/(?:capabilities|drilldown|metrics|refresh))?$/,
+  },
+  {
     // 12.4.1.3 成本差异分析（finance 服务，卷 12「财务核算」L3 12.4.1 成本计算下的第三格）。
     // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 finance 那几条巨型 alternation 里并分支 ——
     //   既有条目**一字未改、也不重排**。
