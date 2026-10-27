@@ -11,6 +11,9 @@ import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import org.jooq.DSLContext;
@@ -21,6 +24,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
+import org.testcontainers.containers.Container;
 import org.testcontainers.containers.PostgreSQLContainer;
 
 /**
@@ -51,6 +55,23 @@ class OAuthAuthorizationIntegrationTest {
   static StubOAuthServer oauth;
   static Path secretDir;
 
+  // ================================================================ 时钟错位开关（默认关闭）
+  //
+  // 只为「两台钟错开也必须绿」这一件事存在。正常 CI 上是 0，不产生任何等待：
+  //
+  //   dbClockSkewSeconds 把**数据库容器自己的墙上时钟**整体拨动 N 秒（**负数 = 拨慢**）。
+  //                  PG 的 now() 取的是容器的系统时钟 ⇒ 拨动它就是真的拨动服务端判定用的那个钟，
+  //                  不是模拟。用来证明「客户端墙钟与数据库时钟的相对位置」不再影响结论。
+  //                  date -s 需要 CAP_SYS_TIME ⇒ 只有开关打开时才把容器提权。
+  //
+  // 🔴 **为什么必须拨慢（负数）**：credential_window CHECK 是 `authorized_at <= now() + 5 分钟`，
+  //    而 authorized_at 若由宿主 JVM 墙钟提供，就是「宿主钟」；DB 钟拨慢 ⇒ 宿主钟比 DB 钟快
+  //    ⇒ 授权时刻落在 `now() + 5 分钟` 之外 ⇒ CHECK 违反 ⇒ 授权路径被翻成 409。
+  //    这正是 L2 round 115 里 OAuth 10/23 例 409 的成因（机器被压垮 ⇒ 两台钟错开）。
+  //    拨慢之后本类必须**照样全绿** —— 这就是「授权时刻必须由 DB 打戳」的验收标准。
+  static final long DB_CLOCK_SKEW_SECONDS =
+      Long.getLong("starcon.channel.oauth.dbClockSkewSeconds", 0L);
+
   static AccessService.Access actor(UUID uid, UUID tenant, List<AccessService.Grant> grants) {
     return new AccessService.Access(
         uid,
@@ -67,7 +88,12 @@ class OAuthAuthorizationIntegrationTest {
   }
 
   static {
+    if (DB_CLOCK_SKEW_SECONDS != 0L) {
+      // date -s 要 CAP_SYS_TIME —— 只有开了「时钟错位」开关才提权，正常 CI 不受影响。
+      pg.withCreateContainerCmdModifier(cmd -> cmd.getHostConfig().withPrivileged(true));
+    }
     pg.start();
+    skewDbClock();
     try {
       try (var c =
               DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
@@ -173,6 +199,9 @@ class OAuthAuthorizationIntegrationTest {
 
   @BeforeEach
   void reset() throws Exception {
+    // 🔴 时钟错位开关打开时，每个用例前重新钉一次：VM 自身的时间同步会把手工拨动的偏移纠回来，
+    //    只在静态块里拨一次的话，跑到后面用例时偏移可能已经被纠回 ⇒ 复现变得不稳定。
+    skewDbClock();
     repointProfilesOnce();
     actorA = actors.get("Bearer tenant-a");
     actorB = actors.get("Bearer tenant-b");
@@ -219,8 +248,46 @@ class OAuthAuthorizationIntegrationTest {
   static void stop() throws Exception {
     oauth.close();
     identity.stop(0);
+    // 🔴 先把数据库容器的钟拨回真实时间，再停容器 —— 还原动作本身要在容器活着时做。
+    restoreDbClock();
     pg.stop();
     deleteRecursively(secretDir);
+  }
+
+  /**
+   * 把**数据库容器自己的墙上时钟**整体拨动 {@link #DB_CLOCK_SKEW_SECONDS} 秒（0 = 不拨）。
+   *
+   * <p>PG 的 {@code now()} 取的是容器的系统时钟，所以拨动它就是真的拨动服务端判定用的那个钟 ——
+   * 这不是模拟一个「相对位置」，是真的让客户端墙钟与数据库时钟错开。
+   */
+  static void skewDbClock() {
+    if (DB_CLOCK_SKEW_SECONDS == 0L) {
+      return;
+    }
+    setContainerClock(Instant.now().getEpochSecond() + DB_CLOCK_SKEW_SECONDS);
+  }
+
+  /** 把数据库容器的墙上钟拨回真实时间（跑完还原，别影响同一个 JVM 里的其它用例）。 */
+  static void restoreDbClock() {
+    if (DB_CLOCK_SKEW_SECONDS == 0L) {
+      return;
+    }
+    setContainerClock(Instant.now().getEpochSecond());
+  }
+
+  private static void setContainerClock(long epochSeconds) {
+    try {
+      Container.ExecResult result = pg.execInContainer("date", "-u", "-s", "@" + epochSeconds);
+      if (result.getExitCode() != 0) {
+        throw new IllegalStateException(
+            "拨动数据库容器时钟失败：" + result.getStdout() + " / " + result.getStderr());
+      }
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+      throw new IllegalStateException("拨动数据库容器时钟被打断", e);
+    } catch (java.io.IOException e) {
+      throw new IllegalStateException("拨动数据库容器时钟失败", e);
+    }
   }
 
   // ------------------------------------------------------------------
@@ -314,6 +381,32 @@ class OAuthAuthorizationIntegrationTest {
   <T> T scalar(Class<T> type, String query, Object... binds) {
     org.jooq.Record row = sql.fetchOne(query, binds);
     return row == null ? null : row.get(0, type);
+  }
+
+  /**
+   * 从 DB 读一个 {@code timestamptz} 值（DB 侧原样读回，不做时区换算）。
+   *
+   * <p>🔴 时刻基准必须**同源**：参照时刻也取自 DB，才不会跟 JVM 墙钟跨钟域比较。
+   * {@code clock_timestamp()} 是**语句时刻**（DB 时钟），{@code now()} 是**事务开始时刻**。
+   */
+  static OffsetDateTime dbTimestamp(String statement) {
+    try (var c = DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
+        var s = c.createStatement();
+        var rs = s.executeQuery(statement)) {
+      String raw = rs.next() ? rs.getString(1) : null;
+      return raw == null ? null : OffsetDateTime.parse(raw.replace(' ', 'T'));
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  /** 取出异常链里的全部消息（PG 的原文在最底层）。 */
+  static String messagesOf(Throwable e) {
+    StringBuilder sb = new StringBuilder();
+    for (Throwable t = e; t != null && t != t.getCause(); t = t.getCause()) {
+      if (t.getMessage() != null) sb.append(t.getMessage()).append('\n');
+    }
+    return sb.toString();
   }
 
   static void deleteRecursively(Path root) throws IOException {
@@ -418,8 +511,73 @@ class OAuthAuthorizationIntegrationTest {
   }
 
   @Test
+  @DisplayName("2.2.1.2 授权时刻由 DB 打戳：宿主钟域的值喂不进来（跨钟域就不会撞约束）")
+  void theAuthorizationMomentIsStampedByTheDatabaseClock() throws Exception {
+    OffsetDateTime dbBefore = dbTimestamp("select clock_timestamp()");
+    Start start = startAs(actorA, "Bearer tenant-a", "EBAY", "");
+    Map<?, ?> session = parse(callback(platformRedirectsToCallback(start)));
+    assertThat(session.get("status")).isEqualTo("AUTHORIZED");
+    OffsetDateTime dbAfter = dbTimestamp("select clock_timestamp()");
+
+    UUID credentialId =
+        as(
+            actorA,
+            "channel.connection.read",
+            () ->
+                scalar(
+                    UUID.class,
+                    "select credential_id from oauth_authorization_session where id=?",
+                    UUID.fromString(start.sessionId())));
+    OffsetDateTime authorizedAt =
+        dbTimestamp("select authorized_at from credential_ref where id='" + credentialId + "'");
+    assertThat(authorizedAt).isNotNull();
+    // 🔴 授权时刻必须落在「回调前后两个 DB 时刻」之间 ⇒ 它是 **DB 钟**打的戳。
+    //    若服务层改回绑宿主 JVM 墙钟，宿主时钟一跳/超前，这里当场红 ——
+    //    因为 credential_window CHECK 比较的正是 authorized_at 与 DB 的 now()，
+    //    不同源时**合法**授权路径会撞 CHECK，而通用错误处理器会把它翻成
+    //    409「店铺编码重复、平台账号已被绑定…」，一句与病因完全无关的话。
+    assertThat(authorizedAt.toInstant())
+        .as("授权时刻由 DB 打戳（两端同钟域：参照时刻也取自 DB 钟）")
+        .isAfterOrEqualTo(dbBefore.toInstant())
+        .isBeforeOrEqualTo(dbAfter.toInstant());
+  }
+
+  @Test
+  @DisplayName("2.2.1.2 credential_window 守卫自证：宿主钟域的值当场被 DB 拒（并指名约束）")
+  void theCredentialWindowGuardRejectsAHostClockValue() {
+    // 复刻「宿主时钟比 DB 快 10 分钟」的旧写法：DB 必须当场拒绝，并指名约束。
+    // 这条用例把「为什么授权时刻必须由 DB 打戳」钉在测试里：它保证 CHECK 还在、还会当场抓；
+    // 而上面那条断言保证服务层**不会**再把宿主钟域的值喂进来。
+    assertThatThrownBy(
+            () ->
+                as(
+                    actorA,
+                    "channel.connection.create",
+                    () -> {
+                      sql.execute(
+                          "insert into credential_ref(id,tenant_id,provider,external_ref,granted_scopes,"
+                              + "authorized_at,expires_at) values (?,?,?,?,?,now() + interval '10 minutes',now())",
+                          UUID.randomUUID(),
+                          tenantA,
+                          "SECRET_MANAGER",
+                          "file://test/host-clock-ahead-" + UUID.randomUUID(),
+                          "offline_access");
+                      return null;
+                    }))
+        .satisfies(
+            e ->
+                assertThat(messagesOf(e))
+                    .as("DB 必须指名拒掉 credential_window")
+                    .contains("credential_window"));
+  }
+
+  @Test
   void shopSiteIsLinkedWhenPlatformReturnsAKnownMarketplace() throws Exception {
-    oauth.shops = List.<String[]>of(new String[] {"SHOP-MK-1", "德国站", "DE"});
+    oauth.shops =
+        List.<String[]>of(
+            new String[] {
+              "SHOP-MK-" + UUID.randomUUID().toString().substring(0, 8), "德国站", "DE"
+            });
     Start start = startAs(actorA, "Bearer tenant-a", "EBAY", "");
     assertThat(parse(callback(platformRedirectsToCallback(start))).get("status"))
         .isEqualTo("AUTHORIZED");
@@ -666,7 +824,13 @@ class OAuthAuthorizationIntegrationTest {
   @Test
   void shopAlreadyClaimedByAnotherTenantIsRejectedAtConfirmTime() throws Exception {
     oauth.accountId = "seller-x" + UUID.randomUUID().toString().substring(0, 8);
-    oauth.shops = List.<String[]>of(new String[] {"SHOP-SHARED", "共享店铺", "US"});
+    // 🔴 两个租户**故意**用同一个平台店铺 id（跨租户冲突是显式构造出来的，不是撞出来的），
+    //    但 id 带本用例随机后缀：shop_platform_owner 是**全局**唯一索引，
+    //    固定 id 会让本用例的结论依赖「之前有没有别的用例用过它」⇒ 顺序敏感。
+    //    随机后缀 + 显式共享 ⇒ 冲突照样被构造出来，但本用例自包含、不污染其它用例。
+    oauth.shops =
+        List.<String[]>of(
+            new String[] {"SHOP-SHARED-" + UUID.randomUUID().toString().substring(0, 8), "共享店铺", "US"});
     Start a = startAs(actorA, "Bearer tenant-a", "EBAY", "");
     callback(platformRedirectsToCallback(a));
     http.perform(
