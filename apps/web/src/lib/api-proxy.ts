@@ -1439,6 +1439,70 @@ const services: readonly {
       /^period\-close\/(?:capabilities|options|checklists(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:items|checks\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/carry\-forward))?)?|executions(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/sync\-approval)?)?)$/,
   },
   {
+    // 14.2.1.2 分时策略（channel 服务，卷 14「广告与增长」的 L3 锚点 14.2.1）。
+    //
+    // 蓝图：「按小时设置不同竞价与预算（高峰提价提预算、低谷降价停投），
+    // 支持按历史出单时段自动推荐分时曲线。输入：分时规则；13.2.1.2 时段分布数据。
+    // 输出：分时策略配置 + 定时调整任务。关系：上游 = 13.2.1.2；下游 = 14.2.2.2 自动规则。
+    // **分时策略需按店铺时区配置**，跨时区店铺用错时区会完全失效。」
+    //
+    // ⚠️ 本条目是**新增一条独立的 `services[]` 元素**，不是往既有 `channel/` 那条巨型
+    //   alternation 里并分支 —— 既有条目**一字未改、也不重排**。
+    //   本文件是多车道共用的累积型白名单，往同一条 alternation 里并分支会让多车道同时
+    //   并入时 git 必然判冲突（结构性，retry 不会自愈）。
+    //
+    // ---- 插入锚点：第一个 `prefix: 'identity/'` 条目的 `  {` 之前（调度者指定）----
+    //   与同批 13.3.1.1（reporting）的锚点（数组最开头）相距 1000+ 行 ⇒ git 能干净求并。
+    //
+    // ---- 首 token「ad-dayparts」的零命中核对结论 ----
+    //   本文件既有 251 个 `services[]` 元素的正则里**没有任何一条**含 `ad-dayparts`
+    //   （既有的是 `ad-campaigns` / `ad-budgets` / `ad-rules` / `ad-keywords` /
+    //   `ad-diagnostics` / `ad-promotions` 一类），
+    //   且逐条用 `new RegExp(pat).test('…')` 实测过：既有元素对本模块的 14 个 shape
+    //   **全部零命中** ⇒ 首 token 既是独立字面量，也不会被既有分支的前缀吃掉。
+    //   `ad-dayparts` 也不匹配 `ad-diagnostics` / `ad-campaigns` 等同族兄弟模块。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   ad-dayparts/capabilities                  能力声明（时区口径 / 系数口径 / 上限 / 未交付维度）
+    //   ad-dayparts/shops                         店铺清单 + 各自的时区归属结论（定不了的也列出来）
+    //   ad-dayparts/shops/{shopCode}/timezone     单个店铺的时区归属结论
+    //   ad-dayparts/strategies                    分时策略清单（GET，真分页 + 真筛选）
+    //   ad-dayparts/strategies/{uuid}             策略详情（GET，含 24 小时曲线）/ 归档（DELETE）
+    //   ad-dayparts/strategies/{uuid}/curve       整体替换分时曲线（PUT）
+    //   ad-dayparts/strategies/{uuid}/status      改策略状态（POST：激活 / 暂停 / 归档）
+    //   ad-dayparts/recommendations               生成推荐曲线（POST）/ 推荐批次列表（GET）
+    //   ad-dayparts/recommendations/{uuid}        推荐批次详情（GET，含逐小时判定依据）
+    //   ad-dayparts/recommendations/{uuid}/apply   把推荐曲线套到策略上（POST）
+    //   ad-dayparts/tasks                         定时调整任务列表（GET，真分页 + 真筛选）
+    //   ad-dayparts/tasks/run                     跑一轮（POST，**外部调度触发的一次入口**）
+    //   ad-dayparts/tasks/{uuid}                  任务详情（GET，含逐条调整明细）
+    //   ad-dayparts/caps                          调整上限读取形状（GET，供 14.2.2.2 自动规则取用）
+    //
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   ad-dayparts                             —— 裸路径：本模块没有裸集合读，一切入口都带子路径。
+    //   ad-dayparts/strategies/{uuid}/delete    —— 策略是配置事实，撤下走 status=ARCHIVED，
+    //                                              不物理删除（曲线 / 基准 / 任务历史还要能复盘）。
+    //   ad-dayparts/tasks/{uuid}/cancel          —— 任务状态由服务端推进，页面没有这个动作。
+    //   ad-dayparts/recommendations/{uuid}/preview —— 变更预览属于 14.1.1.3 批量操作（未交付）。
+    //   ad-dayparts/weekdays                     —— 按星期分曲线属 14.2.1.3（**未交付**），
+    //                                              本模块的曲线是**按小时的**，放行它等于让界面以为已交付。
+    //   ad-dayparts/platform-sync                —— 平台回写队列**未交付**，放行它等于让界面
+    //                                              以为「已经回写平台」。
+    //
+    // id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    // （不是 `[0-9a-f-]+`：后者会把 `carry-forward` 这种非 UUID 形状也当成 id 放行）。
+    // 字面量子路径（capabilities / caps / shops / strategies / recommendations / tasks）
+    // 排在 {uuid} 段**之前**判别 —— alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    // ⚠️ **顶层组不写成可选**（`ad-dayparts` 裸路径必须 404：本模块没有顶层汇总列表端点）。
+    // ⚠️ `{shopCode}` 段用**店铺编码形状**（字母数字 / 下划线 / 连字符，1..64 位），
+    //   它不是 UUID —— 用 UUID 形状会把真实店铺编码挡在门外。
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^ad\-dayparts(?:\/(?:capabilities|caps|shops(?:\/[A-Za-z0-9_\-]{1,64}\/timezone)?|strategies(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:curve|status))?)?|recommendations(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/apply)?)?|tasks(?:\/run|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?))$/,
+  },
+  {
     prefix: 'identity/',
     env: 'IDENTITY_URL',
     fallback: 'http://127.0.0.1:8081',
