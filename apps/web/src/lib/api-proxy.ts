@@ -12897,6 +12897,56 @@ const services: readonly {
     pattern:
       /^product\-sales(?:\/(?:capabilities|metrics|spu\-summary|variants|drilldown|refresh))?$/,
   },
+  {
+    // 13.3.2.1 流量转化（reporting 服务，卷 13「利润与经营分析」L3 13.3.2 流量与转化下的第一格）。
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 reporting/ 正则里并分支 ——
+    //   既有条目**一字未改、也不重排**。
+    //
+    // ---- 插入锚点选在**数组末尾**（收尾的 `];` 之前、紧跟 13.2.2.2 product-sales 那条之后）----
+    //   同批其它车道的插入点（13.1.1.1 / 13.4.2.2 / 13.2.1.1 / 13.2.1.2 / 13.2.2.1 那几条）
+    //   在数组靠前那一段，与本锚点相距 12000 行以上 ⇒ 并入时 git 能干净求并。
+    //
+    // ---- 首 token「traffic-conversion」的零命中核对结论（实测，非目测）----
+    //   发车前用脚本（本车道的 .tmp/ 一次性脚本，不入库）把本文件里**全部 242 条既有元素**
+    //   （prefix + 正则）逐条抽出来，按 resolve() 的**同构口径**实测
+    //   （path.startsWith(prefix) 收窄服务 → 再测 pattern.test(path.slice(prefix.length))）：
+    //     reporting/traffic-conversion               零命中
+    //     reporting/traffic-conversion/capabilities  零命中
+    //     reporting/traffic-conversion/metrics       零命中
+    //     reporting/traffic-conversion/drilldown     零命中
+    //     reporting/traffic-conversion/refresh       零命中
+    //   **零命中** —— 本文件里 prefix === 'reporting/' 的既有条目**一律不改**，它们的首 token
+    //   分别是 overview / expense-variance / store-comparison / sales-trend / metric-cards /
+    //   store-overview / targets / store-site / time-pattern / product-sales，
+    //   没有一条能吃下 `traffic-conversion…`；而别的 prefix 下的正则根本吃不到本模块的路径
+    //   （resolve() 先按 prefix 闸门筛）。
+    //   ⚠️ 特别核对过两个**首 token 同字母开头**的老邻居：`targets` 与 `time-pattern` ——
+    //   它们与 `traffic-conversion` **两两不相交**（完整 token 不相等，不是前缀关系）。
+    //   反向也核对了本文件里 **49 条 reporting 形状**：本条新正则对它们**零命中**
+    //   ⇒ 本条不会遮蔽别的车道已交付的路由。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**，契约 reporting.openapi.json 里就这 5 条）：
+    //   traffic-conversion             流量转化主报表（漏斗 + 关键指标 + 转化率趋势 + 异常诊断）
+    //   traffic-conversion/capabilities 能力声明（真读过哪些上游 / 确实拿不到什么）
+    //   traffic-conversion/metrics      指标口径目录（口径唯一的展示形态）
+    //   traffic-conversion/drilldown    构成明细下钻（哪个平台商品 / 哪个广告活动 / 哪张内部订单）
+    //   traffic-conversion/refresh      投影刷新（POST，写的是投影不是业务事实）
+    //
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   reporting/traffic-conversion/{uuid}        —— 顶层没有 id 段（报表按查询参数定位，不是按 id）。
+    //   reporting/traffic-conversion/unknown-sub   —— 多一层仍然 404。
+    //   reporting/traffic-conversion/funnel        —— 🔴 漏斗随主报表一起给出，没有独立端点。
+    //   reporting/traffic-conversion/trend         —— 🔴 趋势随主报表一起给出，没有独立端点。
+    //   reporting/traffic-conversion/diagnosis     —— 🔴 诊断随主报表一起给出，没有独立端点。
+    //
+    // 字面量子路径（capabilities / metrics / drilldown / refresh）排在可选段**之前**判别 ——
+    // alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    prefix: 'reporting/',
+    env: 'REPORTING_URL',
+    fallback: 'http://127.0.0.1:8088',
+    pattern:
+      /^traffic\-conversion(?:\/(?:capabilities|metrics|drilldown|refresh))?$/,
+  },
 ];
 
 function resolve(path: string) {
