@@ -39,7 +39,8 @@ import org.testcontainers.containers.PostgreSQLContainer;
 @SpringBootTest
 @AutoConfigureMockMvc
 class OAuthAuthorizationIntegrationTest {
-  static final PostgreSQLContainer<?> pg = new PostgreSQLContainer<>("postgres:16-alpine");
+  static final PostgreSQLContainer<?> pg =
+      new PostgreSQLContainer<>("postgres:16-alpine").withUrlParam("sslmode", "disable");
   static final UUID tenantA = UUID.randomUUID(),
       tenantB = UUID.randomUUID(),
       user = UUID.randomUUID();

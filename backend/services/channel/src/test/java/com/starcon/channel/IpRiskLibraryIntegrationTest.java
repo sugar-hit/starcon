@@ -51,7 +51,8 @@ import org.testcontainers.containers.PostgreSQLContainer;
 @AutoConfigureMockMvc
 class IpRiskLibraryIntegrationTest {
 
-  static final PostgreSQLContainer<?> pg = new PostgreSQLContainer<>("postgres:16-alpine");
+  static final PostgreSQLContainer<?> pg =
+      new PostgreSQLContainer<>("postgres:16-alpine").withUrlParam("sslmode", "disable");
   static final UUID user = UUID.randomUUID();
   static HttpServer identity;
   static IpRiskLibraryUpstreamStub upstream;
@@ -130,7 +131,10 @@ class IpRiskLibraryIntegrationTest {
   static void stopStubs() {
     if (identity != null) identity.stop(0);
     if (upstream != null) upstream.close();
+    pg.stop();
   }
+
+
 
   @BeforeEach
   void freshTenant() {

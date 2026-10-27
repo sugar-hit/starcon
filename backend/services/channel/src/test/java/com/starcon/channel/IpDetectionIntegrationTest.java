@@ -52,7 +52,8 @@ import org.testcontainers.containers.PostgreSQLContainer;
 @AutoConfigureMockMvc
 class IpDetectionIntegrationTest {
 
-  static final PostgreSQLContainer<?> pg = new PostgreSQLContainer<>("postgres:16-alpine");
+  static final PostgreSQLContainer<?> pg =
+      new PostgreSQLContainer<>("postgres:16-alpine").withUrlParam("sslmode", "disable");
   static final UUID user = UUID.randomUUID();
   static final UUID AMAZON = UUID.fromString("11111111-1111-1111-1111-111111111101");
   static HttpServer identity;
@@ -142,7 +143,10 @@ class IpDetectionIntegrationTest {
   static void stopStubs() {
     if (identity != null) identity.stop(0);
     if (catalog != null) catalog.stop(0);
+    pg.stop();
   }
+
+
 
   @BeforeEach
   void freshTenant() {
