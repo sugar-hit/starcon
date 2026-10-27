@@ -1,6 +1,591 @@
 {
   "components": {
     "schemas": {
+      "AttainmentAlert": {
+        "properties": {
+          "attainmentRate": {
+            "nullable": true,
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "elapsedRatio": {
+            "type": "number"
+          },
+          "forecastRate": {
+            "nullable": true,
+            "type": "number"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "level": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "metricCode": {
+            "type": "string"
+          },
+          "ownerId": {
+            "type": "string"
+          },
+          "ownerName": {
+            "type": "string"
+          },
+          "scopeType": {
+            "type": "string"
+          },
+          "targetId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AttainmentBoard": {
+        "properties": {
+          "alerts": {
+            "items": {
+              "$ref": "#/components/schemas/AttainmentAlert"
+            },
+            "type": "array"
+          },
+          "asOfDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "evaluatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "groups": {
+            "items": {
+              "$ref": "#/components/schemas/AttainmentGroup"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "rankNote": {
+            "type": "string"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/AttainmentSummary"
+          },
+          "timezone": {
+            "type": "string"
+          },
+          "timezoneNote": {
+            "type": "string"
+          },
+          "timezoneSource": {
+            "type": "string"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AttainmentBucket": {
+        "properties": {
+          "actualStatus": {
+            "type": "string"
+          },
+          "attainmentRate": {
+            "nullable": true,
+            "type": "number"
+          },
+          "bucketEnd": {
+            "format": "date",
+            "type": "string"
+          },
+          "bucketStart": {
+            "format": "date",
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "currentValue": {
+            "nullable": true,
+            "type": "number"
+          },
+          "elapsedRatio": {
+            "type": "number"
+          },
+          "forecastRate": {
+            "nullable": true,
+            "type": "number"
+          },
+          "forecastValue": {
+            "nullable": true,
+            "type": "number"
+          },
+          "granularity": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "targetValue": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "AttainmentCapabilities": {
+        "properties": {
+          "boardAvailable": {
+            "type": "boolean"
+          },
+          "notDelivered": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "rules": {
+            "items": {
+              "$ref": "#/components/schemas/AttainmentRuleNote"
+            },
+            "type": "array"
+          },
+          "upstreamConnected": {
+            "type": "boolean"
+          },
+          "upstreamModules": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "AttainmentEvaluateResult": {
+        "properties": {
+          "asOfDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "board": {
+            "$ref": "#/components/schemas/AttainmentBoard"
+          },
+          "evaluated": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "evaluatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AttainmentGroup": {
+        "properties": {
+          "available": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "groupKey": {
+            "type": "string"
+          },
+          "metricCode": {
+            "type": "string"
+          },
+          "periodEnd": {
+            "format": "date",
+            "type": "string"
+          },
+          "periodStart": {
+            "format": "date",
+            "type": "string"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/AttainmentRow"
+            },
+            "type": "array"
+          },
+          "scopeType": {
+            "type": "string"
+          },
+          "total": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "unavailable": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AttainmentRankEntry": {
+        "properties": {
+          "attainmentRate": {
+            "nullable": true,
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "currentValue": {
+            "nullable": true,
+            "type": "number"
+          },
+          "forecastRate": {
+            "nullable": true,
+            "type": "number"
+          },
+          "groupKey": {
+            "type": "string"
+          },
+          "metricCode": {
+            "type": "string"
+          },
+          "ownerCode": {
+            "type": "string"
+          },
+          "ownerId": {
+            "type": "string"
+          },
+          "ownerName": {
+            "type": "string"
+          },
+          "rank": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "rankTotal": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "scopeType": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "targetValue": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "AttainmentRanking": {
+        "properties": {
+          "entries": {
+            "items": {
+              "$ref": "#/components/schemas/AttainmentRankEntry"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AttainmentRow": {
+        "properties": {
+          "actualStatus": {
+            "type": "string"
+          },
+          "attainmentRate": {
+            "nullable": true,
+            "type": "number"
+          },
+          "buckets": {
+            "items": {
+              "$ref": "#/components/schemas/AttainmentBucket"
+            },
+            "type": "array"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "currentValue": {
+            "nullable": true,
+            "type": "number"
+          },
+          "elapsedRatio": {
+            "type": "number"
+          },
+          "forecastRate": {
+            "nullable": true,
+            "type": "number"
+          },
+          "forecastValue": {
+            "nullable": true,
+            "type": "number"
+          },
+          "metricCode": {
+            "type": "string"
+          },
+          "metricDisplayName": {
+            "type": "string"
+          },
+          "ownerCode": {
+            "type": "string"
+          },
+          "ownerId": {
+            "type": "string"
+          },
+          "ownerName": {
+            "type": "string"
+          },
+          "periodEnd": {
+            "format": "date",
+            "type": "string"
+          },
+          "periodStart": {
+            "format": "date",
+            "type": "string"
+          },
+          "rank": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "rankGroup": {
+            "type": "string"
+          },
+          "rankTotal": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "remainingDays": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "scopeType": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusNote": {
+            "type": "string"
+          },
+          "targetId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "targetValue": {
+            "type": "number"
+          },
+          "underAchieved": {
+            "type": "boolean"
+          },
+          "unit": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AttainmentRuleNote": {
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "ruleCode": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AttainmentSnapshot": {
+        "properties": {
+          "actualNote": {
+            "type": "string"
+          },
+          "actualStatus": {
+            "type": "string"
+          },
+          "attainmentRate": {
+            "nullable": true,
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "currentValue": {
+            "nullable": true,
+            "type": "number"
+          },
+          "elapsedRatio": {
+            "type": "number"
+          },
+          "evaluatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "evaluatedOn": {
+            "format": "date",
+            "type": "string"
+          },
+          "forecastNote": {
+            "type": "string"
+          },
+          "forecastRate": {
+            "nullable": true,
+            "type": "number"
+          },
+          "forecastValue": {
+            "nullable": true,
+            "type": "number"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "metricCode": {
+            "type": "string"
+          },
+          "ownerCode": {
+            "type": "string"
+          },
+          "ownerId": {
+            "type": "string"
+          },
+          "ownerName": {
+            "type": "string"
+          },
+          "periodEnd": {
+            "format": "date",
+            "type": "string"
+          },
+          "periodStart": {
+            "format": "date",
+            "type": "string"
+          },
+          "rank": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "rankGroup": {
+            "type": "string"
+          },
+          "rankTotal": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "scopeType": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "targetId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "targetValue": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "AttainmentSnapshotPage": {
+        "properties": {
+          "note": {
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "snapshots": {
+            "items": {
+              "$ref": "#/components/schemas/AttainmentSnapshot"
+            },
+            "type": "array"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AttainmentSummary": {
+        "properties": {
+          "achieved": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "atRisk": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "behind": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "notComparable": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "notStarted": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "onTrack": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "unavailable": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "underAchieved": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
       "Comparison": {
         "properties": {
           "changeAmount": {
@@ -6218,6 +6803,351 @@
         "summary": "可见店铺集合（筛选器用）+ 每个店铺在这个窗口里有没有事实",
         "tags": [
           "1.1.2.2 店铺概览"
+        ]
+      }
+    },
+    "/reporting/target-attainment/board": {
+      "get": {
+        "description": "🔴 **「算不出来」≠「等于 0」**：拿不到实际值时 currentValue / attainmentRate 为 null，状态是 UNAVAILABLE / NOT_STARTED / NOT_COMPARABLE —— **0% 达成率是有业务含义的断言（确实一件都没做成），「不可得」不是**。⚠️ **预测达成 = 按当前速度直线推算期末值**（当前值 ÷ 时间进度）；时间进度为 0 时预测算不出来（null，不是 0）。⚠️ **评估日取自数据库时钟**（按本租户时区折算成日历日），不是 JVM 墙钟。⚠️ **未达标高亮只认 AT_RISK 与 BEHIND** —— 「算不出来」的那三类不是「没达标」。⚠️ **绝不跨币种相加**：实际值按目标币种取数，排名不跨币种、不跨指标。⚠️ 概览计数与预警清单覆盖**全量**符合条件的目标（不随分页截断）；排名位次在全量上计算，只有达成率行会被切进本页。",
+        "operationId": "get_reporting_target_attainment_board",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "scopeType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "metricCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "currency",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AttainmentBoard"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "达成追踪看板：达成率表 + 预测达成 + 未达标高亮 + 排名 + 预警",
+        "tags": [
+          "13.1.2.2 达成追踪"
+        ]
+      }
+    },
+    "/reporting/target-attainment/capabilities": {
+      "get": {
+        "description": "notDelivered 列出的是**确实拿不到**的部分，每条都写清原因与归属模块 —— 把「拿不到」伪装成 0 比说清楚更糟。⚠️ **部门 / 人员维度的实际值尚未投影到 reporting** ⇒ 那两个维度如实报「不可得」；产品维度取决于 13.2.2.2 的商品维度投影是否跑过。",
+        "operationId": "get_reporting_target_attainment_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AttainmentCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "能力声明：实际值从哪来、哪些维度确实拿不到、判定规则与阈值是什么",
+        "tags": [
+          "13.1.2.2 达成追踪"
+        ]
+      }
+    },
+    "/reporting/target-attainment/evaluate": {
+      "post": {
+        "description": "🔴 **写的是派生读模型，不是业务事实**：同一目标同一天重复评估是**覆盖**，不是堆积。「月初就知道会不会达标」这句话要求的是**一个可回看的时间点**，而不是一个随时会变的实时值 —— 所以落快照。⚠️ 评估日取自数据库时钟（按本租户时区折算成日历日）。",
+        "operationId": "post_reporting_target_attainment_evaluate",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "scopeType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "metricCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "currency",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AttainmentEvaluateResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "评估并落快照：把当前的达成率 / 预测达成冻成一个可回看的时间点",
+        "tags": [
+          "13.1.2.2 达成追踪"
+        ]
+      }
+    },
+    "/reporting/target-attainment/ranking": {
+      "get": {
+        "description": "🔴 **算不出达成率的目标不进排名** —— 给「不可得」一个名次等于替它编了一个成绩。⚠️ **不跨币种、不跨指标排名**：销售额达成率与毛利率达成率不是一回事。",
+        "operationId": "get_reporting_target_attainment_ranking",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "scopeType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "metricCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "currency",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AttainmentRanking"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "排名（人员 / 产品维度）：同归属维度 + 同口径 + 同币种 + 同周期内比",
+        "tags": [
+          "13.1.2.2 达成追踪"
+        ]
+      }
+    },
+    "/reporting/target-attainment/snapshots": {
+      "get": {
+        "description": "快照是**一次评估的落库形态**（派生读模型，不是业务事实）：记的是「在某个评估日、按当时已投影的事实，达成率与预测达成是多少」。「当前值 / 达成率」为 null 表示**当时拿不到实际值**（不是 0%）。",
+        "operationId": "get_reporting_target_attainment_snapshots",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "scopeType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "metricCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "evaluatedOn",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AttainmentSnapshotPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "已落快照清单（真分页 + 真计数）：下游 17 绩效核算 / 1 工作台预警读的就是它",
+        "tags": [
+          "13.1.2.2 达成追踪"
         ]
       }
     },
