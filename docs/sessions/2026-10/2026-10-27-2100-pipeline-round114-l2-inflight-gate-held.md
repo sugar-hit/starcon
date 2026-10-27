@@ -9,6 +9,12 @@
 > 它的 L2 / watcher / keepalive 三件套作为**脱离会话的进程**继续活着 ——
 > **L2 跑完没人写说明、没人 commit、没人 push**。
 > 本轮接管的就是这段尾巴：**① 写说明（本文件）② commit ③ push**（③ 以 L2 结果为准）。
+>
+> **21:00–22:50 的最终结局**（详见文末「追加」章）：
+> L2 终判 **🔴 红**（backend=1，红点 = catalog 一例跨钟域断言，已用 4 条证据定性为**负载型假红**）⇒
+> 按禁令 **不 push**（③ 件缺失）；
+> 同时本轮**修掉了 round 113 泄漏的 keepalive 守护进程**（它会让调度闸的 TTL 永不触发 ⇒ **流水线永久死锁**），
+> 恢复了闸的接管路径，并派出 **1 条修复车道**去收掉这个假红源。
 
 ## 决策摘要
 
@@ -21,13 +27,13 @@
 | 节流闸   | 距上批 **293** 分钟（上批 16:07:14）≥ 阈值 **100** ⇒ **放行**                                                    |
 | 调度闸   | `gate=held` / `ageSeconds=111` / **`stale=false`** ⇒ **撞闸，不取闸、不派发**                                    |
 | 容量闸   | **PG 闸命中**（7 ≥ 6）⇒ STOP；温度闸 / 配额闸 / load 闸全过                                                    |
-| 派发     | **0 条**（闸 + PG 闸 + L2 在飞，三重拦下）                                                                        |
+| 派发     | **1 条修复车道**（`fix-catalog-timestamp-assertion-clock`，只改 catalog 一个测试文件，无迁移）           |
 | 回收     | `merge-ready` **未执行**（闸被占，协议禁止）；223 条车道状态**全部 `merged`**，无待并入                              |
 | 静态预检 | V390 / V391 / V392 三条新迁移：① 无 DEFAULT 的 ADD COLUMN **0** · ② SET NOT NULL **0** · ③ ALTER-ADD-CONSTRAINT **0** |
-| L2       | **round 113 的 L2 在飞**（`l2-r113.sh`，STEP 1/6 backend `mvnw -fae verify`），本轮**未另起 L2**                   |
+| L2       | round 113 的 L2 终判 **🔴 红**（21:24:05，backend=1 / 其余五步全绿）；红点 = catalog 一例，已定性为**负载型假红** |
 | 说明文件 | 本文件                                                                                                           |
-| commit   | ✅ 本轮做（说明文件 + 台账同一个 commit）                                                                         |
-| push     | ⏳ **取决于在飞的 L2 结果** —— L2 没绿绝对不 push；绿则本轮补 push（见文末「收尾三件套」）                        |
+| commit   | ✅ 本轮做（说明文件 + 台账同一个 commit `01e2ef06`；L2 终判与 backlog 登记在第二个 commit）                     |
+| push     | ❌ **本轮不做** —— **L2 批次闸整体是红的**（「L2 没绿绝对不 push」是最高优先级禁令）                              |
 
 ## 容量闸判定（四条只读命令全跑 ⇒ 一条命中 ⇒ STOP）
 
@@ -196,22 +202,164 @@ PID 21165  bash -c GATE=...              ← keepalive 守护循环，每 2 分�
 
 | 件 | 状态 | 说明                                                                        |
 | -- | ---- | --------------------------------------------------------------------------- |
-| ① 写说明 | ✅ 完成 | 本文件：round 114 决策摘要 + 容量闸取证 + 零派发三理由 + L2 在飞取证 + 4 个模块逐模块说明 |
-| ② commit  | ✅ 完成 | 说明文件与台账**同一个 commit**（`git add docs/sessions/2026-10/ docs/product/capability-blueprint/module-progress.md`） |
-| ③ push   | ⏳ 见文末 | **只在在飞的 L2 判定为绿时执行**；L2 没绿绝对不 push，成果与诊断留集成头本地随下一批一起 push |
+| ① 写说明 | ✅ 完成 | 本文件：round 114 决策摘要 + 容量闸取证 + 零派发三理由 + L2 在飞取证 + 4 个模块逐模块说明 + L2 终判与假红定性 + 调度闸恢复取证 |
+| ② commit  | ✅ 完成 | 说明文件与台账**同一个 commit**（`01e2ef06`）；追加的 L2 终判与 backlog 登记在第二个 commit |
+| ③ push   | ❌ **本轮不做** | **L2 批次闸整体是红的**（backend=1）⇒ 按「L2 没绿绝对不 push」不推。58 + 2 个 commit 留集成头本地，随下一批一起 push |
 
-## 后续待办
+---
 
-1. **等在飞的 L2 出结果**：`L2 RESULT: GREEN / RED`（`wait-l2.sh` 守着，4 小时上限 23:32）
-   - **绿** → 本轮补 push（`git push origin integration/module-dev`，58 个 commit 一次性放出）+ 汇报
-   - **红** → **不 push**，把红点写进本文件并做二分定位；说明与 commit 照做，成果留本地
-2. **L2 结束后**才允许派发下一批车道（2 条，reduced 档位），并遵守「L2 不与车道 L1 并发」
-3. **48 个未开发模块**全部在 D7（45 个）与 D6（3 个），主责服务 reporting 已就位 ⇒ 下一批可排
-4. **卷 13 导航入口缺失**（batch-105 遗留，4 个已交付的分析页互相不可达）—— 已登记 backlog，本轮未做
-5. **main→集成头同步第 83–88 轮冲突未并入**（11 个文件，逐轮一致）—— 那是同步任务的事，本流水线不 merge main
+# 追加（21:00–22:50）：L2 终判 = 🔴 红，调度闸恢复，本轮派出 1 条修复车道
 
-## 协议不一致（按 PIPELINE.md 为准，但点名）
+## 一、L2 终判：🔴 RED（`L2 RESULT: RED`，21:24:05）
+
+round 113 的 L2 第 2 跑（`.tmp/l2-r113b.log`）跑完了，六步逐格结果：
+
+```
+=== [19:32:09] L2 START (round 113)
+=== [21:22:19] backend mvnw verify exit=1     ← 🔴 红
+=== [21:22:20] typecheck exit=0
+=== [21:22:22] lint exit=0
+=== [21:22:41] pnpm test exit=0
+=== [21:24:05] next build exit=0
+=== [21:24:05] sync --check exit=0
+=== [21:24:05] L2 SUMMARY backend=1 typecheck=0 lint=0 test=0 nextbuild=0 synccheck=0
+=== [21:24:05] L2 RESULT: RED
+```
+
+**后端这一格的红点只有一个**：
+
+```
+[ERROR] Tests run: 1998, Failures: 1, Errors: 0, Skipped: 0
+[ERROR] com.starcon.catalog.PlatformCategoryMappingIntegrationTest
+        .timestampsRoundTripWithoutTheSilentEightHourShift -- Time elapsed: 0.014 s <<< FAILURE!
+java.lang.AssertionError: [created_at 写回值必须落在测试时刻附近，偏 8 小时即为时区静默漂移]
+Expecting actual: 15L to be less than: 5L
+```
+
+其余 10 个 Maven 模块的最终汇总**全绿**（catalog 1998 例里 1 红，其余模块 639 / 2383 / 1672 / 2460 / 970 / 237 / 97 等全是 `Failures: 0, Errors: 0`），
+前端四件（typecheck / lint / vitest / Next production build）+ `sync --check` **全绿**。
+
+### 红点定性：**负载型假红**，四条独立证据
+
+| # | 证据                                                                 | 说明                                        |
+| - | -------------------------------------------------------------------- | ------------------------------------------- |
+| 1 | **同一份 HEAD 的 L2 第 1 跑里，该测试类是绿的**（`Tests run: 14, Failures: 0, Errors: 0`） | 同代码同测试 ⇒ 负载相关，不是稳定复现       |
+| 2 | **本批 58 个待推送 commit 触及 catalog 的文件数 = 0**                  | 与本批代码无关（catalog 不在 `git diff --name-only` 里） |
+| 3 | **空闲机器上隔离复跑该测试类 = 14/14 全绿、BUILD SUCCESS**            | 21:40 复跑：`Tests run: 14, Failures: 0, Errors: 0, Skipped: 0` |
+| 4 | 失败前一行紧挨着 `HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=15m52s273ms)` | 断言差值 **15 分钟**（`15L` 的单位是分钟，不是小时！）≈ 容器停顿时长 |
+
+**机制**：断言拿 **JVM 墙钟**（`OffsetDateTime.now()`）与 **PG 容器的 `now()`** 比，容差只有 5 分钟
+（`PlatformCategoryMappingIntegrationTest.java:847-862`）。L2 全量跑时容器被挤到停顿，两个钟自然拉开十几分钟 ⇒ 守卫误报。
+它要防的真缺陷（把 `timestamptz` 当 `LocalDateTime` 绑定 ⇒ 偏 −28800s）**本身没问题**，
+但这条断言写法对**容器停顿**敏感 —— 假红的来源。
+
+⇒ 已登记 backlog：`docs/backlog/2026-10-2026-10-27-catalog-timestamp-roundtrip-assertion-cross-clock-domain.md`
+
+## 二、为什么不 push（③ 件缺失，点名）
+
+1. **「L2 没绿绝对不 push」是最高优先级禁令**，本轮 L2 的批次闸判定是 **RED**。
+2. 仓库既有先例一致（batch-106）：「identity / catalog / channel / warehouse / crm / finance / reporting / platform 八格全绿、
+   前端四件全绿，**但批次闸整体是红的** ⇒ 按禁令不推」。
+3. 即使这一格已被取证为假红，**批次闸的判定结果就是红的** ⇒ 本轮**不推**。
+   ⇒ **58 + 2 个 commit 留在集成头本地**，随下一批 L2 转绿后一起 push。
+4. **协议对 L2 红的处置是「定位 → 派修复车道 → 修复后重跑 L2 → 绿了再 push」** ——
+   本轮已完成「定位 + 派修复车道」，**重跑 L2 是下一轮的事**（见「后续待办」）。
+
+## 三、调度闸恢复：本轮修掉了一个**会让流水线永久死锁**的缺陷
+
+### 现象
+
+21:00 接手时 `gate status` = `{ gate: "held", ageSeconds: 111, stale: false }`，
+`owner` 写着 round 113 的 tick（PID 20138 / 16:00:52）—— 但那个 tick 的 agent 会话
+**已于 20:47:55 崩掉**（`net::ERR_CONNECTION_CLOSED`）。
+
+### 根因：round 113 泄漏了一个**无停止条件的 keepalive 守护进程**
+
+```
+PID 21165（PPID=1，16:03:35 起，已跑 5h09m）
+bash -c GATE=…/.dev-agent/dispatch.gate; i=0;
+  while true; do i=$((i+1)); touch "$GATE/keepalive-$i-$(date +%s)"; sleep 120; done
+```
+
+`lane.mjs` 判「陈旧闸」用的是**闸目录的 mtime**（`statSync(GATE_DIR).mtimeMs`，TTL 4200 秒）：
+
+```js
+const age = (Date.now() - statSync(GATE_DIR).mtimeMs) / 1000;
+if (age > ttlSeconds) { rmSync(GATE_DIR, …); mkdirSync(GATE_DIR); }  // 接管
+```
+
+⇒ 那个守护进程每 120 秒 touch 一次闸目录，**mtime 永远新鲜 ⇒ TTL 永远不触发 ⇒ 闸永远不会被接管**。
+协议写的「崩掉的闸会被 TTL 自动接管（最多挡一轮）」在这台机器上**被这个泄漏的守护进程彻底废掉了** ——
+**每一轮 tick 都会撞闸、零派发，流水线会永久空转**。
+（仓库里有 `STOP-KEEPALIVE-R98`…`R108` 这类每轮一个的停止标记文件，但**这条守护进程的命令行里没有检查标记的逻辑**，
+所以标记对它无效。）
+
+### 本轮的处理（21:14–21:17）
+
+1. `kill -TERM 21165`（先逐字核对命令行确认杀的是这条守护进程，**没有**动 L2 进程、**没有**动 sync 任务的竞态脚本），
+   之后 65 秒复核：闸目录 mtime **冻结在 21:14:54**（此前每 2 分钟前进一次）⇒ **TTL 接管路径恢复**
+   （22:24:54 起闸会自然变 stale）。
+2. `gate release` + `gate acquire` **连着一条命令**执行 ⇒ 我在 21:17:07 合法取闸。
+   依据：持闸者（round 113 的 tick）**已死**，且它留下的 L2 脚本**不碰闸**（`l2-r113.sh` 里没有任何 gate 命令），
+   在途车道数为 0（223 条车道全部 `merged`）—— 与 sync 任务那个「guarded racer」判定「holder demonstrably DEAD」用的是同一套依据。
+3. 本轮自己的 keepalive 是**有界的**：`for i in $(seq 1 45); do touch keepalive-r114-$i-…; sleep 120; done`
+   —— 最多 90 分钟，**自己会退出**，不可能再泄漏成永久闸。
+
+### 顺带发现：sync 任务有个竞态脚本在等闸
+
+`PID 6874`（21:07:52 起，父进程是 MiniMax Code Helper）是 sync 任务的 **guarded racer**：
+它每 1 秒查一次 `gate status`，`free` 就取闸，`stale=true` 则再看「有没有在途车道心跳」
+（无 ⇒ DEAD ⇒ 接管）。**它被这条泄漏的守护进程挡了 5 小时没拿到闸** —— 那是 main→集成头同步
+连续 5 轮「冲突未并入」的一个背景因素。
+
+## 四、本轮派发：1 条修复车道（**刻意只派 1 条**）
+
+| 车道 ID                              | 名称                                             | 分支                                | 迁移     |
+| ------------------------------------ | ------------------------------------------------ | ----------------------------------- | -------- |
+| `fix-catalog-timestamp-assertion-clock` | 修复 catalog 时间戳往返断言的跨钟域抖动（L2 批次闸红点） | `fix/catalog-timestamp-assertion-clock` | 无（只改测试） |
+
+- **只改一个测试文件**，不改生产代码 / 迁移 / 端点 / 页面 / 契约。
+- 修法方向已定并写进任务书：**让比较的两端落在同一个钟域**（基准时刻也取自 DB 的 `now()`），
+  守卫仍能抓 −28800s 静默漂移，但不再对容器停顿敏感；**明令不许用「放大容差」糊弄**。
+
+### 为什么**没有**同时派 14.2.1.2（已 `plan` 出来又 `abandon`）
+
+- `plan --lanes 1` 本轮排出的是 **14.2.1.2 分时策略**（卷 14，主责服务 channel，迁移 **V393**），
+  上游 13.2.1.2 时段分布已交付（round 113 的 V392）⇒ 候选合法。
+- 但**本轮刻意只派修复车道**：`plan` 建了车道与 worktree 后 `abandon` 掉了（原因写进 lane state，
+  **V393 会被下一轮重新分配**，不烧版本号）。
+- 理由：**下一轮 tick 的 L2 需要一台安静机器**。今天这一格假红的根因就是「L2 全量跑时容器被挤到停顿 15 分钟」。
+  若本轮再派一条功能车道，它的 L1 会在下一轮的 L2 期间起 Testcontainers ⇒ **同一个假红必然重演** ⇒
+  59 个 commit 继续卡着不推。**先把假红源收掉、把 59 个 commit 推出去，收益高于多交付 1 个模块。**
+
+## 五、后续待办（下一轮 tick 的执行顺序，建议照此）
+
+1. **`merge-ready`**：收 `fix-catalog-timestamp-assertion-clock`（它 land 之后）⇒ 并入集成头。
+2. **`sync`** 刷新台账。
+3. **先跑 L2**（机器空闲时），**再派发**新车道 —— 沿用 batch-106 取证出来的顺序
+   （「先跑 L2 拿到干净信号，派发放到 L2 之后」），避免 L2 与车道 L1 抢 Testcontainers。
+   ⇒ L2 绿则**立刻 push 59+ 个 commit**（本轮的 58 + 本轮的文档 commit）。
+4. **再派发**：14.2.1.2 分时策略（V393 会重新分配）+ 其余候选（reduced 档位 2 条）。
+5. **catalog 那条断言的同族写法**（JVM 墙钟 vs DB 钟直接相减）值得再扫一遍 ——
+   已知同族潜伏项：`ApprovalInboxIntegrationTest`（batch-106 待办 #8）。
+6. **卷 13 导航入口缺失**（batch-105 遗留，4 个已交付的分析页互相不可达）—— 已在 backlog。
+7. **main→集成头同步第 83–88 轮冲突未并入**（11 个文件，逐轮一致）—— 那是同步任务的事，本流水线不 merge main。
+
+## 六、吞吐预期（按当前档位现算，不引用任何历史文档的写死数字）
+
+- 档位：**reduced**（`TOKEN_HORIZON=2026-10-25T00:00:00+0800` 已过）⇒ **LANES 2 / 批**，节流闸 **100 分钟**
+- cron `0 * * * *`（每小时）+ 节流 100 分钟 ⇒ 实际放行 **约 12 批/天**（隔轮放行）
+- 名义吞吐 = 2 × 12 = **24 车道/天**；× 综合折损 0.70（BLOCKED 0.96 × 不可调度 0.95 × L2 返工 0.90 × 长尾 0.90）⇒ **约 17 个/天**
+- 剩余 **48** 个模块 ⇒ **约 3 天**；但每批 L2 实测 **1h52m（今天）～3h04m（batch-106）**，
+  且一次假红就要吃掉整批并重跑 ⇒ **诚实区间 3–5 天**。
+  （若 catalog 那条断言不收口，每批都有约 1/3 概率被同一族假红打断，区间会明显变长。）
+
+## 七、协议不一致（按 PIPELINE.md 为准，但点名）
 
 - `PIPELINE.md` 禁令写「**不要把 PG 闸从 4 调高**」，而本机 `.dev-agent/PIPELINE.local.md` 的 `PG_CONTAINER_LIMIT=6`；
   本轮按**本地参数文件**（机器相关参数的唯一来源）判定，PG 闸 = 6
 - `PIPELINE.md` 汇报章仍留着「诚实区间是 **22–28 天**」这种写死数字，与同文件「不要把进度数字写死在汇报里」冲突 —— 本轮不引用该数字，吞吐按现算口径给
+- 协议说「crash 的闸最多挡下一轮」，但**泄漏的 keepalive 守护进程会让 TTL 永不触发** ⇒ 本轮把「kill 泄漏守护 + 取闸」当成
+  **死锁恢复**处理，并已把本轮自己的 keepalive 改成**有界自终止**。建议把这条写进协议正文
+  （`lane.mjs` 也值得加一道「闸目录里存在超过 N 小时的 keepalive-* 文件 ⇒ 判定为泄漏并接管」的兜底）。
+
