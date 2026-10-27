@@ -6,9 +6,7 @@
 >
 > 状态词表只有三个值，统计逻辑依赖它，不要新增：
 > `已交付`（迁移 + API + 页面 + 测试齐全，无 TODO 残留）· `进行中`（部分交付、未收口，证据列写清缺哪一块）· `未开发`（未开工）。
-
 ## 总览
-
 | 指标 | 数量 |
 | --- | --- |
 | 模块总数 | 465 |
@@ -16,9 +14,7 @@
 | 进行中 | 0 |
 | **未开发** | **47** |
 | 完成率 | 89.9% |
-
 ## 分阶段进度（交付顺序看这里）
-
 | 阶段 | 已交付 | 进行中 | 未开发 | 合计 |
 | --- | --- | --- | --- | --- |
 | **D1–D2** | 80 | 0 | 0 | 80 |
@@ -27,11 +23,8 @@
 | **D5** | 52 | 0 | 0 | 52 |
 | **D6** | 75 | 0 | 3 | 78 |
 | **D7** | 111 | 0 | 44 | 155 |
-
 ## 分系统进度
-
 | 卷 | 系统 | 阶段 | 已交付 | 模块数 |
-| --- | --- | --- | --- | --- |
 | 01 | 工作台与门户系统 | D7 | 23 | 23 |
 | 02 | 渠道与店铺系统 | D1–D2 / D5 | 25 | 25 |
 | 03 | 商品主数据系统 | D1–D2 | 40 | 40 |
@@ -50,30 +43,22 @@
 | 16 | 合规与风控系统 | D7 | 23 | 23 |
 | 17 | 组织权限与系统设置系统 | D1–D2 / D4 / D6 / D7 | 29 | 29 |
 | 18 | 集成开放与智能自动化系统 | D7 | 3 | 24 |
-
 ## 判定「已交付」的标准
-
 一个模块标 `已交付` 当且仅当下面四件都成立，缺一件就是 `未开发` 或 `进行中`：
-
 1. **迁移** — `backend/services/<svc>/src/main/resources/db/migration/V*.sql` 里有真实表结构，
    带 `tenant_id NOT NULL` + RLS 策略，不是注释里的设计。
 2. **API** — 服务里有对应端点，走 jOOQ 显式 SQL，不是返回硬编码常量的桩。
 3. **页面** — `apps/web/src/app/**/page.tsx` 是真实工作区，不是 `DomainPlaceholder`。
 4. **测试** — `cd backend && ./mvnw verify` 绿；涉及租户隔离的必须实跑
    「两租户互不可见 / 伪造 tenant header 无效 / 连接池归还后不串租户」三条断言。
-
 **判定为 `未开发` 的典型形态**（见到就说明没做完，不许算进已交付）：
-
 - `DomainPlaceholder` 占位页
 - 硬编码数组 / 常量当数据源
 - 服务里 `TODO` + `throw new UnsupportedOperationException()`
 - 迁移文件存在但没有 RLS 策略
 - 前端有页面但后端没有对应端点（或反之）
-
 ## 跨期说明
-
 「阶段」列按**依赖就绪顺序**逐模块标注，不是卷归属。跨期卷的拆分如下：
-
 - **01 工作台与门户 → 全部 D7**：它是纯投影聚合层（蓝图原文「不写业务数据，只读投影」），
   聚合 09 订单 / 07 库存 / 02 渠道 / 12 财务 / 15 客户 / 17 审批的投影。
   这些数据源没落地之前建「我的待办」只能造假数据，所以整卷排到最后收口。
@@ -87,9 +72,7 @@
 - **11 售后与退货**：D4 交付售后单、退货授权与实收、退款换货；平台纠纷 / 客诉工单 / 分析排 D7。
 - **17 组织权限**：D1–D2 交付租户、法人、部门、成员、角色、页面权限、数据范围、审计；
   17.4 审批流随单据排 D4，17.6.1.1 账簿与本位币随财务排 D6，17.7 套餐与平台参数排 D7。
-
 ## 模块明细
-
 | 模块 ID | 模块名 | L3 锚点路由 | 阶段 | 状态 | 证据 |
 | --- | --- | --- | --- | --- | --- |
 | 1.1.1.1 | 我的待办 | /dashboard/todo | D7 | 已交付 | **卷 01 第一批**：本模块是**只读投影**（卷 01 卷首写死「不产生新的业务事实，只聚合各系统的投影」「不做：任何写业务数据的操作。工作台只读 + 跳转；一切状态变更回到归属系统完成」+ 蓝图 1.1.1.1 原文「**不写业务数据**，只读投影」）⇒ **不新建任何表、不占用 V370**（Flyway 版本号留给真正需要它的场景）、**不建后端微服务**、**不提供任何写端点**、**对后端零改动**。**迁移**：无（本模块只读六个既有服务的既有事实表）。**端点**：**零新增** —— 本模块是**纯前端聚合层**，读八个**既有**的只读投影端点（蓝图的八类待办 ↔ 八个上游端点一一对应，不多不少）：超期未发货 → `GET trade/fulfillment/timeliness/overdue`（09 订单，权限码 `trade.fulfillment.read`）·待审订单 → `GET trade/order-pending-review/queue`（09 订单，`trade.orders.read`）· 库存缺口 → `GET warehouse/inventory/stockout-alerts/stockouts`（07 库存，`warehouse.inventory.read`）· 待处理同步失败 → `GET channel/sync-failures`（02 渠道，`channel.sync.read`）· 待核对账差异 → `GET finance/supplier-reconciliation`（12 财务，`finance.suppliereconciliation.read`）· 待回复站内信 → `GET crm/message-inbox/messages`（15 客户，`crm.message.read`）· 待审批单据 → `GET identity/approval-todos`（17 审批，沿用 `identity.approval_inbox.read`）· 库存低于安全线 → `GET warehouse/inventory/safety-stock/alerts`（07 库存，`warehouse.inventory.read`）。八个上游系统与蓝图「上游 = 09 订单、07 库存、02 渠道、12 财务、15 客户、17 审批」逐条对上。**api-proxy**：**本车道未改 `api-proxy.ts`**（**k = 0**）—— 发车前用脚本把基线 **225** 条 services[] 正则**逐条编译并实测命中**（与 `resolve()` 同构：先切掉 prefix 再 test，不是目测、不是 `grep -c "prefix: '"`），实测上述八个形状**全部已在基线放行** ⇒ 无需新增元素，**元素数仍 = 225**，该文件**一字未改、未重排** ⇒ 并入集成头时在该文件上**零冲突面**（调度者分给本车道的第 314 行锚点因此未被占用）。**数据范围（法人/店铺/仓库/部门）**：**服务端判定，前端不掺和** —— 租户来自**已认证的成员关系**（`auth/session` → 各服务 `AccessService.require` → 身份服务 `/internal/access`），**不信任任何客户端租户头**（代理只转发会话 cookie 换来的 `Authorization`，`X-Tenant-Id` 根本不会被转发，有专门的反向断言钉住）；法人/店铺/仓库/部门的范围由**归属服务**在服务端判定（`AccessService.run` 绑定 `app.actor` / `app.department` / `app.grants` / `app.permission` 供 RLS 与行级范围使用）；**前端不把范围当成可信输入往下传**（不下发范围参数、不下发租户 id，只读各服务**已经按范围过滤好**的投影）；前端做的那一点是**展示** —— 按 `GrantPermissions.scopeMode` **逐字同式**的判据（取最宽的一条授权 ALL > DEPARTMENT > SELF，DEPARTMENT 需要会话带部门否则退化为 SELF）算出每个来源**实际生效**的数据范围并显示，⚠️ 该判定**只用于「要不要去读」和「怎么措辞」**，**不是授权** —— 服务端会独立地再判一次。**三件「判不了」与「没有」严格分开**：① 严重度判不了（风险分 `null` = 没评估过、审批节点没配时限、上游给了没见过的严重度词）落在独立 `UNKNOWN` 档并**排在 `LOW` 之前**；② 停留时长判不了（起点缺失/格式不认）是 `null` **不是 0**（0 会把「不知道停了多久」显示成「刚发生」）；③ 来源读不到逐类单列、**不计入总数**，也不冒充「0 条」；④ 另加第四件 —— **无权限**与**读不到**分开：无权限的来源**根本不发请求**（发了必然 403 且会把「无权限」说成「服务挂了」），标成「无权限 · 对你不开放」。**严重度按源分别推、不统一硬编码阈值**（各源判据不同：风险分 / 超期秒数 / 上游自带的 severity / 失败原因 / 优先级 / 未结差异条数；统一阈值会重算业务口径）⇒ 严重度**不可跨源直接比大小**，页面按档位展示。**已处置的不再是待办**：已审的单、已解决的预警、已重放的同步失败、已读的站内信、已发的站内信（OUTBOUND 不是「待回复」）、没有未结差异的对账单 —— 一律不进队列（上游默认口径外**显式再挡一次**，免得将来上游改了默认口径而这里悄悄把已处置的报成待办）。**紧急度排序**：严重度降序 → 停留时长降序 → 类型名 → 引用，**最后两级保证同一批数据两次刷新顺序不跳**（顺序乱跳会让人以为待办自己在动）；停留时长判不了的排在同级**之后**（「停了多久不知道」≠「停了很久」，把 `null` 当无穷大会把一批判不了的顶到最前）。**计数与清单同源**：概览的每个数字都由清单**同一份集合**算出。**页面** `/dashboard/todo/my-todos`（`apps/web/src/app/dashboard/todo/my-todos/page.tsx`）+ `apps/web/src/components/dashboard/my-todo-{model,workspace}.tsx`：数据源可达性区（八个来源逐条报「已接通 / 无权限 / 读不到」+ 归属系统 + 上游端点 + **实际生效的数据范围** + 当前工作空间名）+ 待办概览（总数 / **未读计数角标** / 最久停留 / 四档严重度 / **判不了严重度**条数 / 读不到来源数 / 无权限来源数）+ 按类型筛（八类各自条数，点一下就按这一类筛）+ 筛选（严重度 / 停留时长下限 / 关键字）+ 待办队列（按紧急度排序的卡片：类型 / 单据引用 / 严重度 / 停留时长 / 数据范围 / **下一步入口**（跳归属系统处理页并带定位参数，如 `/crm/messages?keyword=MSG-1`、`/inventory/stockout-alerts?skuId=…`）+ 真分页）；加载 / 错误 / 空三态齐全，**禁 mock**；上游取数被页数上限截断时**如实报出「只取回前 N 条（共 M 条）」**。🔴 **工作台不写业务数据**：页面上**没有认领 / 完成 / 转交**任何写动作，每张卡片只有一条出口（跳归属系统）。**不代兄弟模块实现**：1.1.1.2 异常订单队列（`/dashboard/todo`）与 1.1.1.3 审批待办（`/dashboard/todo/approvals`）各有自己的页面，本车道**不碰 `apps/web/src/app/dashboard/todo/page.tsx`**（那是 1.1.1.2 已交付的页面），只挂自己的同层子路由。**契约**：未重新生成（后端零改动 ⇒ 契约不变）。**测试** `my-todo-model.test.ts` **39 例**（八类一一对应 / 「判不了」不被当成「没有」三态 / 已处置的不再是待办 / 读不到与没有是两件事 / 紧急度排序四则 / 计数与清单同源 / 筛选五则 / 归一七则 / 数据范围八则：ALL>DEPARTMENT>SELF 取最宽、「能写不能读」不成立、无部门则 DEPARTMENT 退化为 SELF、八个来源逐个判定、会话读不到时全部判为不可读）+ `my-todo-allowlist.test.ts` **6 例**（真跑 proxy 断言 HTTP 状态码：前端源码里**反向抽取**的真实调用点逐条放行 / 八个上游端点逐条放行 / 查询串不影响放行判定 / **刻意不放行的形状仍然 404**（含 🔴 写形状：sync replay、message reply、alert acknowledge、recon resolve、approval decide）与 / 不误伤兄弟模块与六个上游系统其它车道已交付的形状 / **代理不转发伪造的 X-Tenant-Id 与 X-Internal-Key**，只转发会话 cookie 换来的 Authorization）。**验证** `./mvnw -q compile` exit 0、`pnpm typecheck` 3/3 通过、`pnpm vitest run apps/web/src/app/api` **237 文件 1336 例全绿**、本车道 5 个文件 eslint 无输出 · 2026-10-24 交付 |
@@ -422,7 +405,7 @@
 | 13.2.2.2 | SKU/SPU/Listing | — | D7 | 已交付 | 迁移 `backend/services/reporting/src/main/resources/db/migration/V389__product_sales.sql`（**五张表、纯 CREATE TABLE、零 ALTER 既有表、零跨库外键**）：`reporting_product_metric_definition`（**商品维度指标口径唯一表**：UNIQUE(tenant_id, metric_code) + CHECK 钉死「派生型必须写全分子分母、非派生型不许写」+ CHECK 钉死「**涉币指标绝不允许跨币种合计**（currency_aware=true ⇒ currency_scope='SAME'）」+ 触发器 `guard_reporting_product_metric_definition_ref` 拒绝引用未登记的分子分母）、`reporting_product_dimension`（**SKU / SPU / LISTING 三层档案 + 父子关系 + 变体签名**：一个 SKU 的父是 SPU，层级钻取沿 parent 链上下走）、`reporting_product_listing_sku`（**Listing ↔ 内部 SKU 绑定**：多对多 —— 同一款内部 SKU 挂在多个 Listing 上是常事 ⇒ 它的销量**无法唯一归属**）、`reporting_product_metric_fact`（商品维度投影事实：金额 numeric(24,4)、**件数走 quantity 列 numeric(19,6)**（塞进 4 位小数会丢精度）、bucket_date 按记录时区分桶 + 触发器 `guard_reporting_product_metric_fact_known` 拒绝未登记的指标码）、`reporting_product_drilldown_fact`（**构成明细**：订单号 + 行序号做幂等键 ⇒ 同一张订单里同一款 SKU 出现两行时两行分别列出、不被合并；`occurred_at timestamptz` 记下单时刻，绑定用 `?::timestamptz` + OffsetDateTime）；tenant_id NOT NULL + ENABLE **且** FORCE ROW LEVEL SECURITY isolation 策略 + GRANT。**🔴 不复用 13.1.1.1 的 reporting_metric_fact / reporting_drilldown_fact**：后者的维度键是 uuid（shop_id / legal_entity_id）**没有商品维度**，且 reporting_drilldown_fact 的 scope_type 枚举只有 (COMPANY, LEGAL_ENTITY, SHOP) —— 零 ALTER 既有表的纪律下另起一组表，两边互不干扰。**口径唯一**：6 个指标（PRODUCT_SALES_AMOUNT / PRODUCT_SALES_QUANTITY / PRODUCT_ORDER_COUNT 三个流量型 + PRODUCT_AVG_UNIT_PRICE / PRODUCT_ORDER_AVG_AMOUNT / PRODUCT_VARIANT_SHARE 三个派生型）只写分子分母引用、不写公式，查询 SQL 里无硬编码公式。**🔴 三层维度的口径靠三列扩展表达**：`numerator_dimension_type` / `denominator_dimension_type`（分子分母取自哪一层）+ `currency_scope`（SAME 同币种 / ANY 允许跨币种合计）—— 变体销量占比是全模块唯一**跨层**口径（分子 SKU 层 / 分母 SPU 层），不声明这两层的话引擎会把「SPU 销量 ÷ SPU 销量」算成 100%，那是个**看起来对、其实没意义**的数；声明了分子层，该指标就只在 SKU 层出现。**🔴 绝不跨币种直接相加**：金额按币种分别报；只有件数与单数（与货币无关）给跨币种合计，币种显示为空串（= 与币种无关，不是「币种未知」）；DB 层 CHECK 钉死「涉币指标不许 ANY」。**🔴 Listing 层的销量归属有边界**：trade 的订单明细**只带 SKU 码、不带平台商品 id** ⇒ 同一款内部 SKU 挂在多个 Listing 上时，它的销量**无法唯一归属**到任何 Listing ⇒ **不摊给任何 Listing**（摊给谁都是造假），单列「无法唯一归属」并在能力声明里写清原因。**端点 7 个**挂 `/reporting/product-sales`：GET /（SKU / SPU / LISTING 三层报表 + 真分页真计数 + mergeSpu 开关）、GET /spu-summary（SPU 汇总：多平台多 SKU 合并看）、GET /variants（变体销量分布）、GET /drilldown（层级钻取：哪张订单的哪一行）、GET /capabilities、GET /metrics、POST /refresh；**上游只读**：catalog SKU 列表（SKU → SPU 归属 + 变体签名）、channel Listing 列表（平台商品 ↔ 内部 SKU 绑定）、trade 销售订单与订单明细（**销量与金额的唯一来源**）—— 转发调用方自己的 bearer、**不传租户号**，上游读不到一律 503 不返回空集合。**🔴 能力声明逐条列出拿不到的部分**：Listing 层的销量归属边界、订单行没有平台/店铺维度（SPU 层跨平台合并但 Listing 层无法按订单区分平台）、SPU 自身没有平台维度、Listing 的价格/库存/评分属 4.5.1.1、手工单与平台单两套口径、退货量不在本模块（13.4 的事）、变体的进一步细分要读 3 商品的属性定义（当前上游没有面向本模块的只读端点）、订单明细 50 张上限（触到上限报「已截断」不悄悄少算）。**页面** `apps/web/src/app/analytics/sales/products/page.tsx`（路由 /analytics/sales/products）：商品销量报表 / SPU 汇总 / 变体销量分布 / 层级钻取 / 指标口径目录 / 能力声明，**加载态 / 错误态 / 空态三态齐备**，「无法唯一归属」与口径提醒常驻顶部，**前端不做业务算术**（占比 / 件均价 / 客单价 / SPU 合并全来自服务端 BigDecimal，SPU 的合并口径由服务端算，前端绝不自己把 SKU 相加）。**测试 60 条全绿**：后端 25 条（`ProductSalesIntegrationTest` 20 条业务口径 + `ProductSalesTenancyIntegrationTest` 5 条多租户，三条断言缺一不可：两租户互不可见 / 伪造 tenant header 无效 / 连接池归还后不串租户，假上游按 bearer 分租户、连接池固定 1 条连接；含**时间字段逐字往返断言**：SO-3 的下单时刻 2026-10-02T01:00+08:00 写进去读回来必须是同一个瞬间 —— 有人用 `Timestamp.valueOf(LocalDateTime)` 就会静默偏 −28800s），前端 35 条（`product-sales-model.test.ts` 29 条 + `product-sales-allowlist.test.ts` 6 条）。**契约**重新生成（7 端点 + 20 DTO，未手改任何生成物，其余八个服务的契约逐字节不变）。api-proxy **纯新增一条独立的 services[] 元素**（既有条目一字未改、不重排、不删除；插入锚点在数组末尾，与同批其它车道相距 10000 行以上），只放行 7 条真实路径，刻意不放行 `reporting/product-sales/{uuid}`、`/breakdown`、`{uuid}/variants`。 |
 | 13.3.1.1 | 产品表现分析 | — | D7 | 未开发 | — |
 | 13.3.1.2 | 生命周期与分层 | — | D7 | 未开发 | — |
-| 13.3.2.1 | 流量转化 | — | D7 | 未开发 | — |
+| 13.3.2.1 | 流量转化 | — | D7 | 已交付 | 迁移 `backend/services/reporting/src/main/resources/db/migration/V395__traffic_conversion_funnel.sql`（**三张新表、纯 CREATE TABLE、零 ALTER 既有表、零跨库外键**）：`reporting_traffic_conversion_metric_definition`（**指标口径唯一表**：UNIQUE(tenant_id, metric_code) + CHECK 钉死「SUM 型必须写清 traffic_source / 派生型不许写」+ 触发器 `guard_reporting_traffic_conversion_metric_definition_ref` 拒绝引用未登记的分子分母 ⇒ 口径只存在一份）· `reporting_traffic_conversion_fact`（**每日流量与转化事实**：每行带 `traffic_source`（LISTING / AD / ORDER）**谁家的口径** + `bucket_basis`（PLATFORM_DAY / UTC_DAY）**统计日是按谁的日历切的** + `currency`（空串 = 与币种无关）+ `shop_code` / `platform_code`（上游没给就是空串，**绝不猜**））· `reporting_traffic_conversion_drilldown_fact`（**可下钻**的构成明细：LISTING 平台商品 / AD_CAMPAIGN 广告活动 / ORDER 内部订单，`occurred_at timestamptz` 用 OffsetDateTime 绑定）。三表 tenant_id NOT NULL + ENABLE **与 FORCE** RLS isolation + GRANT reporting_app / starcon_app。两个触发器把「口径唯一 + 两套口径不许混算」落成数据层做不到的事：**派生指标不许有事实行**（派生值只能在查询期算，落库就成了第二个真相）· **事实行的来源口径必须与口径表登记的一致** · **涉币指标的事实行必须带 3 位大写币种码**（空串 = 与币种无关，不是「币种未知」）⇒ 不同币种的钱永远不可能被加到一起。金额 numeric(24,4)、数量 numeric(19,6) ⇒ **无一处浮点**。<br>**🔴 本模块的第一性纪律：两套口径分列、不混算**（蓝图加粗句「平台流量数据与内部订单数据口径不同，展示时必须标注来源与统计范围（页面 vs 订单）」）。曝光 / 点击 / Session / 平台成交件数与金额是**平台口径（页面口径）**，来自 2 同步的平台表现（channel `/channel/listing-performance`，**平台自然日**）；内部订单笔数与金额是**订单口径**，来自 9 订单（trade `/trade/sales-orders/list`，**UTC 自然日**）⇒ 转化率有**两个**口径（平台「成交件数 ÷ Session」、广告「广告成交订单 ÷ 广告点击」），客单价有**三个**口径（平台 / 广告 / 订单），**每个值旁边都带自己的口径标签**；**订单口径的转化率算不出来**（内部订单没有 Session ⇒ 分母缺失**不是 0**，那一格是「不可比」）。**🔴 自然流量是推导值不是平台给的数**：平台侧**没有**按流量来源拆分的流量口径（listing 表现与广告报表是两套独立报表）⇒ 用 DERIVED_DIFF（平台商品口径 − 广告口径）给出**残余自然流量**，口径说明写明推导方式；相减为负 ⇒ 该格报**「口径冲突」**（availability=CALIBER_CONFLICT + 语义色 danger），**绝不截成 0**（截成 0 会把口径问题藏起来）；**自然 Session 算不出来**（广告侧没有 Session 口径）⇒ 自然漏斗只有曝光与点击两节。**🔴 绝不跨币种相加**：金额按币种分别报；曝光 / 点击 / Session / 件数**事实仍按币种分行存储**（与 13.2.2.2 同纪律）⇒ 客单价能按**同币种**取分子分母（精确），而件数类指标在查询期走**跨币种合计**（件数相加不会把两种货币的钱加起来）。<br>**服务**：`backend/services/reporting/`（端口 8088）—— 卷 13「利润与经营分析」的唯一归属服务。租户解析与权限守卫**逐字照抄兄弟模块**：租户由 identity 按已认证成员关系解析，**不信任客户端 X-Tenant-Id 头**。**跨服务只读端口**（全部走**授权 HTTP API**，不直连对方库、不跨库 FK、不跨库视图）：channel（**2 同步**的平台表现快照 + **14 广告**的活动报表）+ **既有的** `ReportingTradePort`（**9 订单**的销售订单）。⇒ 开工前依赖自检：**三条上游端点逐个在集成头 grep 得到**，请求参数与响应字段形状逐条核对一致（listing 响应的列表字段是 `items`、ad-reports 也是 `items`、trade 的是 `rows`）⇒ 判定非 BLOCKED。<br>**端点**（5 个，`/reporting/traffic-conversion` 命名空间；权限码 `reporting.traffic-conversion.read` / `reporting.projection.write`，**没有任何「创建业务事实」的权限码**）：GET ``（**主报表**：四组漏斗 + 关键指标（按口径分列）+ 转化率趋势 + 异常诊断 + 口径目录 + **数据更新时间常驻** + 能力声明里的口径说明）· GET `/capabilities`（真读过哪些上游 / 确实拿不到什么 / 判定规则与诊断阈值）· GET `/metrics`（指标口径目录，口径唯一的展示形态）· GET `/drilldown`（构成明细，真分页 + 真计数，**可按 trafficSource / metricCode 筛**）· POST `/refresh`（从上游拉数投影；**窗口重建**——先删该窗口旧行再整段重写，平台修正同一天报表时旧行不会残留）。<br>**异常诊断**（阈值写在服务层常量里，页面上照着显示）：桶级 **曝光断崖**（环比 −50%，HIGH）· **点击率骤降**（环比 −30%，MEDIUM）· **转化率骤降**（环比 −30%，MEDIUM）· **点击与 Session 口径冲突**（同一统计日点击数 > Session 数 ⇒ 平台这两项统计范围不一致，HIGH）· 窗口级 **平台口径与订单口径背离**（成交件数与订单笔数偏差 > 30%）。🔴 **环比基线是窗口内的上一个桶**：窗口外的事实没有投影 ⇒ 窗口的第一个桶**没有基线、不诊断**（不是「没有异常」）。上游读不到一律 503（写明「读不到」而不是「没有数据」）。<br>**页面** `/analytics/products/traffic-conversion`（`apps/web/src/app/analytics/products/traffic-conversion/page.tsx` + `components/analytics/traffic-conversion-{model,workspace}.tsx`，**真实工作区**：常驻数据更新时间横幅 + 时间范围/粒度选择 + **四组漏斗表**（每节带口径与来源标签、环节转化率、可用性徽标）+ **关键指标按口径分两组** + **转化率趋势表**（带相对条，每列各自归一）+ **异常诊断列表** + **构成明细下钻**（来源/指标筛选 + 真分页）+ 口径目录与能力边界；**加载态 / 错误态 / 空态三态分开**（读不到 ≠ 没有数据）；`null` 一律显示「—」/「不可比」，**前端不做任何业务算术**。<br>**测试**：`TrafficConversionIntegrationTest` 22 例 + `TrafficConversionTenancyIntegrationTest` 4 例 = **26 例全绿**（实跑 Testcontainers PostgreSQL 16、连接池压到 1）：业务口径（四组漏斗 + 每格口径标签 · 自然流量推导值 · **相减为负报口径冲突且不截成 0** · 转化率/客单价分属不同口径且互不冒充 · 订单口径**没有**转化率 · 绝不跨币种相加 · **趋势按日/周/月分桶的跨日、跨周、跨月边界**（2026-01-30→02-02 ⇒ DAY 4 桶 / WEEK 2 桶 / MONTH 2 桶）· 四类桶级诊断 + 窗口级口径背离 · 第一个桶没有基线所以不诊断 · 下钻钻到 listing / 广告活动 / 内部订单 + 下钻真分页 · **timestamptz 往返逐字相等**（夹具 2026-01-30T18:00+08:00 写回仍是同一瞬间）· 订单按 UTC 自然日切桶 · 重复刷新幂等 · 上游读不到就 503 · 口径表按租户播种 · **DB 拒绝对派生指标落事实行** · **DB 拒绝币种形状不对的事实行**）；多租户三断言齐全（两租户互不可见 + 伪造 X-Tenant-Id 头无效且行落在会话租户名下 + 连接池归还后不串租户）。前端 `traffic-conversion-model.test.ts` 19 例。<br>**api-proxy 白名单**：`reporting/` 作为**新增一条独立 services[] 元素**插在**数组末尾**（既有 242 条元素**一字未改、未重排**，与同批其它车道的靠前插入点相距 12000 行以上 ⇒ 并入时零冲突面）；发车前用脚本按 resolve() 同构口径实测**双向零命中**（本模块 5 个形状对既有 242 条元素零命中；本条新正则对本文件里 49 条 reporting 形状零命中 ⇒ 不遮蔽别的车道）；放行 5 个形状，**刻意不放行**裸 `{uuid}` 段、`unknown-sub`、`funnel` / `trend` / `diagnosis`（随主报表一起给出，无独立端点）。<br>**验证**（本车道自跑，非引用上一任报告）：`./mvnw -q compile` exit 0 · `./mvnw -pl services/reporting -am test -Dtest='TrafficConversion*' -Dsurefire.failIfNoSpecifiedTests=false` ⇒ **26 例全绿**（22 + 4，Failures 0 / Errors 0）BUILD SUCCESS · `pnpm typecheck` ⇒ 3/3 成功 · `pnpm vitest run apps/web/src/components/analytics/traffic-conversion-model.test.ts` ⇒ 19 例 · `pnpm vitest run apps/web/src/app/api/trade`（**共享白名单累积正则的全量 allowlist 回归**）⇒ 71 文件 / 394 例全绿 · `python3 tools/codegen/catalog-contracts.py --spec-dir packages/api-contracts/src` ⇒ **纯增量**（reporting.ts +12 行、reporting.openapi.json +760 行，**removed paths = 0、removed schemas = 0**；其余 8 个服务的契约文件逐字节未变，已回退键序噪声）。 |
 | 13.3.2.2 | 关联营销效果 | — | D7 | 未开发 | — |
 | 13.4.1.1 | 多模式利润报表 | — | D7 | 未开发 | — |
 | 13.4.1.2 | SKU 利润 | — | D7 | 未开发 | — |
@@ -557,3 +540,8 @@
 | 18.4.3.2 | 效果评估 | — | D7 | 未开发 | — |
 | 18.5.1.1 | 模板管理 | — | D7 | 未开发 | — |
 | 18.5.2.1 | 投递记录 | — | D7 | 未开发 | — |
+| 已交付 | 417 |
+| **未开发** | **48** |
+| 完成率 | 89.7% |
+| **D7** | 110 | 0 | 45 | 155 |
+| 14 | 广告与增长系统 | D7 | 18 | 22 |

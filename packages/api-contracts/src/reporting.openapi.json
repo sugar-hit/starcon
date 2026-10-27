@@ -5350,6 +5350,497 @@
         },
         "type": "object"
       },
+      "TrafficConversionCapabilities": {
+        "properties": {
+          "dataUpdatedAtVisible": {
+            "type": "boolean"
+          },
+          "diagnosisAvailable": {
+            "type": "boolean"
+          },
+          "drilldownAvailable": {
+            "type": "boolean"
+          },
+          "funnelAvailable": {
+            "type": "boolean"
+          },
+          "granularities": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "metrics": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "notDelivered": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "rules": {
+            "items": {
+              "$ref": "#/components/schemas/TrafficRuleNote"
+            },
+            "type": "array"
+          },
+          "trendAvailable": {
+            "type": "boolean"
+          },
+          "upstreamConnected": {
+            "type": "boolean"
+          },
+          "upstreamModules": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "TrafficConversionResponse": {
+        "properties": {
+          "caliberNotes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "dataUpdatedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "dataUpdatedNote": {
+            "type": "string"
+          },
+          "diagnoses": {
+            "items": {
+              "$ref": "#/components/schemas/TrafficDiagnosis"
+            },
+            "type": "array"
+          },
+          "emptyNote": {
+            "type": "string"
+          },
+          "emptyReason": {
+            "nullable": true,
+            "type": "string"
+          },
+          "funnel": {
+            "items": {
+              "$ref": "#/components/schemas/TrafficFunnelGroup"
+            },
+            "type": "array"
+          },
+          "granularity": {
+            "type": "string"
+          },
+          "granularityLabel": {
+            "type": "string"
+          },
+          "keyMetrics": {
+            "items": {
+              "$ref": "#/components/schemas/TrafficMetricValue"
+            },
+            "type": "array"
+          },
+          "metricDefinitions": {
+            "items": {
+              "$ref": "#/components/schemas/TrafficMetricDefinitionView"
+            },
+            "type": "array"
+          },
+          "requestedFrom": {
+            "format": "date",
+            "type": "string"
+          },
+          "requestedTo": {
+            "format": "date",
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusNote": {
+            "type": "string"
+          },
+          "trend": {
+            "items": {
+              "$ref": "#/components/schemas/TrafficTrendPoint"
+            },
+            "type": "array"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "TrafficDiagnosis": {
+        "properties": {
+          "baseline": {
+            "nullable": true,
+            "type": "number"
+          },
+          "bucketEnd": {
+            "nullable": true,
+            "type": "string"
+          },
+          "bucketStart": {
+            "nullable": true,
+            "type": "string"
+          },
+          "changeRate": {
+            "nullable": true,
+            "type": "number"
+          },
+          "message": {
+            "type": "string"
+          },
+          "metricCode": {
+            "type": "string"
+          },
+          "observed": {
+            "nullable": true,
+            "type": "number"
+          },
+          "ruleCode": {
+            "type": "string"
+          },
+          "scope": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string"
+          },
+          "suggestion": {
+            "type": "string"
+          },
+          "threshold": {
+            "nullable": true,
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "TrafficDrilldownResponse": {
+        "properties": {
+          "dataUpdatedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "dataUpdatedNote": {
+            "type": "string"
+          },
+          "emptyNote": {
+            "type": "string"
+          },
+          "emptyReason": {
+            "nullable": true,
+            "type": "string"
+          },
+          "from": {
+            "format": "date",
+            "type": "string"
+          },
+          "metricCode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/TrafficDrilldownRow"
+            },
+            "type": "array"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusNote": {
+            "type": "string"
+          },
+          "to": {
+            "format": "date",
+            "type": "string"
+          },
+          "totalRows": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "trafficSource": {
+            "type": "string"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "TrafficDrilldownRow": {
+        "properties": {
+          "currency": {
+            "type": "string"
+          },
+          "occurredAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "orderNo": {
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "referenceId": {
+            "type": "string"
+          },
+          "referenceLabel": {
+            "type": "string"
+          },
+          "shopCode": {
+            "type": "string"
+          },
+          "sourceKind": {
+            "type": "string"
+          },
+          "statDate": {
+            "type": "string"
+          },
+          "trafficSource": {
+            "type": "string"
+          },
+          "value": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "TrafficFunnelGroup": {
+        "properties": {
+          "caliber": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "groupKey": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "sourceNote": {
+            "type": "string"
+          },
+          "stages": {
+            "items": {
+              "$ref": "#/components/schemas/TrafficFunnelStage"
+            },
+            "type": "array"
+          },
+          "trafficSource": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "TrafficFunnelStage": {
+        "properties": {
+          "availability": {
+            "type": "string"
+          },
+          "availabilityNote": {
+            "type": "string"
+          },
+          "caliber": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "metricCode": {
+            "type": "string"
+          },
+          "overallRate": {
+            "nullable": true,
+            "type": "number"
+          },
+          "stageKey": {
+            "type": "string"
+          },
+          "stepRate": {
+            "nullable": true,
+            "type": "number"
+          },
+          "trafficSource": {
+            "type": "string"
+          },
+          "unit": {
+            "type": "string"
+          },
+          "value": {
+            "nullable": true,
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "TrafficMetricDefinitionView": {
+        "properties": {
+          "aggregation": {
+            "type": "string"
+          },
+          "caliber": {
+            "type": "string"
+          },
+          "currencyAware": {
+            "type": "boolean"
+          },
+          "denominatorMetricCode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "metricCode": {
+            "type": "string"
+          },
+          "numeratorMetricCode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "trafficSource": {
+            "nullable": true,
+            "type": "string"
+          },
+          "unit": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "TrafficMetricValue": {
+        "properties": {
+          "availability": {
+            "type": "string"
+          },
+          "availabilityNote": {
+            "type": "string"
+          },
+          "caliber": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "metricCode": {
+            "type": "string"
+          },
+          "trafficSource": {
+            "nullable": true,
+            "type": "string"
+          },
+          "unit": {
+            "type": "string"
+          },
+          "value": {
+            "nullable": true,
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "TrafficRefreshResult": {
+        "properties": {
+          "fetched": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "projected": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "source": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "TrafficRuleNote": {
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "ruleCode": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "TrafficTrendPoint": {
+        "properties": {
+          "bucketEnd": {
+            "type": "string"
+          },
+          "bucketLabel": {
+            "type": "string"
+          },
+          "bucketStart": {
+            "type": "string"
+          },
+          "metrics": {
+            "items": {
+              "$ref": "#/components/schemas/TrafficMetricValue"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
       "TrendPoint": {
         "properties": {
           "currency": {
@@ -9540,6 +10031,275 @@
         "summary": "改一个时段配置",
         "tags": [
           "13.2.1.2 分时与分周模式"
+        ]
+      }
+    },
+    "/reporting/traffic-conversion": {
+      "get": {
+        "description": "时间范围默认「最近 30 天」。🔴 **平台流量数据与内部订单数据口径不同**，本接口把两套口径**分列返回**、**绝不混算**：平台口径（页面口径）与订单口径各带自己的标签。🔴 **自然流量是推导值**（平台商品口径 − 广告口径），相减为负时报「口径冲突」，绝不截成 0。🔴 **订单口径的转化率算不出来**（内部订单没有 Session）—— 那一格是「不可比」，不是 0%。🔴 **绝不跨币种相加**：金额按币种分别报。",
+        "operationId": "get_reporting_traffic_conversion",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "granularity",
+            "required": false,
+            "schema": {
+              "default": "DAY",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrafficConversionResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "流量转化：漏斗视图 + 关键指标 + 转化率趋势 + 异常诊断",
+        "tags": [
+          "13.3.2.1 流量转化"
+        ]
+      }
+    },
+    "/reporting/traffic-conversion/capabilities": {
+      "get": {
+        "description": "notDelivered 列出的是**确实拿不到**的部分，每条都写清原因与影响 —— 把「拿不到」伪装成 0 比说清楚更糟。",
+        "operationId": "get_reporting_traffic_conversion_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrafficConversionCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "能力声明：哪些上游真接通、哪些口径拿不到、判定规则与诊断阈值是什么",
+        "tags": [
+          "13.3.2.1 流量转化"
+        ]
+      }
+    },
+    "/reporting/traffic-conversion/drilldown": {
+      "get": {
+        "description": "卷 13 卷首加粗句「可下钻」的落点：每个汇总数字都能钻到构成明细。🔴 明细行带**来源口径**（LISTING / AD / ORDER）与**统计日** —— 平台口径是平台自然日，订单口径是 UTC 自然日。",
+        "operationId": "get_reporting_traffic_conversion_drilldown",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "trafficSource",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "metricCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrafficDrilldownResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "构成明细下钻：某个来源、某个指标的构成明细（哪个 listing / 哪个广告活动 / 哪张订单）",
+        "tags": [
+          "13.3.2.1 流量转化"
+        ]
+      }
+    },
+    "/reporting/traffic-conversion/metrics": {
+      "get": {
+        "operationId": "get_reporting_traffic_conversion_metrics",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/TrafficMetricDefinitionView"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "流量转化的指标口径目录（口径唯一的展示形态）",
+        "tags": [
+          "13.3.2.1 流量转化"
+        ]
+      }
+    },
+    "/reporting/traffic-conversion/refresh": {
+      "post": {
+        "description": "上游：channel 的平台表现快照（4.5.1.1：曝光 / 点击 / Session / 平台销量 / 平台销售额）、channel 的广告活动报表（14.3.1.1：广告曝光 / 点击 / 订单 / 花费 / 销售额）、trade 的销售订单列表（9.1.1.1：订单笔数与订单金额）。⚠️ 三路数据**分属不同口径**：平台口径（平台自然日）与订单口径（UTC 自然日）。⚠️ 刷新会**重建**该窗口（先删旧行再整段重写）—— 平台修正同一天报表时旧行不会残留。",
+        "operationId": "post_reporting_traffic_conversion_refresh",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/TrafficRefreshResult"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "从上游拉取流量与转化数据并投影（写的是投影，不是业务事实）",
+        "tags": [
+          "13.3.2.1 流量转化"
         ]
       }
     }
