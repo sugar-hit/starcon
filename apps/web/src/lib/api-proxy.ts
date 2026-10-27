@@ -62,6 +62,59 @@ const services: readonly {
       /^(?:overview(?:\/(?:capabilities|metrics|trend|drilldown))?|projection(?:\/(?:events|refresh|rebuild))?)$/,
   },
   {
+    // 13.3.1.1 产品表现分析（reporting 服务，卷 13「利润与经营分析」L3 13.3 产品分析下的第一格）。
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 reporting/ 正则里并分支 ——
+    //   既有条目**一字未改、也不重排**。
+    //
+    // ---- 插入锚点选在**13.1.1.1 经营总览那条 reporting/ 之后**（数组最前面那一段，紧邻数组第一个元素）----
+    //   ⚠️ 本条目**曾经**挂在数组末尾（收尾的 `];` 之前、紧跟 13.2.2.2 的 product-sales 之后），
+    //   与同批 13.3.2.1 的 traffic-conversion 撞在同一段 ⇒ 并入集成头时 `api-proxy.ts` 报 CONFLICT。
+    //   本车道改挂到**集成头没有动过的位置**（13.1.1.1 那条之后），
+    //   与 14.2.1.2 的 ad-dayparts（第一个 `prefix: 'identity/'` 之前）
+    //   相距 1300 行以上、与 13.3.2.1 的 traffic-conversion（数组末尾）相距 12000 行以上
+    //   ⇒ 三处追加互不重叠，并入时 git 能干净求并。
+    //
+    // ---- 首 token「product-performance」的零命中核对结论（实测，非目测）----
+    //   发车前用脚本（本车道的 .tmp/ 一次性脚本，不入库）把本文件里**全部既有元素**
+    //   （`prefix` + 正则）逐条抽出来，按 resolve() 的**同构口径**实测
+    //   （path.startsWith(prefix) 收窄服务 → 再测 pattern.test(path.slice(prefix.length))）：
+    //     reporting/product-performance               零命中
+    //     reporting/product-performance/capabilities  零命中
+    //     reporting/product-performance/metrics       零命中
+    //     reporting/product-performance/refresh       零命中
+    //   **零命中** —— 既有 `prefix === 'reporting/'` 的 12 条正则都是**按命名空间精确匹配**的
+    //   （首 token 分别是 overview / projection / expense-variance / store-comparison /
+    //     sales-trend / target-attainment / metric-cards / store-overview / targets /
+    //     store-site / product-sales / time-pattern / traffic-conversion），
+    //   **没有一条能吃下 `product-performance`** ⇒ 本模块 4 条路径在放行前**全部 404**。
+    //   反向核对：另外 **67 条**别的车道已交付的 reporting 形状
+    //   （13.1.1.1 / 13.4.2.2 / 13.1.1.2 / 13.2.1.1 / 13.1.2.x / 1.1.2.x /
+    //     13.2.2.1 / 13.2.1.2 / 13.2.2.2 / 13.3.2.1）
+    //   **全部仍然命中** —— 本条新元素不会遮蔽它们。
+    //   另外核对了本模块**不得**出现在别的服务前缀下：trade/ catalog/ channel/ finance/
+    //   warehouse/ crm/ identity/ platform/ 下的 product-performance **全部 404**。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**，契约 `reporting.openapi.json` 里就这 4 条）：
+    //   product-performance           360 度分析（九大区块 + 趋势 + 排名分位 + 环比基线；裸路径是 @GetMapping 在类根上的）
+    //   product-performance/capabilities 能力声明（真读过哪些上游 / 哪些指标本轮拿不到、归谁管）
+    //   product-performance/metrics   360 度指标口径目录（口径唯一的展示形态）
+    //   product-performance/refresh   刷新 360 度投影（POST，写的是投影不是业务事实）
+    //
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   reporting/product-performance/{uuid}       —— 顶层没有 id 段（按查询参数定位，不是按 id）。
+    //   reporting/product-performance/unknown      —— 未实现的子路径仍然 404。
+    //   reporting/product-performance/drilldown    —— 本模块**没有**层级钻取端点：360 度是**汇总读模型**，
+    //     钻取属各业务域自己的处理页（蓝图「下游 = 各业务域的处理页」）。
+    //   reporting/product-performance/spu-summary  —— SPU 汇总属 13.2.2.2 的 product-sales 命名空间。
+    //
+    // 字面量子路径（capabilities / metrics / refresh）排在可选段**之前**判别 ——
+    //   alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    prefix: 'reporting/',
+    env: 'REPORTING_URL',
+    fallback: 'http://127.0.0.1:8088',
+    pattern: /^product\-performance(?:\/(?:capabilities|metrics|refresh))?$/,
+  },
+  {
     // 13.4.2.2 费用差异（reporting 服务，卷 13「利润与经营分析」L3 13.4.2 成本拆解下的第二格）。
     // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往 13.1.1.1 那条 reporting/ 正则里并分支 ——
     //   13.1.1.1 的条目**一字未改、也不重排**（那条正则只放行 overview / projection 两个命名空间）。
@@ -1437,6 +1490,70 @@ const services: readonly {
     fallback: 'http://127.0.0.1:8087',
     pattern:
       /^period\-close\/(?:capabilities|options|checklists(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:items|checks\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/carry\-forward))?)?|executions(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/sync\-approval)?)?)$/,
+  },
+  {
+    // 14.2.1.2 分时策略（channel 服务，卷 14「广告与增长」的 L3 锚点 14.2.1）。
+    //
+    // 蓝图：「按小时设置不同竞价与预算（高峰提价提预算、低谷降价停投），
+    // 支持按历史出单时段自动推荐分时曲线。输入：分时规则；13.2.1.2 时段分布数据。
+    // 输出：分时策略配置 + 定时调整任务。关系：上游 = 13.2.1.2；下游 = 14.2.2.2 自动规则。
+    // **分时策略需按店铺时区配置**，跨时区店铺用错时区会完全失效。」
+    //
+    // ⚠️ 本条目是**新增一条独立的 `services[]` 元素**，不是往既有 `channel/` 那条巨型
+    //   alternation 里并分支 —— 既有条目**一字未改、也不重排**。
+    //   本文件是多车道共用的累积型白名单，往同一条 alternation 里并分支会让多车道同时
+    //   并入时 git 必然判冲突（结构性，retry 不会自愈）。
+    //
+    // ---- 插入锚点：第一个 `prefix: 'identity/'` 条目的 `  {` 之前（调度者指定）----
+    //   与同批 13.3.1.1（reporting）的锚点（数组最开头）相距 1000+ 行 ⇒ git 能干净求并。
+    //
+    // ---- 首 token「ad-dayparts」的零命中核对结论 ----
+    //   本文件既有 251 个 `services[]` 元素的正则里**没有任何一条**含 `ad-dayparts`
+    //   （既有的是 `ad-campaigns` / `ad-budgets` / `ad-rules` / `ad-keywords` /
+    //   `ad-diagnostics` / `ad-promotions` 一类），
+    //   且逐条用 `new RegExp(pat).test('…')` 实测过：既有元素对本模块的 14 个 shape
+    //   **全部零命中** ⇒ 首 token 既是独立字面量，也不会被既有分支的前缀吃掉。
+    //   `ad-dayparts` 也不匹配 `ad-diagnostics` / `ad-campaigns` 等同族兄弟模块。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   ad-dayparts/capabilities                  能力声明（时区口径 / 系数口径 / 上限 / 未交付维度）
+    //   ad-dayparts/shops                         店铺清单 + 各自的时区归属结论（定不了的也列出来）
+    //   ad-dayparts/shops/{shopCode}/timezone     单个店铺的时区归属结论
+    //   ad-dayparts/strategies                    分时策略清单（GET，真分页 + 真筛选）
+    //   ad-dayparts/strategies/{uuid}             策略详情（GET，含 24 小时曲线）/ 归档（DELETE）
+    //   ad-dayparts/strategies/{uuid}/curve       整体替换分时曲线（PUT）
+    //   ad-dayparts/strategies/{uuid}/status      改策略状态（POST：激活 / 暂停 / 归档）
+    //   ad-dayparts/recommendations               生成推荐曲线（POST）/ 推荐批次列表（GET）
+    //   ad-dayparts/recommendations/{uuid}        推荐批次详情（GET，含逐小时判定依据）
+    //   ad-dayparts/recommendations/{uuid}/apply   把推荐曲线套到策略上（POST）
+    //   ad-dayparts/tasks                         定时调整任务列表（GET，真分页 + 真筛选）
+    //   ad-dayparts/tasks/run                     跑一轮（POST，**外部调度触发的一次入口**）
+    //   ad-dayparts/tasks/{uuid}                  任务详情（GET，含逐条调整明细）
+    //   ad-dayparts/caps                          调整上限读取形状（GET，供 14.2.2.2 自动规则取用）
+    //
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   ad-dayparts                             —— 裸路径：本模块没有裸集合读，一切入口都带子路径。
+    //   ad-dayparts/strategies/{uuid}/delete    —— 策略是配置事实，撤下走 status=ARCHIVED，
+    //                                              不物理删除（曲线 / 基准 / 任务历史还要能复盘）。
+    //   ad-dayparts/tasks/{uuid}/cancel          —— 任务状态由服务端推进，页面没有这个动作。
+    //   ad-dayparts/recommendations/{uuid}/preview —— 变更预览属于 14.1.1.3 批量操作（未交付）。
+    //   ad-dayparts/weekdays                     —— 按星期分曲线属 14.2.1.3（**未交付**），
+    //                                              本模块的曲线是**按小时的**，放行它等于让界面以为已交付。
+    //   ad-dayparts/platform-sync                —— 平台回写队列**未交付**，放行它等于让界面
+    //                                              以为「已经回写平台」。
+    //
+    // id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    // （不是 `[0-9a-f-]+`：后者会把 `carry-forward` 这种非 UUID 形状也当成 id 放行）。
+    // 字面量子路径（capabilities / caps / shops / strategies / recommendations / tasks）
+    // 排在 {uuid} 段**之前**判别 —— alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    // ⚠️ **顶层组不写成可选**（`ad-dayparts` 裸路径必须 404：本模块没有顶层汇总列表端点）。
+    // ⚠️ `{shopCode}` 段用**店铺编码形状**（字母数字 / 下划线 / 连字符，1..64 位），
+    //   它不是 UUID —— 用 UUID 形状会把真实店铺编码挡在门外。
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^ad\-dayparts(?:\/(?:capabilities|caps|shops(?:\/[A-Za-z0-9_\-]{1,64}\/timezone)?|strategies(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:curve|status))?)?|recommendations(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/apply)?)?|tasks(?:\/run|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?))$/,
   },
   {
     prefix: 'identity/',
@@ -12898,46 +13015,54 @@ const services: readonly {
       /^product\-sales(?:\/(?:capabilities|metrics|spu\-summary|variants|drilldown|refresh))?$/,
   },
   {
-    // 13.3.1.1 产品表现分析（reporting 服务，卷 13「利润与经营分析」L3 13.3 产品分析下的第一格）。
+    // 13.3.2.1 流量转化（reporting 服务，卷 13「利润与经营分析」L3 13.3.2 流量与转化下的第一格）。
     // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 reporting/ 正则里并分支 ——
     //   既有条目**一字未改、也不重排**。
     //
-    // ---- 插入锚点选在**数组末尾**（收尾的 `];` 之前、紧跟 13.2.2.2 的 product-sales 之后）----
-    //   同批其它车道的插入点也在数组末尾（13.2.1.1 的 time-pattern 在数组靠前那一段），
-    //   两个锚点相距 10000 行以上，并入时 git 能干净求并。
+    // ---- 插入锚点选在**数组末尾**（收尾的 `];` 之前、紧跟 13.2.2.2 product-sales 那条之后）----
+    //   同批其它车道的插入点（13.1.1.1 / 13.4.2.2 / 13.2.1.1 / 13.2.1.2 / 13.2.2.1 那几条）
+    //   在数组靠前那一段，与本锚点相距 12000 行以上 ⇒ 并入时 git 能干净求并。
     //
-    // ---- 首 token「product-performance」的零命中核对结论 ----
-    //   发车前用**真跑 proxy 断言 HTTP 状态码**的方式核对（不是眼看正则）：
-    //   既有 `prefix === 'reporting/'` 的 11 条正则都是**按命名空间精确匹配**的
-    //   （首 token 分别是 overview / projection / expense-variance / store-comparison /
-    //     sales-trend / target-attainment / metric-cards / store-overview / targets /
-    //     store-site / product-sales / time-pattern），
-    //   **没有一条能吃下 `product-performance`** ⇒ 本模块 4 条路径在放行前**全部 404**。
-    //   反向核对：另外 **49 条**别的车道已交付的 reporting 形状
-    //   （13.1.1.1 / 13.4.2.2 / 13.1.1.2 / 13.2.1.1 / 13.2.2.2 / 13.1.2.x / 13.2.2.1）
-    //   **全部仍然命中** —— 本条新元素不会遮蔽它们。
-    //   另外核对了本模块**不得**出现在别的服务前缀下：trade/ catalog/ channel/ finance/
-    //   warehouse/ crm/ identity/ platform/ 下的 product-performance **全部 404**。
+    // ---- 首 token「traffic-conversion」的零命中核对结论（实测，非目测）----
+    //   发车前用脚本（本车道的 .tmp/ 一次性脚本，不入库）把本文件里**全部 242 条既有元素**
+    //   （prefix + 正则）逐条抽出来，按 resolve() 的**同构口径**实测
+    //   （path.startsWith(prefix) 收窄服务 → 再测 pattern.test(path.slice(prefix.length))）：
+    //     reporting/traffic-conversion               零命中
+    //     reporting/traffic-conversion/capabilities  零命中
+    //     reporting/traffic-conversion/metrics       零命中
+    //     reporting/traffic-conversion/drilldown     零命中
+    //     reporting/traffic-conversion/refresh       零命中
+    //   **零命中** —— 本文件里 prefix === 'reporting/' 的既有条目**一律不改**，它们的首 token
+    //   分别是 overview / expense-variance / store-comparison / sales-trend / metric-cards /
+    //   store-overview / targets / store-site / time-pattern / product-sales，
+    //   没有一条能吃下 `traffic-conversion…`；而别的 prefix 下的正则根本吃不到本模块的路径
+    //   （resolve() 先按 prefix 闸门筛）。
+    //   ⚠️ 特别核对过两个**首 token 同字母开头**的老邻居：`targets` 与 `time-pattern` ——
+    //   它们与 `traffic-conversion` **两两不相交**（完整 token 不相等，不是前缀关系）。
+    //   反向也核对了本文件里 **49 条 reporting 形状**：本条新正则对它们**零命中**
+    //   ⇒ 本条不会遮蔽别的车道已交付的路由。
     //
-    // 形状逐个列出（**只放行本模块真实实现的路径**，契约 `reporting.openapi.json` 里就这 4 条）：
-    //   product-performance           360 度分析（九大区块 + 趋势 + 排名分位 + 环比基线；裸路径是 @GetMapping 在类根上的）
-    //   product-performance/capabilities 能力声明（真读过哪些上游 / 哪些指标本轮拿不到、归谁管）
-    //   product-performance/metrics   360 度指标口径目录（口径唯一的展示形态）
-    //   product-performance/refresh   刷新 360 度投影（POST，写的是投影不是业务事实）
+    // 形状逐个列出（**只放行本模块真实实现的路径**，契约 reporting.openapi.json 里就这 5 条）：
+    //   traffic-conversion             流量转化主报表（漏斗 + 关键指标 + 转化率趋势 + 异常诊断）
+    //   traffic-conversion/capabilities 能力声明（真读过哪些上游 / 确实拿不到什么）
+    //   traffic-conversion/metrics      指标口径目录（口径唯一的展示形态）
+    //   traffic-conversion/drilldown    构成明细下钻（哪个平台商品 / 哪个广告活动 / 哪张内部订单）
+    //   traffic-conversion/refresh      投影刷新（POST，写的是投影不是业务事实）
     //
     // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
-    //   reporting/product-performance/{uuid}       —— 顶层没有 id 段（按查询参数定位，不是按 id）。
-    //   reporting/product-performance/unknown      —— 未实现的子路径仍然 404。
-    //   reporting/product-performance/drilldown    —— 本模块**没有**层级钻取端点：360 度是**汇总读模型**，
-    //     钻取属各业务域自己的处理页（蓝图「下游 = 各业务域的处理页」）。
-    //   reporting/product-performance/spu-summary  —— SPU 汇总属 13.2.2.2 的 product-sales 命名空间。
+    //   reporting/traffic-conversion/{uuid}        —— 顶层没有 id 段（报表按查询参数定位，不是按 id）。
+    //   reporting/traffic-conversion/unknown-sub   —— 多一层仍然 404。
+    //   reporting/traffic-conversion/funnel        —— 🔴 漏斗随主报表一起给出，没有独立端点。
+    //   reporting/traffic-conversion/trend         —— 🔴 趋势随主报表一起给出，没有独立端点。
+    //   reporting/traffic-conversion/diagnosis     —— 🔴 诊断随主报表一起给出，没有独立端点。
     //
-    // 字面量子路径（capabilities / metrics / refresh）排在可选段**之前**判别 ——
-    //   alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    // 字面量子路径（capabilities / metrics / drilldown / refresh）排在可选段**之前**判别 ——
+    // alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
     prefix: 'reporting/',
     env: 'REPORTING_URL',
     fallback: 'http://127.0.0.1:8088',
-    pattern: /^product\-performance(?:\/(?:capabilities|metrics|refresh))?$/,
+    pattern:
+      /^traffic\-conversion(?:\/(?:capabilities|metrics|drilldown|refresh))?$/,
   },
 ];
 
