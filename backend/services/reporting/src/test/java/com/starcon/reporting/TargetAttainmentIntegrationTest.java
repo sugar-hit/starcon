@@ -206,6 +206,35 @@ class TargetAttainmentIntegrationTest {
         });
   }
 
+  /**
+   * 播种成本口径（{@code COGS_AMOUNT}）。
+   *
+   * <p>🔴 **派生型口径的分子 / 分母必须先登记**：{@code guard_reporting_metric_definition_ref()}
+   * （V376）会在 {@code DERIVED_DIFF} / {@code DERIVED_RATIO} 落库前检查分子与分母指标码是否已定义 ——
+   * 「毛利额 = 成交金额 − 成本」里的「成本」必须先有自己的口径，否则毛利额的口径不成立。
+   * 这个校验是**上游的口径纪律**，不是缺陷：它挡住的是「凭空捏出一个派生口径」。
+   */
+  private void seedCogsCaliber() {
+    tenants.run(
+        tenant,
+        () -> {
+          sql.execute(
+              "insert into reporting_metric_definition (id,tenant_id,metric_code,display_name,unit,"
+                  + "aggregation,currency_aware,description,owner_module) "
+                  + "values (?,?,?,?,?,?,?,?,?)",
+              Ids.next(),
+              tenant,
+              "COGS_AMOUNT",
+              "成本金额",
+              "CURRENCY",
+              "SUM",
+              true,
+              "订单成交成本（12.4.1.2 成本分录口径）。",
+              "12.4.1.2");
+          return null;
+        });
+  }
+
   /** 播种商品维度口径（13.2.2.2 的口径表）。 */
   private void seedProductCaliber() {
     tenants.run(
@@ -595,6 +624,9 @@ class TargetAttainmentIntegrationTest {
     var last = previousMonth(today);
     seedOrgCaliber();
     // 毛利额在商品维度**没有等价口径**（成本分录没有商品维度）⇒ 不得拿别的口径冒充。
+    // ⚠️ 派生型口径的**分母必须先登记**（V376 的 guard_reporting_metric_definition_ref 钉死）——
+    //   所以先把「成本」的口径 COGS_AMOUNT 落库，再落派生口径 GROSS_PROFIT。
+    seedCogsCaliber();
     tenants.run(
         tenant,
         () -> {
