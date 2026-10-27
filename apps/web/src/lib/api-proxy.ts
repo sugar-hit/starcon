@@ -62,6 +62,59 @@ const services: readonly {
       /^(?:overview(?:\/(?:capabilities|metrics|trend|drilldown))?|projection(?:\/(?:events|refresh|rebuild))?)$/,
   },
   {
+    // 13.3.1.1 产品表现分析（reporting 服务，卷 13「利润与经营分析」L3 13.3 产品分析下的第一格）。
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 reporting/ 正则里并分支 ——
+    //   既有条目**一字未改、也不重排**。
+    //
+    // ---- 插入锚点选在**13.1.1.1 经营总览那条 reporting/ 之后**（数组最前面那一段，紧邻数组第一个元素）----
+    //   ⚠️ 本条目**曾经**挂在数组末尾（收尾的 `];` 之前、紧跟 13.2.2.2 的 product-sales 之后），
+    //   与同批 13.3.2.1 的 traffic-conversion 撞在同一段 ⇒ 并入集成头时 `api-proxy.ts` 报 CONFLICT。
+    //   本车道改挂到**集成头没有动过的位置**（13.1.1.1 那条之后），
+    //   与 14.2.1.2 的 ad-dayparts（第一个 `prefix: 'identity/'` 之前）
+    //   相距 1300 行以上、与 13.3.2.1 的 traffic-conversion（数组末尾）相距 12000 行以上
+    //   ⇒ 三处追加互不重叠，并入时 git 能干净求并。
+    //
+    // ---- 首 token「product-performance」的零命中核对结论（实测，非目测）----
+    //   发车前用脚本（本车道的 .tmp/ 一次性脚本，不入库）把本文件里**全部既有元素**
+    //   （`prefix` + 正则）逐条抽出来，按 resolve() 的**同构口径**实测
+    //   （path.startsWith(prefix) 收窄服务 → 再测 pattern.test(path.slice(prefix.length))）：
+    //     reporting/product-performance               零命中
+    //     reporting/product-performance/capabilities  零命中
+    //     reporting/product-performance/metrics       零命中
+    //     reporting/product-performance/refresh       零命中
+    //   **零命中** —— 既有 `prefix === 'reporting/'` 的 12 条正则都是**按命名空间精确匹配**的
+    //   （首 token 分别是 overview / projection / expense-variance / store-comparison /
+    //     sales-trend / target-attainment / metric-cards / store-overview / targets /
+    //     store-site / product-sales / time-pattern / traffic-conversion），
+    //   **没有一条能吃下 `product-performance`** ⇒ 本模块 4 条路径在放行前**全部 404**。
+    //   反向核对：另外 **67 条**别的车道已交付的 reporting 形状
+    //   （13.1.1.1 / 13.4.2.2 / 13.1.1.2 / 13.2.1.1 / 13.1.2.x / 1.1.2.x /
+    //     13.2.2.1 / 13.2.1.2 / 13.2.2.2 / 13.3.2.1）
+    //   **全部仍然命中** —— 本条新元素不会遮蔽它们。
+    //   另外核对了本模块**不得**出现在别的服务前缀下：trade/ catalog/ channel/ finance/
+    //   warehouse/ crm/ identity/ platform/ 下的 product-performance **全部 404**。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**，契约 `reporting.openapi.json` 里就这 4 条）：
+    //   product-performance           360 度分析（九大区块 + 趋势 + 排名分位 + 环比基线；裸路径是 @GetMapping 在类根上的）
+    //   product-performance/capabilities 能力声明（真读过哪些上游 / 哪些指标本轮拿不到、归谁管）
+    //   product-performance/metrics   360 度指标口径目录（口径唯一的展示形态）
+    //   product-performance/refresh   刷新 360 度投影（POST，写的是投影不是业务事实）
+    //
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   reporting/product-performance/{uuid}       —— 顶层没有 id 段（按查询参数定位，不是按 id）。
+    //   reporting/product-performance/unknown      —— 未实现的子路径仍然 404。
+    //   reporting/product-performance/drilldown    —— 本模块**没有**层级钻取端点：360 度是**汇总读模型**，
+    //     钻取属各业务域自己的处理页（蓝图「下游 = 各业务域的处理页」）。
+    //   reporting/product-performance/spu-summary  —— SPU 汇总属 13.2.2.2 的 product-sales 命名空间。
+    //
+    // 字面量子路径（capabilities / metrics / refresh）排在可选段**之前**判别 ——
+    //   alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    prefix: 'reporting/',
+    env: 'REPORTING_URL',
+    fallback: 'http://127.0.0.1:8088',
+    pattern: /^product\-performance(?:\/(?:capabilities|metrics|refresh))?$/,
+  },
+  {
     // 13.4.2.2 费用差异（reporting 服务，卷 13「利润与经营分析」L3 13.4.2 成本拆解下的第二格）。
     // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往 13.1.1.1 那条 reporting/ 正则里并分支 ——
     //   13.1.1.1 的条目**一字未改、也不重排**（那条正则只放行 overview / projection 两个命名空间）。
