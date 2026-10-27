@@ -7022,6 +7022,1155 @@
         },
         "type": "object"
       },
+      "AdDaypartApplyRecommendationRequest": {
+        "properties": {
+          "hours": {
+            "description": "要套用的小时（空 = 24 个小时全套）",
+            "items": {
+              "description": "要套用的小时（空 = 24 个小时全套）",
+              "format": "int32",
+              "type": "integer"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "AdDaypartCapView": {
+        "description": "🔴 合并后的有效上限（取最严的那个）",
+        "properties": {
+          "dryRun": {
+            "type": "boolean"
+          },
+          "maxBid": {
+            "type": "number"
+          },
+          "maxBudget": {
+            "type": "number"
+          },
+          "minBid": {
+            "type": "number"
+          },
+          "minBudget": {
+            "type": "number"
+          },
+          "singleAdjustCapAmount": {
+            "type": "number"
+          },
+          "singleAdjustCapPercent": {
+            "type": "number"
+          },
+          "status": {
+            "type": "string"
+          },
+          "strategyCode": {
+            "type": "string"
+          },
+          "strategyId": {
+            "type": "string"
+          },
+          "strategyName": {
+            "type": "string"
+          },
+          "totalCapAmount": {
+            "type": "number"
+          },
+          "totalCapCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "totalCapWindowHours": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AdDaypartCapabilities": {
+        "properties": {
+          "actions": {
+            "description": "小时动作枚举",
+            "items": {
+              "description": "小时动作枚举",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "boundaryNote": {
+            "description": "🔴 与下游 / 边界模块的关系说明",
+            "type": "string"
+          },
+          "dimensions": {
+            "description": "能力维度清单",
+            "items": {
+              "$ref": "#/components/schemas/AdDaypartCapabilityDimension"
+            },
+            "type": "array"
+          },
+          "executionNote": {
+            "description": "🔴 执行路径说明",
+            "type": "string"
+          },
+          "guardrailNote": {
+            "description": "🔴 调整上限的口径说明",
+            "type": "string"
+          },
+          "multiplierNote": {
+            "description": "🔴 系数与「停投」的实现口径说明",
+            "type": "string"
+          },
+          "runModes": {
+            "description": "运行口径枚举",
+            "items": {
+              "description": "运行口径枚举",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "scopes": {
+            "description": "作用范围枚举",
+            "items": {
+              "description": "作用范围枚举",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "statuses": {
+            "description": "策略状态枚举",
+            "items": {
+              "description": "策略状态枚举",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "timezoneNote": {
+            "description": "🔴 时区口径说明",
+            "type": "string"
+          },
+          "triggerSources": {
+            "description": "触发来源枚举",
+            "items": {
+              "description": "触发来源枚举",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "upstreamNote": {
+            "description": "🔴 上游依赖说明",
+            "type": "string"
+          },
+          "upstreamStatuses": {
+            "description": "推荐批次的上游结论枚举",
+            "items": {
+              "description": "推荐批次的上游结论枚举",
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "AdDaypartCapabilityDimension": {
+        "description": "能力维度清单",
+        "properties": {
+          "available": {
+            "description": "本模块是否真的能做",
+            "type": "boolean"
+          },
+          "description": {
+            "description": "这个维度是干什么的",
+            "type": "string"
+          },
+          "dimension": {
+            "description": "维度码",
+            "type": "string"
+          },
+          "impact": {
+            "description": "🔴 做不了的影响（页面上原样显示）",
+            "type": "string"
+          },
+          "ownerModule": {
+            "description": "🔴 做不了的责任模块（做得了时为空串）",
+            "type": "string"
+          },
+          "source": {
+            "description": "数据落在哪 / 依赖谁",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AdDaypartCurveRequest": {
+        "properties": {
+          "hours": {
+            "description": "完整的小时集合（应覆盖 0..23）",
+            "items": {
+              "$ref": "#/components/schemas/AdDaypartHourInput"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "hours"
+        ],
+        "type": "object"
+      },
+      "AdDaypartHourConfig": {
+        "description": "24 个小时曲线",
+        "properties": {
+          "action": {
+            "description": "动作：KEEP / BOOST / REDUCE / PAUSE",
+            "type": "string"
+          },
+          "basisNote": {
+            "description": "判定依据（页面上原样显示）",
+            "type": "string"
+          },
+          "bidMultiplier": {
+            "description": "🔴 竞价系数（相对基准；1 = 不动）",
+            "type": "number"
+          },
+          "budgetMultiplier": {
+            "description": "🔴 预算系数（相对基准；0 = 停投）",
+            "type": "number"
+          },
+          "localHour": {
+            "description": "🔴 店铺本地小时（0..23）",
+            "format": "int32",
+            "type": "integer"
+          },
+          "source": {
+            "description": "来源：MANUAL 人工 / RECOMMENDED 推荐生成",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AdDaypartHourInput": {
+        "description": "完整的小时集合（应覆盖 0..23）",
+        "properties": {
+          "action": {
+            "description": "KEEP / BOOST / REDUCE / PAUSE",
+            "type": "string"
+          },
+          "basisNote": {
+            "type": "string"
+          },
+          "bidMultiplier": {
+            "description": "竞价系数（不给 = 1）",
+            "type": "number"
+          },
+          "budgetMultiplier": {
+            "description": "预算系数（不给 = 1；PAUSE 必须为 0）",
+            "type": "number"
+          },
+          "localHour": {
+            "description": "店铺本地小时（0..23）",
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "action",
+          "localHour"
+        ],
+        "type": "object"
+      },
+      "AdDaypartRecommendationHourView": {
+        "description": "小时明细（定不了时区时为空数组 —— 不是「24 个小时都没有」）",
+        "properties": {
+          "basisNote": {
+            "description": "判定依据（可复算）",
+            "type": "string"
+          },
+          "localHour": {
+            "description": "🔴 店铺本地小时（0..23）",
+            "format": "int32",
+            "type": "integer"
+          },
+          "orderCount": {
+            "description": "该小时的订单笔数",
+            "type": "number"
+          },
+          "orderShare": {
+            "description": "🔴 该小时的订单占比（null = 不可比，不是 0）",
+            "type": "number"
+          },
+          "p90Peak": {
+            "description": "上游的 P90 高峰刻度是否命中",
+            "type": "boolean"
+          },
+          "suggestedAction": {
+            "description": "建议动作",
+            "type": "string"
+          },
+          "suggestedBidMultiplier": {
+            "description": "建议竞价系数",
+            "type": "number"
+          },
+          "suggestedBudgetMultiplier": {
+            "description": "建议预算系数",
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "AdDaypartRecommendationRequest": {
+        "properties": {
+          "from": {
+            "description": "口径窗口起（默认：DB 今天往前 29 天）",
+            "format": "date",
+            "type": "string"
+          },
+          "strategyId": {
+            "description": "策略 id（推荐按店铺生成）",
+            "type": "string"
+          },
+          "to": {
+            "description": "口径窗口止（默认：DB 今天）",
+            "format": "date",
+            "type": "string"
+          }
+        },
+        "required": [
+          "strategyId"
+        ],
+        "type": "object"
+      },
+      "AdDaypartRecommendationView": {
+        "properties": {
+          "alignment": {
+            "description": "汇总口径（本模块只有 LOCAL_TIME）",
+            "type": "string"
+          },
+          "expectedDays": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "generatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "hours": {
+            "description": "小时明细（定不了时区时为空数组 —— 不是「24 个小时都没有」）",
+            "items": {
+              "$ref": "#/components/schemas/AdDaypartRecommendationHourView"
+            },
+            "type": "array"
+          },
+          "id": {
+            "type": "string"
+          },
+          "profile": {
+            "additionalProperties": {
+              "description": "🔴 生成时用的判定参数快照（可复算）",
+              "type": "object"
+            },
+            "description": "🔴 生成时用的判定参数快照（可复算）",
+            "type": "object"
+          },
+          "projectedDays": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "projectedOrderCount": {
+            "type": "number"
+          },
+          "shopCode": {
+            "type": "string"
+          },
+          "shopName": {
+            "type": "string"
+          },
+          "shopTimezone": {
+            "description": "🔴 店铺本地时区（定不了时区时是空串）",
+            "type": "string"
+          },
+          "strategyId": {
+            "type": "string"
+          },
+          "timezoneReason": {
+            "type": "string"
+          },
+          "timezoneStatus": {
+            "type": "string"
+          },
+          "upstreamDataUpdatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "upstreamMessage": {
+            "type": "string"
+          },
+          "upstreamStatus": {
+            "description": "上游结论：OK / SHOP_UNRESOLVED / CONFLICT / NO_FACT",
+            "type": "string"
+          },
+          "windowFrom": {
+            "format": "date",
+            "type": "string"
+          },
+          "windowTo": {
+            "format": "date",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AdDaypartRunRequest": {
+        "properties": {
+          "note": {
+            "type": "string"
+          },
+          "runMode": {
+            "description": "运行口径：DRY_RUN 只算不调 / APPLY 真调（默认 DRY_RUN）",
+            "type": "string"
+          },
+          "strategyId": {
+            "description": "策略 id（不给 = 跑所有「参与调度且生效中」的策略）",
+            "type": "string"
+          },
+          "triggerSource": {
+            "description": "触发来源：MANUAL / SCHEDULED（默认 MANUAL）",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AdDaypartRunResult": {
+        "properties": {
+          "executedCount": {
+            "description": "真的跑了多少条",
+            "format": "int32",
+            "type": "integer"
+          },
+          "skippedCount": {
+            "description": "跳过多少条（不是生效中 / 时区定不了 / 本小时不动）",
+            "format": "int32",
+            "type": "integer"
+          },
+          "skips": {
+            "description": "🔴 被跳过的策略与原因",
+            "items": {
+              "$ref": "#/components/schemas/AdDaypartRunSkip"
+            },
+            "type": "array"
+          },
+          "strategyCount": {
+            "description": "这次触发了多少条策略",
+            "format": "int32",
+            "type": "integer"
+          },
+          "tasks": {
+            "description": "逐条任务的运行结果",
+            "items": {
+              "$ref": "#/components/schemas/AdDaypartTaskView"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "AdDaypartRunSkip": {
+        "description": "🔴 被跳过的策略与原因",
+        "properties": {
+          "reason": {
+            "description": "🔴 为什么被跳过",
+            "type": "string"
+          },
+          "shopCode": {
+            "description": "店铺编码",
+            "type": "string"
+          },
+          "strategyCode": {
+            "description": "策略编码",
+            "type": "string"
+          },
+          "strategyId": {
+            "description": "策略 id",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AdDaypartShopCapsView": {
+        "properties": {
+          "effectiveCaps": {
+            "$ref": "#/components/schemas/AdDaypartCapView"
+          },
+          "note": {
+            "description": "口径说明",
+            "type": "string"
+          },
+          "shopCode": {
+            "type": "string"
+          },
+          "shopName": {
+            "type": "string"
+          },
+          "shopTimezone": {
+            "type": "string"
+          },
+          "strategies": {
+            "description": "该店铺各条策略的上限",
+            "items": {
+              "$ref": "#/components/schemas/AdDaypartCapView"
+            },
+            "type": "array"
+          },
+          "timezoneReason": {
+            "type": "string"
+          },
+          "timezoneStatus": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AdDaypartShopTimezone": {
+        "properties": {
+          "activeSiteCount": {
+            "description": "启用的站点数",
+            "format": "int32",
+            "type": "integer"
+          },
+          "shopCode": {
+            "description": "店铺编码",
+            "type": "string"
+          },
+          "shopId": {
+            "description": "店铺 id",
+            "type": "string"
+          },
+          "shopName": {
+            "description": "店铺名",
+            "type": "string"
+          },
+          "shopTimezone": {
+            "description": "🔴 店铺本地时区（IANA 标识；定不了时区时是空串）",
+            "type": "string"
+          },
+          "siteTimezones": {
+            "description": "启用的站点各自的默认时区（多个且不一致时这里能看出来）",
+            "items": {
+              "description": "启用的站点各自的默认时区（多个且不一致时这里能看出来）",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "timezoneReason": {
+            "description": "定不了 / 冲突的原因（页面上原样显示）",
+            "type": "string"
+          },
+          "timezoneStatus": {
+            "description": "时区归属状态",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AdDaypartStatusRequest": {
+        "properties": {
+          "note": {
+            "type": "string"
+          },
+          "status": {
+            "description": "DRAFT / ACTIVE / PAUSED / ARCHIVED",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "type": "object"
+      },
+      "AdDaypartStrategyPage": {
+        "properties": {
+          "items": {
+            "description": "当前页数据",
+            "items": {
+              "$ref": "#/components/schemas/AdDaypartStrategySummary"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "description": "符合条件的总条数",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AdDaypartStrategyRequest": {
+        "properties": {
+          "currency": {
+            "description": "币种（大写 3 位）",
+            "type": "string"
+          },
+          "dryRun": {
+            "description": "试运行（默认 true）",
+            "type": "boolean"
+          },
+          "maxBid": {
+            "type": "number"
+          },
+          "maxBudget": {
+            "type": "number"
+          },
+          "minBid": {
+            "type": "number"
+          },
+          "minBudget": {
+            "type": "number"
+          },
+          "note": {
+            "type": "string"
+          },
+          "recommendBoostBidMultiplier": {
+            "type": "number"
+          },
+          "recommendBoostBudgetMultiplier": {
+            "type": "number"
+          },
+          "recommendPauseBidMultiplier": {
+            "type": "number"
+          },
+          "recommendPauseBudgetMultiplier": {
+            "type": "number"
+          },
+          "recommendPauseShareMultiple": {
+            "type": "number"
+          },
+          "recommendPeakShareMultiple": {
+            "type": "number"
+          },
+          "recommendReduceBidMultiplier": {
+            "type": "number"
+          },
+          "recommendReduceBudgetMultiplier": {
+            "type": "number"
+          },
+          "recommendTroughShareMultiple": {
+            "type": "number"
+          },
+          "runIntervalMinutes": {
+            "description": "调度间隔（分钟，默认 60）",
+            "format": "int32",
+            "type": "integer"
+          },
+          "scheduleEnabled": {
+            "description": "是否参与外部调度（默认 false）",
+            "type": "boolean"
+          },
+          "scope": {
+            "description": "作用范围：ALL_CAMPAIGNS / CAMPAIGN（默认 ALL_CAMPAIGNS）",
+            "type": "string"
+          },
+          "shopCode": {
+            "description": "店铺编码",
+            "type": "string"
+          },
+          "singleAdjustCapAmount": {
+            "description": "单次调整上限（金额）",
+            "type": "number"
+          },
+          "singleAdjustCapPercent": {
+            "description": "单次调整上限（相对基准的偏离比例；0 = 不额外限制）",
+            "type": "number"
+          },
+          "strategyCode": {
+            "description": "策略编码（租户内唯一）",
+            "type": "string"
+          },
+          "strategyName": {
+            "description": "策略名",
+            "type": "string"
+          },
+          "targetCampaignId": {
+            "description": "scope=CAMPAIGN 时指定的活动 id",
+            "type": "string"
+          },
+          "totalCapAmount": {
+            "description": "窗口内累计上调上限（金额）",
+            "type": "number"
+          },
+          "totalCapCount": {
+            "description": "窗口内累计调整次数上限",
+            "format": "int32",
+            "type": "integer"
+          },
+          "totalCapWindowHours": {
+            "description": "上限窗口长度（小时）",
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "currency",
+          "shopCode",
+          "singleAdjustCapAmount",
+          "strategyCode",
+          "strategyName",
+          "totalCapAmount"
+        ],
+        "type": "object"
+      },
+      "AdDaypartStrategySummary": {
+        "description": "当前页数据",
+        "properties": {
+          "currency": {
+            "type": "string"
+          },
+          "dryRun": {
+            "type": "boolean"
+          },
+          "effectiveHourCount": {
+            "description": "曲线里真正在动的小时数（24 = 全天都在调）",
+            "format": "int32",
+            "type": "integer"
+          },
+          "id": {
+            "type": "string"
+          },
+          "lastRunAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "scheduleEnabled": {
+            "type": "boolean"
+          },
+          "scope": {
+            "type": "string"
+          },
+          "shopCode": {
+            "type": "string"
+          },
+          "shopName": {
+            "type": "string"
+          },
+          "shopTimezone": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "strategyCode": {
+            "type": "string"
+          },
+          "strategyName": {
+            "type": "string"
+          },
+          "timezoneReason": {
+            "type": "string"
+          },
+          "timezoneStatus": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AdDaypartStrategyView": {
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "currency": {
+            "description": "策略币种（跨币种的活动 / 关键词逐条拒绝）",
+            "type": "string"
+          },
+          "dryRun": {
+            "description": "🔴 试运行：true = 只算不调",
+            "type": "boolean"
+          },
+          "hours": {
+            "description": "24 个小时曲线",
+            "items": {
+              "$ref": "#/components/schemas/AdDaypartHourConfig"
+            },
+            "type": "array"
+          },
+          "id": {
+            "type": "string"
+          },
+          "lastAppliedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "lastRunAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "maxBid": {
+            "type": "number"
+          },
+          "maxBudget": {
+            "type": "number"
+          },
+          "minBid": {
+            "type": "number"
+          },
+          "minBudget": {
+            "type": "number"
+          },
+          "note": {
+            "type": "string"
+          },
+          "recommendBoostBidMultiplier": {
+            "type": "number"
+          },
+          "recommendBoostBudgetMultiplier": {
+            "type": "number"
+          },
+          "recommendPauseBidMultiplier": {
+            "type": "number"
+          },
+          "recommendPauseBudgetMultiplier": {
+            "type": "number"
+          },
+          "recommendPauseShareMultiple": {
+            "type": "number"
+          },
+          "recommendPeakShareMultiple": {
+            "type": "number"
+          },
+          "recommendReduceBidMultiplier": {
+            "type": "number"
+          },
+          "recommendReduceBudgetMultiplier": {
+            "type": "number"
+          },
+          "recommendTroughShareMultiple": {
+            "type": "number"
+          },
+          "runIntervalMinutes": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "scheduleEnabled": {
+            "type": "boolean"
+          },
+          "scope": {
+            "type": "string"
+          },
+          "shopCode": {
+            "type": "string"
+          },
+          "shopName": {
+            "type": "string"
+          },
+          "shopTimezone": {
+            "description": "🔴 店铺本地时区（IANA 标识；定不了时区时是空串）",
+            "type": "string"
+          },
+          "singleAdjustCapAmount": {
+            "type": "number"
+          },
+          "singleAdjustCapPercent": {
+            "type": "number"
+          },
+          "status": {
+            "type": "string"
+          },
+          "strategyCode": {
+            "type": "string"
+          },
+          "strategyName": {
+            "type": "string"
+          },
+          "targetCampaignId": {
+            "type": "string"
+          },
+          "targetCampaignName": {
+            "type": "string"
+          },
+          "timezoneReason": {
+            "type": "string"
+          },
+          "timezoneStatus": {
+            "type": "string"
+          },
+          "totalCapAmount": {
+            "type": "number"
+          },
+          "totalCapCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "totalCapWindowHours": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "version": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AdDaypartTaskLineView": {
+        "properties": {
+          "action": {
+            "type": "string"
+          },
+          "afterValue": {
+            "description": "调整后的值（试运行时是「本来会变成多少」）",
+            "type": "number"
+          },
+          "beforeValue": {
+            "description": "调整前的值",
+            "type": "number"
+          },
+          "campaignId": {
+            "type": "string"
+          },
+          "campaignName": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "delta": {
+            "description": "增减额（正 = 调高）",
+            "type": "number"
+          },
+          "guardrailCode": {
+            "description": "🔴 被哪一道闸拦下的（可空 = 没过闸，是业务原因）",
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "keywordId": {
+            "type": "string"
+          },
+          "localHour": {
+            "description": "🔴 店铺本地小时",
+            "format": "int32",
+            "type": "integer"
+          },
+          "message": {
+            "description": "逐条原因（没成必须写清为什么）",
+            "type": "string"
+          },
+          "result": {
+            "description": "APPLIED / REJECTED / SKIPPED / DRY_RUN / PENDING",
+            "type": "string"
+          },
+          "targetRef": {
+            "description": "被调整对象（关键词原文）",
+            "type": "string"
+          },
+          "targetType": {
+            "description": "CAMPAIGN_BUDGET / KEYWORD_BID",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AdDaypartTaskPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AdDaypartTaskSummary"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AdDaypartTaskSummary": {
+        "properties": {
+          "appliedCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "executedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "localHour": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "rejectedCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "runMode": {
+            "type": "string"
+          },
+          "shopCode": {
+            "type": "string"
+          },
+          "shopTimezone": {
+            "type": "string"
+          },
+          "skippedCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "status": {
+            "type": "string"
+          },
+          "strategyCode": {
+            "type": "string"
+          },
+          "strategyId": {
+            "type": "string"
+          },
+          "totalIncrease": {
+            "type": "number"
+          },
+          "triggerSource": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AdDaypartTaskView": {
+        "description": "逐条任务的运行结果",
+        "properties": {
+          "appliedCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "executedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "lines": {
+            "items": {
+              "$ref": "#/components/schemas/AdDaypartTaskLineView"
+            },
+            "type": "array"
+          },
+          "localHour": {
+            "description": "🔴 本轮跑的是店铺本地的第几个小时",
+            "format": "int32",
+            "type": "integer"
+          },
+          "message": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "rejectedCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "runMode": {
+            "type": "string"
+          },
+          "shopCode": {
+            "type": "string"
+          },
+          "shopTimezone": {
+            "type": "string"
+          },
+          "singleAdjustCapAmount": {
+            "type": "number"
+          },
+          "singleAdjustCapPercent": {
+            "type": "number"
+          },
+          "skippedCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "status": {
+            "type": "string"
+          },
+          "strategyCode": {
+            "type": "string"
+          },
+          "strategyId": {
+            "type": "string"
+          },
+          "strategyName": {
+            "type": "string"
+          },
+          "timezoneStatus": {
+            "type": "string"
+          },
+          "totalCapAmount": {
+            "type": "number"
+          },
+          "totalCapCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "totalCapWindowHours": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "totalIncrease": {
+            "description": "🔴 本轮上调金额合计（总上限只管「多花了多少」）",
+            "type": "number"
+          },
+          "triggerSource": {
+            "type": "string"
+          },
+          "windowFrom": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "windowTo": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "AdDiagnosisActionPage": {
         "properties": {
           "appliedCount": {
@@ -83061,6 +84210,829 @@
         },
         "tags": [
           "ad-coupon-controller"
+        ]
+      }
+    },
+    "/channel/ad-dayparts/capabilities": {
+      "get": {
+        "description": "🔴 notAvailable 段列出的是**确实做不了**的部分，每条都写清责任模块与影响 —— 把「做不了」伪装成「能做」比说清楚更糟。",
+        "operationId": "get_channel_ad_dayparts_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdDaypartCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "能力声明：时区怎么定、系数怎么落钱、上限有几道闸、哪些确实做不了",
+        "tags": [
+          "14.2.1.2 分时策略"
+        ]
+      }
+    },
+    "/channel/ad-dayparts/caps": {
+      "get": {
+        "description": "🔴 下游自动规则执行调整时应把**自己的上限**与这里的上限**取更严的那个** —— 两边各用各的，最后谁也说不清一次超支是谁的责任。🔴 平台回写队列未交付 ⇒ 这里的调整只落本地并标「待回写平台」。",
+        "operationId": "get_channel_ad_dayparts_caps",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "shopCode",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdDaypartShopCapsView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "某店铺当前生效的调整上限（**供 14.2.2.2 自动规则取用**）",
+        "tags": [
+          "14.2.1.2 分时策略"
+        ]
+      }
+    },
+    "/channel/ad-dayparts/recommendations": {
+      "get": {
+        "operationId": "get_channel_ad_dayparts_recommendations",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "strategyId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AdDaypartRecommendationView"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "某条策略的推荐批次列表",
+        "tags": [
+          "14.2.1.2 分时策略"
+        ]
+      },
+      "post": {
+        "description": "上游 = **13.2.1.2 分时与分周模式**（reporting 服务）：本模块**只经授权只读 API**读它，转发调用方自己的 bearer、**不传租户号**。🔴 **上游读不到一律 503** —— 返回空集合会被读成「这个店铺没出过单」。🔴 店铺**定不了时区**时返回一批 `upstreamStatus=SHOP_UNRESOLVED` 的空曲线，**不摊给任何默认时区**；两侧时区不一致时返回 `CONFLICT`。",
+        "operationId": "post_channel_ad_dayparts_recommendations",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdDaypartRecommendationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdDaypartRecommendationView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "按历史出单时段生成推荐分时曲线",
+        "tags": [
+          "14.2.1.2 分时策略"
+        ]
+      }
+    },
+    "/channel/ad-dayparts/recommendations/{id}": {
+      "get": {
+        "operationId": "get_channel_ad_dayparts_recommendations_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdDaypartRecommendationView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "一批推荐的详情（含 24 个小时的判定依据）",
+        "tags": [
+          "14.2.1.2 分时策略"
+        ]
+      }
+    },
+    "/channel/ad-dayparts/recommendations/{id}/apply": {
+      "post": {
+        "description": "套用后该小时的来源标成 `RECOMMENDED`，判定依据原样带上（页面上能看懂「为什么这个小时是高峰」）。",
+        "operationId": "post_channel_ad_dayparts_recommendations_id_apply",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdDaypartApplyRecommendationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdDaypartStrategyView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "把推荐曲线套到策略上",
+        "tags": [
+          "14.2.1.2 分时策略"
+        ]
+      }
+    },
+    "/channel/ad-dayparts/shops": {
+      "get": {
+        "description": "🔴 店铺**没有**自己的时区字段：时区来自 channel 的**站点**参数（shop_marketplace → marketplace.default_timezone）。启用多个站点且时区不一致、或没启用站点的店铺 ⇒ **定不了时区**，它们的策略**不许激活**（DB 层 CHECK 钉死）。",
+        "operationId": "get_channel_ad_dayparts_shops",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AdDaypartShopTimezone"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "店铺清单 + 各自的时区归属结论（**定不了的也列出来并写清原因**）",
+        "tags": [
+          "14.2.1.2 分时策略"
+        ]
+      }
+    },
+    "/channel/ad-dayparts/shops/{shopCode}/timezone": {
+      "get": {
+        "operationId": "get_channel_ad_dayparts_shops_shopCode_timezone",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "shopCode",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdDaypartShopTimezone"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "单个店铺的时区归属结论",
+        "tags": [
+          "14.2.1.2 分时策略"
+        ]
+      }
+    },
+    "/channel/ad-dayparts/strategies": {
+      "get": {
+        "description": "🔴 定不了时区的店铺也会出现在清单里（`timezoneStatus=UNRESOLVED`），并写清原因 —— 删掉它们的话，页面只能说「这个店铺不在清单里」，那会让人以为数据缺失。",
+        "operationId": "get_channel_ad_dayparts_strategies",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "shopCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdDaypartStrategyPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "分时策略清单（真分页 + 真筛选）",
+        "tags": [
+          "14.2.1.2 分时策略"
+        ]
+      },
+      "post": {
+        "description": "🔴 **一个店铺一条策略**：分时策略按店铺时区生效，跨店铺合并会让其中一部分的小时错位。🔴 时区由服务端按**站点参数**解析（不硬编码、不猜）；定不了时区时策略建成 DRAFT，**激活会被拒**。",
+        "operationId": "post_channel_ad_dayparts_strategies",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdDaypartStrategyRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdDaypartStrategyView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "新建一条分时策略",
+        "tags": [
+          "14.2.1.2 分时策略"
+        ]
+      }
+    },
+    "/channel/ad-dayparts/strategies/{id}": {
+      "delete": {
+        "description": "归档是**软删除**：曲线、基准、推荐与任务历史都还在，事后能复盘「当时为什么这么调」。",
+        "operationId": "delete_channel_ad_dayparts_strategies_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdDaypartStrategyView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "归档一条策略",
+        "tags": [
+          "14.2.1.2 分时策略"
+        ]
+      },
+      "get": {
+        "operationId": "get_channel_ad_dayparts_strategies_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdDaypartStrategyView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "一条策略的详情（含 24 个小时的曲线）",
+        "tags": [
+          "14.2.1.2 分时策略"
+        ]
+      },
+      "put": {
+        "description": "🔴 每次保存都会**重新解析店铺时区** —— 站点的配置会变，策略不能拿着旧时区跑。",
+        "operationId": "put_channel_ad_dayparts_strategies_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdDaypartStrategyRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdDaypartStrategyView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "改一条策略的属性（曲线不在这里）",
+        "tags": [
+          "14.2.1.2 分时策略"
+        ]
+      }
+    },
+    "/channel/ad-dayparts/strategies/{id}/curve": {
+      "put": {
+        "description": "请求体是**完整的小时集合**，必须覆盖 0..23 全部 24 个小时 —— 缺一个小时，那个小时就落进「没有配置」的空洞。🔴 动作 PAUSE（停投）时预算系数**必须**是 0（否则是自相矛盾的配置）。",
+        "operationId": "put_channel_ad_dayparts_strategies_id_curve",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdDaypartCurveRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdDaypartStrategyView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "整体替换分时曲线（一次成型）",
+        "tags": [
+          "14.2.1.2 分时策略"
+        ]
+      }
+    },
+    "/channel/ad-dayparts/strategies/{id}/status": {
+      "post": {
+        "description": "🔴 **激活会被拒**的两种情况：店铺**定不了时区**（跨时区店铺用错时区会完全失效）；曲线 24 个小时全是「不动」（激活它等于什么都没配）。",
+        "operationId": "post_channel_ad_dayparts_strategies_id_status",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdDaypartStatusRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdDaypartStrategyView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "改策略状态（激活 / 暂停 / 归档）",
+        "tags": [
+          "14.2.1.2 分时策略"
+        ]
+      }
+    },
+    "/channel/ad-dayparts/tasks": {
+      "get": {
+        "operationId": "get_channel_ad_dayparts_tasks",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "strategyId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdDaypartTaskPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "定时调整任务列表（真分页 + 真筛选）",
+        "tags": [
+          "14.2.1.2 分时策略"
+        ]
+      }
+    },
+    "/channel/ad-dayparts/tasks/run": {
+      "post": {
+        "description": "不给 `strategyId` ⇒ 跑所有「参与调度且生效中」的策略。🔴 **「现在是几个小时」由 DB 的 now() 按店铺 IANA 时区换算**（不是 JVM 墙钟）⇒ 夏令时对得上。🔴 **幂等**：同一策略 + 同一本地小时 + 同一运行口径**只有一条任务**，调度重试不会调两次钱。🔴 `runMode=DRY_RUN` 只算「本来会变成多少」，不真调。",
+        "operationId": "post_channel_ad_dayparts_tasks_run",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdDaypartRunRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdDaypartRunResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "跑一轮分时调整（**外部调度触发的一次入口**；本服务不装 @Scheduled）",
+        "tags": [
+          "14.2.1.2 分时策略"
+        ]
+      }
+    },
+    "/channel/ad-dayparts/tasks/{id}": {
+      "get": {
+        "description": "🔴 逐条明细里 **APPLIED / REJECTED / SKIPPED / DRY_RUN** 分得开，被拒的那几条**照样列出来**并写清被哪一道闸拦下 —— 静默丢弃会让人以为「按预期工作」。",
+        "operationId": "get_channel_ad_dayparts_tasks_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdDaypartTaskView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "一次任务的详情（含逐条调整明细）",
+        "tags": [
+          "14.2.1.2 分时策略"
         ]
       }
     },
