@@ -299,6 +299,24 @@ DB 守卫判 `evidence_deadline <= now()`（DB 钟）⇒ 宿主钟比 DB 钟快�
 - **doctrine 依据**（本仓第三次修同一族，前两次：`32a16a6a` identity、`8375e648` warehouse）：
   「**在服务端判定所用的那个钟域里比**」；「两个钟域各管一段时，只换一端反而制造新的跨钟域依赖」。
 
+## 落地状态补记（14:17，写完上文之后）
+
+- **`13.1.2.2` 达成追踪 —— 已落地**（`land` 成功，车道状态 `ready`，HEAD `b569286`）。
+  worker 报告：**L0 编译绿**；**L1 后端 19 例绿**（`TargetAttainmentIntegrationTest` 15 +
+  `TargetAttainmentTenancyIntegrationTest` 4）；**前端本模块 24 例绿**；
+  **白名单全量回归 261 文件 / 1473 例绿**；**`services[]` 元素数 248 → 249（只 +1，逐条集合差：增 1 删 0）**；
+  契约 path 45→50 / schema 100→113，**被删 0 条**；结束后 `postgres:16-alpine` 残留 **0**（ryuk 已回收）。
+  ⚠️ **L1 首跑是红的**，归因精确：`产品维度_毛利额没有等价口径_如实报不可得` 报
+  「指标 GROSS_PROFIT 的分母指标 COGS_AMOUNT 尚未定义」——
+  这是**夹具缺口不是实现缺口**（V376 触发器 `guard_reporting_metric_definition_ref` 正确挡住了
+  凭空捏出的派生口径），修复只动测试夹具（新增 `seedCogsCaliber()`），**生产代码一行未改**。
+  本轮新增 2 个 commit：`a4d02ccd`（补齐派生型口径的分母夹具）+ `b5692868`（会话日志补记）。
+  ⇒ **该车道等待下一轮 tick 的 `merge-ready` 并入 + L2 验收后随修复车道一起 push。**
+- **`13.2.2.1` 与 `fix-trade-clock-domain` 仍在途**（心跳正常）。
+- ⚠️ **本轮没有并入任何车道**：14:18 起调度闸由 **main→集成头同步任务（第 87 轮）**持有
+  （它等了我这一轮 3 小时的闸，提交 `eb7a585e`）⇒ 两个任务共用同一道闸互斥的机制按设计生效，
+  但也意味着**并入动作要等下一轮 tick** —— 协议明令「两个 tick 同时 merge 同一个集成头会留 MERGE_HEAD 残骸」。
+
 ## 为什么不 push（三件套的第 ③ 件，**本轮明确缺失**）
 
 1. **「L2 没绿绝对不 push」是最高优先级禁令**。本轮 L2 **红了**（backend=1）。
