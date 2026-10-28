@@ -1221,6 +1221,565 @@
         },
         "type": "object"
       },
+      "LifecycleMetricReference": {
+        "properties": {
+          "aggregation": {
+            "type": "string"
+          },
+          "availabilityNote": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "caliberOwner": {
+            "type": "string"
+          },
+          "denominatorMetricCode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "metricCode": {
+            "type": "string"
+          },
+          "numeratorMetricCode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "unit": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "LifecycleSegmentSummary": {
+        "properties": {
+          "actionLabel": {
+            "type": "string"
+          },
+          "actionNote": {
+            "type": "string"
+          },
+          "amounts": {
+            "items": {
+              "$ref": "#/components/schemas/LifecycleSegmentationAmountRow"
+            },
+            "type": "array"
+          },
+          "productCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "recommendedAction": {
+            "nullable": true,
+            "type": "string"
+          },
+          "salesQuantity": {
+            "type": "number"
+          },
+          "segment": {
+            "type": "string"
+          },
+          "segmentLabel": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "LifecycleSegmentationAmountRow": {
+        "properties": {
+          "abcByAmount": {
+            "nullable": true,
+            "type": "string"
+          },
+          "abcRankByAmount": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "abcTotalByAmount": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "grossProfitAmount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "grossProfitAvailability": {
+            "type": "string"
+          },
+          "grossProfitNote": {
+            "type": "string"
+          },
+          "salesAmount": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "LifecycleSegmentationCapabilities": {
+        "properties": {
+          "dataUpdatedAtVisible": {
+            "type": "boolean"
+          },
+          "notDelivered": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "ruleConfigurable": {
+            "type": "boolean"
+          },
+          "rules": {
+            "items": {
+              "$ref": "#/components/schemas/LifecycleSegmentationRuleNote"
+            },
+            "type": "array"
+          },
+          "segmentationAvailable": {
+            "type": "boolean"
+          },
+          "upstreamConnected": {
+            "type": "boolean"
+          },
+          "upstreamModules": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "LifecycleSegmentationRefreshResult": {
+        "properties": {
+          "fetched": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "projected": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "source": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "LifecycleSegmentationResponse": {
+        "properties": {
+          "archivedProductCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "caliberNotes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "coverageNote": {
+            "type": "string"
+          },
+          "dataUpdatedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "dataUpdatedNote": {
+            "type": "string"
+          },
+          "dimensionType": {
+            "type": "string"
+          },
+          "emptyNote": {
+            "type": "string"
+          },
+          "emptyReason": {
+            "nullable": true,
+            "type": "string"
+          },
+          "from": {
+            "format": "date",
+            "type": "string"
+          },
+          "metricReferences": {
+            "items": {
+              "$ref": "#/components/schemas/LifecycleMetricReference"
+            },
+            "type": "array"
+          },
+          "notSegmentedProductCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "requestedFrom": {
+            "format": "date",
+            "type": "string"
+          },
+          "requestedTo": {
+            "format": "date",
+            "type": "string"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/LifecycleSegmentationRow"
+            },
+            "type": "array"
+          },
+          "ruleCode": {
+            "type": "string"
+          },
+          "ruleVersion": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "ruleViews": {
+            "items": {
+              "$ref": "#/components/schemas/LifecycleSegmentationRuleView"
+            },
+            "type": "array"
+          },
+          "rules": {
+            "items": {
+              "$ref": "#/components/schemas/LifecycleSegmentationRuleNote"
+            },
+            "type": "array"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusNote": {
+            "type": "string"
+          },
+          "summary": {
+            "items": {
+              "$ref": "#/components/schemas/LifecycleSegmentSummary"
+            },
+            "type": "array"
+          },
+          "to": {
+            "format": "date",
+            "type": "string"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "windowMatched": {
+            "type": "boolean"
+          },
+          "windowNote": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "LifecycleSegmentationRow": {
+        "properties": {
+          "abcByQuantity": {
+            "nullable": true,
+            "type": "string"
+          },
+          "abcRankByQuantity": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "abcTotalByQuantity": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "actionNote": {
+            "type": "string"
+          },
+          "agingDays": {
+            "nullable": true,
+            "type": "number"
+          },
+          "amounts": {
+            "items": {
+              "$ref": "#/components/schemas/LifecycleSegmentationAmountRow"
+            },
+            "type": "array"
+          },
+          "bucketDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "declineRatio": {
+            "nullable": true,
+            "type": "number"
+          },
+          "dimensionId": {
+            "type": "string"
+          },
+          "dimensionKey": {
+            "type": "string"
+          },
+          "dimensionName": {
+            "type": "string"
+          },
+          "dimensionType": {
+            "type": "string"
+          },
+          "firstSaleDate": {
+            "format": "date",
+            "nullable": true,
+            "type": "string"
+          },
+          "historyDays": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "lifecycleSegment": {
+            "nullable": true,
+            "type": "string"
+          },
+          "onHandQuantity": {
+            "type": "number"
+          },
+          "priorQuantity": {
+            "type": "number"
+          },
+          "recentQuantity": {
+            "type": "number"
+          },
+          "recommendedAction": {
+            "nullable": true,
+            "type": "string"
+          },
+          "salesQuantity": {
+            "type": "number"
+          },
+          "salesShare": {
+            "nullable": true,
+            "type": "number"
+          },
+          "segmentAvailability": {
+            "type": "string"
+          },
+          "segmentNote": {
+            "type": "string"
+          },
+          "sourceObservedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "windowFrom": {
+            "format": "date",
+            "type": "string"
+          },
+          "windowTo": {
+            "format": "date",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "LifecycleSegmentationRuleInput": {
+        "properties": {
+          "abcACumulativeRatio": {
+            "nullable": true,
+            "type": "number"
+          },
+          "abcBCumulativeRatio": {
+            "nullable": true,
+            "type": "number"
+          },
+          "decliningMinDeclineRatio": {
+            "nullable": true,
+            "type": "number"
+          },
+          "effectiveFrom": {
+            "format": "date",
+            "nullable": true,
+            "type": "string"
+          },
+          "effectiveTo": {
+            "format": "date",
+            "nullable": true,
+            "type": "string"
+          },
+          "firstSaleLookbackDays": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "hotMinSalesShareRatio": {
+            "nullable": true,
+            "type": "number"
+          },
+          "minHistoryDays": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "newMaxDaysSinceFirstSale": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "note": {
+            "nullable": true,
+            "type": "string"
+          },
+          "ruleName": {
+            "nullable": true,
+            "type": "string"
+          },
+          "slowMaxSalesPerDay": {
+            "nullable": true,
+            "type": "number"
+          },
+          "steadyMinSalesShareRatio": {
+            "nullable": true,
+            "type": "number"
+          },
+          "strongMinSalesShareRatio": {
+            "nullable": true,
+            "type": "number"
+          },
+          "windowDays": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "LifecycleSegmentationRuleNote": {
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "ruleCode": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "LifecycleSegmentationRuleView": {
+        "properties": {
+          "abcACumulativeRatio": {
+            "type": "number"
+          },
+          "abcBCumulativeRatio": {
+            "type": "number"
+          },
+          "amountMetricCode": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdBy": {
+            "type": "string"
+          },
+          "decliningMinDeclineRatio": {
+            "type": "number"
+          },
+          "dimensionType": {
+            "type": "string"
+          },
+          "effectiveFrom": {
+            "format": "date",
+            "type": "string"
+          },
+          "effectiveTo": {
+            "format": "date",
+            "nullable": true,
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "firstSaleLookbackDays": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "grossProfitMetricCode": {
+            "type": "string"
+          },
+          "hotMinSalesShareRatio": {
+            "type": "number"
+          },
+          "minHistoryDays": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "newMaxDaysSinceFirstSale": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "quantityMetricCode": {
+            "type": "string"
+          },
+          "ruleCode": {
+            "type": "string"
+          },
+          "ruleName": {
+            "type": "string"
+          },
+          "slowMaxSalesPerDay": {
+            "type": "number"
+          },
+          "steadyMinSalesShareRatio": {
+            "type": "number"
+          },
+          "strongMinSalesShareRatio": {
+            "type": "number"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "version": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "windowDays": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
       "MetricCard": {
         "properties": {
           "aggregation": {
@@ -6990,6 +7549,294 @@
         "summary": "费用差异表 + 偏差趋势 + 规则调优建议",
         "tags": [
           "13.4.2.2 费用差异"
+        ]
+      }
+    },
+    "/reporting/lifecycle-segmentation": {
+      "get": {
+        "description": "🔴 **一次性拉齐**：一次调用返回分档汇总 + 商品明细 + 生效规则 + 被引用的口径。⚠️ **绝不跨币种相加**：金额按币种分别列出；ABC 按金额**在同一个币种内部**排名。⚠️ **「算不出来」与「等于 0」分开**：档位算不出来时档位是 null 并附原因，**不用 0 或某个默认档位冒充**。⚠️ **窗口外的事实不参与计算**：销量 / 销售额 / 毛利 / 份额只取请求的窗口。",
+        "operationId": "get_reporting_lifecycle_segmentation",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dimensionType",
+            "required": false,
+            "schema": {
+              "default": "SKU",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "segment",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "abcByQuantity",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LifecycleSegmentationResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "生命周期与分层：六档分层 + ABC 分类（销量 / 金额）+ 各层建议动作",
+        "tags": [
+          "13.3.1.2 生命周期与分层"
+        ]
+      }
+    },
+    "/reporting/lifecycle-segmentation/capabilities": {
+      "get": {
+        "description": "notDelivered 列出的是**确实拿不到**的部分，每条都写清原因与归属模块 —— 把「拿不到」伪装成 0 比说清楚更糟。",
+        "operationId": "get_reporting_lifecycle_segmentation_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LifecycleSegmentationCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "能力声明：哪些上游真接通、哪些档位确实算不出来、判定规则是什么",
+        "tags": [
+          "13.3.1.2 生命周期与分层"
+        ]
+      }
+    },
+    "/reporting/lifecycle-segmentation/refresh": {
+      "post": {
+        "description": "🔴 **上游是服务内已落成的投影**：销量 / 销售额来自 13.2.2.2 的日事实，毛利来自 13.3.1.1 的日事实（派生口径：销售额 − 出库成本），库存与库龄来自 13.3.1.1 的时点快照。🔴 **幂等**：同一窗口重刷先删旧行再整段重写。🔴 **上游口径没投影 ⇒ 报「口径未投影」**，不返回 0。",
+        "operationId": "post_reporting_lifecycle_segmentation_refresh",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dimensionType",
+            "required": false,
+            "schema": {
+              "default": "SKU",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/LifecycleSegmentationRefreshResult"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "按规则算一遍分层并落库（写的是**派生读模型**，不是业务事实）",
+        "tags": [
+          "13.3.1.2 生命周期与分层"
+        ]
+      }
+    },
+    "/reporting/lifecycle-segmentation/rules": {
+      "get": {
+        "description": "🔴 **规则在库里，不在代码里**：阈值 / 分类口径 / 版本 / 生效区间都可查、可审计。历史分层结果仍指向它当时用的那个版本。",
+        "operationId": "get_reporting_lifecycle_segmentation_rules",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dimensionType",
+            "required": false,
+            "schema": {
+              "default": "SKU",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/LifecycleSegmentationRuleView"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "分层规则配置（当前生效 + 历史版本）",
+        "tags": [
+          "13.3.1.2 生命周期与分层"
+        ]
+      }
+    },
+    "/reporting/lifecycle-segmentation/rules/{dimensionType}": {
+      "put": {
+        "description": "🔴 **口径码不可改**：销量 / 销售额 / 毛利引用的是 13.2.2.2 与 13.3.1.1 的口径表，改它等于换了一个真相 —— 只让服务端固定。⚠️ 规则改完要**重跑一次分层**（POST /refresh）才会生效；在重跑之前，页面上显示的仍是旧版本规则算出来的结果。",
+        "operationId": "put_reporting_lifecycle_segmentation_rules_dimensionType",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "dimensionType",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LifecycleSegmentationRuleInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LifecycleSegmentationRuleView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "更新分层规则（**改规则 = 加一个版本**，旧版本停用、历史结果不变）",
+        "tags": [
+          "13.3.1.2 生命周期与分层"
         ]
       }
     },

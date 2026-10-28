@@ -115,6 +115,64 @@ const services: readonly {
     pattern: /^product\-performance(?:\/(?:capabilities|metrics|refresh))?$/,
   },
   {
+    // 13.3.1.2 生命周期与分层（reporting 服务，卷 13「利润与经营分析」L3 13.3.1 产品分析下的第二格）。
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 reporting/ 正则里并分支 ——
+    //   既有条目**一字未改、也不重排、不删除**。
+    //
+    // ---- 插入锚点选在**13.3.1.1 product-performance 那条之后**（数组靠前那一段）----
+    //   ⚠️ 本条目**曾经**挂在数组末尾（收尾的 `];` 之前、紧跟 13.3.2.1 的 traffic-conversion 之后），
+    //   与同批 13.3.2.2 的那条撞在同一段 ⇒ 并入集成头时 `api-proxy.ts` 报 CONFLICT。
+    //   （13.3.1.1 当年也踩过同一个坑：它先挂在末尾，与 13.3.2.1 撞车后改挂到 13.1.1.1 那条之后。）
+    //   本车道改挂到**集成头没有动过的位置**（13.3.1.1 那条之后），
+    //   与数组末尾相距 13000 行以上 ⇒ 并入时 git 能干净求并。
+    //
+    // ---- 首 token「lifecycle-segmentation」的零命中核对结论（实测，非目测）----
+    //   发车前用脚本（`.tmp/api-proxy-zero-hit.mjs`，不入库）**用 TypeScript 编译器解析**
+    //   本文件里 `services` 变量的**真实数组字面量**（不是文本计数），
+    //   逐条取出 `prefix` 与 `pattern`，按 `resolve()` 的**同构口径**实测
+    //   （`path.startsWith(prefix)` 收窄服务 → 再测 `pattern.test(path.slice(prefix.length))`），
+    //   对本模块的 6 条路径逐条判定：
+    //     reporting/lifecycle-segmentation               零命中
+    //     reporting/lifecycle-segmentation/capabilities  零命中
+    //     reporting/lifecycle-segmentation/rules         零命中
+    //     reporting/lifecycle-segmentation/rules/SKU     零命中
+    //     reporting/lifecycle-segmentation/rules/SPU     零命中
+    //     reporting/lifecycle-segmentation/refresh       零命中
+    //   **零命中** —— 本文件里 `prefix === 'reporting/'` 的既有 13 条正则都是**按命名空间精确匹配**的
+    //   （首 token 分别是 overview / expense-variance / store-comparison / sales-trend /
+    //     target-attainment / metric-cards / store-overview / targets / store-site / time-pattern /
+    //     product-sales / product-performance / traffic-conversion），
+    //   **没有一条能吃下 `lifecycle-segmentation…`**；而别的 prefix 下的正则根本吃不到本模块的路径
+    //   （`resolve()` 先按 prefix 闸门筛）。
+    //   反向也核对了本文件里 **22 条**别的车道已交付的 reporting 形状：本条新正则对它们**零命中**
+    //   ⇒ 本条不会遮蔽别人已交付的路由。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**，契约 `reporting.openapi.json` 里就这 5 条）：
+    //   lifecycle-segmentation             分层结果（分档汇总 + 商品明细 + 生效规则；裸路径是 @GetMapping 在类根上的）
+    //   lifecycle-segmentation/capabilities 能力声明（真读过哪些上游 / 确实拿不到什么 / 判定规则）
+    //   lifecycle-segmentation/rules        分层规则配置（当前生效 + 历史版本，可审计）
+    //   lifecycle-segmentation/rules/{SKU|SPU} 改规则（PUT，**加一个版本**，旧版本停用）
+    //   lifecycle-segmentation/refresh      重算并落库（POST，写的是**派生读模型**，不是业务事实）
+    //
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   reporting/lifecycle-segmentation/{uuid}     —— 顶层没有 id 段（按查询参数定位，不是按 id）。
+    //   reporting/lifecycle-segmentation/unknown    —— 未实现的子路径仍然 404。
+    //   reporting/lifecycle-segmentation/metrics    —— 🔴 本模块**没有**自己的口径表
+    //     （口径唯一：引用 13.2.2.2 与 13.3.1.1 的口径表）⇒ 这个端点**不存在**。
+    //   reporting/lifecycle-segmentation/drilldown  —— 🔴 本模块**没有**下钻端点：
+    //     分层是**汇总读模型**，钻取属各业务域自己的处理页。
+    //   reporting/lifecycle-segmentation/rules/{uuid} —— 维度层**只有 SKU / SPU 两档**，
+    //     别的值是 400（不静默回落成 SKU）⇒ 不放行。
+    //
+    // 字面量子路径（capabilities / rules / refresh）排在可选段**之前**判别 ——
+    //   alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    prefix: 'reporting/',
+    env: 'REPORTING_URL',
+    fallback: 'http://127.0.0.1:8088',
+    pattern:
+      /^lifecycle\-segmentation(?:\/(?:capabilities|rules(?:\/(?:SKU|SPU))?|refresh))?$/,
+  },
+  {
     // 13.4.2.2 费用差异（reporting 服务，卷 13「利润与经营分析」L3 13.4.2 成本拆解下的第二格）。
     // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往 13.1.1.1 那条 reporting/ 正则里并分支 ——
     //   13.1.1.1 的条目**一字未改、也不重排**（那条正则只放行 overview / projection 两个命名空间）。
