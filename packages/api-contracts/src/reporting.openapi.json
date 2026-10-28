@@ -3782,6 +3782,336 @@
         },
         "type": "object"
       },
+      "ProfitComponentAmount": {
+        "properties": {
+          "amount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "component": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "reason": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ProfitDrilldownPage": {
+        "properties": {
+          "dimension": {
+            "type": "string"
+          },
+          "dimensionCode": {
+            "type": "string"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ProfitDrilldownRow"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "operatingMode": {
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ProfitDrilldownRow": {
+        "properties": {
+          "amount": {
+            "type": "number"
+          },
+          "component": {
+            "type": "string"
+          },
+          "componentLabel": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "mskuCode": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "operatingMode": {
+            "type": "string"
+          },
+          "operatingModeLabel": {
+            "type": "string"
+          },
+          "orderRef": {
+            "type": "string"
+          },
+          "periodEnd": {
+            "format": "date",
+            "type": "string"
+          },
+          "periodStart": {
+            "format": "date",
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "shopCode": {
+            "type": "string"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "sourceReference": {
+            "type": "string"
+          },
+          "sourceService": {
+            "type": "string"
+          },
+          "spuCode": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ProfitModeView": {
+        "properties": {
+          "note": {
+            "type": "string"
+          },
+          "operatingMode": {
+            "type": "string"
+          },
+          "operatingModeLabel": {
+            "type": "string"
+          },
+          "shopCodes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "shopCount": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ProfitRefreshResult": {
+        "properties": {
+          "fetched": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "projected": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "source": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ProfitReportCapabilities": {
+        "properties": {
+          "components": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "dimensions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "notDelivered": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "ownerNote": {
+            "type": "string"
+          },
+          "upstreamConnected": {
+            "type": "boolean"
+          },
+          "upstreams": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "ProfitReportResponse": {
+        "properties": {
+          "caliberNote": {
+            "type": "string"
+          },
+          "dataUpdatedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "dataUpdatedNote": {
+            "type": "string"
+          },
+          "dimension": {
+            "type": "string"
+          },
+          "from": {
+            "format": "date",
+            "type": "string"
+          },
+          "granularity": {
+            "type": "string"
+          },
+          "modes": {
+            "items": {
+              "$ref": "#/components/schemas/ProfitModeView"
+            },
+            "type": "array"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/ProfitReportRow"
+            },
+            "type": "array"
+          },
+          "to": {
+            "format": "date",
+            "type": "string"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "ProfitReportRow": {
+        "properties": {
+          "baseCurrency": {
+            "nullable": true,
+            "type": "string"
+          },
+          "baseGrossProfit": {
+            "nullable": true,
+            "type": "number"
+          },
+          "baseRate": {
+            "nullable": true,
+            "type": "number"
+          },
+          "baseRateAsOf": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "baseRevenue": {
+            "nullable": true,
+            "type": "number"
+          },
+          "components": {
+            "items": {
+              "$ref": "#/components/schemas/ProfitComponentAmount"
+            },
+            "type": "array"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "dimension": {
+            "type": "string"
+          },
+          "dimensionCode": {
+            "type": "string"
+          },
+          "dimensionLabel": {
+            "type": "string"
+          },
+          "factCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "grossMargin": {
+            "nullable": true,
+            "type": "number"
+          },
+          "grossProfit": {
+            "nullable": true,
+            "type": "number"
+          },
+          "grossProfitComparable": {
+            "type": "boolean"
+          },
+          "missingComponents": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "operatingMode": {
+            "type": "string"
+          },
+          "operatingModeLabel": {
+            "type": "string"
+          },
+          "periodEnd": {
+            "format": "date",
+            "type": "string"
+          },
+          "periodStart": {
+            "format": "date",
+            "type": "string"
+          },
+          "totalCost": {
+            "nullable": true,
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
       "ProjectionBatchResult": {
         "properties": {
           "appliedCount": {
@@ -9902,6 +10232,343 @@
         "summary": "变体销量分布：某个 SPU 名下各变体的销量与占比",
         "tags": [
           "13.2.2.2 SKU/SPU/Listing"
+        ]
+      }
+    },
+    "/reporting/profit-report/capabilities": {
+      "get": {
+        "description": "notDelivered 列出的是**确实算不出来**的部分，每条都写清原因与影响 —— 「算不出来」与「等于 0」在页面上长得一样，含义却相反。",
+        "operationId": "get_reporting_profit_report_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfitReportCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "能力声明：哪些上游真接通、哪些确实算不出来、归谁",
+        "tags": [
+          "13.4.1.1 多模式利润报表"
+        ]
+      }
+    },
+    "/reporting/profit-report/drilldown": {
+      "get": {
+        "description": "列出的是**事实行**（来源服务 + 上游行标识），可以逐条回到上游核对。毛利那一格为什么算不出来，在这一层能直接看到缺的是哪几条事实。",
+        "operationId": "get_reporting_profit_report_drilldown",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dimension",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dimensionCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "operatingMode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfitDrilldownPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "多维下钻：这一格背后的构成明细（真分页 + 真计数）",
+        "tags": [
+          "13.4.1.1 多模式利润报表"
+        ]
+      }
+    },
+    "/reporting/profit-report/modes": {
+      "get": {
+        "description": "「未归属」= 挂不上店铺或上游没给经营模式的店铺 —— 它们的收入与成本**不混进任何真实模式**。",
+        "operationId": "get_reporting_profit_report_modes",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ProfitModeView"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "经营模式清单：每个模式带店铺数（模式取自 2.3.2.1）",
+        "tags": [
+          "13.4.1.1 多模式利润报表"
+        ]
+      }
+    },
+    "/reporting/profit-report/refresh": {
+      "post": {
+        "description": "与 POST /reporting/projection/refresh 是同一条管道（同一套幂等键与重建逻辑），这里只跑本模块的四路上游。权限是 reporting.projection.write —— **本模块没有任何「创建业务事实」的权限**。",
+        "operationId": "post_reporting_profit_report_refresh",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sources",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "in": "query",
+            "name": "timezone",
+            "required": false,
+            "schema": {
+              "default": "UTC",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ProfitRefreshResult"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "刷新利润事实（从上游拉取 → 投影）",
+        "tags": [
+          "13.4.1.1 多模式利润报表"
+        ]
+      }
+    },
+    "/reporting/profit-report/report": {
+      "get": {
+        "description": "不同经营模式的利润含义完全不同 ⇒ 报表**按模式分行，模式之间不合并**。dimension 决定核算维度：MODE / SHOP / ORDER 用订单总额口径的收入，SKU / SPU / MSKU 用订单行金额口径的收入（两者不是同一笔钱，不相加）。毛利算不出来时返回 null（页面显示「—」），**不是 0.00**。",
+        "operationId": "get_reporting_profit_report_report",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "granularity",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dimension",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "operatingMode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "shopCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "skuCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "baseCurrency",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfitReportResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "多模式利润报表：按经营模式分别出毛利，支持多维核算",
+        "tags": [
+          "13.4.1.1 多模式利润报表"
         ]
       }
     },
