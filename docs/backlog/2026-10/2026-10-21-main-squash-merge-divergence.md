@@ -1,4 +1,4 @@
-# `origin/main` 的 tip 是集成头的 squash —— main → 集成头同步结构性冲突（连续 8 轮未并入）
+# `origin/main` 的 tip 是集成头的 squash —— main → 集成头同步结构性冲突（第 79–98 轮连续未并入）
 
 - 创建: 2026-10-21
 - Owner: TBD（**发布侧**负责，见「待办内容」第 1 条）
@@ -218,6 +218,10 @@ parents:   1 个父提交 = d28188d6（**常规提交，不是 merge**）
       刻意做的**显式 UTC + 同锚点 + 可执行不变量**的跨时钟域修复 ⇒ **不是语义等价**）。
       ⇒ 方向已清楚：**两个都可按 ours 收**（`api-proxy.ts` 是严格超集；`PriceHistory` 取 theirs
       等于**回退跨时钟域修复**），但仍需人工逐行确认，且解完**必须重跑 L2**。）
+      （2026-10-29 05:15 第 98 轮更新：冲突面已变成 **27 个**；theirs 侧独有合计 **79 行**、
+      **逐行分类完成 ⇒ 0 行是 main 侧的新交付**（详见上方「2026-10-29 05:15 轮」小节）。
+      **新增的 1 个** `SaasUsageIntegrationTest.java` 是**高危型** ——
+      取 theirs 会把 `c904ec63` 修掉的 flaky 子串断言装回去。）
 - [ ] **（顺带）给同步任务补「回合被截断也要 `gate release`」的收尾保障**：
       2026-10-21 02:15 那个同步任务回合在 02:47:10 被截断，**既没写会话日志也没 release 闸**
       ⇒ 闸泄漏 70 分钟，白挡了 03:00 轮与 03:15 轮两次同步。
@@ -262,6 +266,94 @@ parents:   1 个父提交 = d28188d6（**常规提交，不是 merge**）
       **两处措辞都自相矛盾**；本轮据实更正。）
       ⇒ 这解释了为什么 merge-base 仍停在 `1bb270a0`：main 上**两颗**提交都是 squash，
       **合并路径依然只能靠发布侧改用真提交**才能根治。
+- [ ] **（2026-10-29 05:15 第 98 轮新增，P0）冲突面会随集成头前进而增长 —— 撞墙成本加速上升**：
+      本轮冲突面 **26 → 27**，新增的那 1 个**不是 main 侧的新交付**，
+      而是集成头自己的修复车道 `c904ec63`（改 `SaasUsageIntegrationTest.java`）撞上了 main 的旧快照
+      ⇒ **集成头每落一条「改动已存在文件」的修复车道，就新增 1 个 add/add 冲突点**。
+      ⇒ 建议：**发布侧修复到位前，同步任务改为按「模块 ID + 状态」做增量同步**
+      （只同步 main 侧真正领先、且集成头未交付的模块），而不是整树 merge。
+- [ ] **（2026-10-29 05:15 第 98 轮新增，P1）授权「逐文件取 ours + 人工核对 79 行」的机械解法**：
+      本轮已把 theirs 侧 79 行**逐行分类**（35 + 11 墙钟基准、7 `parsed_at` 断言、
+      3 旧 flaky 子串断言、2 + 3 提示串、2、其余 21 个文件各 1 行 import/常量写法）
+      ⇒ **0 行是 main 侧的新交付**；且 **4 个文件 theirs 独有 0 行**（取 ours 无损）。
+      ⇒ 机械解法已具备安全前提，但 `SYNC-MAIN.md` 现行硬规定是「**不自行解冲突**」
+      ⇒ 需**协议层面显式授权**后才可执行，或由发布侧直接改 main 的 tip（首选）。
+      ⚠️ 高危项必须点名：`SaasUsageIntegrationTest.java` 取 theirs
+      会把 `c904ec63` 修掉的 flaky 断言装回去；`AnomalyOrder*` 取 theirs 会回退跨时钟域修复。
+
+### 2026-10-29 05:15 轮（第 98 轮）：冲突面**会随集成头前进而增长**，且 theirs 侧**零行新交付**
+
+> 本节回应流水线第 127 轮（2026-10-29 05:00）的明确请求：
+> *「本流水线不碰它（那是同步任务的职责），但建议由同步任务侧排查那 26 个冲突的根因。」*
+
+**① main tip 仍未动**：`origin/main` tip 仍是 `823ebca5 Integration/module dev (#66)`（**单父**，父 = `6522c497`），
+与第 79–97 轮**同一颗 squash**；merge-base 仍停在 `6522c497`（2026-10-23 09:18）。
+`git rev-list --count integration/module-dev..origin/main` = **1**。
+
+**② 冲突面从 26 → 27，且新增的那 1 个不是 main 侧的新交付**（程序化集合比对，非目测）：
+
+```
+round97 = 26 个   round98 = 27 个
+NEW  : backend/services/identity/src/test/java/com/starcon/identity/SaasUsageIntegrationTest.java
+GONE : （无）
+```
+
+新增来源 = **集成头自己的修复车道** `c904ec63`（identity 用量统计 flaky 断言修复，经 `3e83aa41` 并入）
+⇒ **集成头每落一条「改动已存在文件」的修复车道，就新增 1 个 add/add 冲突点**。
+
+> ⚠️ **这条新增冲突是高危型**：`theirs` 侧独有 3 行正是
+> `assertThat(forA.toString()).contains("111").doesNotContain("222");` 一族
+> —— 即 `c904ec63` **修掉的随机 UUID 子串匹配写法**（原写法因 UUID 随机而 flaky）。
+> ⇒ **取 theirs = 把刚修掉的 flaky 断言装回去** ⇒ 这一处必须取 ours。
+
+**③ theirs 侧独有内容逐行分类（27 个文件全覆盖）**
+
+口径：`git diff --numstat HEAD origin/main -- <file>`。
+
+| 口径 | 结果 |
+| --- | --- |
+| 文件数 | 27（26 add/add + 1 content） |
+| **theirs 是 ours 的严格超集（theirs 独有 = 0 ⇒ 取 ours 无损）** | **4**：`api-proxy.ts` / `LinkageRiskIdentityStub.java` / `ReportingFinancePort.java` / `ReportingUpstreamClient.java` |
+| theirs 独有行合计 | **79 行** |
+| ours 独有行合计 | **1643 行** |
+
+theirs 独有 79 行的构成（**逐行看过**）：
+
+| 文件 | 行数 | 性质 |
+| --- | --- | --- |
+| `AnomalyOrderIntegrationTest.java` | **35** | **JVM 墙钟基准** `static final OffsetDateTime NOW = OffsetDateTime.now(ZoneOffset.UTC).truncatedTo(ChronoUnit.SECONDS)`；ours 侧已改 DB 时钟同源 ⇒ **取 theirs 回退跨时钟域修复** |
+| `AnomalyOrderTenancyIntegrationTest.java` | 11 | 同族（墙钟基准） |
+| `SalesTaxIntegrationTest.java` | 7 | `parsed_at` 必须是真时刻的断言 |
+| `NotificationInboxController.java` | 3 | 「1.3.2.1 预警规则未交付」提示串 |
+| `SaasUsageIntegrationTest.java` | 3 | **旧 flaky 子串断言**（见 ②） |
+| `NotificationPreferenceService.java` | 2 | 「1.3.2.2 外部渠道推送未交付」提示串 |
+| `FundAnalysisIntegrationTest.java` | 2 | — |
+| 其余 21 个文件 | 各 **1** | **几乎全是 import 行 / 常量声明行**写法差异（例：`static final PostgreSQLContainer<?> pg = new PostgreSQLContainer<>("postgres:16-alpine");`、`import { Boxes, ClipboardList, HeartPulse, LayoutGrid, Search } from 'lucide-react';`） |
+
+⇒ **79 行里 0 行是 main 侧的新模块交付**，全部落在「已被集成头后续交付推翻或改写的旧写法」上。
+
+**④ 由 ③ 推出的两条可执行结论**：
+
+1. **方向仍是「以集成头为准」**（与第 93–97 轮一致，本轮证据更硬）；
+   其中 4 个文件 theirs 独有 **0 行** ⇒ 取 ours **无损**；
+   其余 23 个文件 theirs 独有共 79 行，其中 **21 个文件各只有 1 行**（import/常量写法），
+   ⇒ **「逐文件取 ours + 人工核对那 79 行」是安全解法**，但**本任务协议禁止自行解冲突**
+   ⇒ 需协议层面授权，或由发布侧直接改 main 的 tip（首选）。
+2. **撞墙成本会随流水线推进而加速上升，不是恒定 26/27**
+   ⇒ 建议在发布侧修复到位前，**同步任务改为按「模块 ID + 状态」做增量同步**
+   （只同步 main 侧真正领先、且集成头未交付的模块），而不是整树 merge。
+
+**⑤ 协议级待补**：`SYNC-MAIN.md` 可补一条判据 ——
+**「add/add ≠ 真分叉」**：先查 main 侧 blob 是否在集成头历史中原样存在，
+命中即线性演进、可机械取集成头侧（第 96 轮已提，本轮再次实证成立）。
+
+**⑥ 另两条与本条相关的旧待办，本轮再次实证**：
+
+- **「同步任务提交文档会制造下一个冲突文件」**：本轮提交的本 backlog 文件，
+  `git cat-file -e origin/main:<path>` ⇒ **main 侧无同名文件**（main 的 squash 快照停在 2026-10-23，
+  早于本文件创建）⇒ **本轮不会新增 add/add 冲突点**。
+  （但「main 上已有同名文件」的文档仍适用旧规则：**只在集成头改、不往 main 推**。）
+- **「`gate release` 只删自己持有的闸」**：本轮闸是空的、一次命中、只 release 一次 ⇒ 未触发闸泄漏。
 
 ---
 
@@ -270,6 +362,28 @@ parents:   1 个父提交 = d28188d6（**常规提交，不是 merge**）
 - **只影响「main → 集成头同步」这一个任务**（`tools/module-progress/SYNC-MAIN.md`）的推进节奏，
   **不影响**流水线的并入 / L2（集成头自身照常演进，batch-39~42 均正常交付）。
 - **不动任何业务代码**：本条待办是**发布流程 / 仓库拓扑**问题，不是代码问题。
+- 涉及文件（**最新一轮 —— 第 98 轮（2026-10-29 05:15）的冲突面，27 个 = 26 add/add + 1 content**）：
+  - `apps/web/src/components/dashboard/workbench-card-registry.ts`（add/add）
+  - `apps/web/src/components/dashboard/workbench-layout-model.test.ts`（add/add）
+  - `apps/web/src/lib/api-proxy.ts`（**content**；theirs 独有 **0 行**，ours 严格超集）
+  - `backend/services/channel/src/test/java/com/starcon/channel/` 下 **15 个**：
+    `DataGovernanceIntegrationTest.java` / `DataGovernanceTenancyIntegrationTest.java` /
+    `FilingCalendarIntegrationTest.java` / `FilingCalendarTenancyIntegrationTest.java` /
+    `GlobalSearchGroupIntegrationTest.java` / `GlobalSearchIntegrationTest.java` /
+    `LinkageRiskIdentityStub.java`（theirs 独有 **0 行**）/ `LinkageRiskIntegrationTest.java` /
+    `LinkageRiskTenancyIntegrationTest.java` / `SalesTaxIntegrationTest.java` /
+    `SalesTaxTenancyIntegrationTest.java` / `SyncHealthIntegrationTest.java` /
+    `SyncHealthTenancyIntegrationTest.java` / `VatIossIntegrationTest.java` /
+    `VatIossTenancyIntegrationTest.java`
+  - `backend/services/finance/src/test/java/com/starcon/finance/FundAnalysisIntegrationTest.java`（add/add）
+  - `backend/services/identity/src/main/java/com/starcon/identity/NotificationInboxController.java`（add/add）
+  - `backend/services/identity/src/main/java/com/starcon/identity/NotificationPreferenceService.java`（add/add）
+  - `backend/services/identity/src/test/java/com/starcon/identity/ApprovalTodoIntegrationTest.java`（add/add）
+  - `backend/services/identity/src/test/java/com/starcon/identity/SaasUsageIntegrationTest.java`（add/add，**第 98 轮新增**）
+  - `backend/services/reporting/src/main/java/com/starcon/reporting/ReportingFinancePort.java`（add/add，theirs 独有 **0 行**）
+  - `backend/services/reporting/src/main/java/com/starcon/reporting/ReportingUpstreamClient.java`（add/add，theirs 独有 **0 行**）
+  - `backend/services/trade/src/test/java/com/starcon/trade/AnomalyOrderIntegrationTest.java`（add/add，theirs 独有 **35 行**，墙钟基准）
+  - `backend/services/trade/src/test/java/com/starcon/trade/AnomalyOrderTenancyIntegrationTest.java`（add/add，theirs 独有 **11 行**，墙钟基准）
 - 涉及文件（**11:45 轮的冲突面，3 个**）：
   - `apps/web/src/lib/api-proxy.ts`（content 冲突；main 侧独有 **0 行**，ours 严格超集；**同时**是共享白名单累积文件，见
     `docs/backlog/2026-10/2026-10-21-api-proxy-shared-file-merge-conflict.md`）
