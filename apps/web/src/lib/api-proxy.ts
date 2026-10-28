@@ -13123,6 +13123,57 @@ const services: readonly {
       /^traffic\-conversion(?:\/(?:capabilities|metrics|drilldown|refresh))?$/,
   },
   {
+    // 13.4.2.1 成本结构（reporting 服务，卷 13「利润与经营分析」L3 13.4.2 成本拆解下的第一格）。
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 reporting/ 正则里并分支 ——
+    //   既有条目**一字未改、也不重排**。
+    //
+    // ---- 插入锚点选在**13.3.2.1 traffic-conversion 之后、13.3.2.2 affiliate-marketing 之前**----
+    //   与同批其它车道的插入点（数组末尾收尾的 `];` 之前）相隔 12000 行以上 ⇒ 并入时 git 能干净求并。
+    //
+    // ---- 首 token「cost-structure」的零命中核对结论（实测，非目测）----
+    //   发车前用脚本（本车道的 .tmp/ 一次性脚本，不入库）把本文件里**全部 247 条既有元素**
+    //   （prefix + 正则）逐条抽出来，按 resolve() 的**同构口径**实测
+    //   （path.startsWith(prefix) 收窄服务 → 再测 pattern.test(path.slice(prefix.length))）：
+    //     reporting/cost-structure
+    //     reporting/cost-structure/capabilities
+    //     reporting/cost-structure/structure
+    //     reporting/cost-structure/trend
+    //     reporting/cost-structure/anomalies
+    //     reporting/cost-structure/rules
+    //     reporting/cost-structure/rules/PURCHASE
+    //     reporting/cost-structure/rules/AD_FEE
+    //     reporting/cost-structure/refresh
+    //   **零命中** —— 既有 247 条正则里没有任何一条会吃掉本模块的路径，
+    //   而 resolve() 先按 prefix 闸门筛，所以别的服务的正则（identity/ catalog/ trade/ 的 catch-all）
+    //   根本吃不到本模块的路径。
+    //   反向也核对了本文件里 **15 条 prefix === 'reporting/' 的既有形状**：本条新正则对它们**零命中**
+    //   ⇒ 本条不会遮蔽别的车道已交付的路由。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**，契约 reporting.openapi.json 里就这 7 条）：
+    //   capabilities       能力声明（七类成本分别来自哪个上游 / 哪些确实拆不出来）
+    //   structure          占比结构表 + 环比 / 同比基线 + 异常提示
+    //   trend              占比趋势（按期间粒度）
+    //   anomalies          异常提示清单
+    //   rules              异常判定阈值规则（可配置项）
+    //   rules/{costCategory} 改某一类成本的阈值（PUT）
+    //   refresh            刷新成本事实（POST，与 projection/refresh 同一条管道）
+    //
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   cost-structure             —— 裸路径：后端**没有**「一条不存在的汇总列表接口」。
+    //   cost-structure/{uuid}      —— 顶层没有 id 段（结构表按查询参数定位，不是按 id）。
+    //   cost-structure/not-a-shape —— 多一层仍然 404。
+    //   cost-structure/rules/NOPE  —— 规则只认七个成本类别，别的值是 400（不静默回落）。
+    //   cost-structure/alerts      —— 🔴 利润预警是 13.4.3.1，不是本模块。
+    //
+    // 字面量子路径（capabilities / structure / trend / anomalies / rules / refresh）排在可选段
+    // **之前**判别 —— alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    prefix: 'reporting/',
+    env: 'REPORTING_URL',
+    fallback: 'http://127.0.0.1:8088',
+    pattern:
+      /^cost\-structure\/(?:capabilities|structure|trend|anomalies|rules(?:\/(?:PURCHASE|HEAD_MILE|PLATFORM_FEE|LOGISTICS_FEE|AD_FEE|RETURN|OTHER))?|refresh)$/,
+  },
+  {
     // 13.3.2.2 关联营销效果（reporting 服务，卷 13「利润与经营分析」L3 13.3.2 流量与转化下的第二格）。
     // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 reporting/ 正则里并分支 ——
     //   既有条目**一字未改、也不重排**。
