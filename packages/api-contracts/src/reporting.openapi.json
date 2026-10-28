@@ -4117,6 +4117,462 @@
         },
         "type": "object"
       },
+      "ProfitAlert": {
+        "properties": {
+          "actions": {
+            "items": {
+              "$ref": "#/components/schemas/ProfitAlertAction"
+            },
+            "type": "array"
+          },
+          "alertType": {
+            "type": "string"
+          },
+          "alertTypeLabel": {
+            "type": "string"
+          },
+          "baselineMode": {
+            "type": "string"
+          },
+          "baselineValue": {
+            "nullable": true,
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "delta": {
+            "nullable": true,
+            "type": "number"
+          },
+          "fingerprint": {
+            "type": "string"
+          },
+          "grossProfit": {
+            "nullable": true,
+            "type": "number"
+          },
+          "metricCode": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "observedUnit": {
+            "type": "string"
+          },
+          "observedValue": {
+            "nullable": true,
+            "type": "number"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "revenue": {
+            "nullable": true,
+            "type": "number"
+          },
+          "scopeKey": {
+            "type": "string"
+          },
+          "scopeLabel": {
+            "type": "string"
+          },
+          "scopeType": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string"
+          },
+          "severityLabel": {
+            "type": "string"
+          },
+          "thresholdMode": {
+            "type": "string"
+          },
+          "thresholdUnit": {
+            "type": "string"
+          },
+          "thresholdValue": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "ProfitAlertAction": {
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "href": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ProfitAlertCapabilities": {
+        "properties": {
+          "alertTypes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "notDelivered": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "upstreamConnected": {
+            "type": "boolean"
+          },
+          "upstreamModules": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "ProfitAlertNotification": {
+        "properties": {
+          "acknowledgedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "acknowledgedBy": {
+            "nullable": true,
+            "type": "string"
+          },
+          "alertFingerprint": {
+            "type": "string"
+          },
+          "alertType": {
+            "type": "string"
+          },
+          "alertTypeLabel": {
+            "type": "string"
+          },
+          "channel": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "observedUnit": {
+            "type": "string"
+          },
+          "observedValue": {
+            "nullable": true,
+            "type": "number"
+          },
+          "scopeKey": {
+            "type": "string"
+          },
+          "scopeLabel": {
+            "type": "string"
+          },
+          "scopeType": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string"
+          },
+          "severityLabel": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "thresholdValue": {
+            "type": "number"
+          },
+          "title": {
+            "type": "string"
+          },
+          "windowEnd": {
+            "format": "date",
+            "type": "string"
+          },
+          "windowStart": {
+            "format": "date",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ProfitAlertNotificationInput": {
+        "properties": {
+          "status": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ProfitAlertNotificationPage": {
+        "properties": {
+          "note": {
+            "type": "string"
+          },
+          "notifications": {
+            "items": {
+              "$ref": "#/components/schemas/ProfitAlertNotification"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "pendingCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ProfitAlertNotificationSummary": {
+        "properties": {
+          "created": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "from": {
+            "format": "date",
+            "type": "string"
+          },
+          "matched": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "skipped": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "to": {
+            "format": "date",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ProfitAlertPage": {
+        "properties": {
+          "alerts": {
+            "items": {
+              "$ref": "#/components/schemas/ProfitAlert"
+            },
+            "type": "array"
+          },
+          "caliberNote": {
+            "type": "string"
+          },
+          "dataUpdatedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "dataUpdatedNote": {
+            "type": "string"
+          },
+          "from": {
+            "format": "date",
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/ProfitAlertSummary"
+          },
+          "to": {
+            "format": "date",
+            "type": "string"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "undecided": {
+            "items": {
+              "$ref": "#/components/schemas/ProfitAlertUndecided"
+            },
+            "type": "array"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "ProfitAlertRule": {
+        "properties": {
+          "alertType": {
+            "type": "string"
+          },
+          "alertTypeLabel": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "minHistoryPeriods": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "severity": {
+            "type": "string"
+          },
+          "severityLabel": {
+            "type": "string"
+          },
+          "thresholdMode": {
+            "type": "string"
+          },
+          "thresholdUnit": {
+            "type": "string"
+          },
+          "thresholdValue": {
+            "type": "number"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ProfitAlertRuleInput": {
+        "properties": {
+          "enabled": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "minHistoryPeriods": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "severity": {
+            "type": "string"
+          },
+          "thresholdMode": {
+            "type": "string"
+          },
+          "thresholdValue": {
+            "nullable": true,
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "ProfitAlertSummary": {
+        "properties": {
+          "bySeverityCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "byTypeCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "criticalCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "infoCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "truncated": {
+            "type": "boolean"
+          },
+          "undecidedCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "warningCount": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ProfitAlertUndecided": {
+        "properties": {
+          "alertType": {
+            "type": "string"
+          },
+          "alertTypeLabel": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "scopeKey": {
+            "type": "string"
+          },
+          "scopeLabel": {
+            "type": "string"
+          },
+          "scopeType": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "ProfitComponentAmount": {
         "properties": {
           "amount": {
@@ -11032,6 +11488,399 @@
         "summary": "变体销量分布：某个 SPU 名下各变体的销量与占比",
         "tags": [
           "13.2.2.2 SKU/SPU/Listing"
+        ]
+      }
+    },
+    "/reporting/profit-alert/alerts": {
+      "get": {
+        "description": "预警是**从利润投影算出来的读模型**（上游 = 13.4.1.1 的 reporting_profit_fact），不是业务事实 —— 与业务系统冲突时以业务系统为准。阈值落在租户自己的规则表里，**不是写死的百分比**。判不出来的条目单独列在 undecided 里并写明原因，**绝不写成「没异常」**。",
+        "operationId": "get_reporting_profit_alert_alerts",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "alertType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "severity",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "scopeType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "scopeKey",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfitAlertPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "预警清单（SKU 毛利转负 / 店铺利润率骤降 / 费用占比异常 / 广告亏损超标 / 亏损订单占比突增）",
+        "tags": [
+          "13.4.3.1 利润预警"
+        ]
+      }
+    },
+    "/reporting/profit-alert/capabilities": {
+      "get": {
+        "description": "notDelivered 列出的是**确实拆不出来**的部分（SKU 级成本、订单级成本、广告归因收入等），每条都写清原因与影响 —— 「判不出来」与「没异常」在页面上长得一样，含义却相反。",
+        "operationId": "get_reporting_profit_alert_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfitAlertCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "能力声明：五类预警分别算什么、哪些确实算不出来",
+        "tags": [
+          "13.4.3.1 利润预警"
+        ]
+      }
+    },
+    "/reporting/profit-alert/notifications": {
+      "get": {
+        "description": "记录「谁在什么时候被通知过、确认过没有」；终态（已知悉 / 已忽略）**不可复活**。",
+        "operationId": "get_reporting_profit_alert_notifications",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "alertType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfitAlertNotificationPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "通知投递记录台账（真分页 + 真计数）",
+        "tags": [
+          "13.4.3.1 利润预警"
+        ]
+      },
+      "post": {
+        "description": "⚠️ **不真发邮件 / webhook**：那需要地址与凭据，而 AGENTS.md 规定 secret 一律不入仓库。本模块做的是**可观测的通知投递记录**（落库 + 查询端点），通道只有站内（CONSOLE）。同一个窗口反复登记同一条预警**不会**产生第二条记录（通知轰炸比没有通知更糟）。",
+        "operationId": "post_reporting_profit_alert_notifications",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfitAlertNotificationSummary"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "把命中的预警登记成通知投递记录（幂等）",
+        "tags": [
+          "13.4.3.1 利润预警"
+        ]
+      }
+    },
+    "/reporting/profit-alert/notifications/{id}": {
+      "put": {
+        "description": "终态不可复活：已确认 / 已忽略的记录不能改回待处理 —— 否则「处理过的预警」会重新出现在待办里，那比不处理更糟。",
+        "operationId": "put_reporting_profit_alert_notifications_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProfitAlertNotificationInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfitAlertNotification"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "处理一条通知（已知悉 / 误报忽略）",
+        "tags": [
+          "13.4.3.1 利润预警"
+        ]
+      }
+    },
+    "/reporting/profit-alert/rules": {
+      "get": {
+        "description": "阈值落在**租户自己的规则表**里：固定阈值线（FIXED）或相对历史基线的变化量（BASELINE，单位是百分点）；最少历史期数决定基线要前几期同口径窗口。阈值的**单位由 (预警类型 × 阈值口径) 派生**，不落库 —— 存副本就会与口径漂移。",
+        "operationId": "get_reporting_profit_alert_rules",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ProfitAlertRule"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "预警阈值规则（可配置项）",
+        "tags": [
+          "13.4.3.1 利润预警"
+        ]
+      }
+    },
+    "/reporting/profit-alert/rules/{alertType}": {
+      "put": {
+        "description": "只改写进来的那几个字段；本模块**只改自己的规则表**，不写任何上游口径（费率规则在 catalog、归集与分摊结果在 finance）。取值范围会被校验（例：「SKU 毛利转负」的阈值必须 ≤ 0）。",
+        "operationId": "put_reporting_profit_alert_rules_alertType",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "alertType",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProfitAlertRuleInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfitAlertRule"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "改某一类预警的阈值",
+        "tags": [
+          "13.4.3.1 利润预警"
         ]
       }
     },

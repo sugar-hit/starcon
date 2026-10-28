@@ -13257,6 +13257,68 @@ const services: readonly {
     pattern:
       /^affiliate\-marketing(?:\/(?:capabilities|metrics|attributions|refresh))?$/,
   },
+  {
+    // 13.4.3.1 利润预警（reporting 服务，卷 13「利润与经营分析」L3 13.4.3 利润预警下的第一格）。
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 reporting/ 正则里并分支 ——
+    //   既有条目**一字未改、也不重排、不删除**。
+    //
+    // ---- 插入锚点选在**数组末尾**（收尾的 `];` 之前、紧跟 13.3.2.2 affiliate-marketing 那条之后）----
+    //   与同批另一条车道（13.4.1.2 SKU 利润，锚在数组靠前的 profit-report 那条之后）相距 12000+ 行
+    //   ⇒ 并入时 git 能干净求并（本车道走普通 git merge，不是求并驱动器）。
+    //
+    // ---- 首 token「profit-alert」的零命中核对结论（**实测，非目测**）----
+    //   发车前用脚本（本车道的 .tmp/ 一次性脚本，不入库）把本文件里**全部 258 条既有元素**
+    //   （prefix + 正则）逐条抽出来，按 resolve() 的**同构口径**实测
+    //   （path.startsWith(prefix) 收窄服务 → 再测 pattern.test(path.slice(prefix.length))）：
+    //     reporting/profit-alert/capabilities                            零命中
+    //     reporting/profit-alert/alerts                                   零命中
+    //     reporting/profit-alert/rules                                   零命中
+    //     reporting/profit-alert/rules/SKU_NEGATIVE_GROSS_PROFIT         零命中
+    //     reporting/profit-alert/rules/SHOP_MARGIN_DROP                  零命中
+    //     reporting/profit-alert/rules/FEE_RATIO_ANOMALY                 零命中
+    //     reporting/profit-alert/rules/AD_LOSS_EXCEEDED                  零命中
+    //     reporting/profit-alert/rules/LOSS_ORDER_RATIO_SPIKE            零命中
+    //     reporting/profit-alert/notifications                           零命中
+    //     reporting/profit-alert/notifications/{uuid}                    零命中
+    //   **零命中** —— 既有 258 条正则里没有任何一条会吃掉本模块的路径，
+    //   而 resolve() 先按 prefix 闸门筛，所以别的服务的正则（identity/ catalog/ trade/ 的 catch-all）
+    //   根本吃不到本模块的路径。
+    //   ⚠️ 核对脚本**先把整行注释剥掉再抽元素**：别的车道的注释块里写着 `prefix: 'identity/'`
+    //   这类散文，不剥注释会把散文当成元素（抽出的条数与 env: 条数对不上 ⇒ 核对无效）。
+    //   反向也核对了本文件里 **16 条 prefix === 'reporting/' 的既有形状**，它们的首 token 分别是
+    //   product-performance / lifecycle-segmentation / expense-variance / store-comparison /
+    //   sales-trend / target-attainment / metric-cards / store-overview / targets / store-site /
+    //   time-pattern / profit-report / product-sales / traffic-conversion / cost-structure /
+    //   affiliate-marketing —— 与 `profit-alert` **首 token 各不相同** ⇒ 两两不相交，
+    //   本条新正则对它们**零命中**（不遮蔽别的车道已交付的路由）。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**，契约 reporting.openapi.json 里就这 7 条）：
+    //   profit-alert/capabilities      能力声明（五类预警各算什么 / 哪些确实算不出来）
+    //   profit-alert/alerts             预警清单 + 判不出来清单 + 统计（真分页）
+    //   profit-alert/rules              预警阈值规则（可配置项）
+    //   profit-alert/rules/{alertType}  改某一类预警的阈值（PUT；只认五个预警类型）
+    //   profit-alert/notifications      通知投递记录台账（GET）/ 把命中的预警登记成通知（POST）
+    //   profit-alert/notifications/{id} 处理一条通知：已知悉 / 误报忽略（PUT）
+    //
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   profit-alert                 —— 裸路径：后端**没有**「一条不存在的汇总列表接口」。
+    //   profit-alert/{uuid}           —— 顶层没有 id 段（预警清单按查询参数定位，不是按 id）。
+    //   profit-alert/not-a-shape      —— 多一层仍然 404。
+    //   profit-alert/rules/NOPE       —— 规则只认五个预警类型，别的值是 400（不静默回落）。
+    //   profit-alert/refresh          —— 🔴 本模块**只读**13.4.1.1 的利润投影，
+    //                                    **不另建第二个投影管道**（两个写入所有者就是第二个真相）。
+    //   profit-alert/report           —— 🔴 利润报表是 13.4.1.1（`/reporting/profit-report/**`），
+    //                                    不是本模块。
+    //   profit-alert/drilldown        —— 🔴 利润下钻是 13.4.1.1 的端点，不是本模块。
+    //   profit-alert/trend            —— 🔴 趋势是 13.4.2.1 成本结构的端点，不是本模块。
+    //
+    // ⚠️ **字面量子路径排在可选段之前判别** —— alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    prefix: 'reporting/',
+    env: 'REPORTING_URL',
+    fallback: 'http://127.0.0.1:8088',
+    pattern:
+      /^profit\-alert\/(?:capabilities|alerts|rules(?:\/(?:SKU_NEGATIVE_GROSS_PROFIT|SHOP_MARGIN_DROP|FEE_RATIO_ANOMALY|AD_LOSS_EXCEEDED|LOSS_ORDER_RATIO_SPIKE))?|notifications(?:\/[0-9a-fA-F\-]{36})?)$/,
+  },
 ];
 
 function resolve(path: string) {
