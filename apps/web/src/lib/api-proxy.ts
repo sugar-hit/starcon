@@ -621,6 +621,44 @@ const services: readonly {
     pattern: /^profit\-report\/(?:capabilities|report|drilldown|modes|refresh)$/,
   },
   {
+    // 13.4.1.2 SKU 利润（reporting 服务，卷 13「利润与经营分析」L3 13.4.1 利润报表下的第二格）。
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 reporting/ 正则里并分支 ——
+    //   既有条目**一字未改、也不重排、不删除**（13.4.1.1 那条 profit-report 元素保持原样）。
+    //
+    // ---- 插入锚点选在 **13.4.1.1 多模式利润报表（profit-report）那条的正下方** ----
+    //   与同批另一条车道（13.4.3.1 利润预警，锚点在数组末尾）相距 12000+ 行 ⇒ git 能干净求并。
+    //
+    // ---- 首 token「sku-profit」的零命中核对结论（实测，非目测）----
+    //   发车前用 `grep -n "sku-profit" apps/web/src/lib/api-proxy.ts` 实测：**零命中**
+    //   （当时 13.4.1.1 那条的注释里只有一句「profit-report/sku-profit —— 尚未开发」的说明文字，
+    //   那不是放行规则 —— 那条正则的首 token 是 `profit-report`，**吃不下** `sku-profit`）。
+    //   本文件里既有 17 条 `prefix: 'reporting/'` 的正则，首 token 分别是
+    //   overview/projection / product-performance / lifecycle-segmentation / expense-variance /
+    //   store-comparison / sales-trend / target-attainment / metric-cards / store-overview /
+    //   targets / store-site / time-pattern / profit-report / product-sales / traffic-conversion /
+    //   cost-structure / affiliate-marketing，**没有一条能吃下 `sku-profit`**；
+    //   而 resolve() 先按 prefix 闸门筛，别的前缀（channel/ trade/ finance/ catalog/ …）
+    //   根本碰不到 `reporting/` 开头的路径 ⇒ 两两不相交。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   sku-profit/capabilities  能力声明（哪些上游真接通、哪些确实算不出来、归谁管）
+    //   sku-profit/report        SKU 利润表（SKU × 币种；**不跨币种合并**）
+    //   sku-profit/waterfall     构成瀑布（收入 → 逐项成本 → 净利；服务端算好）
+    //   sku-profit/orders        订单级明细钻取（真分页 + 真计数）
+    //   sku-profit/refresh       刷新退款损失事实（POST，写的是投影不是业务事实）
+    //
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   sku-profit            —— 裸路径：后端**没有**「一条不存在的汇总列表接口」。
+    //   sku-profit/{uuid}     —— 顶层没有 id 段（SKU 利润按查询参数定位，不是按 id）。
+    //   sku-profit/unknown    —— 未实现的子路径仍然 404。
+    //   sku-profit/summary    —— 跨币种合计不存在（**不跨币种相加**是仓库铁律）。
+    //   sku-profit/profit-report —— 兄弟模块 13.4.1.1 是**另一条命名空间**（profit-report/…）。
+    prefix: 'reporting/',
+    env: 'REPORTING_URL',
+    fallback: 'http://127.0.0.1:8088',
+    pattern: /^sku\-profit\/(?:capabilities|report|waterfall|orders|refresh)$/,
+  },
+  {
     // 12.4.1.3 成本差异分析（finance 服务，卷 12「财务核算」L3 12.4.1 成本计算下的第三格）。
     // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 finance 那几条巨型 alternation 里并分支 ——
     //   既有条目**一字未改、也不重排**。
