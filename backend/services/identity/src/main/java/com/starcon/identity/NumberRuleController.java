@@ -1346,7 +1346,12 @@ public class NumberRuleController {
     var timezone =
         input.timezone() == null || input.timezone().isBlank() ? "UTC" : input.timezone().trim();
     check(zoneOf(timezone), "时区不合法：" + timezone);
-    var from = input.effectiveFrom() == null ? utcNow() : input.effectiveFrom();
+    // 调用方没给生效起点时，默认值是「此刻」—— 而这个值要与 DB 侧的
+    // `r.effective_from<=now()`（规则是否生效）比在同一口径上比较，
+    // 所以必须取**数据库自己的时钟**，不能取应用服务器墙钟：
+    // 写入侧用墙钟时，两端分属两个钟域，新建规则可能「刚建好却还没生效」
+    // （见 AuditLog.dbNow 的注释）。调用方明确给了时刻的照旧，那是业务契约。
+    var from = input.effectiveFrom() == null ? AuditLog.dbNow(sql) : input.effectiveFrom();
     return new Normalized(timezone, from, input.effectiveTo());
   }
 

@@ -647,16 +647,31 @@ public class AdministrationController {
     }
     sql.execute("delete from role_assignment where membership_id=?", id);
     for (var input : inputs) {
-      // 显式列名 + 生效时间带 ?::timestamptz 且**不在末位**：jOOQ 对 VALUES 列表里的裸 ? 按 varchar
-      // 推断类型，OffsetDateTime 会被当字符串塞进去且不报错（值偏一个时区偏移）；
+      // 生效时间取 **数据库自己的时钟**（now() = transaction_timestamp()），不取应用服务器墙钟。
+      //
+      // 🔴 理由：授权判定在 V47 的 session_access() 里，判据是 `ra.effective_from <= now()`，
+      // 而 PostgreSQL 的 now() 是**当前事务的开始时刻**、且属于**数据库的钟域**。
+      // 若写入侧改用 OffsetDateTime.now()（应用服务器墙钟），两端就分属两个钟域，
+      // 会出现「授权刚写好却被判成尚未生效」⇒ 成员拿不到任何授权码 ⇒ 请求落到
+      // "当前角色没有此操作权限" 的 403 分支。
+      // 两个触发条件都真实存在：
+      //   ① 宿主机与数据库的钟差（满载 / 容器与宿主分属不同钟源时更明显）；
+      //   ② 判定事务先于写入事务开始 —— 本服务按租户用 pg_advisory_xact_lock 串行化请求，
+      //      锁被占住时请求会排队，而 now() 取的是**到达时刻**而非真正执行时刻，
+      //      于是排队中的判定事务带着"过期"的钟去看刚落库的授权。
+      // 改成 now() 后两端同钟域：写入事务的开始时刻必然不晚于判定事务的开始时刻，
+      // 授权恒定生效。列默认值本来就是 now()（LocalBootstrap 与 owner-transfer 都吃这个默认值），
+      // 这里只是让建成员这条路径回到同一个钟域。
+      //
+      // 显式列名 + 不在末位放 cast：jOOQ 对 VALUES 列表里的裸 ? 按 varchar 推断类型，
+      // OffsetDateTime 会被当字符串塞进去且不报错（值偏一个时区偏移）；
       // 而把 cast 放到列表末位会让 jOOQ 整体绑定错位一格。两处都踩过，所以顺序是刻意的，不要「顺手整理」。
       sql.execute(
           "insert into role_assignment(tenant_id,membership_id,role_id,effective_from,scope_mode,assigned_by)"
-              + " values(?,?,?,?::timestamptz,?,?)",
+              + " values(?,?,?,now(),?,?)",
           a.tenantId(),
           id,
           input.roleId(),
-          OffsetDateTime.now(),
           input.scopeMode(),
           a.userId());
       // V47 起「有角色必有范围」是库内延迟约束触发的硬规则。这里 DEPARTMENT 范围就是成员自己的部门，
@@ -1543,7 +1558,11 @@ public class AdministrationController {
           check(exists("select 1 from department where id=?", id), "部门不存在");
           check(leaderSnapshot(id) != null, "请先指定部门负责人再配置代管");
           checkActiveMember(a, input.membershipId(), "代管人");
-          OffsetDateTime startsAt = now();
+          // 生效起点取**数据库自己的时钟**：V44 的 department_approval_chain 用
+          // `p.starts_at <= coalesce(as_of, now())` 判「代管此刻是否生效」——
+          // 那是授权判定，判据用的是 DB 的 now()。写入侧若用应用服务器墙钟，
+          // 两端就分属两个钟域，代管可能「刚建好却还没生效」（见 AuditLog.dbNow 的注释）。
+          OffsetDateTime startsAt = AuditLog.dbNow(sql);
           OffsetDateTime endsAt = input.endsAt();
           check(endsAt == null || endsAt.isAfter(startsAt), "代管结束时间必须晚于开始时间");
           UUID proxyId = Ids.next();
