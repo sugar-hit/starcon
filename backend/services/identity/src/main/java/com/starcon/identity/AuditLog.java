@@ -47,6 +47,24 @@ final class AuditLog {
     return OffsetDateTime.ofInstant(instant, ZoneOffset.UTC);
   }
 
+  /**
+   * 数据库自己的时钟（{@code now()} = {@code transaction_timestamp()}）。
+   *
+   * <p>🔴 <b>什么时候该用它</b>：凡是把「此刻」<b>写进库</b>、以后又要和 DB 的 {@code now()} <b>比较</b>的列 ——
+   * 授权生效时间、审批停留时长的起点与终点、代管生效时间…… —— 写入侧必须取这个值，
+   * <b>不能</b>用应用服务器墙钟（{@code Instant.now()} / {@code OffsetDateTime.now()}）。
+   *
+   * <p>两端分属两个钟域时会咬人：落库值可能落在判定时刻<b>之后</b>，于是「刚生效的授权」被
+   * {@code session_access()} 判成「尚未生效」，成员拿不到任何权限码 ⇒ 请求落到
+   * 「当前角色没有此操作权限」的 403 分支（2026-10-28 L2 批次闸 38 个 403 就是这么来的）。
+   *
+   * <p>反过来，<b>调用方明确给出的绝对时刻</b>（生效窗口、查询区间）按绝对时刻比较是对的，
+   * 不属于这一类，不要动。
+   */
+  static OffsetDateTime dbNow(DSLContext sql) {
+    return utc(sql.fetchOne("select now()").get(0, OffsetDateTime.class).toInstant());
+  }
+
   private String json(Object value) {
     if (value == null) return null;
     try {
