@@ -1,4 +1,4 @@
-# `origin/main` 的 tip 是集成头的 squash —— main → 集成头同步结构性冲突（第 79–98 轮连续未并入）
+# `origin/main` 的 tip 是集成头的 squash —— main → 集成头同步结构性冲突（第 79–99 轮连续未并入）
 
 - 创建: 2026-10-21
 - Owner: TBD（**发布侧**负责，见「待办内容」第 1 条）
@@ -355,6 +355,60 @@ theirs 独有 79 行的构成（**逐行看过**）：
   （但「main 上已有同名文件」的文档仍适用旧规则：**只在集成头改、不往 main 推**。）
 - **「`gate release` 只删自己持有的闸」**：本轮闸是空的、一次命中、只 release 一次 ⇒ 未触发闸泄漏。
 
+### 2026-10-29 07:20 轮（第 99 轮）：**main 侧零新内容的充要证明**（三条独立证据）
+
+> 本轮把「main 侧没有新交付」从「逐行核对冲突文件」升级为**可执行的充要判据**。
+> 第 93–98 轮的口径只能证明「**冲突文件里**没有 main 的新东西」，
+> **不能排除**「main 在非冲突文件里带了新内容」—— 本轮补上了这个缺口。
+
+**① `origin/main` 的树 = 我们自己祖先的树（逐字节相同）**
+
+```
+git rev-parse origin/main^{tree}   ⇒ 83269e111f5f42e8b9481fd0e9549687aa8a7ed0
+git rev-parse 1e3228b4^{tree}      ⇒ 83269e111f5f42e8b9481fd0e9549687aa8a7ed0   ← 相同
+git merge-base --is-ancestor 1e3228b4 integration/module-dev ⇒ YES
+```
+
+⇒ main 的 tip = **集成头分支在 2026-10-25 23:16 时刻的旧快照**。
+
+**② main 树里每个 blob 都已在集成头历史中**
+
+```
+git ls-tree -r origin/main | awk '{print $3}' | sort -u   ⇒ 5478 个唯一 blob
+comm -23 main_blobs our_blobs                             ⇒ 0
+```
+
+**③ `-X ours` 合并的结果树 == 当前 HEAD 的树（结果完全一致）**
+
+在**隔离 scratch clone**（`git clone --shared --no-checkout` 到 `/tmp`，**不碰集成头 worktree**）里：
+
+```
+git merge --no-ff --no-commit -X ours 823ebca5  ⇒ 0 个未解决冲突
+git write-tree                 ⇒ 79a5711bce1e7e88117b4b60895c8210d0ca74e2
+git rev-parse a475f1df^{tree}  ⇒ 79a5711bce1e7e88117b4b60895c8210d0ca74e2   ← 相同
+```
+
+⇒ **「27 个冲突全部取 ours」的结果与「什么都不做」的 HEAD 逐字节相同**
+⇒ 「取 ours」从「大概安全」升级为**可以证明的无损操作**。
+
+**④ 27 个冲突文件的 `theirs` blob 全部 = 我们自己的旧快照 `1e3228b4`**（27 相同 / 0 不同）。
+
+> ⚠️ 本轮**没有**取 ours、**没有**解任何冲突 —— 协议第 3 步明令 `git merge --abort`，本轮照办。
+> 证据 ③ 的作用是**为协议层授权提供依据**。
+
+**冲突面：27 个，与第 98 轮逐字节相同**（`git merge-tree --write-tree --name-only` 程序化比对：NEW 空 / GONE 空）。
+
+> ⚠️ **修正第 98 轮的一个表述**：第 98 轮写「冲突面会随集成头前进而增长」。
+> **准确判据是「集成头是否改了已存在的业务/测试文件」，不是「集成头是否前进」。**
+> 本轮集成头前进了 **3 个纯 docs 文件**（`f05f7c13 → a475f1df`）⇒ 落在已存在文件上的改动一个都没有
+> ⇒ **本轮冲突面不增（27 → 27）**。
+> （真正的触发器是第 97 轮之后那条 `c904ec63` 改 `SaasUsageIntegrationTest.java`。）
+
+**⇒ 待办第 2 条的解法升级**：既然「取 ours 无损」已被证明到等价性级别，
+「27 个冲突全部取 ours + 提交 merge commit」这条机械解法**不再依赖逐行人工核对 79 行**
+⇒ **但仍需协议层授权**（改 `SYNC-MAIN.md` 加一条「main 侧 blob 已被集成头历史覆盖 ⇒ 允许 `-X ours` 机械合并」的判据），
+或由发布侧直接改 main 的 tip（首选）。
+
 ---
 
 ## 影响面
@@ -362,7 +416,7 @@ theirs 独有 79 行的构成（**逐行看过**）：
 - **只影响「main → 集成头同步」这一个任务**（`tools/module-progress/SYNC-MAIN.md`）的推进节奏，
   **不影响**流水线的并入 / L2（集成头自身照常演进，batch-39~42 均正常交付）。
 - **不动任何业务代码**：本条待办是**发布流程 / 仓库拓扑**问题，不是代码问题。
-- 涉及文件（**最新一轮 —— 第 98 轮（2026-10-29 05:15）的冲突面，27 个 = 26 add/add + 1 content**）：
+- 涉及文件（**最新一轮 —— 第 99 轮（2026-10-29 07:20）的冲突面，27 个 = 26 add/add + 1 content**，与第 98 轮**逐字节相同**）：
   - `apps/web/src/components/dashboard/workbench-card-registry.ts`（add/add）
   - `apps/web/src/components/dashboard/workbench-layout-model.test.ts`（add/add）
   - `apps/web/src/lib/api-proxy.ts`（**content**；theirs 独有 **0 行**，ours 严格超集）
