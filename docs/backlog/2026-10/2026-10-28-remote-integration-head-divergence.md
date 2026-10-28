@@ -84,6 +84,14 @@ git merge-tree --write-tree HEAD origin/integration/module-dev
    ⚠️ **必须在 L2 绿之后做** —— 本地那 102 个提交里包含 `identity` L2 红点的相关改动
    （batch 107b / 108 的 `identity` 38 个失败例），推红头等于把红点带到远端。
    ⚠️ **禁止 force-push** —— 会丢掉远端那 1 个提交（尽管它是纯文档）。
+
+   > **2026-10-28 第 122 轮进展：合并这一半已完成。**
+   > `git merge --no-ff origin/integration/module-dev` ⇒ `c61c8637`（clean，ort 策略，零冲突）；
+   > 合并进来的只有远端那 198 行会话语录（**零业务代码**）。
+   > `git push --dry-run` ⇒ **`94192b24..c61c8637 integration/module-dev -> integration/module-dev`**
+   > ⇒ **non-fast-forward 阻塞已解除**，L2 一绿即可一条命令发布 106 个提交。
+   > ⏳ **push 那一半仍待 L2 绿**（identity 38 failures，修复车道 `fix-identity-l2-red` 在途，
+   > 见 `docs/backlog/2026-10/2026-10-28-identity-l2-red-403-cross-test-pollution.md`）。
 2. **【流水线侧】查清第 107 轮为何在「落后 742 个提交的工作副本」上 push**
    —— `lane.mjs` 的 `plan`/车道基线选取必须与**当前集成头**一致，
    否则任何一轮「顺手 push」都可能把远端推到与本地不同的历史上。
