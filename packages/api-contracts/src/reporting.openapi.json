@@ -1,6 +1,650 @@
 {
   "components": {
     "schemas": {
+      "AffiliateMarketingAttributionPage": {
+        "properties": {
+          "items": {
+            "description": "归因明细列表",
+            "items": {
+              "$ref": "#/components/schemas/AffiliateMarketingAttributionRow"
+            },
+            "type": "array"
+          },
+          "note": {
+            "description": "🔴 下钻口径说明",
+            "type": "string"
+          },
+          "page": {
+            "description": "当前页（0 基）",
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "description": "每页条数",
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "description": "总条数",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AffiliateMarketingAttributionRow": {
+        "description": "归因明细列表",
+        "properties": {
+          "attributedAt": {
+            "description": "🔴 归因发生时刻（**归因发生日口径**，上游不带订单日期）",
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "attributedGmv": {
+            "description": "🔴 归因成交金额（null = 上游没给币种或没录）",
+            "nullable": true,
+            "type": "number"
+          },
+          "attributedOrderCount": {
+            "description": "🔴 归因订单数",
+            "nullable": true,
+            "type": "number"
+          },
+          "attributionId": {
+            "description": "上游归因记录 id",
+            "format": "uuid",
+            "type": "string"
+          },
+          "attributionModel": {
+            "description": "🔴 规则快照：归因模型",
+            "type": "string"
+          },
+          "attributionWeight": {
+            "description": "🔴 归因权重（0 ~ 1）",
+            "nullable": true,
+            "type": "number"
+          },
+          "attributionWindowDays": {
+            "description": "🔴 规则快照：归因窗口（天）",
+            "format": "int32",
+            "type": "integer"
+          },
+          "campaignId": {
+            "description": "活动 id",
+            "format": "uuid",
+            "type": "string"
+          },
+          "campaignName": {
+            "description": "活动名称",
+            "type": "string"
+          },
+          "commissionAmount": {
+            "description": "🔴 佣金成本（null = 上游没给币种或没录）",
+            "nullable": true,
+            "type": "number"
+          },
+          "commissionBasis": {
+            "description": "🔴 规则快照：佣金计提口径",
+            "type": "string"
+          },
+          "commissionRate": {
+            "description": "🔴 规则快照：佣金比例",
+            "nullable": true,
+            "type": "number"
+          },
+          "cooperationId": {
+            "description": "合作记录 id",
+            "format": "uuid",
+            "type": "string"
+          },
+          "currency": {
+            "description": "🔴 币种（空串 = 上游没给 ⇒ 金额不可比）",
+            "type": "string"
+          },
+          "effectiveOrderCount": {
+            "description": "🔴 有效订单数（扣退款后）",
+            "nullable": true,
+            "type": "number"
+          },
+          "influencerId": {
+            "description": "达人 id",
+            "format": "uuid",
+            "type": "string"
+          },
+          "influencerName": {
+            "description": "达人名称",
+            "type": "string"
+          },
+          "poolWeightBasis": {
+            "description": "🔴 规则快照：分摊权重基准",
+            "type": "string"
+          },
+          "refundTreatment": {
+            "description": "🔴 规则快照：退款口径",
+            "type": "string"
+          },
+          "ruleCode": {
+            "description": "🔴 归因规则码（规则快照）",
+            "type": "string"
+          },
+          "shopCode": {
+            "description": "店铺编码",
+            "type": "string"
+          },
+          "slotKey": {
+            "description": "营销位键",
+            "type": "string"
+          },
+          "slotLabel": {
+            "description": "营销位可读标签",
+            "type": "string"
+          },
+          "slotType": {
+            "description": "营销位类型",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AffiliateMarketingCapabilities": {
+        "properties": {
+          "attributionAvailable": {
+            "description": "成交归因是否可用（达人归因口径）",
+            "type": "boolean"
+          },
+          "attributionModels": {
+            "description": "🔴 归因模型取值域",
+            "items": {
+              "description": "🔴 归因模型取值域",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "attributionRuleNote": {
+            "description": "🔴 归因规则口径总说明",
+            "type": "string"
+          },
+          "caliberNote": {
+            "description": "🔴 口径边界说明",
+            "type": "string"
+          },
+          "commissionBases": {
+            "description": "🔴 佣金计提口径取值域",
+            "items": {
+              "description": "🔴 佣金计提口径取值域",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "currencyNote": {
+            "description": "🔴 币种口径说明",
+            "type": "string"
+          },
+          "landingListingAvailable": {
+            "description": "落地商品口径（曝光 / 点击）是否可用",
+            "type": "boolean"
+          },
+          "metricCodes": {
+            "description": "指标码清单",
+            "items": {
+              "description": "指标码清单",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "notDelivered": {
+            "description": "🔴 **确实拿不到**的部分（每条都写清原因与替代口径）",
+            "items": {
+              "$ref": "#/components/schemas/AffiliateMarketingCapabilityDimension"
+            },
+            "type": "array"
+          },
+          "poolWeightBases": {
+            "description": "🔴 分摊权重基准取值域",
+            "items": {
+              "description": "🔴 分摊权重基准取值域",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "refreshAvailable": {
+            "description": "投影刷新是否可用",
+            "type": "boolean"
+          },
+          "refundTreatments": {
+            "description": "🔴 退款口径取值域",
+            "items": {
+              "description": "🔴 退款口径取值域",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "reportAvailable": {
+            "description": "营销位效果报表是否可用",
+            "type": "boolean"
+          },
+          "rules": {
+            "description": "判定规则与口径说明",
+            "items": {
+              "$ref": "#/components/schemas/AffiliateMarketingRuleNote"
+            },
+            "type": "array"
+          },
+          "slotTypes": {
+            "description": "四类营销位逐类状态",
+            "items": {
+              "$ref": "#/components/schemas/AffiliateMarketingSlotTypeView"
+            },
+            "type": "array"
+          },
+          "upstreamModules": {
+            "description": "本服务**真的读过**的上游模块",
+            "items": {
+              "description": "本服务**真的读过**的上游模块",
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "AffiliateMarketingCapabilityDimension": {
+        "description": "🔴 **确实拿不到**的部分（每条都写清原因与替代口径）",
+        "properties": {
+          "available": {
+            "description": "本轮是否可用",
+            "type": "boolean"
+          },
+          "description": {
+            "description": "维度说明",
+            "type": "string"
+          },
+          "dimension": {
+            "description": "维度键",
+            "type": "string"
+          },
+          "impact": {
+            "description": "不交付的影响与当前替代口径",
+            "type": "string"
+          },
+          "ownerModule": {
+            "description": "未交付段的责任模块",
+            "type": "string"
+          },
+          "source": {
+            "description": "数据来源（上游模块 / 表）",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AffiliateMarketingMetricDefinitionView": {
+        "description": "指标口径目录",
+        "properties": {
+          "aggregation": {
+            "description": "聚合方式：SUM / DERIVED_RATIO",
+            "type": "string"
+          },
+          "attributionBound": {
+            "description": "是否依赖归因规则",
+            "type": "boolean"
+          },
+          "available": {
+            "description": "🔴 本轮是否可用（false ⇒ 本轮不可用 + 归谁管）",
+            "type": "boolean"
+          },
+          "currencyAware": {
+            "description": "是否涉币（涉币 ⇒ 绝不跨币种相加）",
+            "type": "boolean"
+          },
+          "denominatorMetricCode": {
+            "description": "派生型的分母指标码",
+            "nullable": true,
+            "type": "string"
+          },
+          "description": {
+            "description": "口径说明（页面上照着显示）",
+            "type": "string"
+          },
+          "displayName": {
+            "description": "显示名",
+            "type": "string"
+          },
+          "metricCode": {
+            "description": "指标码",
+            "type": "string"
+          },
+          "numeratorMetricCode": {
+            "description": "派生型的分子指标码",
+            "nullable": true,
+            "type": "string"
+          },
+          "ownerModule": {
+            "description": "上游归属模块 / 未交付段的责任模块",
+            "type": "string"
+          },
+          "unit": {
+            "description": "单位：CURRENCY / COUNT / QUANTITY / PERCENT",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AffiliateMarketingMetricValue": {
+        "description": "逐指标取值（每格都带可用性与原因）",
+        "properties": {
+          "availability": {
+            "description": "🔴 可用性：AVAILABLE / NO_DATA / NOT_AVAILABLE / NOT_COMPARABLE",
+            "type": "string"
+          },
+          "availabilityNote": {
+            "description": "🔴 可用性说明（页面上照着显示）",
+            "type": "string"
+          },
+          "currency": {
+            "description": "🔴 币种（空串 = 与币种无关，不是「币种未知」）",
+            "type": "string"
+          },
+          "displayName": {
+            "description": "显示名",
+            "type": "string"
+          },
+          "metricCode": {
+            "description": "指标码",
+            "type": "string"
+          },
+          "quantity": {
+            "description": "数量型取值（金额型指标恒为 null）",
+            "nullable": true,
+            "type": "number"
+          },
+          "unit": {
+            "description": "单位",
+            "type": "string"
+          },
+          "value": {
+            "description": "金额型取值（数量型指标恒为 null）",
+            "nullable": true,
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "AffiliateMarketingRefreshResult": {
+        "properties": {
+          "fetched": {
+            "description": "拉到的行数",
+            "format": "int32",
+            "type": "integer"
+          },
+          "note": {
+            "description": "🔴 说明（截断 / 缺币种 / 不可用的口径都写在这里）",
+            "type": "string"
+          },
+          "projected": {
+            "description": "落库的行数",
+            "format": "int32",
+            "type": "integer"
+          },
+          "source": {
+            "description": "上游来源标识",
+            "type": "string"
+          },
+          "status": {
+            "description": "状态：SUCCEEDED / TRUNCATED / FAILED",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AffiliateMarketingResponse": {
+        "properties": {
+          "attributionRules": {
+            "description": "🔴 本窗口用到的归因规则（规则快照）",
+            "items": {
+              "$ref": "#/components/schemas/AffiliateMarketingRuleUsage"
+            },
+            "type": "array"
+          },
+          "caliberNotes": {
+            "description": "🔴 口径说明（页面上常驻显示）",
+            "items": {
+              "description": "🔴 口径说明（页面上常驻显示）",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "dataUpdatedAt": {
+            "description": "数据更新时间（最近一次投影落库时刻）",
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "dataUpdatedNote": {
+            "description": "数据更新时间的说明",
+            "type": "string"
+          },
+          "emptyNote": {
+            "description": "空态说明",
+            "type": "string"
+          },
+          "emptyReason": {
+            "description": "空态原因（空 = 不空）",
+            "nullable": true,
+            "type": "string"
+          },
+          "from": {
+            "description": "窗口起始日",
+            "format": "date",
+            "type": "string"
+          },
+          "metricDefinitions": {
+            "description": "指标口径目录",
+            "items": {
+              "$ref": "#/components/schemas/AffiliateMarketingMetricDefinitionView"
+            },
+            "type": "array"
+          },
+          "slotTypes": {
+            "description": "四类营销位逐类状态",
+            "items": {
+              "$ref": "#/components/schemas/AffiliateMarketingSlotTypeView"
+            },
+            "type": "array"
+          },
+          "slots": {
+            "description": "🔴 营销位效果报表（按 (营销位, 归因规则) 分列）",
+            "items": {
+              "$ref": "#/components/schemas/AffiliateMarketingSlotRow"
+            },
+            "type": "array"
+          },
+          "status": {
+            "description": "状态：OK / EMPTY",
+            "type": "string"
+          },
+          "statusNote": {
+            "description": "状态说明",
+            "type": "string"
+          },
+          "to": {
+            "description": "窗口结束日",
+            "format": "date",
+            "type": "string"
+          },
+          "warnings": {
+            "description": "⚠️ 警告（缺数据 / 口径提醒）",
+            "items": {
+              "description": "⚠️ 警告（缺数据 / 口径提醒）",
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "AffiliateMarketingRuleNote": {
+        "description": "判定规则与口径说明",
+        "properties": {
+          "code": {
+            "description": "规则码",
+            "type": "string"
+          },
+          "note": {
+            "description": "规则说明",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AffiliateMarketingRuleUsage": {
+        "description": "🔴 本窗口用到的归因规则（规则快照）",
+        "properties": {
+          "attributionModel": {
+            "description": "🔴 归因模型（规则快照）",
+            "type": "string"
+          },
+          "attributionWindowDays": {
+            "description": "🔴 归因窗口（天，规则快照）",
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "commissionBasis": {
+            "description": "🔴 佣金计提口径（规则快照）",
+            "type": "string"
+          },
+          "note": {
+            "description": "🔴 这条规则是怎么来的（快照，不是「当前规则」）",
+            "type": "string"
+          },
+          "poolWeightBasis": {
+            "description": "🔴 分摊权重基准（规则快照）",
+            "type": "string"
+          },
+          "recordCount": {
+            "description": "本窗口用这条规则的归因记录条数",
+            "format": "int32",
+            "type": "integer"
+          },
+          "refundTreatment": {
+            "description": "🔴 退款口径（规则快照）",
+            "type": "string"
+          },
+          "ruleCode": {
+            "description": "归因规则码",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AffiliateMarketingSlotRow": {
+        "description": "🔴 营销位效果报表（按 (营销位, 归因规则) 分列）",
+        "properties": {
+          "attributionModel": {
+            "description": "🔴 归因模型（规则快照）",
+            "type": "string"
+          },
+          "attributionRecordCount": {
+            "description": "这个营销位在这个窗口里的归因记录条数",
+            "format": "int32",
+            "type": "integer"
+          },
+          "attributionRuleCode": {
+            "description": "🔴 归因规则码（落地商品口径没有归因 ⇒ 空串）",
+            "type": "string"
+          },
+          "attributionWindowDays": {
+            "description": "🔴 归因窗口（天，规则快照）",
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "caliber": {
+            "description": "🔴 数据口径：INFLUENCER_ATTRIBUTION / LANDING_LISTING",
+            "type": "string"
+          },
+          "caliberName": {
+            "description": "🔴 数据口径显示名",
+            "type": "string"
+          },
+          "commissionBasis": {
+            "description": "🔴 佣金计提口径（规则快照）",
+            "type": "string"
+          },
+          "metrics": {
+            "description": "逐指标取值（每格都带可用性与原因）",
+            "items": {
+              "$ref": "#/components/schemas/AffiliateMarketingMetricValue"
+            },
+            "type": "array"
+          },
+          "platformCode": {
+            "description": "平台编码（上游没给就是空串）",
+            "type": "string"
+          },
+          "poolWeightBasis": {
+            "description": "🔴 分摊权重基准（规则快照）",
+            "type": "string"
+          },
+          "refundTreatment": {
+            "description": "🔴 退款口径（规则快照）",
+            "type": "string"
+          },
+          "shopCode": {
+            "description": "店铺编码（上游没给就是空串）",
+            "type": "string"
+          },
+          "slotKey": {
+            "description": "营销位键（社交媒体 = 达人 id : 活动 id；A+ = listing id）",
+            "type": "string"
+          },
+          "slotLabel": {
+            "description": "营销位可读标签",
+            "type": "string"
+          },
+          "slotType": {
+            "description": "营销位类型",
+            "type": "string"
+          },
+          "slotTypeName": {
+            "description": "营销位类型显示名",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AffiliateMarketingSlotTypeView": {
+        "description": "四类营销位逐类状态",
+        "properties": {
+          "available": {
+            "description": "🔴 本轮这一类营销位**有没有**可用数据",
+            "type": "boolean"
+          },
+          "caliber": {
+            "description": "🔴 数据口径：INFLUENCER_ATTRIBUTION / LANDING_LISTING（未交付时为空串）",
+            "type": "string"
+          },
+          "displayName": {
+            "description": "营销位类型显示名",
+            "type": "string"
+          },
+          "note": {
+            "description": "🔴 这一类营销位的口径说明（页面上常驻显示）",
+            "type": "string"
+          },
+          "owner": {
+            "description": "🔴 上游 / 归属模块",
+            "type": "string"
+          },
+          "slotType": {
+            "description": "营销位类型：RELATED_VIDEO / A_PLUS / STORE_TRAFFIC / SOCIAL_MEDIA",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "AttainmentAlert": {
         "properties": {
           "attainmentRate": {
@@ -6537,6 +7181,266 @@
   },
   "openapi": "3.0.1",
   "paths": {
+    "/reporting/affiliate-marketing": {
+      "get": {
+        "description": "时间范围默认「最近 30 天」。🔴 **归因规则必须显式**：报表里的成交归因用的是**上游归因记录自带的规则快照**（不是「当前规则」），并且按 (营销位, 归因规则) **分列** ⇒ ROI 只在同一条规则内部相除。🔴 **两套口径不混算**：达人归因口径（成交归因 / 投入 / ROI）与落地商品口径（曝光 / 点击 / 点击率）是两个统计范围，各带自己的标签。🔴 **「算不出来」与「等于 0」分开**：本轮不可用 / 分母缺失一律显示「不可算」，**不用 0 冒充**。🔴 **绝不跨币种相加**：金额按币种分别报，ROI 分子分母必须同币种。",
+        "operationId": "get_reporting_affiliate_marketing",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffiliateMarketingResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "关联营销效果报表：营销位效果 + 归因成交 + ROI（按 (营销位, 归因规则) 分列）",
+        "tags": [
+          "13.3.2.2 关联营销效果"
+        ]
+      }
+    },
+    "/reporting/affiliate-marketing/attributions": {
+      "get": {
+        "description": "卷 13 卷首加粗句「可下钻」的落点：每个汇总数字都能钻到构成明细。🔴 每行都带**规则快照**（归因模型 / 分摊基准 / 归因窗口 / 退款口径 / 佣金口径）—— 那是**上游归因记录自带的那份**，不是「当前规则」。⚠️ **统计日按「归因发生日（UTC 自然日）」切桶**：上游归因记录**不带订单日期**。",
+        "operationId": "get_reporting_affiliate_marketing_attributions",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "slotType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "ruleCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffiliateMarketingAttributionPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "归因明细下钻：每一条归因记录（带规则快照）",
+        "tags": [
+          "13.3.2.2 关联营销效果"
+        ]
+      }
+    },
+    "/reporting/affiliate-marketing/capabilities": {
+      "get": {
+        "description": "notDelivered 列出的是**确实拿不到**的部分，每条都写清原因、归谁管与当前替代口径 —— 把「拿不到」伪装成 0 比说清楚更糟。",
+        "operationId": "get_reporting_affiliate_marketing_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffiliateMarketingCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "能力声明：哪些上游真接通、哪些口径拿不到、归因规则怎么算",
+        "tags": [
+          "13.3.2.2 关联营销效果"
+        ]
+      }
+    },
+    "/reporting/affiliate-marketing/metrics": {
+      "get": {
+        "operationId": "get_reporting_affiliate_marketing_metrics",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AffiliateMarketingMetricDefinitionView"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "关联营销的指标口径目录（口径唯一的展示形态）",
+        "tags": [
+          "13.3.2.2 关联营销效果"
+        ]
+      }
+    },
+    "/reporting/affiliate-marketing/refresh": {
+      "post": {
+        "description": "上游：channel 的带货归因记录（14.5.2.1：**带规则快照**的归因模型 / 分摊基准 / 归因窗口 / 退款口径 / 佣金口径）、channel 的内容回写留痕（4.3.2.1：**A+ 营销位存在**的证据）、channel 的平台表现快照（4.5.1.1：落地商品口径的曝光 / 点击）。⚠️ 刷新会**重建**该窗口（先删旧行再整段重写）—— 上游修正同一天的归因时旧行不会残留。",
+        "operationId": "post_reporting_affiliate_marketing_refresh",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AffiliateMarketingRefreshResult"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "从上游拉取关联营销数据并投影（写的是投影，不是业务事实）",
+        "tags": [
+          "13.3.2.2 关联营销效果"
+        ]
+      }
+    },
     "/reporting/expense-variance/by-sku": {
       "get": {
         "description": "只覆盖**两侧都有事实**的 SKU —— 目前只有**头程分摊**两侧都带 sku_code。",
