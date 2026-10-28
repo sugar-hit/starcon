@@ -48,8 +48,14 @@ public class ReportingCostStructureService {
   /** 结构表最多返回多少行（超出时如实报截断，不静默丢行）。 */
   static final int MAX_ROWS = 500;
 
-  /** 收入口径用的标准指标码（13.2.1.1 的标准口径，不在本模块重算）。 */
-  static final String REVENUE_METRIC_CODE = "SALES_AMOUNT";
+  /**
+   * 收入口径用的标准指标码（13.2.1.1 的标准口径，不在本模块重算）。
+   *
+   * <p>⚠️ **引用 {@link ReportingMetricCatalog#SALES_AMOUNT} 而不是再写一遍字面量**：
+   * 口径码在 reporting 服务里只有一处定义，字面量副本会变成第二个真相 ——
+   * 上游改了口径码，这里会静默查不到数据（占比恒为「算不出来」）。
+   */
+  static final String REVENUE_METRIC_CODE = ReportingMetricCatalog.SALES_AMOUNT;
 
   /** 默认阈值口径（FIXED = 固定百分点）。 */
   static final String DEFAULT_THRESHOLD_MODE = "FIXED";
