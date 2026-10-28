@@ -2949,6 +2949,50 @@ const services: readonly {
       /^ad\-group\-keyword\-reports\/(?:capabilities|options|rows|exports(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/csv)?)?)$/,
   },
   {
+    // 14.3.1.3 商品维度报表（channel 服务）。纯**新增一条独立的 `services[]` 元素**，
+    // 既有的 `ad-reports`（14.3.1.1）、`ad-group-keyword-reports`（14.3.1.2）
+    // 等**一字未动、也不重排** —— 本文件是多车道共用的累积型白名单。
+    //
+    // ---- 插入锚点固定在 `ad-group-keyword-reports` 那条元素的 `pattern:` 行**之后** ----
+    //   锚点行是本文件里唯一的字面量
+    //   `pattern: /^ad\-group\-keyword\-reports\/(?:capabilities|options|rows|exports...)$/,`
+    //   同批其它车道各自锚在别的行上，git 能干净求并。
+    //
+    // ---- 首 token「ad-product-reports」的零命中核对结论 ----
+    //   本文件既有 100+ 条 services[] 正则里**没有任何一条**含 `ad-product-reports` 这个串
+    //   （既有的是 `ad-campaigns` / `ad-campaign-details` / `ad-reports` /
+    //   `ad-group-keyword-reports` / `ad-type-diffs` / `ad-diagnostics` 一类），
+    //   所以首 token 既是独立字面量，也不会被既有分支的前缀吃掉。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   ad-product-reports/capabilities 能力声明（单量口径广告销售占比 / 归因 / 跨币种统一
+    //                                       显式 available=false）
+    //   ad-product-reports/options      筛选项下拉 + 逐指标口径定义 + **归因规则原文**
+    //   ad-product-reports/rows         商品广告报表（GET，真分页 + 真筛选 + 真排序 + 汇总 +
+    //                                   口径说明 + 归因规则 + 利润/商品主数据上游的可达性）
+    //   ad-product-reports/export       导出 CSV（GET + query；text/csv 由代理原样透传）
+    //   ad-product-reports/exports      导出留痕历史（GET，真分页）
+    //
+    // ⚠️ **本模块的五个形状都没有 id 段**，所以这里**不写 uuid 段**（写了反而会把
+    //   `capabilities` 这类字面量子路径当成 id 放行）。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸路径 `ad-product-reports` —— 本模块没有裸集合读，一切入口都带子路径
+    //   * `ad-product-reports/rows/{id}` —— 报表是按商品聚合的，没有「单行报表详情」这个形状
+    //   * `ad-product-reports/trend` —— 本模块**没有**趋势端点（蓝图的输出句是
+    //     「商品广告报表 + 广告销售占比 + 广告后净利」，没有趋势图）
+    //   * `ad-product-reports/export/{id}` —— 导出是**集合级**（按当前筛选整体导出），没有单条导出
+    //   * `ad-product-reports/capabilities/{id}` —— 字面量子路径不接 id 段
+    //   * `ad-product-reports/rows/not-a-uuid` —— 本模块没有 id 段，任何带尾段的形状都不是真实端点
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    // 末尾**刻意不带 `?`**：带了就等于放行裸路径 `ad-product-reports`。
+    // `exports` 排在 `export` 之前：alternation 是首个命中即返回，
+    // 虽然带 `$` 时回溯也能匹配，但显式排序免得后人读错。
+    pattern: /^ad\-product\-reports(?:\/(?:capabilities|options|rows|exports|export))$/,
+  },
+  {
     // 02 渠道与店铺：平台目录、授权连接、店铺与站点。
     // health/reminders 属于连接健康，marketplace 挂在店铺下，transfer 是负责人转让。
     // platforms/{code}/enums 后面可选一段 id：租户映射覆盖按 id 删除。
