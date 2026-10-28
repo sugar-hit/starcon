@@ -1392,6 +1392,341 @@
         },
         "type": "object"
       },
+      "CostStructureAnomaly": {
+        "properties": {
+          "baselineShare": {
+            "nullable": true,
+            "type": "number"
+          },
+          "costCategory": {
+            "type": "string"
+          },
+          "costCategoryLabel": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "delta": {
+            "nullable": true,
+            "type": "number"
+          },
+          "dimensionKey": {
+            "type": "string"
+          },
+          "dimensionLabel": {
+            "type": "string"
+          },
+          "direction": {
+            "type": "string"
+          },
+          "effectiveThreshold": {
+            "nullable": true,
+            "type": "number"
+          },
+          "note": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "share": {
+            "nullable": true,
+            "type": "number"
+          },
+          "thresholdMode": {
+            "type": "string"
+          },
+          "thresholdValue": {
+            "nullable": true,
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "CostStructureCapabilities": {
+        "properties": {
+          "costCategories": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "defaultMinHistoryPeriods": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "defaultThresholdMode": {
+            "type": "string"
+          },
+          "defaultThresholdValue": {
+            "type": "number"
+          },
+          "notDelivered": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "upstreamConnected": {
+            "type": "boolean"
+          },
+          "upstreamModules": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "CostStructureRefreshSummary": {
+        "properties": {
+          "costCategory": {
+            "type": "string"
+          },
+          "factCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CostStructureResponse": {
+        "properties": {
+          "anomalies": {
+            "items": {
+              "$ref": "#/components/schemas/CostStructureAnomaly"
+            },
+            "type": "array"
+          },
+          "caliberNote": {
+            "type": "string"
+          },
+          "dataUpdatedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "dataUpdatedNote": {
+            "type": "string"
+          },
+          "denominatorCaliber": {
+            "type": "string"
+          },
+          "denominatorNote": {
+            "type": "string"
+          },
+          "dimension": {
+            "type": "string"
+          },
+          "from": {
+            "format": "date",
+            "type": "string"
+          },
+          "granularity": {
+            "type": "string"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/CostStructureRow"
+            },
+            "type": "array"
+          },
+          "to": {
+            "format": "date",
+            "type": "string"
+          },
+          "trend": {
+            "items": {
+              "$ref": "#/components/schemas/CostStructureTrendPoint"
+            },
+            "type": "array"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "CostStructureRow": {
+        "properties": {
+          "amount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "anomaly": {
+            "type": "boolean"
+          },
+          "anomalyReason": {
+            "type": "string"
+          },
+          "baselineShare": {
+            "nullable": true,
+            "type": "number"
+          },
+          "comparable": {
+            "type": "boolean"
+          },
+          "costCategory": {
+            "type": "string"
+          },
+          "costCategoryLabel": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "deltaVsPrevious": {
+            "nullable": true,
+            "type": "number"
+          },
+          "deltaVsYoY": {
+            "nullable": true,
+            "type": "number"
+          },
+          "denominatorAmount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "dimensionKey": {
+            "type": "string"
+          },
+          "dimensionLabel": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "previousShare": {
+            "nullable": true,
+            "type": "number"
+          },
+          "share": {
+            "nullable": true,
+            "type": "number"
+          },
+          "yoyShare": {
+            "nullable": true,
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "CostStructureRule": {
+        "properties": {
+          "costCategory": {
+            "type": "string"
+          },
+          "costCategoryLabel": {
+            "type": "string"
+          },
+          "direction": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "minHistoryPeriods": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "thresholdMode": {
+            "type": "string"
+          },
+          "thresholdValue": {
+            "type": "number"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CostStructureRuleInput": {
+        "properties": {
+          "direction": {
+            "type": "string"
+          },
+          "enabled": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "minHistoryPeriods": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "thresholdMode": {
+            "type": "string"
+          },
+          "thresholdValue": {
+            "nullable": true,
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "CostStructureTrendPoint": {
+        "properties": {
+          "amount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "comparable": {
+            "type": "boolean"
+          },
+          "costCategory": {
+            "type": "string"
+          },
+          "costCategoryLabel": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "denominatorAmount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "dimensionKey": {
+            "type": "string"
+          },
+          "dimensionLabel": {
+            "type": "string"
+          },
+          "periodEnd": {
+            "format": "date",
+            "type": "string"
+          },
+          "periodStart": {
+            "format": "date",
+            "type": "string"
+          },
+          "share": {
+            "nullable": true,
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
       "CurrencyAmount": {
         "properties": {
           "amount": {
@@ -8327,6 +8662,471 @@
         "summary": "从上游拉取关联营销数据并投影（写的是投影，不是业务事实）",
         "tags": [
           "13.3.2.2 关联营销效果"
+        ]
+      }
+    },
+    "/reporting/cost-structure/anomalies": {
+      "get": {
+        "description": "阈值**不是写死的百分比**：它来自租户自己的规则表（固定百分点 / 基线标准差的若干倍），可在 PUT /reporting/cost-structure/rules/{costCategory} 上改。判不出来（历史期数不足 / 基线无波动）时**不报异常**，而是给出「判不了」的原因。",
+        "operationId": "get_reporting_cost_structure_anomalies",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "granularity",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dimension",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "denominatorCaliber",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "currency",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/CostStructureAnomaly"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "异常提示：占比相对历史基线的异常跳变",
+        "tags": [
+          "13.4.2.1 成本结构"
+        ]
+      }
+    },
+    "/reporting/cost-structure/capabilities": {
+      "get": {
+        "description": "notDelivered 列出的是**确实拆不出来**的部分（平台费的 SKU 级结构、退货的店铺维度等），每条都写清原因与影响 —— 「算不出来」与「占比 0%」在页面上长得一样，含义却相反。",
+        "operationId": "get_reporting_cost_structure_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CostStructureCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "能力声明：七类成本分别来自哪个上游、哪些确实拿不到",
+        "tags": [
+          "13.4.2.1 成本结构"
+        ]
+      }
+    },
+    "/reporting/cost-structure/refresh": {
+      "post": {
+        "description": "拉七路上游的成本事实并归到七类成本里（幂等：同一批上游事实重放不会翻倍）。权限是 reporting.projection.write —— **本模块没有任何「创建业务事实」的权限**。",
+        "operationId": "post_reporting_cost_structure_refresh",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sources",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/CostStructureRefreshSummary"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "刷新成本事实（从上游拉取 → 投影）",
+        "tags": [
+          "13.4.2.1 成本结构"
+        ]
+      }
+    },
+    "/reporting/cost-structure/rules": {
+      "get": {
+        "description": "阈值落在**租户自己的规则表**里：固定百分点（FIXED）或基线标准差的若干倍（STDDEV）；最少历史期数决定基线要前几期同口径占比。",
+        "operationId": "get_reporting_cost_structure_rules",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/CostStructureRule"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "异常判定阈值规则（可配置项）",
+        "tags": [
+          "13.4.2.1 成本结构"
+        ]
+      }
+    },
+    "/reporting/cost-structure/rules/{costCategory}": {
+      "put": {
+        "description": "只改写进来的那几个字段；本模块**只改自己的规则表**，不写任何上游口径（费率规则在 catalog、归集规则在 finance）。",
+        "operationId": "put_reporting_cost_structure_rules_costCategory",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "costCategory",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CostStructureRuleInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CostStructureRule"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "改某一类成本的异常判定阈值",
+        "tags": [
+          "13.4.2.1 成本结构"
+        ]
+      }
+    },
+    "/reporting/cost-structure/structure": {
+      "get": {
+        "description": "占比的分母口径由 denominatorCaliber 决定并**写在响应里**（TOTAL_COST 总成本口径 / REVENUE 收入口径），两种口径不可混着读。基线来自**真实历史投影数据**（前 N 期同口径占比），不是写死的基线常量。算不出来的占比是 null（页面上是「—」），**不是 0%**。",
+        "operationId": "get_reporting_cost_structure_structure",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "granularity",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dimension",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "denominatorCaliber",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "currency",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "thresholdValue",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "in": "query",
+            "name": "minHistoryPeriods",
+            "required": false,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "thresholdMode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CostStructureResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "成本占比结构 + 环比 / 同比基线 + 异常提示",
+        "tags": [
+          "13.4.2.1 成本结构"
+        ]
+      }
+    },
+    "/reporting/cost-structure/trend": {
+      "get": {
+        "description": "**分母算不出来的期间没有点**（不是 0%）——「算不出来」与「真的是 0」必须分开。",
+        "operationId": "get_reporting_cost_structure_trend",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "granularity",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dimension",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "denominatorCaliber",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "currency",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/CostStructureTrendPoint"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "成本占比趋势（按期间粒度）",
+        "tags": [
+          "13.4.2.1 成本结构"
         ]
       }
     },
