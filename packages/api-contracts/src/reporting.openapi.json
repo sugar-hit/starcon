@@ -5424,6 +5424,357 @@
         },
         "type": "object"
       },
+      "SkuProfitCapabilities": {
+        "properties": {
+          "components": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "dimensions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "notDelivered": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "ownerNote": {
+            "type": "string"
+          },
+          "upstreamConnected": {
+            "type": "boolean"
+          },
+          "upstreams": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "SkuProfitComponentAmount": {
+        "properties": {
+          "amount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "component": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "quantity": {
+            "nullable": true,
+            "type": "number"
+          },
+          "reason": {
+            "nullable": true,
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SkuProfitModeAmount": {
+        "properties": {
+          "note": {
+            "nullable": true,
+            "type": "string"
+          },
+          "operatingMode": {
+            "type": "string"
+          },
+          "operatingModeLabel": {
+            "type": "string"
+          },
+          "revenue": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "SkuProfitOrderPage": {
+        "properties": {
+          "currency": {
+            "type": "string"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/SkuProfitOrderRow"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "SkuProfitOrderRow": {
+        "properties": {
+          "amount": {
+            "type": "number"
+          },
+          "component": {
+            "type": "string"
+          },
+          "componentLabel": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "operatingMode": {
+            "type": "string"
+          },
+          "operatingModeLabel": {
+            "type": "string"
+          },
+          "orderRef": {
+            "type": "string"
+          },
+          "periodEnd": {
+            "format": "date",
+            "type": "string"
+          },
+          "periodStart": {
+            "format": "date",
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "sourceReference": {
+            "type": "string"
+          },
+          "sourceService": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SkuProfitRefreshResult": {
+        "properties": {
+          "fetched": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "projected": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "source": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "unattributable": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "SkuProfitResponse": {
+        "properties": {
+          "caliberNote": {
+            "type": "string"
+          },
+          "comparableCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "dataUpdatedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "dataUpdatedNote": {
+            "type": "string"
+          },
+          "dimension": {
+            "type": "string"
+          },
+          "from": {
+            "format": "date",
+            "type": "string"
+          },
+          "notComparableCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/SkuProfitRow"
+            },
+            "type": "array"
+          },
+          "skuCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "to": {
+            "format": "date",
+            "type": "string"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "SkuProfitRow": {
+        "properties": {
+          "components": {
+            "items": {
+              "$ref": "#/components/schemas/SkuProfitComponentAmount"
+            },
+            "type": "array"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "factCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "missingComponents": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "modeBreakdown": {
+            "items": {
+              "$ref": "#/components/schemas/SkuProfitModeAmount"
+            },
+            "type": "array"
+          },
+          "netMargin": {
+            "nullable": true,
+            "type": "number"
+          },
+          "netProfit": {
+            "nullable": true,
+            "type": "number"
+          },
+          "netProfitComparable": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "totalCost": {
+            "nullable": true,
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "SkuProfitWaterfall": {
+        "properties": {
+          "currency": {
+            "type": "string"
+          },
+          "netProfit": {
+            "nullable": true,
+            "type": "number"
+          },
+          "netProfitComparable": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "steps": {
+            "items": {
+              "$ref": "#/components/schemas/SkuProfitWaterfallStep"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "SkuProfitWaterfallStep": {
+        "properties": {
+          "amount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "component": {
+            "type": "string"
+          },
+          "cumulative": {
+            "nullable": true,
+            "type": "number"
+          },
+          "label": {
+            "type": "string"
+          },
+          "reason": {
+            "nullable": true,
+            "type": "string"
+          },
+          "sign": {
+            "type": "string"
+          },
+          "step": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
       "SpuSummaryResponse": {
         "properties": {
           "caliberNotes": {
@@ -11944,6 +12295,311 @@
         "summary": "从上游拉取销量事实并投影（写的是投影，不是业务事实）",
         "tags": [
           "13.2.1.1 销量趋势"
+        ]
+      }
+    },
+    "/reporting/sku-profit/capabilities": {
+      "get": {
+        "description": "notDelivered 列出的是**确实算不出来**的部分，每条都写清原因与影响 —— 「算不出来」与「等于 0」在页面上长得一样，含义却相反。",
+        "operationId": "get_reporting_sku_profit_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkuProfitCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "能力声明：哪些上游真接通、哪些确实算不出来、归谁",
+        "tags": [
+          "13.4.1.2 SKU 利润"
+        ]
+      }
+    },
+    "/reporting/sku-profit/orders": {
+      "get": {
+        "description": "列出的是**事实行**（来源服务 + 上游行标识），可以逐条回到上游核对。净利为什么算不出来，在这一层能直接看到缺的是哪几条事实。",
+        "operationId": "get_reporting_sku_profit_orders",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "skuCode",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "currency",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkuProfitOrderPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "订单级明细钻取：这个 SKU 背后的事实行（真分页 + 真计数）",
+        "tags": [
+          "13.4.1.2 SKU 利润"
+        ]
+      }
+    },
+    "/reporting/sku-profit/refresh": {
+      "post": {
+        "description": "只跑本模块这一路上游：9/11 售后的退款申请单。权限是 reporting.projection.write —— **本模块没有任何「创建业务事实」的权限**。",
+        "operationId": "post_reporting_sku_profit_refresh",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkuProfitRefreshResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "刷新退款损失事实（从上游拉取 → 投影）",
+        "tags": [
+          "13.4.1.2 SKU 利润"
+        ]
+      }
+    },
+    "/reporting/sku-profit/report": {
+      "get": {
+        "description": "一行 = 一个 SKU × 一个币种（**绝不跨币种相加**）。成本只取上游**已分摊到 SKU** 的那些行：上游分摊到店铺 / 订单时，SKU 维度就拿不到那一格 —— 显示「不可归属到 SKU」，**不是 0**。",
+        "operationId": "get_reporting_sku_profit_report",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "skuCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "currency",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkuProfitResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "SKU 利润表：单品收入 − 各项成本 = 净利（不可比时是「—」，不是 0）",
+        "tags": [
+          "13.4.1.2 SKU 利润"
+        ]
+      }
+    },
+    "/reporting/sku-profit/waterfall": {
+      "get": {
+        "description": "每一步都是**服务端算好的**，前端只画图。哪一步拿不到，净利就是「—（不可比）」，**不是 0**。",
+        "operationId": "get_reporting_sku_profit_waterfall",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "skuCode",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "currency",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkuProfitWaterfall"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "构成瀑布：收入 → 逐项成本 → 净利",
+        "tags": [
+          "13.4.1.2 SKU 利润"
         ]
       }
     },
