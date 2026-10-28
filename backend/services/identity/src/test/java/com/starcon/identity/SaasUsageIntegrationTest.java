@@ -279,6 +279,42 @@ class SaasUsageIntegrationTest extends IdentityIntegrationTestBase {
     return null;
   }
 
+  /**
+   * 核对某个租户的用量报表：**每一行**都属于该租户，且每一行的 {@code quantity} 都等于本租户
+   * 登记的量。
+   *
+   * <p>为什么不能对 JSON 原文做子串匹配（2026-10-29 的真实 flaky）：响应里除 quantity 外还有
+   * **随机生成的 UUID**（subscriptionId / tenantId / collectionId…），随机 UUID 里恰好出现
+   * {@code 111} / {@code 222} 这三个字符的概率不低——2026-10-29 的 {@code subscriptionId} 尾部
+   * 就是 {@code ...3554907f1112}，于是「forB 的响应不含 111」被一个与隔离无关的巧合打成假红。
+   * 按字段取值比较后，判据只落在 {@code quantity} 上，与 UUID 无关。
+   *
+   * <p>顺带说明为什么不退回字符串比较：quantity 在 JSON 里可能是 {@code 111} 也可能是
+   * {@code 111.0}（BigDecimal 的标度），所以用数值比较；而且必须指定字段——响应里还有
+   * {@code entitlementLimit}（3000）、{@code utilization}（0.074）等数字字段，
+   * 「整份原文里没有 222」这种判据对它们一样会被巧合击穿。
+   *
+   * @param ownQuantity 本租户登记的量；报表里每一行的 quantity 都必须等于它
+   * @param foreignQuantity 另一个租户的量；本租户报表里不允许出现（由「每行 == ownQuantity」蕴含）
+   */
+  private void assertUsageOnlyFor(
+      JsonNode rows, UUID tenantId, double ownQuantity, double foreignQuantity) {
+    assertThat(rows.isArray()).as("用量报表必须是数组").isTrue();
+    assertThat(rows).as("报表至少要有一行").isNotEmpty();
+    for (JsonNode row : rows) {
+      assertThat(row.path("tenantId").asText())
+          .as("报表每一行都必须属于本租户 %s", tenantId)
+          .isEqualTo(tenantId.toString());
+      assertThat(row.path("quantity").isNumber()).as("报表每一行都必须带数值 quantity").isTrue();
+      assertThat(row.path("quantity").asDouble())
+          .as("报表每一行的用量都必须是本租户的 %s", ownQuantity)
+          .isEqualTo(ownQuantity);
+      assertThat(row.path("quantity").asDouble())
+          .as("本租户的报表里不得出现别的租户的量 %s", foreignQuantity)
+          .isNotEqualTo(foreignQuantity);
+    }
+  }
+
   // ------------------------------------------------------------------
   // 纪律一：仅平台管理员可见，租户不可访问
   // ------------------------------------------------------------------
@@ -627,9 +663,13 @@ class SaasUsageIntegrationTest extends IdentityIntegrationTestBase {
             "/identity/saas-usage/report?tenantId=" + tenantB,
             null,
             200);
-    assertThat(forA.toString()).contains("111").doesNotContain("222");
-    assertThat(forB.toString()).contains("222").doesNotContain("111");
-    assertThat(report.toString()).contains(tenantA.toString()).contains(tenantB.toString());
+    // 逐行按**字段值**核对，而不是对 JSON 原文做子串匹配：原文里混着随机 UUID，
+    // 「111」既可能是 A 的量，也可能是随机 subscriptionId 里恰好出现的三个字符。
+    assertUsageOnlyFor(forA, tenantA, 111.0, 222.0);
+    assertUsageOnlyFor(forB, tenantB, 222.0, 111.0);
+    var reportedTenants = new ArrayList<String>();
+    report.forEach(r -> reportedTenants.add(r.path("tenantId").asText()));
+    assertThat(reportedTenants).contains(tenantA.toString(), tenantB.toString());
 
     // ---- 断言二：伪造 tenant header 无效 ----
     // 平台运营带着伪造的 X-Tenant-Id 归集，落点仍由请求体的目标租户决定。
