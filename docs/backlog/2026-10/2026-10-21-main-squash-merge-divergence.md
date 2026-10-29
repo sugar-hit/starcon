@@ -1,4 +1,4 @@
-# `origin/main` 的 tip 是集成头的 squash —— main → 集成头同步结构性冲突（第 79–100 轮连续未并入）
+# `origin/main` 的 tip 是集成头的 squash —— main → 集成头同步结构性冲突（第 79–102 轮连续未并入）
 
 - 创建: 2026-10-21
 - Owner: TBD（**发布侧**负责，见「待办内容」第 1 条）
@@ -280,6 +280,26 @@ parents:   1 个父提交 = d28188d6（**常规提交，不是 merge**）
       ⇒ 需**协议层面显式授权**后才可执行，或由发布侧直接改 main 的 tip（首选）。
       ⚠️ 高危项必须点名：`SaasUsageIntegrationTest.java` 取 theirs
       会把 `c904ec63` 修掉的 flaky 断言装回去；`AnomalyOrder*` 取 theirs 会回退跨时钟域修复。
+- [ ] **（🔴 2026-10-29 18:23 第 102 轮新增，P0）L2 脚本必须走调度闸 —— 现在的闸对 L2 段完全无效**：
+      本轮实测：同步任务 18:23:45 取闸成功后 71 秒，流水线 **r132 的 L2 脚本 `.dev-agent/l2-r132.sh`
+      直接启动 `mvnw verify -fae`**（18:24:55），且把自己的 keepalive 文件
+      `keepalive-r132-l2-*` **写进了别人持有的闸目录** ⇒ **双方都以为自己是持闸者**。
+      根因（`grep` 实测）：该脚本 **既不调用 `gate acquire`，也不调用 `gate release`**，
+      只把闸目录当成「可以随便写文件的目录」；它全程**不做任何 git 变更**（无 reset / checkout / commit / push）。
+      ⇒ 后果：**「宁可挡住一轮，也不能双派发」这条设计意图被绕过** —— 任何 detached 的 L2 脚本
+      都能在别人持闸期间跑 L2，抢 Testcontainers + 抢 `backend/**/target/` ⇒ 成片假红。
+      ⇒ 建议：① 所有 L2 脚本启动前**必须** `gate acquire`（失败即退出、绝不跑 L2），
+      收尾**必须** `gate release`；② keepalive 守护应**挂在闸存活前提**上（闸没了就停）；
+      ③ 把这条写进 `PIPELINE.md` 第 2 步的硬约束。
+- [ ] **（🟠 2026-10-29 18:23 第 102 轮新增，P1）`lane.mjs` 的 TTL 接管路径非原子 ⇒ 互斥可被打破**：
+      `gateAcquire` 的 TTL 分支是 `rmSync(GATE_DIR)` + `mkdirSync(GATE_DIR)`（`lane.mjs:576-578`）
+      —— **不是原子操作**：两个并发接管者可能**都拿到 `ok: true`**。
+      本轮为规避这一点，在等闸期间**主动 kill 了 2 个同族孤儿竞态循环**
+      （`76215/76219`、`76952/76955`，都是「`age>4200` 就 acquire 然后立刻退出」的脚本）——
+      它们若与本轮同时接管，会让互斥失效；且 acquire 后立即退出却把闸留成「新鲜持有」
+      ⇒ **闸泄漏 70 分钟**、白挡下一轮。
+      ⇒ 建议：接管改成「先 `rename` 到唯一临时名，再 `mkdir`」或引入**持有令牌**
+      （owner 文件写随机 token，`release` 时校验 token 匹配才删），使并发接管最多一方成功。
 
 ### 2026-10-29 05:15 轮（第 98 轮）：冲突面**会随集成头前进而增长**，且 theirs 侧**零行新交付**
 
@@ -511,12 +531,73 @@ git rev-parse 1e3228b4^{tree}     ⇒ 83269e111f5f42e8b9481fd0e9549687aa8a7ed0  
 
 ---
 
+### 2026-10-29 18:23 轮（第 102 轮）：**充要证明第 5 次独立复现** ＋ **孤儿锁 ⇒ TTL 接管** ＋ **🔴 双向持闸实证**
+
+> 本轮同样**不引用**第 98–101 轮的结论，而是**重跑取证**，得到同一结果。
+
+**① `origin/main^{tree}` == 集成头祖先 `1e3228b4^{tree}`（逐字节相同）**
+
+```
+git rev-parse origin/main^{tree}  ⇒ 83269e111f5f42e8b9481fd0e9549687aa8a7ed0
+git rev-parse 1e3228b4^{tree}     ⇒ 83269e111f5f42e8b9481fd0e9549687aa8a7ed0   ← 相同
+git diff --stat origin/main 1e3228b4 ⇒ （空）
+```
+
+**② main 可达的 27230 个对象里，只有 1 个不在集成头历史中 —— 且它是 commit 本身**
+
+```
+git rev-list --objects origin/main              ⇒ 27230 个对象
+git rev-list --objects integration/module-dev   ⇒ 46658 个对象
+comm -23 main integration                       ⇒ 1 个：823ebca5…（git cat-file -t ⇒ commit）
+```
+
+⇒ **零个新 blob / 零个新 tree** ⇒ main 侧**没有任何新内容**（第 5 次独立复现）。
+
+**③ 台账逐模块 join：main 领先 = 0**
+
+| 项 | main 快照 | 集成头 `420962f5` |
+| --- | --- | --- |
+| 已交付 | **406** | **431** |
+| 进行中 | 0 | 0 |
+| 未开发 | **59** | **34** |
+| 完成率 | 87.3% | **92.7%** |
+
+状态不同 **25 个**，方向**全部**是「集成头已交付 / main 未开发」⇒ **main 领先 = 0**。
+
+**④ 冲突面：27 个（26 add/add + 1 content），与第 99 / 100 / 101 轮同一集合**
+
+判据「**4 个 theirs 独有 = 0 的文件集合完全一致**」再次复现：
+
+- `apps/web/src/lib/api-proxy.ts`（content；ours 13691 行 / theirs 12470 行，`diff :2: :3:` = **0 增 / 1221 删** ⇒ theirs 是 ours 的真子集）
+- `backend/services/channel/src/test/java/com/starcon/channel/LinkageRiskIdentityStub.java`
+- `backend/services/reporting/src/main/java/com/starcon/reporting/ReportingFinancePort.java`
+- `backend/services/reporting/src/main/java/com/starcon/reporting/ReportingUpstreamClient.java`
+
+⚠️ 本轮的行数口径（theirs 独有 77 / ours 独有 1272）与前三轮（79 / 1786）**不可直接相减**：
+归一化方法不同，且 HEAD 已从 `95151eb1` 前进到 `420962f5`。**可比的只有上面那个文件集合判据。**
+
+**⑤ ⚠️ 等闸 519 秒，持闸者是「孤儿锁」**
+
+首读 `held` / `ageSeconds=3682` / `stale=false` ⇒ 按协议**等**，不抢不清不 force。
+闸外活性取证：**owner PID `74168` 查无此进程**、**同 worktree 无任何 `mvnw`/`java`/`surefire`**、
+**闸目录内无任何 `keepalive-*`**（⇒ 持闸者**没有续期机制在跑**）⇒ 孤儿锁
+（`l2-r132.sh` 注释写明 r131 的 tick 崩在 `plan --lanes 2` 之后、派发 worker 之前）。
+⇒ 但 `stale=false` ⇒ **仍走 TTL 接管**（18:23:45 拿到），**未手删闸目录**。
+
+**⑥ 🔴 双向持闸（见上面新增的 P0 待办）**：我取闸 71 秒后 r132 的 L2 直接开跑并往我的闸目录里
+写 keepalive ⇒ 双方都以为自己是持闸者。后果之一：预检与 L2 共享 `backend/**/target/`
+⇒ 本轮改用**隔离 scratch 树**跑 maven 编译（`git archive HEAD backend` → `/tmp` → `./mvnw -q -o compile` ⇒ **rc=0**），
+`pnpm typecheck` 仍跑在集成头（3/3 绿）。
+⚠️ **若 r132 本轮 L2 报红，请优先怀疑这次 5 秒并发编译**（代码本身已独立验证为绿）。
+
+---
+
 ## 影响面
 
 - **只影响「main → 集成头同步」这一个任务**（`tools/module-progress/SYNC-MAIN.md`）的推进节奏，
   **不影响**流水线的并入 / L2（集成头自身照常演进，batch-39~42 均正常交付）。
 - **不动任何业务代码**：本条待办是**发布流程 / 仓库拓扑**问题，不是代码问题。
-- 涉及文件（**最新一轮 —— 第 101 轮（2026-10-29 11:15）的冲突面，27 个 = 26 add/add + 1 content**，与第 99 / 100 轮**逐字节相同**；theirs 独有 **79 行**、ours 独有 **1786 行**）：
+- 涉及文件（**最新一轮 —— 第 102 轮（2026-10-29 18:23）的冲突面，27 个 = 26 add/add + 1 content**，与第 99 / 100 / 101 轮**同一集合**；theirs 独有 **77 行**、ours 独有 **1272 行** —— ⚠️ 这两个绝对数用了与前三轮不同的行集归一化口径，**不可与前三轮直接相减**，可比的判据是「4 个 theirs 独有 = 0 的文件集合完全一致」）：
   - `apps/web/src/components/dashboard/workbench-card-registry.ts`（add/add）
   - `apps/web/src/components/dashboard/workbench-layout-model.test.ts`（add/add）
   - `apps/web/src/lib/api-proxy.ts`（**content**；theirs 独有 **0 行**，ours 严格超集）
