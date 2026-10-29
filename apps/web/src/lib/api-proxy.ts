@@ -659,6 +659,57 @@ const services: readonly {
     pattern: /^sku\-profit\/(?:capabilities|report|waterfall|orders|refresh)$/,
   },
   {
+    // 13.5.1.1 库存分析（reporting 服务，卷 13「利润与经营分析」L3 13.5.1 库存分析下的第一格）。
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 reporting/ 正则里并分支 ——
+    //   既有条目**一字未改、也不重排、不删除**。
+    //
+    // ---- 插入锚点选在「13.4.1.2 sku-profit 那条之后」----
+    //   本文件是并行车道共同的**累积型**文件，同批其它车道分别落在「数组最开头」
+    //   「第一个 identity/ 之前」「数组末尾」；本车道落在 reporting 簇与 finance 簇的交界处，
+    //   与它们的插入点相距 10000 行以上 ⇒ 并入时 git 能干净求并。
+    //
+    // ---- 首 token「inventory-analysis」的零命中核对结论（实测，非目测）----
+    //   发车前用脚本把本文件里**全部既有元素**（prefix + 正则）逐条抽出来，
+    //   按 resolve() 的**同构口径**实测（path.startsWith(prefix) 收窄服务 →
+    //   再测 pattern.test(path.slice(prefix.length))）：本模块 11 条路径在放行前**全部 404**。
+    //   既有 `prefix === 'reporting/'` 的 18 条正则，首 token 分别是
+    //   overview/projection / product-performance / lifecycle-segmentation / expense-variance /
+    //   store-comparison / sales-trend / target-attainment / metric-cards / store-overview /
+    //   targets / store-site / time-pattern / profit-report / product-sales / traffic-conversion /
+    //   cost-structure / affiliate-marketing / sku-profit，**没有一条能吃下 `inventory-analysis`**。
+    //   反向核对：另外 **60 余条**别的车道已交付的 reporting 形状**全部仍然命中** ——
+    //   本条新元素**不遮蔽**它们（首 token 两两不同 ⇒ 正则互不相交）。
+    //   另外核对了本模块**不得**出现在别的服务前缀下：finance/ catalog/ channel/ trade/
+    //   warehouse/ identity/ 下的 inventory-analysis **全部 404**。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**，契约里就这 11 条）：
+    //   inventory-analysis/capabilities   能力声明（哪些上游真接通、哪些确实拿不到）
+    //   inventory-analysis/structure      库存金额结构（成本口径，按仓库/类目/店铺/SKU 拆解）
+    //   inventory-analysis/turnover       周转率（**成本口径**）+ 趋势
+    //   inventory-analysis/aging          库龄分布 + 呆滞占比
+    //   inventory-analysis/stock-status   缺货与超储
+    //   inventory-analysis/abc            ABC 分类（按库存金额的累计占比切分）
+    //   inventory-analysis/drilldown      SKU 级下钻
+    //   inventory-analysis/stocktakes     盘点历史（准确率）
+    //   inventory-analysis/rules          阈值规则（GET）/ inventory-analysis/rules/{ruleType}（PUT）
+    //   inventory-analysis/refresh        刷新库存分析投影（POST，写的是投影不是业务事实）
+    //
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   inventory-analysis                    —— 裸路径：后端**没有**「一条不存在的汇总列表接口」。
+    //   inventory-analysis/{uuid}             —— 顶层没有 id 段（本模块按查询参数定位）。
+    //   inventory-analysis/unknown            —— 未实现的子路径仍然 404。
+    //   inventory-analysis/rules/NOPE         —— 规则只认 ABC_CLASS / TURNOVER_TARGET 两种。
+    //   inventory-analysis/stock-status/extra —— 多一层仍然 404。
+    //
+    // 规则类型段用**受控词表**（不是 `[A-Z_]+`）：规则类型只有两种，
+    // 放行一个不存在的类型只会让界面以为「那也能配」。
+    prefix: 'reporting/',
+    env: 'REPORTING_URL',
+    fallback: 'http://127.0.0.1:8088',
+    pattern:
+      /^inventory\-analysis\/(?:capabilities|structure|turnover|aging|stock\-status|abc|drilldown|stocktakes|refresh|rules(?:\/ABC_CLASS|\/TURNOVER_TARGET)?)$/,
+  },
+  {
     // 12.4.1.3 成本差异分析（finance 服务，卷 12「财务核算」L3 12.4.1 成本计算下的第三格）。
     // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 finance 那几条巨型 alternation 里并分支 ——
     //   既有条目**一字未改、也不重排**。

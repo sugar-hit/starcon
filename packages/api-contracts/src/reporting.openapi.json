@@ -2200,6 +2200,1094 @@
         },
         "type": "object"
       },
+      "InventoryAbcResponse": {
+        "properties": {
+          "aCumPct": {
+            "nullable": true,
+            "type": "number"
+          },
+          "asOf": {
+            "format": "date",
+            "type": "string"
+          },
+          "bCumPct": {
+            "nullable": true,
+            "type": "number"
+          },
+          "caliberNote": {
+            "type": "string"
+          },
+          "dataUpdatedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "dataUpdatedNote": {
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/InventoryAbcRow"
+            },
+            "type": "array"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "summary": {
+            "items": {
+              "$ref": "#/components/schemas/InventoryAbcSummary"
+            },
+            "type": "array"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "InventoryAbcRow": {
+        "properties": {
+          "abcClass": {
+            "type": "string"
+          },
+          "abcClassLabel": {
+            "type": "string"
+          },
+          "availableQuantity": {
+            "type": "number"
+          },
+          "categoryCode": {
+            "type": "string"
+          },
+          "comparable": {
+            "type": "boolean"
+          },
+          "cumulativeShare": {
+            "nullable": true,
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "inventoryValue": {
+            "nullable": true,
+            "type": "number"
+          },
+          "note": {
+            "type": "string"
+          },
+          "onHandQuantity": {
+            "type": "number"
+          },
+          "shopCode": {
+            "type": "string"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "valueShare": {
+            "nullable": true,
+            "type": "number"
+          },
+          "warehouseCode": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "InventoryAbcSummary": {
+        "properties": {
+          "abcClass": {
+            "type": "string"
+          },
+          "abcClassLabel": {
+            "type": "string"
+          },
+          "comparable": {
+            "type": "boolean"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "inventoryValue": {
+            "nullable": true,
+            "type": "number"
+          },
+          "skuCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "valueShare": {
+            "nullable": true,
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "InventoryAgingBucketRow": {
+        "properties": {
+          "available": {
+            "type": "number"
+          },
+          "availableShare": {
+            "nullable": true,
+            "type": "number"
+          },
+          "bucket": {
+            "type": "string"
+          },
+          "bucketCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "bucketLabel": {
+            "type": "string"
+          },
+          "comparable": {
+            "type": "boolean"
+          },
+          "lowerDays": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "onHand": {
+            "type": "number"
+          },
+          "reserved": {
+            "type": "number"
+          },
+          "scopeKey": {
+            "type": "string"
+          },
+          "scopeLabel": {
+            "type": "string"
+          },
+          "scopeType": {
+            "type": "string"
+          },
+          "skuCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "upperDays": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "InventoryAgingResponse": {
+        "properties": {
+          "asOf": {
+            "format": "date",
+            "type": "string"
+          },
+          "buckets": {
+            "items": {
+              "$ref": "#/components/schemas/InventoryAgingBucketRow"
+            },
+            "type": "array"
+          },
+          "caliberNote": {
+            "type": "string"
+          },
+          "dataUpdatedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "dataUpdatedNote": {
+            "type": "string"
+          },
+          "obsoleteAndUpAvailable": {
+            "nullable": true,
+            "type": "number"
+          },
+          "obsoleteRatio": {
+            "nullable": true,
+            "type": "number"
+          },
+          "ratioComparable": {
+            "type": "boolean"
+          },
+          "ratioNote": {
+            "type": "string"
+          },
+          "slowMoving": {
+            "items": {
+              "$ref": "#/components/schemas/InventorySlowMovingRow"
+            },
+            "type": "array"
+          },
+          "totalAvailable": {
+            "type": "number"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "InventoryAnalysisCapabilities": {
+        "properties": {
+          "abcCaliber": {
+            "type": "string"
+          },
+          "costCaliber": {
+            "type": "string"
+          },
+          "dimensions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "metrics": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "notDelivered": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "turnoverCaliber": {
+            "type": "string"
+          },
+          "upstreamConnected": {
+            "type": "boolean"
+          },
+          "upstreamModules": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "InventoryAnalysisRefreshResult": {
+        "properties": {
+          "note": {
+            "type": "string"
+          },
+          "sources": {
+            "items": {
+              "$ref": "#/components/schemas/InventoryAnalysisRefreshSummary"
+            },
+            "type": "array"
+          },
+          "totalWritten": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "truncated": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "InventoryAnalysisRefreshSummary": {
+        "properties": {
+          "factCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "written": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "InventoryAnalysisRule": {
+        "properties": {
+          "aCumPct": {
+            "nullable": true,
+            "type": "number"
+          },
+          "bCumPct": {
+            "nullable": true,
+            "type": "number"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "minHistoryDays": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "ruleType": {
+            "type": "string"
+          },
+          "targetTurnover": {
+            "nullable": true,
+            "type": "number"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "InventoryAnalysisRuleInput": {
+        "properties": {
+          "aCumPct": {
+            "nullable": true,
+            "type": "number"
+          },
+          "bCumPct": {
+            "nullable": true,
+            "type": "number"
+          },
+          "enabled": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "minHistoryDays": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "targetTurnover": {
+            "nullable": true,
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "InventoryCurrencyTotal": {
+        "properties": {
+          "availableQuantity": {
+            "type": "number"
+          },
+          "costMissingQuantity": {
+            "type": "number"
+          },
+          "costMissingSkuCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "inventoryValue": {
+            "nullable": true,
+            "type": "number"
+          },
+          "onHandQuantity": {
+            "type": "number"
+          },
+          "skuCount": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "InventoryDrilldownResponse": {
+        "properties": {
+          "asOf": {
+            "format": "date",
+            "type": "string"
+          },
+          "caliberNote": {
+            "type": "string"
+          },
+          "dataUpdatedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "dataUpdatedNote": {
+            "type": "string"
+          },
+          "from": {
+            "format": "date",
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/InventoryDrilldownRow"
+            },
+            "type": "array"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "to": {
+            "format": "date",
+            "type": "string"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "InventoryDrilldownRow": {
+        "properties": {
+          "abcClass": {
+            "type": "string"
+          },
+          "abcClassLabel": {
+            "type": "string"
+          },
+          "availableQuantity": {
+            "type": "number"
+          },
+          "categoryCode": {
+            "type": "string"
+          },
+          "comparable": {
+            "type": "boolean"
+          },
+          "costOfGoodsSold": {
+            "nullable": true,
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "inventoryValue": {
+            "nullable": true,
+            "type": "number"
+          },
+          "note": {
+            "type": "string"
+          },
+          "onHandQuantity": {
+            "type": "number"
+          },
+          "overstock": {
+            "type": "boolean"
+          },
+          "reservedQuantity": {
+            "type": "number"
+          },
+          "shopCode": {
+            "type": "string"
+          },
+          "shopName": {
+            "type": "string"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "soldQuantity": {
+            "type": "number"
+          },
+          "thresholdConfigured": {
+            "type": "boolean"
+          },
+          "unitCost": {
+            "nullable": true,
+            "type": "number"
+          },
+          "warehouseCode": {
+            "type": "string"
+          },
+          "warehouseName": {
+            "type": "string"
+          },
+          "zeroStock": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "InventorySlowMovingRow": {
+        "properties": {
+          "available": {
+            "type": "number"
+          },
+          "availableShare": {
+            "nullable": true,
+            "type": "number"
+          },
+          "bucketCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "comparable": {
+            "type": "boolean"
+          },
+          "oldestAgingDays": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "scopeKey": {
+            "type": "string"
+          },
+          "scopeLabel": {
+            "type": "string"
+          },
+          "scopeType": {
+            "type": "string"
+          },
+          "skuCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "InventoryStockStatusAmount": {
+        "properties": {
+          "currency": {
+            "type": "string"
+          },
+          "overstockValue": {
+            "nullable": true,
+            "type": "number"
+          },
+          "totalValue": {
+            "nullable": true,
+            "type": "number"
+          },
+          "zeroStockValue": {
+            "nullable": true,
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "InventoryStockStatusResponse": {
+        "properties": {
+          "asOf": {
+            "format": "date",
+            "type": "string"
+          },
+          "caliberNote": {
+            "type": "string"
+          },
+          "dataUpdatedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "dataUpdatedNote": {
+            "type": "string"
+          },
+          "dimension": {
+            "type": "string"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/InventoryStockStatusRow"
+            },
+            "type": "array"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "InventoryStockStatusRow": {
+        "properties": {
+          "amounts": {
+            "items": {
+              "$ref": "#/components/schemas/InventoryStockStatusAmount"
+            },
+            "type": "array"
+          },
+          "dimension": {
+            "type": "string"
+          },
+          "dimensionKey": {
+            "type": "string"
+          },
+          "dimensionLabel": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "overstockQuantity": {
+            "type": "number"
+          },
+          "overstockSkuCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "thresholdUnsetSkuCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalSkuCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "zeroStockAvailable": {
+            "type": "number"
+          },
+          "zeroStockSkuCount": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "InventoryStocktakeResponse": {
+        "properties": {
+          "caliberNote": {
+            "type": "string"
+          },
+          "dataUpdatedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "dataUpdatedNote": {
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/InventoryStocktakeRow"
+            },
+            "type": "array"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/InventoryStocktakeSummary"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "InventoryStocktakeRow": {
+        "properties": {
+          "bookTotal": {
+            "type": "number"
+          },
+          "code": {
+            "type": "string"
+          },
+          "comparable": {
+            "type": "boolean"
+          },
+          "countedLineCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "countedRate": {
+            "nullable": true,
+            "type": "number"
+          },
+          "frozenAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "lineCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "scopeLabel": {
+            "type": "string"
+          },
+          "scopeType": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "stocktakeId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "varianceLineCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "varianceRate": {
+            "nullable": true,
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "InventoryStocktakeSummary": {
+        "properties": {
+          "comparable": {
+            "type": "boolean"
+          },
+          "countedLineCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "countedRate": {
+            "nullable": true,
+            "type": "number"
+          },
+          "lineCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "sheetCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "varianceLineCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "varianceRate": {
+            "nullable": true,
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "InventoryStructureResponse": {
+        "properties": {
+          "asOf": {
+            "format": "date",
+            "type": "string"
+          },
+          "caliberNote": {
+            "type": "string"
+          },
+          "costMissingQuantity": {
+            "type": "number"
+          },
+          "costMissingSkuCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "dataUpdatedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "dataUpdatedNote": {
+            "type": "string"
+          },
+          "dimension": {
+            "type": "string"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/InventoryStructureRow"
+            },
+            "type": "array"
+          },
+          "totalCurrency": {
+            "nullable": true,
+            "type": "string"
+          },
+          "totalInventoryValue": {
+            "nullable": true,
+            "type": "number"
+          },
+          "totals": {
+            "items": {
+              "$ref": "#/components/schemas/InventoryCurrencyTotal"
+            },
+            "type": "array"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "InventoryStructureRow": {
+        "properties": {
+          "availableQuantity": {
+            "type": "number"
+          },
+          "comparable": {
+            "type": "boolean"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "dimension": {
+            "type": "string"
+          },
+          "dimensionKey": {
+            "type": "string"
+          },
+          "dimensionLabel": {
+            "type": "string"
+          },
+          "inventoryValue": {
+            "nullable": true,
+            "type": "number"
+          },
+          "note": {
+            "type": "string"
+          },
+          "onHandQuantity": {
+            "type": "number"
+          },
+          "overstockQuantity": {
+            "type": "number"
+          },
+          "overstockSkuCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "skuCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "valueShare": {
+            "nullable": true,
+            "type": "number"
+          },
+          "zeroStockSkuCount": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "InventoryTurnoverPoint": {
+        "properties": {
+          "averageInventoryValue": {
+            "nullable": true,
+            "type": "number"
+          },
+          "closingInventoryValue": {
+            "nullable": true,
+            "type": "number"
+          },
+          "comparable": {
+            "type": "boolean"
+          },
+          "costOfGoodsSold": {
+            "nullable": true,
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "dimension": {
+            "type": "string"
+          },
+          "dimensionKey": {
+            "type": "string"
+          },
+          "dimensionLabel": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "openingInventoryValue": {
+            "nullable": true,
+            "type": "number"
+          },
+          "periodEnd": {
+            "format": "date",
+            "type": "string"
+          },
+          "periodStart": {
+            "format": "date",
+            "type": "string"
+          },
+          "turnoverDays": {
+            "nullable": true,
+            "type": "number"
+          },
+          "turnoverRate": {
+            "nullable": true,
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "InventoryTurnoverResponse": {
+        "properties": {
+          "caliberNote": {
+            "type": "string"
+          },
+          "dataUpdatedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "dataUpdatedNote": {
+            "type": "string"
+          },
+          "dimension": {
+            "type": "string"
+          },
+          "from": {
+            "format": "date",
+            "type": "string"
+          },
+          "granularity": {
+            "type": "string"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/InventoryTurnoverRow"
+            },
+            "type": "array"
+          },
+          "targetTurnover": {
+            "nullable": true,
+            "type": "number"
+          },
+          "to": {
+            "format": "date",
+            "type": "string"
+          },
+          "trend": {
+            "items": {
+              "$ref": "#/components/schemas/InventoryTurnoverPoint"
+            },
+            "type": "array"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "InventoryTurnoverRow": {
+        "properties": {
+          "averageInventoryValue": {
+            "nullable": true,
+            "type": "number"
+          },
+          "caliber": {
+            "type": "string"
+          },
+          "closingInventoryValue": {
+            "nullable": true,
+            "type": "number"
+          },
+          "comparable": {
+            "type": "boolean"
+          },
+          "costOfGoodsSold": {
+            "nullable": true,
+            "type": "number"
+          },
+          "costUncoveredSkuCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "dimension": {
+            "type": "string"
+          },
+          "dimensionKey": {
+            "type": "string"
+          },
+          "dimensionLabel": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "openingInventoryValue": {
+            "nullable": true,
+            "type": "number"
+          },
+          "turnoverDays": {
+            "nullable": true,
+            "type": "number"
+          },
+          "turnoverRate": {
+            "nullable": true,
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
       "LifecycleMetricReference": {
         "properties": {
           "aggregation": {
@@ -10390,6 +11478,622 @@
         "summary": "费用差异表 + 偏差趋势 + 规则调优建议",
         "tags": [
           "13.4.2.2 费用差异"
+        ]
+      }
+    },
+    "/reporting/inventory-analysis/abc": {
+      "get": {
+        "description": "库存分析要回答的是「哪些 SKU 占了大部分资金」⇒ 切分依据是**金额**，不是销量、也不是 SKU 数。阈值可按租户改（PUT /reporting/inventory-analysis/rules/ABC_CLASS）。**没有维护成本的 SKU 不进 ABC**（它们的金额算不出来，不是 0 元）。",
+        "operationId": "get_reporting_inventory_analysis_abc",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "currency",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "asOf",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InventoryAbcResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "ABC 分类（按**库存金额**的累计占比切分）",
+        "tags": [
+          "13.5.1.1 库存分析"
+        ]
+      }
+    },
+    "/reporting/inventory-analysis/aging": {
+      "get": {
+        "description": "库龄与呆滞的**判定归 warehouse 7.6.1.1**（含滞销线 / 呆滞线阈值策略），本模块只搬运。两者都是**量口径**（warehouse 的库存事实层没有成本列）。呆滞占比的分母为 0 ⇒ **不可比**（不是 0%）。",
+        "operationId": "get_reporting_inventory_analysis_aging",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "asOf",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "warehouseId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InventoryAgingResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "库龄分布 + 呆滞占比",
+        "tags": [
+          "13.5.1.1 库存分析"
+        ]
+      }
+    },
+    "/reporting/inventory-analysis/capabilities": {
+      "get": {
+        "description": "notDelivered 列出的是**确实拆不出来**的部分（按仓库拆解的周转率、退货冲减等），每条都写清原因与影响 —— 「算不出来」与「数值是 0」在页面上长得一样，含义却相反。",
+        "operationId": "get_reporting_inventory_analysis_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InventoryAnalysisCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "能力声明：六件指标分别来自哪个上游、哪些确实拿不到",
+        "tags": [
+          "13.5.1.1 库存分析"
+        ]
+      }
+    },
+    "/reporting/inventory-analysis/drilldown": {
+      "get": {
+        "description": "每一行给出数量、**成本口径**的单价与库存金额、窗口内的销量与销售出库成本、缺货 / 超储标记；都能回到上游逐条核对。",
+        "operationId": "get_reporting_inventory_analysis_drilldown",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "skuCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "asOf",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InventoryDrilldownResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "SKU 级下钻（真分页 + 真计数）",
+        "tags": [
+          "13.5.1.1 库存分析"
+        ]
+      }
+    },
+    "/reporting/inventory-analysis/refresh": {
+      "post": {
+        "description": "拉四路上游（warehouse 库存 / warehouse 库龄 / warehouse 盘点 / trade 销售订单）并落成本服务的投影（幂等：同一批上游事实重放不会翻倍）。权限是 reporting.projection.write —— **本模块没有任何「创建业务事实」的权限**。",
+        "operationId": "post_reporting_inventory_analysis_refresh",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InventoryAnalysisRefreshResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "刷新库存分析投影（从上游拉取 → 投影）",
+        "tags": [
+          "13.5.1.1 库存分析"
+        ]
+      }
+    },
+    "/reporting/inventory-analysis/rules": {
+      "get": {
+        "description": "ABC 的累计占比线与周转目标都落在**租户自己的规则表**里（没有配置时给默认值）；不同品类、不同店铺的库存结构差一个数量级，写死的阈值对谁都不对。",
+        "operationId": "get_reporting_inventory_analysis_rules",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/InventoryAnalysisRule"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "阈值规则（可配置项）",
+        "tags": [
+          "13.5.1.1 库存分析"
+        ]
+      }
+    },
+    "/reporting/inventory-analysis/rules/{ruleType}": {
+      "put": {
+        "description": "只改写进来的那几个字段；本模块**只改自己的规则表**，不写任何上游口径（成本单价在 catalog、库龄阈值在 warehouse）。",
+        "operationId": "put_reporting_inventory_analysis_rules_ruleType",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "ruleType",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InventoryAnalysisRuleInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InventoryAnalysisRule"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "改阈值",
+        "tags": [
+          "13.5.1.1 库存分析"
+        ]
+      }
+    },
+    "/reporting/inventory-analysis/stock-status": {
+      "get": {
+        "description": "缺货 = 可用量 ≤ 0；超储 = 在手量超过**已配置**的阈值。**未设阈值**的行单独计数 —— 「没查过」与「查过没超」是两件事，混在一起会让人以为超储为零。",
+        "operationId": "get_reporting_inventory_analysis_stock_status",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dimension",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "asOf",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InventoryStockStatusResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "缺货与超储（按维度拆解）",
+        "tags": [
+          "13.5.1.1 库存分析"
+        ]
+      }
+    },
+    "/reporting/inventory-analysis/stocktakes": {
+      "get": {
+        "description": "账面 / 已盘 / 差异三列计数都来自 warehouse 7.4.2.1。**账面合计不等于当前库存余额** —— 它是盘点**冻结那一刻**的账面数。账面行数为 0 ⇒ 准确率**不可比**（不是 0%）。",
+        "operationId": "get_reporting_inventory_analysis_stocktakes",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InventoryStocktakeResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "盘点历史（准确率）",
+        "tags": [
+          "13.5.1.1 库存分析"
+        ]
+      }
+    },
+    "/reporting/inventory-analysis/structure": {
+      "get": {
+        "description": "库存金额 = 在手数量 × **catalog 成本构成里的单位成本**（成本口径）。**多币种绝不相加** —— 每一行带自己的币种；跨币种的「总计」只有单币种时才存在。没有维护成本的 SKU 金额是「—」，**不在合计里**（不是 0 元）。",
+        "operationId": "get_reporting_inventory_analysis_structure",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dimension",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "currency",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "asOf",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InventoryStructureResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "库存金额结构（成本口径，按仓库 / 类目 / 店铺 / SKU 拆解）",
+        "tags": [
+          "13.5.1.1 库存分析"
+        ]
+      }
+    },
+    "/reporting/inventory-analysis/turnover": {
+      "get": {
+        "description": "🔴 周转率 = **销售出库成本** ÷ **平均库存金额**，**没有用售价** —— 用售价算会虚高（蓝图加粗句）。**先汇总再相除**：分子分母都是先加总再相除，不是对逐 SKU 的周转率求平均。分母为 0 ⇒ 周转率**不可比**（不是 0）。按仓库拆解这一格不可比（销售订单不带仓库维度），如实报「—」而不是摊给某个仓库。",
+        "operationId": "get_reporting_inventory_analysis_turnover",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "granularity",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dimension",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "currency",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InventoryTurnoverResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "周转率（**成本口径**）+ 趋势",
+        "tags": [
+          "13.5.1.1 库存分析"
         ]
       }
     },
