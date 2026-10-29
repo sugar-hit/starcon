@@ -116,10 +116,10 @@ parents:   1 个父提交 = d28188d6（**常规提交，不是 merge**）
 - 但 merge-base 仍是 `1bb270a0`（老 squash `d28188d6` 还在 main 历史里，血缘仍被抹掉）⇒ **merge 仍失败**。
 - **冲突面从 6 个文件缩到 2 个，且换了文件**（各 7 个 hunk）：
 
-  | 冲突文件 | 类型 | base / ours / theirs 行数 | main 侧独有内容 |
-  | --- | --- | --- | --- |
-  | `apps/web/src/lib/api-proxy.ts` | content | 2634 / 5359 / 4967 | **0 行** ⇒ ours 严格超集 |
-  | `backend/services/catalog/src/test/java/com/starcon/catalog/PriceHistoryIntegrationTest.java` | add/add | 0 / 812 / 769 | **27 行**，**修复前的 JVM 墙钟写法**（见下方 ⚠️） |
+  | 冲突文件                                                                                      | 类型    | base / ours / theirs 行数 | main 侧独有内容                                   |
+  | --------------------------------------------------------------------------------------------- | ------- | ------------------------- | ------------------------------------------------- |
+  | `apps/web/src/lib/api-proxy.ts`                                                               | content | 2634 / 5359 / 4967        | **0 行** ⇒ ours 严格超集                          |
+  | `backend/services/catalog/src/test/java/com/starcon/catalog/PriceHistoryIntegrationTest.java` | add/add | 0 / 812 / 769             | **27 行**，**修复前的 JVM 墙钟写法**（见下方 ⚠️） |
 
   ⇒ 仍然**没有一处是 main 侧的新交付**；结论与前 6 轮一致，只是文件名单变了。
 
@@ -127,11 +127,11 @@ parents:   1 个父提交 = d28188d6（**常规提交，不是 merge**）
 > 写成「**14 行**，同一 fixture 的旧写法（`base.plusDays(N)` vs 集成头 `a1At/a2At`），**语义等价**」。
 > **「语义等价」这个判断是错的**，实测（`git show <side>:…PriceHistoryIntegrationTest.java`）：
 >
-> | | main 侧 | 集成头侧 |
-> | --- | --- | --- |
-> | 窗口锚点 | `LocalDate.now()`（**JVM 默认时区**）+ `OffsetDateTime.now().minusDays(10)` | `LocalDate.now(ZoneOffset.UTC)`（**显式 UTC**） |
-> | 种子与查询窗口的关系 | 种子 `base` 与查询用的 `LocalDate.now().minusDays(9)` **各自取墙上时钟** | 种子 `a1At/a2At` 与查询窗口**同源于 `windowDay`** ⇒ 不可能跨日界 |
-> | 可执行不变量 | 无 | 有（`assertThat(a2At.toInstant()).isAfterOrEqualTo(windowFromBound).isBefore(windowToBound)`） |
+> |                      | main 侧                                                                     | 集成头侧                                                                                       |
+> | -------------------- | --------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+> | 窗口锚点             | `LocalDate.now()`（**JVM 默认时区**）+ `OffsetDateTime.now().minusDays(10)` | `LocalDate.now(ZoneOffset.UTC)`（**显式 UTC**）                                                |
+> | 种子与查询窗口的关系 | 种子 `base` 与查询用的 `LocalDate.now().minusDays(9)` **各自取墙上时钟**    | 种子 `a1At/a2At` 与查询窗口**同源于 `windowDay`** ⇒ 不可能跨日界                               |
+> | 可执行不变量         | 无                                                                          | 有（`assertThat(a2At.toInstant()).isAfterOrEqualTo(windowFromBound).isBefore(windowToBound)`） |
 >
 > ⇒ 集成头侧是车道 `fix/5-5-1-1-price-history-window` **刻意做的跨时钟域修复**
 > （把窗口锚到显式 UTC 日、并写了一条把旧写法**钉死成必红**的不变量），
@@ -304,7 +304,7 @@ parents:   1 个父提交 = d28188d6（**常规提交，不是 merge**）
 ### 2026-10-29 05:15 轮（第 98 轮）：冲突面**会随集成头前进而增长**，且 theirs 侧**零行新交付**
 
 > 本节回应流水线第 127 轮（2026-10-29 05:00）的明确请求：
-> *「本流水线不碰它（那是同步任务的职责），但建议由同步任务侧排查那 26 个冲突的根因。」*
+> _「本流水线不碰它（那是同步任务的职责），但建议由同步任务侧排查那 26 个冲突的根因。」_
 
 **① main tip 仍未动**：`origin/main` tip 仍是 `823ebca5 Integration/module dev (#66)`（**单父**，父 = `6522c497`），
 与第 79–97 轮**同一颗 squash**；merge-base 仍停在 `6522c497`（2026-10-23 09:18）。
@@ -330,25 +330,25 @@ GONE : （无）
 
 口径：`git diff --numstat HEAD origin/main -- <file>`。
 
-| 口径 | 结果 |
-| --- | --- |
-| 文件数 | 27（26 add/add + 1 content） |
+| 口径                                                            | 结果                                                                                                                  |
+| --------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| 文件数                                                          | 27（26 add/add + 1 content）                                                                                          |
 | **theirs 是 ours 的严格超集（theirs 独有 = 0 ⇒ 取 ours 无损）** | **4**：`api-proxy.ts` / `LinkageRiskIdentityStub.java` / `ReportingFinancePort.java` / `ReportingUpstreamClient.java` |
-| theirs 独有行合计 | **79 行** |
-| ours 独有行合计 | **1643 行** |
+| theirs 独有行合计                                               | **79 行**                                                                                                             |
+| ours 独有行合计                                                 | **1643 行**                                                                                                           |
 
 theirs 独有 79 行的构成（**逐行看过**）：
 
-| 文件 | 行数 | 性质 |
-| --- | --- | --- |
-| `AnomalyOrderIntegrationTest.java` | **35** | **JVM 墙钟基准** `static final OffsetDateTime NOW = OffsetDateTime.now(ZoneOffset.UTC).truncatedTo(ChronoUnit.SECONDS)`；ours 侧已改 DB 时钟同源 ⇒ **取 theirs 回退跨时钟域修复** |
-| `AnomalyOrderTenancyIntegrationTest.java` | 11 | 同族（墙钟基准） |
-| `SalesTaxIntegrationTest.java` | 7 | `parsed_at` 必须是真时刻的断言 |
-| `NotificationInboxController.java` | 3 | 「1.3.2.1 预警规则未交付」提示串 |
-| `SaasUsageIntegrationTest.java` | 3 | **旧 flaky 子串断言**（见 ②） |
-| `NotificationPreferenceService.java` | 2 | 「1.3.2.2 外部渠道推送未交付」提示串 |
-| `FundAnalysisIntegrationTest.java` | 2 | — |
-| 其余 21 个文件 | 各 **1** | **几乎全是 import 行 / 常量声明行**写法差异（例：`static final PostgreSQLContainer<?> pg = new PostgreSQLContainer<>("postgres:16-alpine");`、`import { Boxes, ClipboardList, HeartPulse, LayoutGrid, Search } from 'lucide-react';`） |
+| 文件                                      | 行数     | 性质                                                                                                                                                                                                                                   |
+| ----------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `AnomalyOrderIntegrationTest.java`        | **35**   | **JVM 墙钟基准** `static final OffsetDateTime NOW = OffsetDateTime.now(ZoneOffset.UTC).truncatedTo(ChronoUnit.SECONDS)`；ours 侧已改 DB 时钟同源 ⇒ **取 theirs 回退跨时钟域修复**                                                      |
+| `AnomalyOrderTenancyIntegrationTest.java` | 11       | 同族（墙钟基准）                                                                                                                                                                                                                       |
+| `SalesTaxIntegrationTest.java`            | 7        | `parsed_at` 必须是真时刻的断言                                                                                                                                                                                                         |
+| `NotificationInboxController.java`        | 3        | 「1.3.2.1 预警规则未交付」提示串                                                                                                                                                                                                       |
+| `SaasUsageIntegrationTest.java`           | 3        | **旧 flaky 子串断言**（见 ②）                                                                                                                                                                                                          |
+| `NotificationPreferenceService.java`      | 2        | 「1.3.2.2 外部渠道推送未交付」提示串                                                                                                                                                                                                   |
+| `FundAnalysisIntegrationTest.java`        | 2        | —                                                                                                                                                                                                                                      |
+| 其余 21 个文件                            | 各 **1** | **几乎全是 import 行 / 常量声明行**写法差异（例：`static final PostgreSQLContainer<?> pg = new PostgreSQLContainer<>("postgres:16-alpine");`、`import { Boxes, ClipboardList, HeartPulse, LayoutGrid, Search } from 'lucide-react';`） |
 
 ⇒ **79 行里 0 行是 main 侧的新模块交付**，全部落在「已被集成头后续交付推翻或改写的旧写法」上。
 
@@ -451,12 +451,12 @@ NEW  : （空）
 GONE : （空）
 ```
 
-| 口径                 | 第 99 轮 | **第 100 轮** |
-| -------------------- | -------- | ------------ |
-| 文件数               | 27       | **27**       |
-| **theirs 独有 = 0 ⇒ 取 ours 无损** | **4** | **4**（同一批 4 个文件） |
-| **theirs 独有行合计** | **79**   | **79**       |
-| ours 独有行合计      | 1643     | **1786**     |
+| 口径                               | 第 99 轮 | **第 100 轮**            |
+| ---------------------------------- | -------- | ------------------------ |
+| 文件数                             | 27       | **27**                   |
+| **theirs 独有 = 0 ⇒ 取 ours 无损** | **4**    | **4**（同一批 4 个文件） |
+| **theirs 独有行合计**              | **79**   | **79**                   |
+| ours 独有行合计                    | 1643     | **1786**                 |
 
 > ours 独有行 1643 → 1786（+143）是集成头这期间自己的推进（batch 110/111/112）。
 > ⇒ **再次印证第 99 轮修正后的判据**：**冲突面只在「集成头改动已存在的业务/测试文件」时增长**，
@@ -492,12 +492,12 @@ git rev-parse 1e3228b4^{tree}     ⇒ 83269e111f5f42e8b9481fd0e9549687aa8a7ed0  
 
 **③ 台账逐模块 join：main 领先 = 0**（两侧各 465 行，模块 ID 集合**完全相同**）
 
-| 项 | main 快照 | 集成头 `95151eb1` |
-| --- | --- | --- |
-| 已交付 | **406** | **429** |
-| 进行中 | 0 | 0 |
-| 未开发 | **59** | **36** |
-| 完成率 | 87.3% | **92.3%** |
+| 项     | main 快照 | 集成头 `95151eb1` |
+| ------ | --------- | ----------------- |
+| 已交付 | **406**   | **429**           |
+| 进行中 | 0         | 0                 |
+| 未开发 | **59**    | **36**            |
+| 完成率 | 87.3%     | **92.3%**         |
 
 状态不同 **23 个**，方向**全部**是「集成头已交付 / main 未开发」
 （batch 110/111/112 的 13.x / 14.x 批次 + 1.1.2.1 / 1.1.2.2 / 1.3.2.1 / 1.3.2.2 / 1.5.2.1）
@@ -505,21 +505,21 @@ git rev-parse 1e3228b4^{tree}     ⇒ 83269e111f5f42e8b9481fd0e9549687aa8a7ed0  
 
 **④ 冲突面：27 个，与第 99 / 100 轮逐字节相同**（程序化集合比对，按 basename：NEW 空 / GONE 空）
 
-| 口径 | 第 99 轮 | 第 100 轮 | **第 101 轮** |
-| --- | --- | --- | --- |
-| 文件数 | 27 | 27 | **27** |
-| **theirs 独有 = 0 ⇒ 取 ours 无损** | 4 | 4 | **4** |
-| **theirs 独有行合计** | 79 | 79 | **79** |
-| ours 独有行合计 | 1643 | 1786 | **1786** |
+| 口径                               | 第 99 轮 | 第 100 轮 | **第 101 轮** |
+| ---------------------------------- | -------- | --------- | ------------- |
+| 文件数                             | 27       | 27        | **27**        |
+| **theirs 独有 = 0 ⇒ 取 ours 无损** | 4        | 4         | **4**         |
+| **theirs 独有行合计**              | 79       | 79        | **79**        |
+| ours 独有行合计                    | 1643     | 1786      | **1786**      |
 
 > ⚠️ 本轮 merge 的 base 已换（第 100 轮 `a475f1df` → 本轮 `95151eb1`），
 > **冲突面仍逐字节不变** ⇒ 再次印证「冲突面只随『集成头改动已存在的业务/测试文件』变化」。
 
 **⑤ ⚠️ 新证据：同一时刻存在 ≥2 个 main 同步竞态循环**（实证上面那条 P0 待办）
 
-| 实例 | 触发 | 结果 |
-| --- | --- | --- |
-| 第 100 轮 | 12:15 | 等闸 544 秒 ⇒ **先拿到闸** ⇒ 12:28:37 提交 `95151eb1` ⇒ release |
+| 实例                  | 触发  | 结果                                                                |
+| --------------------- | ----- | ------------------------------------------------------------------- |
+| 第 100 轮             | 12:15 | 等闸 544 秒 ⇒ **先拿到闸** ⇒ 12:28:37 提交 `95151eb1` ⇒ release     |
 | **第 101 轮（本轮）** | 11:15 | 等闸 **4396 秒** ⇒ 第 100 轮 release 后 **12 秒**才拿到（12:28:52） |
 
 ⇒ **后触发的第 100 轮反而先拿到闸**（它的竞态间隔更密）
@@ -555,12 +555,12 @@ comm -23 main integration                       ⇒ 1 个：823ebca5…（git ca
 
 **③ 台账逐模块 join：main 领先 = 0**
 
-| 项 | main 快照 | 集成头 `420962f5` |
-| --- | --- | --- |
-| 已交付 | **406** | **431** |
-| 进行中 | 0 | 0 |
-| 未开发 | **59** | **34** |
-| 完成率 | 87.3% | **92.7%** |
+| 项     | main 快照 | 集成头 `420962f5` |
+| ------ | --------- | ----------------- |
+| 已交付 | **406**   | **431**           |
+| 进行中 | 0         | 0                 |
+| 未开发 | **59**    | **34**            |
+| 完成率 | 87.3%     | **92.7%**         |
 
 状态不同 **25 个**，方向**全部**是「集成头已交付 / main 未开发」⇒ **main 领先 = 0**。
 
@@ -630,3 +630,109 @@ comm -23 main integration                       ⇒ 1 个：823ebca5…（git ca
 - 根提交：`d28188d6`（`Integration/module dev (#11)`，2026-10-20 20:39:44 +0800，**squash**）
   ＋ `ec225641`（`feat: 到岸成本、成本分摊等 24 项能力交付`，**同样是 squash**，1 个父提交 = `d28188d6`）
 - merge-base：`1bb270a0`（被老 squash 拉回）
+
+---
+
+## 第 103 轮追加（2026-10-29 19:15）—— 字节级判据 + 🔴 L2 假红根因
+
+> 会话日志：`docs/sessions/2026-10/2026-10-29-2015-main-sync-round103-conflict-not-merged.md`
+
+### 一、冲突面：仍是 **27 个**（26 add/add + 1 content），与第 99 / 100 / 101 / 102 轮**同一集合**
+
+### 二、🔴 新判据（可复用）：**27 个冲突文件的 theirs blob 全部 = 集成头自己的旧快照**
+
+```
+for f in <27 个冲突文件>; do
+  git rev-parse "origin/main:$f"   vs   git rev-parse "1e3228b4:$f"
+done
+⇒ 27 same / 0 differs
+```
+
+⇒ main 侧那 27 个文件的内容 **就是集成头自己在第 75 轮时的旧快照** ⇒
+冲突不是真分叉，是 git 对「同一份内容的两种历史」的机械撞车。
+
+配套的三条独立复现（与第 99–102 轮一致，本轮为**第 6 次**）：
+
+| #   | 判据                        | 本轮结果                                                               |
+| --- | --------------------------- | ---------------------------------------------------------------------- |
+| 1   | `origin/main^{tree}`        | `83269e111f5f42e8b9481fd0e9549687aa8a7ed0`                             |
+| 2   | 集成头祖先中 `tree` 相同者  | `1e3228b4`（**与 main 逐字节相同**）                                   |
+| 3   | `rev-list --objects` 集合差 | **只有 1 个对象**（`commit 823ebca5` 本身）⇒ **零个新 blob / 新 tree** |
+
+### 三、🔴 `-X ours` 的无损性：再次证明到**等价性级别**
+
+隔离 scratch clone（`git clone --shared --no-checkout`）里：
+
+```
+git merge --no-ff --no-commit -X ours 823ebca5
+⇒ 未解决冲突：0
+git write-tree             ⇒ 439a1388ec2e8336f95558d9c517ae0972221faa
+git rev-parse HEAD^{tree}  ⇒ 439a1388ec2e8336f95558d9c517ae0972221faa   ← 相同
+```
+
+⇒ **「27 个冲突全部取 ours」的结果与「什么都不做」的 HEAD 逐字节相同**。
+⇒ **本轮仍按协议 `abort`**（`SYNC-MAIN.md` 正文仍无该授权判据）。
+
+### 四、🔴🔴 **L2 假红根因（本轮最重要的发现）**：同步任务的 merge 冲突标记污染了并发编译
+
+r132 的 L2（18:24:55–19:29:02）在 **identity 模块编译**失败，报错行号：
+
+```
+NotificationInboxController.java:[95,1] 非法的表达式开始
+NotificationInboxController.java:[96,21] 需要>或','
+NotificationInboxController.java:[99,1] 非法的表达式开始
+NotificationInboxController.java:[103,1] 非法的表达式开始
+NotificationPreferenceService.java:[230,1] 非法的表达式开始
+```
+
+**复现第 102 轮的 merge，得到的文件内容：**
+
+```
+ 95: <<<<<<< HEAD                          ← 与 [95,1] 报错行**完全重合**
+ 96:     "1.3.1.2 通知偏好…已交付…",          ← 与 [96,21] 报错行**完全重合**
+ 99: =======                               ← 与 [99,1] 报错行**完全重合**
+103: >>>>>>> 823ebca5                      ← 与 [103,1] 报错行**完全重合**
+```
+
+⇒ **报错行号 = 冲突标记行号，逐行重合** ⇒ 编译器读到的**不是 HEAD 的源码**，
+而是第 102 轮 merge 写到工作区里的**冲突标记版**。
+
+时间线闭合：
+
+| 时刻                           | 事件                                                            |
+| ------------------------------ | --------------------------------------------------------------- |
+| 18:24:55                       | r132 `mvnw verify -fae` 启动（**未取闸**）                      |
+| 18:25:20 / 18:26:04 / 18:26:22 | 第 102 轮同步任务 `git reset --hard`（reflog 三条）             |
+| 18:26:22                       | **27 个冲突文件 mtime 全部 = 18:26:22**（27/27 同一时间戳）     |
+| ~18:26                         | **L2 的编译器正在读 identity 源码** ⇒ 读到冲突标记版 ⇒ 编译失败 |
+| 19:29:02                       | L2 结束，`MVN_EXIT=1`                                           |
+
+反证：`git archive HEAD backend` 到隔离树后 `./mvnw -q -o -pl services/identity -am compile`
+⇒ **rc=0** ⇒ **HEAD 的代码本身是绿的** ⇒ L2 的红**不是代码缺陷**。
+
+⇒ **给流水线的归因建议**：r132 本批**零并入**（最后 3 个提交全是 `.md`），
+**不要走 `git bisect`**（无业务代码可二分）；**重跑一次 L2 即可确认**。
+
+### 五、🔴 P0（新增）：`stale` 在 L2 运行期间**恒为 false** ⇒ TTL 接管机制性不可达
+
+`lane.mjs:620` 的 `stale = age > 4200`，而 `age` 取闸目录 mtime；
+r132 的 keepalive 守护（`l2-r132.sh:42-50`）**每 60 秒 `touch` 一个新建文件**进闸目录
+⇒ **新建文件刷新目录 mtime** ⇒ `ageSeconds` 被拉回 ~60s ⇒ **`stale` 永远翻不过 true**。
+
+⇒ 本轮等闸 **96 分钟**（19:15 → 20:51），直到 **持闸 tick 崩溃**（`ERR_CONNECTION_CLOSED`）
+
+- L2 退出 + keepalive 停止，TTL 才变得可达。
+
+⇒ **只要 L2 不走闸，就没人能接管孤儿闸。** ⇒ 与「L2 必须走闸」是**同一个根因**。
+
+### 六、待办状态更新
+
+- [x] **（2026-10-29 第 103 轮完成第 6 次独立复现）** 逐字节判据（tree 相同 + 对象集合差 + theirs blob = 旧快照）
+- [x] **（2026-10-29 第 103 轮完成等价性证明）** `-X ours` 结果树 == HEAD 树
+- [ ] **（协议层授权，仍未落地）** `SYNC-MAIN.md` 增判据：「main 侧 blob 已被集成头历史逐字节覆盖 ⇒ 允许 `-X ours` 机械合并」
+- [ ] **（🔴 P0）L2 脚本必须走调度闸** —— `l2-r132.sh` 不调用 `gate acquire` 也不 `gate release`，
+      却在别人持闸期间跑 L2 ⇒ 闸对 L2 段完全无效 ⇒ **已实测造成假红**（本文件第四节）
+- [ ] **（🔴 P0）keepalive 不应刷新闸目录 mtime** —— 否则 `stale` 恒 false、TTL 接管不可达（第五节）
+- [ ] **（🟠 P1）`lane.mjs` 的 TTL 接管路径非原子**（`rmSync` + `mkdirSync`，`lane.mjs:576-578`）
+- [ ] **（🟠 P1）`gate release` 应只删自己持有的闸**（现为无条件 `rmSync(GATE_DIR)`）
+- [ ] **（协议层）** 补「等闸上限 + 超时如实汇报退出」判据 —— 本轮等闸 96 分钟
