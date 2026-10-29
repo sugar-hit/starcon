@@ -89,9 +89,18 @@ public final class ReportingCustomReportCatalog {
      * {@code date >= varchar} 在 PostgreSQL 里没有运算符 ⇒ 直接报错。
      * 写成 {@code ?::date} / {@code ?::text} 就不会有这个问题，
      * 也**杜绝了「值被当成 SQL 片段」的可能**（它永远只是个字面量）。
+     *
+     * <p>⚠️ **UUID 维度必须 cast 成 {@code uuid}**：{@link Dimension#expression(String)} 给
+     * LEGAL_ENTITY / SHOP 产出的是 {@code f.shop_id::uuid}，而 PostgreSQL **没有**
+     * {@code uuid = text} 这个运算符 ⇒ 写成 {@code ?::text} 会直接报
+     * 「operator does not exist: uuid = text」。
+     * （13.6.1.1 交付时只测过 CURRENCY 这个文本维度，UUID 维度这条路径没被走到；
+     * 13.6.1.2 看板搭建按「店铺 / 法人」筛组件时撞上了它，这里一并修好。）
      */
     public String valueCast() {
-      return "DATE".equals(kind) ? "date" : "text";
+      if ("DATE".equals(kind)) return "date";
+      if ("UUID".equals(kind)) return "uuid";
+      return "text";
     }
 
     /** 按码取维度；取不到抛 {@link IllegalArgumentException}（不静默回落）。 */

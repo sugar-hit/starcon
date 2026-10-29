@@ -1902,6 +1902,81 @@ const services: readonly {
       /^ad\-bidding(?:\/(?:capabilities|options|keywords|dispatch(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/cancel)?|policies(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/status)?)?|suggestions(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|adjustments(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?))$/,
   },
   {
+    // 13.6.1.2 看板搭建（reporting 服务，卷 13「利润与经营分析」L3 13.6.1 下的第二格）。
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 reporting/ 正则里并分支 ——
+    //   既有条目**一字未改、也不重排、不删除**。本文件是多车道共用的累积型白名单，
+    //   往同一条 alternation 里并分支会让多车道同时并入时 git 必然判冲突。
+    //
+    // ---- 插入锚点选在**第一个真正的 `prefix: 'identity/'` 元素之前**（调度者指定）----
+    //   与同批 13.6.2.1（导出与订阅，改写文件末尾的 custom-report 元素）相距 11800+ 行
+    //   ⇒ 并入时 git 能干净求并。
+    //
+    // ---- 首 token「board」的零命中核对结论（实测，非目测）----
+    //   发车前用脚本（本车道 .tmp/api-proxy-allowlist-check.mjs，一次性，不入库）把本文件里
+    //   **全部 267 个既有元素**（prefix + 正则）逐条抽出来，按 resolve() 的**同构口径**实测
+    //   （path.startsWith(prefix) 收窄服务 → 再测 pattern.test(path.slice(prefix.length))）：
+    //     reporting/board/board
+    //     reporting/board/board-templates
+    //     reporting/board/board-templates/{uuid}/instantiate
+    //     reporting/board/boards
+    //     reporting/board/boards/{uuid}
+    //     reporting/board/boards/{uuid}/components
+    //     reporting/board/boards/{uuid}/components/{uuid}
+    //     reporting/board/boards/{uuid}/defaults
+    //     reporting/board/boards/{uuid}/layout
+    //     reporting/board/boards/{uuid}/shares
+    //     reporting/board/boards/{uuid}/shares/{uuid}
+    //     reporting/board/boards/{uuid}/view
+    //     reporting/board/capabilities
+    //     reporting/board/dimensions
+    //     reporting/board/metrics
+    //   **零命中** —— 既有 23 条 `prefix === 'reporting/'` 的正则都是**按命名空间精确匹配**的
+    //   （首 token 分别是 overview / product-performance / lifecycle-segmentation /
+    //     expense-variance / store-comparison / sales-trend / target-attainment /
+    //     metric-cards / store-overview / targets / store-site / time-pattern /
+    //     profit-report / sku-profit / inventory-analysis / procurement-analysis /
+    //     logistics-analysis / product-sales / traffic-conversion / cost-structure /
+    //     affiliate-marketing / profit-alert / custom-report），
+    //   **没有一条能吃下 `board`** ⇒ 本模块 15 条路径在放行前**全部 404**。
+    //   反向核对：另外 **23 条**别的车道已交付的 reporting 形状命中集合**逐条未变**
+    //   （本条新元素不会遮蔽它们）。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**，契约 `reporting.openapi.json` 里就这 15 条）：
+    //   board                              我的看板（工作台视图：能打开的看板 + 可见组件数）
+    //   boards                             看板清单（GET 真分页 + 真搜索 / POST 新建）
+    //   boards/{uuid}                      看板详情（GET 读 / PUT 改 / DELETE 删）
+    //   boards/{uuid}/components            加组件（POST）
+    //   boards/{uuid}/components/{uuid}     改组件（PUT，含拖拽后的位置与尺寸）/ 删除（DELETE）
+    //   boards/{uuid}/layout                批量保存布局（PUT，拖拽一次 ⇒ 一次提交）
+    //   boards/{uuid}/shares                共享清单（GET）/ 加一条共享（POST）
+    //   boards/{uuid}/shares/{uuid}         撤销一条共享（DELETE）
+    //   boards/{uuid}/defaults              默认值（GET 读 / PUT 保存）
+    //   boards/{uuid}/view                  看板视图（GET，已按角色权限过滤的组件 + 实时数据）
+    //   board-templates                     模板清单（GET）/ 保存模板（POST）
+    //   board-templates/{uuid}/instantiate  用模板建看板（POST）
+    //   capabilities                        能力声明（真能跑什么 / 哪些未交付 / 判定规则）
+    //   metrics                             可用的语义层指标清单（口径唯一的展示形态）
+    //   dimensions                          维度白名单（与 13.6.1.1 完全一致的 5 个）
+    //
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   board                    —— 裸路径：后端**没有**「一条不存在的汇总列表接口」。
+    //   boards/{uuid}/export     —— 🔴 导出属 13.6.2.1（**未交付**），本模块没有导出端点。
+    //   boards/{uuid}/subscriptions —— 定时订阅属 13.6.2.1（**未交付**）。
+    //   boards/{uuid}/deliveries —— 投递队列属 13.6.2.1（**未交付**）。
+    //   boards/{uuid}/unknown    —— 未实现的子路径仍然 404。
+    //
+    // id 段用**完整 UUID 形状** `[0-9a-fA-F]{8}(?:-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}`
+    // （不是 `[0-9a-f-]+`：后者会把 `not-a-uuid` 这种非 UUID 形状也当成 id 放行）。
+    // 字面量子路径（board / board-templates / boards / capabilities / dimensions / metrics）
+    // 排在 {uuid} 段**之前**判别 —— alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    // ⚠️ **顶层组不写成可选**（`board` 裸路径必须 404：本模块没有顶层汇总列表端点）。
+    prefix: 'reporting/',
+    env: 'REPORTING_URL',
+    fallback: 'http://127.0.0.1:8088',
+    pattern:
+      /^board\/(?:board|board\-templates(?:\/[0-9a-fA-F]{8}(?:-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}\/instantiate)?|boards(?:\/[0-9a-fA-F]{8}(?:-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}(?:\/(?:components(?:\/[0-9a-fA-F]{8}(?:-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12})?|defaults|layout|shares(?:\/[0-9a-fA-F]{8}(?:-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12})?|view))?)?|capabilities|dimensions|metrics)$/,
+  },
+  {
     prefix: 'identity/',
     env: 'IDENTITY_URL',
     fallback: 'http://127.0.0.1:8081',
