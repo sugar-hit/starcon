@@ -758,6 +758,51 @@ const services: readonly {
       /^procurement\-analysis\/(?:capabilities|trend|concentration|price\-variance|on\-time|purchase\-cycle|cost\-to\-sales|suppliers|drilldown|refresh|rules(?:\/CONCENTRATION_RISK|\/ON_TIME_TARGET|\/PURCHASE_CYCLE_TARGET)?)$/,
   },
   {
+    // 13.5.3.1 物流分析（reporting 服务，卷 13「利润与经营分析」L3 13.5.3 物流分析下的第一格）。
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 reporting/ 正则里并分支 ——
+    //   既有条目**一字未改、也不重排、不删除**。
+    //
+    // ---- 插入锚点选在「13.5.2.1 procurement-analysis 那条之后」----
+    //   本文件是并行车道共同的**累积型**文件；本车道落在 reporting 簇内部，
+    //   与同批另一条车道（14.3.2.1 落 channel 簇，约 3092 行）相距 2000+ 行 ⇒ 并入时 git 能干净求并。
+    //
+    // ---- 首 token「logistics-analysis」的零命中核对结论（实测，非目测）----
+    //   既有 `prefix === 'reporting/'` 的正则，首 token 两两不同
+    //   （overview/projection / product-performance / … / inventory-analysis / procurement-analysis），
+    //   **没有一条能吃下 `logistics-analysis`**（⇒ 正则互不相交）。
+    //   另外核对了本模块**不得**出现在别的服务前缀下：
+    //   finance/ catalog/ channel/ trade/ warehouse/ identity/ 下的 logistics-analysis **全部 404**。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**，契约里就这 13 条）：
+    //   logistics-analysis/capabilities  能力声明（哪些上游真接通、哪些确实拿不到）
+    //   logistics-analysis/overview      物流成本总览（尾程 / 头程分摊 / 关税 / 包材，逐币种）
+    //   logistics-analysis/freight-per-order 单均运费（运费总额 ÷ **订单数**）
+    //   logistics-analysis/head-mile      头程分摊后成本（读 channel 的分摊结果，不重算）
+    //   logistics-analysis/channels       渠道对比（承运商 × 渠道 × 币种，真分页）
+    //   logistics-analysis/timeliness     时效达成率（渠道 × 国家）
+    //   logistics-analysis/countries      各国成本对比（逐币种）
+    //   logistics-analysis/exceptions     异常件占比（窗口内异常件 ÷ 窗口内运单）
+    //   logistics-analysis/category-cost  类目维度的物流成本占销售额比（下游 5 定价）
+    //   logistics-analysis/drilldown      运单级下钻（真分页）
+    //   logistics-analysis/rules          阈值规则（GET）/ logistics-analysis/rules/{ruleType}（PUT）
+    //   logistics-analysis/refresh        刷新物流分析投影（POST，写的是投影不是业务事实）
+    //
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   logistics-analysis                    —— 裸路径：后端**没有**「一条不存在的汇总列表接口」。
+    //   logistics-analysis/{uuid}             —— 顶层没有 id 段（本模块按查询参数定位）。
+    //   logistics-analysis/unknown            —— 未实现的子路径仍然 404。
+    //   logistics-analysis/rules/NOPE         —— 规则只认 ON_TIME_TARGET / FREIGHT_PER_ORDER_TARGET /
+    //                                               EXCEPTION_SHARE_TARGET / COST_TO_SALES_TARGET 四种。
+    //   logistics-analysis/overview/extra     —— 多一层仍然 404。
+    //
+    // 规则类型段用**受控词表**（不是 `[A-Z_]+`）：放行一个不存在的类型只会让界面以为「那也能配」。
+    prefix: 'reporting/',
+    env: 'REPORTING_URL',
+    fallback: 'http://127.0.0.1:8088',
+    pattern:
+      /^logistics\-analysis\/(?:capabilities|overview|freight\-per\-order|head\-mile|channels|timeliness|countries|exceptions|category\-cost|drilldown|refresh|rules(?:\/ON_TIME_TARGET|\/FREIGHT_PER_ORDER_TARGET|\/EXCEPTION_SHARE_TARGET|\/COST_TO_SALES_TARGET)?)$/,
+  },
+  {
     // 12.4.1.3 成本差异分析（finance 服务，卷 12「财务核算」L3 12.4.1 成本计算下的第三格）。
     // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 finance 那几条巨型 alternation 里并分支 ——
     //   既有条目**一字未改、也不重排**。
