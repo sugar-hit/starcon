@@ -3022,6 +3022,1429 @@
         },
         "type": "object"
       },
+      "AdBiddingAdjustTarget": {
+        "description": "调价目标（逐条给期望的绝对竞价；与 suggestionId 二选一）",
+        "properties": {
+          "bidValue": {
+            "description": "期望的竞价（绝对值）",
+            "type": "number"
+          },
+          "keywordId": {
+            "description": "关键词 id",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AdBiddingAdjustmentItemView": {
+        "description": "逐条明细",
+        "properties": {
+          "afterBid": {
+            "description": "调价后的竞价",
+            "type": "number"
+          },
+          "beforeBid": {
+            "description": "调价前的竞价",
+            "type": "number"
+          },
+          "guardrailCode": {
+            "description": "🔴 被哪道闸拦下的",
+            "type": "string"
+          },
+          "id": {
+            "description": "明细 id",
+            "type": "string"
+          },
+          "keywordId": {
+            "description": "关键词 id",
+            "type": "string"
+          },
+          "reason": {
+            "description": "🔴 原因（没成必须写清为什么）",
+            "type": "string"
+          },
+          "requestedBid": {
+            "description": "请求里给的期望竞价",
+            "type": "number"
+          },
+          "status": {
+            "description": "结果：APPLIED / REJECTED / SKIPPED / PENDING",
+            "type": "string"
+          },
+          "targetRef": {
+            "description": "关键词原文",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AdBiddingAdjustmentPage": {
+        "properties": {
+          "items": {
+            "description": "本页条目",
+            "items": {
+              "$ref": "#/components/schemas/AdBiddingAdjustmentSummary"
+            },
+            "type": "array"
+          },
+          "page": {
+            "description": "页码（从 0 起）",
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "description": "每页条数",
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "description": "筛选后的总条数",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AdBiddingAdjustmentRequest": {
+        "properties": {
+          "currency": {
+            "description": "调价币种（逐条按币种核对；不给则用策略的币种）",
+            "type": "string"
+          },
+          "dryRun": {
+            "description": "试运行（默认 true）",
+            "type": "boolean"
+          },
+          "idempotencyKey": {
+            "description": "🔴 幂等键（租户内唯一）",
+            "type": "string"
+          },
+          "note": {
+            "description": "备注",
+            "type": "string"
+          },
+          "policyId": {
+            "description": "策略 id",
+            "type": "string"
+          },
+          "suggestionId": {
+            "description": "建议批次 id（给了就以建议里的建议竞价为目标，与 targets 二选一）",
+            "type": "string"
+          },
+          "targets": {
+            "description": "调价目标（逐条给期望的绝对竞价；与 suggestionId 二选一）",
+            "items": {
+              "$ref": "#/components/schemas/AdBiddingAdjustTarget"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "AdBiddingAdjustmentSummary": {
+        "description": "本页条目",
+        "properties": {
+          "actionType": {
+            "description": "动作类型",
+            "type": "string"
+          },
+          "appliedCount": {
+            "description": "成功条目数",
+            "format": "int32",
+            "type": "integer"
+          },
+          "bidMode": {
+            "description": "调价方式",
+            "type": "string"
+          },
+          "bulkActionId": {
+            "description": "🔴 14.1.3.1 批量任务的 id（写路径的凭证）",
+            "type": "string"
+          },
+          "createdAt": {
+            "description": "创建时间",
+            "format": "date-time",
+            "type": "string"
+          },
+          "currency": {
+            "description": "币种",
+            "type": "string"
+          },
+          "failedCount": {
+            "description": "失败条目数",
+            "format": "int32",
+            "type": "integer"
+          },
+          "guardrail": {
+            "additionalProperties": {
+              "description": "🔴 护栏快照",
+              "type": "object"
+            },
+            "description": "🔴 护栏快照",
+            "type": "object"
+          },
+          "id": {
+            "description": "任务 id",
+            "type": "string"
+          },
+          "idempotencyKey": {
+            "description": "幂等键",
+            "type": "string"
+          },
+          "note": {
+            "description": "备注",
+            "type": "string"
+          },
+          "policyId": {
+            "description": "策略 id",
+            "type": "string"
+          },
+          "policyName": {
+            "description": "策略名",
+            "type": "string"
+          },
+          "reason": {
+            "description": "整批被拒的原因",
+            "type": "string"
+          },
+          "requestedCount": {
+            "description": "请求条目数",
+            "format": "int32",
+            "type": "integer"
+          },
+          "runMode": {
+            "description": "运行口径：DRY_RUN / APPLY",
+            "type": "string"
+          },
+          "shopCode": {
+            "description": "店铺编码",
+            "type": "string"
+          },
+          "shopId": {
+            "description": "店铺 id",
+            "type": "string"
+          },
+          "status": {
+            "description": "任务状态：RECEIVED / APPLIED / PARTIAL / REJECTED",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AdBiddingAdjustmentView": {
+        "properties": {
+          "actionType": {
+            "description": "动作类型",
+            "type": "string"
+          },
+          "appliedCount": {
+            "description": "成功条目数",
+            "format": "int32",
+            "type": "integer"
+          },
+          "bidMode": {
+            "description": "调价方式",
+            "type": "string"
+          },
+          "bulkActionId": {
+            "description": "🔴 14.1.3.1 批量任务的 id（写路径的凭证）",
+            "type": "string"
+          },
+          "createdAt": {
+            "description": "创建时间",
+            "format": "date-time",
+            "type": "string"
+          },
+          "currency": {
+            "description": "币种",
+            "type": "string"
+          },
+          "failedCount": {
+            "description": "失败条目数",
+            "format": "int32",
+            "type": "integer"
+          },
+          "guardrail": {
+            "additionalProperties": {
+              "description": "🔴 护栏快照",
+              "type": "object"
+            },
+            "description": "🔴 护栏快照",
+            "type": "object"
+          },
+          "id": {
+            "description": "任务 id",
+            "type": "string"
+          },
+          "idempotencyKey": {
+            "description": "幂等键",
+            "type": "string"
+          },
+          "items": {
+            "description": "逐条明细",
+            "items": {
+              "$ref": "#/components/schemas/AdBiddingAdjustmentItemView"
+            },
+            "type": "array"
+          },
+          "note": {
+            "description": "备注",
+            "type": "string"
+          },
+          "policyId": {
+            "description": "策略 id",
+            "type": "string"
+          },
+          "policyName": {
+            "description": "策略名",
+            "type": "string"
+          },
+          "reason": {
+            "description": "整批被拒的原因",
+            "type": "string"
+          },
+          "requestedCount": {
+            "description": "请求条目数",
+            "format": "int32",
+            "type": "integer"
+          },
+          "runMode": {
+            "description": "运行口径：DRY_RUN / APPLY",
+            "type": "string"
+          },
+          "shopCode": {
+            "description": "店铺编码",
+            "type": "string"
+          },
+          "shopId": {
+            "description": "店铺 id",
+            "type": "string"
+          },
+          "status": {
+            "description": "任务状态：RECEIVED / APPLIED / PARTIAL / REJECTED",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AdBiddingCapabilities": {
+        "properties": {
+          "boundaryNote": {
+            "description": "🔴 边界说明",
+            "type": "string"
+          },
+          "dimensions": {
+            "description": "能力维度清单",
+            "items": {
+              "$ref": "#/components/schemas/AdBiddingCapabilityDimension"
+            },
+            "type": "array"
+          },
+          "dispatchNote": {
+            "description": "🔴 待下发队列的说明",
+            "type": "string"
+          },
+          "dispatchStatuses": {
+            "description": "待下发队列状态枚举",
+            "items": {
+              "description": "待下发队列状态枚举",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "dynamicStrategies": {
+            "description": "🔴 动态竞价策略枚举（**只有三档**）",
+            "items": {
+              "description": "🔴 动态竞价策略枚举（**只有三档**）",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "guardrailCodes": {
+            "description": "🔴 闸门码枚举",
+            "items": {
+              "description": "🔴 闸门码枚举",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "guardrailNote": {
+            "description": "🔴 两道闸的口径说明",
+            "type": "string"
+          },
+          "profitNote": {
+            "description": "🔴 利润打通的说明",
+            "type": "string"
+          },
+          "ratioNote": {
+            "description": "🔴 ACOS / ROAS 的口径说明",
+            "type": "string"
+          },
+          "runModes": {
+            "description": "运行口径枚举",
+            "items": {
+              "description": "运行口径枚举",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "scopes": {
+            "description": "作用范围枚举",
+            "items": {
+              "description": "作用范围枚举",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "statuses": {
+            "description": "策略状态枚举",
+            "items": {
+              "description": "策略状态枚举",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "strategyNote": {
+            "description": "🔴 动态竞价策略的口径说明",
+            "type": "string"
+          },
+          "upstreamNote": {
+            "description": "🔴 上游依赖说明",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AdBiddingCapabilityDimension": {
+        "description": "能力维度清单",
+        "properties": {
+          "available": {
+            "description": "本模块是否真的能做",
+            "type": "boolean"
+          },
+          "description": {
+            "description": "这个维度是干什么的",
+            "type": "string"
+          },
+          "dimension": {
+            "description": "维度码",
+            "type": "string"
+          },
+          "impact": {
+            "description": "🔴 做不了的影响（页面上原样显示）",
+            "type": "string"
+          },
+          "ownerModule": {
+            "description": "🔴 做不了的责任模块（做得了时为空串）",
+            "type": "string"
+          },
+          "source": {
+            "description": "数据落在哪 / 依赖谁",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AdBiddingDispatchCancelRequest": {
+        "properties": {
+          "reason": {
+            "description": "🔴 撤销原因（必填：不写清楚为什么撤销，下周就没人知道这条为什么没了）",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AdBiddingDispatchPage": {
+        "properties": {
+          "items": {
+            "description": "本页条目",
+            "items": {
+              "$ref": "#/components/schemas/AdBiddingDispatchView"
+            },
+            "type": "array"
+          },
+          "page": {
+            "description": "页码（从 0 起）",
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "description": "每页条数",
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "description": "筛选后的总条数",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AdBiddingDispatchView": {
+        "properties": {
+          "actionPayload": {
+            "additionalProperties": {
+              "description": "🔴 下发载荷（平台适配器要什么就放什么）",
+              "type": "object"
+            },
+            "description": "🔴 下发载荷（平台适配器要什么就放什么）",
+            "type": "object"
+          },
+          "actionType": {
+            "description": "动作类型：SET_BID / SET_BIDDING_STRATEGY",
+            "type": "string"
+          },
+          "adjustmentId": {
+            "description": "调整任务 id",
+            "type": "string"
+          },
+          "adjustmentItemId": {
+            "description": "调整明细 id",
+            "type": "string"
+          },
+          "afterBid": {
+            "description": "改价后的竞价（快照）",
+            "type": "number"
+          },
+          "beforeBid": {
+            "description": "改价前的竞价（快照）",
+            "type": "number"
+          },
+          "cancelReason": {
+            "description": "撤销原因",
+            "type": "string"
+          },
+          "cancelledAt": {
+            "description": "撤销时刻",
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdAt": {
+            "description": "入队时刻",
+            "format": "date-time",
+            "type": "string"
+          },
+          "dispatchRef": {
+            "description": "下发回执",
+            "type": "string"
+          },
+          "dispatchStatus": {
+            "description": "🔴 队列状态：PENDING 待下发 / DISPATCHED / FAILED / CANCELLED",
+            "type": "string"
+          },
+          "dispatchedAt": {
+            "description": "下发时刻",
+            "format": "date-time",
+            "type": "string"
+          },
+          "externalCampaignId": {
+            "description": "外部活动 id",
+            "type": "string"
+          },
+          "externalKeywordId": {
+            "description": "外部关键词 id",
+            "type": "string"
+          },
+          "id": {
+            "description": "下发记录 id",
+            "type": "string"
+          },
+          "keywordText": {
+            "description": "关键词原文（快照）",
+            "type": "string"
+          },
+          "note": {
+            "description": "备注",
+            "type": "string"
+          },
+          "platformCode": {
+            "description": "平台编码",
+            "type": "string"
+          },
+          "platformId": {
+            "description": "平台 id",
+            "type": "string"
+          },
+          "policyId": {
+            "description": "策略 id（**每条下发都挂一条策略**：可见性随策略 → 店铺收敛）",
+            "type": "string"
+          },
+          "shopCode": {
+            "description": "店铺编码",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AdBiddingKeywordPage": {
+        "properties": {
+          "items": {
+            "description": "本页条目",
+            "items": {
+              "$ref": "#/components/schemas/AdBiddingKeywordRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "description": "页码（从 0 起）",
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "description": "每页条数",
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "description": "筛选后的总条数",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AdBiddingKeywordRow": {
+        "description": "本页条目",
+        "properties": {
+          "bid": {
+            "description": "当前竞价",
+            "type": "number"
+          },
+          "bidCurrency": {
+            "description": "竞价币种",
+            "type": "string"
+          },
+          "externalCampaignId": {
+            "description": "外部活动 id",
+            "type": "string"
+          },
+          "externalKeywordId": {
+            "description": "外部关键词 id",
+            "type": "string"
+          },
+          "keyword": {
+            "description": "关键词原文",
+            "type": "string"
+          },
+          "keywordId": {
+            "description": "关键词 id",
+            "type": "string"
+          },
+          "lastSyncedAt": {
+            "description": "最近一次指标同步时刻",
+            "format": "date-time",
+            "type": "string"
+          },
+          "metricCurrency": {
+            "description": "指标币种",
+            "type": "string"
+          },
+          "platformCode": {
+            "description": "平台编码",
+            "type": "string"
+          },
+          "shopCode": {
+            "description": "店铺编码",
+            "type": "string"
+          },
+          "skuCode": {
+            "description": "SKU 编码（归不到时为空串）",
+            "type": "string"
+          },
+          "skuId": {
+            "description": "内部 SKU id（归不到时为空串）",
+            "type": "string"
+          },
+          "skuMapped": {
+            "description": "🔴 归到 SKU 的结论",
+            "type": "boolean"
+          },
+          "skuNote": {
+            "description": "🔴 归到 SKU 的说明（归不到时写清为什么）",
+            "type": "string"
+          },
+          "spuCode": {
+            "description": "SPU 编码（归不到时为空串）",
+            "type": "string"
+          },
+          "status": {
+            "description": "关键词状态",
+            "type": "string"
+          },
+          "windowDays": {
+            "description": "窗口内有指标的天数",
+            "format": "int32",
+            "type": "integer"
+          },
+          "windowSales": {
+            "description": "窗口内销售额（平台自报口径）",
+            "type": "number"
+          },
+          "windowSpend": {
+            "description": "窗口内花费（平台自报口径）",
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "AdBiddingOption": {
+        "description": "策略状态下拉项",
+        "properties": {
+          "label": {
+            "description": "展示名",
+            "type": "string"
+          },
+          "note": {
+            "description": "副标题 / 说明",
+            "type": "string"
+          },
+          "value": {
+            "description": "取值",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AdBiddingOptions": {
+        "properties": {
+          "caliberNote": {
+            "description": "🔴 口径说明",
+            "type": "string"
+          },
+          "dynamicStrategies": {
+            "description": "动态竞价策略下拉项（三档）",
+            "items": {
+              "$ref": "#/components/schemas/AdBiddingOption"
+            },
+            "type": "array"
+          },
+          "platforms": {
+            "description": "平台下拉项",
+            "items": {
+              "$ref": "#/components/schemas/AdBiddingOption"
+            },
+            "type": "array"
+          },
+          "shops": {
+            "description": "店铺下拉项",
+            "items": {
+              "$ref": "#/components/schemas/AdBiddingOption"
+            },
+            "type": "array"
+          },
+          "statuses": {
+            "description": "策略状态下拉项",
+            "items": {
+              "$ref": "#/components/schemas/AdBiddingOption"
+            },
+            "type": "array"
+          },
+          "upstreamGuardrails": {
+            "$ref": "#/components/schemas/AdBiddingUpstreamGuardrails"
+          }
+        },
+        "type": "object"
+      },
+      "AdBiddingPolicyPage": {
+        "properties": {
+          "items": {
+            "description": "本页条目",
+            "items": {
+              "$ref": "#/components/schemas/AdBiddingPolicySummary"
+            },
+            "type": "array"
+          },
+          "page": {
+            "description": "页码（从 0 起）",
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "description": "每页条数",
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "description": "筛选后的总条数",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AdBiddingPolicyRequest": {
+        "properties": {
+          "currency": {
+            "description": "币种（ISO 三位）",
+            "type": "string"
+          },
+          "dryRun": {
+            "description": "试运行（默认 true；与请求侧取更严的那个）",
+            "type": "boolean"
+          },
+          "dynamicBiddingStrategy": {
+            "description": "🔴 动态竞价策略：UP_AND_DOWN 只增只降 / DOWN_ONLY 只降低 / UP_ONLY 只提高",
+            "type": "string"
+          },
+          "maxBid": {
+            "description": "🔴 闸①：竞价范围上限（null = 不设上限）",
+            "type": "number"
+          },
+          "minBid": {
+            "description": "🔴 闸①：竞价范围下限（null = 不设下限）",
+            "type": "number"
+          },
+          "note": {
+            "description": "备注",
+            "type": "string"
+          },
+          "platformId": {
+            "description": "平台 id",
+            "type": "string"
+          },
+          "policyCode": {
+            "description": "策略编码（租户内唯一）",
+            "type": "string"
+          },
+          "policyName": {
+            "description": "策略名",
+            "type": "string"
+          },
+          "scope": {
+            "description": "作用范围：SHOP 店铺级 / CAMPAIGN 活动级",
+            "type": "string"
+          },
+          "shopCode": {
+            "description": "店铺编码",
+            "type": "string"
+          },
+          "singleAdjustCapAmount": {
+            "description": "🔴 闸②：单次调整金额额度（0 = 不额外限制）",
+            "type": "number"
+          },
+          "singleAdjustCapRatio": {
+            "description": "🔴 闸②：单次调整比例额度（0 = 不额外限制，交给 14.1.3.1 的 ±50%）",
+            "type": "number"
+          },
+          "targetAcos": {
+            "description": "目标 ACOS（**比例**，0.25 = 25%；与 targetRoas 二选一）",
+            "type": "number"
+          },
+          "targetCampaignId": {
+            "description": "目标活动 id（scope=CAMPAIGN 时必填）",
+            "type": "string"
+          },
+          "targetRoas": {
+            "description": "目标 ROAS（**比例**，4 = 400%；与 targetAcos 二选一）",
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "AdBiddingPolicySummary": {
+        "description": "本页条目",
+        "properties": {
+          "currency": {
+            "description": "币种",
+            "type": "string"
+          },
+          "dryRun": {
+            "description": "试运行",
+            "type": "boolean"
+          },
+          "dynamicBiddingStrategy": {
+            "description": "🔴 动态竞价策略（三档）",
+            "type": "string"
+          },
+          "id": {
+            "description": "策略 id",
+            "type": "string"
+          },
+          "maxBid": {
+            "description": "🔴 闸①：竞价范围上限",
+            "type": "number"
+          },
+          "minBid": {
+            "description": "🔴 闸①：竞价范围下限",
+            "type": "number"
+          },
+          "platformCode": {
+            "description": "平台编码",
+            "type": "string"
+          },
+          "policyCode": {
+            "description": "策略编码",
+            "type": "string"
+          },
+          "policyName": {
+            "description": "策略名",
+            "type": "string"
+          },
+          "scope": {
+            "description": "作用范围",
+            "type": "string"
+          },
+          "shopCode": {
+            "description": "店铺编码",
+            "type": "string"
+          },
+          "shopName": {
+            "description": "店铺名",
+            "type": "string"
+          },
+          "status": {
+            "description": "策略状态",
+            "type": "string"
+          },
+          "targetAcos": {
+            "description": "目标 ACOS（比例）",
+            "type": "number"
+          },
+          "targetRoas": {
+            "description": "目标 ROAS（比例）",
+            "type": "number"
+          },
+          "updatedAt": {
+            "description": "更新时间",
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AdBiddingPolicyView": {
+        "properties": {
+          "createdAt": {
+            "description": "创建时间",
+            "format": "date-time",
+            "type": "string"
+          },
+          "currency": {
+            "description": "币种",
+            "type": "string"
+          },
+          "dryRun": {
+            "description": "试运行",
+            "type": "boolean"
+          },
+          "dynamicBiddingStrategy": {
+            "description": "🔴 动态竞价策略（三档）",
+            "type": "string"
+          },
+          "id": {
+            "description": "策略 id",
+            "type": "string"
+          },
+          "maxBid": {
+            "description": "🔴 闸①：竞价范围上限",
+            "type": "number"
+          },
+          "minBid": {
+            "description": "🔴 闸①：竞价范围下限",
+            "type": "number"
+          },
+          "note": {
+            "description": "备注",
+            "type": "string"
+          },
+          "platformCode": {
+            "description": "平台编码",
+            "type": "string"
+          },
+          "platformId": {
+            "description": "平台 id",
+            "type": "string"
+          },
+          "platformName": {
+            "description": "平台名",
+            "type": "string"
+          },
+          "policyCode": {
+            "description": "策略编码",
+            "type": "string"
+          },
+          "policyName": {
+            "description": "策略名",
+            "type": "string"
+          },
+          "scope": {
+            "description": "作用范围",
+            "type": "string"
+          },
+          "shopCode": {
+            "description": "店铺编码",
+            "type": "string"
+          },
+          "shopId": {
+            "description": "店铺 id",
+            "type": "string"
+          },
+          "shopName": {
+            "description": "店铺名",
+            "type": "string"
+          },
+          "singleAdjustCapAmount": {
+            "description": "🔴 闸②：单次调整金额额度",
+            "type": "number"
+          },
+          "singleAdjustCapRatio": {
+            "description": "🔴 闸②：单次调整比例额度",
+            "type": "number"
+          },
+          "status": {
+            "description": "策略状态",
+            "type": "string"
+          },
+          "targetAcos": {
+            "description": "目标 ACOS（比例）",
+            "type": "number"
+          },
+          "targetCampaignId": {
+            "description": "目标活动 id",
+            "type": "string"
+          },
+          "targetCampaignName": {
+            "description": "目标活动名",
+            "type": "string"
+          },
+          "targetRoas": {
+            "description": "目标 ROAS（比例）",
+            "type": "number"
+          },
+          "updatedAt": {
+            "description": "更新时间",
+            "format": "date-time",
+            "type": "string"
+          },
+          "version": {
+            "description": "版本号",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AdBiddingStatusRequest": {
+        "properties": {
+          "note": {
+            "description": "备注",
+            "type": "string"
+          },
+          "status": {
+            "description": "目标状态：DRAFT / ACTIVE / PAUSED / ARCHIVED",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AdBiddingSuggestionItemView": {
+        "description": "关键词级建议",
+        "properties": {
+          "bidCurrency": {
+            "description": "竞价币种",
+            "type": "string"
+          },
+          "bidDelta": {
+            "description": "与当前竞价的差额（下调为负）",
+            "type": "number"
+          },
+          "currentBid": {
+            "description": "当前竞价",
+            "type": "number"
+          },
+          "guardrailCode": {
+            "description": "🔴 被哪道闸拦下的",
+            "type": "string"
+          },
+          "id": {
+            "description": "建议明细 id",
+            "type": "string"
+          },
+          "keywordId": {
+            "description": "关键词 id",
+            "type": "string"
+          },
+          "keywordText": {
+            "description": "关键词原文",
+            "type": "string"
+          },
+          "reason": {
+            "description": "原因",
+            "type": "string"
+          },
+          "status": {
+            "description": "结论：SUGGESTED / REJECTED",
+            "type": "string"
+          },
+          "suggestedBid": {
+            "description": "🔴 建议竞价（null = 算不出来）",
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "AdBiddingSuggestionPage": {
+        "properties": {
+          "items": {
+            "description": "本页条目",
+            "items": {
+              "$ref": "#/components/schemas/AdBiddingSuggestionSummary"
+            },
+            "type": "array"
+          },
+          "page": {
+            "description": "页码（从 0 起）",
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "description": "每页条数",
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "description": "筛选后的总条数",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AdBiddingSuggestionRequest": {
+        "properties": {
+          "from": {
+            "description": "口径窗口起（含）",
+            "format": "date",
+            "type": "string"
+          },
+          "idempotencyKey": {
+            "description": "🔴 幂等键（租户内唯一）",
+            "type": "string"
+          },
+          "note": {
+            "description": "备注",
+            "type": "string"
+          },
+          "policyId": {
+            "description": "策略 id",
+            "type": "string"
+          },
+          "to": {
+            "description": "口径窗口止（含）",
+            "format": "date",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AdBiddingSuggestionSkuView": {
+        "description": "SKU 级口径行",
+        "properties": {
+          "attributedSales": {
+            "description": "窗口内归因销售额",
+            "type": "number"
+          },
+          "bidRatio": {
+            "description": "🔴 建议倍率（null = 算不出来）",
+            "type": "number"
+          },
+          "breakEvenAcos": {
+            "description": "🔴 盈亏平衡 ACOS（null = 算不出来）",
+            "type": "number"
+          },
+          "currency": {
+            "description": "币种",
+            "type": "string"
+          },
+          "currentAcos": {
+            "description": "🔴 当前 ACOS（null = 不可比）",
+            "type": "number"
+          },
+          "currentRoas": {
+            "description": "🔴 当前 ROAS（null = 不可比）",
+            "type": "number"
+          },
+          "guardrailCode": {
+            "description": "🔴 被哪道闸拦下的",
+            "type": "string"
+          },
+          "id": {
+            "description": "SKU 级口径行 id",
+            "type": "string"
+          },
+          "items": {
+            "description": "关键词级建议",
+            "items": {
+              "$ref": "#/components/schemas/AdBiddingSuggestionItemView"
+            },
+            "type": "array"
+          },
+          "profitStatus": {
+            "description": "利润侧状态：AVAILABLE / NOT_COMPARABLE / NO_DATA",
+            "type": "string"
+          },
+          "reason": {
+            "description": "原因",
+            "type": "string"
+          },
+          "skuCode": {
+            "description": "SKU 编码",
+            "type": "string"
+          },
+          "skuId": {
+            "description": "内部 SKU id",
+            "type": "string"
+          },
+          "spend": {
+            "description": "窗口内花费",
+            "type": "number"
+          },
+          "status": {
+            "description": "结论：SUGGESTED / REJECTED",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AdBiddingSuggestionSummary": {
+        "description": "本页条目",
+        "properties": {
+          "attributionModel": {
+            "description": "🔴 归因模型",
+            "type": "string"
+          },
+          "attributionRuleCode": {
+            "description": "🔴 归因规则编码（口径快照）",
+            "type": "string"
+          },
+          "attributionRuleVersion": {
+            "description": "🔴 归因规则版本",
+            "format": "int64",
+            "type": "integer"
+          },
+          "attributionWindowDays": {
+            "description": "🔴 归因窗口（天）",
+            "format": "int32",
+            "type": "integer"
+          },
+          "createdAt": {
+            "description": "创建时间",
+            "format": "date-time",
+            "type": "string"
+          },
+          "dataAsOf": {
+            "description": "🔴 数据截至时刻",
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "description": "批次 id",
+            "type": "string"
+          },
+          "note": {
+            "description": "备注",
+            "type": "string"
+          },
+          "policyId": {
+            "description": "策略 id",
+            "type": "string"
+          },
+          "policyName": {
+            "description": "策略名",
+            "type": "string"
+          },
+          "profitAvailable": {
+            "description": "🔴 利润侧这次读到了没有",
+            "type": "boolean"
+          },
+          "profitUnavailableReason": {
+            "description": "🔴 利润侧读不到的原因",
+            "type": "string"
+          },
+          "rejectedCount": {
+            "description": "给不出建议的 SKU 数",
+            "format": "int32",
+            "type": "integer"
+          },
+          "shopCode": {
+            "description": "店铺编码",
+            "type": "string"
+          },
+          "shopName": {
+            "description": "店铺名",
+            "type": "string"
+          },
+          "skuCount": {
+            "description": "SKU 数",
+            "format": "int32",
+            "type": "integer"
+          },
+          "status": {
+            "description": "批次状态：READY / PARTIAL / EMPTY",
+            "type": "string"
+          },
+          "suggestedCount": {
+            "description": "给出建议的 SKU 数",
+            "format": "int32",
+            "type": "integer"
+          },
+          "targetAcos": {
+            "description": "目标 ACOS 快照（比例）",
+            "type": "number"
+          },
+          "targetRoas": {
+            "description": "目标 ROAS 快照（比例）",
+            "type": "number"
+          },
+          "windowFrom": {
+            "description": "口径窗口起",
+            "format": "date",
+            "type": "string"
+          },
+          "windowTo": {
+            "description": "口径窗口止",
+            "format": "date",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AdBiddingSuggestionView": {
+        "properties": {
+          "attributionModel": {
+            "description": "🔴 归因模型",
+            "type": "string"
+          },
+          "attributionRuleCode": {
+            "description": "🔴 归因规则编码（口径快照）",
+            "type": "string"
+          },
+          "attributionRuleVersion": {
+            "description": "🔴 归因规则版本",
+            "format": "int64",
+            "type": "integer"
+          },
+          "attributionWindowDays": {
+            "description": "🔴 归因窗口（天）",
+            "format": "int32",
+            "type": "integer"
+          },
+          "basis": {
+            "additionalProperties": {
+              "description": "🔴 判定参数快照（可复算）",
+              "type": "object"
+            },
+            "description": "🔴 判定参数快照（可复算）",
+            "type": "object"
+          },
+          "createdAt": {
+            "description": "创建时间",
+            "format": "date-time",
+            "type": "string"
+          },
+          "dataAsOf": {
+            "description": "🔴 数据截至时刻",
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "description": "批次 id",
+            "type": "string"
+          },
+          "note": {
+            "description": "备注",
+            "type": "string"
+          },
+          "policyId": {
+            "description": "策略 id",
+            "type": "string"
+          },
+          "policyName": {
+            "description": "策略名",
+            "type": "string"
+          },
+          "profitAvailable": {
+            "description": "🔴 利润侧这次读到了没有",
+            "type": "boolean"
+          },
+          "profitUnavailableReason": {
+            "description": "🔴 利润侧读不到的原因",
+            "type": "string"
+          },
+          "rejectedCount": {
+            "description": "给不出建议的 SKU 数",
+            "format": "int32",
+            "type": "integer"
+          },
+          "shopCode": {
+            "description": "店铺编码",
+            "type": "string"
+          },
+          "shopName": {
+            "description": "店铺名",
+            "type": "string"
+          },
+          "skuCount": {
+            "description": "SKU 数",
+            "format": "int32",
+            "type": "integer"
+          },
+          "skus": {
+            "description": "SKU 级口径行",
+            "items": {
+              "$ref": "#/components/schemas/AdBiddingSuggestionSkuView"
+            },
+            "type": "array"
+          },
+          "status": {
+            "description": "批次状态：READY / PARTIAL / EMPTY",
+            "type": "string"
+          },
+          "suggestedCount": {
+            "description": "给出建议的 SKU 数",
+            "format": "int32",
+            "type": "integer"
+          },
+          "targetAcos": {
+            "description": "目标 ACOS 快照（比例）",
+            "type": "number"
+          },
+          "targetRoas": {
+            "description": "目标 ROAS 快照（比例）",
+            "type": "number"
+          },
+          "windowFrom": {
+            "description": "口径窗口起",
+            "format": "date",
+            "type": "string"
+          },
+          "windowTo": {
+            "description": "口径窗口止",
+            "format": "date",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AdBiddingUpstreamGuardrails": {
+        "description": "🔴 14.1.3.1 已交付写路径的护栏上限（**继承，不另设**）",
+        "properties": {
+          "maxBidAbsolute": {
+            "description": "单条竞价绝对上限",
+            "type": "number"
+          },
+          "maxBidDeltaRatio": {
+            "description": "单次调整幅度上限（比例，0.50 = ±50%）",
+            "type": "number"
+          },
+          "maxTotalBidIncrease": {
+            "description": "单次总上调上限",
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
       "AdBudgetAllocationGuardrails": {
         "description": "执行护栏上限",
         "properties": {
@@ -84087,6 +85510,836 @@
         },
         "tags": [
           "ad-attribution-controller"
+        ]
+      }
+    },
+    "/channel/ad-bidding/adjustments": {
+      "get": {
+        "operationId": "get_channel_ad_bidding_adjustments",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "policyId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdBiddingAdjustmentPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "批量调整任务列表（真分页 + 真筛选）",
+        "tags": [
+          "14.2.1.1 竞价管理"
+        ]
+      },
+      "post": {
+        "description": "🔴 改竞价**一律走** `AdKeywordService.bulkAction` ⇒ ±50% / 1000.00 / 单次总上调 5000.00 / 幂等 / 操作审计**全部继承**，本模块**不另开绕过护栏的写路径**。🔴 给了 `suggestionId` ⇒ 目标从建议批次里取（只取给出建议的那几条）；给了 `targets` ⇒ 手工指定。二选一。🔴 **试运行默认开**：只算「本来会变成多少」，不真的改。🔴 真调之后只落**待下发队列**（平台广告 API 未交付）——界面写「待下发」，不是「已生效」。",
+        "operationId": "post_channel_ad_bidding_adjustments",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdBiddingAdjustmentRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdBiddingAdjustmentView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "提交一次批量竞价调整（**走 14.1.3.1 已交付的写路径**）",
+        "tags": [
+          "14.2.1.1 竞价管理"
+        ]
+      }
+    },
+    "/channel/ad-bidding/adjustments/{id}": {
+      "get": {
+        "description": "🔴 逐条明细里 **APPLIED / REJECTED / SKIPPED** 分得开，被拒的那几条**照样列出来**并写清被哪一道闸拦下。",
+        "operationId": "get_channel_ad_bidding_adjustments_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdBiddingAdjustmentView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "一次调整任务的详情（含逐条明细与 14.1.3.1 的批量任务 id）",
+        "tags": [
+          "14.2.1.1 竞价管理"
+        ]
+      }
+    },
+    "/channel/ad-bidding/capabilities": {
+      "get": {
+        "description": "🔴 notAvailable 段列出的是**确实做不了**的部分，每条都写清责任模块与影响 —— 把「做不了」伪装成「能做」比说清楚更糟。",
+        "operationId": "get_channel_ad_bidding_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdBiddingCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "能力声明：动态竞价策略几档、两道闸怎么分、哪些确实做不了",
+        "tags": [
+          "14.2.1.1 竞价管理"
+        ]
+      }
+    },
+    "/channel/ad-bidding/dispatch": {
+      "get": {
+        "description": "🔴 平台广告 API 未交付 ⇒ 这里的记录停在「**待下发**」，**不是**「已生效」。本地竞价已经改了，平台侧还没改。",
+        "operationId": "get_channel_ad_bidding_dispatch",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "shopCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdBiddingDispatchPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "待下发队列（真分页 + 真筛选）",
+        "tags": [
+          "14.2.1.1 竞价管理"
+        ]
+      }
+    },
+    "/channel/ad-bidding/dispatch/{id}/cancel": {
+      "post": {
+        "description": "🔴 **刻意不提供**「标记已下发」这种假动作 —— 平台回写真的发生了才有 DISPATCHED，手动标会让假事实进账。🔴 **撤销 = 停止下发，不等于回滚**：本地竞价已经通过 14.1.3.1 的写路径改过了，撤销**不会**把本地竞价改回去（那是一次新的调价，要走同一套护栏）。🔴 撤销必须写清原因。",
+        "operationId": "post_channel_ad_bidding_dispatch_id_cancel",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdBiddingDispatchCancelRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdBiddingDispatchView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "撤销一条待下发（**本模块唯一**能改变队列的动作）",
+        "tags": [
+          "14.2.1.1 竞价管理"
+        ]
+      }
+    },
+    "/channel/ad-bidding/keywords": {
+      "get": {
+        "description": "🔴 窗口内的花费 / 销售额是**平台自报口径**（14.1.3.1）；反推竞价用的是 14.3.2.1 的**归因**销售额 —— 两个口径不同，页面上分开写明。🔴 归不到 SKU 的关键词**照样列出来**并写清原因（删掉它们的话，页面只能说「这个店铺没关键词」，那会让人以为数据缺失）。",
+        "operationId": "get_channel_ad_bidding_keywords",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "shopCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdBiddingKeywordPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "可调价的关键词清单（真分页 + 真筛选）+ 窗口内表现 + 归到 SKU 的结论",
+        "tags": [
+          "14.2.1.1 竞价管理"
+        ]
+      }
+    },
+    "/channel/ad-bidding/options": {
+      "get": {
+        "description": "🔴 护栏上限是**继承**来的，不是本模块另设的一套。",
+        "operationId": "get_channel_ad_bidding_options",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdBiddingOptions"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "建策略要用的下拉项（平台 / 店铺 / 动态竞价策略三档）+ 14.1.3.1 的护栏上限",
+        "tags": [
+          "14.2.1.1 竞价管理"
+        ]
+      }
+    },
+    "/channel/ad-bidding/policies": {
+      "get": {
+        "operationId": "get_channel_ad_bidding_policies",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "shopCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdBiddingPolicyPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "竞价策略清单（真分页 + 真筛选）",
+        "tags": [
+          "14.2.1.1 竞价管理"
+        ]
+      },
+      "post": {
+        "description": "🔴 **动态竞价策略是三档枚举**（只增只降 / 只降低 / 只提高），不是自由文本。🔴 **目标 ACOS 与目标 ROAS 二选一**（它们互为倒数，同时给两个就必须自洽）。🔴 新建策略一律是草稿（DRAFT），激活要单独一步 —— 激活会进**待下发队列**。",
+        "operationId": "post_channel_ad_bidding_policies",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdBiddingPolicyRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdBiddingPolicyView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "新建一条竞价策略",
+        "tags": [
+          "14.2.1.1 竞价管理"
+        ]
+      }
+    },
+    "/channel/ad-bidding/policies/{id}": {
+      "get": {
+        "operationId": "get_channel_ad_bidding_policies_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdBiddingPolicyView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "一条竞价策略的详情",
+        "tags": [
+          "14.2.1.1 竞价管理"
+        ]
+      },
+      "put": {
+        "description": "🔴 改了**动态竞价策略档位**会进**待下发队列**（平台侧要重新知道这条策略）。🔴 已归档的策略不能再改（归档是软删除：历史还要能复盘）。",
+        "operationId": "put_channel_ad_bidding_policies_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdBiddingPolicyRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdBiddingPolicyView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "改一条竞价策略的属性",
+        "tags": [
+          "14.2.1.1 竞价管理"
+        ]
+      }
+    },
+    "/channel/ad-bidding/policies/{id}/status": {
+      "post": {
+        "description": "🔴 激活前必须有目标（目标 ACOS 或目标 ROAS），否则反推不出建议竞价。🔴 **激活会进待下发队列** —— 平台广告 API 未交付，界面写「待下发」，不是「已生效」。",
+        "operationId": "post_channel_ad_bidding_policies_id_status",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdBiddingStatusRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdBiddingPolicyView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "改策略状态（激活 / 暂停 / 归档）",
+        "tags": [
+          "14.2.1.1 竞价管理"
+        ]
+      }
+    },
+    "/channel/ad-bidding/suggestions": {
+      "get": {
+        "operationId": "get_channel_ad_bidding_suggestions",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "policyId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdBiddingSuggestionPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "建议批次列表（真分页 + 真筛选）",
+        "tags": [
+          "14.2.1.1 竞价管理"
+        ]
+      },
+      "post": {
+        "description": "🔴 口径：ACOS = 花费 ÷ **归因销售额**、ROAS = 归因销售额 ÷ 花费，**分母为 0 ⇒ 一律 NULL（不可比）而不是 0**（「压根算不出来」与「算出来是零」在调价里是相反的两件事）。🔴 建议竞价 = 该关键词自己的当前竞价 × (目标 ACOS ÷ 当前 ACOS)。🔴 **利润侧读不到一律 503** —— 没有利润数据就不知道「这个价投下去赚不赚钱」。🔴 目标 ACOS 高于**盈亏平衡 ACOS**的建议会被**否决**并写明原因。",
+        "operationId": "post_channel_ad_bidding_suggestions",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdBiddingSuggestionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdBiddingSuggestionView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "按目标 ACOS / 目标 ROAS 反推竞价建议（**按商品/SKU**）",
+        "tags": [
+          "14.2.1.1 竞价管理"
+        ]
+      }
+    },
+    "/channel/ad-bidding/suggestions/{id}": {
+      "get": {
+        "description": "🔴 被闸拦下或算不出来的那几条**照样列出来**并写清被哪道闸拦下 —— 静默丢弃会让人以为「按预期工作」。",
+        "operationId": "get_channel_ad_bidding_suggestions_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdBiddingSuggestionView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "一个建议批次的详情（含 SKU 级口径行与关键词级建议）",
+        "tags": [
+          "14.2.1.1 竞价管理"
         ]
       }
     },

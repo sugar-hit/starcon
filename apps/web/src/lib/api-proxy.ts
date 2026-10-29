@@ -1831,6 +1831,77 @@ const services: readonly {
       /^ad\-dayparts(?:\/(?:capabilities|caps|shops(?:\/[A-Za-z0-9_\-]{1,64}\/timezone)?|strategies(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:curve|status))?)?|recommendations(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/apply)?)?|tasks(?:\/run|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?))$/,
   },
   {
+    // 14.2.1.1 竞价管理（channel 服务，卷 14「广告与增长」的 L3 锚点 14.2.1）。
+    //
+    // 蓝图：「管理竞价：动态竞价策略选择（只增只降/降低/提高）、手动竞价调整、竞价范围上限、
+    // 按商品/SKU 的目标 ACOS 反推竞价建议。输入：竞价设置；目标 ACOS/ROAS；历史表现。
+    // 输出：竞价建议（目标 ACOS → 建议竞价）；批量调整任务。关系：上游 = 14.1.3.1、14.3.2.1；
+    // 下游 = 平台广告 API。
+    // **目标 ACOS 反推竞价是广告与利润打通的接口**——没有利润数据，投放只能看平台给的建议，
+    // 无法判断是否真的赚钱。」
+    //
+    // ⚠️ 本条目是**新增一条独立的 `services[]` 元素**，不是往既有 `channel/` 那几条正则里并分支 ——
+    //   既有条目**一字未改、也不重排**。本文件是多车道共用的累积型白名单，
+    //   往同一条 alternation 里并分支会让多车道同时并入时 git 必然判冲突。
+    //
+    // ---- 插入锚点：第一个 `prefix: 'identity/'` 条目的 `  {` 之前（调度者指定）----
+    //   与同批 13.6.1.1（reporting，数组末尾）的插入点相距 11000+ 行 ⇒ git 能干净求并。
+    //
+    // ---- 首 token「ad-bidding」的零命中核对结论（实测，非目测）----
+    //   发车前用脚本（`.tmp/api-proxy-zero-hit.mjs`，不入库）把本文件里**全部 368 个既有元素**
+    //   （`prefix` + 正则）逐条抽出来，按 resolve() 的**同构口径**实测
+    //   （path.startsWith(prefix) 收窄服务 → 再测 pattern.test(path.slice(prefix.length))）：
+    //     ad-bidding/capabilities          ad-bidding/options
+    //     ad-bidding/policies              ad-bidding/policies/{uuid}
+    //     ad-bidding/policies/{uuid}/status ad-bidding/keywords
+    //     ad-bidding/suggestions           ad-bidding/suggestions/{uuid}
+    //     ad-bidding/adjustments           ad-bidding/adjustments/{uuid}
+    //     ad-bidding/dispatch              ad-bidding/dispatch/{uuid}/cancel
+    //   **零命中** —— 既有 368 条正则里**没有任何一条**含 `ad-bidding`
+    //   （既有的是 `ad-campaigns` / `ad-keywords` / `ad-rules` / `ad-dayparts` /
+    //     `ad-diagnostics` / `ad-budgets` 一类），且逐条实测过。
+    //   反向核对：另外 12 条别的车道已交付的形状（ad-dayparts / ad-campaigns / ad-rules /
+    //     ad-budgets / ad-diagnostics / ad-keywords / ad-targetings / stock-forecasts /
+    //     compliance-precheck / trade/platform-disputes / identity/roles /
+    //     catalog/products）**全部仍然命中** —— 本条新元素不会遮蔽它们。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   ad-bidding/capabilities               能力声明（三档策略 / 两道闸 / 比率口径 / 未交付维度）
+    //   ad-bidding/options                    建策略要用的下拉项 + 14.1.3.1 的护栏上限
+    //   ad-bidding/policies                   策略清单（GET，真分页 + 真筛选）
+    //   ad-bidding/policies/{uuid}            策略详情（GET）/ 改策略（PUT）
+    //   ad-bidding/policies/{uuid}/status     改策略状态（POST：激活 / 暂停 / 归档）
+    //   ad-bidding/keywords                   竞价候选清单（GET，真分页 + 真筛选）
+    //   ad-bidding/suggestions                生成建议（POST）/ 建议批次列表（GET）
+    //   ad-bidding/suggestions/{uuid}         建议批次详情（GET，含 SKU 级口径 + 关键词级建议）
+    //   ad-bidding/adjustments                提交批量调整（POST）/ 调整任务列表（GET）
+    //   ad-bidding/adjustments/{uuid}         调整任务详情（GET，含逐条明细与上游批量任务 id）
+    //   ad-bidding/dispatch                    待下发队列（GET，真分页 + 真筛选）
+    //   ad-bidding/dispatch/{uuid}/cancel      撤销一条待下发（POST，**本模块唯一**能改队列的动作）
+    //
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   ad-bidding                              —— 裸路径：本模块没有裸集合读，一切入口都带子路径。
+    //   ad-bidding/platform-sync                —— 平台回写队列**未交付**，放行它等于让界面
+    //                                              以为「已经回写平台」（界面只写「待下发」）。
+    //   ad-bidding/dispatch/{uuid}              —— 没有「单条待下发详情」端点；只有「撤销」这一个动作。
+    //   ad-bidding/dispatch/{uuid}/mark-dispatched —— **刻意不提供**「标记已下发」这种假动作。
+    //   ad-bidding/policies/{uuid}/delete       —— 策略是配置事实，撤下走 status=ARCHIVED，
+    //                                              不物理删除（建议 / 调整 / 队列历史还要能复盘）。
+    //   ad-bidding/suggestions/{uuid}/preview   —— 变更预览属 14.1.1.3 批量操作（未交付）。
+    //   ad-bidding/capabilities/extra           —— 字面量子路径刻意不接 id 段。
+    //
+    // id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    // （不是 `[0-9a-f-]+`：后者会把 `not-a-uuid` 这种非 UUID 形状也当成 id 放行）。
+    // 字面量子路径（capabilities / options / keywords / dispatch / policies / suggestions /
+    // adjustments）排在 {uuid} 段**之前**判别 —— alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    // ⚠️ **顶层组不写成可选**（`ad-bidding` 裸路径必须 404：本模块没有顶层汇总列表端点）。
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^ad\-bidding(?:\/(?:capabilities|options|keywords|dispatch(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/cancel)?|policies(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/status)?)?|suggestions(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|adjustments(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?))$/,
+  },
+  {
     prefix: 'identity/',
     env: 'IDENTITY_URL',
     fallback: 'http://127.0.0.1:8081',
