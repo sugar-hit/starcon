@@ -3847,6 +3847,1423 @@
         },
         "type": "object"
       },
+      "LogisticsAllocationRow": {
+        "properties": {
+          "allocatedTotalAmount": {
+            "type": "number"
+          },
+          "allocationBasis": {
+            "type": "string"
+          },
+          "allocationBasisLabel": {
+            "type": "string"
+          },
+          "allocationCode": {
+            "type": "string"
+          },
+          "allocationId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "computedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "costAsOf": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "destinationCountry": {
+            "type": "string"
+          },
+          "lineCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "lockedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "ruleCode": {
+            "type": "string"
+          },
+          "ruleVersion": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "sourceCarrierName": {
+            "type": "string"
+          },
+          "sourceShipmentCode": {
+            "type": "string"
+          },
+          "sourceTotalAmount": {
+            "type": "number"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "LogisticsAnalysisCapabilities": {
+        "properties": {
+          "allocationNote": {
+            "type": "string"
+          },
+          "availableMetrics": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "caliberNote": {
+            "type": "string"
+          },
+          "categoryNote": {
+            "type": "string"
+          },
+          "currencyNote": {
+            "type": "string"
+          },
+          "dataDependencyNote": {
+            "type": "string"
+          },
+          "orderScopeNote": {
+            "type": "string"
+          },
+          "sections": {
+            "items": {
+              "$ref": "#/components/schemas/LogisticsAnalysisCapabilitySection"
+            },
+            "type": "array"
+          },
+          "upstreamNote": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "LogisticsAnalysisCapabilitySection": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "caliber": {
+            "type": "string"
+          },
+          "evidence": {
+            "nullable": true,
+            "type": "string"
+          },
+          "impact": {
+            "nullable": true,
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "nullable": true,
+            "type": "string"
+          },
+          "reason": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "LogisticsAnalysisRefreshResult": {
+        "properties": {
+          "note": {
+            "type": "string"
+          },
+          "summaries": {
+            "items": {
+              "$ref": "#/components/schemas/LogisticsAnalysisRefreshSummary"
+            },
+            "type": "array"
+          },
+          "totalWritten": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "truncated": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "LogisticsAnalysisRefreshSummary": {
+        "properties": {
+          "factCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "label": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "written": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "LogisticsAnalysisRule": {
+        "properties": {
+          "costToSalesTargetPct": {
+            "nullable": true,
+            "type": "number"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "exceptionShareTargetPct": {
+            "nullable": true,
+            "type": "number"
+          },
+          "freightPerOrderCurrency": {
+            "nullable": true,
+            "type": "string"
+          },
+          "freightPerOrderTarget": {
+            "nullable": true,
+            "type": "number"
+          },
+          "minHistoryDays": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "onTimeTargetPct": {
+            "nullable": true,
+            "type": "number"
+          },
+          "ruleType": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "LogisticsAnalysisRuleInput": {
+        "properties": {
+          "costToSalesTargetPct": {
+            "nullable": true,
+            "type": "number"
+          },
+          "enabled": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "exceptionShareTargetPct": {
+            "nullable": true,
+            "type": "number"
+          },
+          "freightPerOrderCurrency": {
+            "nullable": true,
+            "type": "string"
+          },
+          "freightPerOrderTarget": {
+            "nullable": true,
+            "type": "number"
+          },
+          "minHistoryDays": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "onTimeTargetPct": {
+            "nullable": true,
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "LogisticsCategoryCostResponse": {
+        "properties": {
+          "caliberNote": {
+            "type": "string"
+          },
+          "categoryCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "currencies": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "dataUpdatedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "dataUpdatedNote": {
+            "type": "string"
+          },
+          "from": {
+            "format": "date",
+            "type": "string"
+          },
+          "revenueMissingSkuCount": {
+            "format": "int64",
+            "nullable": true,
+            "type": "integer"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/LogisticsCategoryCostRow"
+            },
+            "type": "array"
+          },
+          "skuCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "targetRatio": {
+            "nullable": true,
+            "type": "number"
+          },
+          "to": {
+            "format": "date",
+            "type": "string"
+          },
+          "unattributedAmount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "unattributedLineCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "LogisticsCategoryCostRow": {
+        "properties": {
+          "categoryCode": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "exceedsTarget": {
+            "type": "boolean"
+          },
+          "lineCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "logisticsCost": {
+            "nullable": true,
+            "type": "number"
+          },
+          "note": {
+            "type": "string"
+          },
+          "ratio": {
+            "nullable": true,
+            "type": "number"
+          },
+          "revenue": {
+            "nullable": true,
+            "type": "number"
+          },
+          "skuCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "skuCountWithCost": {
+            "format": "int64",
+            "nullable": true,
+            "type": "integer"
+          },
+          "skuCountWithRevenue": {
+            "format": "int64",
+            "nullable": true,
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "LogisticsChannelComparisonResponse": {
+        "properties": {
+          "caliberNote": {
+            "type": "string"
+          },
+          "carrierCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "dataUpdatedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "dataUpdatedNote": {
+            "type": "string"
+          },
+          "freightNotRegistered": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "freightRegistered": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "from": {
+            "format": "date",
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/LogisticsChannelComparisonRow"
+            },
+            "type": "array"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "snapshotAsOf": {
+            "format": "date",
+            "nullable": true,
+            "type": "string"
+          },
+          "to": {
+            "format": "date",
+            "type": "string"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "waybills": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "LogisticsChannelComparisonRow": {
+        "properties": {
+          "amount": {
+            "type": "number"
+          },
+          "carrierChannel": {
+            "type": "string"
+          },
+          "carrierChannelLabel": {
+            "type": "string"
+          },
+          "carrierCode": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "shareOfCurrency": {
+            "nullable": true,
+            "type": "number"
+          },
+          "totalWeightKg": {
+            "nullable": true,
+            "type": "number"
+          },
+          "upstreamPerWaybillFreight": {
+            "nullable": true,
+            "type": "number"
+          },
+          "waybills": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "LogisticsCostCurrencyRow": {
+        "properties": {
+          "currency": {
+            "type": "string"
+          },
+          "dutyAndTax": {
+            "nullable": true,
+            "type": "number"
+          },
+          "dutyAndTaxShare": {
+            "nullable": true,
+            "type": "number"
+          },
+          "firstMileAllocation": {
+            "nullable": true,
+            "type": "number"
+          },
+          "firstMileShare": {
+            "nullable": true,
+            "type": "number"
+          },
+          "includedComponents": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "lastMileFreight": {
+            "nullable": true,
+            "type": "number"
+          },
+          "lastMileShare": {
+            "nullable": true,
+            "type": "number"
+          },
+          "missingComponents": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "notRegisteredWaybills": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "packaging": {
+            "nullable": true,
+            "type": "number"
+          },
+          "packagingShare": {
+            "nullable": true,
+            "type": "number"
+          },
+          "registeredWaybills": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "subtotal": {
+            "nullable": true,
+            "type": "number"
+          },
+          "totalWeightKg": {
+            "nullable": true,
+            "type": "number"
+          },
+          "upstreamPerKgFreight": {
+            "nullable": true,
+            "type": "number"
+          },
+          "upstreamPerWaybillFreight": {
+            "nullable": true,
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "LogisticsCostOverviewResponse": {
+        "properties": {
+          "caliberNote": {
+            "type": "string"
+          },
+          "coverageComplete": {
+            "type": "boolean"
+          },
+          "currencies": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "dataUpdatedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "dataUpdatedNote": {
+            "type": "string"
+          },
+          "from": {
+            "format": "date",
+            "type": "string"
+          },
+          "missingComponents": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/LogisticsCostCurrencyRow"
+            },
+            "type": "array"
+          },
+          "scannedWaybills": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "snapshotAsOf": {
+            "format": "date",
+            "nullable": true,
+            "type": "string"
+          },
+          "to": {
+            "format": "date",
+            "type": "string"
+          },
+          "truncated": {
+            "type": "boolean"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "LogisticsCountryCostResponse": {
+        "properties": {
+          "caliberNote": {
+            "type": "string"
+          },
+          "countryCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "currencies": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "dataUpdatedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "dataUpdatedNote": {
+            "type": "string"
+          },
+          "from": {
+            "format": "date",
+            "type": "string"
+          },
+          "missingCountryCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "orderCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/LogisticsCountryCostRow"
+            },
+            "type": "array"
+          },
+          "to": {
+            "format": "date",
+            "type": "string"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "waybillCount": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "LogisticsCountryCostRow": {
+        "properties": {
+          "amount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "countryCode": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "orderCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "perKg": {
+            "nullable": true,
+            "type": "number"
+          },
+          "perOrder": {
+            "nullable": true,
+            "type": "number"
+          },
+          "perWaybill": {
+            "nullable": true,
+            "type": "number"
+          },
+          "shareOfCurrency": {
+            "nullable": true,
+            "type": "number"
+          },
+          "totalWeightKg": {
+            "nullable": true,
+            "type": "number"
+          },
+          "waybills": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "LogisticsDrilldownResponse": {
+        "properties": {
+          "caliberNote": {
+            "type": "string"
+          },
+          "dataUpdatedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "dataUpdatedNote": {
+            "type": "string"
+          },
+          "from": {
+            "format": "date",
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/LogisticsDrilldownRow"
+            },
+            "type": "array"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "to": {
+            "format": "date",
+            "type": "string"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "LogisticsDrilldownRow": {
+        "properties": {
+          "carrierChannel": {
+            "type": "string"
+          },
+          "carrierCode": {
+            "type": "string"
+          },
+          "destinationCountry": {
+            "type": "string"
+          },
+          "freightAmount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "freightCurrency": {
+            "nullable": true,
+            "type": "string"
+          },
+          "freightGapCode": {
+            "type": "string"
+          },
+          "grossWeightKg": {
+            "nullable": true,
+            "type": "number"
+          },
+          "note": {
+            "type": "string"
+          },
+          "occurredAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "occurredOn": {
+            "format": "date",
+            "type": "string"
+          },
+          "salesOrderNo": {
+            "type": "string"
+          },
+          "waybillId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "waybillNo": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "LogisticsExceptionGroupRow": {
+        "properties": {
+          "count": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "dimension": {
+            "type": "string"
+          },
+          "dimensionKey": {
+            "type": "string"
+          },
+          "dimensionLabel": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "shareOfExceptions": {
+            "nullable": true,
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "LogisticsExceptionRow": {
+        "properties": {
+          "carrierCode": {
+            "type": "string"
+          },
+          "caseId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "caseNo": {
+            "type": "string"
+          },
+          "detectedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "detectedOn": {
+            "format": "date",
+            "type": "string"
+          },
+          "exceptionType": {
+            "type": "string"
+          },
+          "exceptionTypeLabel": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "overdue": {
+            "type": "boolean"
+          },
+          "salesOrderNo": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string"
+          },
+          "severityLabel": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "waybillNo": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "LogisticsExceptionShareResponse": {
+        "properties": {
+          "bySeverity": {
+            "items": {
+              "$ref": "#/components/schemas/LogisticsExceptionGroupRow"
+            },
+            "type": "array"
+          },
+          "byStatus": {
+            "items": {
+              "$ref": "#/components/schemas/LogisticsExceptionGroupRow"
+            },
+            "type": "array"
+          },
+          "byType": {
+            "items": {
+              "$ref": "#/components/schemas/LogisticsExceptionGroupRow"
+            },
+            "type": "array"
+          },
+          "caliberNote": {
+            "type": "string"
+          },
+          "dataUpdatedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "dataUpdatedNote": {
+            "type": "string"
+          },
+          "exceptionCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "exceptionShare": {
+            "nullable": true,
+            "type": "number"
+          },
+          "from": {
+            "format": "date",
+            "type": "string"
+          },
+          "meetsTarget": {
+            "type": "boolean"
+          },
+          "targetShare": {
+            "nullable": true,
+            "type": "number"
+          },
+          "to": {
+            "format": "date",
+            "type": "string"
+          },
+          "topCases": {
+            "items": {
+              "$ref": "#/components/schemas/LogisticsExceptionRow"
+            },
+            "type": "array"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "waybillCount": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "LogisticsFreightPerOrderResponse": {
+        "properties": {
+          "caliberNote": {
+            "type": "string"
+          },
+          "currencies": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "dataUpdatedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "dataUpdatedNote": {
+            "type": "string"
+          },
+          "from": {
+            "format": "date",
+            "type": "string"
+          },
+          "meetsTarget": {
+            "type": "boolean"
+          },
+          "notRegisteredWaybillCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "orderCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "orderCountAll": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "orderScope": {
+            "type": "string"
+          },
+          "registeredWaybillCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/LogisticsFreightPerOrderRow"
+            },
+            "type": "array"
+          },
+          "targetCurrency": {
+            "nullable": true,
+            "type": "string"
+          },
+          "targetPerOrder": {
+            "nullable": true,
+            "type": "number"
+          },
+          "to": {
+            "format": "date",
+            "type": "string"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "waybillCount": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "LogisticsFreightPerOrderRow": {
+        "properties": {
+          "currency": {
+            "type": "string"
+          },
+          "freightAmount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "notRegisteredWaybillCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "orderCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "orderCountAll": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "perKg": {
+            "nullable": true,
+            "type": "number"
+          },
+          "perOrder": {
+            "nullable": true,
+            "type": "number"
+          },
+          "perWaybill": {
+            "nullable": true,
+            "type": "number"
+          },
+          "registeredWaybillCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalWeightKg": {
+            "nullable": true,
+            "type": "number"
+          },
+          "waybillCount": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "LogisticsHeadMileCurrencyRow": {
+        "properties": {
+          "allocatedAmount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "allocationCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "differenceToOverview": {
+            "nullable": true,
+            "type": "number"
+          },
+          "lineCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "sourceTotalAmount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "upstreamOverviewAmount": {
+            "nullable": true,
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "LogisticsHeadMileResponse": {
+        "properties": {
+          "allocationCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "allocations": {
+            "items": {
+              "$ref": "#/components/schemas/LogisticsAllocationRow"
+            },
+            "type": "array"
+          },
+          "caliberNote": {
+            "type": "string"
+          },
+          "dataUpdatedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "dataUpdatedNote": {
+            "type": "string"
+          },
+          "from": {
+            "format": "date",
+            "type": "string"
+          },
+          "lockedCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/LogisticsHeadMileCurrencyRow"
+            },
+            "type": "array"
+          },
+          "supersededCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "to": {
+            "format": "date",
+            "type": "string"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "LogisticsTimelinessCell": {
+        "properties": {
+          "avgDeviationHours": {
+            "nullable": true,
+            "type": "number"
+          },
+          "avgTransitHours": {
+            "nullable": true,
+            "type": "number"
+          },
+          "channelCode": {
+            "type": "string"
+          },
+          "channelId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "channelName": {
+            "type": "string"
+          },
+          "comparableCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "countryCode": {
+            "type": "string"
+          },
+          "deliveredCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "deliveryRate": {
+            "nullable": true,
+            "type": "number"
+          },
+          "noPromiseCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "onTimeCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "onTimeRate": {
+            "nullable": true,
+            "type": "number"
+          },
+          "overdueCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "overdueRate": {
+            "nullable": true,
+            "type": "number"
+          },
+          "pendingCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "returnedCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "sampleSufficient": {
+            "type": "boolean"
+          },
+          "score": {
+            "nullable": true,
+            "type": "number"
+          },
+          "scoreGrade": {
+            "nullable": true,
+            "type": "string"
+          },
+          "shippedCount": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "LogisticsTimelinessCountryRow": {
+        "properties": {
+          "avgTransitHours": {
+            "nullable": true,
+            "type": "number"
+          },
+          "comparableCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "countryCode": {
+            "type": "string"
+          },
+          "onTimeCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "onTimeRate": {
+            "nullable": true,
+            "type": "number"
+          },
+          "overdueCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "overdueRate": {
+            "nullable": true,
+            "type": "number"
+          },
+          "shippedCount": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "LogisticsTimelinessResponse": {
+        "properties": {
+          "avgTransitHours": {
+            "nullable": true,
+            "type": "number"
+          },
+          "byCountry": {
+            "items": {
+              "$ref": "#/components/schemas/LogisticsTimelinessCountryRow"
+            },
+            "type": "array"
+          },
+          "caliberNote": {
+            "type": "string"
+          },
+          "cells": {
+            "items": {
+              "$ref": "#/components/schemas/LogisticsTimelinessCell"
+            },
+            "type": "array"
+          },
+          "comparableCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "dataUpdatedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "dataUpdatedNote": {
+            "type": "string"
+          },
+          "deliveredCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "from": {
+            "format": "date",
+            "type": "string"
+          },
+          "meetsTarget": {
+            "type": "boolean"
+          },
+          "noPromiseCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "onTimeCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "overallDeliveryRate": {
+            "nullable": true,
+            "type": "number"
+          },
+          "overallOnTimeRate": {
+            "nullable": true,
+            "type": "number"
+          },
+          "overallOverdueRate": {
+            "nullable": true,
+            "type": "number"
+          },
+          "overdueCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "pendingCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "returnedCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "shippedCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "snapshotAsOf": {
+            "format": "date",
+            "nullable": true,
+            "type": "string"
+          },
+          "targetRate": {
+            "nullable": true,
+            "type": "number"
+          },
+          "to": {
+            "format": "date",
+            "type": "string"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
       "MetricCard": {
         "properties": {
           "aggregation": {
@@ -13535,6 +14952,716 @@
         "summary": "更新分层规则（**改规则 = 加一个版本**，旧版本停用、历史结果不变）",
         "tags": [
           "13.3.1.2 生命周期与分层"
+        ]
+      }
+    },
+    "/reporting/logistics-analysis/capabilities": {
+      "get": {
+        "description": "notAvailable 列出的是**确实拆不出来**的部分（没投影 ⇒ 那一格不可比；没有类目归属 ⇒ 类目占比不可比），每条都写清原因与影响 —— 「算不出来」与「数值是 0」在页面上长得一样，含义却相反。",
+        "operationId": "get_reporting_logistics_analysis_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LogisticsAnalysisCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "能力声明：六件指标分别来自哪个上游、哪些确实拿不到",
+        "tags": [
+          "13.5.3.1 物流分析"
+        ]
+      }
+    },
+    "/reporting/logistics-analysis/category-cost": {
+      "get": {
+        "description": "🔴 蓝图关系句：「**物流成本占比高的类目必须单独定价**，统一毛利率会吃掉利润。」分子 = 类目下的**头程分摊后成本**（channel 的分摊明细逐 SKU，再归到类目）；分母 = **13.4.1.2 SKU 利润的销售额投影**（component='REVENUE'）—— 与利润侧同口径，本模块**不重算销售额**。⚠️ **类目维度只覆盖头程分摊部分**：尾程运费落在运单上，一票可能多 SKU，**没有 SKU 维度** ⇒ 那一段进不了类目。",
+        "operationId": "get_reporting_logistics_analysis_category_cost",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LogisticsCategoryCostResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "**类目维度**的物流成本占销售额比（下游 5 定价的输入）",
+        "tags": [
+          "13.5.3.1 物流分析"
+        ]
+      }
+    },
+    "/reporting/logistics-analysis/channels": {
+      "get": {
+        "description": "渠道维度取 **channel 10.6.1.1 的 by-channel**。**逐币种**：占比的分母是**同币种**的窗口合计；跨币种没有占比。每一行带自己的币种。",
+        "operationId": "get_reporting_logistics_analysis_channels",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "currency",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LogisticsChannelComparisonResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "渠道对比（承运商 × 渠道 × 币种，真分页 + 真计数）",
+        "tags": [
+          "13.5.3.1 物流分析"
+        ]
+      }
+    },
+    "/reporting/logistics-analysis/countries": {
+      "get": {
+        "description": "口径 = **运单级尾程运费**（运单是运费金额与目的国共同的最小颗粒）。**多币种绝不相加**：某国占比的分母是**同币种**的合计。**运费未登记的票有票数、没有金额**，不进任何金额合计。没有目的国的票单列「未标注目的国」，不摊进任何国家。",
+        "operationId": "get_reporting_logistics_analysis_countries",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LogisticsCountryCostResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "各国成本对比（**逐币种**：币种 × 目的国）",
+        "tags": [
+          "13.5.3.1 物流分析"
+        ]
+      }
+    },
+    "/reporting/logistics-analysis/drilldown": {
+      "get": {
+        "description": "每一行是一张运单：运费金额、目的国、销售订单号，都能回到上游逐条核对。**没有运费的行是「—」**，不在任何合计里（不是 0 元）。",
+        "operationId": "get_reporting_logistics_analysis_drilldown",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "currency",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "country",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "carrierChannel",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LogisticsDrilldownResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "下钻到运单（真分页 + 真计数）",
+        "tags": [
+          "13.5.3.1 物流分析"
+        ]
+      }
+    },
+    "/reporting/logistics-analysis/exceptions": {
+      "get": {
+        "description": "🔴 分子取 channel 10.3.1.2 的**已判定异常件**（按发现日归窗），分母取**同一窗口**的运单数。上游的 `/exceptions/overview` 是**累计全量**（没有时间窗），拿它除以窗口内运单数会得到一个**没有意义**的比率 —— 本模块只把它单列为对照，不参与占比计算。分母为 0 ⇒ 占比**不可比**（不是 0%）。",
+        "operationId": "get_reporting_logistics_analysis_exceptions",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LogisticsExceptionShareResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "异常件占比（**窗口内异常件 ÷ 窗口内运单**，分子分母同范围）",
+        "tags": [
+          "13.5.3.1 物流分析"
+        ]
+      }
+    },
+    "/reporting/logistics-analysis/freight-per-order": {
+      "get": {
+        "description": "🔴 **分母是订单数，不是运单票数**：订单取同一批运单上的 distinct 销售订单号，与运费总额**同范围**。channel 自己的「每票运费」也并排给出（**两者不是一回事**：一单多票时票数 > 订单数，用票数会把单均运费压低）。**没有订单 ⇒ 不可比**（不是 0 元）。",
+        "operationId": "get_reporting_logistics_analysis_freight_per_order",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LogisticsFreightPerOrderResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "单均运费（运费总额 ÷ **订单数**，逐币种）",
+        "tags": [
+          "13.5.3.1 物流分析"
+        ]
+      }
+    },
+    "/reporting/logistics-analysis/head-mile": {
+      "get": {
+        "description": "🔴 **本模块不重算一套分摊** —— 分摊结果读 **channel 10.6.1.1**，两个分摊口径会让「物流成本占比」有两个答案。分摊单按**结账时点（cost_as_of）**归窗，并与上游成本总览的头程分摊位**并排对照**（对不上时以 channel 为准）。",
+        "operationId": "get_reporting_logistics_analysis_head_mile",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LogisticsHeadMileResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "头程分摊后成本（逐币种 + 分摊单清单）",
+        "tags": [
+          "13.5.3.1 物流分析"
+        ]
+      }
+    },
+    "/reporting/logistics-analysis/overview": {
+      "get": {
+        "description": "口径 = **channel 10.6.1.1 的成本分析**。**多币种绝不相加** —— 每一行带自己的币种；跨币种的「总计」不存在。缺项（仓储费在本仓没有来源）在 missingComponents 里逐条列明，**不是 0**。⚠️ 上游的「每票运费」分母是**票**不是**单**，单均运费看 `/freight-per-order`。",
+        "operationId": "get_reporting_logistics_analysis_overview",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LogisticsCostOverviewResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "物流成本总览（**逐币种**：尾程 / 头程分摊 / 关税 / 包材 / 合计）",
+        "tags": [
+          "13.5.3.1 物流分析"
+        ]
+      }
+    },
+    "/reporting/logistics-analysis/refresh": {
+      "post": {
+        "description": "拉三路上游（channel 10.6.1.1 成本分析 + 10.6.2.1 时效 + 10.3.1.2 异常件；trade 10.2.1.1 运单；catalog 6.1.1.1 SKU 类目）并落成本服务的投影（幂等：同一批上游事实重放不会翻倍）。权限是 reporting.projection.write —— **本模块没有任何「创建业务事实」的权限**。",
+        "operationId": "post_reporting_logistics_analysis_refresh",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "timezone",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LogisticsAnalysisRefreshResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "刷新物流分析投影（从上游拉取 → 投影）",
+        "tags": [
+          "13.5.3.1 物流分析"
+        ]
+      }
+    },
+    "/reporting/logistics-analysis/rules": {
+      "get": {
+        "description": "时效达成率目标、单均运费目标、异常件占比上限、物流成本占销售额比上限都落在**租户自己的规则表**里（没有配置时给默认值）；不同物流结构差一个数量级，写死的阈值对谁都不对。",
+        "operationId": "get_reporting_logistics_analysis_rules",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/LogisticsAnalysisRule"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "阈值规则（可配置项）",
+        "tags": [
+          "13.5.3.1 物流分析"
+        ]
+      }
+    },
+    "/reporting/logistics-analysis/rules/{ruleType}": {
+      "put": {
+        "description": "只改写进来的那几个字段；本模块**只改自己的规则表**，不写任何上游口径（达成率在 channel、分摊在 channel、运费登记在 trade）。",
+        "operationId": "put_reporting_logistics_analysis_rules_ruleType",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "ruleType",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LogisticsAnalysisRuleInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LogisticsAnalysisRule"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "改阈值",
+        "tags": [
+          "13.5.3.1 物流分析"
+        ]
+      }
+    },
+    "/reporting/logistics-analysis/timeliness": {
+      "get": {
+        "description": "达成率 = 准点数 ÷ **可比数**；没有承诺送达日与未签收的票**不进分母**。分母为 0 ⇒ 达成率**不可比**（不是 0%）。按国家的汇总**先汇总再相除**，不是各格比率的平均。",
+        "operationId": "get_reporting_logistics_analysis_timeliness",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LogisticsTimelinessResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "时效达成率（**判定归 channel 10.6.2.1**，本模块只搬运）",
+        "tags": [
+          "13.5.3.1 物流分析"
         ]
       }
     },
