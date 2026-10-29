@@ -5,17 +5,13 @@ import java.util.List;
 /**
  * 角色授权判定（1.2.1.1 全局搜索引入）。
  *
- * <p><b>判定规则与各服务 {@code AccessService.require} 逐字同构</b>：命中某条授权时，
- * 同一条授权里必须**同时**有「动作权限」与「该动作所属页面的 {@code .read} 权限」，
- * 且数据范围（ALL / SELF / DEPARTMENT）成立。否则「能写不能读」这种组合会被静默放行。
+ * <p><b>判定规则与各服务 {@code AccessService.require} 逐字同构</b>：命中某条授权时， 同一条授权里必须**同时**有「动作权限」与「该动作所属页面的
+ * {@code .read} 权限」， 且数据范围（ALL / SELF / DEPARTMENT）成立。否则「能写不能读」这种组合会被静默放行。
  *
- * <p><b>为什么抽到这里而不是各服务各写一份</b>：授权判定一旦出现第二个实现，
- * 「哪些端点信任什么」就变成需要逐个审计的问题 —— 这正是各服务 {@code AccessService}
- * 类注释里写死的纪律（「刻意不在本服务重写一份简化版守卫」）。本类只提供**纯判定**，
- * 不解析租户、不发起任何调用：租户永远来自已认证的成员关系，不来自请求头。
+ * <p><b>为什么抽到这里而不是各服务各写一份</b>：授权判定一旦出现第二个实现， 「哪些端点信任什么」就变成需要逐个审计的问题 —— 这正是各服务 {@code AccessService}
+ * 类注释里写死的纪律（「刻意不在本服务重写一份简化版守卫」）。本类只提供**纯判定**， 不解析租户、不发起任何调用：租户永远来自已认证的成员关系，不来自请求头。
  *
- * <p><b>本类不是租户隔离</b>：租户隔离由各服务的 RLS（{@code app.current_tenant}）在数据库层强制，
- * 本类只回答「这个会话有没有某个页面的读权限」。
+ * <p><b>本类不是租户隔离</b>：租户隔离由各服务的 RLS（{@code app.current_tenant}）在数据库层强制， 本类只回答「这个会话有没有某个页面的读权限」。
  */
 public final class GrantPermissions {
 
@@ -66,8 +62,7 @@ public final class GrantPermissions {
   /**
    * 数据范围：租户级数据 —— 授权之外**不再**按个人 / 部门收窄。
    *
-   * <p>这不是一种授权范围模式，而是「该域的表没有归属维度」时的事实：
-   * 往来单位（party）、仓库档案、物流单据这类表上只有 {@code tenant_id}，
+   * <p>这不是一种授权范围模式，而是「该域的表没有归属维度」时的事实： 往来单位（party）、仓库档案、物流单据这类表上只有 {@code tenant_id}，
    * 任何人的授权都看不到比「本租户」更小的范围。
    */
   public static final String SCOPE_TENANT = "TENANT";
@@ -75,13 +70,11 @@ public final class GrantPermissions {
   /**
    * 某个权限码上**实际生效**的数据范围。
    *
-   * <p>取「最宽」的一条授权（ALL &gt; DEPARTMENT &gt; SELF），与 RLS 的判定同语义：
-   * {@code catalog_scope} / {@code channel_scope} 是「任一条授权成立即成立」，
-   * 所以多条授权里只要有一条 ALL，返回的行就是全租户可见 ——
-   * 报成 SELF 会与实际可见范围不符（界面就会说「只看到本人的」，实际看到的是全租户的）。
+   * <p>取「最宽」的一条授权（ALL &gt; DEPARTMENT &gt; SELF），与 RLS 的判定同语义： {@code catalog_scope} / {@code
+   * channel_scope} 是「任一条授权成立即成立」， 所以多条授权里只要有一条 ALL，返回的行就是全租户可见 —— 报成 SELF
+   * 会与实际可见范围不符（界面就会说「只看到本人的」，实际看到的是全租户的）。
    *
-   * <p>DEPARTMENT 需要会话确实带部门（{@code hasDepartment}），否则退化为 SELF ——
-   * 往更严的一侧退化，与各服务既有口径一致。
+   * <p>DEPARTMENT 需要会话确实带部门（{@code hasDepartment}），否则退化为 SELF —— 往更严的一侧退化，与各服务既有口径一致。
    *
    * @param grants 会话的全部授权
    * @param permission 形如 {@code catalog.sku.read} 的权限码
@@ -89,8 +82,7 @@ public final class GrantPermissions {
    */
   public static String scopeMode(List<Grant> grants, String permission, boolean hasDepartment) {
     if (grants == null || grants.isEmpty()) return SCOPE_SELF;
-    String siblingRead =
-        permission.substring(0, permission.lastIndexOf('.')) + ".read";
+    String siblingRead = permission.substring(0, permission.lastIndexOf('.')) + ".read";
     boolean all = false;
     boolean department = false;
     for (Grant grant : grants) {
