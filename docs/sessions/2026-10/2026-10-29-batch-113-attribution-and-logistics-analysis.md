@@ -3,16 +3,16 @@
 > 本批由 **round-131 tick**（14:00 触发）并入集成头并跑 L2；该 tick **中途崩在 Token Plan 上限**，
 > **round-132 tick**（15:00 触发）接管收尾（补 commit + push、更正起草稿笔误）。
 >
-> | 项 | 值 |
-> | --- | --- |
-> | 本批并入 | `14.3.2.1 归因分析`（V404, channel）+ `13.5.3.1 物流分析`（V406, reporting） |
-> | 并入前台账 | 429 已交付 / 0 进行中 / 36 未开发（92.3%） |
-> | 并入后台账 | **431 已交付 / 0 进行中 / 34 未开发（92.7%）** |
-> | 静态预检 | **绿**（三个互相破坏形状全部零命中） |
-> | L2 | **绿**（后端步骤退出码 1，但 3 例失败经**四条独立证据**判定为假红、隔离复跑 4/4 绿；步骤 2–6 由 round-132 补跑全绿 —— 见「L2 批量验证」） |
-> | 闸 | round-131 取闸时闸被**崩掉的同步任务**持有，等 TTL 到期后接管；round-131 随后**死在闸里**，闸由僵尸采样器刷新鲜度（见「调度取证」） |
-> | 模式 | **降档模式**（已过 `TOKEN_HORIZON` 2026-10-25 ⇒ LANES 4→2、节流闸 50→100 分钟） |
-> | 本轮派发 | **零**（节流闸：距上批 46 分钟 < 100 分钟阈值 ⇒ 零派发） |
+> | 项         | 值                                                                                                                                        |
+> | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+> | 本批并入   | `14.3.2.1 归因分析`（V404, channel）+ `13.5.3.1 物流分析`（V406, reporting）                                                              |
+> | 并入前台账 | 429 已交付 / 0 进行中 / 36 未开发（92.3%）                                                                                                |
+> | 并入后台账 | **431 已交付 / 0 进行中 / 34 未开发（92.7%）**                                                                                            |
+> | 静态预检   | **绿**（三个互相破坏形状全部零命中）                                                                                                      |
+> | L2         | **绿**（后端步骤退出码 1，但 3 例失败经**四条独立证据**判定为假红、隔离复跑 4/4 绿；步骤 2–6 由 round-132 补跑全绿 —— 见「L2 批量验证」） |
+> | 闸         | round-131 取闸时闸被**崩掉的同步任务**持有，等 TTL 到期后接管；round-131 随后**死在闸里**，闸由僵尸采样器刷新鲜度（见「调度取证」）       |
+> | 模式       | **降档模式**（已过 `TOKEN_HORIZON` 2026-10-25 ⇒ LANES 4→2、节流闸 50→100 分钟）                                                           |
+> | 本轮派发   | **零**（节流闸：距上批 46 分钟 < 100 分钟阈值 ⇒ 零派发）                                                                                  |
 
 ---
 
@@ -39,6 +39,7 @@
 
   五张表均 `tenant_id uuid NOT NULL` + ENABLE **且** FORCE ROW LEVEL SECURITY isolation 策略
   （USING 与 WITH CHECK 同时钉死）+ `data_scope`（RESTRICTIVE，按店铺收敛）+ GRANT 零权限。
+
 - **端点**：11 个，挂 `/channel/ad-attributions/**` ——
   `GET /capabilities`（能力声明）、`GET /options`（筛选项 + 逐指标口径 + 规则原文）、
   `GET /rules`、`GET /rules/current`、`POST /rules`、`POST /import`、`POST /run`、
@@ -52,10 +53,10 @@
   → 增量口径常驻（含「不是因果增量」的边界）→ 汇总按币种分块 → 导出留痕 → 能力声明。
   **前端不做任何算术**；`null` 渲染成「不可比」而不是 `0.00%`；加载 / 错误 / 空三态齐全。
 - **测试**：`AdAttributionIntegrationTest` **21 例**（真实 PostgreSQL 16 + Testcontainers）
-  + `AdAttributionTenancyIntegrationTest` **3 例**（租户隔离三断言：用**应用角色**
-  `channel_app`（nobypassrls）查 —— 容器超级用户是 BYPASSRLS，证明不了隔离；
-  五张表逐张断言 `relforcerowsecurity=true`）+ 前端 `ad-attribution-model.test.ts` **32 例**
-  + `ad-attribution-allowlist.test.ts` **5 例**。
+  - `AdAttributionTenancyIntegrationTest` **3 例**（租户隔离三断言：用**应用角色**
+    `channel_app`（nobypassrls）查 —— 容器超级用户是 BYPASSRLS，证明不了隔离；
+    五张表逐张断言 `relforcerowsecurity=true`）+ 前端 `ad-attribution-model.test.ts` **32 例**
+  - `ad-attribution-allowlist.test.ts` **5 例**。
 
 **关键设计决策**：
 
@@ -99,11 +100,12 @@
     异常件占比上限 / 物流成本占销售额比上限，租户可改）
 
   九表 `tenant_id` NOT NULL + ENABLE **且** FORCE RLS isolation + GRANT
-  + `REVOKE ALL ON flyway_schema_history`。
-  🔴 **一致性写进 CHECK**：金额要么带币种、要么是「未登记」缺口码（**运费没登记 ≠ 运费是 0**）；
-  分摊明细行必须挂得上 SKU 维度；规则表四类阈值**字段互斥** + 取值范围 CHECK。
-  🔴 **幂等键**（tenant + as_of/币种、as_of/渠道/币种、as_of/渠道/国家、waybill_id、
-  allocation_id、allocation_id+line_no、case_id、sku_id）⇒ 同一批上游事实重放**不翻倍**。
+  - `REVOKE ALL ON flyway_schema_history`。
+    🔴 **一致性写进 CHECK**：金额要么带币种、要么是「未登记」缺口码（**运费没登记 ≠ 运费是 0**）；
+    分摊明细行必须挂得上 SKU 维度；规则表四类阈值**字段互斥** + 取值范围 CHECK。
+    🔴 **幂等键**（tenant + as_of/币种、as_of/渠道/币种、as_of/渠道/国家、waybill_id、
+    allocation_id、allocation_id+line_no、case_id、sku_id）⇒ 同一批上游事实重放**不翻倍**。
+
 - **端点**：13 个，挂 `/reporting/logistics-analysis` ——
   `GET /capabilities`（能力声明，七段逐条报可得性 / 归属模块号 / 影响）、
   `GET /overview`、`GET /freight-per-order`、`GET /head-mile`、`GET /channels`（真分页 + 真计数）、
@@ -160,20 +162,21 @@
 
 **结论：闸被一个崩掉的同步任务持有，不是被活着的流水线 tick 持有。**
 
-| 取证 | 结果 |
-| --- | --- |
-| `gate status`（14:06 首读） | `held` / `ageSeconds=3060` / `ttl=4200` / `stale=false` |
-| `owner` 文件 | PID `42231` + 时间戳 `2026-10-29T05:15:39.441Z`（= 13:15:39 +0800） |
-| PID 42231 是否存活 | **否**（`ps -p 42231` 空） |
-| 闸目录内 keepalive 文件 | **无**（r130 那种每 60 秒一个的 keepalive 一个都没有） |
-| 闸外的构建进程 | **无**（`mvnw` / `surefire` / `java` 全无）⇒ 持闸者**不在跑 L2** |
-| `mavis session list` | 13:15 那一格起的是 **「main → module-dev 集成头同步」**任务，
-状态 **`error`（`net::ERR_CONNECTION_CLOSED`）** ⇒ **取闸后崩在网络错误上，没能 release** |
+| 取证                                                                                      | 结果                                                                |
+| ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
+| `gate status`（14:06 首读）                                                               | `held` / `ageSeconds=3060` / `ttl=4200` / `stale=false`             |
+| `owner` 文件                                                                              | PID `42231` + 时间戳 `2026-10-29T05:15:39.441Z`（= 13:15:39 +0800） |
+| PID 42231 是否存活                                                                        | **否**（`ps -p 42231` 空）                                          |
+| 闸目录内 keepalive 文件                                                                   | **无**（r130 那种每 60 秒一个的 keepalive 一个都没有）              |
+| 闸外的构建进程                                                                            | **无**（`mvnw` / `surefire` / `java` 全无）⇒ 持闸者**不在跑 L2**    |
+| `mavis session list`                                                                      | 13:15 那一格起的是 **「main → module-dev 集成头同步」**任务，       |
+| 状态 **`error`（`net::ERR_CONNECTION_CLOSED`）** ⇒ **取闸后崩在网络错误上，没能 release** |
 
 ⇒ 协议明文规定「**只有 `gate status` 的 `stale=true`（超过 TTL 70 分钟）才允许接管**」，
 且「**不要为了让 tick 通过而 force 清掉别人持有的调度闸**」。
 
 **处置**：
+
 1. **不 force、不删闸、不改闸** —— 用 `lane.mjs gate acquire` 自带的 stale 判定做等待
    （该函数自己保证「非 stale 不抢」，`lane.mjs:568-588`）。
 2. 用一个只读等待循环（1 秒一次、只调 `gate acquire`）等到 **14:25:39** ——
@@ -198,13 +201,13 @@
 **round-131 tick 在本轮中途死掉**，留下「已合并、未提交、未推送、L2 仍在跑」的半成品状态。
 round-132（15:00 触发）接手把它收口。
 
-| 取证 | 结果 |
-| --- | --- |
-| `mavis session list` | round-131 的会话 `mvs_eeff9f588d30448b84d167113fe2e9da`（14:19 起）状态 **`error`**：`已达到 Token Plan 用量上限 … (2056)` / `errorCode 42212`，`updatedAt=14:56:21` ⇒ **owner 已死** |
-| L2 进程 | `.dev-agent/l2-r131.sh` 及其子进程（`mvnw` PID 47742 / surefire / `caffeinate` 47718 / 采样器 47717）**仍在跑** ⇒ L2 是**脱离会话**的后台脚本，owner 死后它继续跑完，但**没人再去读结果、commit、push** |
-| 闸 | `gate status` = `held` / `ageSeconds=38` / `stale=false` —— **新鲜度是僵尸采样器刷出来的**（每 60 秒 `touch` 闸目录），不是活着的 owner ⇒ **正是 `docs/backlog/2026-10-28-orphan-keepalive-daemon-gate-deadlock-batch107.md` 记的那个形状**（owner 已死 ⇒ 无人 `release` ⇒ 闸一直 `held` ⇒ 下一轮白等） |
-| 工作区 | `git status` = 1 个未跟踪文件（本文档）+ 台账被 `sync.mjs` 改写（429→431） |
-| 远端 | `git rev-list --left-right --count origin/integration/module-dev...HEAD` = **0 8** ⇒ **8 个 commit 压在本地没推**（含两条 merge commit） |
+| 取证                 | 结果                                                                                                                                                                                                                                                                                                    |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mavis session list` | round-131 的会话 `mvs_eeff9f588d30448b84d167113fe2e9da`（14:19 起）状态 **`error`**：`已达到 Token Plan 用量上限 … (2056)` / `errorCode 42212`，`updatedAt=14:56:21` ⇒ **owner 已死**                                                                                                                   |
+| L2 进程              | `.dev-agent/l2-r131.sh` 及其子进程（`mvnw` PID 47742 / surefire / `caffeinate` 47718 / 采样器 47717）**仍在跑** ⇒ L2 是**脱离会话**的后台脚本，owner 死后它继续跑完，但**没人再去读结果、commit、push**                                                                                                 |
+| 闸                   | `gate status` = `held` / `ageSeconds=38` / `stale=false` —— **新鲜度是僵尸采样器刷出来的**（每 60 秒 `touch` 闸目录），不是活着的 owner ⇒ **正是 `docs/backlog/2026-10-28-orphan-keepalive-daemon-gate-deadlock-batch107.md` 记的那个形状**（owner 已死 ⇒ 无人 `release` ⇒ 闸一直 `held` ⇒ 下一轮白等） |
+| 工作区               | `git status` = 1 个未跟踪文件（本文档）+ 台账被 `sync.mjs` 改写（429→431）                                                                                                                                                                                                                              |
+| 远端                 | `git rev-list --left-right --count origin/integration/module-dev...HEAD` = **0 8** ⇒ **8 个 commit 压在本地没推**（含两条 merge commit）                                                                                                                                                                |
 
 **round-132 的处置（按协议逐条）**：
 
@@ -231,15 +234,16 @@ round-132（15:00 触发）接手把它收口。
 **实际结果：后端步骤退出码 1（3 例失败，**经四条独立证据判定为假红**），
 后端其余 2460 例全绿，步骤 2–6 由 round-132 在空载下补跑全绿。**
 
-| 步骤 | 命令 | 结果 |
-| --- | --- | --- |
-| 1/6 后端 | `cd backend && ./mvnw verify -fae` | ⚠️ **退出码 1** —— `trade` 的 `ReplenishmentSuggestionTenancyIntegrationTest` **3 例失败**（断言 1/2/3 全挂，报 `expected:<200> but was:<503>`）。**已证伪为假红，非回归**（取证见下） |
-| 1/6 隔离复跑 | `./mvnw -pl services/trade -am test -Dtest='ReplenishmentSuggestionTenancyIntegrationTest' -Dsurefire.failIfNoSpecifiedTests=false -DfailIfNoSpecifiedTests=false` | ✅ **绿**（4 例 / 0 失败；空载、PG 容器 0、load 3.31） |
-| 2/6 类型 | `pnpm typecheck --force` | ✅ **绿**（3 包） |
-| 3/6 Lint | `pnpm lint` | ✅ **绿** |
-| 4/6 前端单测 | `pnpm test`（vitest） | ✅ **绿** |
-| 5/6 前端构建 | `NEXT_TELEMETRY_DISABLED=1 pnpm --filter @starcon/web build` | ✅ **绿** |
-| 6/6 台账一致 | `node tools/module-progress/sync.mjs --check` | ✅ **绿**（台账与蓝图一致） |
+| 步骤                             | 命令                                                                                                                                                               | 结果                                                                                                                                                                                   |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1/6 后端                         | `cd backend && ./mvnw verify -fae`                                                                                                                                 | ⚠️ **退出码 1** —— `trade` 的 `ReplenishmentSuggestionTenancyIntegrationTest` **3 例失败**（断言 1/2/3 全挂，报 `expected:<200> but was:<503>`）。**已证伪为假红，非回归**（取证见下） |
+| 1/6 隔离复跑                     | `./mvnw -pl services/trade -am test -Dtest='ReplenishmentSuggestionTenancyIntegrationTest' -Dsurefire.failIfNoSpecifiedTests=false -DfailIfNoSpecifiedTests=false` | ✅ **绿**（4 例 / 0 失败；空载、PG 容器 0、load 3.31）                                                                                                                                 |
+| 1/6 模块级复跑（round-132 追加） | `./mvnw -pl services/trade -am test`（空载，PG 容器 0）                                                                                                            | ✅ **绿**（**1506 例 / 0 失败 / 0 错误**）                                                                                                                                             |
+| 2/6 类型                         | `pnpm typecheck --force`                                                                                                                                           | ✅ **绿**（3 包）                                                                                                                                                                      |
+| 3/6 Lint                         | `pnpm lint`                                                                                                                                                        | ✅ **绿**                                                                                                                                                                              |
+| 4/6 前端单测                     | `pnpm test`（vitest）                                                                                                                                              | ✅ **绿**                                                                                                                                                                              |
+| 5/6 前端构建                     | `NEXT_TELEMETRY_DISABLED=1 pnpm --filter @starcon/web build`                                                                                                       | ✅ **绿**                                                                                                                                                                              |
+| 6/6 台账一致                     | `node tools/module-progress/sync.mjs --check`                                                                                                                      | ✅ **绿**（台账与蓝图一致）                                                                                                                                                            |
 
 ### 那 3 例为什么判定为假红（四条**互相独立**的证据）
 
@@ -250,18 +254,33 @@ round-132（15:00 触发）接手把它收口。
    （`cfa76762` = r130 绿批的 HEAD）。本批只动了 **channel**（V404）与 **reporting**（V406）。
 3. **同一个测试在 r130 的绿 L2 里是过的** —— r130 日志：`Tests run: 4, Failures: 0, Errors: 0`。
 4. **隔离复跑 4/4 全绿** —— L2 退出后（PG 容器 0）单独跑该测试类，全绿。
+5. **（round-132 追加）空载下整个 `trade` 模块复跑 1506 例全绿** ——
+   `./mvnw -pl services/trade -am test` ⇒ `Tests run: 1506, Failures: 0, Errors: 0`。
+   ⇒ trade 服务的**全部**测试在空载下都是绿的，不是「只好了那一个类」。
+6. **（round-132 追加）失败集合会漂移，这是 flaky 的决定性特征** ——
+   第一次复跑（在 `next build` + vitest 并发下）失败的是**另外三个类**
+   （`FulfillmentMonitorIntegrationTest` / `FulfillmentRoutingIntegrationTest` /
+   `OrderConsolidationIntegrationTest`），而它们在 r130 **和** r131 的 L2 里**都是绿的**；
+   同时 r131 L2 失败的那个 tenancy 类在复跑里**是绿的**。
+   ⇒ **同一份代码、同一批断言，每次红的类不一样** ⇒ 这不是「某个逻辑写错了」，
+   而是**环境/时序敏感的 flaky**。
+   根因取证：`trade` 的 `AccessService` 在身份服务不可达时抛 **503**
+   （`AccessService.java:124-127`），而这些集成测试的身份服务桩是
+   JDK `com.sun.net.httpserver.HttpServer` **没有 `setExecutor`** ⇒
+   **默认单线程 dispatcher**，客户端 keep-alive 残留会把下一个请求堵死 ——
+   这与协议里记的「负载型假红」机制**同源**（r129/r130 会话日志已两次记录同一形状）。
 
 ⇒ **不是跨车道互相破坏** ⇒ 不需要二分、不需要派修复任务、不需要重跑全量后端。
-（这四条证据**缺任一条就应当按协议二分定位并派修复车道**；本轮四条齐备才下这个结论。）
+（这几条证据**缺任一条就应当按协议二分定位并派修复车道**；本轮齐备才下这个结论。）
 
 ### 本批自己的新测试：在全量 L2 里全绿
 
-| 测试类 | 例数 | 结果 |
-| --- | --- | --- |
-| `AdAttributionIntegrationTest`（channel，14.3.2.1） | 21 | ✅ 0 失败 |
-| `AdAttributionTenancyIntegrationTest`（channel，14.3.2.1） | 3 | ✅ 0 失败（三断言） |
-| `LogisticsAnalysisIntegrationTest`（reporting，13.5.3.1） | 15 | ✅ 0 失败 |
-| `LogisticsAnalysisTenancyIntegrationTest`（reporting，13.5.3.1） | 3 | ✅ 0 失败（三断言） |
+| 测试类                                                           | 例数 | 结果                |
+| ---------------------------------------------------------------- | ---- | ------------------- |
+| `AdAttributionIntegrationTest`（channel，14.3.2.1）              | 21   | ✅ 0 失败           |
+| `AdAttributionTenancyIntegrationTest`（channel，14.3.2.1）       | 3    | ✅ 0 失败（三断言） |
+| `LogisticsAnalysisIntegrationTest`（reporting，13.5.3.1）        | 15   | ✅ 0 失败           |
+| `LogisticsAnalysisTenancyIntegrationTest`（reporting，13.5.3.1） | 3    | ✅ 0 失败（三断言） |
 
 **静态预检**（L2 之前，几秒）：
 
@@ -287,20 +306,20 @@ grep -rn 'ADD CONSTRAINT.*CHECK' .../V404__ad_attribution.sql .../V406__logistic
 
 round-131 tick 打算在 L2 之后派发两条车道（**L3 锚点互不相同 ⇒ 互不依赖**）：
 
-| 模块 ID | 名称 | 阶段 | L3 | 服务 | 迁移版本 | 分支 |
-| --- | --- | --- | --- | --- | --- | --- |
-| `13.6.1.1` | 自定义报表 | D7 | 13.6.1 | reporting | ~~V407~~ | ~~`feat/13-6-1-1`~~ |
-| `18.1.1.2` | 接口目录 | D7 | 18.1.1 | platform | ~~V408~~ | ~~`feat/18-1-1-2`~~ |
+| 模块 ID    | 名称       | 阶段 | L3     | 服务      | 迁移版本 | 分支                |
+| ---------- | ---------- | ---- | ------ | --------- | -------- | ------------------- |
+| `13.6.1.1` | 自定义报表 | D7   | 13.6.1 | reporting | ~~V407~~ | ~~`feat/13-6-1-1`~~ |
+| `18.1.1.2` | 接口目录   | D7   | 18.1.1 | platform  | ~~V408~~ | ~~`feat/18-1-1-2`~~ |
 
 **但这两条车道从未真正创建**，round-132 逐项取证（全部为空）：
 
-| 取证项 | 命令 | 结果 |
-| --- | --- | --- |
-| 车道记录 | `grep -c '13\.6\.1\.1' .dev-agent/lanes.json` | **0**（`18.1.1.2` 同样 **0**） |
-| 分支 | `git branch --list 'feat/13-6-1-1' 'feat/18-1-1-2'` | **空** |
-| worktree | `git worktree list` | **无这两条** |
-| 迁移版本占用 | `git ls-files \| grep -E 'V40[78]__'` | **空** ⇒ **V407 / V408 未被占用** |
-| 台账 | 两行状态 | **仍为 `未开发`** |
+| 取证项       | 命令                                                | 结果                              |
+| ------------ | --------------------------------------------------- | --------------------------------- |
+| 车道记录     | `grep -c '13\.6\.1\.1' .dev-agent/lanes.json`       | **0**（`18.1.1.2` 同样 **0**）    |
+| 分支         | `git branch --list 'feat/13-6-1-1' 'feat/18-1-1-2'` | **空**                            |
+| worktree     | `git worktree list`                                 | **无这两条**                      |
+| 迁移版本占用 | `git ls-files \| grep -E 'V40[78]__'`               | **空** ⇒ **V407 / V408 未被占用** |
+| 台账         | 两行状态                                            | **仍为 `未开发`**                 |
 
 ⇒ **V407 / V408 未被预分配，未被占用**；下一轮 `plan --lanes 2` 会重新选模块并重新发版本号，
 不会与本文件产生冲突。这两个模块仍在待开发队列里（`13.6.1.1`、`18.1.1.2`）。
