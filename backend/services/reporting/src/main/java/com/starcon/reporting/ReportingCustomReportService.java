@@ -123,22 +123,25 @@ public class ReportingCustomReportService {
   // 能力声明
   // ==========================================================================
 
-  /** 能力声明：**导出**与**实际投递**都属 13.6.2.1（未交付）⇒ available=false。 */
+  /**
+   * 能力声明：**导出**与**实际投递**已由 13.6.2.1「导出与订阅」交付 ⇒ available=true。
+   *
+   * <p>🔴 13.6.1.1 交付时这两项是 {@code available=false}（上游如实标注的缺口）。
+   * 13.6.2.1 补齐了导出任务表 + 下载有效期 + 真实文件生成（CSV / XLSX / PDF）与
+   * 邮件 / 企业 IM 的**实际投递**（传输层回报成功才写 DELIVERED），
+   * ⇒ 这里必须改成真实的可用状态，**不能让界面继续显示「未交付」**。
+   */
   public ReportingCustomReportModels.CustomReportCapabilities capabilities() {
     return new ReportingCustomReportModels.CustomReportCapabilities(
         true,
         true,
         true,
-        false,
+        true,
         "13.6.2.1 导出与订阅",
-        "🔴 **大文件导出（Excel / CSV / PDF）未交付** —— 归属 13.6.2.1。"
-            + "蓝图关系句写死「大导出走异步任务并给出有效期」⇒ 那需要**异步任务表 + 文件有效期**，"
-            + "本模块既没有导出端点，也没有导出任务表。界面上「导出」写「未交付」，不提供假按钮。",
-        false,
+        "",
+        true,
         "13.6.2.1 导出与订阅",
-        "🔴 **邮件 / 企业 IM 的实际投递未交付** —— 归属 13.6.2.1。"
-            + "本模块只负责「订阅计划（cron + 通道 + 收件目标）」与「**待投递记录**（队列）」；"
-            + "队列里的记录状态是 PENDING（待投递），**不是「已发送」**。",
+        "",
         ReportingCustomReportCatalog.UPSTREAM_MODULES,
         ReportingCustomReportCatalog.NOT_DELIVERED,
         ReportingCustomReportCatalog.RULES);
