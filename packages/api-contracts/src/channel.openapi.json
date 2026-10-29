@@ -1789,6 +1789,1216 @@
         },
         "type": "object"
       },
+      "AdAttributionCapabilities": {
+        "properties": {
+          "attributionModels": {
+            "description": "归因模型取值",
+            "items": {
+              "description": "归因模型取值",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "attributionNote": {
+            "description": "🔴 归因口径原文（规则变了历史报表不可比，必须公示）",
+            "type": "string"
+          },
+          "attributionStatuses": {
+            "description": "归因状态取值",
+            "items": {
+              "description": "归因状态取值",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "boundaryNote": {
+            "description": "下游与边界说明",
+            "type": "string"
+          },
+          "dimensions": {
+            "description": "逐维度能力声明；未交付段 available=false",
+            "items": {
+              "$ref": "#/components/schemas/AdAttributionCapabilityDimension"
+            },
+            "type": "array"
+          },
+          "emptyReasons": {
+            "description": "空态原因取值",
+            "items": {
+              "description": "空态原因取值",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "incrementalityNote": {
+            "description": "🔴 增量效果估计的口径原文（它是推导值，不是平台原值）",
+            "type": "string"
+          },
+          "metricDefinitionNote": {
+            "description": "🔴 逐指标口径说明（随报表一起返回）",
+            "type": "string"
+          },
+          "metricDefinitions": {
+            "description": "🔴 逐指标口径定义（TACOS / 增量效果估计的定义写在这里）",
+            "items": {
+              "$ref": "#/components/schemas/AdAttributionMetricDefinition"
+            },
+            "type": "array"
+          },
+          "upstreamNote": {
+            "description": "上游依赖说明",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AdAttributionCapabilityDimension": {
+        "description": "逐维度能力声明；未交付段 available=false",
+        "properties": {
+          "available": {
+            "description": "本模块是否已交付",
+            "type": "boolean"
+          },
+          "description": {
+            "description": "维度说明",
+            "type": "string"
+          },
+          "dimension": {
+            "description": "维度键",
+            "type": "string"
+          },
+          "impact": {
+            "description": "不交付的影响",
+            "type": "string"
+          },
+          "ownerModule": {
+            "description": "未交付段的责任模块",
+            "type": "string"
+          },
+          "source": {
+            "description": "数据来源（表 / 上游模块）",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AdAttributionClickImport": {
+        "description": "🔴 点击触点列表",
+        "properties": {
+          "clickAt": {
+            "description": "🔴 点击时刻（timestamptz）",
+            "format": "date-time",
+            "type": "string"
+          },
+          "clickId": {
+            "description": "平台侧点击 id",
+            "type": "string"
+          },
+          "platformAttributed": {
+            "description": "🔴 平台自己标记的归因点击（PLATFORM_WINDOW 口径用它）",
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "AdAttributionExportPage": {
+        "properties": {
+          "items": {
+            "description": "当前页数据",
+            "items": {
+              "$ref": "#/components/schemas/AdAttributionExportRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "description": "页码，从 0 起",
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "description": "每页条数",
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "description": "总条数",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AdAttributionExportRow": {
+        "description": "当前页数据",
+        "properties": {
+          "attributionModel": {
+            "description": "🔴 归因模型（快照）",
+            "type": "string"
+          },
+          "attributionNote": {
+            "description": "🔴 导出当时的归因口径原文",
+            "type": "string"
+          },
+          "attributionWindowDays": {
+            "description": "🔴 归因窗口（快照）",
+            "format": "int32",
+            "type": "integer"
+          },
+          "campaignId": {
+            "description": "活动筛选（null = 没筛）",
+            "format": "uuid",
+            "type": "string"
+          },
+          "createdAt": {
+            "description": "发生时刻",
+            "format": "date-time",
+            "type": "string"
+          },
+          "currency": {
+            "description": "币种筛选（null = 没筛）",
+            "type": "string"
+          },
+          "dataAsOf": {
+            "description": "🔴 这次导出对着哪个水位算出来的",
+            "format": "date-time",
+            "type": "string"
+          },
+          "dateFrom": {
+            "description": "统计起始日",
+            "format": "date",
+            "type": "string"
+          },
+          "dateTo": {
+            "description": "统计截止日",
+            "format": "date",
+            "type": "string"
+          },
+          "id": {
+            "description": "导出留痕 id",
+            "format": "uuid",
+            "type": "string"
+          },
+          "metricDefinitionNote": {
+            "description": "🔴 导出当时的逐指标口径定义",
+            "type": "string"
+          },
+          "requestedBy": {
+            "description": "发起人（已认证成员）",
+            "format": "uuid",
+            "type": "string"
+          },
+          "rowCount": {
+            "description": "导出的行数",
+            "format": "int32",
+            "type": "integer"
+          },
+          "ruleCode": {
+            "description": "🔴 规则编码（快照）",
+            "type": "string"
+          },
+          "ruleId": {
+            "description": "🔴 规则 id",
+            "format": "uuid",
+            "type": "string"
+          },
+          "ruleVersion": {
+            "description": "🔴 规则版本（快照）",
+            "format": "int64",
+            "type": "integer"
+          },
+          "shopCode": {
+            "description": "店铺筛选（null = 没筛）",
+            "type": "string"
+          },
+          "skuId": {
+            "description": "SKU 筛选（null = 没筛）",
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AdAttributionImportRequest": {
+        "properties": {
+          "dataAsOf": {
+            "description": "🔴 这批数据的数据截至时刻",
+            "format": "date-time",
+            "type": "string"
+          },
+          "orders": {
+            "description": "订单级归因候选列表",
+            "items": {
+              "$ref": "#/components/schemas/AdAttributionOrderImport"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "AdAttributionImportResult": {
+        "properties": {
+          "dataAsOf": {
+            "description": "数据截至时刻",
+            "format": "date-time",
+            "type": "string"
+          },
+          "note": {
+            "description": "🔴 导入口径说明",
+            "type": "string"
+          },
+          "orderRows": {
+            "description": "读进来的订单行数",
+            "format": "int32",
+            "type": "integer"
+          },
+          "rejected": {
+            "description": "🔴 被拒绝的行数与原因（**逐条列明**，不静默丢弃）",
+            "items": {
+              "description": "🔴 被拒绝的行数与原因（**逐条列明**，不静默丢弃）",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "writtenClickRows": {
+            "description": "写进去的点击行数",
+            "format": "int32",
+            "type": "integer"
+          },
+          "writtenOrderRows": {
+            "description": "写进去（新增或刷新）的订单行数",
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AdAttributionMetricDefinition": {
+        "description": "🔴 逐指标口径定义（表头渲染用）",
+        "properties": {
+          "available": {
+            "description": "🔴 当前是否可算（false = 这一格取不到，不是 0）",
+            "type": "boolean"
+          },
+          "formula": {
+            "description": "🔴 口径定义（写进表头的那句话）",
+            "type": "string"
+          },
+          "label": {
+            "description": "指标显示名",
+            "type": "string"
+          },
+          "metric": {
+            "description": "指标键",
+            "type": "string"
+          },
+          "ownerModule": {
+            "description": "未交付段的责任模块",
+            "type": "string"
+          },
+          "source": {
+            "description": "数据来源",
+            "type": "string"
+          },
+          "unavailableReason": {
+            "description": "🔴 取不到的原因（available=false 时说明为什么没有数值）",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AdAttributionOption": {
+        "description": "平台下拉项",
+        "properties": {
+          "label": {
+            "description": "显示名",
+            "type": "string"
+          },
+          "value": {
+            "description": "取值",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AdAttributionOptions": {
+        "properties": {
+          "attributionModels": {
+            "description": "归因模型下拉项",
+            "items": {
+              "$ref": "#/components/schemas/AdAttributionOption"
+            },
+            "type": "array"
+          },
+          "attributionNote": {
+            "description": "🔴 归因口径原文",
+            "type": "string"
+          },
+          "attributionStatuses": {
+            "description": "归因状态下拉项",
+            "items": {
+              "$ref": "#/components/schemas/AdAttributionOption"
+            },
+            "type": "array"
+          },
+          "incrementalityNote": {
+            "description": "🔴 增量效果估计的口径原文",
+            "type": "string"
+          },
+          "metricDefinitionNote": {
+            "description": "🔴 逐指标口径说明",
+            "type": "string"
+          },
+          "metricDefinitions": {
+            "description": "🔴 逐指标口径定义",
+            "items": {
+              "$ref": "#/components/schemas/AdAttributionMetricDefinition"
+            },
+            "type": "array"
+          },
+          "platforms": {
+            "description": "平台下拉项",
+            "items": {
+              "$ref": "#/components/schemas/AdAttributionOption"
+            },
+            "type": "array"
+          },
+          "rangeLimitNote": {
+            "description": "🔴 时间范围与上限说明",
+            "type": "string"
+          },
+          "shops": {
+            "description": "店铺下拉项",
+            "items": {
+              "$ref": "#/components/schemas/AdAttributionOption"
+            },
+            "type": "array"
+          },
+          "sorts": {
+            "description": "排序下拉项",
+            "items": {
+              "$ref": "#/components/schemas/AdAttributionOption"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "AdAttributionOrderImport": {
+        "description": "订单级归因候选列表",
+        "properties": {
+          "attributedOrders": {
+            "description": "广告归因订单数",
+            "type": "number"
+          },
+          "attributedSales": {
+            "description": "广告销售额",
+            "type": "number"
+          },
+          "attributedSpend": {
+            "description": "广告花费",
+            "type": "number"
+          },
+          "attributedUnits": {
+            "description": "广告归因件数",
+            "type": "number"
+          },
+          "campaignId": {
+            "description": "内部活动 id（与下面三项二选一）",
+            "format": "uuid",
+            "type": "string"
+          },
+          "clicks": {
+            "description": "🔴 点击触点列表",
+            "items": {
+              "$ref": "#/components/schemas/AdAttributionClickImport"
+            },
+            "type": "array"
+          },
+          "currency": {
+            "description": "🔴 币种（char3）",
+            "type": "string"
+          },
+          "externalCampaignId": {
+            "description": "平台侧活动 id",
+            "type": "string"
+          },
+          "externalOrderNo": {
+            "description": "平台侧订单号",
+            "type": "string"
+          },
+          "internalSkuId": {
+            "description": "🔴 内部 SKU（null = 归得到订单但归不到 SKU）",
+            "format": "uuid",
+            "type": "string"
+          },
+          "orderAt": {
+            "description": "🔴 下单时刻（timestamptz）",
+            "format": "date-time",
+            "type": "string"
+          },
+          "platformCode": {
+            "description": "平台编码",
+            "type": "string"
+          },
+          "shopCode": {
+            "description": "店铺编码",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AdAttributionRecordPage": {
+        "properties": {
+          "attributionModel": {
+            "description": "🔴 归因模型",
+            "type": "string"
+          },
+          "attributionNote": {
+            "description": "🔴 归因口径原文",
+            "type": "string"
+          },
+          "attributionWindowDays": {
+            "description": "🔴 归因窗口（天）",
+            "format": "int32",
+            "type": "integer"
+          },
+          "emptyNote": {
+            "description": "🔴 空态说明文案（几种空的解释各不相同）",
+            "type": "string"
+          },
+          "emptyReason": {
+            "description": "🔴 空态原因：NO_IMPORTED_DATA / NO_FACTS_FOR_RULE / FILTERED_EMPTY / NO_CAMPAIGN_BINDING / null",
+            "type": "string"
+          },
+          "incrementalityNote": {
+            "description": "🔴 增量效果估计的口径原文",
+            "type": "string"
+          },
+          "items": {
+            "description": "当前页数据",
+            "items": {
+              "$ref": "#/components/schemas/AdAttributionRecordRow"
+            },
+            "type": "array"
+          },
+          "metricDefinitionNote": {
+            "description": "🔴 逐指标口径说明",
+            "type": "string"
+          },
+          "page": {
+            "description": "页码，从 0 起",
+            "format": "int32",
+            "type": "integer"
+          },
+          "ruleCode": {
+            "description": "🔴 规则编码",
+            "type": "string"
+          },
+          "ruleId": {
+            "description": "🔴 用的规则 id",
+            "format": "uuid",
+            "type": "string"
+          },
+          "ruleVersion": {
+            "description": "🔴 规则版本",
+            "format": "int64",
+            "type": "integer"
+          },
+          "size": {
+            "description": "每页条数",
+            "format": "int32",
+            "type": "integer"
+          },
+          "summaries": {
+            "description": "🔴 筛选后全集的汇总（按币种拆开，不受分页影响）",
+            "items": {
+              "$ref": "#/components/schemas/AdAttributionRecordSummary"
+            },
+            "type": "array"
+          },
+          "total": {
+            "description": "符合筛选条件的行数（不受分页影响）",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AdAttributionRecordRow": {
+        "description": "当前页数据",
+        "properties": {
+          "attributed": {
+            "description": "🔴 这一行进不进 SKU 报表（= 状态成立 且 归到了 SKU）",
+            "type": "boolean"
+          },
+          "attributedAt": {
+            "description": "归因计算时刻",
+            "format": "date-time",
+            "type": "string"
+          },
+          "attributedOrders": {
+            "description": "广告归因订单数",
+            "type": "string"
+          },
+          "attributedSales": {
+            "description": "广告销售额",
+            "type": "string"
+          },
+          "attributedSpend": {
+            "description": "广告花费",
+            "type": "string"
+          },
+          "attributedUnits": {
+            "description": "广告归因件数",
+            "type": "string"
+          },
+          "attributionModel": {
+            "description": "🔴 归因模型（快照）",
+            "type": "string"
+          },
+          "attributionStatus": {
+            "description": "🔴 归因状态：ATTRIBUTED / NO_ELIGIBLE_CLICK / NO_PLATFORM_ATTRIBUTED_CLICK",
+            "type": "string"
+          },
+          "attributionStatusLabel": {
+            "description": "🔴 归因状态的中文说明",
+            "type": "string"
+          },
+          "attributionWindowDays": {
+            "description": "🔴 归因窗口（快照）",
+            "format": "int32",
+            "type": "integer"
+          },
+          "campaignId": {
+            "description": "内部活动 id",
+            "format": "uuid",
+            "type": "string"
+          },
+          "campaignName": {
+            "description": "活动名",
+            "type": "string"
+          },
+          "chosenClickAt": {
+            "description": "命中点击的时刻（null = 没命中）",
+            "format": "date-time",
+            "type": "string"
+          },
+          "chosenClickId": {
+            "description": "🔴 命中哪一次点击（空串 = 没命中）",
+            "type": "string"
+          },
+          "currency": {
+            "description": "🔴 币种",
+            "type": "string"
+          },
+          "eligibleClickCount": {
+            "description": "🔴 窗口内的合格点击数",
+            "format": "int32",
+            "type": "integer"
+          },
+          "externalOrderNo": {
+            "description": "平台侧订单号",
+            "type": "string"
+          },
+          "id": {
+            "description": "归因结果 id",
+            "format": "uuid",
+            "type": "string"
+          },
+          "internalSkuId": {
+            "description": "🔴 内部 SKU（null = 归不到 SKU）",
+            "format": "uuid",
+            "type": "string"
+          },
+          "orderAt": {
+            "description": "下单时刻",
+            "format": "date-time",
+            "type": "string"
+          },
+          "platformCode": {
+            "description": "平台编码",
+            "type": "string"
+          },
+          "ruleCode": {
+            "description": "🔴 规则编码（快照）",
+            "type": "string"
+          },
+          "ruleVersion": {
+            "description": "🔴 规则版本（快照）",
+            "format": "int64",
+            "type": "integer"
+          },
+          "shopCode": {
+            "description": "店铺编码",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AdAttributionRecordSummary": {
+        "description": "🔴 筛选后全集的汇总（按币种拆开，不受分页影响）",
+        "properties": {
+          "attributedRows": {
+            "description": "🔴 归因成立（进报表）的行数",
+            "format": "int64",
+            "type": "integer"
+          },
+          "attributedSales": {
+            "description": "🔴 归因成立（进报表）的广告销售额",
+            "type": "string"
+          },
+          "attributedSpend": {
+            "description": "🔴 归因成立（进报表）的广告花费",
+            "type": "string"
+          },
+          "attributionNote": {
+            "description": "🔴 归因口径原文",
+            "type": "string"
+          },
+          "currency": {
+            "description": "币种",
+            "type": "string"
+          },
+          "rowCount": {
+            "description": "符合筛选条件的行数",
+            "format": "int64",
+            "type": "integer"
+          },
+          "statusCounts": {
+            "description": "🔴 归因状态分布",
+            "items": {
+              "$ref": "#/components/schemas/AdAttributionStatusCount"
+            },
+            "type": "array"
+          },
+          "totalOrders": {
+            "description": "广告归因订单数合计（全部行）",
+            "type": "string"
+          },
+          "totalSales": {
+            "description": "广告销售额合计（全部行）",
+            "type": "string"
+          },
+          "totalSpend": {
+            "description": "广告花费合计（全部行）",
+            "type": "string"
+          },
+          "totalUnits": {
+            "description": "广告归因件数合计（全部行）",
+            "type": "string"
+          },
+          "unattributedOrders": {
+            "description": "🔴 归不上的广告订单数",
+            "type": "string"
+          },
+          "unattributedRows": {
+            "description": "🔴 归不上的行数",
+            "format": "int64",
+            "type": "integer"
+          },
+          "unattributedSales": {
+            "description": "🔴 归不上的广告销售额",
+            "type": "string"
+          },
+          "unattributedSpend": {
+            "description": "🔴 归不上（不摊给任何 SKU，也不摊成 0）的广告花费",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AdAttributionReportPage": {
+        "properties": {
+          "attributionModel": {
+            "description": "🔴 归因模型",
+            "type": "string"
+          },
+          "attributionNote": {
+            "description": "🔴 归因口径原文",
+            "type": "string"
+          },
+          "attributionWindowDays": {
+            "description": "🔴 归因窗口（天）",
+            "format": "int32",
+            "type": "integer"
+          },
+          "catalogAvailable": {
+            "description": "🔴 商品主数据上游（catalog）这次是否读到了",
+            "type": "boolean"
+          },
+          "catalogUnavailableReason": {
+            "description": "🔴 商品主数据上游读不到时的原因（读到了则为空串）",
+            "type": "string"
+          },
+          "dataAsOf": {
+            "description": "🔴 数据截至时刻",
+            "format": "date-time",
+            "type": "string"
+          },
+          "emptyNote": {
+            "description": "🔴 空态说明文案",
+            "type": "string"
+          },
+          "emptyReason": {
+            "description": "🔴 空态原因",
+            "type": "string"
+          },
+          "incrementalityNote": {
+            "description": "🔴 增量效果估计的口径原文",
+            "type": "string"
+          },
+          "items": {
+            "description": "当前页数据",
+            "items": {
+              "$ref": "#/components/schemas/AdAttributionReportRow"
+            },
+            "type": "array"
+          },
+          "metricDefinitionNote": {
+            "description": "🔴 逐指标口径说明",
+            "type": "string"
+          },
+          "metricDefinitions": {
+            "description": "🔴 逐指标口径定义（表头渲染用）",
+            "items": {
+              "$ref": "#/components/schemas/AdAttributionMetricDefinition"
+            },
+            "type": "array"
+          },
+          "page": {
+            "description": "页码，从 0 起",
+            "format": "int32",
+            "type": "integer"
+          },
+          "profitAvailable": {
+            "description": "🔴 利润上游（13.4.1.2）这次是否读到了",
+            "type": "boolean"
+          },
+          "profitUnavailableReason": {
+            "description": "🔴 利润上游读不到时的原因（读到了则为空串）",
+            "type": "string"
+          },
+          "ruleCode": {
+            "description": "🔴 规则编码",
+            "type": "string"
+          },
+          "ruleId": {
+            "description": "🔴 用的规则 id",
+            "format": "uuid",
+            "type": "string"
+          },
+          "ruleVersion": {
+            "description": "🔴 规则版本",
+            "format": "int64",
+            "type": "integer"
+          },
+          "size": {
+            "description": "每页条数",
+            "format": "int32",
+            "type": "integer"
+          },
+          "summaries": {
+            "description": "🔴 筛选后全集的汇总（按币种拆开，不受分页影响）",
+            "items": {
+              "$ref": "#/components/schemas/AdAttributionReportSummary"
+            },
+            "type": "array"
+          },
+          "total": {
+            "description": "符合筛选条件的 SKU 条数（不受分页影响）",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AdAttributionReportRow": {
+        "description": "当前页数据",
+        "properties": {
+          "acos": {
+            "description": "🔴 ACOS = Σ广告花费 / Σ广告销售额（分母为 0 时为 null=不可比）",
+            "type": "string"
+          },
+          "adAfterNetProfit": {
+            "description": "🔴 广告后净利 = 总净利 − 广告花费（任一项缺失时为 null）",
+            "type": "string"
+          },
+          "adOrders": {
+            "description": "🔴 归因成立并归到本 SKU 的订单数",
+            "type": "string"
+          },
+          "adProfitShare": {
+            "description": "🔴 广告占比利润 = 广告花费 / 总净利（分母为 0 或负时为 null=不可比）",
+            "type": "string"
+          },
+          "adSales": {
+            "description": "🔴 归因成立并归到本 SKU 的广告销售额",
+            "type": "string"
+          },
+          "adSalesShare": {
+            "description": "🔴 广告销售占比 = 广告销售额 / 总销售额（分母为 0 时为 null=不可比）",
+            "type": "string"
+          },
+          "adSpend": {
+            "description": "🔴 归因成立并归到本 SKU 的广告花费",
+            "type": "string"
+          },
+          "adUnits": {
+            "description": "🔴 归因成立并归到本 SKU 的件数",
+            "type": "string"
+          },
+          "attributionModel": {
+            "description": "🔴 归因模型（快照）",
+            "type": "string"
+          },
+          "attributionWindowDays": {
+            "description": "🔴 归因窗口（快照）",
+            "format": "int32",
+            "type": "integer"
+          },
+          "currency": {
+            "description": "🔴 币种",
+            "type": "string"
+          },
+          "incrementalSalesEstimate": {
+            "description": "🔴 增量销售额估计（**推导值，不是平台原值**；算不出来时为 null）",
+            "type": "string"
+          },
+          "incrementalShare": {
+            "description": "🔴 增量占比估计 = 增量销售额估计 / 总销售额（分母为 0 时为 null）",
+            "type": "string"
+          },
+          "netProfit": {
+            "description": "🔴 总净利（13.4.1.2 利润口径；上游读不到时为 null）",
+            "type": "string"
+          },
+          "profitAdFee": {
+            "description": "🔴 利润口径的广告费（13.4.1.2 的 AD_FEE；上游读不到时为 null）",
+            "type": "string"
+          },
+          "profitNote": {
+            "description": "🔴 利润侧不可用时的原因（可用则为空串）",
+            "type": "string"
+          },
+          "ruleCode": {
+            "description": "🔴 规则编码（快照）",
+            "type": "string"
+          },
+          "ruleVersion": {
+            "description": "🔴 规则版本（快照）",
+            "format": "int64",
+            "type": "integer"
+          },
+          "skuCode": {
+            "description": "内部 SKU 编码（catalog 读不到时为空串）",
+            "type": "string"
+          },
+          "skuId": {
+            "description": "内部 SKU id",
+            "format": "uuid",
+            "type": "string"
+          },
+          "spuCode": {
+            "description": "SPU 编码（catalog 读不到时为空串）",
+            "type": "string"
+          },
+          "tacos": {
+            "description": "🔴 TACOS = Σ广告花费 / 总销售额（分母为 0 时为 null=不可比）",
+            "type": "string"
+          },
+          "totalSales": {
+            "description": "🔴 总销售额（13.4.1.2 利润口径；上游读不到时为 null）",
+            "type": "string"
+          },
+          "totalUnits": {
+            "description": "🔴 总件数（13.4.1.2 利润口径；上游读不到时为 null）",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AdAttributionReportSummary": {
+        "description": "🔴 筛选后全集的汇总（按币种拆开，不受分页影响）",
+        "properties": {
+          "acos": {
+            "description": "🔴 ACOS = Σ广告花费 / Σ广告销售额（分母为 0 时为 null）",
+            "type": "string"
+          },
+          "adAfterNetProfit": {
+            "description": "🔴 广告后净利 = 总净利 − 广告花费（任一项缺失时为 null）",
+            "type": "string"
+          },
+          "adProfitShare": {
+            "description": "🔴 广告占比利润 = 广告花费 / 总净利（分母为 0 或负时为 null）",
+            "type": "string"
+          },
+          "adSalesShare": {
+            "description": "🔴 广告销售占比 = 广告销售额 / 总销售额（分母为 0 时为 null）",
+            "type": "string"
+          },
+          "attributedOrders": {
+            "description": "🔴 归因成立并归到 SKU 的订单数",
+            "type": "string"
+          },
+          "attributedSales": {
+            "description": "🔴 归因成立并归到 SKU 的广告销售额",
+            "type": "string"
+          },
+          "attributedSpend": {
+            "description": "🔴 归因成立并归到 SKU 的广告花费",
+            "type": "string"
+          },
+          "attributedUnits": {
+            "description": "🔴 归因成立并归到 SKU 的件数",
+            "type": "string"
+          },
+          "attributionCoverage": {
+            "description": "🔴 归因覆盖率 = 归因花费 / 活动总花费（分母为 0 时为 null）",
+            "type": "string"
+          },
+          "attributionNote": {
+            "description": "🔴 归因口径原文",
+            "type": "string"
+          },
+          "campaignSpendGap": {
+            "description": "🔴 活动总花费里没有落到订单上的部分（对账缺口；可为负）",
+            "type": "string"
+          },
+          "campaignTotalSpend": {
+            "description": "🔴 活动级总花费（14.1.1.1 `ad_campaign_daily_metric`；与订单级归因是两种粒度）",
+            "type": "string"
+          },
+          "currency": {
+            "description": "币种",
+            "type": "string"
+          },
+          "incrementalSalesEstimate": {
+            "description": "🔴 增量销售额估计（**推导值**；算不出来时为 null）",
+            "type": "string"
+          },
+          "incrementalShare": {
+            "description": "🔴 增量占比估计（分母为 0 时为 null）",
+            "type": "string"
+          },
+          "incrementalityNote": {
+            "description": "🔴 增量效果估计的口径原文",
+            "type": "string"
+          },
+          "metricDefinitionNote": {
+            "description": "🔴 逐指标口径说明",
+            "type": "string"
+          },
+          "skuCount": {
+            "description": "该币种下的 SKU 条数",
+            "format": "int64",
+            "type": "integer"
+          },
+          "tacos": {
+            "description": "🔴 TACOS = Σ广告花费 / 总销售额（分母为 0 时为 null）",
+            "type": "string"
+          },
+          "totalNetProfit": {
+            "description": "🔴 总净利（13.4.1.2；上游读不到时为 null）",
+            "type": "string"
+          },
+          "totalRevenue": {
+            "description": "🔴 总销售额（13.4.1.2；上游读不到时为 null）",
+            "type": "string"
+          },
+          "totalUnits": {
+            "description": "🔴 总件数（13.4.1.2；上游读不到时为 null）",
+            "type": "string"
+          },
+          "unattributedOrders": {
+            "description": "🔴 归不上的广告订单数",
+            "type": "string"
+          },
+          "unattributedSales": {
+            "description": "🔴 归不上的广告销售额",
+            "type": "string"
+          },
+          "unattributedSpend": {
+            "description": "🔴 归不上（不摊给任何 SKU，也不摊成 0）的广告花费",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AdAttributionRulePage": {
+        "properties": {
+          "items": {
+            "description": "当前页数据",
+            "items": {
+              "$ref": "#/components/schemas/AdAttributionRuleRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "description": "页码，从 0 起",
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "description": "每页条数",
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "description": "总条数",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AdAttributionRuleRow": {
+        "properties": {
+          "attributionModel": {
+            "description": "🔴 归因模型：LAST_CLICK / PLATFORM_WINDOW",
+            "type": "string"
+          },
+          "attributionWindowDays": {
+            "description": "🔴 归因窗口（天）；0 = 只有与下单同时刻的点击才算",
+            "format": "int32",
+            "type": "integer"
+          },
+          "createdAt": {
+            "description": "创建时刻",
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "description": "规则 id",
+            "format": "uuid",
+            "type": "string"
+          },
+          "note": {
+            "description": "备注",
+            "type": "string"
+          },
+          "ruleCode": {
+            "description": "规则编码（租户内唯一）",
+            "type": "string"
+          },
+          "status": {
+            "description": "状态：ACTIVE / PAUSED",
+            "type": "string"
+          },
+          "updatedAt": {
+            "description": "更新时刻",
+            "format": "date-time",
+            "type": "string"
+          },
+          "version": {
+            "description": "🔴 规则版本（每次改动 +1）",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AdAttributionRunRequest": {
+        "properties": {
+          "from": {
+            "description": "统计起始日（含）",
+            "format": "date",
+            "type": "string"
+          },
+          "recompute": {
+            "description": "🔴 是否重算已归因的行（false = 已归因的是事实，不改写）",
+            "type": "boolean"
+          },
+          "ruleId": {
+            "description": "规则 id（null = 当前生效规则）",
+            "format": "uuid",
+            "type": "string"
+          },
+          "to": {
+            "description": "统计截止日（含）",
+            "format": "date",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AdAttributionRunResult": {
+        "properties": {
+          "attributedFacts": {
+            "description": "🔴 归因成立（进报表）的行数",
+            "format": "int32",
+            "type": "integer"
+          },
+          "attributionModel": {
+            "description": "🔴 归因模型",
+            "type": "string"
+          },
+          "attributionWindowDays": {
+            "description": "🔴 归因窗口（天）",
+            "format": "int32",
+            "type": "integer"
+          },
+          "candidateOrders": {
+            "description": "窗口内参与计算的订单行数",
+            "format": "int32",
+            "type": "integer"
+          },
+          "note": {
+            "description": "🔴 口径说明",
+            "type": "string"
+          },
+          "ruleCode": {
+            "description": "规则编码",
+            "type": "string"
+          },
+          "ruleId": {
+            "description": "用的规则 id",
+            "format": "uuid",
+            "type": "string"
+          },
+          "ruleVersion": {
+            "description": "🔴 规则版本",
+            "format": "int64",
+            "type": "integer"
+          },
+          "statusCounts": {
+            "description": "🔴 归因不成立的原因分布（状态 → 行数）",
+            "items": {
+              "$ref": "#/components/schemas/AdAttributionStatusCount"
+            },
+            "type": "array"
+          },
+          "unattributedFacts": {
+            "description": "🔴 归因不成立的行数",
+            "format": "int32",
+            "type": "integer"
+          },
+          "writtenFacts": {
+            "description": "🔴 写入的归因结果行数",
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AdAttributionStatusCount": {
+        "description": "🔴 归因不成立的原因分布（状态 → 行数）",
+        "properties": {
+          "count": {
+            "description": "行数",
+            "format": "int64",
+            "type": "integer"
+          },
+          "label": {
+            "description": "说明",
+            "type": "string"
+          },
+          "status": {
+            "description": "归因状态",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "AdBidGuardrails": {
         "description": "🔴 本次生效的护栏上限",
         "properties": {
@@ -69267,6 +70477,37 @@
         },
         "type": "object"
       },
+      "SaveAdAttributionRuleRequest": {
+        "properties": {
+          "activate": {
+            "description": "是否立即生效（true = 成为本租户唯一生效口径）",
+            "type": "boolean"
+          },
+          "attributionModel": {
+            "description": "🔴 归因模型：LAST_CLICK / PLATFORM_WINDOW",
+            "type": "string"
+          },
+          "attributionWindowDays": {
+            "description": "🔴 归因窗口（天）",
+            "format": "int32",
+            "type": "integer"
+          },
+          "id": {
+            "description": "规则 id（null = 新建）",
+            "format": "uuid",
+            "type": "string"
+          },
+          "note": {
+            "description": "备注",
+            "type": "string"
+          },
+          "ruleCode": {
+            "description": "规则编码（租户内唯一）",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "SaveBudgetPoolRequest": {
         "properties": {
           "currency": {
@@ -82097,6 +83338,755 @@
         },
         "tags": [
           "account-health-controller"
+        ]
+      }
+    },
+    "/channel/ad-attributions/capabilities": {
+      "get": {
+        "operationId": "get_channel_ad_attributions_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdAttributionCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ad-attribution-controller"
+        ]
+      }
+    },
+    "/channel/ad-attributions/export": {
+      "get": {
+        "operationId": "get_channel_ad_attributions_export",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "ruleId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "ruleVersion",
+            "required": false,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "shopCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "campaignId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "skuId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "currency",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "required": false,
+            "schema": {
+              "default": "SPEND_DESC",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "text/csv": {
+                "schema": {
+                  "$ref": "#/components/schemas/StreamingResponseBody"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ad-attribution-controller"
+        ]
+      }
+    },
+    "/channel/ad-attributions/exports": {
+      "get": {
+        "operationId": "get_channel_ad_attributions_exports",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdAttributionExportPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ad-attribution-controller"
+        ]
+      }
+    },
+    "/channel/ad-attributions/import": {
+      "post": {
+        "operationId": "post_channel_ad_attributions_import",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdAttributionImportRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdAttributionImportResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ad-attribution-controller"
+        ]
+      }
+    },
+    "/channel/ad-attributions/options": {
+      "get": {
+        "operationId": "get_channel_ad_attributions_options",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdAttributionOptions"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ad-attribution-controller"
+        ]
+      }
+    },
+    "/channel/ad-attributions/records": {
+      "get": {
+        "operationId": "get_channel_ad_attributions_records",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "ruleId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "ruleVersion",
+            "required": false,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "shopCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "campaignId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "skuId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "platformCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "required": false,
+            "schema": {
+              "default": "ORDER_AT_DESC",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdAttributionRecordPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ad-attribution-controller"
+        ]
+      }
+    },
+    "/channel/ad-attributions/records/{id}": {
+      "get": {
+        "operationId": "get_channel_ad_attributions_records_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdAttributionRecordRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ad-attribution-controller"
+        ]
+      }
+    },
+    "/channel/ad-attributions/report": {
+      "get": {
+        "operationId": "get_channel_ad_attributions_report",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "ruleId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "ruleVersion",
+            "required": false,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "shopCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "campaignId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "skuId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "currency",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "required": false,
+            "schema": {
+              "default": "SPEND_DESC",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdAttributionReportPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ad-attribution-controller"
+        ]
+      }
+    },
+    "/channel/ad-attributions/rules": {
+      "get": {
+        "operationId": "get_channel_ad_attributions_rules",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdAttributionRulePage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ad-attribution-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_channel_ad_attributions_rules",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveAdAttributionRuleRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdAttributionRuleRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ad-attribution-controller"
+        ]
+      }
+    },
+    "/channel/ad-attributions/rules/current": {
+      "get": {
+        "operationId": "get_channel_ad_attributions_rules_current",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdAttributionRuleRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ad-attribution-controller"
+        ]
+      }
+    },
+    "/channel/ad-attributions/run": {
+      "post": {
+        "operationId": "post_channel_ad_attributions_run",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdAttributionRunRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdAttributionRunResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ad-attribution-controller"
         ]
       }
     },
