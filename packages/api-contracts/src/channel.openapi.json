@@ -12699,6 +12699,679 @@
         },
         "type": "object"
       },
+      "AdProductCapabilityDimension": {
+        "description": "逐维度能力声明；未交付段 available=false",
+        "properties": {
+          "available": {
+            "description": "本模块是否已交付",
+            "type": "boolean"
+          },
+          "description": {
+            "description": "维度说明",
+            "type": "string"
+          },
+          "dimension": {
+            "description": "维度键",
+            "type": "string"
+          },
+          "impact": {
+            "description": "不交付的影响",
+            "type": "string"
+          },
+          "ownerModule": {
+            "description": "未交付段的责任模块",
+            "type": "string"
+          },
+          "source": {
+            "description": "数据来源（表 / 上游模块）",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AdProductMetricDefinition": {
+        "description": "🔴 逐指标口径定义（表头渲染用）",
+        "properties": {
+          "available": {
+            "description": "🔴 当前是否可算（false = 这一格取不到，不是 0）",
+            "type": "boolean"
+          },
+          "formula": {
+            "description": "🔴 口径定义（写进表头的那句话）",
+            "type": "string"
+          },
+          "label": {
+            "description": "指标显示名",
+            "type": "string"
+          },
+          "metric": {
+            "description": "指标键",
+            "type": "string"
+          },
+          "ownerModule": {
+            "description": "未交付段的责任模块",
+            "type": "string"
+          },
+          "source": {
+            "description": "数据来源",
+            "type": "string"
+          },
+          "unavailableReason": {
+            "description": "🔴 取不到的原因（available=false 时说明为什么没有数值）",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AdProductReportCapabilities": {
+        "properties": {
+          "attributionNote": {
+            "description": "🔴 归因口径原文（两级等分规则；规则变了历史报表不可比）",
+            "type": "string"
+          },
+          "boundaryNote": {
+            "description": "下游与边界说明",
+            "type": "string"
+          },
+          "dataAsOfNote": {
+            "description": "🔴 「数据截至 X 时间」的口径说明",
+            "type": "string"
+          },
+          "dimensions": {
+            "description": "逐维度能力声明；未交付段 available=false",
+            "items": {
+              "$ref": "#/components/schemas/AdProductCapabilityDimension"
+            },
+            "type": "array"
+          },
+          "dimensions_": {
+            "description": "商品维度取值",
+            "items": {
+              "description": "商品维度取值",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "emptyReasons": {
+            "description": "空态原因取值",
+            "items": {
+              "description": "空态原因取值",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "metricDefinitionNote": {
+            "description": "🔴 逐指标口径说明（随报表一起返回）",
+            "type": "string"
+          },
+          "metricDefinitions": {
+            "description": "🔴 逐指标口径定义（ACOS / TACOS / 广告销售占比的定义写在这里）",
+            "items": {
+              "$ref": "#/components/schemas/AdProductMetricDefinition"
+            },
+            "type": "array"
+          },
+          "sortOptions": {
+            "description": "排序方式取值",
+            "items": {
+              "description": "排序方式取值",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "upstreamNote": {
+            "description": "上游依赖说明",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AdProductReportExportPage": {
+        "properties": {
+          "items": {
+            "description": "当前页数据",
+            "items": {
+              "$ref": "#/components/schemas/AdProductReportExportRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "description": "页码，从 0 起",
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "description": "每页条数",
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "description": "总条数",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AdProductReportExportRow": {
+        "description": "当前页数据",
+        "properties": {
+          "attributionNote": {
+            "description": "🔴 导出当时的归因口径原文",
+            "type": "string"
+          },
+          "createdAt": {
+            "description": "发生时刻",
+            "format": "date-time",
+            "type": "string"
+          },
+          "dataAsOf": {
+            "description": "🔴 这次导出对着哪个水位算出来的（成功同步的水位）",
+            "format": "date-time",
+            "type": "string"
+          },
+          "dateFrom": {
+            "description": "统计起始日",
+            "format": "date",
+            "type": "string"
+          },
+          "dateTo": {
+            "description": "统计截止日",
+            "format": "date",
+            "type": "string"
+          },
+          "dimension": {
+            "description": "商品维度",
+            "type": "string"
+          },
+          "id": {
+            "description": "导出留痕 id",
+            "format": "uuid",
+            "type": "string"
+          },
+          "internalAdType": {
+            "description": "归一后类型筛选（null = 没筛）",
+            "type": "string"
+          },
+          "metricDefinitionNote": {
+            "description": "🔴 导出当时的逐指标口径定义",
+            "type": "string"
+          },
+          "platformId": {
+            "description": "平台 id 筛选（null = 没筛）",
+            "format": "uuid",
+            "type": "string"
+          },
+          "requestedBy": {
+            "description": "发起人（已认证成员）",
+            "format": "uuid",
+            "type": "string"
+          },
+          "rowCount": {
+            "description": "导出的分组行数",
+            "format": "int32",
+            "type": "integer"
+          },
+          "shopCode": {
+            "description": "店铺筛选（null = 没筛）",
+            "type": "string"
+          },
+          "status": {
+            "description": "状态筛选（null = 没筛）",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AdProductReportOption": {
+        "description": "排序下拉项",
+        "properties": {
+          "label": {
+            "description": "显示名",
+            "type": "string"
+          },
+          "value": {
+            "description": "取值",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AdProductReportOptions": {
+        "properties": {
+          "attributionNote": {
+            "description": "🔴 归因口径原文",
+            "type": "string"
+          },
+          "dimensions": {
+            "description": "商品维度下拉项",
+            "items": {
+              "$ref": "#/components/schemas/AdProductReportOption"
+            },
+            "type": "array"
+          },
+          "internalAdTypes": {
+            "description": "归一后类型下拉项",
+            "items": {
+              "$ref": "#/components/schemas/AdProductReportOption"
+            },
+            "type": "array"
+          },
+          "metricDefinitionNote": {
+            "description": "🔴 逐指标口径说明",
+            "type": "string"
+          },
+          "metricDefinitions": {
+            "description": "🔴 逐指标口径定义",
+            "items": {
+              "$ref": "#/components/schemas/AdProductMetricDefinition"
+            },
+            "type": "array"
+          },
+          "platforms": {
+            "description": "平台下拉项",
+            "items": {
+              "$ref": "#/components/schemas/AdProductReportOption"
+            },
+            "type": "array"
+          },
+          "rangeLimitNote": {
+            "description": "🔴 时间范围与粒度的上限说明",
+            "type": "string"
+          },
+          "shops": {
+            "description": "店铺下拉项",
+            "items": {
+              "$ref": "#/components/schemas/AdProductReportOption"
+            },
+            "type": "array"
+          },
+          "sorts": {
+            "description": "排序下拉项",
+            "items": {
+              "$ref": "#/components/schemas/AdProductReportOption"
+            },
+            "type": "array"
+          },
+          "statuses": {
+            "description": "状态下拉项",
+            "items": {
+              "$ref": "#/components/schemas/AdProductReportOption"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "AdProductReportPage": {
+        "properties": {
+          "attributionNote": {
+            "description": "🔴 归因口径原文",
+            "type": "string"
+          },
+          "candidateTruncated": {
+            "description": "🔴 候选集是否被截断（SPU 维度会先取 SKU 候选集再归并）",
+            "type": "boolean"
+          },
+          "candidateTruncationNote": {
+            "description": "🔴 截断说明（未截断时为空串）",
+            "type": "string"
+          },
+          "catalogAvailable": {
+            "description": "🔴 商品主数据上游（catalog）这次是否读到了",
+            "type": "boolean"
+          },
+          "catalogUnavailableReason": {
+            "description": "🔴 商品主数据上游读不到时的原因（读到了则为空串）",
+            "type": "string"
+          },
+          "dataAsOf": {
+            "description": "🔴 数据截至时刻（成功同步的水位；从未同步成功过则为 null）",
+            "format": "date-time",
+            "type": "string"
+          },
+          "dataAsOfNote": {
+            "description": "🔴 「数据截至 X 时间」的口径说明",
+            "type": "string"
+          },
+          "dimension": {
+            "description": "商品维度：LISTING / SKU / SPU",
+            "type": "string"
+          },
+          "emptyNote": {
+            "description": "🔴 空态说明文案（几种空的解释各不相同）",
+            "type": "string"
+          },
+          "emptyReason": {
+            "description": "🔴 空态原因：NO_SYNCED_DATA / NO_METRICS_IN_RANGE / FILTERED_EMPTY / NO_PRODUCT_BINDING / null",
+            "type": "string"
+          },
+          "items": {
+            "description": "当前页数据",
+            "items": {
+              "$ref": "#/components/schemas/AdProductReportRow"
+            },
+            "type": "array"
+          },
+          "metricDefinitionNote": {
+            "description": "🔴 逐指标口径说明",
+            "type": "string"
+          },
+          "metricDefinitions": {
+            "description": "🔴 逐指标口径定义（表头渲染用）",
+            "items": {
+              "$ref": "#/components/schemas/AdProductMetricDefinition"
+            },
+            "type": "array"
+          },
+          "page": {
+            "description": "页码，从 0 起",
+            "format": "int32",
+            "type": "integer"
+          },
+          "profitAvailable": {
+            "description": "🔴 利润上游（13.4.1.2）这次是否读到了",
+            "type": "boolean"
+          },
+          "profitUnavailableReason": {
+            "description": "🔴 利润上游读不到时的原因（读到了则为空串）",
+            "type": "string"
+          },
+          "size": {
+            "description": "每页条数",
+            "format": "int32",
+            "type": "integer"
+          },
+          "summaries": {
+            "description": "🔴 筛选后全集的汇总（按币种拆开，不受分页影响）",
+            "items": {
+              "$ref": "#/components/schemas/AdProductReportSummary"
+            },
+            "type": "array"
+          },
+          "total": {
+            "description": "符合筛选条件的分组总条数（不受分页影响）",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AdProductReportRow": {
+        "description": "当前页数据",
+        "properties": {
+          "acos": {
+            "description": "🔴 ACOS = Σ花费 / Σ广告销售额（分母为 0 时为 null=不可比）",
+            "type": "string"
+          },
+          "adAfterNetProfit": {
+            "description": "🔴 广告后净利 = 总净利 − 广告花费（任一项缺失时为 null）",
+            "type": "string"
+          },
+          "adProfitShare": {
+            "description": "🔴 广告占比利润 = 广告花费 / 总净利（分母为 0 或负时为 null=不可比）",
+            "type": "string"
+          },
+          "adSalesShare": {
+            "description": "🔴 广告销售占比 = 广告销售额 / 总销售额（分母为 0 时为 null=不可比）",
+            "type": "string"
+          },
+          "attributionLabel": {
+            "description": "🔴 归因方式的中文说明",
+            "type": "string"
+          },
+          "attributionMode": {
+            "description": "🔴 归因方式：DIRECT / ALLOCATED_EVENLY / MIXED",
+            "type": "string"
+          },
+          "clicks": {
+            "description": "点击合计",
+            "type": "string"
+          },
+          "cpc": {
+            "description": "🔴 CPC = Σ花费 / Σ点击（分母为 0 时为 null=不可比）",
+            "type": "string"
+          },
+          "ctr": {
+            "description": "🔴 CTR = Σ点击 / Σ曝光（分母为 0 时为 null=不可比）",
+            "type": "string"
+          },
+          "currency": {
+            "description": "🔴 币种（本仓无汇率源，不同币种不合并）",
+            "type": "string"
+          },
+          "cvr": {
+            "description": "🔴 转化率 = Σ订单 / Σ点击（分母为 0 时为 null=不可比）",
+            "type": "string"
+          },
+          "dimension": {
+            "description": "商品维度：LISTING / SKU / SPU",
+            "type": "string"
+          },
+          "dimensionKey": {
+            "description": "分组键（LISTING = listing id；SKU = 内部 SKU id；SPU = SPU 编码）",
+            "type": "string"
+          },
+          "dimensionLabel": {
+            "description": "分组显示名",
+            "type": "string"
+          },
+          "externalItemId": {
+            "description": "平台侧商品 id（原文照抄，不折叠大小写）",
+            "type": "string"
+          },
+          "impressions": {
+            "description": "曝光合计",
+            "type": "string"
+          },
+          "listingId": {
+            "description": "listing id（LISTING 维度有值）",
+            "type": "string"
+          },
+          "listingTitle": {
+            "description": "listing 标题",
+            "type": "string"
+          },
+          "metricFrom": {
+            "description": "该分组实际统计到的最早日期",
+            "format": "date",
+            "type": "string"
+          },
+          "metricTo": {
+            "description": "该分组实际统计到的最晚日期",
+            "format": "date",
+            "type": "string"
+          },
+          "netProfit": {
+            "description": "🔴 总净利（13.4.1.2 利润口径；上游读不到时为 null）",
+            "type": "string"
+          },
+          "orders": {
+            "description": "广告带来的订单合计",
+            "type": "string"
+          },
+          "platformName": {
+            "description": "平台名",
+            "type": "string"
+          },
+          "profitNote": {
+            "description": "🔴 这一行的利润列为空时的原因（取到了就是空串）",
+            "type": "string"
+          },
+          "roas": {
+            "description": "🔴 ROAS = Σ广告销售额 / Σ广告花费（分母为 0 时为 null=不可比）",
+            "type": "string"
+          },
+          "sales": {
+            "description": "广告销售额合计",
+            "type": "string"
+          },
+          "shopName": {
+            "description": "店铺名",
+            "type": "string"
+          },
+          "skuCode": {
+            "description": "内部 SKU 编码（SKU / SPU 维度有值；catalog 读不到时为空串）",
+            "type": "string"
+          },
+          "skuId": {
+            "description": "内部 SKU id（SKU / SPU 维度有值）",
+            "type": "string"
+          },
+          "sourceListingCount": {
+            "description": "贡献到本行的投放商品数（SKU / SPU 维度有值）",
+            "format": "int32",
+            "type": "integer"
+          },
+          "spend": {
+            "description": "广告花费合计",
+            "type": "string"
+          },
+          "spuCode": {
+            "description": "SPU 编码（SPU 维度有值；catalog 读不到时为空串）",
+            "type": "string"
+          },
+          "tacos": {
+            "description": "🔴 TACOS = Σ广告花费 / 总销售额（分母为 0 时为 null=不可比）",
+            "type": "string"
+          },
+          "totalSales": {
+            "description": "🔴 总销售额（13.4.1.2 利润口径；上游读不到时为 null）",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AdProductReportSummary": {
+        "description": "🔴 筛选后全集的汇总（按币种拆开，不受分页影响）",
+        "properties": {
+          "acos": {
+            "description": "🔴 ACOS = Σ花费 / Σ广告销售额（分母为 0 时为 null=不可比）",
+            "type": "string"
+          },
+          "adAfterNetProfit": {
+            "description": "🔴 广告后净利 = 总净利 − 广告花费（任一项缺失时为 null）",
+            "type": "string"
+          },
+          "adProfitShare": {
+            "description": "🔴 广告占比利润 = 广告花费 / 总净利（分母为 0 或负时为 null=不可比）",
+            "type": "string"
+          },
+          "adSalesShare": {
+            "description": "🔴 广告销售占比 = 广告销售额 / 总销售额（分母为 0 时为 null=不可比）",
+            "type": "string"
+          },
+          "attributionNote": {
+            "description": "🔴 归因口径原文",
+            "type": "string"
+          },
+          "campaignTotalSales": {
+            "description": "🔴 范围内广告销售额总额（= 行合计 + 未归属）",
+            "type": "string"
+          },
+          "campaignTotalSpend": {
+            "description": "🔴 范围内广告花费总额（= 行合计 + 未归属）",
+            "type": "string"
+          },
+          "cpc": {
+            "description": "🔴 CPC = Σ花费 / Σ点击（分母为 0 时为 null=不可比）",
+            "type": "string"
+          },
+          "ctr": {
+            "description": "🔴 CTR = Σ点击 / Σ曝光（分母为 0 时为 null=不可比）",
+            "type": "string"
+          },
+          "currency": {
+            "description": "币种",
+            "type": "string"
+          },
+          "cvr": {
+            "description": "🔴 转化率 = Σ订单 / Σ点击（分母为 0 时为 null=不可比）",
+            "type": "string"
+          },
+          "groupCount": {
+            "description": "该币种下的分组条数",
+            "format": "int64",
+            "type": "integer"
+          },
+          "metricDefinitionNote": {
+            "description": "🔴 逐指标口径说明",
+            "type": "string"
+          },
+          "metricFrom": {
+            "description": "实际统计到的最早日期",
+            "format": "date",
+            "type": "string"
+          },
+          "metricTo": {
+            "description": "实际统计到的最晚日期",
+            "format": "date",
+            "type": "string"
+          },
+          "roas": {
+            "description": "🔴 ROAS = Σ广告销售额 / Σ广告花费（分母为 0 时为 null=不可比）",
+            "type": "string"
+          },
+          "scopedGroupCount": {
+            "description": "🔴 与利润侧同一范围的分组条数",
+            "format": "int64",
+            "type": "integer"
+          },
+          "scopedSales": {
+            "description": "🔴 与利润侧同一范围的广告销售额（广告销售占比的分子）",
+            "type": "string"
+          },
+          "scopedScopeNote": {
+            "description": "🔴 「同一范围」是什么意思（口径说明）",
+            "type": "string"
+          },
+          "scopedSpend": {
+            "description": "🔴 与利润侧同一范围的广告花费（TACOS / 广告销售占比的分子）",
+            "type": "string"
+          },
+          "tacos": {
+            "description": "🔴 TACOS = Σ广告花费 / 总销售额（分母为 0 时为 null=不可比）",
+            "type": "string"
+          },
+          "totalClicks": {
+            "description": "点击合计",
+            "type": "string"
+          },
+          "totalImpressions": {
+            "description": "曝光合计",
+            "type": "string"
+          },
+          "totalNetProfit": {
+            "description": "🔴 总净利（上游读不到时为 null）",
+            "type": "string"
+          },
+          "totalOrders": {
+            "description": "广告订单合计",
+            "type": "string"
+          },
+          "totalRevenue": {
+            "description": "🔴 总销售额（13.4.1.2 利润口径；上游读不到时为 null）",
+            "type": "string"
+          },
+          "totalSales": {
+            "description": "广告销售额合计",
+            "type": "string"
+          },
+          "totalSpend": {
+            "description": "广告花费合计",
+            "type": "string"
+          },
+          "unattributedSales": {
+            "description": "🔴 归不到任何商品的广告销售额",
+            "type": "string"
+          },
+          "unattributedSpend": {
+            "description": "🔴 归不到当前维度的广告花费（活动没登记投放商品 / 商品没映射 SKU / 候选集被截断）",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "AdPromotionAnalysisCapabilities": {
         "properties": {
           "baselineNote": {
@@ -88275,6 +88948,337 @@
         },
         "tags": [
           "ad-keyword-controller"
+        ]
+      }
+    },
+    "/channel/ad-product-reports/capabilities": {
+      "get": {
+        "operationId": "get_channel_ad_product_reports_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdProductReportCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ad-product-report-controller"
+        ]
+      }
+    },
+    "/channel/ad-product-reports/export": {
+      "get": {
+        "operationId": "get_channel_ad_product_reports_export",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dimension",
+            "required": false,
+            "schema": {
+              "default": "LISTING",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "required": false,
+            "schema": {
+              "default": "SPEND_DESC",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "platformId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "shopCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "internalAdType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "text/csv": {
+                "schema": {
+                  "$ref": "#/components/schemas/StreamingResponseBody"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ad-product-report-controller"
+        ]
+      }
+    },
+    "/channel/ad-product-reports/exports": {
+      "get": {
+        "operationId": "get_channel_ad_product_reports_exports",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdProductReportExportPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ad-product-report-controller"
+        ]
+      }
+    },
+    "/channel/ad-product-reports/options": {
+      "get": {
+        "operationId": "get_channel_ad_product_reports_options",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdProductReportOptions"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ad-product-report-controller"
+        ]
+      }
+    },
+    "/channel/ad-product-reports/rows": {
+      "get": {
+        "operationId": "get_channel_ad_product_reports_rows",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dimension",
+            "required": false,
+            "schema": {
+              "default": "LISTING",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "required": false,
+            "schema": {
+              "default": "SPEND_DESC",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "platformId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "shopCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "internalAdType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdProductReportPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ad-product-report-controller"
         ]
       }
     },
