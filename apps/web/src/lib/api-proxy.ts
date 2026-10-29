@@ -13586,6 +13586,74 @@ const services: readonly {
     pattern:
       /^profit\-alert\/(?:capabilities|alerts|rules(?:\/(?:SKU_NEGATIVE_GROSS_PROFIT|SHOP_MARGIN_DROP|FEE_RATIO_ANOMALY|AD_LOSS_EXCEEDED|LOSS_ORDER_RATIO_SPIKE))?|notifications(?:\/[0-9a-fA-F\-]{36})?)$/,
   },
+  {
+    // 13.6.1.1 自定义报表（reporting 服务，卷 13「利润与经营分析」L3 13.6.1 下的第一格）。
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 reporting/ 正则里并分支 ——
+    //   既有条目**一字未改、也不重排、不删除**。
+    //
+    // ---- 插入锚点选在**数组末尾**（收尾的 `];` 之前、紧跟 13.4.3.1 profit-alert 那条之后）----
+    //   与同批另一条车道（14.2.1.1，channel，锚在第一个真正的 `prefix: 'identity/'` 之前）
+    //   相距 11000+ 行 ⇒ 并入时 git 能干净求并。
+    //
+    // ---- 首 token「custom-report」的零命中核对结论（**实测，非目测**）----
+    //   发车前用脚本（本车道的 .tmp/ 一次性脚本，不入库）把本文件里**全部既有元素**
+    //   （prefix + 正则）逐条抽出来，按 resolve() 的**同构口径**实测
+    //   （path.startsWith(prefix) 收窄服务 → 再测 pattern.test(path.slice(prefix.length))）：
+    //     reporting/custom-report/capabilities      零命中
+    //     reporting/custom-report/metrics           零命中
+    //     reporting/custom-report/dimensions        零命中
+    //     reporting/custom-report/reports           零命中
+    //     reporting/custom-report/reports/{uuid}            零命中
+    //     reporting/custom-report/reports/{uuid}/run        零命中
+    //     reporting/custom-report/reports/{uuid}/shares     零命中
+    //     reporting/custom-report/reports/{uuid}/subscriptions 零命中
+    //     reporting/custom-report/shares/{uuid}     零命中
+    //     reporting/custom-report/subscriptions/{uuid} 零命中
+    //     reporting/custom-report/deliveries        零命中
+    //     reporting/custom-report/deliveries/tick   零命中
+    //     reporting/custom-report/shared/{token}    零命中
+    //   **零命中** —— 既有 `prefix === 'reporting/'` 的正则都是**按命名空间精确匹配**的
+    //   （首 token 分别是 overview / projection / product-performance / lifecycle-segmentation /
+    //     expense-variance / store-comparison / sales-trend / target-attainment / metric-cards /
+    //     store-overview / targets / store-site / time-pattern / profit-report / product-sales /
+    //     traffic-conversion / cost-structure / affiliate-marketing / profit-alert），
+    //   **没有一条能吃下 `custom-report`** ⇒ 本模块的路径在放行前**全部 404**。
+    //   核对脚本**先把整行注释剥掉再抽元素**（别的车道的注释块里写着 `prefix: 'identity/'`
+    //   这类散文，不剥注释会把散文当成元素）。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**，契约 reporting.openapi.json 里就这些）：
+    //   custom-report/capabilities       能力声明（真能跑什么 / 哪些未交付）
+    //   custom-report/metrics            可用的语义层指标清单（口径唯一）
+    //   custom-report/dimensions         可用维度白名单（只有 5 个）
+    //   custom-report/reports            报表清单（GET）/ 新建（POST）
+    //   custom-report/reports/{uuid}     读 / 改 / 删一份报表配置
+    //   custom-report/reports/{uuid}/run 跑报表（POST，返回结果集）
+    //   custom-report/reports/{uuid}/shares     分享链接（GET 清单 / POST 生成）
+    //   custom-report/reports/{uuid}/subscriptions 订阅计划（GET 清单 / POST 新增）
+    //   custom-report/shares/{uuid}      撤销一条分享链接（DELETE）
+    //   custom-report/subscriptions/{uuid} 切换订阅启停（PUT）/ 删除（DELETE）
+    //   custom-report/deliveries         待投递记录台账（GET）
+    //   custom-report/deliveries/tick    跑一轮：到期的订阅落成待投递记录（POST）
+    //   custom-report/shared/{token}     通过分享链接读报表（GET）
+    //
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   custom-report             —— 裸路径：后端**没有**「一条不存在的汇总列表接口」。
+    //   custom-report/{uuid}       —— 顶层没有 id 段（报表按查询参数 / 子路径定位）。
+    //   custom-report/unknown-sub  —— 多一层仍然 404。
+    //   custom-report/export       —— 🔴 导出属 13.6.2.1（**未交付**），本模块没有导出端点。
+    //   custom-report/deliveries/{uuid} —— 投递记录没有单条详情端点（只有台账列表）。
+    //   custom-report/subscriptions/{uuid}/deliveries —— 没有这个端点。
+    //
+    // ⚠️ **顶层组不写成可选** ⇒ 裸路径（只有命名空间、没有子路径）刻意不放行。
+    //
+    // ⚠️ **字面量子路径排在 {uuid} 段之前判别** —— alternation 是首个命中即返回，
+    //   顺序反了会被通配支吃掉半截。
+    prefix: 'reporting/',
+    env: 'REPORTING_URL',
+    fallback: 'http://127.0.0.1:8088',
+    pattern:
+      /^custom\-report\/(?:capabilities|metrics|dimensions|deliveries(?:\/tick)?|shared\/[0-9a-f]{32}|shares\/[0-9a-fA-F\-]{36}|subscriptions\/[0-9a-fA-F\-]{36}|reports(?:\/[0-9a-fA-F\-]{36}(?:\/(?:run|shares|subscriptions))?)?)$/,
+  },
 ];
 
 function resolve(path: string) {
