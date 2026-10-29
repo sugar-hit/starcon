@@ -4641,6 +4641,1159 @@
         },
         "type": "object"
       },
+      "ProcurementAnalysisCapabilities": {
+        "properties": {
+          "availableMetrics": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "caliberNote": {
+            "type": "string"
+          },
+          "concentrationNote": {
+            "type": "string"
+          },
+          "currencyNote": {
+            "type": "string"
+          },
+          "cycleNote": {
+            "type": "string"
+          },
+          "dataDependencyNote": {
+            "type": "string"
+          },
+          "sections": {
+            "items": {
+              "$ref": "#/components/schemas/ProcurementAnalysisCapabilitySection"
+            },
+            "type": "array"
+          },
+          "upstreamNote": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ProcurementAnalysisCapabilitySection": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "caliber": {
+            "type": "string"
+          },
+          "evidence": {
+            "nullable": true,
+            "type": "string"
+          },
+          "impact": {
+            "nullable": true,
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "nullable": true,
+            "type": "string"
+          },
+          "reason": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ProcurementAnalysisRefreshResult": {
+        "properties": {
+          "note": {
+            "type": "string"
+          },
+          "summaries": {
+            "items": {
+              "$ref": "#/components/schemas/ProcurementAnalysisRefreshSummary"
+            },
+            "type": "array"
+          },
+          "totalWritten": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "truncated": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "ProcurementAnalysisRefreshSummary": {
+        "properties": {
+          "factCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "label": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "written": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ProcurementAnalysisRule": {
+        "properties": {
+          "concentrationTopN": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "concentrationTopSharePct": {
+            "nullable": true,
+            "type": "number"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "minHistoryDays": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "onTimeTargetPct": {
+            "nullable": true,
+            "type": "number"
+          },
+          "purchaseCycleTargetDays": {
+            "nullable": true,
+            "type": "number"
+          },
+          "ruleType": {
+            "type": "string"
+          },
+          "singleSupplierSharePct": {
+            "nullable": true,
+            "type": "number"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ProcurementAnalysisRuleInput": {
+        "properties": {
+          "concentrationTopN": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "concentrationTopSharePct": {
+            "nullable": true,
+            "type": "number"
+          },
+          "enabled": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "minHistoryDays": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "onTimeTargetPct": {
+            "nullable": true,
+            "type": "number"
+          },
+          "purchaseCycleTargetDays": {
+            "nullable": true,
+            "type": "number"
+          },
+          "singleSupplierSharePct": {
+            "nullable": true,
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "ProcurementConcentrationBucket": {
+        "properties": {
+          "currency": {
+            "type": "string"
+          },
+          "currencyRiskLevel": {
+            "nullable": true,
+            "type": "string"
+          },
+          "currencyRiskNote": {
+            "nullable": true,
+            "type": "string"
+          },
+          "factCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "hhi": {
+            "type": "number"
+          },
+          "hhiScale": {
+            "type": "string"
+          },
+          "supplierCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "suppliers": {
+            "items": {
+              "$ref": "#/components/schemas/ProcurementConcentrationSupplier"
+            },
+            "type": "array"
+          },
+          "top1Share": {
+            "type": "number"
+          },
+          "topNShare": {
+            "type": "number"
+          },
+          "totalAmount": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "ProcurementConcentrationResponse": {
+        "properties": {
+          "buckets": {
+            "items": {
+              "$ref": "#/components/schemas/ProcurementConcentrationBucket"
+            },
+            "type": "array"
+          },
+          "caliberNote": {
+            "type": "string"
+          },
+          "dataUpdatedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "dataUpdatedNote": {
+            "type": "string"
+          },
+          "from": {
+            "format": "date",
+            "type": "string"
+          },
+          "riskLevel": {
+            "type": "string"
+          },
+          "riskNote": {
+            "type": "string"
+          },
+          "singleSupplierShareThreshold": {
+            "type": "number"
+          },
+          "to": {
+            "format": "date",
+            "type": "string"
+          },
+          "topN": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "topShareThreshold": {
+            "type": "number"
+          },
+          "topSupplierName": {
+            "nullable": true,
+            "type": "string"
+          },
+          "topSupplierShare": {
+            "nullable": true,
+            "type": "number"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "ProcurementConcentrationSupplier": {
+        "properties": {
+          "amount": {
+            "type": "number"
+          },
+          "averageCycleDays": {
+            "nullable": true,
+            "type": "number"
+          },
+          "cumulativeShare": {
+            "type": "number"
+          },
+          "factCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "onTimeRate": {
+            "nullable": true,
+            "type": "number"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "ratingGrade": {
+            "nullable": true,
+            "type": "string"
+          },
+          "ratingScore": {
+            "nullable": true,
+            "type": "number"
+          },
+          "share": {
+            "type": "number"
+          },
+          "supplierCode": {
+            "type": "string"
+          },
+          "supplierId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "supplierName": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ProcurementCostToSalesResponse": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "caliberNote": {
+            "type": "string"
+          },
+          "dataUpdatedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "dataUpdatedNote": {
+            "type": "string"
+          },
+          "from": {
+            "format": "date",
+            "type": "string"
+          },
+          "impact": {
+            "nullable": true,
+            "type": "string"
+          },
+          "ownerModule": {
+            "nullable": true,
+            "type": "string"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/ProcurementCostToSalesRow"
+            },
+            "type": "array"
+          },
+          "to": {
+            "format": "date",
+            "type": "string"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "ProcurementCostToSalesRow": {
+        "properties": {
+          "currency": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "purchaseAmount": {
+            "type": "number"
+          },
+          "purchaseFactCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "ratio": {
+            "nullable": true,
+            "type": "number"
+          },
+          "salesAmount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "salesFactCount": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ProcurementCycleResponse": {
+        "properties": {
+          "averageCycleDays": {
+            "nullable": true,
+            "type": "number"
+          },
+          "caliberNote": {
+            "type": "string"
+          },
+          "dataUpdatedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "dataUpdatedNote": {
+            "type": "string"
+          },
+          "from": {
+            "format": "date",
+            "type": "string"
+          },
+          "medianCycleDays": {
+            "nullable": true,
+            "type": "number"
+          },
+          "meetsTarget": {
+            "type": "boolean"
+          },
+          "p90CycleDays": {
+            "nullable": true,
+            "type": "number"
+          },
+          "sampleCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "suppliers": {
+            "items": {
+              "$ref": "#/components/schemas/ProcurementCycleSupplierRow"
+            },
+            "type": "array"
+          },
+          "targetDays": {
+            "nullable": true,
+            "type": "number"
+          },
+          "to": {
+            "format": "date",
+            "type": "string"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "ProcurementCycleSupplierRow": {
+        "properties": {
+          "averageCycleDays": {
+            "nullable": true,
+            "type": "number"
+          },
+          "latestCycleDays": {
+            "nullable": true,
+            "type": "number"
+          },
+          "latestReceivedDate": {
+            "format": "date",
+            "nullable": true,
+            "type": "string"
+          },
+          "medianCycleDays": {
+            "nullable": true,
+            "type": "number"
+          },
+          "p90CycleDays": {
+            "nullable": true,
+            "type": "number"
+          },
+          "sampleCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "supplierCode": {
+            "type": "string"
+          },
+          "supplierId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "supplierName": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ProcurementDrilldownResponse": {
+        "properties": {
+          "caliberNote": {
+            "type": "string"
+          },
+          "dataUpdatedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "dataUpdatedNote": {
+            "type": "string"
+          },
+          "from": {
+            "format": "date",
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/ProcurementDrilldownRow"
+            },
+            "type": "array"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "to": {
+            "format": "date",
+            "type": "string"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "ProcurementDrilldownRow": {
+        "properties": {
+          "amount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "categoryCode": {
+            "type": "string"
+          },
+          "currency": {
+            "nullable": true,
+            "type": "string"
+          },
+          "factId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "occurredAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "occurredOn": {
+            "format": "date",
+            "type": "string"
+          },
+          "onTimeStatus": {
+            "type": "string"
+          },
+          "promisedArrivalDate": {
+            "format": "date",
+            "nullable": true,
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "shopCode": {
+            "type": "string"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "sourceDocNo": {
+            "type": "string"
+          },
+          "sourceRefNo": {
+            "type": "string"
+          },
+          "supplierCode": {
+            "type": "string"
+          },
+          "supplierId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "supplierName": {
+            "type": "string"
+          },
+          "unitPrice": {
+            "nullable": true,
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "ProcurementOnTimeLateRow": {
+        "properties": {
+          "amount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "currency": {
+            "nullable": true,
+            "type": "string"
+          },
+          "factId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "lateDays": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "occurredAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "promisedArrivalDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "sourceDocNo": {
+            "type": "string"
+          },
+          "sourceRefNo": {
+            "type": "string"
+          },
+          "supplierName": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ProcurementOnTimeResponse": {
+        "properties": {
+          "caliberNote": {
+            "type": "string"
+          },
+          "dataUpdatedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "dataUpdatedNote": {
+            "type": "string"
+          },
+          "denominatorCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "from": {
+            "format": "date",
+            "type": "string"
+          },
+          "lateCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "lateRows": {
+            "items": {
+              "$ref": "#/components/schemas/ProcurementOnTimeLateRow"
+            },
+            "type": "array"
+          },
+          "meetsTarget": {
+            "type": "boolean"
+          },
+          "onTimeCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "onTimeRate": {
+            "nullable": true,
+            "type": "number"
+          },
+          "pendingCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "suppliers": {
+            "items": {
+              "$ref": "#/components/schemas/ProcurementOnTimeSupplierRow"
+            },
+            "type": "array"
+          },
+          "targetRate": {
+            "nullable": true,
+            "type": "number"
+          },
+          "to": {
+            "format": "date",
+            "type": "string"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "ProcurementOnTimeSupplierRow": {
+        "properties": {
+          "denominatorCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "lateCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "onTimeCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "onTimeRate": {
+            "nullable": true,
+            "type": "number"
+          },
+          "ratingGrade": {
+            "nullable": true,
+            "type": "string"
+          },
+          "ratingScore": {
+            "nullable": true,
+            "type": "number"
+          },
+          "supplierCode": {
+            "type": "string"
+          },
+          "supplierId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "supplierName": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ProcurementPriceVarianceResponse": {
+        "properties": {
+          "caliberNote": {
+            "type": "string"
+          },
+          "currencies": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "dataUpdatedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "dataUpdatedNote": {
+            "type": "string"
+          },
+          "dimension": {
+            "type": "string"
+          },
+          "from": {
+            "format": "date",
+            "type": "string"
+          },
+          "overallChangeRate": {
+            "nullable": true,
+            "type": "number"
+          },
+          "previousFrom": {
+            "format": "date",
+            "type": "string"
+          },
+          "previousTo": {
+            "format": "date",
+            "type": "string"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/ProcurementPriceVarianceRow"
+            },
+            "type": "array"
+          },
+          "to": {
+            "format": "date",
+            "type": "string"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "ProcurementPriceVarianceRow": {
+        "properties": {
+          "changeRate": {
+            "nullable": true,
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "currentAmount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "currentAveragePrice": {
+            "nullable": true,
+            "type": "number"
+          },
+          "currentQuantity": {
+            "nullable": true,
+            "type": "number"
+          },
+          "dimension": {
+            "type": "string"
+          },
+          "dimensionKey": {
+            "type": "string"
+          },
+          "dimensionLabel": {
+            "type": "string"
+          },
+          "factCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "previousAmount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "previousAveragePrice": {
+            "nullable": true,
+            "type": "number"
+          },
+          "previousQuantity": {
+            "nullable": true,
+            "type": "number"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ProcurementSupplierComparisonResponse": {
+        "properties": {
+          "caliberNote": {
+            "type": "string"
+          },
+          "dataUpdatedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "dataUpdatedNote": {
+            "type": "string"
+          },
+          "from": {
+            "format": "date",
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/ProcurementSupplierRow"
+            },
+            "type": "array"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "to": {
+            "format": "date",
+            "type": "string"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "ProcurementSupplierRow": {
+        "properties": {
+          "averageCycleDays": {
+            "nullable": true,
+            "type": "number"
+          },
+          "cooperationLevel": {
+            "type": "string"
+          },
+          "countryCode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "onTimeRate": {
+            "nullable": true,
+            "type": "number"
+          },
+          "partyStatus": {
+            "type": "string"
+          },
+          "purchaseAmount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "purchaseCurrency": {
+            "nullable": true,
+            "type": "string"
+          },
+          "purchaseFactCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "purchaseShare": {
+            "nullable": true,
+            "type": "number"
+          },
+          "ratingGrade": {
+            "nullable": true,
+            "type": "string"
+          },
+          "ratingPeriodEnd": {
+            "format": "date",
+            "nullable": true,
+            "type": "string"
+          },
+          "ratingPeriodStart": {
+            "format": "date",
+            "nullable": true,
+            "type": "string"
+          },
+          "ratingScore": {
+            "nullable": true,
+            "type": "number"
+          },
+          "supplierCode": {
+            "type": "string"
+          },
+          "supplierId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "supplierName": {
+            "type": "string"
+          },
+          "supplyStatus": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ProcurementTrendPoint": {
+        "properties": {
+          "amount": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "factCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "period": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "ProcurementTrendResponse": {
+        "properties": {
+          "caliberNote": {
+            "type": "string"
+          },
+          "currencies": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "dataUpdatedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "dataUpdatedNote": {
+            "type": "string"
+          },
+          "dimension": {
+            "type": "string"
+          },
+          "from": {
+            "format": "date",
+            "type": "string"
+          },
+          "granularity": {
+            "type": "string"
+          },
+          "points": {
+            "items": {
+              "$ref": "#/components/schemas/ProcurementTrendPoint"
+            },
+            "type": "array"
+          },
+          "shares": {
+            "items": {
+              "$ref": "#/components/schemas/ProcurementTrendShareRow"
+            },
+            "type": "array"
+          },
+          "to": {
+            "format": "date",
+            "type": "string"
+          },
+          "totalAmount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "totalCurrency": {
+            "nullable": true,
+            "type": "string"
+          },
+          "totals": {
+            "items": {
+              "$ref": "#/components/schemas/ProcurementTrendTotal"
+            },
+            "type": "array"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "ProcurementTrendShareRow": {
+        "properties": {
+          "amount": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "dimension": {
+            "type": "string"
+          },
+          "dimensionKey": {
+            "type": "string"
+          },
+          "dimensionLabel": {
+            "type": "string"
+          },
+          "factCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "share": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "ProcurementTrendTotal": {
+        "properties": {
+          "amount": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "factCount": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
       "ProductDrilldownResponse": {
         "properties": {
           "caliberNotes": {
@@ -12830,6 +13983,697 @@
         "summary": "趋势：逐日逐币种（没有事实的那一天没有点，不是 0）",
         "tags": [
           "13.1.1.1 经营总览"
+        ]
+      }
+    },
+    "/reporting/procurement-analysis/capabilities": {
+      "get": {
+        "description": "notAvailable 列出的是**确实拆不出来**的部分（没有到货记录 ⇒ 采购周期不可比；销售额投影没跑 ⇒ 成本占比不可比；没有评级 ⇒ 评级列是「未评级」而不是 0 分），每条都写清原因与影响 —— 「算不出来」与「数值是 0」在页面上长得一样，含义却相反。",
+        "operationId": "get_reporting_procurement_analysis_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProcurementAnalysisCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "能力声明：七件指标分别来自哪个上游、哪些确实拿不到",
+        "tags": [
+          "13.5.2.1 采购分析"
+        ]
+      }
+    },
+    "/reporting/procurement-analysis/concentration": {
+      "get": {
+        "description": "🔴 蓝图加粗句「供应商集中度是供应链风险指标，单一供应商占比过高会在断供时直接击穿业务」：本端点给的不只是中性百分比，还有**风险等级**（LOW / MEDIUM / HIGH）与**风险说明**（哪一家、占比多少、断供时哪一档采购额会中断）。逐币种分段 —— 集中度**不跨币种合并**（跨币种相加会得到一个没有意义的数）。",
+        "operationId": "get_reporting_procurement_analysis_concentration",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "currency",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProcurementConcentrationResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "供应商集中度 + **风险信号**",
+        "tags": [
+          "13.5.2.1 采购分析"
+        ]
+      }
+    },
+    "/reporting/procurement-analysis/cost-to-sales": {
+      "get": {
+        "description": "分母（销售额）取 **13.1.1.1 已投影的 SALES_AMOUNT**，本模块**不重算**（口径唯一）。该投影没跑 ⇒ 分母为 0 ⇒ 比率**不可比**（不是 0%）。**多币种绝不相加** —— 每个币种各自和自己的销售额比。",
+        "operationId": "get_reporting_procurement_analysis_cost_to_sales",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProcurementCostToSalesResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "采购成本占销售额比（**逐币种**）",
+        "tags": [
+          "13.5.2.1 采购分析"
+        ]
+      }
+    },
+    "/reporting/procurement-analysis/drilldown": {
+      "get": {
+        "description": "每一行是一次到货流水：金额、单价、数量、承诺到货日与准时判定，都能回到上游逐条核对。**没有金额的行是「—」，不在任何合计里**（不是 0 元）。",
+        "operationId": "get_reporting_procurement_analysis_drilldown",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "currency",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProcurementDrilldownResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "下钻到到货流水（真分页 + 真计数）",
+        "tags": [
+          "13.5.2.1 采购分析"
+        ]
+      }
+    },
+    "/reporting/procurement-analysis/on-time": {
+      "get": {
+        "description": "分母 = **已到货**流水数；PENDING（未到货）**不进分母**。分母为 0 ⇒ 准时率**不可比**（不是 0%）。逾期待到货清单可下钻到具体单据。",
+        "operationId": "get_reporting_procurement_analysis_on_time",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProcurementOnTimeResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "到货准时率（**判定归 trade 6.3.2.2**，本模块只搬运）",
+        "tags": [
+          "13.5.2.1 采购分析"
+        ]
+      }
+    },
+    "/reporting/procurement-analysis/price-variance": {
+      "get": {
+        "description": "均价 = 金额 ÷ 数量（**加权**均价，不是各行单价的平均）。上一期间没有数量、或均价为 0 ⇒ 环比**不可比**（不是 0%）。逐币种分列 —— 跨币种的价格不可比。",
+        "operationId": "get_reporting_procurement_analysis_price_variance",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dimension",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "currency",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProcurementPriceVarianceResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "采购价格波动（当前期间 vs **上一等长期间**）",
+        "tags": [
+          "13.5.2.1 采购分析"
+        ]
+      }
+    },
+    "/reporting/procurement-analysis/purchase-cycle": {
+      "get": {
+        "description": "🔴 这是**实际采购周期**，不是「承诺到货日 − 下单日」那个**承诺交期** —— 两者不能混。来源是 catalog 6.1.1.1 的到货记录（**全仓唯一同时有下单日与到货日的事实源**）。没有到货记录 ⇒ 周期**不可比**（不是 0 天）。",
+        "operationId": "get_reporting_procurement_analysis_purchase_cycle",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProcurementCycleResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "采购周期（到货日 − 下单日）",
+        "tags": [
+          "13.5.2.1 采购分析"
+        ]
+      }
+    },
+    "/reporting/procurement-analysis/refresh": {
+      "post": {
+        "description": "拉两路上游（trade 采购到货流水 + 供应商评级；catalog 供应商档案 + 到货记录）并落成本服务的投影（幂等：同一批上游事实重放不会翻倍）。权限是 reporting.projection.write —— **本模块没有任何「创建业务事实」的权限**。",
+        "operationId": "post_reporting_procurement_analysis_refresh",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "timezone",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProcurementAnalysisRefreshResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "刷新采购分析投影（从上游拉取 → 投影）",
+        "tags": [
+          "13.5.2.1 采购分析"
+        ]
+      }
+    },
+    "/reporting/procurement-analysis/rules": {
+      "get": {
+        "description": "集中度风险线、准时率目标与采购周期目标都落在**租户自己的规则表**里（没有配置时给默认值）；不同采购结构差一个数量级，写死的阈值对谁都不对。",
+        "operationId": "get_reporting_procurement_analysis_rules",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ProcurementAnalysisRule"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "阈值规则（可配置项）",
+        "tags": [
+          "13.5.2.1 采购分析"
+        ]
+      }
+    },
+    "/reporting/procurement-analysis/rules/{ruleType}": {
+      "put": {
+        "description": "只改写进来的那几个字段；本模块**只改自己的规则表**，不写任何上游口径（准时判定在 trade、供应商档案在 catalog、评级在 trade）。",
+        "operationId": "put_reporting_procurement_analysis_rules_ruleType",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "ruleType",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProcurementAnalysisRuleInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProcurementAnalysisRule"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "改阈值",
+        "tags": [
+          "13.5.2.1 采购分析"
+        ]
+      }
+    },
+    "/reporting/procurement-analysis/suppliers": {
+      "get": {
+        "description": "每一行给出：供应商档案（catalog 6.1.1.1，只读）、采购贡献与占比、准时率、**平均采购周期**、**供应商评级**（6.1.1.3 的最新一期）。多币种时**不跨币种相加** —— 请用 `currency` 参数筛选后再看金额与占比。",
+        "operationId": "get_reporting_procurement_analysis_suppliers",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "currency",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProcurementSupplierComparisonResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "供应商对比（真分页 + 真计数）",
+        "tags": [
+          "13.5.2.1 采购分析"
+        ]
+      }
+    },
+    "/reporting/procurement-analysis/trend": {
+      "get": {
+        "description": "金额口径 = **trade 6.5.2.1 的到货流水**（分批到货按流水累加）。**多币种绝不相加** —— 每一行带自己的币种；跨币种的「总计」只有单币种时才存在。占比的分母是**同币种**的窗口合计；分母为 0 ⇒ 占比**不可比**（不是 0%）。",
+        "operationId": "get_reporting_procurement_analysis_trend",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "granularity",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dimension",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "currency",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProcurementTrendResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "采购金额趋势与占比（**逐币种**）",
+        "tags": [
+          "13.5.2.1 采购分析"
         ]
       }
     },
