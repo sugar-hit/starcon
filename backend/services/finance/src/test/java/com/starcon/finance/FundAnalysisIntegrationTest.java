@@ -228,12 +228,19 @@ class FundAnalysisIntegrationTest {
 
     // ---- 应付单（负债端）----
     var payA = payable("AP-A", "USD", "600", TODAY.plusDays(7), TODAY.minusDays(5));
-    var payB = payable("AP-B", "USD", "200", TODAY.plusDays(20), TODAY.minusDays(6));
+    var payB = payable("AP-B", "USD", "200", TODAY.plusDays(21), TODAY.minusDays(6));
     var payC = payable("AP-C", "EUR", "250", TODAY.plusDays(12), TODAY.minusDays(5));
 
     // ---- 付款计划（计划流出；execution_available 被 CHECK 钉死为 false）----
+    // ⚠️ PLAN-A 与 PLAN-B **必须恰好隔两周**（+7 / +21）—— 集中度按
+    // `date_trunc('week', planned_paid_date)` 分桶（ISO 周，周一起算），
+    // 两周之差 ⇒ 两个计划必然落在**相隔一周**的两个桶里 ⇒ 中间那个空桶必然存在，
+    // 「空桶不许被少算一格」这条口径才测得到。
+    // ⚠️ 早先这里是 +7 / **+20**（相隔 13 天）：**当 TODAY 恰好是周一时**，
+    // A 被截断到本周一、B 落进下一个桶 ⇒ 两桶相邻 ⇒ 中间空桶根本不存在 ⇒
+    // 「桶必须有 3 个 / 中间桶必须是 0」这两条断言只在**周一**失败 —— 每周一天假的红灯。
     plan("PLAN-A", payA, "USD", "600", TODAY.plusDays(7));
-    plan("PLAN-B", payB, "USD", "200", TODAY.plusDays(20));
+    plan("PLAN-B", payB, "USD", "200", TODAY.plusDays(21));
     plan("PLAN-C", payC, "EUR", "250", TODAY.plusDays(12));
   }
 

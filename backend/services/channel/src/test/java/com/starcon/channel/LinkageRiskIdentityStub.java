@@ -52,6 +52,11 @@ final class LinkageRiskIdentityStub {
     return "http://127.0.0.1:" + server.getAddress().getPort();
   }
 
+  /** 🔴 收尾：停掉这台本地桩（端口被占住会一直占满整个 JVM 生命周期）。 */
+  void close() {
+    server.stop(0);
+  }
+
   void register(String bearer, AccessService.Access actor) {
     actors.put(bearer, actor);
   }

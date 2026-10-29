@@ -43,6 +43,18 @@ import org.testcontainers.containers.PostgreSQLContainer;
  * <p><b>本测试的核心是「同一仓内两个货主必须能并存」这一组</b>：蓝图原话「同一仓内不同货主 必须能并存，{@code stock_bucket} 的组成维度要含货主，不能用 {@code
  * tenant} 代替货主」。 夹具刻意让两批货的**其余七个维度逐列相同**（同仓库、同库位、同 SKU、同法人、同质量状态、 同无批次），只有货主不同 —— 只有在这种最难的夹具下，"两行
  * bucket" 才真的证明了 货主进了唯一键，而不是碰巧两行其它列不同。
+ *
+ * <p>🔴 <b>时间基准取数据库自己的时钟</b>（{@link #dbNow()}），而且<b>每个用例重新取一次</b>；
+ * 货权档的生效起点与判定时刻必须落在**同一个钟域**里：服务端所有货权判定
+ * （{@code resolve_stock_owner}、{@code drift}、{@code effectiveOnly} 过滤、bucket 自动赋权触发器）
+ * 用的都是 Postgres 容器时钟（{@code now()}），所以夹具写的 {@code effective_from} 也必须取 PG 的时钟。
+ * 夹具若留 {@code null} 让生产侧拿 JVM 墙钟去填，两端就分属两个钟域：
+ * 宿主机钟**领先**容器钟（本机实测：空载约 0.35~1.0ms，高负载下 0.7~5.0ms），
+ * 写档那一瞬间的宿主钟时刻可能**晚于**判定那一刻的容器钟时刻 ⇒ 这一档落进「容器钟的未来」⇒
+ * {@code effective_from <= now()} 不成立 ⇒ 解析命中不到 ⇒ 返回 NULL ⇒
+ * 漂移的 {@code having ... is not null} 把这一行整个滤掉 ⇒ 行数直接变成 0
+ * （2026-10-27 的 L2 批次闸就是这么红的：Expected size: 1 but was: 0）。
+ * 跨钟域比，等于假设两台钟准得一模一样。
  */
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -232,8 +244,29 @@ class StockOwnershipIntegrationTest {
     return tenant.equals(a) ? actorA : actorB;
   }
 
-  static OffsetDateTime now() {
-    return OffsetDateTime.now().truncatedTo(ChronoUnit.MILLIS);
+  /**
+   * 读一次**数据库自己的时钟**（Postgres 容器时钟），并归一到 UTC。
+   *
+   * <p>服务端所有货权判定都发生在 **DB 钟域**里：{@code resolve_stock_owner(... now())}、
+   * {@code drift(...)}、{@code pageRules} 的 {@code effectiveOnly} 过滤，以及 bucket 自动赋权触发器 ——
+   * 用的都是 Postgres 的 {@code now()}。 夹具要跟它比，就必须也用它的钟：拿 JVM 墙钟写
+   * {@code effective_from}，宿主机钟一旦领先容器钟（本机实测空载约 0.35~1.0ms、
+   * 高负载下 0.7~5.0ms），这一档就落进「容器钟的未来」，
+   * {@code effective_from <= now()} 不成立 ⇒ 解析返回 NULL ⇒ 漂移行数变成 0
+   * （2026-10-27 的 L2 批次闸：Expected size: 1 but was: 0）。
+   *
+   * <p>两端同域之后，比较的是「同一个钟域里较早写入的时刻 ≤ 较晚读到的时刻」，
+   * 与两台机器的钟差**完全无关** ⇒ 判定确定。
+   *
+   * <p>归一到 UTC 是为了能原样塞进 URL 查询参数：{@code +08:00} 里的 {@code +} 在查询串里会被
+   * 当成空格。 截断到毫秒沿用原 {@code now()} 的做法 —— 截断只会让这个时刻更早，
+   * 对「必须落在过去」这类比较永远安全。
+   */
+  OffsetDateTime dbNow() {
+    return sql.fetchOne("select now()")
+        .get(0, OffsetDateTime.class)
+        .withOffsetSameInstant(ZoneOffset.UTC)
+        .truncatedTo(ChronoUnit.MILLIS);
   }
 
   // ================================================================ 夹具写入
@@ -272,11 +305,26 @@ class StockOwnershipIntegrationTest {
         () -> service.saveRule(supersedeId, input, actorA.membershipId()));
   }
 
+  /**
+   * 一条货权档夹具。
+   *
+   * <p>🔴 {@code effectiveFrom} 取**数据库自己的时钟**（{@link #dbNow()}）再往前挪一分钟：
+   * 服务端的货权判定（{@code resolve_stock_owner} / {@code drift}）用的都是 PG 的 {@code now()}，
+   * 夹具若留 {@code null} 让生产侧拿 JVM 墙钟去填 {@code effective_from}，两端就分属两个钟域 ——
+   * 宿主机钟领先容器钟（本机实测高负载下 0.7~5.0ms）时，这一档落进「容器钟的未来」，
+   * {@code effective_from <= now()} 不成立，解析返回 NULL，漂移行数直接变成 0
+   * （2026-10-27 的 L2 批次闸）。
+   *
+   * <p>往前挪一分钟是让它稳稳落在容器钟的「过去」，而不是正好压在 {@code now()} 的边界上。
+   * 两端同域之后，比较的是「同一个钟域里较早写入的时刻 ≤ 较晚读到的时刻」——
+   * 这与两台机器的钟差**完全无关** ⇒ 判定确定。
+   */
   OwnershipRuleSaved rule(
       String scope, UUID ownerId, UUID warehouseId, UUID legalEntityId, UUID skuId) {
     return saveRule(
         null,
-        new OwnershipRuleInput(scope, warehouseId, legalEntityId, skuId, ownerId, null, "夹具"));
+        new OwnershipRuleInput(
+            scope, warehouseId, legalEntityId, skuId, ownerId, dbNow().minusMinutes(1), "夹具"));
   }
 
   /** 一条余额行（可选默认货主 —— 绝大多数夹具刻意**不**传，验证触发器兜底）。 */
@@ -578,7 +626,7 @@ class StockOwnershipIntegrationTest {
                 .run(
                     actorA,
                     "warehouse.inventory.read",
-                    () -> service.resolve(whOwn, le, sku, now()))
+                    () -> service.resolve(whOwn, le, sku, dbNow()))
                 .owner()
                 .id())
         .isEqualTo(defaultOwner.ownerId());
@@ -590,7 +638,7 @@ class StockOwnershipIntegrationTest {
                 .run(
                     actorA,
                     "warehouse.inventory.read",
-                    () -> service.resolve(whOwn, le, sku, now()))
+                    () -> service.resolve(whOwn, le, sku, dbNow()))
                 .owner()
                 .id())
         .isEqualTo(whOwner.ownerId());
@@ -602,7 +650,7 @@ class StockOwnershipIntegrationTest {
                 .run(
                     actorA,
                     "warehouse.inventory.read",
-                    () -> service.resolve(whOwn, le, sku, now()))
+                    () -> service.resolve(whOwn, le, sku, dbNow()))
                 .owner()
                 .id())
         .isEqualTo(leOwner.ownerId());
@@ -614,7 +662,7 @@ class StockOwnershipIntegrationTest {
                 .run(
                     actorA,
                     "warehouse.inventory.read",
-                    () -> service.resolve(whOwn, le, sku, now()))
+                    () -> service.resolve(whOwn, le, sku, dbNow()))
                 .owner()
                 .id())
         .isEqualTo(skuOwner.ownerId());
@@ -622,7 +670,7 @@ class StockOwnershipIntegrationTest {
     // 命中状态必须如实报出来，不能让界面以为"没配过"
     var resolved =
         access.run(
-            actorA, "warehouse.inventory.read", () -> service.resolve(whOwn, le, sku, now()));
+            actorA, "warehouse.inventory.read", () -> service.resolve(whOwn, le, sku, dbNow()));
     assertThat(resolved.usedFallback()).isFalse();
     assertThat(resolved.matchedScope()).isEqualTo(OwnershipScopeType.SKU);
   }
@@ -636,7 +684,7 @@ class StockOwnershipIntegrationTest {
             actorA);
     var resolved =
         access.run(
-            actorA, "warehouse.inventory.read", () -> service.resolve(whOwn, le, sku, now()));
+            actorA, "warehouse.inventory.read", () -> service.resolve(whOwn, le, sku, dbNow()));
     assertThat(resolved.usedFallback()).isTrue();
     assertThat(resolved.rule()).isNull();
     assertThat(resolved.owner().id()).isEqualTo(fallback.ownerId());
@@ -650,7 +698,7 @@ class StockOwnershipIntegrationTest {
     selfOwner("OWN-1");
     var resolved =
         access.run(
-            actorA, "warehouse.inventory.read", () -> service.resolve(whOwn, le, sku, now()));
+            actorA, "warehouse.inventory.read", () -> service.resolve(whOwn, le, sku, dbNow()));
     assertThat(resolved.owner()).isNull();
     assertThat(resolved.usedFallback()).isTrue();
     assertThat(resolved.note()).contains("写入第一条库位明细时会自动建立");
@@ -689,7 +737,7 @@ class StockOwnershipIntegrationTest {
                         null,
                         null,
                         two.ownerId(),
-                        now().minusSeconds(60),
+                        dbNow().minusSeconds(60),
                         "重叠档")))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("重叠");
@@ -704,7 +752,7 @@ class StockOwnershipIntegrationTest {
                 .run(
                     actorA,
                     "warehouse.inventory.read",
-                    () -> service.resolve(whOwn, le, sku, now()))
+                    () -> service.resolve(whOwn, le, sku, dbNow()))
                 .owner()
                 .id())
         .isEqualTo(consigned.ownerId());
@@ -713,7 +761,7 @@ class StockOwnershipIntegrationTest {
         access.run(
             actorA,
             "warehouse.inventory.update",
-            () -> service.retireRule(created.ruleId(), now().plusSeconds(60)));
+            () -> service.retireRule(created.ruleId(), dbNow().plusSeconds(60)));
     assertThat(retired.effectiveTo()).isNotNull();
 
     // 收口之后解析不到这一档 → 回落默认货主，而不是继续用这一档
@@ -721,7 +769,7 @@ class StockOwnershipIntegrationTest {
         access.run(
             actorA,
             "warehouse.inventory.read",
-            () -> service.resolve(whOwn, le, sku, now().plusSeconds(120)));
+            () -> service.resolve(whOwn, le, sku, dbNow().plusSeconds(120)));
     assertThat(resolved.rule()).isNull();
     assertThat(resolved.usedFallback()).isTrue();
   }
@@ -742,7 +790,7 @@ class StockOwnershipIntegrationTest {
                         le,
                         null,
                         two.ownerId(),
-                        now().plusSeconds(60),
+                        dbNow().plusSeconds(60),
                         "跨槽位")))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("同一个范围槽位");
@@ -854,10 +902,28 @@ class StockOwnershipIntegrationTest {
     UUID bucket = bucketOwned(balanceId, self.ownerId(), "100");
 
     // 配一档「整仓寄销」—— 配置只影响之后写入的明细，存量不自动跟改
-    rule("WAREHOUSE", consign.ownerId(), whOwn, null, null);
+    var saved = rule("WAREHOUSE", consign.ownerId(), whOwn, null, null);
 
     // 存量仍然挂在原货主上（这是有意的：追溯改存量货权等于改账）
     assertThat(ownerOf(bucket)).isEqualTo(self.ownerId());
+
+    // 锚点必须钉在 **DB 钟域的过去**：这一档若落在容器钟的未来（夹具改回 JVM 墙钟就会这样），
+    // resolve_stock_owner 命中不到它、返回 NULL，漂移的 having ... is not null 会把这一行滤掉，
+    // 行数变成 0 —— 2026-10-27 的 L2 批次闸就是这么红的（Expected size: 1 but was: 0）。
+    // 读回库里的那一列（不是夹具里的 Java 值），并钉住它比 DB 钟早一整分钟：
+    // 只有从 DB 钟域取的锚点才可能早这么多，JVM 墙钟写出来的值只会与 DB 钟差几毫秒。
+    var storedFrom =
+        access.run(
+            actorA,
+            "warehouse.inventory.read",
+            () ->
+                sql.fetchOne(
+                        "select effective_from from stock_ownership_rule where id = ?",
+                        saved.ruleId())
+                    .get("effective_from", OffsetDateTime.class));
+    assertThat(storedFrom.toInstant())
+        .as("货权档的生效起点必须取数据库自己的时钟，并落在数据库钟域的过去")
+        .isBefore(dbNow().toInstant().minusSeconds(30));
 
     var drift =
         access.run(actorA, "warehouse.inventory.read", () -> service.drift(null, null, null));
@@ -908,7 +974,7 @@ class StockOwnershipIntegrationTest {
                 service.reassign(
                     new OwnershipReassignRequest(
                         self.ownerId(), consign.ownerId(), null, null, null),
-                    now()));
+                    dbNow()));
 
     assertThat(result.movedBucketCount()).isEqualTo(1);
     assertThat(result.movedOnHand()).isEqualByComparingTo("100");
@@ -953,7 +1019,7 @@ class StockOwnershipIntegrationTest {
                 service.reassign(
                     new OwnershipReassignRequest(
                         self.ownerId(), consign.ownerId(), whFba, null, null),
-                    now()));
+                    dbNow()));
     assertThat(result.movedBucketCount()).isZero();
     assertThat(result.message()).contains("合法的空结果");
   }
@@ -975,7 +1041,7 @@ class StockOwnershipIntegrationTest {
                         service.reassign(
                             new OwnershipReassignRequest(
                                 self.ownerId(), consign.ownerId(), null, null, null),
-                            now())))
+                            dbNow())))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("停用");
   }
@@ -992,7 +1058,7 @@ class StockOwnershipIntegrationTest {
                         service.reassign(
                             new OwnershipReassignRequest(
                                 self.ownerId(), self.ownerId(), null, null, null),
-                            now())))
+                            dbNow())))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("没有任何行会被改动");
   }
@@ -1218,9 +1284,12 @@ class StockOwnershipIntegrationTest {
                     .contentType("application/json")
                     .content(
                         """
-                {"scopeType":"WAREHOUSE","warehouseId":"%s","ownerId":"%s","note":"端点夹具"}
+                {"scopeType":"WAREHOUSE","warehouseId":"%s","ownerId":"%s","effectiveFrom":"%s","note":"端点夹具"}
                 """
-                            .formatted(whOwn, self.ownerId())))
+                            // 🔴 生效起点显式给 DB 钟域的时刻：端点不传 effectiveFrom 时生产侧会用
+                            // JVM 墙钟填，而 effectiveOnly 过滤用的是 PG 的 now() ⇒ 又是跨钟域比较。
+                            // 这里传 dbNow()-1min，两端同域，判定确定。
+                            .formatted(whOwn, self.ownerId(), dbNow().minusMinutes(1))))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.scopeType").value("WAREHOUSE"))
             .andReturn()
@@ -1238,6 +1307,8 @@ class StockOwnershipIntegrationTest {
                 .param("warehouseId", whOwn.toString())
                 .param("legalEntityId", le.toString())
                 .param("skuId", sku.toString())
+                // 判定时刻也取 DB 钟域（UTC 表示，避免查询串里的 '+' 被当成空格）
+                .param("at", dbNow().toString())
                 .header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.usedFallback").value(false))

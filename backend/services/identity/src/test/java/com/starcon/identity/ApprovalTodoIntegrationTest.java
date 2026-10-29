@@ -8,6 +8,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.starcon.tenancy.TenantTransactions;
 import java.math.BigDecimal;
 import java.sql.DriverManager;
+import java.time.Duration;
+import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
@@ -34,6 +36,13 @@ import org.junit.jupiter.api.Test;
  *       两者都不是硬编码常量；</li>
  *   <li><b>分档是整集合的计数</b>——按某一维筛完之后，那一维的分档计数仍然是它自己的真实条数。</li>
  * </ol>
+ *
+ * <p>🔴 <b>时间基准取数据库自己的时钟</b>（{@link #dbNow()}），而且<b>每个用例重新取一次</b>；
+ * 停留时长的断言在<b>服务端判定所用的那个钟域</b>里比（服务端是 DB 侧
+ * {@code approval_dwell_seconds(now(), node_entered_at)}，两端都在 PG 的时钟域里，
+ * 所以夹具的起点也必须取 PG 的时钟）—— 跨钟域比，等于假设两台钟准得一模一样：
+ * 差 1 毫秒就足以把「停了 10800 秒」压成 10799 秒，让超时判定在边界上翻车
+ * （2026-10-27 的 L2 批次闸就是这么红的：实际 7199 vs 期望 ≥ 7200）。
  */
 class ApprovalTodoIntegrationTest extends IdentityIntegrationTestBase {
 
@@ -182,7 +191,15 @@ class ApprovalTodoIntegrationTest extends IdentityIntegrationTestBase {
 
     // 把「超时单」的停留起点往回拨三小时（写的是 timestamptz，用 OffsetDateTime 绑定）
     var tenant = tenantOf(approver);
-    var backdated = OffsetDateTime.now(ZoneOffset.UTC).minusHours(3).truncatedTo(ChronoUnit.MICROS);
+    // 🔴 停留起点取**数据库自己的时钟**，不是 JVM 墙钟。
+    //
+    // 分域判定：生产侧 dwell/overdue 的两端本来就在**同一个钟域**里 ——
+    //   approval_dwell_seconds(now(), i.node_entered_at)：终点是 PG 的 now()，起点是库里那一列。
+    // 夹具却拿 JVM 墙钟去写起点 ⇒ 两端分属两个钟域（宿主钟 vs 容器钟）。
+    // 两个钟差不到 1 秒就正好压在 floor() 的取整边界上：真实 10800.0s 落成 10799
+    // ⇒ overdue = 10799 - 3600 = 7199 < 7200，断言翻车（2026-10-27 的 L2 批次闸）。
+    // 两端同域后，落点只取决于「真实流逝了多久」，与两台机器的钟差无关 ⇒ 判定确定。
+    var backdated = dbNow().atOffset(ZoneOffset.UTC).minusHours(3).truncatedTo(ChronoUnit.MICROS);
     tx()
         .run(
             tenant,
@@ -202,11 +219,29 @@ class ApprovalTodoIntegrationTest extends IdentityIntegrationTestBase {
                         .get("node_entered_at", OffsetDateTime.class));
     assertThat(readBack.toInstant()).as("写回的停留起点必须与写入值一致").isEqualTo(backdated.toInstant());
 
+    // 判定时刻也在**数据库钟域**里：请求前后各读一次 DB 时钟，把服务端的判定夹在中间。
+    // 服务端用的是 PG 的 now()，所以这里也必须用 PG 的时钟读，前后夹逼才成立。
+    var before = dbNow().atOffset(ZoneOffset.UTC);
     var items = todos(approver, "").get("items");
+    var after = dbNow().atOffset(ZoneOffset.UTC);
+
     var overdue = findById(items, overdueId.toString());
     assertThat(overdue.get("timeoutSeconds").asLong()).isEqualTo(3600);
     assertThat(overdue.get("overdueSeconds").asLong()).isGreaterThanOrEqualTo(7200);
     assertThat(overdue.get("dwellSeconds").asLong()).isGreaterThanOrEqualTo(10800);
+
+    // 停留起点必须是夹具写进去的那个值（服务端读的就是这一列，不是别的时刻）
+    assertThat(Instant.parse(overdue.get("nodeEnteredAt").asText()))
+        .as("服务端读到的停留起点必须与夹具写入值逐位一致")
+        .isEqualTo(backdated.toInstant());
+    // 停留时长与服务端**同一套取整规则**、同一个钟域：请求前后的 DB 时钟把服务端的判定夹在中间
+    assertThat(overdue.get("dwellSeconds").asLong())
+        .as("停留时长必须等于「判定时刻 − 停留起点」，与服务端同一套向下取整规则")
+        .isBetween(dwellFloor(before, backdated), dwellFloor(after, backdated));
+    // 超时秒数是服务端用同一次判定的停留时长减掉节点上配的时限算出来的（不是另起一个口径）
+    assertThat(overdue.get("overdueSeconds").asLong())
+        .as("超时秒数必须等于「停留时长 − 节点上配的时限」")
+        .isEqualTo(overdue.get("dwellSeconds").asLong() - 3600);
 
     var unjudgeable = findById(items, itemIdOf(items, "判不了单 " + tag));
     assertThat(unjudgeable.get("timeoutSeconds").isNull()).as("没配时限就判不了超时").isTrue();
@@ -398,6 +433,20 @@ class ApprovalTodoIntegrationTest extends IdentityIntegrationTestBase {
   // ------------------------------------------------------------------
   // 小工具
   // ------------------------------------------------------------------
+
+  /**
+   * 「判定时刻 − 停留起点」的秒数，与服务端 {@code approval_dwell_seconds} <b>同一个算法</b>：
+   * {@code floor(extract(epoch FROM (clock - entered)))}。
+   *
+   * <p>服务端那把尺子就是 {@code floor(...)}（向下取整到秒），所以这里也必须向下取整：
+   * 用「四舍五入」或「不取整」去算期望值，就等于拿另一把尺子去量服务端量出来的东西。
+   *
+   * <p>两端都取<b>数据库自己的时钟</b>（{@link #dbNow()}）：服务端判超时用的就是 PG 的
+   * {@code now()}，夹具的起点也必须在同一个钟域里 —— 跨钟域比，等于假设两台钟准得一模一样。
+   */
+  private static long dwellFloor(OffsetDateTime clock, OffsetDateTime entered) {
+    return Math.max(0L, Duration.between(entered.toInstant(), clock.toInstant()).getSeconds());
+  }
 
   private List<String> perms(String... actions) {
     var out = new ArrayList<String>();

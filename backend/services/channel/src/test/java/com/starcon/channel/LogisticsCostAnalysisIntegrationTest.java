@@ -56,7 +56,8 @@ import org.testcontainers.containers.PostgreSQLContainer;
 @SpringBootTest
 @AutoConfigureMockMvc
 class LogisticsCostAnalysisIntegrationTest {
-  static final PostgreSQLContainer<?> pg = new PostgreSQLContainer<>("postgres:16-alpine");
+  static final PostgreSQLContainer<?> pg =
+      new PostgreSQLContainer<>("postgres:16-alpine").withUrlParam("sslmode", "disable");
   static final UUID a = UUID.randomUUID(), b = UUID.randomUUID(), user = UUID.randomUUID();
 
   /** 固定夹具时刻：2026-03-01T00:00:00Z。写时间的用例都断言**写回的值**。 */

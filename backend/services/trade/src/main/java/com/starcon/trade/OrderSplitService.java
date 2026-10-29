@@ -587,6 +587,29 @@ public class OrderSplitService {
    * allocated_amount_total / residual_amount_total 与守恒等式全部由 V151 的
    * 延迟约束触发器在提交时从明细实算并复核。服务层自己算一遍再写进去，
    * 就会出现「明细 3 个单元、头写 2 个」这种自相矛盾的凭据。
+   *
+   * <p>🔴 <b>本方法写的每一行，记账时刻（{@code created_at} / {@code updated_at}）都由
+   * DB 自己取（{@code now()}），不绑 JVM 墙钟</b>。
+   *
+   * <p>原因：V151 给 {@code order_split} / {@code order_split_unit} /
+   * {@code order_split_reservation_command} / {@code order_split_writeback_task} 都钉了
+   * {@code CHECK(updated_at>=created_at)}，而 {@code advance_order_split_status(...)}
+   * 推进状态时写的是 {@code updated_at=now()}（<b>DB 钟</b>）。若建行时刻绑的是
+   * <b>JVM 墙钟</b>，这一行就变成「两个钟域的时刻在比大小」：宿主钟只要比容器钟快 1ms，
+   * 一次<b>完全合法</b>的状态推进就被 DB 当成「updated_at 早于 created_at」挡下
+   * （2026-10-27 的 L2 批次闸就是这么红的：
+   * {@code violates check constraint "order_split_timestamps_ordered"}）。
+   *
+   * <p>约束本身是对的 —— 它防的是「记账时刻早于建行时刻」这个真实错误；
+   * 错的是喂给它的跨钟域值。所以这里改的是<b>取时刻的方式</b>，不是约束。
+   *
+   * <p>⚠️ <b>两个钟域各管一段时，只换一端反而制造新的跨钟域依赖</b>：所以
+   * {@code recordReservation} / {@code recordWriteback} 里那两处 {@code updated_at}
+   * 也一并改成 DB 的 {@code now()} —— 它们改的正是上面这些行。
+   *
+   * <p>⚠️ <b>业务时刻不走这条路</b>：{@code planned_at} / {@code ship_by_at} /
+   * {@code occurred_at} 记的是「事情发生在什么时候」，由入参给，DB 不拿它跟
+   * {@code created_at} 比（V151 刻意不给这些列加 CHECK），保持原样。
    */
   @Transactional
   public SplitSaved split(SplitInput input, UUID actorId) {
@@ -612,14 +635,14 @@ public class OrderSplitService {
             + "order_total_amount,creates_sales_order,strategy,planned_at,note,version,"
             + "created_by_membership_id,created_at,updated_at)"
             + " values(?,?,?,'PLANNED',?,?,?,?,?,?,?,?,?,?,?,?,?,false,?,?::timestamptz,?,0,?,"
-            + "?::timestamptz,?::timestamptz)",
+            + "now(),now())",
         splitId, tenant, splitNo,
         input.orderRef().trim(), nz(input.orderNo()), plan.orderSource(),
         nz(input.platformCode()), nz(input.shopCode()), nz(input.platformOrderRef()),
         nz(input.recipientName()), nz(input.recipientPhone()), nz(input.recipientEmail()),
         nz(input.countryCode()).toUpperCase(Locale.ROOT), nz(input.addressLine()),
         plan.currency(), money(plan.orderTotal()), plan.strategy().name(), plan.plannedAt(),
-        nz(input.note()), actorId, OffsetDateTime.now(), OffsetDateTime.now());
+        nz(input.note()), actorId);
 
     Map<String, UUID> unitIdsByGroupKey = new LinkedHashMap<>();
     for (PlanUnit u : plan.units()) {
@@ -629,29 +652,26 @@ public class OrderSplitService {
           "insert into order_split_unit(id,tenant_id,split_id,unit_seq,unit_status,unit_strategy,"
               + "warehouse_ref,carrier_code,ship_by_at,ship_by_hours,platform_code,"
               + "legal_entity_code,note,created_at,updated_at)"
-              + " values(?,?,?,?,'PLANNED',?,?,?,?::timestamptz,?,?,?,?,?::timestamptz,?::timestamptz)",
+              + " values(?,?,?,?,'PLANNED',?,?,?,?::timestamptz,?,?,?,?,now(),now())",
           unitId, tenant, splitId, u.unitSeq, u.strategy.name(), u.warehouseRef, u.carrierCode,
-          u.shipByAt, u.shipByHours, u.platformCode, u.legalEntityCode, "", OffsetDateTime.now(),
-          OffsetDateTime.now());
+          u.shipByAt, u.shipByHours, u.platformCode, u.legalEntityCode, "");
 
       for (PlanSlice s : u.slices) {
         sql.execute(
             "insert into order_split_unit_line(id,tenant_id,split_id,unit_id,order_line_ref,"
                 + "sku_ref,sku_code,sku_name,allocated_qty,allocated_amount,residual_amount,"
-                + "created_at) values(?,?,?,?,?,?,?,?,?,?,?,?::timestamptz)",
+                + "created_at) values(?,?,?,?,?,?,?,?,?,?,?,now())",
             UUID.randomUUID(), tenant, splitId, unitId, s.line.orderLineRef(), s.line.skuRef(),
-            s.line.skuCode(), s.line.skuName(), qty(s.qty), money(s.amount), money(s.residual),
-            OffsetDateTime.now());
+            s.line.skuCode(), s.line.skuName(), qty(s.qty), money(s.amount), money(s.residual));
 
         // 蓝图输出②：预占**指令**登记（不是预占事实 —— 7 预占在 warehouse 独立库）。
         sql.execute(
             "insert into order_split_reservation_command(id,tenant_id,split_id,unit_id,sku_ref,"
                 + "order_line_ref,reserved_qty,warehouse_ref,target_service,command_source,"
                 + "command_status,upstream_reserved,created_by_membership_id,created_at,updated_at)"
-                + " values(?,?,?,?,?,?,?,?,'WAREHOUSE','SPLIT_PLAN','REQUESTED',false,?,"
-                + "?::timestamptz,?::timestamptz)",
+                + " values(?,?,?,?,?,?,?,?,'WAREHOUSE','SPLIT_PLAN','REQUESTED',false,?,now(),now())",
             UUID.randomUUID(), tenant, splitId, unitId, s.line.skuRef(), s.line.orderLineRef(),
-            qty(s.qty), u.warehouseRef, actorId, OffsetDateTime.now(), OffsetDateTime.now());
+            qty(s.qty), u.warehouseRef, actorId);
       }
 
       // 蓝图输出③：发货回传按拆分执行 —— **一单元一条**（UNIQUE(tenant_id,unit_id)）。
@@ -661,10 +681,9 @@ public class OrderSplitService {
         sql.execute(
             "insert into order_split_writeback_task(id,tenant_id,split_id,unit_id,platform_code,"
                 + "shop_code,platform_order_ref,carrier_code,status,attempt_count,created_at,"
-                + "updated_at) values(?,?,?,?,?,?,?,?,'PENDING',0,?::timestamptz,?::timestamptz)",
+                + "updated_at) values(?,?,?,?,?,?,?,?,'PENDING',0,now(),now())",
             UUID.randomUUID(), tenant, splitId, unitId, plan.platformCode(), nz(plan.shopCode()),
-            nz(plan.platformOrderRef()), u.carrierCode, OffsetDateTime.now(),
-            OffsetDateTime.now());
+            nz(plan.platformOrderRef()), u.carrierCode);
       }
     }
 
@@ -682,11 +701,11 @@ public class OrderSplitService {
           "insert into order_split_candidate(id,tenant_id,split_id,unit_id,order_line_ref,"
               + "warehouse_ref,carrier_code,selected,reject_reason,reject_detail,available_qty,"
               + "demand_qty,collected_at,stock_source,rank_no,created_at)"
-              + " values(?,?,?,?,?,?,?,?,?,?,?,?,?::timestamptz,?,?,?::timestamptz)",
+              + " values(?,?,?,?,?,?,?,?,?,?,?,?,?::timestamptz,?,?,now())",
           UUID.randomUUID(), tenant, splitId, unitId, c.orderLineRef(), c.warehouseRef(),
           c.carrierCode(), c.selected(), c.rejectReason(), c.rejectDetail(),
           qty(c.availableQty()), qty(c.demandQty()), c.collectedAt(), nz(c.stockSource()),
-          c.rankNo(), OffsetDateTime.now());
+          c.rankNo());
     }
 
     appendEvent(
@@ -1455,9 +1474,9 @@ public class OrderSplitService {
     sql.execute(
         "update order_split_reservation_command set command_status=?,external_reservation_ref=?,"
             + "reject_reason=?,acknowledged_at=coalesce(acknowledged_at,?::timestamptz),"
-            + "updated_at=?::timestamptz where tenant_id=" + TENANT_PREDICATE + " and id=?",
+            + "updated_at=now() where tenant_id=" + TENANT_PREDICATE + " and id=?",
         input.status().name(), nz(input.externalReservationRef()), nz(input.rejectReason()),
-        input.occurredAt(), OffsetDateTime.now(), cmdId);
+        input.occurredAt(), cmdId);
     appendEvent(splitId, "RESERVATION_COMMAND_ISSUED", from, input.status().name(), actorId,
         "预占回执 " + nz(input.externalReservationRef()) + " → " + input.status().label(),
         input.occurredAt());
@@ -1563,12 +1582,15 @@ public class OrderSplitService {
             + "   else coalesce(submitted_at,?::timestamptz) end,"
             + "settled_at=case when ? in ('CONFIRMED','REJECTED','PENDING_VERIFICATION')"
             + "   then ?::timestamptz else settled_at end,"
-            // ⚠️ updated_at 是**行的记账时刻**，必须是 now()，不能拿入参的业务时刻去填：
+            // ⚠️ updated_at 是**行的记账时刻**，必须是 DB 的 now()，不能拿入参的业务时刻去填：
             // 回传结果经常是补录的，业务时刻早于建行时刻，拿它填会撞上 CHECK(updated_at>=created_at)。
-            + "updated_at=?::timestamptz where tenant_id=" + TENANT_PREDICATE + " and id=?",
+            // ⚠️ 也不能拿 **JVM 墙钟**填：建行时刻（created_at）走的是 DB 的 now()，
+            // 两端一旦分属两个钟域，这条 CHECK 就变成「宿主钟比容器钟慢多少」的比运气 ——
+            // 容器钟落后 1ms，一次完全合法的回传补录就被 DB 当成「updated_at 早于 created_at」挡下。
+            + "updated_at=now() where tenant_id=" + TENANT_PREDICATE + " and id=?",
         input.status().name(), nz(input.trackingNumber()), nz(input.carrierCode()),
         nz(input.lastError()), input.status().name(), input.occurredAt(),
-        input.status().name(), input.occurredAt(), OffsetDateTime.now(), taskId);
+        input.status().name(), input.occurredAt(), taskId);
     appendEvent(splitId, "WRITEBACK_RECORDED", from, input.status().name(), actorId,
         "物流号 " + nz(input.trackingNumber()) + " → " + input.status().label(),
         input.occurredAt());
@@ -1587,9 +1609,8 @@ public class OrderSplitService {
     sql.execute(
         "insert into order_split_event(id,tenant_id,split_id,event_type,from_status,to_status,"
             + "actor_membership_id,detail,occurred_at,created_at)"
-            + " values(?,?,?,?,?,?,?,?,?::timestamptz,?::timestamptz)",
-        UUID.randomUUID(), currentTenant(), splitId, type, nz(from), nz(to), actorId, detail,
-        at, OffsetDateTime.now());
+            + " values(?,?,?,?,?,?,?,?,?::timestamptz,now())",
+        UUID.randomUUID(), currentTenant(), splitId, type, nz(from), nz(to), actorId, detail, at);
   }
 
   private Record headOr404(UUID id) {

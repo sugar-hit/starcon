@@ -9,6 +9,8 @@ import com.sun.net.httpserver.HttpServer;
 import java.math.BigDecimal;
 import java.net.InetSocketAddress;
 import java.sql.DriverManager;
+import java.time.Duration;
+import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
@@ -26,6 +28,7 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.server.ResponseStatusException;
+import org.testcontainers.containers.Container;
 import org.testcontainers.containers.PostgreSQLContainer;
 
 /**
@@ -45,6 +48,11 @@ import org.testcontainers.containers.PostgreSQLContainer;
  *   <li><b>清单与明细同口径</b>：明细页给出的异常类型集合必须与清单行逐字一致，
  *       否则点进去看到的与列表上说的对不上。</li>
  * </ul>
+ *
+ * <p>🔴 <b>时间基准取数据库自己的时钟</b>（{@link #dbNow()}），而且<b>每个用例重新取一次</b>；
+ * 停留时长的断言在<b>服务端判定所用的那个钟域</b>里比（详见 {@link #dbNow()} 与
+ * {@link #dwellFloor}）—— 基准若固定在类加载那一刻，机器一慢就飘出容差，
+ * 而被测行为一个字都没变（2026-10-26 的 L2 批次闸就是这么红的：实际 260106 秒 vs 期望 [259080, 259320]）。
  */
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -63,8 +71,24 @@ class AnomalyOrderIntegrationTest {
                       .map(op -> "trade." + p + "." + op))
           .toList();
 
+  // ================================================================ 时钟错位开关（默认关闭）
+  //
+  // 只为「两台钟错开也必须绿」这一件事存在。正常 CI 上是 0，不产生任何等待：
+  //
+  //   dbClockSkewSeconds 把**数据库容器自己的墙上时钟**整体拨动 N 秒（正数 = 拨快）。
+  //                  PG 的 now() 取的是容器的系统时钟 ⇒ 拨动它就是真的拨动服务端
+  //                  判「这张单进不进队列」用的那个钟，不是模拟。
+  //                  date -s 需要 CAP_SYS_TIME ⇒ 只有开关打开时才把容器提权。
+  static final long DB_CLOCK_SKEW_SECONDS =
+      Long.getLong("starcon.trade.anomaly.dbClockSkewSeconds", 0L);
+
   static {
+    if (DB_CLOCK_SKEW_SECONDS != 0L) {
+      // date -s 要 CAP_SYS_TIME —— 只有开了「时钟错位」开关才提权，正常 CI 不受影响。
+      pg.withCreateContainerCmdModifier(cmd -> cmd.getHostConfig().withPrivileged(true));
+    }
     pg.start();
+    skewDbClock();
     try {
       try (var c =
               DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
@@ -125,8 +149,48 @@ class AnomalyOrderIntegrationTest {
 
   @AfterAll
   static void stop() {
+    // 先把数据库容器自己的钟拨回真实时间，再停容器 —— 免得同一 JVM 里的其它用例
+    // 接手一个被拨歪的钟。
+    restoreDbClock();
     identity.stop(0);
     pg.stop();
+  }
+
+  /**
+   * 把**数据库容器自己的墙上时钟**整体拨动 {@link #DB_CLOCK_SKEW_SECONDS} 秒（0 = 不拨）。
+   *
+   * <p>PG 的 {@code now()} 取的是容器的系统时钟，所以拨动它就是真的拨动服务端判
+   * 「这张单进不进队列」用的那个钟 —— 这不是模拟一个「相对位置」，是真的让客户端墙钟
+   * 与数据库时钟错开。
+   */
+  static void skewDbClock() {
+    if (DB_CLOCK_SKEW_SECONDS == 0L) {
+      return;
+    }
+    setContainerClock(Instant.now().getEpochSecond() + DB_CLOCK_SKEW_SECONDS);
+  }
+
+  /** 把数据库容器的墙上钟拨回真实时间（跑完还原，别影响同一个 JVM 里的其它用例）。 */
+  static void restoreDbClock() {
+    if (DB_CLOCK_SKEW_SECONDS == 0L) {
+      return;
+    }
+    setContainerClock(Instant.now().getEpochSecond());
+  }
+
+  private static void setContainerClock(long epochSeconds) {
+    try {
+      Container.ExecResult result = pg.execInContainer("date", "-u", "-s", "@" + epochSeconds);
+      if (result.getExitCode() != 0) {
+        throw new IllegalStateException(
+            "拨动数据库容器时钟失败：" + result.getStdout() + " / " + result.getStderr());
+      }
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+      throw new IllegalStateException("拨动数据库容器时钟被打断", e);
+    } catch (java.io.IOException e) {
+      throw new IllegalStateException("拨动数据库容器时钟失败", e);
+    }
   }
 
   AccessService.Access actorA;
@@ -137,18 +201,59 @@ class AnomalyOrderIntegrationTest {
 
   // ------------------------------------------------------------ 夹具
 
-  /** 基准时刻：截断到秒，避免亚秒误差混进停留时长的断言。 */
-  static final OffsetDateTime NOW =
-      OffsetDateTime.now(ZoneOffset.UTC).truncatedTo(ChronoUnit.SECONDS);
+  // ------------------------------------------------------------ 时间基准
+  //
+  // 🔴 基准**每个用例重新取一次**（@BeforeEach），不写在 static 初始化里。
+  //
+  // 根因：服务端算停留时长时取的是「查询那一刻」的 JVM 墙钟
+  // （AnomalyOrderService.dwellSeconds → OffsetDateTime.now(ZoneOffset.UTC)），
+  // 而基准若固定在**类加载那一刻**，停留时长就等于
+  //     「72 小时 +（查询时刻 − 类加载时刻）」。
+  // 机器一慢（Testcontainers 起容器 + 其它模块抢 CPU），这个差就能到十几分钟：
+  // 2026-10-26 的 L2 批次闸就是这么红的（实际 260106 秒 vs 期望 [259080, 259320]），
+  // 而本模块这一行代码一行都没改 —— 潜伏缺陷被慢机器暴露，不是回归。
 
-  static final OffsetDateTime H72 = NOW.minusHours(72);
-  static final OffsetDateTime H48 = NOW.minusHours(48);
-  static final OffsetDateTime H24 = NOW.minusHours(24);
-  static final OffsetDateTime H3 = NOW.minusHours(3);
+  /** 本用例的时间基准：取**数据库自己的时钟**，截断到秒。 */
+  OffsetDateTime base;
+
+  /** 基准往前推的各个时点（逐个用例重算）。 */
+  OffsetDateTime h72, h48, h24, h3;
+
+  /**
+   * 🔴 <b>同源 DB 时钟</b>：读一次**数据库自己的时钟**。
+   *
+   * <p>服务端判「这张单进不进异常队列」用的是 PG 的 {@code now()}（transaction_timestamp），
+   * 测试要播种「停了多久」就必须用**同一个钟**算基准：拿客户端墙钟当基准，等于假设两台钟
+   * 准得一模一样。
+   *
+   * <p>而「停留时长」这个值本身，服务端是用 <b>JVM 墙钟</b>减播种时刻算的
+   * （{@code AnomalyOrderService.dwellSeconds}），所以它那条断言要在<b>客户端自己的钟域</b>里
+   * 夹逼（见 {@link #dwellFloor}）—— 两个钟域各归各的，不混。
+   */
+  OffsetDateTime dbNow() {
+    return sql.fetchOne("select now() as t").get("t", OffsetDateTime.class);
+  }
+
+  /**
+   * 「判定时刻 − 判定基准时刻」的秒数，与服务端 {@code AnomalyOrderService.dwellSeconds}
+   * <b>同一个算法</b>（向下取整到秒）。
+   *
+   * <p>服务端算停留时长用的是 JVM 墙钟，所以夹逼也必须用 JVM 墙钟：查询前后各读一次，
+   * 判定时刻必落在两次读数之间 ⇒ 停留时长必落在两个下界之间。
+   */
+  static long dwellFloor(OffsetDateTime moment, OffsetDateTime since) {
+    return Math.max(0L, Duration.between(since, moment).getSeconds());
+  }
 
   @BeforeEach
   void seed() throws Exception {
     actorA = actors.get("Bearer tenant-a");
+    // 时间基准：每个用例重新取一次数据库时钟（见上面「时间基准」的说明）。
+    base = dbNow().truncatedTo(ChronoUnit.SECONDS);
+    h72 = base.minusHours(72);
+    h48 = base.minusHours(48);
+    h24 = base.minusHours(24);
+    h3 = base.minusHours(3);
     try (var c = DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
         var s = c.createStatement()) {
       s.execute(
@@ -339,7 +444,7 @@ class AnomalyOrderIntegrationTest {
                   orderId,
                   AddressPaymentStatus.PAID,
                   AddressPaymentStatusSource.PLATFORM_CALLBACK,
-                  NOW),
+                  base),
               user);
           return null;
         });
@@ -414,17 +519,29 @@ class AnomalyOrderIntegrationTest {
   // ==========================================================================
   @Test
   void 地址不可达的单进队列并带停留时长与凭据() {
-    UUID orderId = seedOrder("SO-ADDR", UUID.randomUUID(), new BigDecimal("2"), H72);
+    UUID orderId = seedOrder("SO-ADDR", UUID.randomUUID(), new BigDecimal("2"), h72);
     seedUndeliverableAddress(orderId);
 
+    // 服务端算停留时长用的是「查询那一刻」的 JVM 墙钟 ⇒ 夹逼必须用**同一个钟**：
+    // 查询前读一次、查询后读一次，判定时刻必落在两次读数之间。
+    var before = OffsetDateTime.now(ZoneOffset.UTC);
     var page = asA(() -> service.page(null, null, null, null, null, null, 0, 50));
+    var after = OffsetDateTime.now(ZoneOffset.UTC);
     assertThat(page.total()).isEqualTo(1);
     var row = page.items().get(0);
     assertThat(row.orderNo()).isEqualTo("SO-ADDR");
     assertThat(row.anomalyTypes()).containsExactly("ADDRESS_UNDELIVERABLE");
     assertThat(row.severity()).isEqualTo("HIGH");
-    // 停留时长锚在地址校验的判定基准时刻（= 订单提交时刻），不是「订单创建至今」的别的口径。
-    assertThat(row.dwellSeconds()).isBetween(72 * 3600L - 120L, 72 * 3600L + 120L);
+    // 停留起点必须就是地址校验的判定基准时刻（= 订单提交时刻）——
+    // 不是「订单创建至今」，也不是校验落库那一刻。
+    assertThat(row.dwellSince().toInstant())
+        .as("停留起点必须是地址校验的判定基准时刻（订单提交时刻 %s）", h72)
+        .isEqualTo(h72.toInstant());
+    // 停留时长 = 判定时刻 − 判定基准时刻（精确到秒，容差只有「查询耗时」那么大）。
+    // 锚错了（拿订单创建时刻、拿落库时刻当起点）会差出几小时，这里必红。
+    assertThat(row.dwellSeconds())
+        .as("停留时长必须等于「判定时刻 − 判定基准时刻」（基准 %s）", h72)
+        .isBetween(dwellFloor(before, h72), dwellFloor(after, h72));
     assertThat(row.recommendedActions()).contains("ESCALATE_MANUAL", "OPEN_ORDER");
 
     var detail = asA(() -> service.detail(orderId));
@@ -443,10 +560,10 @@ class AnomalyOrderIntegrationTest {
 
   @Test
   void 平台超时未回传发货只认超过阈值的回传任务() {
-    UUID stuck = seedOrder("SO-STUCK", UUID.randomUUID(), new BigDecimal("1"), H72);
-    UUID fresh = seedOrder("SO-FRESH", UUID.randomUUID(), new BigDecimal("1"), H72);
-    seedWritebackTask(stuck, "SO-STUCK", "SHOP-1", "PENDING", H72);
-    seedWritebackTask(fresh, "SO-FRESH", "SHOP-2", "PENDING", H3);
+    UUID stuck = seedOrder("SO-STUCK", UUID.randomUUID(), new BigDecimal("1"), h72);
+    UUID fresh = seedOrder("SO-FRESH", UUID.randomUUID(), new BigDecimal("1"), h72);
+    seedWritebackTask(stuck, "SO-STUCK", "SHOP-1", "PENDING", h72);
+    seedWritebackTask(fresh, "SO-FRESH", "SHOP-2", "PENDING", h3);
 
     var page = asA(() -> service.page(null, null, null, null, null, null, 0, 50));
     assertThat(page.total()).isEqualTo(1);
@@ -458,10 +575,10 @@ class AnomalyOrderIntegrationTest {
 
   @Test
   void 买家留言待确认只认超过阈值的平台单() {
-    UUID stuck = seedOrder("SO-PEND", UUID.randomUUID(), new BigDecimal("1"), H72);
-    UUID fresh = seedOrder("SO-CONF", UUID.randomUUID(), new BigDecimal("1"), H72);
-    seedPlatformOrder(stuck, "EXT-SO-PEND", "SHOP-1", "PENDING_CONFIRMATION", H72);
-    seedPlatformOrder(fresh, "EXT-SO-CONF", "SHOP-1", "CONFIRMED", H3);
+    UUID stuck = seedOrder("SO-PEND", UUID.randomUUID(), new BigDecimal("1"), h72);
+    UUID fresh = seedOrder("SO-CONF", UUID.randomUUID(), new BigDecimal("1"), h72);
+    seedPlatformOrder(stuck, "EXT-SO-PEND", "SHOP-1", "PENDING_CONFIRMATION", h72);
+    seedPlatformOrder(fresh, "EXT-SO-CONF", "SHOP-1", "CONFIRMED", h3);
 
     var page = asA(() -> service.page(null, null, null, null, null, null, 0, 50));
     assertThat(page.total()).isEqualTo(1);
@@ -472,16 +589,26 @@ class AnomalyOrderIntegrationTest {
 
   @Test
   void 风控的两个维度分别给出地址欺诈疑似与重复下单() {
-    UUID orderId = seedOrder("SO-RISK", UUID.randomUUID(), new BigDecimal("1"), H72);
+    UUID orderId = seedOrder("SO-RISK", UUID.randomUUID(), new BigDecimal("1"), h72);
     seedRiskAssessment(
-        orderId, "SO-RISK", H72, List.of("ORDER_FREQUENCY", "ADDRESS_CONCENTRATION"));
+        orderId, "SO-RISK", h72, List.of("ORDER_FREQUENCY", "ADDRESS_CONCENTRATION"));
 
+    // 同上：判定时刻用 JVM 墙钟前后夹逼。
+    var before = OffsetDateTime.now(ZoneOffset.UTC);
     var page = asA(() -> service.page(null, null, null, null, null, null, 0, 50));
+    var after = OffsetDateTime.now(ZoneOffset.UTC);
     assertThat(page.total()).isEqualTo(1);
     var row = page.items().get(0);
     assertThat(row.anomalyTypes()).containsExactlyInAnyOrder("DUPLICATE_ORDER", "ADDRESS_FRAUD_SUSPECTED");
     assertThat(row.severity()).isEqualTo("HIGH");
-    assertThat(row.dwellSeconds()).isBetween(72 * 3600L - 120L, 72 * 3600L + 120L);
+    // 停留起点 = 风控评估的判定基准时刻（evaluated_reference_at = 订单提交时刻）。
+    assertThat(row.dwellSince().toInstant())
+        .as("停留起点必须是风控评估的判定基准时刻（订单提交时刻 %s）", h72)
+        .isEqualTo(h72.toInstant());
+    // 停留时长 = 判定时刻 − 判定基准时刻。
+    assertThat(row.dwellSeconds())
+        .as("停留时长必须等于「判定时刻 − 判定基准时刻」（基准 %s）", h72)
+        .isBetween(dwellFloor(before, h72), dwellFloor(after, h72));
 
     var detail = asA(() -> service.detail(orderId));
     assertThat(detail.evidence()).hasSize(2);
@@ -495,12 +622,12 @@ class AnomalyOrderIntegrationTest {
   // ==========================================================================
   @Test
   void 分页是真的且合计不受分页影响() {
-    UUID p1 = seedOrder("SO-P1", UUID.randomUUID(), new BigDecimal("1"), H72);
-    UUID p2 = seedOrder("SO-P2", UUID.randomUUID(), new BigDecimal("1"), H48);
-    UUID p3 = seedOrder("SO-P3", UUID.randomUUID(), new BigDecimal("1"), H24);
-    seedWritebackTask(p1, "SO-P1", "SHOP-1", "PENDING", H72);
-    seedWritebackTask(p2, "SO-P2", "SHOP-1", "PENDING", H48);
-    seedWritebackTask(p3, "SO-P3", "SHOP-1", "PENDING", H24);
+    UUID p1 = seedOrder("SO-P1", UUID.randomUUID(), new BigDecimal("1"), h72);
+    UUID p2 = seedOrder("SO-P2", UUID.randomUUID(), new BigDecimal("1"), h48);
+    UUID p3 = seedOrder("SO-P3", UUID.randomUUID(), new BigDecimal("1"), h24);
+    seedWritebackTask(p1, "SO-P1", "SHOP-1", "PENDING", h72);
+    seedWritebackTask(p2, "SO-P2", "SHOP-1", "PENDING", h48);
+    seedWritebackTask(p3, "SO-P3", "SHOP-1", "PENDING", h24);
 
     // 默认排序是**卡得最久的排最前**（停留时长从长到短）⇒ 停了三天的在第一页。
     var first = asA(() -> service.page(null, null, null, null, null, null, 0, 1));
@@ -523,10 +650,10 @@ class AnomalyOrderIntegrationTest {
 
   @Test
   void 筛选按异常类型与店铺与关键字生效() {
-    UUID addrOrder = seedOrder("SO-A", UUID.randomUUID(), new BigDecimal("1"), H72);
+    UUID addrOrder = seedOrder("SO-A", UUID.randomUUID(), new BigDecimal("1"), h72);
     seedUndeliverableAddress(addrOrder);
-    UUID wbOrder = seedOrder("SO-B", UUID.randomUUID(), new BigDecimal("1"), H72);
-    seedWritebackTask(wbOrder, "SO-B", "SHOP-9", "PENDING", H72);
+    UUID wbOrder = seedOrder("SO-B", UUID.randomUUID(), new BigDecimal("1"), h72);
+    seedWritebackTask(wbOrder, "SO-B", "SHOP-9", "PENDING", h72);
 
     var byType = asA(() -> service.page("ADDRESS_UNDELIVERABLE", null, null, null, null, null, 0, 50));
     assertThat(byType.total()).isEqualTo(1);
@@ -560,8 +687,8 @@ class AnomalyOrderIntegrationTest {
 
   @Test
   void 清单与明细口径一致且明细给出费用与留痕() {
-    UUID orderId = seedOrder("SO-SAME", UUID.randomUUID(), new BigDecimal("2"), H72);
-    seedWritebackTask(orderId, "SO-SAME", "SHOP-1", "PENDING", H72);
+    UUID orderId = seedOrder("SO-SAME", UUID.randomUUID(), new BigDecimal("2"), h72);
+    seedWritebackTask(orderId, "SO-SAME", "SHOP-1", "PENDING", h72);
 
     var row = asA(() -> service.page(null, null, null, null, null, null, 0, 50)).items().get(0);
     var detail = asA(() -> service.detail(orderId));
@@ -587,8 +714,8 @@ class AnomalyOrderIntegrationTest {
 
   @Test
   void 端点真的挂在命名空间下并且要认证() throws Exception {
-    UUID orderId = seedOrder("SO-HTTP", UUID.randomUUID(), new BigDecimal("1"), H72);
-    seedWritebackTask(orderId, "SO-HTTP", "SHOP-1", "PENDING", H72);
+    UUID orderId = seedOrder("SO-HTTP", UUID.randomUUID(), new BigDecimal("1"), h72);
+    seedWritebackTask(orderId, "SO-HTTP", "SHOP-1", "PENDING", h72);
     var unauthorized =
         http.perform(
                 org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get(

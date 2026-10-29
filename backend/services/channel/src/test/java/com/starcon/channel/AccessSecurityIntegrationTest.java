@@ -49,7 +49,8 @@ import org.testcontainers.containers.PostgreSQLContainer;
 @AutoConfigureMockMvc
 class AccessSecurityIntegrationTest {
 
-  static final PostgreSQLContainer<?> pg = new PostgreSQLContainer<>("postgres:16-alpine");
+  static final PostgreSQLContainer<?> pg =
+      new PostgreSQLContainer<>("postgres:16-alpine").withUrlParam("sslmode", "disable");
   static final UUID user = UUID.randomUUID();
   static AccessSecurityIdentityStub identity;
   static final Map<String, AccessService.Access> actors = new ConcurrentHashMap<>();
@@ -216,7 +217,12 @@ class AccessSecurityIntegrationTest {
             + "','"
             + tenant
             + "','file://./.starcon-secrets/t1','file://./.starcon-secrets/t1/token','OAUTH2',"
-            + "'orders.read','" + OffsetDateTime.now(ZoneOffset.UTC) + "','ACTIVE')");
+            + "'orders.read',"
+            // ⚠️ authorized_at 用**数据库的** now()，不用 Java 墙钟：
+            //    约束 credential_window 是 CHECK(authorized_at <= now() + interval '5 minutes')，
+            //    而 PG 的 now() = transaction_timestamp()（事务开始时刻）。长事务里
+            //    「墙钟」与「事务开始」会分叉，机器负载高时必然违约（2026-10-26 r102 L2 实测假红）。
+            + "now(),'ACTIVE')");
     return id;
   }
 
@@ -807,5 +813,20 @@ class AccessSecurityIntegrationTest {
     identity.mode = AccessSecurityIdentityStub.Mode.UNAVAILABLE;
     http.perform(post("/channel/access-security/login-audit/scan").header("Authorization", bearer))
         .andExpect(status().isServiceUnavailable());
+  }
+
+  /**
+   * 🔴 收尾：停掉本地桩与 Testcontainers 容器。
+   *
+   * <p>不回收容器的话，Ryuk 只在 JVM 退出时按 session 标签统一回收 —— 整个模块跑完之前容器一直活着
+   * （实测 channel 一个服务就能堆到 110+ 个 postgres 容器），容器内存 + Docker VM 把机器压进 swap，
+   * JVM 被卡住十几分钟 ⇒ 全量跑时断言假红、SSL 握手失败。
+   *
+   * <p>顺序：先停外部服务，再停容器。反了会出现「容器已停但还有 in-flight 请求打进来」。
+   */
+  @AfterAll
+  static void stopTestResources() {
+    if (identity != null) identity.close();
+    pg.stop();
   }
 }

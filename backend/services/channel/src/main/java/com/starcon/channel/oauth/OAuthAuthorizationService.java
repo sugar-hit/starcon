@@ -383,7 +383,6 @@ public class OAuthAuthorizationService {
     UUID credentialId =
         upsertCredential(boot.tenantId(), reference, granted, authorization.expiresAt());
 
-    java.sql.Timestamp authorizedAt = Timestamps.at(Instant.now());
     java.sql.Timestamp expiresAt = Timestamps.at(authorization.expiresAt());
     sql.execute(
         "update oauth_authorization_session set granted_scopes=?,authorized_account=?,authorized_account_name=?,"
@@ -393,12 +392,15 @@ public class OAuthAuthorizationService {
         authorization.accountName() == null ? "" : authorization.accountName(),
         credentialId,
         sessionId);
-    // 凭据表的时间列由 2.2.1.3 的 credential_window 约束校验，这里必须显式给合法窗口
+    // 🔴 authorized_at 由 **DB 钟**打戳（now()），不是宿主 JVM 墙钟。
+    // 原因：credential_window CHECK 比较的正是 authorized_at 与 DB 的 now()；
+    // 两者不同源时（宿主时钟跳变/超前），**合法**的授权路径会撞 CHECK，
+    // 而 channel 的通用错误处理器把任何 DataAccessException 都翻成
+    // 409「店铺编码重复、平台账号已被绑定…」—— 一句与病因完全无关的话。
     sql.execute(
-        "update credential_ref set granted_scopes=?,authorized_at=?,expires_at=?,status=?,version=version+1,updated_at=now()"
+        "update credential_ref set granted_scopes=?,authorized_at=now(),expires_at=?,status=?,version=version+1,updated_at=now()"
             + " where tenant_id=? and id=?",
         String.join(" ", granted),
-        authorizedAt,
         expiresAt,
         authorization.expiresAt() != null && authorization.expiresAt().isBefore(Instant.now())
             ? "EXPIRED"
@@ -851,7 +853,6 @@ public class OAuthAuthorizationService {
 
   private UUID upsertCredential(
       UUID tenantId, String reference, List<String> scopes, Instant expiresAt) {
-    java.sql.Timestamp authorizedAt = Timestamps.at(Instant.now());
     java.sql.Timestamp expires = Timestamps.at(expiresAt);
     UUID existing =
         one(
@@ -861,15 +862,18 @@ public class OAuthAuthorizationService {
             reference);
     if (existing != null) return existing;
     UUID id = Ids.next();
+    // 🔴 authorized_at 由 **DB 钟**打戳（now()），不是宿主 JVM 墙钟。
+    // credential_window CHECK 比较的正是 authorized_at 与 DB 的 now()：
+    // 喂给它一个宿主钟域的值，就等于让「宿主时钟跳变」变成「合法授权路径撞约束」。
+    // 授权时刻没有业务含义（就是「写入的那一刻」），所以交给 DB 取最正确。
     sql.execute(
         "insert into credential_ref(id,tenant_id,provider,external_ref,granted_scopes,authorized_at,expires_at)"
-            + " values (?,?,?,?,?,?,?)",
+            + " values (?,?,?,?,?,now(),?)",
         id,
         tenantId,
         secrets.provider(),
         reference,
         String.join(" ", scopes),
-        authorizedAt,
         expires);
     return id;
   }

@@ -69,6 +69,55 @@ public class ReportingFinancePort {
         ReceivablePage.class);
   }
 
+  // ---------------------------------------------------------------- 收款单（回款）
+
+  /**
+   * 上游按币种的收款单汇总（**上游自己算好的合计**）。
+   *
+   * <p>⚠️ 本记录只声明本服务真正用到的字段：{@code amount}（到账金额合计）、
+   * {@code count}（笔数）、{@code advanceAmount}（预收金额）。其余字段不声明 ——
+   * 少声明不会读错，写错字段名会静默变 null（那个更危险）。
+   */
+  @JsonIgnoreProperties(ignoreUnknown = true)
+  public record ReceiptCurrencySummary(
+      String currency,
+      BigDecimal amount,
+      BigDecimal settledAmount,
+      BigDecimal unsettledAmount,
+      long count,
+      long advanceCount,
+      BigDecimal advanceAmount) {}
+
+  /**
+   * 上游收款单列表页。
+   *
+   * <p>⚠️ **只取 {@code summaryByCurrency}**：上游的汇总是**整个筛选结果集**的合计
+   * （不是当前页），所以回款这一格直接用上游的合计 —— 本服务**不把收款单拉回来自己加**
+   * （那就是在跨服务重算口径）。
+   */
+  @JsonIgnoreProperties(ignoreUnknown = true)
+  public record ReceiptPage(List<ReceiptCurrencySummary> summaryByCurrency) {}
+
+  /**
+   * 拉一页收款单的按币种汇总（回款口径：12.2.1.1 收款单）。
+   *
+   * @param from 到账起日（含）
+   * @param to 到账止日（含）
+   * @param status 单据状态。回款只认 {@code RECORDED}（作废单不是到账）
+   */
+  public ReceiptPage receipts(LocalDate from, LocalDate to, String status, int page, String bearer) {
+    return client.get(
+        uriBuilder -> {
+          var builder = uriBuilder.path("/finance/receipts");
+          builder = builder.queryParam("receivedFrom", from);
+          builder = builder.queryParam("receivedTo", to);
+          if (status != null && !status.isBlank()) builder = builder.queryParam("status", status);
+          return builder.queryParam("page", Math.max(page, 0)).queryParam("size", PAGE_SIZE);
+        },
+        bearer,
+        ReceiptPage.class);
+  }
+
   // ---------------------------------------------------------------- 成本分录
 
   /** 上游一行成本分录。 */

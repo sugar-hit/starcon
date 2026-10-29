@@ -11,7 +11,6 @@ import java.net.InetSocketAddress;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Map;
@@ -52,7 +51,8 @@ import org.testcontainers.containers.PostgreSQLContainer;
 @AutoConfigureMockMvc
 class IpRiskLibraryIntegrationTest {
 
-  static final PostgreSQLContainer<?> pg = new PostgreSQLContainer<>("postgres:16-alpine");
+  static final PostgreSQLContainer<?> pg =
+      new PostgreSQLContainer<>("postgres:16-alpine").withUrlParam("sslmode", "disable");
   static final UUID user = UUID.randomUUID();
   static HttpServer identity;
   static IpRiskLibraryUpstreamStub upstream;
@@ -131,7 +131,10 @@ class IpRiskLibraryIntegrationTest {
   static void stopStubs() {
     if (identity != null) identity.stop(0);
     if (upstream != null) upstream.close();
+    pg.stop();
   }
+
+
 
   @BeforeEach
   void freshTenant() {
@@ -213,6 +216,36 @@ class IpRiskLibraryIntegrationTest {
     } catch (SQLException e) {
       throw new RuntimeException(e);
     }
+  }
+
+  /**
+   * 从 DB 取「现在」（DB 时钟）。
+   *
+   * <p>🔴 时刻基准必须**同源**：参照时刻也取自 DB，才不会跟 JVM 墙钟跨钟域比较。
+   * {@code clock_timestamp()} 是**语句时刻**（DB 时钟），{@code now()} 是**事务开始时刻**。
+   */
+  static OffsetDateTime dbNow() {
+    String raw = scalar("select clock_timestamp()");
+    return raw == null ? null : OffsetDateTime.parse(raw.replace(' ', 'T'));
+  }
+
+  /**
+   * 停用时刻守卫：两端**同钟域**（参照时刻也取自 DB 钟），区间包住「停用动作」本身。
+   *
+   * <p>🔴 为什么不再用「JVM 墙钟 ± 5 分钟」：那是拿**宿主墙钟**比**DB 写的时刻**，容差只有 5 分钟；
+   * 机器一卡（宿主时钟跳变 / 线程停顿十几分钟）就必然假红 —— L2 round 115 打红过 1 例，
+   * 实际偏差 14m58s（紧邻的日志是 {@code HikariPool ... clock leap detected (housekeeper delta=15m27s)}）。
+   *
+   * <p>改成区间后：停顿只会把区间撑宽，**不会**把一个本来正确的时刻挤出区间 ⇒ 不再假红；
+   * 而**真偏 8 小时（±28800s）必然落在区间外**，守卫照样当场抓住（见
+   * {@code theDisableTimestampGuardStillRejectsTheEightHourShift}）。
+   */
+  static void assertDisabledAtWithinDbClockWindow(
+      OffsetDateTime disabledAt, OffsetDateTime dbBefore, OffsetDateTime dbAfter) {
+    assertThat(disabledAt.toInstant())
+        .as("停用时刻写回不得偏 8 小时（两端同钟域：参照时刻也取自 DB 钟）")
+        .isAfterOrEqualTo(dbBefore.toInstant())
+        .isBeforeOrEqualTo(dbAfter.toInstant());
   }
 
   /** 登记一个条目的便捷方法。 */
@@ -615,7 +648,8 @@ class IpRiskLibraryIntegrationTest {
                     () -> service.setStatus(entry.entryId(), new IpRiskLibraryStatusInput("DISABLED", "  "))))
         .hasMessageContaining("理由");
 
-    OffsetDateTime before = OffsetDateTime.now();
+    // 🔴 参照时刻也取自 DB 钟（两端同钟域）：夹住「停用」这一次写入。
+    OffsetDateTime dbBefore = dbNow();
     IpRiskLibraryEntryDetail disabled =
         as(
             "channel.operation.update",
@@ -623,13 +657,12 @@ class IpRiskLibraryIntegrationTest {
                 service.setStatus(
                     entry.entryId(),
                     new IpRiskLibraryStatusInput("DISABLED", "品牌方已发函，暂缓上架")));
+    OffsetDateTime dbAfter = dbNow();
     assertThat(disabled.entry().status()).isEqualTo("DISABLED");
     assertThat(disabled.entry().disableReason()).contains("品牌方已发函");
     assertThat(disabled.entry().disabledAt()).isNotNull();
-    // 🔴 timestamptz 往返不偏 −28800s：写回值与「此刻」在同一绝对时刻附近。
-    assertThat(Duration.between(before, disabled.entry().disabledAt()).abs())
-        .as("停用时刻写回不得偏 8 小时")
-        .isLessThan(Duration.ofMinutes(5));
+    // 🔴 timestamptz 往返不偏 −28800s：写回值落在「停用动作前后两个 DB 时刻」之间。
+    assertDisabledAtWithinDbClockWindow(disabled.entry().disabledAt(), dbBefore, dbAfter);
 
     // 🔴 停用后不可改内容（服务层 422）。
     assertThatThrownBy(
@@ -690,6 +723,27 @@ class IpRiskLibraryIntegrationTest {
     assertThat(reactivated.entry().status()).isEqualTo("ACTIVE");
     assertThat(reactivated.entry().disableReason()).contains("品牌方已发函");
     assertThat(reactivated.entry().disabledAt()).isNotNull();
+  }
+
+  @Test
+  @DisplayName("16.4.1.1 停用时刻守卫仍能当场抓住真偏 8 小时（守卫自证：没被放松）")
+  void theDisableTimestampGuardStillRejectsTheEightHourShift() {
+    // 基准时刻取自 DB 钟，守卫的判定里没有任何真实时钟依赖 ⇒ 这条用例自己不会假红。
+    OffsetDateTime dbBefore = dbNow();
+    OffsetDateTime dbAfter = dbNow();
+    OffsetDateTime real = dbAfter;
+
+    // 正常的写回值必须通过守卫。
+    assertThatCode(() -> assertDisabledAtWithinDbClockWindow(real, dbBefore, dbAfter))
+        .doesNotThrowAnyException();
+
+    // 🔴 真偏 8 小时（两个方向）必须当场被拒 —— 守卫没被放松。
+    assertThatThrownBy(
+            () -> assertDisabledAtWithinDbClockWindow(real.minusHours(8), dbBefore, dbAfter))
+        .isInstanceOf(AssertionError.class);
+    assertThatThrownBy(
+            () -> assertDisabledAtWithinDbClockWindow(real.plusHours(8), dbBefore, dbAfter))
+        .isInstanceOf(AssertionError.class);
   }
 
   // ==================================================================
