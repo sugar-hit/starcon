@@ -158,6 +158,19 @@ ABC 切在**库存金额**上 —— 直接回答「哪些 SKU 占了大部分�
 - L2 在集成头 `f2c5f630` 上跑**一次**全量：`./mvnw verify` → `pnpm typecheck --force` → `pnpm lint` → `pnpm test` → `NEXT_TELEMETRY_DISABLED=1 pnpm --filter @starcon/web build` → `sync.mjs --check`
 - 结果见本轮汇报与 `.dev-agent/l2/l2-r129.log`
 
+### 补证（2026-10-29 12:22，batch-112 轮）
+
+本批 L2 首跑（round-129，`.dev-agent/l2/l2-r129.log`）在 channel 红 1 例：
+`ListingPublishJobIntegrationTest.endpointsRoundTrip` 期望 200 实得 **503**。
+取证判定为**负载型假红**（identity 进程内 HttpServer 桩是 JDK 默认单线程 dispatcher，
+客户端 keep-alive 残留把下一个请求堵死 ⇒ 超时 ⇒ 503；
+同一缺陷在 round-119 换了个受害模块重演，而受害模块每轮都在漂移 ⇒ 随机/负载依赖，非跨车道互相破坏）。
+
+**batch-112 轮用 `-fae`（fail at end）复跑同一集成头内容（含本批 14.3.1.3 与 13.5.1.1）：
+11 个后端模块全绿 · 后端 Tests run 11,222 / Failures 0 / Errors 0 · 前端 679 files / 9589 tests 全绿 ·
+Next 构建 EXIT=0 · `sync --check` EXIT=0 ⇒ L2 绿。** 详见 `2026-10-29-batch-112-procurement-analysis.md` 与
+`.dev-agent/l2/l2-r130.log`。**round-129 的 503 未复现，印证「负载型假红」判定，未做二分。**
+
 ## 遗留与后续（不在本批职责内，如实记录）
 
 1. **单量口径的广告销售占比** —— 13.4.1.1 的利润事实只给金额与件数、没有 SKU 级订单数 ⇒ 要交付得先在 13.4.1.1 补订单数口径。
