@@ -1,4 +1,4 @@
-# `origin/main` 的 tip 是集成头的 squash —— main → 集成头同步结构性冲突（第 79–99 轮连续未并入）
+# `origin/main` 的 tip 是集成头的 squash —— main → 集成头同步结构性冲突（第 79–100 轮连续未并入）
 
 - 创建: 2026-10-21
 - Owner: TBD（**发布侧**负责，见「待办内容」第 1 条）
@@ -409,6 +409,50 @@ git rev-parse a475f1df^{tree}  ⇒ 79a5711bce1e7e88117b4b60895c8210d0ca74e2   �
 ⇒ **但仍需协议层授权**（改 `SYNC-MAIN.md` 加一条「main 侧 blob 已被集成头历史覆盖 ⇒ 允许 `-X ours` 机械合并」的判据），
 或由发布侧直接改 main 的 tip（首选）。
 
+### 2026-10-29 12:15 轮（第 100 轮）：**充要证明独立复现** ＋ **等闸 544 秒**
+
+> 本轮**不引用**第 99 轮的结论，而是**重跑取证**，得到同一结果 ⇒ 判据可复现、可依赖。
+
+**① `origin/main^{tree}` == 集成头祖先 `1e3228b4^{tree}`（逐字节相同）**
+
+```
+git rev-parse origin/main^{tree}  ⇒ 83269e111f5f42e8b9481fd0e9549687aa8a7ed0
+git rev-parse 1e3228b4^{tree}     ⇒ 83269e111f5f42e8b9481fd0e9549687aa8a7ed0   ← 相同
+```
+
+**② main 树里的 5478 个唯一 blob，0 个不在集成头历史中**（`comm -23 main_blobs our_blobs` ⇒ 0）
+
+**冲突面：27 个，与第 99 轮逐字节相同**（程序化集合比对，**按 basename**：
+第 99 轮 backlog 把 channel 目录前缀只写了一次，故裸文件名与全路径直接比对会出现 15 个假差异）：
+
+```
+round99(记录) = 27   round100(实测) = 27
+NEW  : （空）
+GONE : （空）
+```
+
+| 口径                 | 第 99 轮 | **第 100 轮** |
+| -------------------- | -------- | ------------ |
+| 文件数               | 27       | **27**       |
+| **theirs 独有 = 0 ⇒ 取 ours 无损** | **4** | **4**（同一批 4 个文件） |
+| **theirs 独有行合计** | **79**   | **79**       |
+| ours 独有行合计      | 1643     | **1786**     |
+
+> ours 独有行 1643 → 1786（+143）是集成头这期间自己的推进（batch 110/111/112）。
+> ⇒ **再次印证第 99 轮修正后的判据**：**冲突面只在「集成头改动已存在的业务/测试文件」时增长**，
+> **不是**「集成头前进了就增长」——本轮集成头新增的是**新模块文件**，故 27 → 27 不变。
+
+**⚠️ 新增观测：闸的 `ageSeconds` 会被 keepalive 重置。**
+
+`touch` 闸目录**内**的文件会刷新**目录自身 mtime**，而 `ageSeconds` 正是
+`Date.now() - statSync(GATE_DIR).mtimeMs`（`lane.mjs:612`）。
+⇒ 实测 12:21 观察到 `ageSeconds` 从 41 突降到 **1**：**不是**「闸被释放又重取」，**是持闸者做了一次续期**。
+⇒ **判活仍只看 `stale`**（续期只会让 `stale` 更不容易为真）；**不要**把 `ageSeconds` 回落当作闸已释放。
+
+**⚠️ 等闸量级实测**：活着的 L2 tick 可以持有闸 **1 小时+**（含每 60 秒续期 ⇒ `stale` 永远为真）。
+本轮用**密集 `gate acquire` 竞态**等 **544 秒**后取到闸（**未抢、未清、未 force**）。
+⇒ 建议 `SYNC-MAIN.md` 补一条「等闸上限 + 超时如实汇报退出」的显式判据。
+
 ---
 
 ## 影响面
@@ -416,7 +460,7 @@ git rev-parse a475f1df^{tree}  ⇒ 79a5711bce1e7e88117b4b60895c8210d0ca74e2   �
 - **只影响「main → 集成头同步」这一个任务**（`tools/module-progress/SYNC-MAIN.md`）的推进节奏，
   **不影响**流水线的并入 / L2（集成头自身照常演进，batch-39~42 均正常交付）。
 - **不动任何业务代码**：本条待办是**发布流程 / 仓库拓扑**问题，不是代码问题。
-- 涉及文件（**最新一轮 —— 第 99 轮（2026-10-29 07:20）的冲突面，27 个 = 26 add/add + 1 content**，与第 98 轮**逐字节相同**）：
+- 涉及文件（**最新一轮 —— 第 100 轮（2026-10-29 12:15）的冲突面，27 个 = 26 add/add + 1 content**，与第 99 轮**逐字节相同**；theirs 独有 **79 行**、ours 独有 **1786 行**）：
   - `apps/web/src/components/dashboard/workbench-card-registry.ts`（add/add）
   - `apps/web/src/components/dashboard/workbench-layout-model.test.ts`（add/add）
   - `apps/web/src/lib/api-proxy.ts`（**content**；theirs 独有 **0 行**，ours 严格超集）
