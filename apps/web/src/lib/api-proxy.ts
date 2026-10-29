@@ -3092,6 +3092,47 @@ const services: readonly {
     pattern: /^ad\-product\-reports(?:\/(?:capabilities|options|rows|exports|export))$/,
   },
   {
+    // 14.3.2.1 归因分析：把广告花费归因到 SKU/订单（末次点击 / 平台归因窗口口径），
+    // 计算广告后净利、TACOS、增量效果估计。
+    // 形状逐个列出：
+    //   capabilities            能力声明（未交付段 available=false）
+    //   options                 筛选项 + 逐指标口径 + 归因规则原文 + 增量估计口径原文
+    //   rules                   归因规则列表（一个租户同时只有一套生效口径）
+    //   rules/current           当前生效的归因规则
+    //   rules                   保存归因规则（POST；改规则 = 版本 +1）
+    //   import                  导入平台广告归因数据（POST；幂等）
+    //   run                     跑一次归因计算（POST）
+    //   records                 归因明细（GET，真分页 + 规则快照随行）
+    //   records/{id}            单条归因结果详情
+    //   report                  广告后利润报表（GET，真分页 + 汇总）
+    //   export                  导出 CSV（GET + query；text/csv 由代理原样透传）
+    //   exports                 导出留痕历史（GET，真分页；留痕带规则快照）
+    //
+    // ⚠️ `rules` 与 `rules/current` 是**父路径 + 子路径**：alternation 是首个命中即返回，
+    //    所以 `rules/current` 必须排在 `rules` 之前。
+    //
+    // ⚠️ **首 token 零命中核对**：`ad-attributions` 在本文件既有正则里一次都没出现
+    //    （既有的是 `ad-reports` / `ad-product-reports` / `ad-group-keyword-reports`，
+    //    首 token 都对不上）⇒ 新增这条不会改变任何既有路由的匹配结果。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸路径 `ad-attributions` —— 本模块没有裸集合读，一切入口都带子路径
+    //   * `ad-attributions/records/{id}/xxx` —— 单条详情下没有子动作
+    //   * `ad-attributions/rules/{id}` —— 改规则走 `POST /rules`（带 id 在请求体里）
+    //   * `ad-attributions/sync` —— 本模块**没有**同步端点（平台归因数据走 `POST /import`；
+    //     平台适配器未接入，不放行一个不存在的「同步」比 404 更糟）
+    //   * `ad-attributions/trend` —— 蓝图输出句是「归因明细 + 广告后利润报表」，没有趋势图
+    //   * `ad-attributions/attributions` —— 那是 14.5.2.1 带货归因的命名空间，不是本模块
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    // 末尾**刻意不带 `?`**：带了就等于放行裸路径 `ad-attributions`。
+    // `records/{uuid}` 排在 `records` 之前；`rules/current` 排在 `rules` 之前；
+    // `exports` 排在 `export` 之前（alternation 是首个命中即返回）。
+    pattern:
+      /^ad\-attributions(?:\/(?:capabilities|options|rules\/current|rules|import|run|records\/(?:[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})|records|report|exports|export))$/,
+  },
+  {
     // 02 渠道与店铺：平台目录、授权连接、店铺与站点。
     // health/reminders 属于连接健康，marketplace 挂在店铺下，transfer 是负责人转让。
     // platforms/{code}/enums 后面可选一段 id：租户映射覆盖按 id 删除。
