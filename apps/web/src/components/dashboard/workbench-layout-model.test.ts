@@ -148,7 +148,12 @@ describe('1.4.1.1 布局解析：只认现在认识的卡片', () => {
       'risk.inventory',
       'metric.fulfillment-health',
     ]);
-    expect(resolved.order.slice(3)).toEqual(['nav.global-search', 'nav.shortcuts']);
+    expect(resolved.order.slice(3)).toEqual([
+      'metric.core-metric-cards',
+      'metric.store-overview',
+      'nav.global-search',
+      'nav.shortcuts',
+    ]);
   });
 });
 
@@ -253,6 +258,8 @@ describe('1.4.1.1 渲染口径', () => {
       'risk.inventory',
       'todo.anomaly-orders',
       'metric.fulfillment-health',
+      'metric.core-metric-cards',
+      'metric.store-overview',
       'nav.global-search',
       'nav.shortcuts',
     ]);

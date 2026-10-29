@@ -12,8 +12,6 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.time.Instant;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -44,7 +42,8 @@ import org.testcontainers.containers.PostgreSQLContainer;
 @AutoConfigureMockMvc
 class AccessSecurityTenancyIntegrationTest {
 
-  static final PostgreSQLContainer<?> pg = new PostgreSQLContainer<>("postgres:16-alpine");
+  static final PostgreSQLContainer<?> pg =
+      new PostgreSQLContainer<>("postgres:16-alpine").withUrlParam("sslmode", "disable");
   static final UUID user = UUID.randomUUID();
   static HttpServer identity;
   static final Map<String, AccessService.Access> actors = new ConcurrentHashMap<>();
@@ -250,9 +249,16 @@ class AccessSecurityTenancyIntegrationTest {
                     + "','"
                     + a
                     + "','file://./.starcon-secrets/t1','file://./.starcon-secrets/t1/token','OAUTH2',"
-                    + "'orders.read','"
-                    + OffsetDateTime.now(ZoneOffset.UTC)
-                    + "','ACTIVE') returning id::text"));
+                    + "'orders.read',"
+                    // ⚠️ authorized_at 必须用**数据库的** now()，不能用 Java 墙钟：
+                    //    约束 credential_window 是 CHECK(authorized_at <= now() + interval '5 minutes')，
+                    //    而 PG 的 now() = transaction_timestamp()（**事务开始时刻**）。
+                    //    Java 墙钟是「语句执行时刻」，两者在长事务里会分叉 —— 机器负载高时
+                    //    本类曾跑到 919s/3 例，事务一旦跨过 5 分钟，墙钟值就会超出
+                    //    「事务开始 + 5 分钟」而违约（2026-10-26 r102 L2 实测假红）。
+                    //    用 DB 的 now() ⇒ 与约束同一时间基准，与机器负载彻底解耦。
+                    + "now(),"
+                    + "'ACTIVE') returning id::text"));
     as(
         actorA,
         "channel.connection.read",
@@ -437,5 +443,20 @@ class AccessSecurityTenancyIntegrationTest {
     // 池里那条连接归还后，租户上下文必须被清掉
     assertThat(countAsTenant(b, "select count(*) from access_security_ip_allowlist")).isEqualTo(1);
     assertThat(countAsTenant(a, "select count(*) from access_security_ip_allowlist")).isEqualTo(1);
+  }
+
+  /**
+   * 🔴 收尾：停掉本地桩与 Testcontainers 容器。
+   *
+   * <p>不回收容器的话，Ryuk 只在 JVM 退出时按 session 标签统一回收 —— 整个模块跑完之前容器一直活着
+   * （实测 channel 一个服务就能堆到 110+ 个 postgres 容器），容器内存 + Docker VM 把机器压进 swap，
+   * JVM 被卡住十几分钟 ⇒ 全量跑时断言假红、SSL 握手失败。
+   *
+   * <p>顺序：先停外部服务，再停容器。反了会出现「容器已停但还有 in-flight 请求打进来」。
+   */
+  @AfterAll
+  static void stopTestResources() {
+    if (identity != null) identity.stop(0);
+    pg.stop();
   }
 }

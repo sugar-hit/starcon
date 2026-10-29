@@ -104,6 +104,50 @@ final class ReportingUpstreamClient {
     }
   }
 
+  /**
+   * GET 一个上游端点并反序列化成**列表**。
+   *
+   * <p>⚠️ **为什么需要这一支**：有的上游端点**直接返回 JSON 数组**，不是「包在 page 对象里」——
+   * identity 的 {@code GET /identity/departments} 与 {@code GET /identity/members}、
+   * catalog 的 {@code GET /catalog/products} 都是这种形状。{@link #get} 只吃 {@link Class}，
+   * 拿它反序列化数组会得到 {@code LinkedHashMap}（类型信息丢了），
+   * 所以这里用 {@link org.springframework.core.ParameterizedTypeReference} 保住元素类型。
+   *
+   * <p>⚠️ **失败语义与 {@link #get} 完全一致**：上游读不到一律 503，理由写明「读不到」而不是
+   * 「没有数据」—— 绝不返回空集合冒充「上游没有数据」。
+   *
+   * @param uriBuilder 端点路径与查询参数
+   * @param bearer 调用方自己的会话
+   * @param type 目标列表类型
+   */
+  <T> List<T> list(
+      java.util.function.Function<org.springframework.web.util.UriBuilder, org.springframework.web.util.UriBuilder>
+          uriBuilder,
+      String bearer,
+      org.springframework.core.ParameterizedTypeReference<List<T>> type) {
+    try {
+      List<T> result =
+          client
+              .get()
+              .uri(builder -> uriBuilder.apply(builder).build())
+              .header("Authorization", bearer)
+              .retrieve()
+              .body(type);
+      if (result == null) throw unavailable("上游没有返回内容");
+      return result;
+    } catch (RestClientResponseException e) {
+      if (e.getStatusCode().value() == 401 || e.getStatusCode().value() == 403) {
+        throw new ResponseStatusException(
+            HttpStatus.SERVICE_UNAVAILABLE,
+            "无权读取 " + serviceName + " 的上游事实，报表无法投影",
+            e);
+      }
+      throw unavailable("上游返回 " + e.getStatusCode().value() + "：事实读不到");
+    } catch (org.springframework.web.client.ResourceAccessException e) {
+      throw unavailable("上游不可达");
+    }
+  }
+
   /** 上游不可用一律 503，理由写明「读不到」而不是「没有数据」。 */
   private ResponseStatusException unavailable(String detail) {
     return new ResponseStatusException(

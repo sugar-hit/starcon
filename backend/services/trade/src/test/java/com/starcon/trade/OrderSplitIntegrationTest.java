@@ -13,6 +13,9 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -292,6 +295,80 @@ class OrderSplitIntegrationTest {
             sql.fetchOne(
                     "select count(*) c from sales_order where tenant_id = ?", tenant)
                 .get("c", Long.class));
+  }
+
+  /**
+   * 读一次**数据库自己的时钟**（Postgres 容器时钟），并归一到 UTC。
+   *
+   * <p>写法照抄 {@code com.starcon.warehouse.StockOwnershipIntegrationTest#dbNow()}：
+   * 服务端对「什么时候算超期 / 什么时候算记账时刻」的所有判定都发生在 <b>DB 钟域</b>里
+   * （V151 的 {@code now()}、V265 守卫① 的 {@code evidence_deadline <= now()}），
+   * 夹具要跟它比，就必须也用它的钟：拿 JVM 墙钟写时间，宿主机钟一旦领先容器钟
+   * （本机实测：PG 容器钟领先宿主 JVM 约 50ms，重负载下还会互相超越），
+   * 这一行就落进「另一个钟域的过去/未来」⇒ 判定结果取决于两台钟的差，
+   * 也就是取决于运气。
+   *
+   * <p>截断到毫秒沿用原 {@code now()} 的做法 —— 截断只会让这个时刻更早，
+   * 对「必须落在过去」这类比较永远安全。
+   */
+  OffsetDateTime dbNow() {
+    return sql.fetchOne("select now()")
+        .get(0, OffsetDateTime.class)
+        .withOffsetSameInstant(ZoneOffset.UTC)
+        .truncatedTo(ChronoUnit.MILLIS);
+  }
+
+  /**
+   * 收齐一次拆单**整族行**的记账时刻（{@code created_at}）。
+   *
+   * <p>覆盖 V151 建的七张表：头 / 单元 / 行级明细 / 候选依据 / 预占指令 / 回传任务 / 事件流。
+   * 这几张表里带 {@code CHECK(updated_at>=created_at)} 的那几张（头、单元、预占指令、回传任务）
+   * 是本轮修的对象；另几张（明细、候选、事件）只有 {@code created_at}，一起收进来是为了
+   * 断言「整族行的记账时刻来自**同一个** DB 事务时钟」。
+   */
+  List<OffsetDateTime> splitBookkeepingTimes(UUID splitId) {
+    return asA(
+        () -> {
+          List<OffsetDateTime> times = new ArrayList<>();
+          times.add(
+              sql.fetchOne(
+                      "select created_at from order_split where id = ?::uuid", splitId)
+                  .get("created_at", OffsetDateTime.class));
+          for (var r :
+              sql.fetch(
+                  "select created_at from order_split_unit where split_id = ?::uuid", splitId)) {
+            times.add(r.get("created_at", OffsetDateTime.class));
+          }
+          for (var r :
+              sql.fetch(
+                  "select created_at from order_split_unit_line where split_id = ?::uuid", splitId)) {
+            times.add(r.get("created_at", OffsetDateTime.class));
+          }
+          for (var r :
+              sql.fetch(
+                  "select created_at from order_split_candidate where split_id = ?::uuid", splitId)) {
+            times.add(r.get("created_at", OffsetDateTime.class));
+          }
+          for (var r :
+              sql.fetch(
+                  "select created_at from order_split_reservation_command"
+                      + " where split_id = ?::uuid",
+                  splitId)) {
+            times.add(r.get("created_at", OffsetDateTime.class));
+          }
+          for (var r :
+              sql.fetch(
+                  "select created_at from order_split_writeback_task where split_id = ?::uuid",
+                  splitId)) {
+            times.add(r.get("created_at", OffsetDateTime.class));
+          }
+          for (var r :
+              sql.fetch(
+                  "select created_at from order_split_event where split_id = ?::uuid", splitId)) {
+            times.add(r.get("created_at", OffsetDateTime.class));
+          }
+          return times;
+        });
   }
 
   // ================================================================ 能力声明
@@ -1123,6 +1200,132 @@ class OrderSplitIntegrationTest {
     assertThat(stillRequested)
         .as("🔴 方案没了还让 warehouse 去锁货，就是在锁一堆没人会取的货")
         .isZero();
+  }
+
+  /**
+   * 🔴 回归：拆单这一族行的**记账时刻**必须与 DB 钟同域。
+   *
+   * <p><b>缺陷（2026-10-27 的 L2 批次闸定位）</b>：{@code split()} 落库时把
+   * {@code created_at} / {@code updated_at} 绑成 {@code OffsetDateTime.now()}
+   * （<b>JVM 墙钟</b>），而 {@code advance_order_split_status(...)} 推进状态时写的是
+   * {@code updated_at=now()}（<b>DB 钟</b>）。V151 给这几张表都钉了
+   * {@code CHECK(updated_at>=created_at)} ⇒ 这一行变成「两个钟域的时刻在比大小」：
+   * 宿主钟比容器钟快 1ms，一次<b>完全合法</b>的状态推进就被 DB 挡下
+   * （{@code violates check constraint "order_split_timestamps_ordered"}）。
+   *
+   * <p><b>这条断言是确定性的，不靠运气</b>：PostgreSQL 的 {@code now()} 是
+   * <b>事务开始时刻</b>，同一个事务里写的每一行拿到的都是<b>同一个</b>值。
+   * 所以「整族行共享同一个时刻」⇔「它们的记账时刻全部来自 DB 事务时钟」。
+   * 绑 JVM 墙钟时每一次 {@code now()} 都是一个新的瞬间，整族行的时刻必然参差 ⇒
+   * 这条断言<b>每次都红</b>，完全不依赖宿主钟与容器钟的毫秒级偏差 ——
+   * 这正是它比「再跑三遍看看绿不绿」强的地方。
+   */
+  @Test
+  void 拆单记账时刻与DB钟同域() {
+    threeWarehouses();
+    stock("WH-HK", SKU, "6.000000", T_COLLECTED);
+    stock("WH-SH", SKU, "4.000000", T_COLLECTED);
+    rule(SplitStrategy.WAREHOUSE, 8, true, null, null);
+
+    OffsetDateTime dbBefore = dbNow();
+    var saved =
+        asA(
+            () ->
+                service.split(
+                    snapshotInput(REF, "10.000000", "100.0000", "100.0000"),
+                    actorA.membershipId()));
+    OffsetDateTime dbAfter = dbNow();
+
+    // ---- ① 整族行共享同一个时刻 = DB 的事务时钟 ----
+    List<OffsetDateTime> born = splitBookkeepingTimes(saved.id());
+    assertThat(born)
+        .as("🔴 拆单这一族行的记账时刻必须全部来自 DB 的事务时钟（now()）："
+            + "整族行共享同一个时刻，正是「同域」的充要特征。"
+            + "一旦某一处绑了 JVM 墙钟，这一族行的时刻就会参差，"
+            + "CHECK(updated_at>=created_at) 就变成跨钟域比大小 —— 宿主钟快 1ms 就红一次")
+        .isNotEmpty()
+        .allSatisfy(t -> assertThat(t).isEqualTo(born.get(0)));
+
+    // ---- ② 那个时刻落在 DB 钟的采样区间里（不是宿主墙钟） ----
+    // ⚠️ dbNow() 按仓库既有写法截断到毫秒（只会更早），所以上界放宽 1ms。
+    assertThat(born.get(0))
+        .as("建行时刻必须落在 DB 钟前后两次采样之间 —— 那是 DB 自己的钟域")
+        .isBetween(dbBefore, dbAfter.plus(1, ChronoUnit.MILLIS));
+
+    // ---- ③ 状态推进后，头行与单元行的 updated_at 仍然不早于 created_at ----
+    //    这一条就是那条 CHECK 的不变量；同域之后它是**恒真**的，
+    //    不再取决于两台钟差了多少。
+    asA(
+        () ->
+            service.advanceStatus(
+                saved.id(),
+                new SplitStatusInput(SplitStatus.CONFIRMED, "", T_OCCURRED),
+                actorA.membershipId()));
+    for (var r :
+        asA(
+            () ->
+                sql.fetch(
+                    "select created_at, updated_at from order_split where id = ?::uuid",
+                    saved.id()))) {
+      assertThat(r.get("updated_at", OffsetDateTime.class))
+          .as("🔴 推进状态写的是 DB 的 now()，建行时刻也必须是 DB 的 now()："
+              + "两个钟域的时刻比大小，宿主钟快 1ms 就把一次合法的推进挡下")
+          .isAfterOrEqualTo(r.get("created_at", OffsetDateTime.class));
+    }
+    for (var r :
+        asA(
+            () ->
+                sql.fetch(
+                    "select created_at, updated_at from order_split_unit"
+                        + " where split_id = ?::uuid",
+                    saved.id()))) {
+      assertThat(r.get("updated_at", OffsetDateTime.class))
+          .as("单元行同理：状态推进连带改单元状态，写的是 DB 的 now()")
+          .isAfterOrEqualTo(r.get("created_at", OffsetDateTime.class));
+    }
+
+    // ---- ④ 预占回执 / 发货回传这两条「改写既有行」的路径也必须在 DB 钟域 ----
+    //    ⚠️ 两个钟域各管一段时，只换一端反而制造新的跨钟域依赖：
+    //    建行时刻换成 DB 钟之后，这两处的 updated_at 也必须一起换。
+    UUID unitId = asA(() -> service.split(saved.id())).units().get(0).id();
+    asA(
+        () ->
+            service.recordReservation(
+                saved.id(),
+                unitId,
+                new SplitReservationInput(
+                    SplitReservationStatus.ACKNOWLEDGED, "RES-9311-1", "", T_OCCURRED),
+                actorA.membershipId()));
+    asA(
+        () ->
+            service.recordWriteback(
+                saved.id(),
+                unitId,
+                new SplitWritebackInput(
+                    SplitWritebackStatus.CONFIRMED, "TRACK-9311-1", "SF", "", T_OCCURRED),
+                actorA.membershipId()));
+    for (var r :
+        asA(
+            () ->
+                sql.fetch(
+                    "select created_at, updated_at from order_split_reservation_command"
+                        + " where split_id = ?::uuid",
+                    saved.id()))) {
+      assertThat(r.get("updated_at", OffsetDateTime.class))
+          .as("预占回执改写既有行：updated_at 必须与建行时刻同一个钟域")
+          .isAfterOrEqualTo(r.get("created_at", OffsetDateTime.class));
+    }
+    for (var r :
+        asA(
+            () ->
+                sql.fetch(
+                    "select created_at, updated_at from order_split_writeback_task"
+                        + " where split_id = ?::uuid",
+                    saved.id()))) {
+      assertThat(r.get("updated_at", OffsetDateTime.class))
+          .as("发货回传改写既有行：updated_at 必须与建行时刻同一个钟域")
+          .isAfterOrEqualTo(r.get("created_at", OffsetDateTime.class));
+    }
   }
 
   @Test

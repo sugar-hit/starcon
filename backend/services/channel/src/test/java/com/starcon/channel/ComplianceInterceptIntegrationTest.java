@@ -55,7 +55,8 @@ import org.testcontainers.containers.PostgreSQLContainer;
 @AutoConfigureMockMvc
 class ComplianceInterceptIntegrationTest {
 
-  static final PostgreSQLContainer<?> pg = new PostgreSQLContainer<>("postgres:16-alpine");
+  static final PostgreSQLContainer<?> pg =
+      new PostgreSQLContainer<>("postgres:16-alpine").withUrlParam("sslmode", "disable");
   static final UUID user = UUID.randomUUID();
   static HttpServer identity;
   static final Map<String, AccessService.Access> actors = new ConcurrentHashMap<>();
@@ -133,7 +134,10 @@ class ComplianceInterceptIntegrationTest {
   @AfterAll
   static void stopStubs() {
     if (identity != null) identity.stop(0);
+    pg.stop();
   }
+
+
 
   @BeforeEach
   void freshTenant() {

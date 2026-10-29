@@ -802,7 +802,11 @@ public class ApprovalInboxController {
     var nodeKey = row.get("current_node_key", String.class);
     var flowId = row.get("flow_id", UUID.class);
     var order = row.get("current_node_order", Integer.class);
-    var now = AuditLog.utc(Instant.now());
+    // 「此刻」取**数据库自己的时钟**：停留时长在 DB 侧算（approval_dwell_seconds(now(), node_entered_at)），
+    // 判据里的 now() 是 DB 的钟、且取的是事务开始时刻；写入侧若用应用服务器墙钟，
+    // 两端就分属两个钟域，停留时长会被钟差整体带偏（超时/未超时判定跟着翻车）。
+    // 这正是 32a16a6a 在**测试夹具**侧处理过的同一族问题 —— 这里是生产写入侧。
+    var now = AuditLog.dbNow(sql);
 
     var next = nextNode(tenant, flowId, order);
     // 条件节点的路由不执行（见类注释）：宁可 409 说清楚，也不要猜一个节点把单子送错人。
@@ -897,7 +901,10 @@ public class ApprovalInboxController {
         row.get("current_node_key", String.class),
         comment == null ? "" : comment.trim(),
         toMembershipId,
-        AuditLog.utc(Instant.now()));
+        // 与 decide 的同款纪律：decided_at 会和 node_entered_at 相减
+        // （ApprovalRecordController 的 avg_dwell / avg_handle / avg_action），
+        // 那条链路的时间戳必须同钟域。
+        AuditLog.dbNow(sql));
     var names = memberNames(auth);
     var targetName = toMembershipId == null ? null : names.get(toMembershipId);
     audit.record(
@@ -1020,7 +1027,10 @@ public class ApprovalInboxController {
 
           var start = startNode(a.tenantId(), input);
           var id = Ids.next();
-          var now = AuditLog.utc(Instant.now());
+          // 提交时刻与进入首节点的时刻取**数据库自己的时钟**：两者都与 DB 侧的
+          // approval_dwell_seconds(now(), …) / node_entered_at <= now() 比较，
+          // 写入侧用应用服务器墙钟会让两端分属两个钟域（见上面 decide 的同款注释）。
+          var now = AuditLog.dbNow(sql);
           var instanceNo =
               sql.fetchOne("select approval_next_instance_no() as no").get("no", String.class);
           sql.execute(

@@ -1789,6 +1789,1216 @@
         },
         "type": "object"
       },
+      "AdAttributionCapabilities": {
+        "properties": {
+          "attributionModels": {
+            "description": "归因模型取值",
+            "items": {
+              "description": "归因模型取值",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "attributionNote": {
+            "description": "🔴 归因口径原文（规则变了历史报表不可比，必须公示）",
+            "type": "string"
+          },
+          "attributionStatuses": {
+            "description": "归因状态取值",
+            "items": {
+              "description": "归因状态取值",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "boundaryNote": {
+            "description": "下游与边界说明",
+            "type": "string"
+          },
+          "dimensions": {
+            "description": "逐维度能力声明；未交付段 available=false",
+            "items": {
+              "$ref": "#/components/schemas/AdAttributionCapabilityDimension"
+            },
+            "type": "array"
+          },
+          "emptyReasons": {
+            "description": "空态原因取值",
+            "items": {
+              "description": "空态原因取值",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "incrementalityNote": {
+            "description": "🔴 增量效果估计的口径原文（它是推导值，不是平台原值）",
+            "type": "string"
+          },
+          "metricDefinitionNote": {
+            "description": "🔴 逐指标口径说明（随报表一起返回）",
+            "type": "string"
+          },
+          "metricDefinitions": {
+            "description": "🔴 逐指标口径定义（TACOS / 增量效果估计的定义写在这里）",
+            "items": {
+              "$ref": "#/components/schemas/AdAttributionMetricDefinition"
+            },
+            "type": "array"
+          },
+          "upstreamNote": {
+            "description": "上游依赖说明",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AdAttributionCapabilityDimension": {
+        "description": "逐维度能力声明；未交付段 available=false",
+        "properties": {
+          "available": {
+            "description": "本模块是否已交付",
+            "type": "boolean"
+          },
+          "description": {
+            "description": "维度说明",
+            "type": "string"
+          },
+          "dimension": {
+            "description": "维度键",
+            "type": "string"
+          },
+          "impact": {
+            "description": "不交付的影响",
+            "type": "string"
+          },
+          "ownerModule": {
+            "description": "未交付段的责任模块",
+            "type": "string"
+          },
+          "source": {
+            "description": "数据来源（表 / 上游模块）",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AdAttributionClickImport": {
+        "description": "🔴 点击触点列表",
+        "properties": {
+          "clickAt": {
+            "description": "🔴 点击时刻（timestamptz）",
+            "format": "date-time",
+            "type": "string"
+          },
+          "clickId": {
+            "description": "平台侧点击 id",
+            "type": "string"
+          },
+          "platformAttributed": {
+            "description": "🔴 平台自己标记的归因点击（PLATFORM_WINDOW 口径用它）",
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "AdAttributionExportPage": {
+        "properties": {
+          "items": {
+            "description": "当前页数据",
+            "items": {
+              "$ref": "#/components/schemas/AdAttributionExportRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "description": "页码，从 0 起",
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "description": "每页条数",
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "description": "总条数",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AdAttributionExportRow": {
+        "description": "当前页数据",
+        "properties": {
+          "attributionModel": {
+            "description": "🔴 归因模型（快照）",
+            "type": "string"
+          },
+          "attributionNote": {
+            "description": "🔴 导出当时的归因口径原文",
+            "type": "string"
+          },
+          "attributionWindowDays": {
+            "description": "🔴 归因窗口（快照）",
+            "format": "int32",
+            "type": "integer"
+          },
+          "campaignId": {
+            "description": "活动筛选（null = 没筛）",
+            "format": "uuid",
+            "type": "string"
+          },
+          "createdAt": {
+            "description": "发生时刻",
+            "format": "date-time",
+            "type": "string"
+          },
+          "currency": {
+            "description": "币种筛选（null = 没筛）",
+            "type": "string"
+          },
+          "dataAsOf": {
+            "description": "🔴 这次导出对着哪个水位算出来的",
+            "format": "date-time",
+            "type": "string"
+          },
+          "dateFrom": {
+            "description": "统计起始日",
+            "format": "date",
+            "type": "string"
+          },
+          "dateTo": {
+            "description": "统计截止日",
+            "format": "date",
+            "type": "string"
+          },
+          "id": {
+            "description": "导出留痕 id",
+            "format": "uuid",
+            "type": "string"
+          },
+          "metricDefinitionNote": {
+            "description": "🔴 导出当时的逐指标口径定义",
+            "type": "string"
+          },
+          "requestedBy": {
+            "description": "发起人（已认证成员）",
+            "format": "uuid",
+            "type": "string"
+          },
+          "rowCount": {
+            "description": "导出的行数",
+            "format": "int32",
+            "type": "integer"
+          },
+          "ruleCode": {
+            "description": "🔴 规则编码（快照）",
+            "type": "string"
+          },
+          "ruleId": {
+            "description": "🔴 规则 id",
+            "format": "uuid",
+            "type": "string"
+          },
+          "ruleVersion": {
+            "description": "🔴 规则版本（快照）",
+            "format": "int64",
+            "type": "integer"
+          },
+          "shopCode": {
+            "description": "店铺筛选（null = 没筛）",
+            "type": "string"
+          },
+          "skuId": {
+            "description": "SKU 筛选（null = 没筛）",
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AdAttributionImportRequest": {
+        "properties": {
+          "dataAsOf": {
+            "description": "🔴 这批数据的数据截至时刻",
+            "format": "date-time",
+            "type": "string"
+          },
+          "orders": {
+            "description": "订单级归因候选列表",
+            "items": {
+              "$ref": "#/components/schemas/AdAttributionOrderImport"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "AdAttributionImportResult": {
+        "properties": {
+          "dataAsOf": {
+            "description": "数据截至时刻",
+            "format": "date-time",
+            "type": "string"
+          },
+          "note": {
+            "description": "🔴 导入口径说明",
+            "type": "string"
+          },
+          "orderRows": {
+            "description": "读进来的订单行数",
+            "format": "int32",
+            "type": "integer"
+          },
+          "rejected": {
+            "description": "🔴 被拒绝的行数与原因（**逐条列明**，不静默丢弃）",
+            "items": {
+              "description": "🔴 被拒绝的行数与原因（**逐条列明**，不静默丢弃）",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "writtenClickRows": {
+            "description": "写进去的点击行数",
+            "format": "int32",
+            "type": "integer"
+          },
+          "writtenOrderRows": {
+            "description": "写进去（新增或刷新）的订单行数",
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AdAttributionMetricDefinition": {
+        "description": "🔴 逐指标口径定义（表头渲染用）",
+        "properties": {
+          "available": {
+            "description": "🔴 当前是否可算（false = 这一格取不到，不是 0）",
+            "type": "boolean"
+          },
+          "formula": {
+            "description": "🔴 口径定义（写进表头的那句话）",
+            "type": "string"
+          },
+          "label": {
+            "description": "指标显示名",
+            "type": "string"
+          },
+          "metric": {
+            "description": "指标键",
+            "type": "string"
+          },
+          "ownerModule": {
+            "description": "未交付段的责任模块",
+            "type": "string"
+          },
+          "source": {
+            "description": "数据来源",
+            "type": "string"
+          },
+          "unavailableReason": {
+            "description": "🔴 取不到的原因（available=false 时说明为什么没有数值）",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AdAttributionOption": {
+        "description": "平台下拉项",
+        "properties": {
+          "label": {
+            "description": "显示名",
+            "type": "string"
+          },
+          "value": {
+            "description": "取值",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AdAttributionOptions": {
+        "properties": {
+          "attributionModels": {
+            "description": "归因模型下拉项",
+            "items": {
+              "$ref": "#/components/schemas/AdAttributionOption"
+            },
+            "type": "array"
+          },
+          "attributionNote": {
+            "description": "🔴 归因口径原文",
+            "type": "string"
+          },
+          "attributionStatuses": {
+            "description": "归因状态下拉项",
+            "items": {
+              "$ref": "#/components/schemas/AdAttributionOption"
+            },
+            "type": "array"
+          },
+          "incrementalityNote": {
+            "description": "🔴 增量效果估计的口径原文",
+            "type": "string"
+          },
+          "metricDefinitionNote": {
+            "description": "🔴 逐指标口径说明",
+            "type": "string"
+          },
+          "metricDefinitions": {
+            "description": "🔴 逐指标口径定义",
+            "items": {
+              "$ref": "#/components/schemas/AdAttributionMetricDefinition"
+            },
+            "type": "array"
+          },
+          "platforms": {
+            "description": "平台下拉项",
+            "items": {
+              "$ref": "#/components/schemas/AdAttributionOption"
+            },
+            "type": "array"
+          },
+          "rangeLimitNote": {
+            "description": "🔴 时间范围与上限说明",
+            "type": "string"
+          },
+          "shops": {
+            "description": "店铺下拉项",
+            "items": {
+              "$ref": "#/components/schemas/AdAttributionOption"
+            },
+            "type": "array"
+          },
+          "sorts": {
+            "description": "排序下拉项",
+            "items": {
+              "$ref": "#/components/schemas/AdAttributionOption"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "AdAttributionOrderImport": {
+        "description": "订单级归因候选列表",
+        "properties": {
+          "attributedOrders": {
+            "description": "广告归因订单数",
+            "type": "number"
+          },
+          "attributedSales": {
+            "description": "广告销售额",
+            "type": "number"
+          },
+          "attributedSpend": {
+            "description": "广告花费",
+            "type": "number"
+          },
+          "attributedUnits": {
+            "description": "广告归因件数",
+            "type": "number"
+          },
+          "campaignId": {
+            "description": "内部活动 id（与下面三项二选一）",
+            "format": "uuid",
+            "type": "string"
+          },
+          "clicks": {
+            "description": "🔴 点击触点列表",
+            "items": {
+              "$ref": "#/components/schemas/AdAttributionClickImport"
+            },
+            "type": "array"
+          },
+          "currency": {
+            "description": "🔴 币种（char3）",
+            "type": "string"
+          },
+          "externalCampaignId": {
+            "description": "平台侧活动 id",
+            "type": "string"
+          },
+          "externalOrderNo": {
+            "description": "平台侧订单号",
+            "type": "string"
+          },
+          "internalSkuId": {
+            "description": "🔴 内部 SKU（null = 归得到订单但归不到 SKU）",
+            "format": "uuid",
+            "type": "string"
+          },
+          "orderAt": {
+            "description": "🔴 下单时刻（timestamptz）",
+            "format": "date-time",
+            "type": "string"
+          },
+          "platformCode": {
+            "description": "平台编码",
+            "type": "string"
+          },
+          "shopCode": {
+            "description": "店铺编码",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AdAttributionRecordPage": {
+        "properties": {
+          "attributionModel": {
+            "description": "🔴 归因模型",
+            "type": "string"
+          },
+          "attributionNote": {
+            "description": "🔴 归因口径原文",
+            "type": "string"
+          },
+          "attributionWindowDays": {
+            "description": "🔴 归因窗口（天）",
+            "format": "int32",
+            "type": "integer"
+          },
+          "emptyNote": {
+            "description": "🔴 空态说明文案（几种空的解释各不相同）",
+            "type": "string"
+          },
+          "emptyReason": {
+            "description": "🔴 空态原因：NO_IMPORTED_DATA / NO_FACTS_FOR_RULE / FILTERED_EMPTY / NO_CAMPAIGN_BINDING / null",
+            "type": "string"
+          },
+          "incrementalityNote": {
+            "description": "🔴 增量效果估计的口径原文",
+            "type": "string"
+          },
+          "items": {
+            "description": "当前页数据",
+            "items": {
+              "$ref": "#/components/schemas/AdAttributionRecordRow"
+            },
+            "type": "array"
+          },
+          "metricDefinitionNote": {
+            "description": "🔴 逐指标口径说明",
+            "type": "string"
+          },
+          "page": {
+            "description": "页码，从 0 起",
+            "format": "int32",
+            "type": "integer"
+          },
+          "ruleCode": {
+            "description": "🔴 规则编码",
+            "type": "string"
+          },
+          "ruleId": {
+            "description": "🔴 用的规则 id",
+            "format": "uuid",
+            "type": "string"
+          },
+          "ruleVersion": {
+            "description": "🔴 规则版本",
+            "format": "int64",
+            "type": "integer"
+          },
+          "size": {
+            "description": "每页条数",
+            "format": "int32",
+            "type": "integer"
+          },
+          "summaries": {
+            "description": "🔴 筛选后全集的汇总（按币种拆开，不受分页影响）",
+            "items": {
+              "$ref": "#/components/schemas/AdAttributionRecordSummary"
+            },
+            "type": "array"
+          },
+          "total": {
+            "description": "符合筛选条件的行数（不受分页影响）",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AdAttributionRecordRow": {
+        "description": "当前页数据",
+        "properties": {
+          "attributed": {
+            "description": "🔴 这一行进不进 SKU 报表（= 状态成立 且 归到了 SKU）",
+            "type": "boolean"
+          },
+          "attributedAt": {
+            "description": "归因计算时刻",
+            "format": "date-time",
+            "type": "string"
+          },
+          "attributedOrders": {
+            "description": "广告归因订单数",
+            "type": "string"
+          },
+          "attributedSales": {
+            "description": "广告销售额",
+            "type": "string"
+          },
+          "attributedSpend": {
+            "description": "广告花费",
+            "type": "string"
+          },
+          "attributedUnits": {
+            "description": "广告归因件数",
+            "type": "string"
+          },
+          "attributionModel": {
+            "description": "🔴 归因模型（快照）",
+            "type": "string"
+          },
+          "attributionStatus": {
+            "description": "🔴 归因状态：ATTRIBUTED / NO_ELIGIBLE_CLICK / NO_PLATFORM_ATTRIBUTED_CLICK",
+            "type": "string"
+          },
+          "attributionStatusLabel": {
+            "description": "🔴 归因状态的中文说明",
+            "type": "string"
+          },
+          "attributionWindowDays": {
+            "description": "🔴 归因窗口（快照）",
+            "format": "int32",
+            "type": "integer"
+          },
+          "campaignId": {
+            "description": "内部活动 id",
+            "format": "uuid",
+            "type": "string"
+          },
+          "campaignName": {
+            "description": "活动名",
+            "type": "string"
+          },
+          "chosenClickAt": {
+            "description": "命中点击的时刻（null = 没命中）",
+            "format": "date-time",
+            "type": "string"
+          },
+          "chosenClickId": {
+            "description": "🔴 命中哪一次点击（空串 = 没命中）",
+            "type": "string"
+          },
+          "currency": {
+            "description": "🔴 币种",
+            "type": "string"
+          },
+          "eligibleClickCount": {
+            "description": "🔴 窗口内的合格点击数",
+            "format": "int32",
+            "type": "integer"
+          },
+          "externalOrderNo": {
+            "description": "平台侧订单号",
+            "type": "string"
+          },
+          "id": {
+            "description": "归因结果 id",
+            "format": "uuid",
+            "type": "string"
+          },
+          "internalSkuId": {
+            "description": "🔴 内部 SKU（null = 归不到 SKU）",
+            "format": "uuid",
+            "type": "string"
+          },
+          "orderAt": {
+            "description": "下单时刻",
+            "format": "date-time",
+            "type": "string"
+          },
+          "platformCode": {
+            "description": "平台编码",
+            "type": "string"
+          },
+          "ruleCode": {
+            "description": "🔴 规则编码（快照）",
+            "type": "string"
+          },
+          "ruleVersion": {
+            "description": "🔴 规则版本（快照）",
+            "format": "int64",
+            "type": "integer"
+          },
+          "shopCode": {
+            "description": "店铺编码",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AdAttributionRecordSummary": {
+        "description": "🔴 筛选后全集的汇总（按币种拆开，不受分页影响）",
+        "properties": {
+          "attributedRows": {
+            "description": "🔴 归因成立（进报表）的行数",
+            "format": "int64",
+            "type": "integer"
+          },
+          "attributedSales": {
+            "description": "🔴 归因成立（进报表）的广告销售额",
+            "type": "string"
+          },
+          "attributedSpend": {
+            "description": "🔴 归因成立（进报表）的广告花费",
+            "type": "string"
+          },
+          "attributionNote": {
+            "description": "🔴 归因口径原文",
+            "type": "string"
+          },
+          "currency": {
+            "description": "币种",
+            "type": "string"
+          },
+          "rowCount": {
+            "description": "符合筛选条件的行数",
+            "format": "int64",
+            "type": "integer"
+          },
+          "statusCounts": {
+            "description": "🔴 归因状态分布",
+            "items": {
+              "$ref": "#/components/schemas/AdAttributionStatusCount"
+            },
+            "type": "array"
+          },
+          "totalOrders": {
+            "description": "广告归因订单数合计（全部行）",
+            "type": "string"
+          },
+          "totalSales": {
+            "description": "广告销售额合计（全部行）",
+            "type": "string"
+          },
+          "totalSpend": {
+            "description": "广告花费合计（全部行）",
+            "type": "string"
+          },
+          "totalUnits": {
+            "description": "广告归因件数合计（全部行）",
+            "type": "string"
+          },
+          "unattributedOrders": {
+            "description": "🔴 归不上的广告订单数",
+            "type": "string"
+          },
+          "unattributedRows": {
+            "description": "🔴 归不上的行数",
+            "format": "int64",
+            "type": "integer"
+          },
+          "unattributedSales": {
+            "description": "🔴 归不上的广告销售额",
+            "type": "string"
+          },
+          "unattributedSpend": {
+            "description": "🔴 归不上（不摊给任何 SKU，也不摊成 0）的广告花费",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AdAttributionReportPage": {
+        "properties": {
+          "attributionModel": {
+            "description": "🔴 归因模型",
+            "type": "string"
+          },
+          "attributionNote": {
+            "description": "🔴 归因口径原文",
+            "type": "string"
+          },
+          "attributionWindowDays": {
+            "description": "🔴 归因窗口（天）",
+            "format": "int32",
+            "type": "integer"
+          },
+          "catalogAvailable": {
+            "description": "🔴 商品主数据上游（catalog）这次是否读到了",
+            "type": "boolean"
+          },
+          "catalogUnavailableReason": {
+            "description": "🔴 商品主数据上游读不到时的原因（读到了则为空串）",
+            "type": "string"
+          },
+          "dataAsOf": {
+            "description": "🔴 数据截至时刻",
+            "format": "date-time",
+            "type": "string"
+          },
+          "emptyNote": {
+            "description": "🔴 空态说明文案",
+            "type": "string"
+          },
+          "emptyReason": {
+            "description": "🔴 空态原因",
+            "type": "string"
+          },
+          "incrementalityNote": {
+            "description": "🔴 增量效果估计的口径原文",
+            "type": "string"
+          },
+          "items": {
+            "description": "当前页数据",
+            "items": {
+              "$ref": "#/components/schemas/AdAttributionReportRow"
+            },
+            "type": "array"
+          },
+          "metricDefinitionNote": {
+            "description": "🔴 逐指标口径说明",
+            "type": "string"
+          },
+          "metricDefinitions": {
+            "description": "🔴 逐指标口径定义（表头渲染用）",
+            "items": {
+              "$ref": "#/components/schemas/AdAttributionMetricDefinition"
+            },
+            "type": "array"
+          },
+          "page": {
+            "description": "页码，从 0 起",
+            "format": "int32",
+            "type": "integer"
+          },
+          "profitAvailable": {
+            "description": "🔴 利润上游（13.4.1.2）这次是否读到了",
+            "type": "boolean"
+          },
+          "profitUnavailableReason": {
+            "description": "🔴 利润上游读不到时的原因（读到了则为空串）",
+            "type": "string"
+          },
+          "ruleCode": {
+            "description": "🔴 规则编码",
+            "type": "string"
+          },
+          "ruleId": {
+            "description": "🔴 用的规则 id",
+            "format": "uuid",
+            "type": "string"
+          },
+          "ruleVersion": {
+            "description": "🔴 规则版本",
+            "format": "int64",
+            "type": "integer"
+          },
+          "size": {
+            "description": "每页条数",
+            "format": "int32",
+            "type": "integer"
+          },
+          "summaries": {
+            "description": "🔴 筛选后全集的汇总（按币种拆开，不受分页影响）",
+            "items": {
+              "$ref": "#/components/schemas/AdAttributionReportSummary"
+            },
+            "type": "array"
+          },
+          "total": {
+            "description": "符合筛选条件的 SKU 条数（不受分页影响）",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AdAttributionReportRow": {
+        "description": "当前页数据",
+        "properties": {
+          "acos": {
+            "description": "🔴 ACOS = Σ广告花费 / Σ广告销售额（分母为 0 时为 null=不可比）",
+            "type": "string"
+          },
+          "adAfterNetProfit": {
+            "description": "🔴 广告后净利 = 总净利 − 广告花费（任一项缺失时为 null）",
+            "type": "string"
+          },
+          "adOrders": {
+            "description": "🔴 归因成立并归到本 SKU 的订单数",
+            "type": "string"
+          },
+          "adProfitShare": {
+            "description": "🔴 广告占比利润 = 广告花费 / 总净利（分母为 0 或负时为 null=不可比）",
+            "type": "string"
+          },
+          "adSales": {
+            "description": "🔴 归因成立并归到本 SKU 的广告销售额",
+            "type": "string"
+          },
+          "adSalesShare": {
+            "description": "🔴 广告销售占比 = 广告销售额 / 总销售额（分母为 0 时为 null=不可比）",
+            "type": "string"
+          },
+          "adSpend": {
+            "description": "🔴 归因成立并归到本 SKU 的广告花费",
+            "type": "string"
+          },
+          "adUnits": {
+            "description": "🔴 归因成立并归到本 SKU 的件数",
+            "type": "string"
+          },
+          "attributionModel": {
+            "description": "🔴 归因模型（快照）",
+            "type": "string"
+          },
+          "attributionWindowDays": {
+            "description": "🔴 归因窗口（快照）",
+            "format": "int32",
+            "type": "integer"
+          },
+          "currency": {
+            "description": "🔴 币种",
+            "type": "string"
+          },
+          "incrementalSalesEstimate": {
+            "description": "🔴 增量销售额估计（**推导值，不是平台原值**；算不出来时为 null）",
+            "type": "string"
+          },
+          "incrementalShare": {
+            "description": "🔴 增量占比估计 = 增量销售额估计 / 总销售额（分母为 0 时为 null）",
+            "type": "string"
+          },
+          "netProfit": {
+            "description": "🔴 总净利（13.4.1.2 利润口径；上游读不到时为 null）",
+            "type": "string"
+          },
+          "profitAdFee": {
+            "description": "🔴 利润口径的广告费（13.4.1.2 的 AD_FEE；上游读不到时为 null）",
+            "type": "string"
+          },
+          "profitNote": {
+            "description": "🔴 利润侧不可用时的原因（可用则为空串）",
+            "type": "string"
+          },
+          "ruleCode": {
+            "description": "🔴 规则编码（快照）",
+            "type": "string"
+          },
+          "ruleVersion": {
+            "description": "🔴 规则版本（快照）",
+            "format": "int64",
+            "type": "integer"
+          },
+          "skuCode": {
+            "description": "内部 SKU 编码（catalog 读不到时为空串）",
+            "type": "string"
+          },
+          "skuId": {
+            "description": "内部 SKU id",
+            "format": "uuid",
+            "type": "string"
+          },
+          "spuCode": {
+            "description": "SPU 编码（catalog 读不到时为空串）",
+            "type": "string"
+          },
+          "tacos": {
+            "description": "🔴 TACOS = Σ广告花费 / 总销售额（分母为 0 时为 null=不可比）",
+            "type": "string"
+          },
+          "totalSales": {
+            "description": "🔴 总销售额（13.4.1.2 利润口径；上游读不到时为 null）",
+            "type": "string"
+          },
+          "totalUnits": {
+            "description": "🔴 总件数（13.4.1.2 利润口径；上游读不到时为 null）",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AdAttributionReportSummary": {
+        "description": "🔴 筛选后全集的汇总（按币种拆开，不受分页影响）",
+        "properties": {
+          "acos": {
+            "description": "🔴 ACOS = Σ广告花费 / Σ广告销售额（分母为 0 时为 null）",
+            "type": "string"
+          },
+          "adAfterNetProfit": {
+            "description": "🔴 广告后净利 = 总净利 − 广告花费（任一项缺失时为 null）",
+            "type": "string"
+          },
+          "adProfitShare": {
+            "description": "🔴 广告占比利润 = 广告花费 / 总净利（分母为 0 或负时为 null）",
+            "type": "string"
+          },
+          "adSalesShare": {
+            "description": "🔴 广告销售占比 = 广告销售额 / 总销售额（分母为 0 时为 null）",
+            "type": "string"
+          },
+          "attributedOrders": {
+            "description": "🔴 归因成立并归到 SKU 的订单数",
+            "type": "string"
+          },
+          "attributedSales": {
+            "description": "🔴 归因成立并归到 SKU 的广告销售额",
+            "type": "string"
+          },
+          "attributedSpend": {
+            "description": "🔴 归因成立并归到 SKU 的广告花费",
+            "type": "string"
+          },
+          "attributedUnits": {
+            "description": "🔴 归因成立并归到 SKU 的件数",
+            "type": "string"
+          },
+          "attributionCoverage": {
+            "description": "🔴 归因覆盖率 = 归因花费 / 活动总花费（分母为 0 时为 null）",
+            "type": "string"
+          },
+          "attributionNote": {
+            "description": "🔴 归因口径原文",
+            "type": "string"
+          },
+          "campaignSpendGap": {
+            "description": "🔴 活动总花费里没有落到订单上的部分（对账缺口；可为负）",
+            "type": "string"
+          },
+          "campaignTotalSpend": {
+            "description": "🔴 活动级总花费（14.1.1.1 `ad_campaign_daily_metric`；与订单级归因是两种粒度）",
+            "type": "string"
+          },
+          "currency": {
+            "description": "币种",
+            "type": "string"
+          },
+          "incrementalSalesEstimate": {
+            "description": "🔴 增量销售额估计（**推导值**；算不出来时为 null）",
+            "type": "string"
+          },
+          "incrementalShare": {
+            "description": "🔴 增量占比估计（分母为 0 时为 null）",
+            "type": "string"
+          },
+          "incrementalityNote": {
+            "description": "🔴 增量效果估计的口径原文",
+            "type": "string"
+          },
+          "metricDefinitionNote": {
+            "description": "🔴 逐指标口径说明",
+            "type": "string"
+          },
+          "skuCount": {
+            "description": "该币种下的 SKU 条数",
+            "format": "int64",
+            "type": "integer"
+          },
+          "tacos": {
+            "description": "🔴 TACOS = Σ广告花费 / 总销售额（分母为 0 时为 null）",
+            "type": "string"
+          },
+          "totalNetProfit": {
+            "description": "🔴 总净利（13.4.1.2；上游读不到时为 null）",
+            "type": "string"
+          },
+          "totalRevenue": {
+            "description": "🔴 总销售额（13.4.1.2；上游读不到时为 null）",
+            "type": "string"
+          },
+          "totalUnits": {
+            "description": "🔴 总件数（13.4.1.2；上游读不到时为 null）",
+            "type": "string"
+          },
+          "unattributedOrders": {
+            "description": "🔴 归不上的广告订单数",
+            "type": "string"
+          },
+          "unattributedSales": {
+            "description": "🔴 归不上的广告销售额",
+            "type": "string"
+          },
+          "unattributedSpend": {
+            "description": "🔴 归不上（不摊给任何 SKU，也不摊成 0）的广告花费",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AdAttributionRulePage": {
+        "properties": {
+          "items": {
+            "description": "当前页数据",
+            "items": {
+              "$ref": "#/components/schemas/AdAttributionRuleRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "description": "页码，从 0 起",
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "description": "每页条数",
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "description": "总条数",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AdAttributionRuleRow": {
+        "properties": {
+          "attributionModel": {
+            "description": "🔴 归因模型：LAST_CLICK / PLATFORM_WINDOW",
+            "type": "string"
+          },
+          "attributionWindowDays": {
+            "description": "🔴 归因窗口（天）；0 = 只有与下单同时刻的点击才算",
+            "format": "int32",
+            "type": "integer"
+          },
+          "createdAt": {
+            "description": "创建时刻",
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "description": "规则 id",
+            "format": "uuid",
+            "type": "string"
+          },
+          "note": {
+            "description": "备注",
+            "type": "string"
+          },
+          "ruleCode": {
+            "description": "规则编码（租户内唯一）",
+            "type": "string"
+          },
+          "status": {
+            "description": "状态：ACTIVE / PAUSED",
+            "type": "string"
+          },
+          "updatedAt": {
+            "description": "更新时刻",
+            "format": "date-time",
+            "type": "string"
+          },
+          "version": {
+            "description": "🔴 规则版本（每次改动 +1）",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AdAttributionRunRequest": {
+        "properties": {
+          "from": {
+            "description": "统计起始日（含）",
+            "format": "date",
+            "type": "string"
+          },
+          "recompute": {
+            "description": "🔴 是否重算已归因的行（false = 已归因的是事实，不改写）",
+            "type": "boolean"
+          },
+          "ruleId": {
+            "description": "规则 id（null = 当前生效规则）",
+            "format": "uuid",
+            "type": "string"
+          },
+          "to": {
+            "description": "统计截止日（含）",
+            "format": "date",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AdAttributionRunResult": {
+        "properties": {
+          "attributedFacts": {
+            "description": "🔴 归因成立（进报表）的行数",
+            "format": "int32",
+            "type": "integer"
+          },
+          "attributionModel": {
+            "description": "🔴 归因模型",
+            "type": "string"
+          },
+          "attributionWindowDays": {
+            "description": "🔴 归因窗口（天）",
+            "format": "int32",
+            "type": "integer"
+          },
+          "candidateOrders": {
+            "description": "窗口内参与计算的订单行数",
+            "format": "int32",
+            "type": "integer"
+          },
+          "note": {
+            "description": "🔴 口径说明",
+            "type": "string"
+          },
+          "ruleCode": {
+            "description": "规则编码",
+            "type": "string"
+          },
+          "ruleId": {
+            "description": "用的规则 id",
+            "format": "uuid",
+            "type": "string"
+          },
+          "ruleVersion": {
+            "description": "🔴 规则版本",
+            "format": "int64",
+            "type": "integer"
+          },
+          "statusCounts": {
+            "description": "🔴 归因不成立的原因分布（状态 → 行数）",
+            "items": {
+              "$ref": "#/components/schemas/AdAttributionStatusCount"
+            },
+            "type": "array"
+          },
+          "unattributedFacts": {
+            "description": "🔴 归因不成立的行数",
+            "format": "int32",
+            "type": "integer"
+          },
+          "writtenFacts": {
+            "description": "🔴 写入的归因结果行数",
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AdAttributionStatusCount": {
+        "description": "🔴 归因不成立的原因分布（状态 → 行数）",
+        "properties": {
+          "count": {
+            "description": "行数",
+            "format": "int64",
+            "type": "integer"
+          },
+          "label": {
+            "description": "说明",
+            "type": "string"
+          },
+          "status": {
+            "description": "归因状态",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "AdBidGuardrails": {
         "description": "🔴 本次生效的护栏上限",
         "properties": {
@@ -7022,6 +8232,1155 @@
         },
         "type": "object"
       },
+      "AdDaypartApplyRecommendationRequest": {
+        "properties": {
+          "hours": {
+            "description": "要套用的小时（空 = 24 个小时全套）",
+            "items": {
+              "description": "要套用的小时（空 = 24 个小时全套）",
+              "format": "int32",
+              "type": "integer"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "AdDaypartCapView": {
+        "description": "🔴 合并后的有效上限（取最严的那个）",
+        "properties": {
+          "dryRun": {
+            "type": "boolean"
+          },
+          "maxBid": {
+            "type": "number"
+          },
+          "maxBudget": {
+            "type": "number"
+          },
+          "minBid": {
+            "type": "number"
+          },
+          "minBudget": {
+            "type": "number"
+          },
+          "singleAdjustCapAmount": {
+            "type": "number"
+          },
+          "singleAdjustCapPercent": {
+            "type": "number"
+          },
+          "status": {
+            "type": "string"
+          },
+          "strategyCode": {
+            "type": "string"
+          },
+          "strategyId": {
+            "type": "string"
+          },
+          "strategyName": {
+            "type": "string"
+          },
+          "totalCapAmount": {
+            "type": "number"
+          },
+          "totalCapCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "totalCapWindowHours": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AdDaypartCapabilities": {
+        "properties": {
+          "actions": {
+            "description": "小时动作枚举",
+            "items": {
+              "description": "小时动作枚举",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "boundaryNote": {
+            "description": "🔴 与下游 / 边界模块的关系说明",
+            "type": "string"
+          },
+          "dimensions": {
+            "description": "能力维度清单",
+            "items": {
+              "$ref": "#/components/schemas/AdDaypartCapabilityDimension"
+            },
+            "type": "array"
+          },
+          "executionNote": {
+            "description": "🔴 执行路径说明",
+            "type": "string"
+          },
+          "guardrailNote": {
+            "description": "🔴 调整上限的口径说明",
+            "type": "string"
+          },
+          "multiplierNote": {
+            "description": "🔴 系数与「停投」的实现口径说明",
+            "type": "string"
+          },
+          "runModes": {
+            "description": "运行口径枚举",
+            "items": {
+              "description": "运行口径枚举",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "scopes": {
+            "description": "作用范围枚举",
+            "items": {
+              "description": "作用范围枚举",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "statuses": {
+            "description": "策略状态枚举",
+            "items": {
+              "description": "策略状态枚举",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "timezoneNote": {
+            "description": "🔴 时区口径说明",
+            "type": "string"
+          },
+          "triggerSources": {
+            "description": "触发来源枚举",
+            "items": {
+              "description": "触发来源枚举",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "upstreamNote": {
+            "description": "🔴 上游依赖说明",
+            "type": "string"
+          },
+          "upstreamStatuses": {
+            "description": "推荐批次的上游结论枚举",
+            "items": {
+              "description": "推荐批次的上游结论枚举",
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "AdDaypartCapabilityDimension": {
+        "description": "能力维度清单",
+        "properties": {
+          "available": {
+            "description": "本模块是否真的能做",
+            "type": "boolean"
+          },
+          "description": {
+            "description": "这个维度是干什么的",
+            "type": "string"
+          },
+          "dimension": {
+            "description": "维度码",
+            "type": "string"
+          },
+          "impact": {
+            "description": "🔴 做不了的影响（页面上原样显示）",
+            "type": "string"
+          },
+          "ownerModule": {
+            "description": "🔴 做不了的责任模块（做得了时为空串）",
+            "type": "string"
+          },
+          "source": {
+            "description": "数据落在哪 / 依赖谁",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AdDaypartCurveRequest": {
+        "properties": {
+          "hours": {
+            "description": "完整的小时集合（应覆盖 0..23）",
+            "items": {
+              "$ref": "#/components/schemas/AdDaypartHourInput"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "hours"
+        ],
+        "type": "object"
+      },
+      "AdDaypartHourConfig": {
+        "description": "24 个小时曲线",
+        "properties": {
+          "action": {
+            "description": "动作：KEEP / BOOST / REDUCE / PAUSE",
+            "type": "string"
+          },
+          "basisNote": {
+            "description": "判定依据（页面上原样显示）",
+            "type": "string"
+          },
+          "bidMultiplier": {
+            "description": "🔴 竞价系数（相对基准；1 = 不动）",
+            "type": "number"
+          },
+          "budgetMultiplier": {
+            "description": "🔴 预算系数（相对基准；0 = 停投）",
+            "type": "number"
+          },
+          "localHour": {
+            "description": "🔴 店铺本地小时（0..23）",
+            "format": "int32",
+            "type": "integer"
+          },
+          "source": {
+            "description": "来源：MANUAL 人工 / RECOMMENDED 推荐生成",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AdDaypartHourInput": {
+        "description": "完整的小时集合（应覆盖 0..23）",
+        "properties": {
+          "action": {
+            "description": "KEEP / BOOST / REDUCE / PAUSE",
+            "type": "string"
+          },
+          "basisNote": {
+            "type": "string"
+          },
+          "bidMultiplier": {
+            "description": "竞价系数（不给 = 1）",
+            "type": "number"
+          },
+          "budgetMultiplier": {
+            "description": "预算系数（不给 = 1；PAUSE 必须为 0）",
+            "type": "number"
+          },
+          "localHour": {
+            "description": "店铺本地小时（0..23）",
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "action",
+          "localHour"
+        ],
+        "type": "object"
+      },
+      "AdDaypartRecommendationHourView": {
+        "description": "小时明细（定不了时区时为空数组 —— 不是「24 个小时都没有」）",
+        "properties": {
+          "basisNote": {
+            "description": "判定依据（可复算）",
+            "type": "string"
+          },
+          "localHour": {
+            "description": "🔴 店铺本地小时（0..23）",
+            "format": "int32",
+            "type": "integer"
+          },
+          "orderCount": {
+            "description": "该小时的订单笔数",
+            "type": "number"
+          },
+          "orderShare": {
+            "description": "🔴 该小时的订单占比（null = 不可比，不是 0）",
+            "type": "number"
+          },
+          "p90Peak": {
+            "description": "上游的 P90 高峰刻度是否命中",
+            "type": "boolean"
+          },
+          "suggestedAction": {
+            "description": "建议动作",
+            "type": "string"
+          },
+          "suggestedBidMultiplier": {
+            "description": "建议竞价系数",
+            "type": "number"
+          },
+          "suggestedBudgetMultiplier": {
+            "description": "建议预算系数",
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "AdDaypartRecommendationRequest": {
+        "properties": {
+          "from": {
+            "description": "口径窗口起（默认：DB 今天往前 29 天）",
+            "format": "date",
+            "type": "string"
+          },
+          "strategyId": {
+            "description": "策略 id（推荐按店铺生成）",
+            "type": "string"
+          },
+          "to": {
+            "description": "口径窗口止（默认：DB 今天）",
+            "format": "date",
+            "type": "string"
+          }
+        },
+        "required": [
+          "strategyId"
+        ],
+        "type": "object"
+      },
+      "AdDaypartRecommendationView": {
+        "properties": {
+          "alignment": {
+            "description": "汇总口径（本模块只有 LOCAL_TIME）",
+            "type": "string"
+          },
+          "expectedDays": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "generatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "hours": {
+            "description": "小时明细（定不了时区时为空数组 —— 不是「24 个小时都没有」）",
+            "items": {
+              "$ref": "#/components/schemas/AdDaypartRecommendationHourView"
+            },
+            "type": "array"
+          },
+          "id": {
+            "type": "string"
+          },
+          "profile": {
+            "additionalProperties": {
+              "description": "🔴 生成时用的判定参数快照（可复算）",
+              "type": "object"
+            },
+            "description": "🔴 生成时用的判定参数快照（可复算）",
+            "type": "object"
+          },
+          "projectedDays": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "projectedOrderCount": {
+            "type": "number"
+          },
+          "shopCode": {
+            "type": "string"
+          },
+          "shopName": {
+            "type": "string"
+          },
+          "shopTimezone": {
+            "description": "🔴 店铺本地时区（定不了时区时是空串）",
+            "type": "string"
+          },
+          "strategyId": {
+            "type": "string"
+          },
+          "timezoneReason": {
+            "type": "string"
+          },
+          "timezoneStatus": {
+            "type": "string"
+          },
+          "upstreamDataUpdatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "upstreamMessage": {
+            "type": "string"
+          },
+          "upstreamStatus": {
+            "description": "上游结论：OK / SHOP_UNRESOLVED / CONFLICT / NO_FACT",
+            "type": "string"
+          },
+          "windowFrom": {
+            "format": "date",
+            "type": "string"
+          },
+          "windowTo": {
+            "format": "date",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AdDaypartRunRequest": {
+        "properties": {
+          "note": {
+            "type": "string"
+          },
+          "runMode": {
+            "description": "运行口径：DRY_RUN 只算不调 / APPLY 真调（默认 DRY_RUN）",
+            "type": "string"
+          },
+          "strategyId": {
+            "description": "策略 id（不给 = 跑所有「参与调度且生效中」的策略）",
+            "type": "string"
+          },
+          "triggerSource": {
+            "description": "触发来源：MANUAL / SCHEDULED（默认 MANUAL）",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AdDaypartRunResult": {
+        "properties": {
+          "executedCount": {
+            "description": "真的跑了多少条",
+            "format": "int32",
+            "type": "integer"
+          },
+          "skippedCount": {
+            "description": "跳过多少条（不是生效中 / 时区定不了 / 本小时不动）",
+            "format": "int32",
+            "type": "integer"
+          },
+          "skips": {
+            "description": "🔴 被跳过的策略与原因",
+            "items": {
+              "$ref": "#/components/schemas/AdDaypartRunSkip"
+            },
+            "type": "array"
+          },
+          "strategyCount": {
+            "description": "这次触发了多少条策略",
+            "format": "int32",
+            "type": "integer"
+          },
+          "tasks": {
+            "description": "逐条任务的运行结果",
+            "items": {
+              "$ref": "#/components/schemas/AdDaypartTaskView"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "AdDaypartRunSkip": {
+        "description": "🔴 被跳过的策略与原因",
+        "properties": {
+          "reason": {
+            "description": "🔴 为什么被跳过",
+            "type": "string"
+          },
+          "shopCode": {
+            "description": "店铺编码",
+            "type": "string"
+          },
+          "strategyCode": {
+            "description": "策略编码",
+            "type": "string"
+          },
+          "strategyId": {
+            "description": "策略 id",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AdDaypartShopCapsView": {
+        "properties": {
+          "effectiveCaps": {
+            "$ref": "#/components/schemas/AdDaypartCapView"
+          },
+          "note": {
+            "description": "口径说明",
+            "type": "string"
+          },
+          "shopCode": {
+            "type": "string"
+          },
+          "shopName": {
+            "type": "string"
+          },
+          "shopTimezone": {
+            "type": "string"
+          },
+          "strategies": {
+            "description": "该店铺各条策略的上限",
+            "items": {
+              "$ref": "#/components/schemas/AdDaypartCapView"
+            },
+            "type": "array"
+          },
+          "timezoneReason": {
+            "type": "string"
+          },
+          "timezoneStatus": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AdDaypartShopTimezone": {
+        "properties": {
+          "activeSiteCount": {
+            "description": "启用的站点数",
+            "format": "int32",
+            "type": "integer"
+          },
+          "shopCode": {
+            "description": "店铺编码",
+            "type": "string"
+          },
+          "shopId": {
+            "description": "店铺 id",
+            "type": "string"
+          },
+          "shopName": {
+            "description": "店铺名",
+            "type": "string"
+          },
+          "shopTimezone": {
+            "description": "🔴 店铺本地时区（IANA 标识；定不了时区时是空串）",
+            "type": "string"
+          },
+          "siteTimezones": {
+            "description": "启用的站点各自的默认时区（多个且不一致时这里能看出来）",
+            "items": {
+              "description": "启用的站点各自的默认时区（多个且不一致时这里能看出来）",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "timezoneReason": {
+            "description": "定不了 / 冲突的原因（页面上原样显示）",
+            "type": "string"
+          },
+          "timezoneStatus": {
+            "description": "时区归属状态",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AdDaypartStatusRequest": {
+        "properties": {
+          "note": {
+            "type": "string"
+          },
+          "status": {
+            "description": "DRAFT / ACTIVE / PAUSED / ARCHIVED",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "type": "object"
+      },
+      "AdDaypartStrategyPage": {
+        "properties": {
+          "items": {
+            "description": "当前页数据",
+            "items": {
+              "$ref": "#/components/schemas/AdDaypartStrategySummary"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "description": "符合条件的总条数",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AdDaypartStrategyRequest": {
+        "properties": {
+          "currency": {
+            "description": "币种（大写 3 位）",
+            "type": "string"
+          },
+          "dryRun": {
+            "description": "试运行（默认 true）",
+            "type": "boolean"
+          },
+          "maxBid": {
+            "type": "number"
+          },
+          "maxBudget": {
+            "type": "number"
+          },
+          "minBid": {
+            "type": "number"
+          },
+          "minBudget": {
+            "type": "number"
+          },
+          "note": {
+            "type": "string"
+          },
+          "recommendBoostBidMultiplier": {
+            "type": "number"
+          },
+          "recommendBoostBudgetMultiplier": {
+            "type": "number"
+          },
+          "recommendPauseBidMultiplier": {
+            "type": "number"
+          },
+          "recommendPauseBudgetMultiplier": {
+            "type": "number"
+          },
+          "recommendPauseShareMultiple": {
+            "type": "number"
+          },
+          "recommendPeakShareMultiple": {
+            "type": "number"
+          },
+          "recommendReduceBidMultiplier": {
+            "type": "number"
+          },
+          "recommendReduceBudgetMultiplier": {
+            "type": "number"
+          },
+          "recommendTroughShareMultiple": {
+            "type": "number"
+          },
+          "runIntervalMinutes": {
+            "description": "调度间隔（分钟，默认 60）",
+            "format": "int32",
+            "type": "integer"
+          },
+          "scheduleEnabled": {
+            "description": "是否参与外部调度（默认 false）",
+            "type": "boolean"
+          },
+          "scope": {
+            "description": "作用范围：ALL_CAMPAIGNS / CAMPAIGN（默认 ALL_CAMPAIGNS）",
+            "type": "string"
+          },
+          "shopCode": {
+            "description": "店铺编码",
+            "type": "string"
+          },
+          "singleAdjustCapAmount": {
+            "description": "单次调整上限（金额）",
+            "type": "number"
+          },
+          "singleAdjustCapPercent": {
+            "description": "单次调整上限（相对基准的偏离比例；0 = 不额外限制）",
+            "type": "number"
+          },
+          "strategyCode": {
+            "description": "策略编码（租户内唯一）",
+            "type": "string"
+          },
+          "strategyName": {
+            "description": "策略名",
+            "type": "string"
+          },
+          "targetCampaignId": {
+            "description": "scope=CAMPAIGN 时指定的活动 id",
+            "type": "string"
+          },
+          "totalCapAmount": {
+            "description": "窗口内累计上调上限（金额）",
+            "type": "number"
+          },
+          "totalCapCount": {
+            "description": "窗口内累计调整次数上限",
+            "format": "int32",
+            "type": "integer"
+          },
+          "totalCapWindowHours": {
+            "description": "上限窗口长度（小时）",
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "currency",
+          "shopCode",
+          "singleAdjustCapAmount",
+          "strategyCode",
+          "strategyName",
+          "totalCapAmount"
+        ],
+        "type": "object"
+      },
+      "AdDaypartStrategySummary": {
+        "description": "当前页数据",
+        "properties": {
+          "currency": {
+            "type": "string"
+          },
+          "dryRun": {
+            "type": "boolean"
+          },
+          "effectiveHourCount": {
+            "description": "曲线里真正在动的小时数（24 = 全天都在调）",
+            "format": "int32",
+            "type": "integer"
+          },
+          "id": {
+            "type": "string"
+          },
+          "lastRunAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "scheduleEnabled": {
+            "type": "boolean"
+          },
+          "scope": {
+            "type": "string"
+          },
+          "shopCode": {
+            "type": "string"
+          },
+          "shopName": {
+            "type": "string"
+          },
+          "shopTimezone": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "strategyCode": {
+            "type": "string"
+          },
+          "strategyName": {
+            "type": "string"
+          },
+          "timezoneReason": {
+            "type": "string"
+          },
+          "timezoneStatus": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AdDaypartStrategyView": {
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "currency": {
+            "description": "策略币种（跨币种的活动 / 关键词逐条拒绝）",
+            "type": "string"
+          },
+          "dryRun": {
+            "description": "🔴 试运行：true = 只算不调",
+            "type": "boolean"
+          },
+          "hours": {
+            "description": "24 个小时曲线",
+            "items": {
+              "$ref": "#/components/schemas/AdDaypartHourConfig"
+            },
+            "type": "array"
+          },
+          "id": {
+            "type": "string"
+          },
+          "lastAppliedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "lastRunAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "maxBid": {
+            "type": "number"
+          },
+          "maxBudget": {
+            "type": "number"
+          },
+          "minBid": {
+            "type": "number"
+          },
+          "minBudget": {
+            "type": "number"
+          },
+          "note": {
+            "type": "string"
+          },
+          "recommendBoostBidMultiplier": {
+            "type": "number"
+          },
+          "recommendBoostBudgetMultiplier": {
+            "type": "number"
+          },
+          "recommendPauseBidMultiplier": {
+            "type": "number"
+          },
+          "recommendPauseBudgetMultiplier": {
+            "type": "number"
+          },
+          "recommendPauseShareMultiple": {
+            "type": "number"
+          },
+          "recommendPeakShareMultiple": {
+            "type": "number"
+          },
+          "recommendReduceBidMultiplier": {
+            "type": "number"
+          },
+          "recommendReduceBudgetMultiplier": {
+            "type": "number"
+          },
+          "recommendTroughShareMultiple": {
+            "type": "number"
+          },
+          "runIntervalMinutes": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "scheduleEnabled": {
+            "type": "boolean"
+          },
+          "scope": {
+            "type": "string"
+          },
+          "shopCode": {
+            "type": "string"
+          },
+          "shopName": {
+            "type": "string"
+          },
+          "shopTimezone": {
+            "description": "🔴 店铺本地时区（IANA 标识；定不了时区时是空串）",
+            "type": "string"
+          },
+          "singleAdjustCapAmount": {
+            "type": "number"
+          },
+          "singleAdjustCapPercent": {
+            "type": "number"
+          },
+          "status": {
+            "type": "string"
+          },
+          "strategyCode": {
+            "type": "string"
+          },
+          "strategyName": {
+            "type": "string"
+          },
+          "targetCampaignId": {
+            "type": "string"
+          },
+          "targetCampaignName": {
+            "type": "string"
+          },
+          "timezoneReason": {
+            "type": "string"
+          },
+          "timezoneStatus": {
+            "type": "string"
+          },
+          "totalCapAmount": {
+            "type": "number"
+          },
+          "totalCapCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "totalCapWindowHours": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "version": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AdDaypartTaskLineView": {
+        "properties": {
+          "action": {
+            "type": "string"
+          },
+          "afterValue": {
+            "description": "调整后的值（试运行时是「本来会变成多少」）",
+            "type": "number"
+          },
+          "beforeValue": {
+            "description": "调整前的值",
+            "type": "number"
+          },
+          "campaignId": {
+            "type": "string"
+          },
+          "campaignName": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "delta": {
+            "description": "增减额（正 = 调高）",
+            "type": "number"
+          },
+          "guardrailCode": {
+            "description": "🔴 被哪一道闸拦下的（可空 = 没过闸，是业务原因）",
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "keywordId": {
+            "type": "string"
+          },
+          "localHour": {
+            "description": "🔴 店铺本地小时",
+            "format": "int32",
+            "type": "integer"
+          },
+          "message": {
+            "description": "逐条原因（没成必须写清为什么）",
+            "type": "string"
+          },
+          "result": {
+            "description": "APPLIED / REJECTED / SKIPPED / DRY_RUN / PENDING",
+            "type": "string"
+          },
+          "targetRef": {
+            "description": "被调整对象（关键词原文）",
+            "type": "string"
+          },
+          "targetType": {
+            "description": "CAMPAIGN_BUDGET / KEYWORD_BID",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AdDaypartTaskPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AdDaypartTaskSummary"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AdDaypartTaskSummary": {
+        "properties": {
+          "appliedCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "executedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "localHour": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "rejectedCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "runMode": {
+            "type": "string"
+          },
+          "shopCode": {
+            "type": "string"
+          },
+          "shopTimezone": {
+            "type": "string"
+          },
+          "skippedCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "status": {
+            "type": "string"
+          },
+          "strategyCode": {
+            "type": "string"
+          },
+          "strategyId": {
+            "type": "string"
+          },
+          "totalIncrease": {
+            "type": "number"
+          },
+          "triggerSource": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AdDaypartTaskView": {
+        "description": "逐条任务的运行结果",
+        "properties": {
+          "appliedCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "executedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "lines": {
+            "items": {
+              "$ref": "#/components/schemas/AdDaypartTaskLineView"
+            },
+            "type": "array"
+          },
+          "localHour": {
+            "description": "🔴 本轮跑的是店铺本地的第几个小时",
+            "format": "int32",
+            "type": "integer"
+          },
+          "message": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "rejectedCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "runMode": {
+            "type": "string"
+          },
+          "shopCode": {
+            "type": "string"
+          },
+          "shopTimezone": {
+            "type": "string"
+          },
+          "singleAdjustCapAmount": {
+            "type": "number"
+          },
+          "singleAdjustCapPercent": {
+            "type": "number"
+          },
+          "skippedCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "status": {
+            "type": "string"
+          },
+          "strategyCode": {
+            "type": "string"
+          },
+          "strategyId": {
+            "type": "string"
+          },
+          "strategyName": {
+            "type": "string"
+          },
+          "timezoneStatus": {
+            "type": "string"
+          },
+          "totalCapAmount": {
+            "type": "number"
+          },
+          "totalCapCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "totalCapWindowHours": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "totalIncrease": {
+            "description": "🔴 本轮上调金额合计（总上限只管「多花了多少」）",
+            "type": "number"
+          },
+          "triggerSource": {
+            "type": "string"
+          },
+          "windowFrom": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "windowTo": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "AdDiagnosisActionPage": {
         "properties": {
           "appliedCount": {
@@ -11546,6 +13905,679 @@
             "description": "符合条件的总条数",
             "format": "int64",
             "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AdProductCapabilityDimension": {
+        "description": "逐维度能力声明；未交付段 available=false",
+        "properties": {
+          "available": {
+            "description": "本模块是否已交付",
+            "type": "boolean"
+          },
+          "description": {
+            "description": "维度说明",
+            "type": "string"
+          },
+          "dimension": {
+            "description": "维度键",
+            "type": "string"
+          },
+          "impact": {
+            "description": "不交付的影响",
+            "type": "string"
+          },
+          "ownerModule": {
+            "description": "未交付段的责任模块",
+            "type": "string"
+          },
+          "source": {
+            "description": "数据来源（表 / 上游模块）",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AdProductMetricDefinition": {
+        "description": "🔴 逐指标口径定义（表头渲染用）",
+        "properties": {
+          "available": {
+            "description": "🔴 当前是否可算（false = 这一格取不到，不是 0）",
+            "type": "boolean"
+          },
+          "formula": {
+            "description": "🔴 口径定义（写进表头的那句话）",
+            "type": "string"
+          },
+          "label": {
+            "description": "指标显示名",
+            "type": "string"
+          },
+          "metric": {
+            "description": "指标键",
+            "type": "string"
+          },
+          "ownerModule": {
+            "description": "未交付段的责任模块",
+            "type": "string"
+          },
+          "source": {
+            "description": "数据来源",
+            "type": "string"
+          },
+          "unavailableReason": {
+            "description": "🔴 取不到的原因（available=false 时说明为什么没有数值）",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AdProductReportCapabilities": {
+        "properties": {
+          "attributionNote": {
+            "description": "🔴 归因口径原文（两级等分规则；规则变了历史报表不可比）",
+            "type": "string"
+          },
+          "boundaryNote": {
+            "description": "下游与边界说明",
+            "type": "string"
+          },
+          "dataAsOfNote": {
+            "description": "🔴 「数据截至 X 时间」的口径说明",
+            "type": "string"
+          },
+          "dimensions": {
+            "description": "逐维度能力声明；未交付段 available=false",
+            "items": {
+              "$ref": "#/components/schemas/AdProductCapabilityDimension"
+            },
+            "type": "array"
+          },
+          "dimensions_": {
+            "description": "商品维度取值",
+            "items": {
+              "description": "商品维度取值",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "emptyReasons": {
+            "description": "空态原因取值",
+            "items": {
+              "description": "空态原因取值",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "metricDefinitionNote": {
+            "description": "🔴 逐指标口径说明（随报表一起返回）",
+            "type": "string"
+          },
+          "metricDefinitions": {
+            "description": "🔴 逐指标口径定义（ACOS / TACOS / 广告销售占比的定义写在这里）",
+            "items": {
+              "$ref": "#/components/schemas/AdProductMetricDefinition"
+            },
+            "type": "array"
+          },
+          "sortOptions": {
+            "description": "排序方式取值",
+            "items": {
+              "description": "排序方式取值",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "upstreamNote": {
+            "description": "上游依赖说明",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AdProductReportExportPage": {
+        "properties": {
+          "items": {
+            "description": "当前页数据",
+            "items": {
+              "$ref": "#/components/schemas/AdProductReportExportRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "description": "页码，从 0 起",
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "description": "每页条数",
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "description": "总条数",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AdProductReportExportRow": {
+        "description": "当前页数据",
+        "properties": {
+          "attributionNote": {
+            "description": "🔴 导出当时的归因口径原文",
+            "type": "string"
+          },
+          "createdAt": {
+            "description": "发生时刻",
+            "format": "date-time",
+            "type": "string"
+          },
+          "dataAsOf": {
+            "description": "🔴 这次导出对着哪个水位算出来的（成功同步的水位）",
+            "format": "date-time",
+            "type": "string"
+          },
+          "dateFrom": {
+            "description": "统计起始日",
+            "format": "date",
+            "type": "string"
+          },
+          "dateTo": {
+            "description": "统计截止日",
+            "format": "date",
+            "type": "string"
+          },
+          "dimension": {
+            "description": "商品维度",
+            "type": "string"
+          },
+          "id": {
+            "description": "导出留痕 id",
+            "format": "uuid",
+            "type": "string"
+          },
+          "internalAdType": {
+            "description": "归一后类型筛选（null = 没筛）",
+            "type": "string"
+          },
+          "metricDefinitionNote": {
+            "description": "🔴 导出当时的逐指标口径定义",
+            "type": "string"
+          },
+          "platformId": {
+            "description": "平台 id 筛选（null = 没筛）",
+            "format": "uuid",
+            "type": "string"
+          },
+          "requestedBy": {
+            "description": "发起人（已认证成员）",
+            "format": "uuid",
+            "type": "string"
+          },
+          "rowCount": {
+            "description": "导出的分组行数",
+            "format": "int32",
+            "type": "integer"
+          },
+          "shopCode": {
+            "description": "店铺筛选（null = 没筛）",
+            "type": "string"
+          },
+          "status": {
+            "description": "状态筛选（null = 没筛）",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AdProductReportOption": {
+        "description": "排序下拉项",
+        "properties": {
+          "label": {
+            "description": "显示名",
+            "type": "string"
+          },
+          "value": {
+            "description": "取值",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AdProductReportOptions": {
+        "properties": {
+          "attributionNote": {
+            "description": "🔴 归因口径原文",
+            "type": "string"
+          },
+          "dimensions": {
+            "description": "商品维度下拉项",
+            "items": {
+              "$ref": "#/components/schemas/AdProductReportOption"
+            },
+            "type": "array"
+          },
+          "internalAdTypes": {
+            "description": "归一后类型下拉项",
+            "items": {
+              "$ref": "#/components/schemas/AdProductReportOption"
+            },
+            "type": "array"
+          },
+          "metricDefinitionNote": {
+            "description": "🔴 逐指标口径说明",
+            "type": "string"
+          },
+          "metricDefinitions": {
+            "description": "🔴 逐指标口径定义",
+            "items": {
+              "$ref": "#/components/schemas/AdProductMetricDefinition"
+            },
+            "type": "array"
+          },
+          "platforms": {
+            "description": "平台下拉项",
+            "items": {
+              "$ref": "#/components/schemas/AdProductReportOption"
+            },
+            "type": "array"
+          },
+          "rangeLimitNote": {
+            "description": "🔴 时间范围与粒度的上限说明",
+            "type": "string"
+          },
+          "shops": {
+            "description": "店铺下拉项",
+            "items": {
+              "$ref": "#/components/schemas/AdProductReportOption"
+            },
+            "type": "array"
+          },
+          "sorts": {
+            "description": "排序下拉项",
+            "items": {
+              "$ref": "#/components/schemas/AdProductReportOption"
+            },
+            "type": "array"
+          },
+          "statuses": {
+            "description": "状态下拉项",
+            "items": {
+              "$ref": "#/components/schemas/AdProductReportOption"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "AdProductReportPage": {
+        "properties": {
+          "attributionNote": {
+            "description": "🔴 归因口径原文",
+            "type": "string"
+          },
+          "candidateTruncated": {
+            "description": "🔴 候选集是否被截断（SPU 维度会先取 SKU 候选集再归并）",
+            "type": "boolean"
+          },
+          "candidateTruncationNote": {
+            "description": "🔴 截断说明（未截断时为空串）",
+            "type": "string"
+          },
+          "catalogAvailable": {
+            "description": "🔴 商品主数据上游（catalog）这次是否读到了",
+            "type": "boolean"
+          },
+          "catalogUnavailableReason": {
+            "description": "🔴 商品主数据上游读不到时的原因（读到了则为空串）",
+            "type": "string"
+          },
+          "dataAsOf": {
+            "description": "🔴 数据截至时刻（成功同步的水位；从未同步成功过则为 null）",
+            "format": "date-time",
+            "type": "string"
+          },
+          "dataAsOfNote": {
+            "description": "🔴 「数据截至 X 时间」的口径说明",
+            "type": "string"
+          },
+          "dimension": {
+            "description": "商品维度：LISTING / SKU / SPU",
+            "type": "string"
+          },
+          "emptyNote": {
+            "description": "🔴 空态说明文案（几种空的解释各不相同）",
+            "type": "string"
+          },
+          "emptyReason": {
+            "description": "🔴 空态原因：NO_SYNCED_DATA / NO_METRICS_IN_RANGE / FILTERED_EMPTY / NO_PRODUCT_BINDING / null",
+            "type": "string"
+          },
+          "items": {
+            "description": "当前页数据",
+            "items": {
+              "$ref": "#/components/schemas/AdProductReportRow"
+            },
+            "type": "array"
+          },
+          "metricDefinitionNote": {
+            "description": "🔴 逐指标口径说明",
+            "type": "string"
+          },
+          "metricDefinitions": {
+            "description": "🔴 逐指标口径定义（表头渲染用）",
+            "items": {
+              "$ref": "#/components/schemas/AdProductMetricDefinition"
+            },
+            "type": "array"
+          },
+          "page": {
+            "description": "页码，从 0 起",
+            "format": "int32",
+            "type": "integer"
+          },
+          "profitAvailable": {
+            "description": "🔴 利润上游（13.4.1.2）这次是否读到了",
+            "type": "boolean"
+          },
+          "profitUnavailableReason": {
+            "description": "🔴 利润上游读不到时的原因（读到了则为空串）",
+            "type": "string"
+          },
+          "size": {
+            "description": "每页条数",
+            "format": "int32",
+            "type": "integer"
+          },
+          "summaries": {
+            "description": "🔴 筛选后全集的汇总（按币种拆开，不受分页影响）",
+            "items": {
+              "$ref": "#/components/schemas/AdProductReportSummary"
+            },
+            "type": "array"
+          },
+          "total": {
+            "description": "符合筛选条件的分组总条数（不受分页影响）",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AdProductReportRow": {
+        "description": "当前页数据",
+        "properties": {
+          "acos": {
+            "description": "🔴 ACOS = Σ花费 / Σ广告销售额（分母为 0 时为 null=不可比）",
+            "type": "string"
+          },
+          "adAfterNetProfit": {
+            "description": "🔴 广告后净利 = 总净利 − 广告花费（任一项缺失时为 null）",
+            "type": "string"
+          },
+          "adProfitShare": {
+            "description": "🔴 广告占比利润 = 广告花费 / 总净利（分母为 0 或负时为 null=不可比）",
+            "type": "string"
+          },
+          "adSalesShare": {
+            "description": "🔴 广告销售占比 = 广告销售额 / 总销售额（分母为 0 时为 null=不可比）",
+            "type": "string"
+          },
+          "attributionLabel": {
+            "description": "🔴 归因方式的中文说明",
+            "type": "string"
+          },
+          "attributionMode": {
+            "description": "🔴 归因方式：DIRECT / ALLOCATED_EVENLY / MIXED",
+            "type": "string"
+          },
+          "clicks": {
+            "description": "点击合计",
+            "type": "string"
+          },
+          "cpc": {
+            "description": "🔴 CPC = Σ花费 / Σ点击（分母为 0 时为 null=不可比）",
+            "type": "string"
+          },
+          "ctr": {
+            "description": "🔴 CTR = Σ点击 / Σ曝光（分母为 0 时为 null=不可比）",
+            "type": "string"
+          },
+          "currency": {
+            "description": "🔴 币种（本仓无汇率源，不同币种不合并）",
+            "type": "string"
+          },
+          "cvr": {
+            "description": "🔴 转化率 = Σ订单 / Σ点击（分母为 0 时为 null=不可比）",
+            "type": "string"
+          },
+          "dimension": {
+            "description": "商品维度：LISTING / SKU / SPU",
+            "type": "string"
+          },
+          "dimensionKey": {
+            "description": "分组键（LISTING = listing id；SKU = 内部 SKU id；SPU = SPU 编码）",
+            "type": "string"
+          },
+          "dimensionLabel": {
+            "description": "分组显示名",
+            "type": "string"
+          },
+          "externalItemId": {
+            "description": "平台侧商品 id（原文照抄，不折叠大小写）",
+            "type": "string"
+          },
+          "impressions": {
+            "description": "曝光合计",
+            "type": "string"
+          },
+          "listingId": {
+            "description": "listing id（LISTING 维度有值）",
+            "type": "string"
+          },
+          "listingTitle": {
+            "description": "listing 标题",
+            "type": "string"
+          },
+          "metricFrom": {
+            "description": "该分组实际统计到的最早日期",
+            "format": "date",
+            "type": "string"
+          },
+          "metricTo": {
+            "description": "该分组实际统计到的最晚日期",
+            "format": "date",
+            "type": "string"
+          },
+          "netProfit": {
+            "description": "🔴 总净利（13.4.1.2 利润口径；上游读不到时为 null）",
+            "type": "string"
+          },
+          "orders": {
+            "description": "广告带来的订单合计",
+            "type": "string"
+          },
+          "platformName": {
+            "description": "平台名",
+            "type": "string"
+          },
+          "profitNote": {
+            "description": "🔴 这一行的利润列为空时的原因（取到了就是空串）",
+            "type": "string"
+          },
+          "roas": {
+            "description": "🔴 ROAS = Σ广告销售额 / Σ广告花费（分母为 0 时为 null=不可比）",
+            "type": "string"
+          },
+          "sales": {
+            "description": "广告销售额合计",
+            "type": "string"
+          },
+          "shopName": {
+            "description": "店铺名",
+            "type": "string"
+          },
+          "skuCode": {
+            "description": "内部 SKU 编码（SKU / SPU 维度有值；catalog 读不到时为空串）",
+            "type": "string"
+          },
+          "skuId": {
+            "description": "内部 SKU id（SKU / SPU 维度有值）",
+            "type": "string"
+          },
+          "sourceListingCount": {
+            "description": "贡献到本行的投放商品数（SKU / SPU 维度有值）",
+            "format": "int32",
+            "type": "integer"
+          },
+          "spend": {
+            "description": "广告花费合计",
+            "type": "string"
+          },
+          "spuCode": {
+            "description": "SPU 编码（SPU 维度有值；catalog 读不到时为空串）",
+            "type": "string"
+          },
+          "tacos": {
+            "description": "🔴 TACOS = Σ广告花费 / 总销售额（分母为 0 时为 null=不可比）",
+            "type": "string"
+          },
+          "totalSales": {
+            "description": "🔴 总销售额（13.4.1.2 利润口径；上游读不到时为 null）",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AdProductReportSummary": {
+        "description": "🔴 筛选后全集的汇总（按币种拆开，不受分页影响）",
+        "properties": {
+          "acos": {
+            "description": "🔴 ACOS = Σ花费 / Σ广告销售额（分母为 0 时为 null=不可比）",
+            "type": "string"
+          },
+          "adAfterNetProfit": {
+            "description": "🔴 广告后净利 = 总净利 − 广告花费（任一项缺失时为 null）",
+            "type": "string"
+          },
+          "adProfitShare": {
+            "description": "🔴 广告占比利润 = 广告花费 / 总净利（分母为 0 或负时为 null=不可比）",
+            "type": "string"
+          },
+          "adSalesShare": {
+            "description": "🔴 广告销售占比 = 广告销售额 / 总销售额（分母为 0 时为 null=不可比）",
+            "type": "string"
+          },
+          "attributionNote": {
+            "description": "🔴 归因口径原文",
+            "type": "string"
+          },
+          "campaignTotalSales": {
+            "description": "🔴 范围内广告销售额总额（= 行合计 + 未归属）",
+            "type": "string"
+          },
+          "campaignTotalSpend": {
+            "description": "🔴 范围内广告花费总额（= 行合计 + 未归属）",
+            "type": "string"
+          },
+          "cpc": {
+            "description": "🔴 CPC = Σ花费 / Σ点击（分母为 0 时为 null=不可比）",
+            "type": "string"
+          },
+          "ctr": {
+            "description": "🔴 CTR = Σ点击 / Σ曝光（分母为 0 时为 null=不可比）",
+            "type": "string"
+          },
+          "currency": {
+            "description": "币种",
+            "type": "string"
+          },
+          "cvr": {
+            "description": "🔴 转化率 = Σ订单 / Σ点击（分母为 0 时为 null=不可比）",
+            "type": "string"
+          },
+          "groupCount": {
+            "description": "该币种下的分组条数",
+            "format": "int64",
+            "type": "integer"
+          },
+          "metricDefinitionNote": {
+            "description": "🔴 逐指标口径说明",
+            "type": "string"
+          },
+          "metricFrom": {
+            "description": "实际统计到的最早日期",
+            "format": "date",
+            "type": "string"
+          },
+          "metricTo": {
+            "description": "实际统计到的最晚日期",
+            "format": "date",
+            "type": "string"
+          },
+          "roas": {
+            "description": "🔴 ROAS = Σ广告销售额 / Σ广告花费（分母为 0 时为 null=不可比）",
+            "type": "string"
+          },
+          "scopedGroupCount": {
+            "description": "🔴 与利润侧同一范围的分组条数",
+            "format": "int64",
+            "type": "integer"
+          },
+          "scopedSales": {
+            "description": "🔴 与利润侧同一范围的广告销售额（广告销售占比的分子）",
+            "type": "string"
+          },
+          "scopedScopeNote": {
+            "description": "🔴 「同一范围」是什么意思（口径说明）",
+            "type": "string"
+          },
+          "scopedSpend": {
+            "description": "🔴 与利润侧同一范围的广告花费（TACOS / 广告销售占比的分子）",
+            "type": "string"
+          },
+          "tacos": {
+            "description": "🔴 TACOS = Σ广告花费 / 总销售额（分母为 0 时为 null=不可比）",
+            "type": "string"
+          },
+          "totalClicks": {
+            "description": "点击合计",
+            "type": "string"
+          },
+          "totalImpressions": {
+            "description": "曝光合计",
+            "type": "string"
+          },
+          "totalNetProfit": {
+            "description": "🔴 总净利（上游读不到时为 null）",
+            "type": "string"
+          },
+          "totalOrders": {
+            "description": "广告订单合计",
+            "type": "string"
+          },
+          "totalRevenue": {
+            "description": "🔴 总销售额（13.4.1.2 利润口径；上游读不到时为 null）",
+            "type": "string"
+          },
+          "totalSales": {
+            "description": "广告销售额合计",
+            "type": "string"
+          },
+          "totalSpend": {
+            "description": "广告花费合计",
+            "type": "string"
+          },
+          "unattributedSales": {
+            "description": "🔴 归不到任何商品的广告销售额",
+            "type": "string"
+          },
+          "unattributedSpend": {
+            "description": "🔴 归不到当前维度的广告花费（活动没登记投放商品 / 商品没映射 SKU / 候选集被截断）",
+            "type": "string"
           }
         },
         "type": "object"
@@ -67445,6 +70477,37 @@
         },
         "type": "object"
       },
+      "SaveAdAttributionRuleRequest": {
+        "properties": {
+          "activate": {
+            "description": "是否立即生效（true = 成为本租户唯一生效口径）",
+            "type": "boolean"
+          },
+          "attributionModel": {
+            "description": "🔴 归因模型：LAST_CLICK / PLATFORM_WINDOW",
+            "type": "string"
+          },
+          "attributionWindowDays": {
+            "description": "🔴 归因窗口（天）",
+            "format": "int32",
+            "type": "integer"
+          },
+          "id": {
+            "description": "规则 id（null = 新建）",
+            "format": "uuid",
+            "type": "string"
+          },
+          "note": {
+            "description": "备注",
+            "type": "string"
+          },
+          "ruleCode": {
+            "description": "规则编码（租户内唯一）",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "SaveBudgetPoolRequest": {
         "properties": {
           "currency": {
@@ -70932,6 +73995,613 @@
             "format": "date-time",
             "nullable": true,
             "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ServiceTaskStatusAlert": {
+        "properties": {
+          "detail": {
+            "type": "string"
+          },
+          "failureClass": {
+            "nullable": true,
+            "type": "string"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string"
+          },
+          "sourceKey": {
+            "type": "string"
+          },
+          "sourceLabel": {
+            "type": "string"
+          },
+          "targetAvailable": {
+            "type": "boolean"
+          },
+          "targetHint": {
+            "nullable": true,
+            "type": "string"
+          },
+          "targetModule": {
+            "type": "string"
+          },
+          "targetNote": {
+            "type": "string"
+          },
+          "targetRoute": {
+            "nullable": true,
+            "type": "string"
+          },
+          "taskId": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ServiceTaskStatusAlertList": {
+        "properties": {
+          "failed": {
+            "items": {
+              "$ref": "#/components/schemas/ServiceTaskStatusAlert"
+            },
+            "type": "array"
+          },
+          "failedTotal": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "stalled": {
+            "items": {
+              "$ref": "#/components/schemas/ServiceTaskStatusAlert"
+            },
+            "type": "array"
+          },
+          "stalledTotal": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "truncated": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "ServiceTaskStatusCapabilities": {
+        "properties": {
+          "dataAsOf": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "downstreamNote": {
+            "type": "string"
+          },
+          "failureClassSemantics": {
+            "type": "string"
+          },
+          "failureClasses": {
+            "items": {
+              "$ref": "#/components/schemas/ServiceTaskStatusFailureClassDoc"
+            },
+            "type": "array"
+          },
+          "gaps": {
+            "items": {
+              "$ref": "#/components/schemas/ServiceTaskStatusCapabilityGap"
+            },
+            "type": "array"
+          },
+          "readFailureSemantics": {
+            "type": "string"
+          },
+          "rules": {
+            "items": {
+              "$ref": "#/components/schemas/ServiceTaskStatusRuleDoc"
+            },
+            "type": "array"
+          },
+          "severityLevels": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "sources": {
+            "items": {
+              "$ref": "#/components/schemas/ServiceTaskStatusSourceDoc"
+            },
+            "type": "array"
+          },
+          "stallSemantics": {
+            "type": "string"
+          },
+          "thresholds": {
+            "$ref": "#/components/schemas/ServiceTaskStatusThresholds"
+          },
+          "upstreamNote": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ServiceTaskStatusCapabilityGap": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "impact": {
+            "type": "string"
+          },
+          "module": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ServiceTaskStatusFailureClassCount": {
+        "properties": {
+          "byReason": {
+            "items": {
+              "$ref": "#/components/schemas/ServiceTaskStatusFailureReasonCount"
+            },
+            "type": "array"
+          },
+          "failureClass": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "totalCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "windowCount": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ServiceTaskStatusFailureClassDoc": {
+        "properties": {
+          "actionHint": {
+            "type": "string"
+          },
+          "failureClass": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "meaning": {
+            "type": "string"
+          },
+          "reasons": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "ServiceTaskStatusFailureReasonCount": {
+        "properties": {
+          "failureClass": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "totalCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "windowCount": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ServiceTaskStatusOptions": {
+        "properties": {
+          "failureClasses": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "severities": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "sources": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "states": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "triggerSources": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "ServiceTaskStatusReason": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ServiceTaskStatusRuleDoc": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "condition": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ServiceTaskStatusSourceDoc": {
+        "properties": {
+          "canonicalStates": {
+            "type": "string"
+          },
+          "durationColumn": {
+            "nullable": true,
+            "type": "string"
+          },
+          "failureClassNote": {
+            "type": "string"
+          },
+          "finishColumn": {
+            "nullable": true,
+            "type": "string"
+          },
+          "inFlightValues": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "ownerModuleName": {
+            "type": "string"
+          },
+          "sourceKey": {
+            "type": "string"
+          },
+          "stallNote": {
+            "type": "string"
+          },
+          "stallSupported": {
+            "type": "boolean"
+          },
+          "startColumn": {
+            "nullable": true,
+            "type": "string"
+          },
+          "stateColumn": {
+            "type": "string"
+          },
+          "stateValues": {
+            "type": "string"
+          },
+          "table": {
+            "type": "string"
+          },
+          "timingNote": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ServiceTaskStatusSourceStat": {
+        "properties": {
+          "failed": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "partial": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "running": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "sourceKey": {
+            "type": "string"
+          },
+          "sourceLabel": {
+            "type": "string"
+          },
+          "stallUndeterminable": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "stalled": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ServiceTaskStatusSummary": {
+        "properties": {
+          "businessFailureTotal": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "dataAsOf": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "failedCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "failedRecordTotal": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "failureByClass": {
+            "items": {
+              "$ref": "#/components/schemas/ServiceTaskStatusFailureClassCount"
+            },
+            "type": "array"
+          },
+          "gaps": {
+            "items": {
+              "$ref": "#/components/schemas/ServiceTaskStatusCapabilityGap"
+            },
+            "type": "array"
+          },
+          "partialCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "runningCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "sources": {
+            "items": {
+              "$ref": "#/components/schemas/ServiceTaskStatusSourceStat"
+            },
+            "type": "array"
+          },
+          "stallUndeterminableCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "stalledCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "systemFailureTotal": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalTasks": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ServiceTaskStatusTaskCard": {
+        "properties": {
+          "detail": {
+            "type": "string"
+          },
+          "durationMs": {
+            "format": "int64",
+            "nullable": true,
+            "type": "integer"
+          },
+          "failed": {
+            "type": "boolean"
+          },
+          "failureClass": {
+            "type": "string"
+          },
+          "failureClassNote": {
+            "type": "string"
+          },
+          "finishedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "inFlight": {
+            "type": "boolean"
+          },
+          "occurredAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "rawState": {
+            "type": "string"
+          },
+          "reasons": {
+            "items": {
+              "$ref": "#/components/schemas/ServiceTaskStatusReason"
+            },
+            "type": "array"
+          },
+          "severity": {
+            "type": "string"
+          },
+          "sourceKey": {
+            "type": "string"
+          },
+          "sourceLabel": {
+            "type": "string"
+          },
+          "stallDeterminable": {
+            "type": "boolean"
+          },
+          "stallMinutes": {
+            "format": "int64",
+            "nullable": true,
+            "type": "integer"
+          },
+          "stallSeverity": {
+            "nullable": true,
+            "type": "string"
+          },
+          "stalled": {
+            "type": "boolean"
+          },
+          "startedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "state": {
+            "type": "string"
+          },
+          "targetAvailable": {
+            "type": "boolean"
+          },
+          "targetHint": {
+            "nullable": true,
+            "type": "string"
+          },
+          "targetModule": {
+            "type": "string"
+          },
+          "targetNote": {
+            "type": "string"
+          },
+          "targetRoute": {
+            "nullable": true,
+            "type": "string"
+          },
+          "taskId": {
+            "type": "string"
+          },
+          "timingNote": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "triggerSource": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ServiceTaskStatusTaskPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ServiceTaskStatusTaskCard"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ServiceTaskStatusThresholds": {
+        "properties": {
+          "failureWindowHours": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "maxPageSize": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "stallCriticalMinutes": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "stallWarnMinutes": {
+            "format": "int32",
+            "type": "integer"
           }
         },
         "type": "object"
@@ -79671,6 +83341,755 @@
         ]
       }
     },
+    "/channel/ad-attributions/capabilities": {
+      "get": {
+        "operationId": "get_channel_ad_attributions_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdAttributionCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ad-attribution-controller"
+        ]
+      }
+    },
+    "/channel/ad-attributions/export": {
+      "get": {
+        "operationId": "get_channel_ad_attributions_export",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "ruleId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "ruleVersion",
+            "required": false,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "shopCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "campaignId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "skuId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "currency",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "required": false,
+            "schema": {
+              "default": "SPEND_DESC",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "text/csv": {
+                "schema": {
+                  "$ref": "#/components/schemas/StreamingResponseBody"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ad-attribution-controller"
+        ]
+      }
+    },
+    "/channel/ad-attributions/exports": {
+      "get": {
+        "operationId": "get_channel_ad_attributions_exports",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdAttributionExportPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ad-attribution-controller"
+        ]
+      }
+    },
+    "/channel/ad-attributions/import": {
+      "post": {
+        "operationId": "post_channel_ad_attributions_import",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdAttributionImportRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdAttributionImportResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ad-attribution-controller"
+        ]
+      }
+    },
+    "/channel/ad-attributions/options": {
+      "get": {
+        "operationId": "get_channel_ad_attributions_options",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdAttributionOptions"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ad-attribution-controller"
+        ]
+      }
+    },
+    "/channel/ad-attributions/records": {
+      "get": {
+        "operationId": "get_channel_ad_attributions_records",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "ruleId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "ruleVersion",
+            "required": false,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "shopCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "campaignId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "skuId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "platformCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "required": false,
+            "schema": {
+              "default": "ORDER_AT_DESC",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdAttributionRecordPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ad-attribution-controller"
+        ]
+      }
+    },
+    "/channel/ad-attributions/records/{id}": {
+      "get": {
+        "operationId": "get_channel_ad_attributions_records_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdAttributionRecordRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ad-attribution-controller"
+        ]
+      }
+    },
+    "/channel/ad-attributions/report": {
+      "get": {
+        "operationId": "get_channel_ad_attributions_report",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "ruleId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "ruleVersion",
+            "required": false,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "shopCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "campaignId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "skuId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "currency",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "required": false,
+            "schema": {
+              "default": "SPEND_DESC",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdAttributionReportPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ad-attribution-controller"
+        ]
+      }
+    },
+    "/channel/ad-attributions/rules": {
+      "get": {
+        "operationId": "get_channel_ad_attributions_rules",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdAttributionRulePage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ad-attribution-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_channel_ad_attributions_rules",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveAdAttributionRuleRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdAttributionRuleRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ad-attribution-controller"
+        ]
+      }
+    },
+    "/channel/ad-attributions/rules/current": {
+      "get": {
+        "operationId": "get_channel_ad_attributions_rules_current",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdAttributionRuleRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ad-attribution-controller"
+        ]
+      }
+    },
+    "/channel/ad-attributions/run": {
+      "post": {
+        "operationId": "post_channel_ad_attributions_run",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdAttributionRunRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdAttributionRunResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ad-attribution-controller"
+        ]
+      }
+    },
     "/channel/ad-budgets/capabilities": {
       "get": {
         "operationId": "get_channel_ad_budgets_capabilities",
@@ -82454,6 +86873,829 @@
         },
         "tags": [
           "ad-coupon-controller"
+        ]
+      }
+    },
+    "/channel/ad-dayparts/capabilities": {
+      "get": {
+        "description": "🔴 notAvailable 段列出的是**确实做不了**的部分，每条都写清责任模块与影响 —— 把「做不了」伪装成「能做」比说清楚更糟。",
+        "operationId": "get_channel_ad_dayparts_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdDaypartCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "能力声明：时区怎么定、系数怎么落钱、上限有几道闸、哪些确实做不了",
+        "tags": [
+          "14.2.1.2 分时策略"
+        ]
+      }
+    },
+    "/channel/ad-dayparts/caps": {
+      "get": {
+        "description": "🔴 下游自动规则执行调整时应把**自己的上限**与这里的上限**取更严的那个** —— 两边各用各的，最后谁也说不清一次超支是谁的责任。🔴 平台回写队列未交付 ⇒ 这里的调整只落本地并标「待回写平台」。",
+        "operationId": "get_channel_ad_dayparts_caps",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "shopCode",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdDaypartShopCapsView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "某店铺当前生效的调整上限（**供 14.2.2.2 自动规则取用**）",
+        "tags": [
+          "14.2.1.2 分时策略"
+        ]
+      }
+    },
+    "/channel/ad-dayparts/recommendations": {
+      "get": {
+        "operationId": "get_channel_ad_dayparts_recommendations",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "strategyId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AdDaypartRecommendationView"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "某条策略的推荐批次列表",
+        "tags": [
+          "14.2.1.2 分时策略"
+        ]
+      },
+      "post": {
+        "description": "上游 = **13.2.1.2 分时与分周模式**（reporting 服务）：本模块**只经授权只读 API**读它，转发调用方自己的 bearer、**不传租户号**。🔴 **上游读不到一律 503** —— 返回空集合会被读成「这个店铺没出过单」。🔴 店铺**定不了时区**时返回一批 `upstreamStatus=SHOP_UNRESOLVED` 的空曲线，**不摊给任何默认时区**；两侧时区不一致时返回 `CONFLICT`。",
+        "operationId": "post_channel_ad_dayparts_recommendations",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdDaypartRecommendationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdDaypartRecommendationView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "按历史出单时段生成推荐分时曲线",
+        "tags": [
+          "14.2.1.2 分时策略"
+        ]
+      }
+    },
+    "/channel/ad-dayparts/recommendations/{id}": {
+      "get": {
+        "operationId": "get_channel_ad_dayparts_recommendations_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdDaypartRecommendationView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "一批推荐的详情（含 24 个小时的判定依据）",
+        "tags": [
+          "14.2.1.2 分时策略"
+        ]
+      }
+    },
+    "/channel/ad-dayparts/recommendations/{id}/apply": {
+      "post": {
+        "description": "套用后该小时的来源标成 `RECOMMENDED`，判定依据原样带上（页面上能看懂「为什么这个小时是高峰」）。",
+        "operationId": "post_channel_ad_dayparts_recommendations_id_apply",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdDaypartApplyRecommendationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdDaypartStrategyView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "把推荐曲线套到策略上",
+        "tags": [
+          "14.2.1.2 分时策略"
+        ]
+      }
+    },
+    "/channel/ad-dayparts/shops": {
+      "get": {
+        "description": "🔴 店铺**没有**自己的时区字段：时区来自 channel 的**站点**参数（shop_marketplace → marketplace.default_timezone）。启用多个站点且时区不一致、或没启用站点的店铺 ⇒ **定不了时区**，它们的策略**不许激活**（DB 层 CHECK 钉死）。",
+        "operationId": "get_channel_ad_dayparts_shops",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AdDaypartShopTimezone"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "店铺清单 + 各自的时区归属结论（**定不了的也列出来并写清原因**）",
+        "tags": [
+          "14.2.1.2 分时策略"
+        ]
+      }
+    },
+    "/channel/ad-dayparts/shops/{shopCode}/timezone": {
+      "get": {
+        "operationId": "get_channel_ad_dayparts_shops_shopCode_timezone",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "shopCode",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdDaypartShopTimezone"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "单个店铺的时区归属结论",
+        "tags": [
+          "14.2.1.2 分时策略"
+        ]
+      }
+    },
+    "/channel/ad-dayparts/strategies": {
+      "get": {
+        "description": "🔴 定不了时区的店铺也会出现在清单里（`timezoneStatus=UNRESOLVED`），并写清原因 —— 删掉它们的话，页面只能说「这个店铺不在清单里」，那会让人以为数据缺失。",
+        "operationId": "get_channel_ad_dayparts_strategies",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "shopCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdDaypartStrategyPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "分时策略清单（真分页 + 真筛选）",
+        "tags": [
+          "14.2.1.2 分时策略"
+        ]
+      },
+      "post": {
+        "description": "🔴 **一个店铺一条策略**：分时策略按店铺时区生效，跨店铺合并会让其中一部分的小时错位。🔴 时区由服务端按**站点参数**解析（不硬编码、不猜）；定不了时区时策略建成 DRAFT，**激活会被拒**。",
+        "operationId": "post_channel_ad_dayparts_strategies",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdDaypartStrategyRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdDaypartStrategyView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "新建一条分时策略",
+        "tags": [
+          "14.2.1.2 分时策略"
+        ]
+      }
+    },
+    "/channel/ad-dayparts/strategies/{id}": {
+      "delete": {
+        "description": "归档是**软删除**：曲线、基准、推荐与任务历史都还在，事后能复盘「当时为什么这么调」。",
+        "operationId": "delete_channel_ad_dayparts_strategies_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdDaypartStrategyView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "归档一条策略",
+        "tags": [
+          "14.2.1.2 分时策略"
+        ]
+      },
+      "get": {
+        "operationId": "get_channel_ad_dayparts_strategies_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdDaypartStrategyView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "一条策略的详情（含 24 个小时的曲线）",
+        "tags": [
+          "14.2.1.2 分时策略"
+        ]
+      },
+      "put": {
+        "description": "🔴 每次保存都会**重新解析店铺时区** —— 站点的配置会变，策略不能拿着旧时区跑。",
+        "operationId": "put_channel_ad_dayparts_strategies_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdDaypartStrategyRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdDaypartStrategyView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "改一条策略的属性（曲线不在这里）",
+        "tags": [
+          "14.2.1.2 分时策略"
+        ]
+      }
+    },
+    "/channel/ad-dayparts/strategies/{id}/curve": {
+      "put": {
+        "description": "请求体是**完整的小时集合**，必须覆盖 0..23 全部 24 个小时 —— 缺一个小时，那个小时就落进「没有配置」的空洞。🔴 动作 PAUSE（停投）时预算系数**必须**是 0（否则是自相矛盾的配置）。",
+        "operationId": "put_channel_ad_dayparts_strategies_id_curve",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdDaypartCurveRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdDaypartStrategyView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "整体替换分时曲线（一次成型）",
+        "tags": [
+          "14.2.1.2 分时策略"
+        ]
+      }
+    },
+    "/channel/ad-dayparts/strategies/{id}/status": {
+      "post": {
+        "description": "🔴 **激活会被拒**的两种情况：店铺**定不了时区**（跨时区店铺用错时区会完全失效）；曲线 24 个小时全是「不动」（激活它等于什么都没配）。",
+        "operationId": "post_channel_ad_dayparts_strategies_id_status",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdDaypartStatusRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdDaypartStrategyView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "改策略状态（激活 / 暂停 / 归档）",
+        "tags": [
+          "14.2.1.2 分时策略"
+        ]
+      }
+    },
+    "/channel/ad-dayparts/tasks": {
+      "get": {
+        "operationId": "get_channel_ad_dayparts_tasks",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "strategyId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdDaypartTaskPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "定时调整任务列表（真分页 + 真筛选）",
+        "tags": [
+          "14.2.1.2 分时策略"
+        ]
+      }
+    },
+    "/channel/ad-dayparts/tasks/run": {
+      "post": {
+        "description": "不给 `strategyId` ⇒ 跑所有「参与调度且生效中」的策略。🔴 **「现在是几个小时」由 DB 的 now() 按店铺 IANA 时区换算**（不是 JVM 墙钟）⇒ 夏令时对得上。🔴 **幂等**：同一策略 + 同一本地小时 + 同一运行口径**只有一条任务**，调度重试不会调两次钱。🔴 `runMode=DRY_RUN` 只算「本来会变成多少」，不真调。",
+        "operationId": "post_channel_ad_dayparts_tasks_run",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdDaypartRunRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdDaypartRunResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "跑一轮分时调整（**外部调度触发的一次入口**；本服务不装 @Scheduled）",
+        "tags": [
+          "14.2.1.2 分时策略"
+        ]
+      }
+    },
+    "/channel/ad-dayparts/tasks/{id}": {
+      "get": {
+        "description": "🔴 逐条明细里 **APPLIED / REJECTED / SKIPPED / DRY_RUN** 分得开，被拒的那几条**照样列出来**并写清被哪一道闸拦下 —— 静默丢弃会让人以为「按预期工作」。",
+        "operationId": "get_channel_ad_dayparts_tasks_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdDaypartTaskView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "一次任务的详情（含逐条调整明细）",
+        "tags": [
+          "14.2.1.2 分时策略"
         ]
       }
     },
@@ -85696,6 +90938,337 @@
         },
         "tags": [
           "ad-keyword-controller"
+        ]
+      }
+    },
+    "/channel/ad-product-reports/capabilities": {
+      "get": {
+        "operationId": "get_channel_ad_product_reports_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdProductReportCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ad-product-report-controller"
+        ]
+      }
+    },
+    "/channel/ad-product-reports/export": {
+      "get": {
+        "operationId": "get_channel_ad_product_reports_export",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dimension",
+            "required": false,
+            "schema": {
+              "default": "LISTING",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "required": false,
+            "schema": {
+              "default": "SPEND_DESC",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "platformId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "shopCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "internalAdType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "text/csv": {
+                "schema": {
+                  "$ref": "#/components/schemas/StreamingResponseBody"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ad-product-report-controller"
+        ]
+      }
+    },
+    "/channel/ad-product-reports/exports": {
+      "get": {
+        "operationId": "get_channel_ad_product_reports_exports",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdProductReportExportPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ad-product-report-controller"
+        ]
+      }
+    },
+    "/channel/ad-product-reports/options": {
+      "get": {
+        "operationId": "get_channel_ad_product_reports_options",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdProductReportOptions"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ad-product-report-controller"
+        ]
+      }
+    },
+    "/channel/ad-product-reports/rows": {
+      "get": {
+        "operationId": "get_channel_ad_product_reports_rows",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dimension",
+            "required": false,
+            "schema": {
+              "default": "LISTING",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "required": false,
+            "schema": {
+              "default": "SPEND_DESC",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "platformId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "shopCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "internalAdType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdProductReportPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ad-product-report-controller"
         ]
       }
     },
@@ -131625,6 +137198,268 @@
         },
         "tags": [
           "sales-tax-controller"
+        ]
+      }
+    },
+    "/channel/service-task-status/alerts": {
+      "get": {
+        "operationId": "get_channel_service_task_status_alerts",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceTaskStatusAlertList"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "service-task-status-controller"
+        ]
+      }
+    },
+    "/channel/service-task-status/capabilities": {
+      "get": {
+        "operationId": "get_channel_service_task_status_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceTaskStatusCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "service-task-status-controller"
+        ]
+      }
+    },
+    "/channel/service-task-status/options": {
+      "get": {
+        "operationId": "get_channel_service_task_status_options",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceTaskStatusOptions"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "service-task-status-controller"
+        ]
+      }
+    },
+    "/channel/service-task-status/summary": {
+      "get": {
+        "operationId": "get_channel_service_task_status_summary",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceTaskStatusSummary"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "service-task-status-controller"
+        ]
+      }
+    },
+    "/channel/service-task-status/tasks": {
+      "get": {
+        "operationId": "get_channel_service_task_status_tasks",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sourceKey",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "state",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "triggerSource",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "stalled",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "failed",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceTaskStatusTaskPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "service-task-status-controller"
+        ]
+      }
+    },
+    "/channel/service-task-status/tasks/{id}": {
+      "get": {
+        "operationId": "get_channel_service_task_status_tasks_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceTaskStatusTaskCard"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "service-task-status-controller"
         ]
       }
     },

@@ -692,6 +692,17 @@ WT=".worktrees/main-merge-$(date +%H%M%S)"
 git worktree add --detach "$WT" upstream/main
 cd "$WT"
 
+# ①' 硬校验：确认这里确实是 git 登记的 linked worktree
+#     ⚠️ 2026-10-24 实测踩到：.worktrees/ 下存在**不是** worktree 的普通目录
+#        （没有 .git 文件）⇒ git 在里面执行命令会解析到主仓库 ⇒
+#        · `git checkout -B` 切的是**主工作区**的分支（会打断流水线）；
+#        · `git add` 得到的路径形如 `.worktrees/<name>/docs/...`，而 .gitignore 里有
+#          `.worktrees/` ⇒ 新文件被 ignore ⇒ `git status --porcelain` 连 untracked 都不显示、
+#          `git add -A` 静默无操作 ⇒ **写完会话记录却以为提交上了**。
+#     不相等就**立即停止**，不要在里面跑任何写操作。
+test "$(git rev-parse --show-toplevel)" = "$(cd "$WT" && pwd -P)" \
+  || { echo "❌ $WT 不是真 worktree，停止操作"; exit 1; }
+
 # ② 切出同步分支（已存在就重置到 main）
 git checkout -B chore/sync-module-dev
 
@@ -747,9 +758,22 @@ gh pr checks <PR号> --watch --interval 30   # 有界等待，超时上限约 15
 
 **等完之后，用闸工具判一次**（它会把 PR 的失败与 `main` 最近一次 run 的失败逐条比对）：
 
+⛔ **必须用 PR 头那份闸工具判，不要用仓库根目录那份**：
+
 ```bash
-node tools/module-progress/ci-gate.mjs --pr <PR号>
+# ① 确认自己拿到的这份带「PR 侧没跑到出结果那一步」的识别能力（必须 > 0）
+git show upstream/chore/sync-module-dev:tools/module-progress/ci-gate.mjs | grep -c unreachedJobs
+# ② 在 PR 头的 worktree 里跑（那份才是修复版）
+cd <PR 头 worktree> && node tools/module-progress/ci-gate.mjs --pr <PR号>
 ```
+
+⚠️ **为什么必须指定副本**：修复提交只存在于 PR 分支上，`main` 与集成分支**都还是旧版**。
+旧版把「PR 侧作业挂在构建期 ⇒ 测试一条没跑 ⇒ 失败明细天然为空」一律归入
+「明细不可比 ⇒ 按作业粒度放行」⇒ **PR 引入了新的失败原因会被误判成「没有新增失败」**
+⇒ 输出「可以合并」。
+2026-10-24 实测：同一个 run，仓库根那份给**「可以合并」**（退出码 0），
+PR 头那份给**「阻塞」**并点名失败作业 ⇒ **结论相反**。
+⇒ 采信任何结论前，先跑上面第 ① 步确认副本；`grep -c` 为 0 就是旧版，**它的结论一律不作数**。
 
 判据（保守）：
 
@@ -884,6 +908,8 @@ git diff upstream/main...HEAD --stat | tail -3   # 确认合并进来的东西�
 - **必须清理 `.worktrees/main-merge`**（无论成败）
 - **不许在冲突解到一半时提交**
 - **不许把「读不到台账」当成「没有新交付」**
+- **不许用仓库根目录那份旧版闸工具的结论** —— 修复只在 PR 分支上，旧版会把「PR 侧没跑到出结果那一步」误判成可以合并（见 7.3）
+- **不许在没确认 `$WT` 是真 worktree 时往里写东西** —— 普通目录会让新文件被 gitignore 静默吞掉（见 7.1）
 
 ---
 

@@ -48,7 +48,8 @@ import org.testcontainers.containers.PostgreSQLContainer;
 @AutoConfigureMockMvc
 class PiiAccessIntegrationTest {
 
-  static final PostgreSQLContainer<?> pg = new PostgreSQLContainer<>("postgres:16-alpine");
+  static final PostgreSQLContainer<?> pg =
+      new PostgreSQLContainer<>("postgres:16-alpine").withUrlParam("sslmode", "disable");
   static final UUID user = UUID.randomUUID();
   static final UUID otherUser = UUID.randomUUID();
   static HttpServer identity;
@@ -762,5 +763,21 @@ class PiiAccessIntegrationTest {
     }
     // PostgreSQL 的 boolean::text 给的是 'true' / 'false'，不是 psql 的 't' / 'f'。
     return "true".equals(value) ? "t" : "false".equals(value) ? "f" : value;
+  }
+
+  /**
+   * 🔴 收尾：停掉本地桩与 Testcontainers 容器。
+   *
+   * <p>不回收容器的话，Ryuk 只在 JVM 退出时按 session 标签统一回收 —— 整个模块跑完之前容器一直活着
+   * （实测 channel 一个服务就能堆到 110+ 个 postgres 容器），容器内存 + Docker VM 把机器压进 swap，
+   * JVM 被卡住十几分钟 ⇒ 全量跑时断言假红、SSL 握手失败。
+   *
+   * <p>顺序：先停外部服务，再停容器。反了会出现「容器已停但还有 in-flight 请求打进来」。
+   */
+  @AfterAll
+  static void stopTestResources() {
+    if (identity != null) identity.stop(0);
+    if (upstream != null) upstream.close();
+    pg.stop();
   }
 }
