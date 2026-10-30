@@ -429,7 +429,20 @@ PID 10296 `com.apple.Virtualization.VirtualMachine`，宿主 `crewhub-*`（7 个
 其中 `langfuse-worker` / `langfuse-web` 处于 `Restarting (1)` 崩溃重启循环，持续产生进程 churn。
 **本流水线无授权处置用户自有栈**，故只观察不干预 ⇒ 需用户决定是否处理。
 
-### 7. 本机 vitest 在高负载下会**静默漏跑文件**
+### 7. `lane.mjs gc` 按 `lane.id` 推导 worktree 路径 ⇒ **`-fix` 车道的 worktree 永不被清理**
+
+`lane.mjs:499` 定义 `const laneWorktree = (id) => join(WORKTREE_DIR, id);`，
+而 `gc`（`lane.mjs:1098`）用的是 `laneWorktree(lane.id)` ——
+**它忽略车道登记里已有的 `lane.worktree` 字段**。
+凡 worktree 路径不遵循默认 `<id>` 约定的车道（本轮两条修复车道为 `<id>-fix`，
+历史车道 `4.3.1.1` 同型）**一律被 `gc` 跳过**，worktree 目录越积越多。
+
+本轮实测：`gc` 只清掉 `13.6.1.2` / `13.6.2.1` / `18.1.1.2` / `18.1.2.1`，
+**`13.6.1.1-fix` 与 `3.6.3.1-fix` 被原样留下** ⇒ 已手工执行 `git worktree remove --force` + `git worktree prune` 清掉。
+**建议修法**：`gc` 改用 `lane.worktree ?? laneWorktree(lane.id)`。
+本轮**未擅自改**（属仓库基建决策）。
+
+### 8. 本机 vitest 在高负载下会**静默漏跑文件**
 
 已在本轮实测：worker 启动失败的文件**不计入 `Test Files` 总数**，vitest 也不报「跳过」。
 ⇒ 单看总数发现不了漏跑。**建议在 CI 与本机都加一道「文件总数守恒」断言**
