@@ -1,6 +1,616 @@
 {
   "components": {
     "schemas": {
+      "EventSubscriptionAuditEventPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/EventSubscriptionAuditEventRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "EventSubscriptionAuditEventRow": {
+        "properties": {
+          "action": {
+            "type": "string"
+          },
+          "actorUserId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "occurredAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "subscriptionId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "targetId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "targetType": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "EventSubscriptionCapabilities": {
+        "properties": {
+          "capabilities": {
+            "items": {
+              "$ref": "#/components/schemas/EventSubscriptionCapability"
+            },
+            "type": "array"
+          },
+          "downstreamGaps": {
+            "items": {
+              "$ref": "#/components/schemas/EventSubscriptionGap"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "EventSubscriptionCapability": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "basis": {
+            "type": "string"
+          },
+          "impact": {
+            "type": "string"
+          },
+          "module": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "EventSubscriptionDeliveryInput": {
+        "properties": {
+          "eventType": {
+            "type": "string"
+          },
+          "payload": {
+            "type": "string"
+          },
+          "schemaVersion": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "EventSubscriptionDeliveryOutcome": {
+        "properties": {
+          "connected": {
+            "type": "boolean"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "sent": {
+            "type": "boolean"
+          },
+          "statusCode": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "EventSubscriptionDetail": {
+        "properties": {
+          "effectivePolicy": {
+            "$ref": "#/components/schemas/EventSubscriptionPolicyRow"
+          },
+          "filters": {
+            "items": {
+              "$ref": "#/components/schemas/EventSubscriptionFilterRow"
+            },
+            "type": "array"
+          },
+          "signingSecrets": {
+            "items": {
+              "$ref": "#/components/schemas/EventSubscriptionSecretRow"
+            },
+            "type": "array"
+          },
+          "subscription": {
+            "$ref": "#/components/schemas/EventSubscriptionRow"
+          }
+        },
+        "type": "object"
+      },
+      "EventSubscriptionEventTypeInput": {
+        "properties": {
+          "eventType": {
+            "type": "string"
+          },
+          "payloadSchema": {
+            "type": "string"
+          },
+          "schemaVersion": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "sourceArtifact": {
+            "type": "string"
+          },
+          "sourceService": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "EventSubscriptionEventTypePage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/EventSubscriptionEventTypeRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "EventSubscriptionEventTypeRow": {
+        "properties": {
+          "eventType": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "payloadSchema": {
+            "type": "string"
+          },
+          "registeredAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "schemaVersion": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "sourceArtifact": {
+            "type": "string"
+          },
+          "sourceService": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "EventSubscriptionEventTypeStatusInput": {
+        "properties": {
+          "status": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "EventSubscriptionFilterInput": {
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "eventType": {
+            "type": "string"
+          },
+          "filter": {
+            "type": "string"
+          },
+          "schemaVersion": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "EventSubscriptionFilterRow": {
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "eventType": {
+            "type": "string"
+          },
+          "filter": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "schemaVersion": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "subscriptionId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "EventSubscriptionGap": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "group": {
+            "type": "string"
+          },
+          "module": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "ownerService": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "EventSubscriptionInput": {
+        "properties": {
+          "appId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "targetUrl": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "EventSubscriptionOverview": {
+        "properties": {
+          "activeEventTypeCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "activeSigningSecretCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "activeSubscriptionCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "eventTypeCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "filterCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "policyCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "signingSecretCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "subscriptionCount": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "EventSubscriptionPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/EventSubscriptionRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "EventSubscriptionPolicyInput": {
+        "properties": {
+          "backoffMultiplier": {
+            "type": "number"
+          },
+          "deadLetterRetentionDays": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "initialBackoffSeconds": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "maxAttempts": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "maxBackoffSeconds": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "requestTimeoutSeconds": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "subscriptionId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "EventSubscriptionPolicyRow": {
+        "properties": {
+          "backoffMultiplier": {
+            "type": "number"
+          },
+          "deadLetterRetentionDays": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "initialBackoffSeconds": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "maxAttempts": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "maxBackoffSeconds": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "requestTimeoutSeconds": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "signatureAlgorithm": {
+            "type": "string"
+          },
+          "signatureHeader": {
+            "type": "string"
+          },
+          "subscriptionId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "EventSubscriptionRow": {
+        "properties": {
+          "appId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "appName": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "filterCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "hasActiveSecret": {
+            "type": "boolean"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "targetUrl": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "EventSubscriptionSecretIssued": {
+        "properties": {
+          "plaintext": {
+            "type": "string"
+          },
+          "secret": {
+            "$ref": "#/components/schemas/EventSubscriptionSecretRow"
+          },
+          "warning": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "EventSubscriptionSecretRow": {
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "rotatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "secretHint": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "subscriptionId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "version": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "EventSubscriptionSignaturePreview": {
+        "properties": {
+          "headerValue": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "samplePayload": {
+            "type": "string"
+          },
+          "signature": {
+            "type": "string"
+          },
+          "signatureAlgorithm": {
+            "type": "string"
+          },
+          "signatureHeader": {
+            "type": "string"
+          },
+          "signedPayload": {
+            "type": "string"
+          },
+          "timestamp": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "EventSubscriptionSignaturePreviewInput": {
+        "properties": {
+          "payload": {
+            "type": "string"
+          },
+          "timestamp": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "FinanceSoftwareAccountInput": {
         "properties": {
           "bookCode": {
@@ -5542,6 +6152,1052 @@
         },
         "tags": [
           "text-translation-controller"
+        ]
+      }
+    },
+    "/platform/webhooks/audit-events": {
+      "get": {
+        "operationId": "get_platform_webhooks_audit_events",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "subscriptionId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventSubscriptionAuditEventPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "event-subscription-controller"
+        ]
+      }
+    },
+    "/platform/webhooks/capabilities": {
+      "get": {
+        "operationId": "get_platform_webhooks_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventSubscriptionCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "event-subscription-controller"
+        ]
+      }
+    },
+    "/platform/webhooks/event-types": {
+      "get": {
+        "operationId": "get_platform_webhooks_event_types",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventSubscriptionEventTypePage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "event-subscription-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_platform_webhooks_event_types",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EventSubscriptionEventTypeInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventSubscriptionEventTypeRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "event-subscription-controller"
+        ]
+      }
+    },
+    "/platform/webhooks/event-types/{eventTypeId}/status": {
+      "post": {
+        "operationId": "post_platform_webhooks_event_types_eventTypeId_status",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "eventTypeId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EventSubscriptionEventTypeStatusInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventSubscriptionEventTypeRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "event-subscription-controller"
+        ]
+      }
+    },
+    "/platform/webhooks/overview": {
+      "get": {
+        "operationId": "get_platform_webhooks_overview",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventSubscriptionOverview"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "event-subscription-controller"
+        ]
+      }
+    },
+    "/platform/webhooks/policies": {
+      "get": {
+        "operationId": "get_platform_webhooks_policies",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/EventSubscriptionPolicyRow"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "event-subscription-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_platform_webhooks_policies",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EventSubscriptionPolicyInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventSubscriptionPolicyRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "event-subscription-controller"
+        ]
+      }
+    },
+    "/platform/webhooks/policies/{policyId}": {
+      "post": {
+        "operationId": "post_platform_webhooks_policies_policyId",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "policyId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EventSubscriptionPolicyInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventSubscriptionPolicyRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "event-subscription-controller"
+        ]
+      }
+    },
+    "/platform/webhooks/subscriptions": {
+      "get": {
+        "operationId": "get_platform_webhooks_subscriptions",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "appId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventSubscriptionPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "event-subscription-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_platform_webhooks_subscriptions",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EventSubscriptionInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventSubscriptionRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "event-subscription-controller"
+        ]
+      }
+    },
+    "/platform/webhooks/subscriptions/{subscriptionId}": {
+      "get": {
+        "operationId": "get_platform_webhooks_subscriptions_subscriptionId",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "subscriptionId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventSubscriptionDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "event-subscription-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_platform_webhooks_subscriptions_subscriptionId",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "subscriptionId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EventSubscriptionInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventSubscriptionRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "event-subscription-controller"
+        ]
+      }
+    },
+    "/platform/webhooks/subscriptions/{subscriptionId}/deliver": {
+      "post": {
+        "operationId": "post_platform_webhooks_subscriptions_subscriptionId_deliver",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "subscriptionId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EventSubscriptionDeliveryInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventSubscriptionDeliveryOutcome"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "event-subscription-controller"
+        ]
+      }
+    },
+    "/platform/webhooks/subscriptions/{subscriptionId}/events": {
+      "get": {
+        "operationId": "get_platform_webhooks_subscriptions_subscriptionId_events",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "subscriptionId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/EventSubscriptionFilterRow"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "event-subscription-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_platform_webhooks_subscriptions_subscriptionId_events",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "subscriptionId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EventSubscriptionFilterInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventSubscriptionFilterRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "event-subscription-controller"
+        ]
+      }
+    },
+    "/platform/webhooks/subscriptions/{subscriptionId}/events/{filterId}": {
+      "delete": {
+        "operationId": "delete_platform_webhooks_subscriptions_subscriptionId_events_filterId",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "subscriptionId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "filterId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "event-subscription-controller"
+        ]
+      }
+    },
+    "/platform/webhooks/subscriptions/{subscriptionId}/revoke": {
+      "post": {
+        "operationId": "post_platform_webhooks_subscriptions_subscriptionId_revoke",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "subscriptionId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "reason",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventSubscriptionRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "event-subscription-controller"
+        ]
+      }
+    },
+    "/platform/webhooks/subscriptions/{subscriptionId}/signature-preview": {
+      "post": {
+        "operationId": "post_platform_webhooks_subscriptions_subscriptionId_signature_preview",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "subscriptionId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EventSubscriptionSignaturePreviewInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventSubscriptionSignaturePreview"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "event-subscription-controller"
+        ]
+      }
+    },
+    "/platform/webhooks/subscriptions/{subscriptionId}/signing-secrets": {
+      "get": {
+        "operationId": "get_platform_webhooks_subscriptions_subscriptionId_signing_secrets",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "subscriptionId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/EventSubscriptionSecretRow"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "event-subscription-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_platform_webhooks_subscriptions_subscriptionId_signing_secrets",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "subscriptionId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventSubscriptionSecretIssued"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "event-subscription-controller"
+        ]
+      }
+    },
+    "/platform/webhooks/subscriptions/{subscriptionId}/signing-secrets/revoke": {
+      "post": {
+        "operationId": "post_platform_webhooks_subscriptions_subscriptionId_signing_secrets_revoke",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "subscriptionId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventSubscriptionSecretRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "event-subscription-controller"
+        ]
+      }
+    },
+    "/platform/webhooks/subscriptions/{subscriptionId}/signing-secrets/rotate": {
+      "post": {
+        "operationId": "post_platform_webhooks_subscriptions_subscriptionId_signing_secrets_rotate",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "subscriptionId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventSubscriptionSecretIssued"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "event-subscription-controller"
         ]
       }
     }

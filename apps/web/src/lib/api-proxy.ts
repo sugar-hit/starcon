@@ -20,6 +20,63 @@ const services: readonly {
   fallback: string;
 }[] = [
   {
+    // 18.1.2.1 事件订阅（platform 服务，卷 18「集成开放与智能自动化」L3 18.1.2 下的第一格）。
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有的 platform/ 分支里并分支 ——
+    //   既有条目**一字未改、也不重排**。
+    //
+    // ---- 插入锚点选在**数组最开头**（本文件第一个元素之前）----
+    //   同批其它车道的插入点是「数组末尾」（收尾的 `];` 之前）；本车道落在这里，
+    //   与它们的插入点相距 10000 行以上，并入时 git 能干净求并。
+    //
+    // ---- 首 token「webhooks」的零命中核对结论 ----
+    //   本文件里既有的 `prefix: 'platform/'` 条目有三条：`^apps…$`（18.1.1.1 应用与凭证）、
+    //   `^text\/…$`（18.4.2.1 文本与翻译）、`^finance\-software\/…$`（18.2.1.1 财务软件）。
+    //   三条的首 token 与 `webhooks` **全不相同** ⇒ 天然互斥，
+    //   本车道**不需要**改动那三条里的任何一个字符。
+    //   ⚠️ channel 那一族 `webhook-dedup` / `webhook-endpoints` / `webhook-receipts`
+    //   是 **channel 服务**的电商平台回传通道（首 token 不同，且它们在 channel/ 前缀下），
+    //   与本模块的「本系统对外提供的事件订阅」**不是一件事** —— 别混淆。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   webhooks/capabilities                        能力声明
+    //   webhooks/overview                           概览（几个数）
+    //   webhooks/event-types                        可订阅事件列表（GET 真分页真筛选）/ 登记事件定义（POST）
+    //   webhooks/event-types/{uuid}/status          改事件定义状态（**只能改状态**，结构不可原地修改）
+    //   webhooks/subscriptions                      订阅列表（GET）/ 登记订阅（POST）
+    //   webhooks/subscriptions/{uuid}               订阅详情（GET）/ 改订阅（PUT）
+    //   webhooks/subscriptions/{uuid}/revoke        吊销订阅（POST）
+    //   webhooks/subscriptions/{uuid}/events        事件过滤列表（GET）/ 加一条过滤（POST）
+    //   webhooks/subscriptions/{uuid}/events/{uuid} 删一条事件过滤（DELETE）
+    //   webhooks/subscriptions/{uuid}/signing-secrets        签名密钥列表（GET）/ 生成（POST）
+    //   webhooks/subscriptions/{uuid}/signing-secrets/rotate  轮换签名密钥（POST）
+    //   webhooks/subscriptions/{uuid}/signing-secrets/revoke  吊销签名密钥（POST）
+    //   webhooks/subscriptions/{uuid}/signature-preview       签名试算（POST，真算但不投递）
+    //   webhooks/subscriptions/{uuid}/deliver        投递一次（POST，**适配器未接入时恒 409**）
+    //   webhooks/policies                           策略列表（GET）/ 新建策略（POST）
+    //   webhooks/policies/{uuid}                    改策略（PUT）
+    //   webhooks/audit-events                       审计事件列表（GET 真分页）
+    //
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   platform/webhooks                           —— 裸路径：后端**没有**「一条不存在的汇总列表接口」。
+    //   platform/webhooks/deliveries                —— 🔴 **投递记录**归 18.1.2.2，本车道不实现；
+    //                                                  放行它会让界面以为有投递流水表。
+    //   platform/webhooks/dead-letters              —— 同上（死信是投递明细的一种）。
+    //   platform/webhooks/event-types/{uuid}        —— 事件定义**只改状态**；没有「取单条 / 改结构」的端点。
+    //   platform/webhooks/event-types/{uuid}/schema —— 同上（破坏性变更要**新增版本**，不是原地改）。
+    //   platform/webhooks/subscriptions/not-a-uuid  —— 非 UUID 段不应被 uuid 分支吃掉。
+    //   platform/webhooks/subscriptions/{uuid}/not-a-shape —— 多一段仍然 404。
+    //
+    // id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //   （不是 `[0-9a-f-]+`）：后者会把 `revoke` / `rotate` 这种非 UUID 形状也当成 id 放行。
+    // 字面量子路径（capabilities / overview / event-types / policies / audit-events）
+    //   排在 {uuid} 段**之前**判别 —— alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    prefix: 'platform/',
+    env: 'PLATFORM_URL',
+    fallback: 'http://127.0.0.1:8089',
+    pattern:
+      /^webhooks\/(?:capabilities|overview|event-types(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/status)?|subscriptions(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:revoke|events(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|signing-secrets(?:\/(?:rotate|revoke))?|signature-preview|deliver))?)?|policies(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|audit-events)$/,
+  },
+  {
     // 13.1.1.1 经营总览（reporting 服务，卷 13「利润与经营分析」L3 13.1.1 下的第一格）。
     // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 finance / trade 那几条巨型
     //   alternation 里并分支 —— 既有条目**一字未改、也不重排**。
