@@ -128,7 +128,36 @@ mkdir -p target/credential-store → Permission denied
   - `reporting-export` 与 `credential-store` **可写** ✅
   - 反证 `/app/target` 仍 `Permission denied` ⇒ 精确复现原故障条件 ✅
 - 完整镜像重建在本机**未完成**：Maven 依赖拉取阶段无网络活动，改为轻量验证路径。
-  ⇒ **CI 上的实际效果尚未由远端验证**，需下一轮看 CI 的 `Catalog Browser` 作业。
+
+### 🔍 CI 补出第三个同型存储（本机 grep 漏掉的那一个）
+
+PR #70 的 CI `Catalog Browser` 作业暴露了 `LocalCertificationDocumentStorage`：
+`CERTIFICATION_STORAGE_ROOT` 未配，同样退回 `target/certification-store`
+⇒ `/app/target/certification-store` ⇒ 同一个 `AccessDeniedException`。
+
+**对照证据非常直接**：
+
+| | 基线 run `41060196055` | PR 侧 run `41079858588` |
+| --- | --- | --- |
+| reporting | ❌ `reporting-export-store` 启动失败 | ✅ **已正常启动**（0 次 Application run failed） |
+| channel | ❌ `credential-store` 启动失败 | ✅ credential-store 已修好 |
+| channel | — | ❌ `certification-store` 启动失败（**新暴露**） |
+
+⇒ 修掉两个之后，**原先被前一个失败挡在后面的第三个浮了出来**。
+这正是「本机无法验证、交给 CI 验证」的价值：同型缺陷共 5 个存储根
+（`MEDIA_STORAGE_ROOT` / `CHANNEL_SECRET_STORE_DIR` / `CREDENTIAL_STORAGE_ROOT` /
+`REPORTING_EXPORT_STORAGE_ROOT` / `CERTIFICATION_STORAGE_ROOT`），
+本机第一轮 grep 漏了 `CERTIFICATION_STORAGE_ROOT`，CI 补上了。
+
+补齐后：compose 六个服务 env 全部到位（catalog / channel / reporting /
+migrate-channel / migrate-reporting），Dockerfile 建 5 个目录并授权，
+以 UID 10001 实测三个新目录均可写。
+
+### CI 断言：让修复被持续守护
+
+`Catalog Browser` 作业原有的「验证存储可写」只覆盖 `MEDIA_STORAGE_ROOT`
+与 `CHANNEL_SECRET_STORE_DIR`。已补上三个新存储根的断言 ——
+否则这个缺陷形态只要回归，CI 不会报警。
 
 ## 三、残留 worktree 清理
 
@@ -159,25 +188,56 @@ mkdir -p target/credential-store → Permission denied
 
 ## 五、验证结果汇总
 
+### 本机验证
+
 | 项 | 结果 |
 | --- | --- |
 | `format-gate.itest.mjs` | **10 通过 / 0 失败** |
 | `lane-gate.itest.mjs` | **21 通过 / 0 失败** |
 | `lane-gate-reclaim.itest.mjs` | **24 通过 / 0 失败** |
 | `sync.mjs --check` | ✅ 台账与蓝图一致 |
-| `docker compose config` | ✅ 语法通过，四个服务 env 到位 |
-| UID 10001 目录可写实测 | ✅ 通过 |
+| `docker compose config` | ✅ 语法通过，六个服务 env 到位 |
+| UID 10001 目录可写实测 | ✅ 三个新目录均可写，反证 `/app/target` 不可写 |
 | 本次改动文件 prettier 合规 | ✅ 全部合规 |
 | 全仓 `pnpm format:check` | 仍红（590 个存量文件），**比修复前的 1086 减少 496** |
-| CI `Catalog Browser` 实际效果 | ⚠️ **未验证** —— 本机未能完成镜像重建 |
+
+### CI 侧验证（PR #70，run `41079858588` vs 基线 `41060196055`）
+
+| 作业 | 基线 | PR 侧 | 判定 |
+| --- | --- | --- | --- |
+| Lint（format:check） | 1085 个不合规 | **588** 个 | **净减 497、零新增** ✅ |
+| Java 21 | 644 例 / **3 失败** | 644 例 / **3 失败**（同三个用例名） | **零新增失败** ✅ |
+| Security Scan | 失败 | 失败 | 同一根因（lockfile 未变，见下） |
+| Catalog Browser | reporting + channel 启动失败 | reporting **已正常启动**，channel 剩 certification-store | **修复生效**，并补出第三个同型存储 |
+| Typecheck / Unit & Integration Tests / CodeQL | 绿 | 绿 | ✅ |
+
+闸工具结论：**新增失败作业无 / 新增失败用例无 / 结论：可以合并**（退出码 0）。
+
+Security Scan 两侧漏洞数相同，且本次**未改任何依赖文件**（`package.json` /
+`pnpm-lock.yaml` 未进改动清单）⇒ 差异来自 advisory 库自身漂移，不是本次合入造成。
+
+### 闸门判定为什么必须下钻
+
+四个失败作业中有三个只能比到作业粒度。逐个下钻后：
+
+- **Lint** 比的是**不合规文件集合**（不是文件数）：基线 1085 → PR 侧 588。
+- **Java 21** 比到了**用例粒度**：两侧同为 644 例 / 3 失败，用例名逐字相同
+  （`NotificationInboxIntegrationTest` / `PlatformFlagIntegrationTest` /
+  `ApprovalRecordIntegrationTest`，均在 identity 模块）⇒ 存量问题，非本次引入。
+- **Catalog Browser** 比的是**失败根因链**：基线的两个失败（reporting /
+  channel）在 PR 侧消失，浮出第三个同型失败 ⇒ 修复方向被实证。
 
 ## 六、本轮未做 / 留给后续
 
 - **589 个存量源码格式债**未重排：需单独立项、分批做（全仓一次重排 32.8 万行
   会与在途车道冲突）。
-- **CI `Catalog Browser` 作业的实际效果未验证**：本机 Maven 依赖拉取无网络活动。
-  下一轮看远端 CI 结果，确认 reporting 与 channel 能正常起来。
-- **本机三个调度任务仍全部暂停**，活执行机自 10-11 起无新车道提交。
-  若要本机接管，需先确认活机器调度器已停。
+- **PR #70 的最终合入未完成**：闸门已给出「可以合并」，
+  但补充了第三个存储根的修复后需要重跑一轮 CI 验证
+  （run `41082122590`），待其收尾再合。
+- **本机三个调度任务仍全部暂停**。活执行机（`/Users/guan/Projects/starcon`，
+  远端名 `origin`）在 22:26 有提交，**是活的** ——
+  它推的 `origin/integration/module-dev` 与本机 `upstream` 是同一个仓库。
+  ⇒ 本机与活执行机共用同一批 `feat/<id>` 分支名，
+  **本机不能启用调度器**，否则双写并撞 Flyway 版本号。
 - `TOKEN_HORIZON` 延期仍只在**本机** `.dev-agent/PIPELINE.local.md` 生效，
   活执行机上必须人工改同一行，否则流水线一直停在降档模式。
