@@ -95,10 +95,15 @@ services:
       # 不配的话会退回相对路径默认值 target/credential-store ⇒ 解析成 /app/target/...
       # ⇒ UID 10001 无权创建 ⇒ 容器启动失败（AccessDeniedException: /app/target）。
       CREDENTIAL_STORAGE_ROOT: /app/data/credential-store
+      # 认证扫描件存储根目录。与上面两个同型：未配时退回相对路径默认值
+      # target/certification-store ⇒ 解析成 /app/target/... ⇒ UID 10001 无权创建
+      # ⇒ 容器启动失败（AccessDeniedException: /app/target）。
+      CERTIFICATION_STORAGE_ROOT: /app/data/certification-store
       INTERNAL_KEY: ${INTERNAL_KEY}
     volumes:
       - channel-secret-data:/app/data/channel-secrets
       - channel-credential-data:/app/data/credential-store
+      - channel-certification-data:/app/data/certification-store
   warehouse:
     build:
       context: ../..
@@ -275,6 +280,7 @@ services:
       # migrate-* 用的是同一个镜像与同一个 Spring 上下文，
       # 存储实现的构造函数照样会执行 ⇒ 这里也必须给可写的绝对路径。
       CREDENTIAL_STORAGE_ROOT: /app/data/credential-store
+      CERTIFICATION_STORAGE_ROOT: /app/data/certification-store
       INTERNAL_KEY: ${INTERNAL_KEY}
       LOCAL_BOOTSTRAP_ENABLED: 'false'
   migrate-warehouse:
@@ -373,5 +379,6 @@ volumes:
   catalog-media-data:
   channel-secret-data:
   channel-credential-data:
+  channel-certification-data:
   reporting-export-data:
   catalog-pg-data:
