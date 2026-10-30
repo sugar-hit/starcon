@@ -242,18 +242,22 @@ echo "main 树: $MAIN_TREE"
 
 `merge-tree` 会**提前告诉你哪些文件会真冲突**。它是只读的，**不要跳过**。
 
-⚠️ **「提交数」不是增量，`main` 是 squash 合入的**：
+⚠️ **「提交数」不是增量**（2026-10-30 更新：形态已改为双父合并，但这条判据不变）：
 
-`main` 的每次更新都是 **squash 合并**，所以 `main` 的提交**不是**集成分支的祖先
-（`merge-base --is-ancestor upstream/main upstream/integration/module-dev` 恒为假），
-`git rev-list --count upstream/main...upstream/integration/module-dev` 会报出**上百个提交**，
-而**实际内容差异可能只有几十个文件**（实测：提交数口径报 142，内容口径是 83 个文件）。
+`main` 的每次更新现在都是**双父合并**（`gh pr merge --merge`，见 7.4），
+所以 `main` 的 tip **是**集成分支 tip 的真后代 ⇒ 提交数口径基本准确。
 
-⇒ **判断有没有新内容，只能看树差异**（`git diff --quiet upstream/main upstream/integration/module-dev`）。
+但**历史里仍有 squash 时代的提交**（2026-10-21 之前合入的那些），
+那些提交与集成分支**没有共同祖先** ⇒ `git rev-list --count upstream/main...upstream/integration/module-dev`
+仍可能报出**上百个提交**，而**实际内容差异可能只有几十个文件**
+（实测：提交数口径报 142，内容口径是 83 个文件）。
+
+⇒ **判断有没有新内容，优先看树差异**（`git diff --quiet upstream/main upstream/integration/module-dev`）。
 用提交数判断的后果是：**每一轮都以为有大增量**，于是每轮都开一个内容其实没变的 PR。
 
-同理，第 3.2 节的「可快进」判据在 squash 合入后**基本不成立** ——
-正常形态是「真合并」，且冲突解法见第 4 节。
+同理，第 3.2 节的「可快进」判据**在双父形态下成立**；
+只有在 main 历史还含 squash 提交、两边无共同祖先时才基本不成立 ——
+此时正常形态是「真合并」，且冲突解法见第 4 节。
 
 ⚠️ **树差异非空 ≠ 有新内容要合入 —— 最终判据是「落地树哈希」**：
 
@@ -319,9 +323,13 @@ fatal: ambiguous argument 'upstream/chore/sync-module-dev': unknown revision
 
 | 形态                  | 判据                      | 处理                                                       |
 | --------------------- | ------------------------- | ---------------------------------------------------------- |
-| **A. 可快进**         | 树差异为空且祖先关系成立  | 极少出现（`main` 是 squash 合入的，祖先关系通常不成立）    |
+| **A. 可快进**         | 树差异为空且祖先关系成立  | 双父形态下**常见**（main 已是集成分支的祖先）              |
 | **B. 真合并但无冲突** | `merge-tree` 不报冲突文件 | 正常 `git merge --no-ff`，可能有 `contract-union` 自动求并 |
 | **C. 真合并且有冲突** | `merge-tree` 报出冲突文件 | 走第 4 节逐个解冲突                                        |
+
+> 2026-10-30 起 `main` 改为**双父合并**（7.4 节），A 形态随之变得常见。
+> 若 `main` 历史里还含 squash 时代的提交、两边无共同祖先，A 形态会消失 ——
+> 那时仍然是 B 或 C。
 
 ---
 
@@ -339,13 +347,15 @@ fatal: ambiguous argument 'upstream/chore/sync-module-dev': unknown revision
 
 **这不是可选的诊断步骤，是解冲突的入口。**
 
-因为 `main` 是 **squash 合入**的，`main` 的文件版本来自集成分支的**某个较早提交**。
-所以大多数冲突**不是双向分叉，而是线性演进**：
+**前提**：`main` 的文件版本来自集成分支的**某个较早提交**。
+双父合并之后这一点不再对最新一轮成立（main 已是集成分支的祖先），
+但 `main` **历史里**仍有 squash 时代的提交，那些提交的文件版本确实来自较早快照。
+所以只要两边无共同祖先（形态 C），大多数冲突**不是双向分叉，而是线性演进**：
 
 - main 侧 = 集成分支历史上的某个旧版本 ⇒ **取集成分支侧**（新侧是演进的终点，取一边不丢内容）。
 - main 侧 = 集成分支**从未有过**的内容（真分叉）⇒ **必须并入**，取一边会丢东西。
 
-⚠️ **在 squash 合入的仓库里，「无脑求并」是错的** —— 求并会把 main 侧的旧内容重新塞回去，
+⚠️ **在两边无共同祖先时，「无脑求并」是错的** —— 求并会把 main 侧的旧内容重新塞回去，
 制造出「本该被替换掉的旧代码又活了」的状态。
 
 **用工具判，不要靠眼睛：**
@@ -832,12 +842,42 @@ PR 头那份给**「阻塞」**并点名失败作业 ⇒ **结论相反**。
 ```bash
 cd /Users/tommy/Project/starcon
 node tools/module-progress/lane.mjs gate acquire   # 退出码 3 = 撞闸 ⇒ 本轮不合，下轮再合
-gh pr merge <PR号> --squash --subject "feat: <功能概述>" --body "<按 6.3 的格式>" --delete-branch
+gh pr merge <PR号> --merge --delete-branch
 node tools/module-progress/lane.mjs gate release
 ```
 
-**用 squash**：合进 `main` 的是**一条**可读提交，读者在 `git log` 里一眼看到
-「这次交付了哪些功能」，而不是几百条工程流水账。
+**用 `--merge`（双父），不要用 `--squash`** —— 这一条在 2026-10-30 被改过，原因见下。
+
+**为什么改**：squash 会把集成分支压成一颗**与集成分支无共同祖先**的新提交
+（单父）。于是 `main` 的 tip 不再是集成分支的祖先 ⇒ 「main → 集成头同步」
+任务每轮都会撞同一堵墙：**add/add 假冲突**。
+2026-10-21 的 P0 记录（`docs/backlog/2026-10/2026-10-21-main-squash-merge-divergence.md`）
+量化过：第 79–102 轮连续未并入，冲突面从 6 个涨到 27 个文件。
+
+那份 backlog 的「待办内容」第 1 条写明：
+
+> **（首选，改发布侧）发布侧把集成头的真实 commit（不 squash）推到 main**，
+> 使 `origin/main` 的 tip 重新成为集成头的祖先 ⇒ 冲突从根上消失。
+> **这是唯一的根治办法** —— 在集成头这边做任何解冲突都是治标。
+
+⇒ 双父 merge commit 让 `main` 的 tip 成为集成分支 tip 的**真后代**，
+同步任务随即回到「无新提交、零改动」的常态。
+
+**合并后必须核验**（缺任何一项都说明形态没生效）：
+
+```bash
+git fetch upstream main
+git cat-file -p upstream/main | grep -c '^parent '      # 必须是 2
+git diff --stat upstream/main upstream/integration/module-dev   # 必须为空（树逐字节相同）
+git merge-base --is-ancestor upstream/integration/module-dev upstream/main  # 退出码 0
+git merge-tree --write-tree upstream/integration/module-dev upstream/main  # 只输出一个树哈希 = 零冲突
+```
+
+⚠️ **别用 `git log --format='%p' | awk 'NF==3'` 数父提交** —— `%p` 是换行分隔的，
+每行一个父 ⇒ 那个写法恒得 0，会把双父误判成单父。
+用 `git cat-file -p <sha> | grep -c '^parent '`。
+
+⚠️ **GitHub 的 `--merge` 可能被静默降级成 squash**，所以上面第 1 项核验是必须的。
 
 ⚠️ `gh pr merge` 若报 `Pull request is not mergeable` / `not mergeable: the merge commit cannot be cleanly created`，
 **不要加 `--admin` 强合**。把真实原因写进汇报。
@@ -890,7 +930,9 @@ git diff upstream/main...HEAD --stat | tail -3   # 确认合并进来的东西�
 
 - **不许直推 `main`**（只经 PR）
 - **不许在没有证据的情况下「取一边」** —— 必须先跑 4.2 的判定工具
-- **不许在 squash 合入的仓库里无脑求并** —— 那会把旧内容塞回去；判据是祖先快照 + 三件套
+- **不许在两边无共同祖先时无脑求并** —— 那会把旧内容塞回去；判据是祖先快照 + 三件套
+- **不许用 `--squash` 合 `main`** —— squash 会让 `main` 的 tip 与集成分支无共同祖先，
+  把「main → 集成头同步」重新打回每轮冲突的老路；用 `--merge`（双父），见 7.4
 - **不许在出现「比 `main` 基线更多的失败」时合并**（用 7.3 的闸工具判，不许凭感觉）
 - **不许把「CI 全绿」当成合并前提**（`main` 基线就是红的），也**不许因为「反正也是红的」就无条件合并**
 - **不许无证据地「取一边」** —— 白名单/契约/台账取一边 = 静默删交付成果（要取就带证据，见 4.2）
