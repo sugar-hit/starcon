@@ -90,6 +90,17 @@ round-133 起用的 `.dev-agent/keepalive-r133.sh` 有**三重退出条件**（�
 - [ ] **续期守护应随 tick 一起结束**（`finally` 里终止），并把「守护 PID」写进
       `dispatch.gate/` 里，让下一轮 tick 能一眼看出「上一个 tick 的守护还活着」。
 
+- ⭐ **（2026-10-30 round-135 新增）`owner` 文件记的是「一次性 `node lane.mjs gate acquire`
+      进程自己的 PID」，该进程打完即退 ⇒ owner PID 在正常情况下也立刻死亡。**
+      取证位置：`tools/module-progress/lane.mjs:586`
+      （`writeFileSync(join(GATE_DIR, 'owner'), \`${process.pid}\n${new Date().toISOString()}\n\`)`）。
+      ⇒ **「owner PID 不存在」本身不能作为「持闸者已死」的独立证据** ——
+      本文件第二节取证清单的第 1 条（round-133 记的「PID 73961 不存在」）正属这一类，
+      当时是靠另外 5 条证据（会话状态 / 无构建进程 / 无在途车道 / 无 racer / 守护身份）兜住结论的。
+      建议把「持闸者存活」判据改成 **「持闸会话状态 + 在途车道 + 构建进程 + 是否有 mtime 写入者」** 四合一，
+      owner PID 降级为辅助线索；并在 `dispatch.gate/` 里写 `holder: <kind>` 区分持有者来源
+      （**pipeline tick / sync-main 任务 / 孤儿守护**）—— round-135 实测 sync-main 也会竞态取同一把闸。
+
 ## 六、流程教训
 
 **「撞闸 ⇒ 零派发」这条规则的前提是「持闸者是活体 tick」。**
