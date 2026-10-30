@@ -13813,6 +13813,41 @@ const services: readonly {
     pattern:
       /^custom\-report\/(?:capabilities|metrics|dimensions|export\/(?:sources|sync|jobs(?:\/[0-9a-fA-F\-]{36}(?:\/(?:file|cancel))?)?)|deliveries(?:\/(?:tick|dispatch)|\/[0-9a-fA-F\-]{36})?|shared\/[0-9a-f]{32}|shares\/[0-9a-fA-F\-]{36}|subscriptions\/[0-9a-fA-F\-]{36}|reports(?:\/[0-9a-fA-F\-]{36}(?:\/(?:run|shares|subscriptions))?)?)$/,
   },
+  {
+    // 18.1.1.2 接口目录（platform 服务，卷 18「集成开放与智能自动化」L3 18.1.1 API 管理下的第三格）。
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有任何一条里并分支 ——
+    //   既有条目**一字未改、也不重排**。
+    //
+    // ---- 插入锚点选在**数组末尾**（最后一个 services[] 元素之后、收尾的 `];` 之前）----
+    //   同批其它车道把新元素插在数组最开头；本车道落在末尾，并入时 git 能干净求并。
+    //
+    // ---- 首 token「api-catalog」的零命中核对结论 ----
+    //   本仓此前**没有任何** services[] 元素用 `api-catalog` 这个首 token
+    //   （既有 platform/ 前缀下只有 `apps`（18.1.1.1）与 `text`（18.4.2.1）两支，
+    //   `finance-software` 是**第三支** —— 它的首 token 与本条不同）。
+    //   ⇒ resolve() 先按 prefix 过滤再测正则，本条的首 token `api-catalog`
+    //   与既有三支**两两不相交** ⇒ 既有那支吃不到本模块的路径，本模块也吃不到它们的路径。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   platform/api-catalog/capabilities     能力声明（哪些真接通 / 哪些还没交付、归谁）
+    //   platform/api-catalog/overview         概览（几个数）
+    //   platform/api-catalog/domains          业务域清单（按对外路径首段分组）
+    //   platform/api-catalog/interfaces       接口清单（GET，真分页 + 真筛选 + 真搜索）
+    //   platform/api-catalog/interfaces/detail 接口详情（GET：参数 / 返回 / 限流说明 / 示例）
+    //   platform/api-catalog/sandbox/targets  可测试的目标服务清单（GET）
+    //   platform/api-catalog/sandbox/runs     沙箱测试历史（GET）/ 真发一次请求（POST）
+    //
+    // ⚠️ **刻意不放行**：
+    //   platform/api-catalog                        —— 裸路径：后端**没有**汇总端点。
+    //   platform/api-catalog/interfaces/spec        —— spec 由后端自己去各服务取，
+    //                                                  前端**不**代理它（那等于把代理变成任意转发器）。
+    //   platform/api-catalog/sandbox/runs/{id}      —— 后端没有按 id 寻址的端点。
+    //   platform/api-catalog/unknown                —— 多一层仍然 404。
+    prefix: 'platform/',
+    env: 'PLATFORM_URL',
+    fallback: 'http://127.0.0.1:8089',
+    pattern: /^api\-catalog\/(?:capabilities|overview|domains|interfaces(?:\/detail)?|sandbox\/(?:targets|runs))$/,
+  },
 ];
 
 function resolve(path: string) {
