@@ -181,8 +181,9 @@ mkdir -p target/credential-store → Permission denied
 | 基线 | identity / catalog / warehouse / trade / crm / finance / platform | reporting、channel |
 | PR `41079858588` | 上述 7 个 + **reporting** | channel（`certification-store`） |
 | PR `41082342953` | 上述 8 个 | channel（`CHANNEL_WEBHOOK_SIGNING_KEY`） |
+| PR `41087784163` | **全部 9 个** | **无** ✅ |
 
-⇒ **失败服务数从 2 个降到 1 个**，且每轮失败点都沿启动链前进一格。
+⇒ 失败服务数 2 → 1 → 0。**`Catalog Browser & Contract Tests` 作业从 failure 变成 success。**
 
 ## 三、残留 worktree 清理
 
@@ -255,12 +256,49 @@ Security Scan 两侧漏洞数相同，且本次**未改任何依赖文件**（`p
   基线 {reporting, channel} → PR 侧 {channel} ⇒ 失败面收窄，非新增。
 - **Security Scan** 比的是**审计条目与严重度分布**，且确认 lockfile 未变。
 
-## 六、本轮未做 / 留给后续
+## 六、合并入 main（PR #70）
+
+### 闸门判定
+
+run `41087784163` 的结论：**新增失败作业无 / 新增失败用例无 / 可以合并**（退出码 0）。
+
+下钻到作业粒度之后的实际对比：
+
+| 作业 | 基线 `41060196055` | PR 侧 `41087784163` | 变化 |
+| --- | --- | --- | --- |
+| **Catalog Browser & Contract Tests** | failure | **success** | ✅ **修好了** |
+| Lint | failure | failure | 债 1085 → 588，净减 497 |
+| Java 21 | failure | failure | 两侧同为 644 例 / 3 失败，用例名逐字相同 |
+| Security Scan | failure | failure | lockfile 逐字节未变 ⇒ advisory 库漂移 |
+| Typecheck / Unit & Integration | success | success | 持平 |
+
+### 合并形态：用**双父** merge commit（不是 squash）
+
+协议第 7.4 步写的是 `--squash`，但那条是 squash 时代的写法。
+`docs/backlog/2026-10/2026-10-21-main-squash-merge-divergence.md`
+（优先级 P0）把根治办法写在「待办内容」第 1 条：
+
+> **（首选，改发布侧）发布侧把集成头的真实 commit（不 squash）推到 main**，
+> 使 `origin/main` 的 tip 重新成为集成头的祖先 ⇒ 冲突从根上消失。
+> **这是唯一的根治办法** —— 在集成头这边做任何解冲突都是治标。
+
+⇒ 本轮用 `gh pr merge --merge`（双父）。上一轮 PR #69 也是这个形态。
+
+**合并后核验**：
+
+- `upstream/main` = `e10007ad`，**双父**（父1 `7852acdd` = 原 main 头 /
+  父2 `18cf7a7e` = 集成分支头）；
+- main 的树与 `upstream/integration/module-dev` **逐字节相同**（零差异）；
+- **集成分支头已是 main 的祖先**（这是根治目标）；
+- 双向同步模拟（`git merge-tree --write-tree`）**冲突数 0** ——
+  活执行机下一轮 main → 集成分支的同步回到无冲突常态；
+- main 台账：465 总数 / 437 已交付 / 0 进行中 / 28 未开发 / 完成率 94.0%
+  （与合并前一致，本轮不含模块交付）。
+
+## 七、本轮未做 / 留给后续
 
 - **589 个存量源码格式债**未重排：需单独立项、分批做（全仓一次重排 32.8 万行
   会与在途车道冲突）。
-- **PR #70 的最终合入未完成**：闸门已给出「可以合并」，
-  但补充签名密钥修复后又需要重跑一轮 CI 验证，待其收尾再合。
 - **本机三个调度任务仍全部暂停**。活执行机（`/Users/guan/Projects/starcon`，
   远端名 `origin`）在 22:26 有提交，**是活的** ——
   它推的 `origin/integration/module-dev` 与本机 `upstream` 是同一个仓库。
@@ -268,3 +306,6 @@ Security Scan 两侧漏洞数相同，且本次**未改任何依赖文件**（`p
   **本机不能启用调度器**，否则双写并撞 Flyway 版本号。
 - `TOKEN_HORIZON` 延期仍只在**本机** `.dev-agent/PIPELINE.local.md` 生效，
   活执行机上必须人工改同一行，否则流水线一直停在降档模式。
+- **协议第 7.4 步的 `--squash` 写法与 P0 backlog 文档的根治建议不一致**，
+  本轮按 backlog 执行双父。协议该处应更新为 `--merge`，否则后续轮次
+  可能照旧 squash 重新引入分叉。
