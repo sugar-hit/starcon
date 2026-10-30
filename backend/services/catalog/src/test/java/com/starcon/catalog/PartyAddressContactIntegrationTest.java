@@ -3,7 +3,6 @@ package com.starcon.catalog;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.catchThrowable;
-import static org.assertj.core.api.Assertions.within;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -13,7 +12,7 @@ import com.sun.net.httpserver.HttpServer;
 import java.net.InetSocketAddress;
 import java.sql.DriverManager;
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -165,6 +164,40 @@ class PartyAddressContactIntegrationTest {
         });
   }
 
+  // ================================================================ timestamptz 同钟域守卫
+
+  /**
+   * DB 自己的时钟（语句时刻）。
+   *
+   * <p>🔴 参照时刻一律从这里取，**不碰 JVM 墙钟**。
+   */
+  Instant dbNow() {
+    // 🔴 party_address_version.changed_at 写的是 now()（见 PartyAddressService#appendVersion），
+    // party_contact.created_at 是 DEFAULT now()（V31）—— 两者都属于**数据库的时钟域**；
+    // 拿客户端墙钟去比它们，等于假设两台钟准得一模一样 —— 容器被负载挤压、线程停顿十几分钟时，
+    // 两个读数之间就隔着一段真实停顿，断言必然假红。
+    // 这里用 clock_timestamp() 而不是 now()：前者是语句执行的那一刻，后者是事务起始时刻；
+    // 参照时刻要的是「此刻」，所以取前者。
+    return tx(actor, () -> sql.fetchOne("select clock_timestamp()").get(0, OffsetDateTime.class))
+        .toInstant();
+  }
+
+  /**
+   * 守卫：写回的时刻必须落在「写入前 DB 时钟」与「读取后 DB 时钟」之间。
+   *
+   * <p>🔴 两端**同源**（都是 DB 时钟）。
+   */
+  void assertWithinDbClockWindow(Instant dbBefore, Instant value, Instant dbAfter) {
+    // 🔴 这是这条守卫不再假红的原因：容器停顿只会把区间撑宽，不会把一个本来正确的时刻挤出区间。
+    // 而真发生「timestamptz 当 LocalDateTime 绑定 ⇒ 偏 −28800s」时，偏移是 8 小时量级，
+    // 一定落在区间外 ⇒ 照样当场抓住。
+    // 区间宽度在健康跑法下只有毫秒级（两次 DB 往返），比旧写法的「±5 分钟」**严**得多 ——
+    // 这不是把容差放宽换来的稳定性。
+    // 与先例 67e1381e（PlatformCategoryMappingIntegrationTest）同一套写法，
+    // 本车道是把它补到另一处漏网的断言上。
+    assertThat(value).as("写回的时刻必须落在 DB 自己时钟的前后区间内，偏 8 小时即为时区静默漂移").isBetween(dbBefore, dbAfter);
+  }
+
   static String unique(String prefix) {
     return prefix + "-" + SEQ.incrementAndGet();
   }
@@ -223,6 +256,13 @@ class PartyAddressContactIntegrationTest {
   @Test
   void 建档即写入版本一且时间戳没偏() {
     UUID partyId = party(actor, "ADDR");
+    // 🔴 参照时刻**同源**：前后两个基准都取自 DB 自己的时钟，不再取 JVM 墙钟。
+    // 旧写法拿 JVM 墙钟（Instant.now()）去比 PG 写下的 now()，那是**跨时钟域**比较：
+    // 两个读数之间只要隔着一次容器停顿（负载挤压时可达十几分钟），守卫就把「停顿」
+    // 当成「时区漂移」误报 —— 2026-10-30 14:01 的 L2 全量里就红过这一条（同一份 HEAD
+    // 在空闲机器上隔离复跑全绿 ⇒ 负载型假红）。
+    // 改成同钟域之后：停顿只会把区间撑宽，不会让守卫误判；而真偏 8 小时照样被抓住。
+    Instant dbBefore = dbNow();
     UUID addressId =
         write(actor, () -> addresses.save(actor, partyId, null, address("科技园路 1 号", "深圳市"))).id();
 
@@ -245,8 +285,11 @@ class PartyAddressContactIntegrationTest {
     // 用 Timestamp.valueOf(LocalDateTime) 读 timestamptz 会静默偏 −28800s（东八区），
     // 而偏 8 小时的时间戳在「今天几点改的地址」这种界面上看起来完全正常。
     assertThat(v1.changedAt()).isNotNull();
-    assertThat(Instant.parse(v1.changedAt()))
-        .isCloseTo(Instant.now(), within(5, ChronoUnit.MINUTES));
+    // 🔴 参照时刻同源（DB 自己的时钟）：写入前取一次、读回后取一次，夹住写回值。
+    // 健康跑法下区间宽度只有毫秒级，比旧的「±5 分钟」严得多；容器停顿只会撑宽区间，
+    // 不会把一个本来正确的时刻挤出区间 ⇒ 不再假红；而真偏 8 小时（−28800s）必落在区间外 ⇒ 照样抓住。
+    Instant dbAfter = dbNow();
+    assertWithinDbClockWindow(dbBefore, Instant.parse(v1.changedAt()), dbAfter);
   }
 
   @Test
@@ -727,6 +770,12 @@ class PartyAddressContactIntegrationTest {
   @Test
   void 联系人建档往返一致且默认只有一个() {
     UUID partyId = party(actor, "CONTACT");
+    // 🔴 参照时刻同源（DB 自己的时钟）：写入前取一次、读回后取一次，夹住写回值。
+    // party_contact.created_at 是 DEFAULT now()（V31），属于 DB 的时钟域；拿 JVM 墙钟
+    // （Instant.now()）去比它是**跨时钟域**比较 —— 两个读数之间隔着一次容器停顿时，
+    // 守卫就把「停顿」当成「时区漂移」误报（2026-10-30 的 L2 全量红过这一条）。
+    // 同钟域区间判定后：停顿只会撑宽区间不会误判，真偏 8 小时照样被抓住。
+    Instant dbBefore = dbNow();
     UUID first =
         write(
                 actor,
@@ -747,8 +796,8 @@ class PartyAddressContactIntegrationTest {
     assertThat(detail.isPrimary()).isTrue();
     assertThat(detail.selectionBlockCode()).isNull();
     assertThat(detail.createdAt()).isNotNull();
-    assertThat(Instant.parse(detail.createdAt()))
-        .isCloseTo(Instant.now(), within(5, ChronoUnit.MINUTES));
+    Instant dbAfter = dbNow();
+    assertWithinDbClockWindow(dbBefore, Instant.parse(detail.createdAt()), dbAfter);
 
     // 第二个不能也成默认：整体设默认时前一个被取消。
     write(
