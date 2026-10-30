@@ -17,7 +17,7 @@
  */
 
 import { execFileSync } from 'node:child_process';
-import { mkdirSync, rmSync, utimesSync, statSync, existsSync } from 'node:fs';
+import { mkdirSync, rmSync, utimesSync, statSync, existsSync, readdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, resolve } from 'node:path';
 
@@ -64,10 +64,21 @@ const json = (r) => {
 
 const GATE_DIR = join(SANDBOX, '.dev-agent', 'dispatch.gate');
 
-/** 把闸的 mtime 往前推 minutes 分钟（模拟「已经持有这么久」） */
+/**
+ * 把闸的 mtime 往前推 minutes 分钟（模拟「已经持有这么久」）。
+ *
+ * ⚠️ 必须同时老化**闸目录里的文件**（keepalive / owner）——
+ * 2026-10-30 起闸龄判据改成「持闸者自己续期的文件」，不再看闸目录 mtime
+ * （闸目录 mtime 会被续期守护刷新，与持闸者死活无关 ⇒ 孤儿守护能把 TTL 接管堵死）。
+ * 只老化目录的话，闸龄仍是 0，测试会假绿。
+ */
 function ageGate(minutes) {
   const t = (Date.now() - minutes * 60_000) / 1000;
   utimesSync(GATE_DIR, t, t);
+  for (const f of readdirSync(GATE_DIR)) {
+    if (!f.startsWith('keepalive') && f !== 'owner') continue;
+    utimesSync(join(GATE_DIR, f), t, t);
+  }
 }
 
 /* ── 准备 ─────────────────────────────────────────────────────────────── */

@@ -34,6 +34,7 @@ import {
   statSync,
   writeFileSync,
   rmSync,
+  renameSync,
 } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, resolve } from 'node:path';
@@ -255,9 +256,7 @@ function readUpstreamMap() {
 function readVolumeOwners() {
   const readme = join(BLUEPRINT_DIR, 'README.md');
   if (!existsSync(readme)) {
-    throw new Error(
-      `找不到 ${readme}：无法判定卷的后端主责服务，微服务盲区闸拒绝放行任何模块。`,
-    );
+    throw new Error(`找不到 ${readme}：无法判定卷的后端主责服务，微服务盲区闸拒绝放行任何模块。`);
   }
   const owners = new Map();
   for (const line of readFileSync(readme, 'utf8').split('\n')) {
@@ -539,6 +538,15 @@ function ensureIntegration() {
 /* ── 调度闸：防止两个定时 tick 同时派发 ───────────────────────────────── */
 
 const GATE_DIR = join(STATE_DIR, 'dispatch.gate');
+const GATE_OWNER_FILE = 'owner';
+const GATE_KEEPALIVE_FILE = 'keepalive';
+const GATE_TOKEN_FILE = join(STATE_DIR, 'dispatch.gate.token');
+/**
+ * 接管的「偷取目标」目录 —— **固定名字**，所有接管者抢同一个。
+ * 固定是关键：两个进程 rename 到同一个目标，只有一个能成功（另一个 ENOTEMPTY/EEXIST）。
+ * 若用「每次唯一名」，第二个进程就能把第一个刚建好的新闸偷走（第一版修复实测到的失败）。
+ */
+const GATE_STEAL_DIR = `${GATE_DIR}.steal`;
 
 /**
  * 用 mkdir 做原子互斥（POSIX 下 mkdir 对已存在目录必然失败，天然原子）。
@@ -565,29 +573,315 @@ const GATE_DIR = join(STATE_DIR, 'dispatch.gate');
  */
 const GATE_TTL_SECONDS = 4200;
 
-function gateAcquire(ttlSeconds = GATE_TTL_SECONDS) {
-  mkdirSync(STATE_DIR, { recursive: true });
-  try {
-    mkdirSync(GATE_DIR);
-  } catch {
-    // 已存在：看是不是陈旧闸
+/**
+ * 闸龄判据：看**持闸者自己续期**的信号，不看闸目录 mtime。
+ *
+ * 为什么不能只看闸目录 mtime（2026-10-30 round-130/131/132 连做三次取证却无人处置）：
+ *   续期守护 touch 的是**闸目录**，所以目录 mtime 由守护刷新，与「持闸 tick 死活」无关。
+ *   持闸 tick 崩了、守护还活着 ⇒ 目录 mtime 永远新鲜 ⇒ TTL 自愈路径**机制性不可达**
+ *   ⇒ 同一个死锁连续复发 4 轮，每轮都「证明持闸者已死」却没人处置。
+ *
+ * 判据取 keepalive 文件与 owner 文件里较新的那个：
+ *   - 新式持闸者用 `lane.mjs gate touch` 续期 keepalive 文件 ⇒ 闸龄实时归零；
+ *   - 守护只碰目录 ⇒ **碰不到这个信号** ⇒ 持闸者一死，闸龄立刻开始计；
+ *   - 完全没有这两个文件的老式闸 ⇒ 退回闸目录 mtime（保持旧行为，不引入提前接管）。
+ */
+function gateActivityMtimeMs(dir = GATE_DIR) {
+  // 目录不存在时**必须抛错** —— 调用方据此返回 null（闸是空的），
+  // 不能返回 0（那会被算成「闸龄 = 1970 年至今」）。
+  const entries = readdirSync(dir);
+  let newest = 0;
+  for (const f of entries) {
+    if (!f.startsWith('keepalive') && f !== GATE_OWNER_FILE) continue;
     try {
-      const age = (Date.now() - statSync(GATE_DIR).mtimeMs) / 1000;
-      if (age > ttlSeconds) {
-        rmSync(GATE_DIR, { recursive: true, force: true });
-        mkdirSync(GATE_DIR);
-      } else {
-        return false;
-      }
+      const m = statSync(join(dir, f)).mtimeMs;
+      if (m > newest) newest = m;
     } catch {
-      return false;
+      // 扫到就删了（竞态）就跳过
     }
   }
-  writeFileSync(join(GATE_DIR, 'owner'), `${process.pid}\n${new Date().toISOString()}\n`);
+  if (newest) return newest;
+  return statSync(dir).mtimeMs;
+}
+
+/** 闸龄（秒）。闸不存在返回 null。dir 可指向别的目录（偷取后判定用）。 */
+function gateAgeSeconds(dir = GATE_DIR) {
+  try {
+    return (Date.now() - gateActivityMtimeMs(dir)) / 1000;
+  } catch {
+    return null;
+  }
+}
+
+/** 读 owner 文件，解析成结构化信息。 */
+function readGateOwner() {
+  try {
+    const raw = readFileSync(join(GATE_DIR, GATE_OWNER_FILE), 'utf8').split('\n');
+    return {
+      pid: Number(raw[0]) || null,
+      acquiredAt: raw[1] ?? null,
+      holder: raw[2] || null,
+      token: raw[3] || null,
+    };
+  } catch {
+    return null;
+  }
+}
+
+/** 读本机记录的「我是闸的持有者」令牌。 */
+function readGateToken() {
+  try {
+    return readFileSync(GATE_TOKEN_FILE, 'utf8').trim() || null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * 「持闸者是否还活着」的取证。
+ *
+ * ⚠️ **owner 里的 PID 只能当辅助线索，不能当独立证据**（2026-10-30 round-135 实测）：
+ *   `owner` 记的是「一次性 `node lane.mjs gate acquire` 进程自己的 PID」，
+ *   那个进程打完即退 ⇒ 正常情况下 owner PID 也立刻死亡。
+ *   round-133 当时正是靠另外 5 条证据兜住结论的。
+ *
+ * 这里只采集能**在仓库内自证**的两条：
+ *   ① 在途车道（lanes.json 里 running/ready 的条数）—— 持闸 tick 的在途工作；
+ *   ② 构建进程（mvnw / java / surefire / vitest / next / playwright）—— 正在跑 L1/L2。
+ * 两条任一命中 ⇒ 持闸者还活着，**不许接管**。
+ */
+function holderLiveness(state) {
+  const inFlightLanes = Object.values(state.lanes).filter(
+    (l) => l.state === 'running' || l.state === 'ready',
+  ).length;
+
+  let buildProcesses = [];
+  try {
+    const out = execFileSync('ps', ['-Ao', 'pid,command'], {
+      encoding: 'utf8',
+      maxBuffer: 32 * 1024 * 1024,
+    });
+    buildProcesses = out
+      .split('\n')
+      .filter((l) => /mvnw|surefire|vitest|next build|playwright|gradle/i.test(l))
+      .filter((l) => !/\bps -Ao\b|grep /.test(l))
+      .map((l) => l.trim().split(/\s+/)[0]);
+  } catch {
+    buildProcesses = [];
+  }
+
+  return {
+    inFlightLanes,
+    buildProcesses,
+    holderAlive: inFlightLanes > 0 || buildProcesses.length > 0,
+  };
+}
+
+/**
+ * 取闸。已有闸时按「陈旧 + 持闸者已死」双条件才接管。
+ *
+ * ⚠️ **接管必须原子的**（2026-10-30 round-102 实测「双向持闸」）：
+ *   旧实现是 `rmSync(GATE_DIR)` 然后 `mkdirSync(GATE_DIR)` —— **两步、留窗口**。
+ *   两个 tick 同时判定「陈旧」时：A 删完目录还没建，B 抢先 mkdir 成功并写入 owner，
+ *   A 随后 mkdir 失败被 catch 吞掉；反过来 A 已建好并写入 owner，
+ *   B 的 rmSync 会把 **A 的 owner 证据连同闸一起删掉**，B 再建
+ *   ⇒ A 和 B **都以为闸是自己的** ⇒ 两个 tick 同时 plan / 同时跑 L2。
+ *
+ *   现在改成「**rename 到一个固定的偷取目标** + mkdir」：
+ *   ① 所有接管者都 rename 到**同一个** `GATE_STEAL_DIR`
+ *      ⇒ 两个进程只有一个能成功（另一个拿到 ENOTEMPTY/EEXIST）⇒ 结构上不可能双向持闸；
+ *   ② **陈旧判定放在 rename 之后重新做** —— 若放在之前，「判定」与「动手」之间有窗口，
+ *      别的进程刚建好的**新闸**会被误当成陈旧闸偷走（这正是第一版修复实测到的失败：
+ *      8 个并发接管者全部成功，每个都把前一个的闸偷了）。
+ *   ③ 偷到的闸若其实不陈旧 / 持闸者还活着 ⇒ **原样放回去**（rename 回去），不抢。
+ */
+function gateAcquire(ttlSeconds = GATE_TTL_SECONDS, opts = {}) {
+  mkdirSync(STATE_DIR, { recursive: true });
+  const state = readState();
+
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    try {
+      mkdirSync(GATE_DIR);
+      break; // 拿到空闸
+    } catch {
+      const age = gateAgeSeconds();
+      if (age === null) continue; // 闸刚被别人释放 ⇒ 重试
+      if (age <= ttlSeconds) return false;
+
+      // 陈旧还不够 —— 还要证明持闸者已死
+      if (!opts.override) {
+        const live = holderLiveness(state);
+        if (live.holderAlive) return false;
+      }
+
+      // 上一次接管崩在中途会留下 STEAL 残留；它自己也会把闸堵死。
+      // 判定它是不是「崩溃残留」：残留的年龄也超过 TTL ⇒ 没人还在用 ⇒ 清掉。
+      try {
+        const stealAge = (Date.now() - statSync(GATE_STEAL_DIR).mtimeMs) / 1000;
+        if (stealAge > ttlSeconds) rmSync(GATE_STEAL_DIR, { recursive: true, force: true });
+      } catch {
+        // 不存在，正常路径
+      }
+
+      // 原子偷取：所有接管者抢同一个目标目录，只有一个能成
+      try {
+        renameSync(GATE_DIR, GATE_STEAL_DIR);
+      } catch {
+        continue; // 别人正在接管 ⇒ 重新判定（闸可能已经空了）
+      }
+
+      // 我现在独占了旧闸的内容 —— **重新**判定陈旧与持闸者死活
+      const stolenAge = gateAgeSeconds(GATE_STEAL_DIR);
+      const stolenLive = holderLiveness(state);
+      const stillStale = stolenAge !== null && stolenAge > ttlSeconds;
+      const holderDead = !stolenLive.holderAlive;
+
+      if (!stillStale || (!opts.override && !holderDead)) {
+        // 偷错了 —— 把闸原样放回去，让真正的主人来处置
+        try {
+          renameSync(GATE_STEAL_DIR, GATE_DIR);
+        } catch {
+          rmSync(GATE_STEAL_DIR, { recursive: true, force: true });
+        }
+        return false;
+      }
+
+      try {
+        mkdirSync(GATE_DIR);
+      } catch {
+        rmSync(GATE_STEAL_DIR, { recursive: true, force: true });
+        return false; // 别人在偷取与重建之间抢到了 ⇒ 认输，不双持
+      }
+      rmSync(GATE_STEAL_DIR, { recursive: true, force: true });
+      break;
+    }
+  }
+
+  const token = `${process.pid}-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+  const holder = opts.holder || process.env.LANE_HOLDER_KIND || 'unknown';
+  const stamp = `${process.pid}\n${new Date().toISOString()}\n${holder}\n${token}\n`;
+  writeFileSync(join(GATE_DIR, GATE_OWNER_FILE), stamp);
+  writeFileSync(join(GATE_DIR, GATE_KEEPALIVE_FILE), stamp);
+  writeFileSync(GATE_TOKEN_FILE, token);
   return true;
 }
 
-const gateRelease = () => rmSync(GATE_DIR, { recursive: true, force: true });
+/**
+ * 续期。只有闸的**当前持有者**能续 —— 令牌对不上就拒绝。
+ *
+ * 用法：`node tools/module-progress/lane.mjs gate touch`
+ *
+ * 落盘方式沿用协议既有约定：**新建一个 `keepalive-<时间戳>` 文件**
+ * （沿用旧文件不刷新目录 mtime；新建才刷新）。
+ * 但闸龄判据现在直接读这个文件的 mtime，所以续期效果不依赖目录 mtime。
+ */
+function gateTouch() {
+  const token = readGateToken();
+  const owner = readGateOwner();
+  if (!token || !owner || owner.token !== token) return false;
+  const stamp = `${owner.pid}\n${new Date().toISOString()}\n${owner.holder}\n${token}\n`;
+  writeFileSync(join(GATE_DIR, GATE_KEEPALIVE_FILE), stamp);
+  const name = `keepalive-${new Date().toISOString().replace(/[-:.]/g, '')}-${process.pid}`;
+  writeFileSync(join(GATE_DIR, name), stamp);
+  return true;
+}
+
+/**
+ * 释放闸。**只删自己持有的闸** —— 令牌对不上就不动。
+ *
+ * ⚠️ 旧实现是无条件 `rm -rf` 整个闸目录。2026-10-30 round-133 之所以不用
+ * 「release + acquire」做接管，正是因为 release 会**无条件删掉别人的闸**，
+ * 制造出一个「release → acquire」的竞速窗口。
+ */
+function gateRelease() {
+  const token = readGateToken();
+  const owner = readGateOwner();
+  if (!token || !owner || owner.token !== token) {
+    return { released: false, reason: '不是本机持有的闸（或闸已被别人接管），不删' };
+  }
+  rmSync(GATE_DIR, { recursive: true, force: true });
+  rmSync(GATE_TOKEN_FILE, { force: true });
+  return { released: true, reason: '已释放本机持有的闸' };
+}
+
+/**
+ * 受管的「等待并接管」入口 —— 2026-10-30 round-133 的临时脚本
+ * （`.dev-agent/takeover-r133.mjs`）沉淀进工具，不再让每个 tick 各自造轮子。
+ *
+ * 流程：等闸龄超 TTL ⇒ 采集持闸者存活证据 ⇒ 四条证据支持「已死」才原子接管。
+ * 任何一条证据说「还活着」就**拒绝接管并点名阻塞点**，
+ * 避免 round-130/131/132 那种「连续三轮只取证不处置」的固化停机。
+ *
+ * 用法：
+ *   node tools/module-progress/lane.mjs gate reclaim --wait 600
+ *   node tools/module-progress/lane.mjs gate reclaim --force
+ */
+function gateReclaim(opts = {}) {
+  const ttl = opts.ttlSeconds ?? GATE_TTL_SECONDS;
+  const deadline = Date.now() + (opts.waitMs ?? 0);
+  const state = readState();
+
+  for (;;) {
+    const age = gateAgeSeconds();
+    if (age === null) {
+      // 闸已经空了 —— 直接取
+      const ok = gateAcquire(ttl, { holder: opts.holder });
+      return { ok, reclaimed: ok, reason: '闸已空，直接取到' };
+    }
+    if (age <= ttl) {
+      if (Date.now() >= deadline) {
+        const live = holderLiveness(state);
+        return {
+          ok: false,
+          reclaimed: false,
+          ageSeconds: Math.round(age),
+          ttlSeconds: ttl,
+          ...live,
+          reason: `闸龄 ${Math.round(age)}s ≤ TTL ${ttl}s，未到接管窗口`,
+        };
+      }
+      sleepMs(1000);
+      continue;
+    }
+
+    const live = holderLiveness(state);
+    if (live.holderAlive) {
+      // ⚠️ `--force` 只表示「不等闸龄窗口」，**不表示可以无视持闸者死活**。
+      // 无视它就是「从活着的持闸者手里抢闸」⇒ 双派发 ⇒ 版本号撞号 + L2 成片假红。
+      return {
+        ok: false,
+        reclaimed: false,
+        ageSeconds: Math.round(age),
+        ttlSeconds: ttl,
+        ...live,
+        reason:
+          `闸龄 ${Math.round(age)}s > TTL ${ttl}s，但持闸者仍活着` +
+          `（在途车道 ${live.inFlightLanes} 条 / 构建进程 ${live.buildProcesses.length} 个）` +
+          `⇒ 不接管，等持闸者自己释放`,
+      };
+    }
+
+    const ok = gateAcquire(ttl, { holder: opts.holder });
+    return {
+      ok,
+      reclaimed: ok,
+      ageSeconds: Math.round(age),
+      ttlSeconds: ttl,
+      ...live,
+      reason: ok
+        ? `闸龄 ${Math.round(age)}s > TTL ${ttl}s 且持闸者已死 ⇒ 原子接管成功`
+        : '原子接管失败（别人抢先）',
+    };
+  }
+}
+
+const sleepMs = (ms) => {
+  const end = Date.now() + ms;
+  while (Date.now() < end) {
+    // 忙等（这里只等几秒，且只在 reclaim --wait 里用）
+    execFileSync('sleep', ['0.1']);
+  }
+};
 
 /* ── 命令 ─────────────────────────────────────────────────────────────── */
 
@@ -601,26 +895,67 @@ if (cmd === 'gate') {
     process.exit(ok ? 0 : 3);
   }
   if (action === 'release') {
-    gateRelease();
-    console.log(JSON.stringify({ ok: true, gate: 'released' }, null, 2));
-    process.exit(0);
+    const r = gateRelease();
+    console.log(
+      JSON.stringify(
+        { ok: r.released, gate: r.released ? 'released' : 'not-mine', reason: r.reason },
+        null,
+        2,
+      ),
+    );
+    process.exit(r.released ? 0 : 3);
+  }
+  if (action === 'touch') {
+    const ok = gateTouch();
+    console.log(
+      JSON.stringify(
+        {
+          ok,
+          gate: ok ? 'refreshed' : 'not-mine',
+          reason: ok ? 'keepalive 文件已续期' : '不是本机持有的闸，拒绝续期',
+        },
+        null,
+        2,
+      ),
+    );
+    process.exit(ok ? 0 : 3);
+  }
+  if (action === 'reclaim') {
+    const r = gateReclaim({
+      // --force 只表示「不等闸龄窗口」，**不能**无视持闸者死活（那是双派发的入口）
+      waitMs: flag('--force') === true ? 0 : Number(flag('--wait') ?? 0) * 1000,
+      ttlSeconds: flag('--ttl') ? Number(flag('--ttl')) : GATE_TTL_SECONDS,
+      holder: flag('--holder') ?? process.env.LANE_HOLDER_KIND,
+    });
+    console.log(JSON.stringify(r, null, 2));
+    process.exit(r.ok ? 0 : 3);
   }
   // status
-  let held = false;
-  let ageSeconds = null;
-  try {
-    ageSeconds = Math.round((Date.now() - statSync(GATE_DIR).mtimeMs) / 1000);
-    held = true;
-  } catch {
-    held = false;
-  }
+  const ageSeconds = gateAgeSeconds();
+  const held = ageSeconds !== null;
   // **必须把 TTL 和 stale 一起输出。**
   // 只给 ageSeconds 的话，调度者无从判断「这闸还能不能抢」——
   // 2026-10-19 那轮就是因为缺这个判据，把「PG 闸误触发」误诊成「调度闸泄漏 3 小时」。
   const stale = held && ageSeconds > GATE_TTL_SECONDS;
+  const owner = readGateOwner();
+  const live = holderLiveness(readState());
   console.log(
     JSON.stringify(
-      { gate: held ? 'held' : 'free', ageSeconds, ttlSeconds: GATE_TTL_SECONDS, stale },
+      {
+        gate: held ? 'held' : 'free',
+        ageSeconds: held ? Math.round(ageSeconds) : null,
+        ttlSeconds: GATE_TTL_SECONDS,
+        stale,
+        // 持有者信息（owner PID 只是辅助线索，见 holderLiveness 的注释）
+        holder: owner?.holder ?? null,
+        ownerPid: owner?.pid ?? null,
+        acquiredAt: owner?.acquiredAt ?? null,
+        // 接管判据：stale 之外，还要看持闸者死没死
+        reclaimable: held && stale && !live.holderAlive,
+        inFlightLanes: live.inFlightLanes,
+        buildProcesses: live.buildProcesses,
+        holderAlive: live.holderAlive,
+      },
       null,
       2,
     ),
@@ -968,7 +1303,8 @@ if (cmd === 'merge-ready') {
     if (lane.state !== 'conflict') continue;
     const mergedAlready =
       lane.headSha &&
-      git(['merge-base', '--is-ancestor', lane.headSha, state.integrationBranch], ROOT, true) === '';
+      git(['merge-base', '--is-ancestor', lane.headSha, state.integrationBranch], ROOT, true) ===
+        '';
     if (mergedAlready) {
       lane.state = 'merged';
       lane.mergedAt = lane.mergedAt ?? new Date().toISOString();
@@ -981,7 +1317,8 @@ if (cmd === 'merge-ready') {
   if (conflictUnresolved.length) {
     console.error(
       `⚠ 仍有未解决的并入冲突，请人工处理：${conflictUnresolved.join(', ')}` +
-        `（` + `解决并提交后，下一次 merge-ready 会自动把它们补记为 merged）`,
+        `（` +
+        `解决并提交后，下一次 merge-ready 会自动把它们补记为 merged）`,
     );
   }
 
