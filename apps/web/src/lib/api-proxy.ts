@@ -13782,13 +13782,26 @@ const services: readonly {
     //   custom-report/deliveries/tick    跑一轮：到期的订阅落成待投递记录（POST）
     //   custom-report/shared/{token}     通过分享链接读报表（GET）
     //
+    // ==== 13.6.2.1「导出与订阅」补进本元素（2026-10-30）====================
+    //   custom-report/export/sources            导出能力声明（GET）
+    //   custom-report/export/sync               同步导出（小结果集，POST）
+    //   custom-report/export/jobs               发起异步导出（POST）/ 任务清单（GET）
+    //   custom-report/export/jobs/{uuid}        任务详情（GET）
+    //   custom-report/export/jobs/{uuid}/file   下载文件（GET，二进制原样透传）
+    //   custom-report/export/jobs/{uuid}/cancel 作废（POST）
+    //   custom-report/deliveries/{uuid}         单条投递详情（GET）
+    //   custom-report/deliveries/dispatch       真正执行一次投递（POST）
+    //
+    // ⚠️ **字面量子路径排在 {uuid} 段之前判别** —— alternation 是首个命中即返回，
+    //   顺序反了 `deliveries/dispatch` 会被 `{uuid}` 支吃掉半截。
+    //
     // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
     //   custom-report             —— 裸路径：后端**没有**「一条不存在的汇总列表接口」。
     //   custom-report/{uuid}       —— 顶层没有 id 段（报表按查询参数 / 子路径定位）。
     //   custom-report/unknown-sub  —— 多一层仍然 404。
-    //   custom-report/export       —— 🔴 导出属 13.6.2.1（**未交付**），本模块没有导出端点。
-    //   custom-report/deliveries/{uuid} —— 投递记录没有单条详情端点（只有台账列表）。
-    //   custom-report/subscriptions/{uuid}/deliveries —— 没有这个端点。
+    //   custom-report/export/{uuid} —— 导出的 id 段在 **jobs 之下**（export/jobs/{uuid}），
+    //                                  顶层 export 下没有 id 段。
+    //   custom-report/export/jobs/{uuid}/unknown —— 多一层仍然 404。
     //
     // ⚠️ **顶层组不写成可选** ⇒ 裸路径（只有命名空间、没有子路径）刻意不放行。
     //
@@ -13798,7 +13811,7 @@ const services: readonly {
     env: 'REPORTING_URL',
     fallback: 'http://127.0.0.1:8088',
     pattern:
-      /^custom\-report\/(?:capabilities|metrics|dimensions|deliveries(?:\/tick)?|shared\/[0-9a-f]{32}|shares\/[0-9a-fA-F\-]{36}|subscriptions\/[0-9a-fA-F\-]{36}|reports(?:\/[0-9a-fA-F\-]{36}(?:\/(?:run|shares|subscriptions))?)?)$/,
+      /^custom\-report\/(?:capabilities|metrics|dimensions|export\/(?:sources|sync|jobs(?:\/[0-9a-fA-F\-]{36}(?:\/(?:file|cancel))?)?)|deliveries(?:\/(?:tick|dispatch)|\/[0-9a-fA-F\-]{36})?|shared\/[0-9a-f]{32}|shares\/[0-9a-fA-F\-]{36}|subscriptions\/[0-9a-fA-F\-]{36}|reports(?:\/[0-9a-fA-F\-]{36}(?:\/(?:run|shares|subscriptions))?)?)$/,
   },
 ];
 
@@ -13839,7 +13852,6 @@ export async function proxy(
       cache: 'no-store',
       signal: AbortSignal.timeout(15_000),
     });
-    const text = await upstream.text();
     const contentType = upstream.headers.get('content-type') ?? '';
     // CSV 导出必须原样透传：走 JSON.parse 会把 CSV 解析失败变成 503，而且即使解析成功
     // 也会被重新序列化成 JSON，下载到的是一串引号转义的文本。
@@ -13850,11 +13862,38 @@ export async function proxy(
     // 所以把这两个 content-type 一并纳入原样透传（content-disposition 也一起带走，
     // 否则浏览器会拿不到文件名）。白名单式列举而不是「非 JSON 就透传」：
     // 后者会让上游一个返回 HTML 的错误页被当成文件下载下来，更难排查。
-    const passthrough =
+    //
+    // ⚠️ 13.6.2.1「导出与订阅」的 **XLSX / PDF** 也要原样透传，而且是**二进制**：
+    //   * 白名单里加上 xlsx 与 pdf 的 content-type；
+    //   * 🔴 **二进制不能走 `upstream.text()`** —— 它按 UTF-8 解码，xlsx/pdf 里的
+    //     字节会被替换成 U+FFFD，下载下来的文件**打不开**（现场表现是「下载失败」，
+    //     但服务端明明返回了 200）。所以二进制分支用 `arrayBuffer()` 原样取字节。
+    //   * content-disposition 一起带走，否则浏览器拿不到文件名。
+    const binaryPassthrough =
+      contentType.includes(
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      ) || contentType.includes('application/pdf');
+    const textPassthrough =
       contentType.includes('text/csv') ||
       contentType.includes('text/vnd.zpl') ||
       contentType.includes('text/html');
-    if (text && passthrough) {
+    if (binaryPassthrough) {
+      const raw = new NextResponse(await upstream.arrayBuffer(), {
+        status: upstream.status,
+        headers: {},
+      });
+      raw.headers.set('Content-Type', contentType);
+      const disposition = upstream.headers.get('content-disposition');
+      if (disposition) raw.headers.set('Content-Disposition', disposition);
+      raw.headers.set('Cache-Control', 'no-store');
+      if (upstream.status === 401) {
+        raw.cookies.delete(cookieName);
+        raw.cookies.delete(legacyCookieName);
+      }
+      return raw;
+    }
+    const text = await upstream.text();
+    if (text && textPassthrough) {
       const raw = new NextResponse(text, { status: upstream.status, headers: {} });
       raw.headers.set('Content-Type', contentType);
       const disposition = upstream.headers.get('content-disposition');

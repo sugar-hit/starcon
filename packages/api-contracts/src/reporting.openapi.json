@@ -3719,6 +3719,362 @@
         },
         "type": "object"
       },
+      "ExportSubscriptionColumnInfo": {
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ExportSubscriptionDeliveryView": {
+        "properties": {
+          "attemptCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "channel": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "deliveryId": {
+            "type": "string"
+          },
+          "lastError": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "reportCode": {
+            "type": "string"
+          },
+          "reportId": {
+            "type": "string"
+          },
+          "reportName": {
+            "type": "string"
+          },
+          "scheduledFor": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "subscriptionId": {
+            "type": "string"
+          },
+          "target": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ExportSubscriptionDispatchRequest": {
+        "properties": {
+          "limit": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ExportSubscriptionDispatchResult": {
+        "properties": {
+          "attempted": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "delivered": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "failed": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/ExportSubscriptionDeliveryView"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "ExportSubscriptionFilterOperatorInfo": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ExportSubscriptionFormatInfo": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "code": {
+            "type": "string"
+          },
+          "contentType": {
+            "type": "string"
+          },
+          "extension": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ExportSubscriptionJobCreateRequest": {
+        "properties": {
+          "fields": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "format": {
+            "type": "string"
+          },
+          "from": {
+            "format": "date",
+            "nullable": true,
+            "type": "string"
+          },
+          "reportId": {
+            "type": "string"
+          },
+          "to": {
+            "format": "date",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ExportSubscriptionJobPage": {
+        "properties": {
+          "formatFilter": {
+            "type": "string"
+          },
+          "keyword": {
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/ExportSubscriptionJobView"
+            },
+            "type": "array"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "statusFilter": {
+            "type": "string"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ExportSubscriptionJobView": {
+        "properties": {
+          "actorId": {
+            "type": "string"
+          },
+          "byteSize": {
+            "nullable": true,
+            "type": "number"
+          },
+          "contentSha256": {
+            "nullable": true,
+            "type": "string"
+          },
+          "downloadNote": {
+            "type": "string"
+          },
+          "downloadable": {
+            "type": "boolean"
+          },
+          "error": {
+            "type": "string"
+          },
+          "expiresAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "fieldHeaders": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "fileName": {
+            "nullable": true,
+            "type": "string"
+          },
+          "finishedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "format": {
+            "type": "string"
+          },
+          "jobId": {
+            "type": "string"
+          },
+          "reportCode": {
+            "type": "string"
+          },
+          "reportId": {
+            "type": "string"
+          },
+          "reportName": {
+            "type": "string"
+          },
+          "requestedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "rowCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "selectedFields": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "startedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ExportSubscriptionSortInfo": {
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ExportSubscriptionSourcesResponse": {
+        "properties": {
+          "columns": {
+            "items": {
+              "$ref": "#/components/schemas/ExportSubscriptionColumnInfo"
+            },
+            "type": "array"
+          },
+          "downloadTtlHours": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "filterOperators": {
+            "items": {
+              "$ref": "#/components/schemas/ExportSubscriptionFilterOperatorInfo"
+            },
+            "type": "array"
+          },
+          "formats": {
+            "items": {
+              "$ref": "#/components/schemas/ExportSubscriptionFormatInfo"
+            },
+            "type": "array"
+          },
+          "maxRows": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "notes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "reportCode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "reportId": {
+            "nullable": true,
+            "type": "string"
+          },
+          "reportName": {
+            "nullable": true,
+            "type": "string"
+          },
+          "sorts": {
+            "items": {
+              "$ref": "#/components/schemas/ExportSubscriptionSortInfo"
+            },
+            "type": "array"
+          },
+          "syncRowThreshold": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
       "InventoryAbcResponse": {
         "properties": {
           "aCumPct": {
@@ -16182,6 +16538,48 @@
         ]
       }
     },
+    "/reporting/custom-report/deliveries/dispatch": {
+      "post": {
+        "description": "⚠️ **本服务不装 @Scheduled**（多副本下自带定时器要做主节点选举与分布式锁）⇒ 这一轮由**外部调度**触发。🔴 **没配置 SMTP / Webhook 时，投递会被记为 FAILED 并写明缺什么** —— 不会假装「已发送」。",
+        "operationId": "post_reporting_custom_report_deliveries_dispatch",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExportSubscriptionDispatchRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExportSubscriptionDispatchResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "跑一轮投递：把待投递记录真的送出去",
+        "tags": [
+          "13.6.2.1 导出与订阅"
+        ]
+      }
+    },
     "/reporting/custom-report/deliveries/tick": {
       "post": {
         "description": "⚠️ **本服务不装 @Scheduled**（与 channel / identity 同一纪律：多副本下自带定时器要做主节点选举与分布式锁）⇒ 这一轮由**外部调度**触发。落的是「待投递」，**不是「已发送」**。",
@@ -16212,6 +16610,47 @@
         "summary": "跑一轮：把到期的订阅计划落成待投递记录",
         "tags": [
           "13.6.1.1 自定义报表"
+        ]
+      }
+    },
+    "/reporting/custom-report/deliveries/{deliveryId}": {
+      "get": {
+        "description": "🔴 **「待投递」不是「已发送」**：status 是真的投递结果 —— 只有传输层回报成功才是 DELIVERED，没配置通道或被拒收是 FAILED 并写明原因。",
+        "operationId": "get_reporting_custom_report_deliveries_deliveryId",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "deliveryId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExportSubscriptionDeliveryView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "一条投递记录的详情（真的投了没有、失败原因是什么）",
+        "tags": [
+          "13.6.2.1 导出与订阅"
         ]
       }
     },
@@ -16248,6 +16687,331 @@
         "summary": "可用维度白名单（只有这 5 个）",
         "tags": [
           "13.6.1.1 自定义报表"
+        ]
+      }
+    },
+    "/reporting/custom-report/export/jobs": {
+      "get": {
+        "operationId": "get_reporting_custom_report_export_jobs",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "format",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExportSubscriptionJobPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "导出任务清单（真分页 + 真搜索 + 真筛选）",
+        "tags": [
+          "13.6.2.1 导出与订阅"
+        ]
+      },
+      "post": {
+        "description": "🔴 **返回即「已受理」，不是「已完成」** —— 大文件异步导出是蓝图原话。文件与行数要轮询任务详情才拿得到。",
+        "operationId": "post_reporting_custom_report_export_jobs",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExportSubscriptionJobCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExportSubscriptionJobView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "发起一次异步导出（已受理，文件在后台生成）",
+        "tags": [
+          "13.6.2.1 导出与订阅"
+        ]
+      }
+    },
+    "/reporting/custom-report/export/jobs/{jobId}": {
+      "get": {
+        "description": "🔴 **下载就绪标记（downloadable）由服务端算** —— 前端不自己判断过期，过期后下载端点会回 410 Gone。",
+        "operationId": "get_reporting_custom_report_export_jobs_jobId",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "jobId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExportSubscriptionJobView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "导出任务详情（含状态、下载有效期、下载就绪标记）",
+        "tags": [
+          "13.6.2.1 导出与订阅"
+        ]
+      }
+    },
+    "/reporting/custom-report/export/jobs/{jobId}/cancel": {
+      "post": {
+        "operationId": "post_reporting_custom_report_export_jobs_jobId_cancel",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "jobId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExportSubscriptionJobView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "作废一份导出（已生成文件的也不允许再下载）",
+        "tags": [
+          "13.6.2.1 导出与订阅"
+        ]
+      }
+    },
+    "/reporting/custom-report/export/jobs/{jobId}/file": {
+      "get": {
+        "description": "🔴 **有效期由服务端判**：过期回 410 Gone 并把状态推进到 EXPIRED、清理文件 —— 「有效期过了文件还在」等于有效期没生效。⚠️ **这个端点刻意不包在 access.run 的事务里** —— 过期时要在回 410 之前先把「推进到 EXPIRED + 删文件」提交掉；包在事务里那次写会被异常一起回滚。",
+        "operationId": "get_reporting_custom_report_export_jobs_jobId_file",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "jobId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "format": "byte",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "下载导出文件（CSV / XLSX / PDF，带下载有效期）",
+        "tags": [
+          "13.6.2.1 导出与订阅"
+        ]
+      }
+    },
+    "/reporting/custom-report/export/sources": {
+      "get": {
+        "description": "🔴 **大导出走异步任务并给出有效期**：syncRowThreshold 是同步导出的行数上限，超过它同步端点会明确拒绝（409），请改用异步任务。传 reportId 会额外返回这份报表自己的可导出列（**只有它的维度与度量**）。",
+        "operationId": "get_reporting_custom_report_export_sources",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "reportId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExportSubscriptionSourcesResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "导出能力声明：可用格式、可导出字段、排序、筛选与阈值",
+        "tags": [
+          "13.6.2.1 导出与订阅"
+        ]
+      }
+    },
+    "/reporting/custom-report/export/sync": {
+      "post": {
+        "description": "🔴 超过 syncRowThreshold 行会回 **409** 并说清「请改用异步任务」—— **不截断**（截断出来的文件看上去完整，其实少了一半数据）。",
+        "operationId": "post_reporting_custom_report_export_sync",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExportSubscriptionJobCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "format": "byte",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "同步导出（**只允许小结果集**）",
+        "tags": [
+          "13.6.2.1 导出与订阅"
         ]
       }
     },

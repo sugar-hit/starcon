@@ -75,6 +75,28 @@
       <artifactId>tenancy</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <!--
+      13.6.2.1「导出与订阅」的文件生成依赖。
+      ⚠️ 这两个库是**真实生成文件字节**的正路：XLSX 由 POI 生成 OOXML 工作簿，
+      PDF 由 PDFBox 生成 PDF 文档。**不手搓「假 xlsx / 假 pdf」** ——
+      下载下来打不开的文件比不提供这个格式更糟（用户会以为导坏了）。
+      版本号固定在这里（不跟 Spring Boot 的 BOM），保证构建可复现。
+    -->
+    <dependency>
+      <groupId>org.apache.poi</groupId>
+      <artifactId>poi</artifactId>
+      <version>5.2.3</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.poi</groupId>
+      <artifactId>poi-ooxml</artifactId>
+      <version>5.2.3</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.pdfbox</groupId>
+      <artifactId>pdfbox</artifactId>
+      <version>2.0.4</version>
+    </dependency>
   </dependencies>
   <build>
     <plugins>
