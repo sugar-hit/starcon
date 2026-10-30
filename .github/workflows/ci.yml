@@ -137,6 +137,14 @@ jobs:
         run: |
           docker compose --env-file deploy/.env.catalog.local -f deploy/docker/docker-compose.catalog.yml exec -T catalog sh -c 'test "$(id -u)" = 10001 && test -w "$MEDIA_STORAGE_ROOT"'
           docker compose --env-file deploy/.env.catalog.local -f deploy/docker/docker-compose.catalog.yml exec -T channel sh -c 'test "$(id -u)" = 10001 && test -w "$CHANNEL_SECRET_STORE_DIR"'
+          # 授权凭证存储与导出存储的根目录同样必须存在且可写。
+          # 这两个存储实现在构造函数里就 createDirectories(root)，
+          # 目录不存在或不可写会让服务直接启动失败 ——
+          # 漏配 env 时它们退回相对路径默认值，在容器里解析到 /app/target/...，
+          # 而 /app 属主是 root、进程以 UID 10001 运行 ⇒ AccessDeniedException。
+          docker compose --env-file deploy/.env.catalog.local -f deploy/docker/docker-compose.catalog.yml exec -T channel sh -c 'test "$(id -u)" = 10001 && test -w "$CREDENTIAL_STORAGE_ROOT"'
+          docker compose --env-file deploy/.env.catalog.local -f deploy/docker/docker-compose.catalog.yml exec -T channel sh -c 'test "$(id -u)" = 10001 && test -w "$CERTIFICATION_STORAGE_ROOT"'
+          docker compose --env-file deploy/.env.catalog.local -f deploy/docker/docker-compose.catalog.yml exec -T reporting sh -c 'test "$(id -u)" = 10001 && test -w "$REPORTING_EXPORT_STORAGE_ROOT"'
       - run: pnpm contracts:generate
       - run: git diff --exit-code -- packages/api-contracts/src
       - run: pnpm exec playwright test tests/e2e/catalog.spec.ts

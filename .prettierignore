@@ -4,3 +4,16 @@
 packages/api-contracts/
 packages/sdk/
 docs/product/capability-blueprint/module-progress.md
+
+# Markdown 文档：不参与 prettier 格式化
+#
+# 仓库对 Markdown 表格的既有约定是**紧凑写法** `| --- | --- |`
+# （实测 docs/backlog 近 30 天新增 71 个文件，紧凑写法 46 处、对齐写法 0 处）。
+# 而 prettier 会把表格重排成按列宽对齐的空格填充写法，两者系统性冲突。
+# 冲突的后果不是代码质量问题，而是「每轮流水线都产出一批新的格式债」：
+# 流水线每轮写会话记录与 backlog，prettier 一律把它们判为不合规。
+#
+# 实测 2026-10-30：排除 docs/ 后不合规文件从 1086 降到 589，
+# 剩下 589 个全是 apps/web/src 与 packages/ui 的**真实代码排版债**，
+# 由 L2 批次闸的增量格式闸逐步收敛。
+docs/

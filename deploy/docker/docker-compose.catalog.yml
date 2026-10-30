@@ -90,9 +90,26 @@ services:
       DB_MIGRATION_PASSWORD: ${PG_PASSWORD}
       IDENTITY_URL: http://identity:8081
       CHANNEL_SECRET_STORE_DIR: /app/data/channel-secrets
+      # 授权凭证存储根目录。与 CHANNEL_SECRET_STORE_DIR 是两个不同的东西：
+      # 前者是渠道对接的密钥配置，后者是品牌授权书/证书等上传文档的落盘位置。
+      # 不配的话会退回相对路径默认值 target/credential-store ⇒ 解析成 /app/target/...
+      # ⇒ UID 10001 无权创建 ⇒ 容器启动失败（AccessDeniedException: /app/target）。
+      CREDENTIAL_STORAGE_ROOT: /app/data/credential-store
+      # 认证扫描件存储根目录。与上面两个同型：未配时退回相对路径默认值
+      # target/certification-store ⇒ 解析成 /app/target/... ⇒ UID 10001 无权创建
+      # ⇒ 容器启动失败（AccessDeniedException: /app/target）。
+      CERTIFICATION_STORAGE_ROOT: /app/data/certification-store
+      # 渠道回调签名主密钥（32 字节的 base64，AES-256）。
+      # WebhookService 构造时注入它，且**没有默认值** —— 缺失会让 channel 起不来。
+      # 用 `:?` 而不是普通 `${X}`：普通写法在变量缺失时会静默代入空串，
+      # 服务能启动、运行时才炸（keyOf 要求恰好 32 字节），属于难查的静默错误。
+      # 这里让 compose 在编排阶段就明确失败。
+      CHANNEL_WEBHOOK_SIGNING_KEY: ${CHANNEL_WEBHOOK_SIGNING_KEY:?CHANNEL_WEBHOOK_SIGNING_KEY 未设置 —— 渠道回调签名主密钥必填}
       INTERNAL_KEY: ${INTERNAL_KEY}
     volumes:
       - channel-secret-data:/app/data/channel-secrets
+      - channel-credential-data:/app/data/credential-store
+      - channel-certification-data:/app/data/certification-store
   warehouse:
     build:
       context: ../..
@@ -197,7 +214,13 @@ services:
       DB_MIGRATION_USER: starcon_migrator
       DB_MIGRATION_PASSWORD: ${PG_PASSWORD}
       IDENTITY_URL: http://identity:8081
+      # 导出存储根目录。不配的话会退回相对路径默认值 target/reporting-export-store
+      # ⇒ 解析成 /app/target/... ⇒ UID 10001 无权创建 ⇒ 容器启动失败
+      # （AccessDeniedException: /app/target）。
+      REPORTING_EXPORT_STORAGE_ROOT: /app/data/reporting-export
       INTERNAL_KEY: ${INTERNAL_KEY}
+    volumes:
+      - reporting-export-data:/app/data/reporting-export
   platform:
     build:
       context: ../..
@@ -260,6 +283,11 @@ services:
       DB_MIGRATION_USER: starcon_migrator
       DB_MIGRATION_PASSWORD: ${PG_PASSWORD}
       IDENTITY_URL: http://identity:8081
+      # migrate-* 用的是同一个镜像与同一个 Spring 上下文，
+      # 存储实现的构造函数照样会执行 ⇒ 这里也必须给可写的绝对路径。
+      CREDENTIAL_STORAGE_ROOT: /app/data/credential-store
+      CERTIFICATION_STORAGE_ROOT: /app/data/certification-store
+      CHANNEL_WEBHOOK_SIGNING_KEY: ${CHANNEL_WEBHOOK_SIGNING_KEY:?CHANNEL_WEBHOOK_SIGNING_KEY 未设置 —— 渠道回调签名主密钥必填}
       INTERNAL_KEY: ${INTERNAL_KEY}
       LOCAL_BOOTSTRAP_ENABLED: 'false'
   migrate-warehouse:
@@ -335,6 +363,8 @@ services:
       DB_MIGRATION_USER: starcon_migrator
       DB_MIGRATION_PASSWORD: ${PG_PASSWORD}
       IDENTITY_URL: http://identity:8081
+      # 同 migrate-channel：存储实现的构造函数会在迁移进程里执行，也需要可写路径。
+      REPORTING_EXPORT_STORAGE_ROOT: /app/data/reporting-export
       INTERNAL_KEY: ${INTERNAL_KEY}
       LOCAL_BOOTSTRAP_ENABLED: 'false'
   migrate-platform:
@@ -355,4 +385,7 @@ services:
 volumes:
   catalog-media-data:
   channel-secret-data:
+  channel-credential-data:
+  channel-certification-data:
+  reporting-export-data:
   catalog-pg-data:
