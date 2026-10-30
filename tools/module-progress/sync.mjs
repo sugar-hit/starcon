@@ -25,10 +25,12 @@
 
 import { readFileSync, writeFileSync, readdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { dirname, join } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
-const ROOT = join(HERE, '..', '..');
+// `LANE_ROOT` 与 lane.mjs / remote-lane.mjs 同一套约定：测试用沙箱根目录覆盖，
+// 让 sync.mjs 能在 `.tmp/` 沙箱里跑（没有它就没法对台账解析逻辑做隔离测试）。
+const ROOT = process.env.LANE_ROOT ? resolve(process.env.LANE_ROOT) : join(HERE, '..', '..');
 const BLUEPRINT_DIR = join(ROOT, 'docs', 'product', 'capability-blueprint');
 const LEDGER = join(BLUEPRINT_DIR, 'module-progress.md');
 
@@ -173,6 +175,15 @@ function extractTree(body) {
   return nodes;
 }
 
+/**
+ * 证据格含字面竖线的行 ID（由 readExisting 填充）。
+ *
+ * ⚠️ 这是台账的**第一号杀手**：竖线既会把表格切成多列，也曾让旧版正则
+ * 在写盘时把证据格**静默截断**（2026-10-30 实测：13.6.1.2 从 6111 字掉到 2100 字）。
+ * 截断后 sync --check 反而是绿的 ⇒ 丢失不可见。所以这里必须**点名**，不点名就等于没发生。
+ */
+const pipeRows = [];
+
 /** 读既有台账，取回「状态」「证据」两列 */
 function readExisting() {
   const map = new Map();
@@ -189,16 +200,30 @@ function readExisting() {
   // 实测（2026-10-19）：11.1.2.2 的行只有 6 根竖线，
   // 把已交付的 11.2.1.1 退货授权单误判成未开发，统计凭空少 1 个已交付。
   // 改成不跨行后，畸形行只会**干净地匹配失败**（自己回落），不再伤及邻行。
-  const row = /^\|\s*(\d+\.\d+\.\d+\.\d+)\s*\|([^|\n]*)\|([^|\n]*)\|([^|\n]*)\|([^|\n]*)\|([^|\n]*)\|/gm;
+  //
+  // ⚠️ **证据格（第 6 格）必须用贪婪的 `(.*)` 捕获到行尾最后一根竖线**，不能用 `([^|\n]*)`：
+  // `[^|]` 表达不了「证据格里可以出现竖线」，所以证据格一旦含字面 `|`，
+  // 旧正则只截到第一根竖线就收工 ⇒ **每次 sync 写盘都会把证据格静默截断**。
+  // 实测（2026-10-30）：13.6.1.2 的证据格里有「`PUT|DELETE …`」，
+  // 09:15 那轮 sync 把它从 6111 字截到 2100 字，**丢掉了端点后半段 + 前端 + 测试 + 缺口四段**，
+  // 而且截断后的文件再跑 sync 是「一致」的 ⇒ 丢失不可见、CI 也看不见。
+  // 改成贪婪捕获后：证据格里的竖线**原样保留**，写盘不再截断。
+  const row = /^\|\s*(\d+\.\d+\.\d+\.\d+)\s*\|([^|\n]*)\|([^|\n]*)\|([^|\n]*)\|([^|\n]*)\|(.*)\|[ \t]*$/gm;
   let m;
   while ((m = row.exec(text)) !== null) {
     const [, id, name, route, phase, status, evidence] = m;
     const s = (status ?? '').trim();
     // 状态非法（被手改坏）时不继承，回落到未开发，避免统计被污染
+    const ev = (evidence ?? '').trim();
+    if (ev.includes('|')) {
+      // 证据格里出现字面竖线 ⇒ 表格会被切列（渲染错位），而且多半是作者想用竖线当分隔符。
+      // 这里**点名**，不要静默 —— 竖线是台账的第一号杀手。
+      pipeRows.push(id.trim());
+    }
     map.set(id.trim(), {
       name: name.trim(),
       status: VALID_STATUS.has(s) ? s : STATUS.TODO,
-      evidence: (evidence ?? '').trim(),
+      evidence: ev,
     });
   }
   return map;
@@ -367,6 +392,12 @@ const check = process.argv.includes('--check');
 const result = build();
 const next = render(result);
 
+// ⚠️ 证据格里出现字面竖线的行：表格渲染会切列错位，历史上还因此静默丢过证据。
+// 这里**点名**（check 模式直接判红），别让它再无声无息地过去。
+const pipeWarn = pipeRows.length
+  ? `\n⚠ 证据格含字面竖线（会切列 / 曾导致证据被静默截断）：${pipeRows.join('、')}`
+  : '';
+
 if (check) {
   let current = '';
   try {
@@ -374,9 +405,17 @@ if (check) {
   } catch {
     /* 首次生成 */
   }
-  if (current === next) {
+  if (current === next && pipeRows.length === 0) {
     console.log('✓ 台账与蓝图一致');
     process.exit(0);
+  }
+  if (pipeRows.length) {
+    console.error(
+      `✗ 台账有 ${pipeRows.length} 行的证据格里含字面竖线：${pipeRows.join('、')}\n` +
+        `  竖线会把表格切成多列，也会让本脚本旧版把证据截断。\n` +
+        `  请把证据格里的「|」改成「／」或「、」，并把行尾多余的竖线去掉。`,
+    );
+    process.exit(1);
   }
   console.error('✗ 台账与蓝图不一致，运行：node tools/module-progress/sync.mjs');
   process.exit(1);
@@ -388,5 +427,6 @@ for (const r of result.rows) tally[r.status] += 1;
 console.log(
   `✓ 同步 ${result.volumeCount} 卷 / ${result.rows.length} 个 L4 模块\n` +
     `  已交付 ${tally.已交付} · 进行中 ${tally.进行中} · 未开发 ${tally.未开发}` +
-    (result.orphans.length ? `\n  ⚠ 台账中有 ${result.orphans.length} 个孤儿 ID` : ''),
+    (result.orphans.length ? `\n  ⚠ 台账中有 ${result.orphans.length} 个孤儿 ID` : '') +
+    pipeWarn,
 );
