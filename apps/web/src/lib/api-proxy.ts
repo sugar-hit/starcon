@@ -20,6 +20,63 @@ const services: readonly {
   fallback: string;
 }[] = [
   {
+    // 18.1.2.1 事件订阅（platform 服务，卷 18「集成开放与智能自动化」L3 18.1.2 下的第一格）。
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有的 platform/ 分支里并分支 ——
+    //   既有条目**一字未改、也不重排**。
+    //
+    // ---- 插入锚点选在**数组最开头**（本文件第一个元素之前）----
+    //   同批其它车道的插入点是「数组末尾」（收尾的 `];` 之前）；本车道落在这里，
+    //   与它们的插入点相距 10000 行以上，并入时 git 能干净求并。
+    //
+    // ---- 首 token「webhooks」的零命中核对结论 ----
+    //   本文件里既有的 `prefix: 'platform/'` 条目有三条：`^apps…$`（18.1.1.1 应用与凭证）、
+    //   `^text\/…$`（18.4.2.1 文本与翻译）、`^finance\-software\/…$`（18.2.1.1 财务软件）。
+    //   三条的首 token 与 `webhooks` **全不相同** ⇒ 天然互斥，
+    //   本车道**不需要**改动那三条里的任何一个字符。
+    //   ⚠️ channel 那一族 `webhook-dedup` / `webhook-endpoints` / `webhook-receipts`
+    //   是 **channel 服务**的电商平台回传通道（首 token 不同，且它们在 channel/ 前缀下），
+    //   与本模块的「本系统对外提供的事件订阅」**不是一件事** —— 别混淆。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   webhooks/capabilities                        能力声明
+    //   webhooks/overview                           概览（几个数）
+    //   webhooks/event-types                        可订阅事件列表（GET 真分页真筛选）/ 登记事件定义（POST）
+    //   webhooks/event-types/{uuid}/status          改事件定义状态（**只能改状态**，结构不可原地修改）
+    //   webhooks/subscriptions                      订阅列表（GET）/ 登记订阅（POST）
+    //   webhooks/subscriptions/{uuid}               订阅详情（GET）/ 改订阅（PUT）
+    //   webhooks/subscriptions/{uuid}/revoke        吊销订阅（POST）
+    //   webhooks/subscriptions/{uuid}/events        事件过滤列表（GET）/ 加一条过滤（POST）
+    //   webhooks/subscriptions/{uuid}/events/{uuid} 删一条事件过滤（DELETE）
+    //   webhooks/subscriptions/{uuid}/signing-secrets        签名密钥列表（GET）/ 生成（POST）
+    //   webhooks/subscriptions/{uuid}/signing-secrets/rotate  轮换签名密钥（POST）
+    //   webhooks/subscriptions/{uuid}/signing-secrets/revoke  吊销签名密钥（POST）
+    //   webhooks/subscriptions/{uuid}/signature-preview       签名试算（POST，真算但不投递）
+    //   webhooks/subscriptions/{uuid}/deliver        投递一次（POST，**适配器未接入时恒 409**）
+    //   webhooks/policies                           策略列表（GET）/ 新建策略（POST）
+    //   webhooks/policies/{uuid}                    改策略（PUT）
+    //   webhooks/audit-events                       审计事件列表（GET 真分页）
+    //
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   platform/webhooks                           —— 裸路径：后端**没有**「一条不存在的汇总列表接口」。
+    //   platform/webhooks/deliveries                —— 🔴 **投递记录**归 18.1.2.2，本车道不实现；
+    //                                                  放行它会让界面以为有投递流水表。
+    //   platform/webhooks/dead-letters              —— 同上（死信是投递明细的一种）。
+    //   platform/webhooks/event-types/{uuid}        —— 事件定义**只改状态**；没有「取单条 / 改结构」的端点。
+    //   platform/webhooks/event-types/{uuid}/schema —— 同上（破坏性变更要**新增版本**，不是原地改）。
+    //   platform/webhooks/subscriptions/not-a-uuid  —— 非 UUID 段不应被 uuid 分支吃掉。
+    //   platform/webhooks/subscriptions/{uuid}/not-a-shape —— 多一段仍然 404。
+    //
+    // id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //   （不是 `[0-9a-f-]+`）：后者会把 `revoke` / `rotate` 这种非 UUID 形状也当成 id 放行。
+    // 字面量子路径（capabilities / overview / event-types / policies / audit-events）
+    //   排在 {uuid} 段**之前**判别 —— alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    prefix: 'platform/',
+    env: 'PLATFORM_URL',
+    fallback: 'http://127.0.0.1:8089',
+    pattern:
+      /^webhooks\/(?:capabilities|overview|event-types(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/status)?|subscriptions(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:revoke|events(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|signing-secrets(?:\/(?:rotate|revoke))?|signature-preview|deliver))?)?|policies(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|audit-events)$/,
+  },
+  {
     // 13.1.1.1 经营总览（reporting 服务，卷 13「利润与经营分析」L3 13.1.1 下的第一格）。
     // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 finance / trade 那几条巨型
     //   alternation 里并分支 —— 既有条目**一字未改、也不重排**。
@@ -1829,6 +1886,152 @@ const services: readonly {
     fallback: 'http://127.0.0.1:8083',
     pattern:
       /^ad\-dayparts(?:\/(?:capabilities|caps|shops(?:\/[A-Za-z0-9_\-]{1,64}\/timezone)?|strategies(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:curve|status))?)?|recommendations(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/apply)?)?|tasks(?:\/run|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?))$/,
+  },
+  {
+    // 14.2.1.1 竞价管理（channel 服务，卷 14「广告与增长」的 L3 锚点 14.2.1）。
+    //
+    // 蓝图：「管理竞价：动态竞价策略选择（只增只降/降低/提高）、手动竞价调整、竞价范围上限、
+    // 按商品/SKU 的目标 ACOS 反推竞价建议。输入：竞价设置；目标 ACOS/ROAS；历史表现。
+    // 输出：竞价建议（目标 ACOS → 建议竞价）；批量调整任务。关系：上游 = 14.1.3.1、14.3.2.1；
+    // 下游 = 平台广告 API。
+    // **目标 ACOS 反推竞价是广告与利润打通的接口**——没有利润数据，投放只能看平台给的建议，
+    // 无法判断是否真的赚钱。」
+    //
+    // ⚠️ 本条目是**新增一条独立的 `services[]` 元素**，不是往既有 `channel/` 那几条正则里并分支 ——
+    //   既有条目**一字未改、也不重排**。本文件是多车道共用的累积型白名单，
+    //   往同一条 alternation 里并分支会让多车道同时并入时 git 必然判冲突。
+    //
+    // ---- 插入锚点：第一个 `prefix: 'identity/'` 条目的 `  {` 之前（调度者指定）----
+    //   与同批 13.6.1.1（reporting，数组末尾）的插入点相距 11000+ 行 ⇒ git 能干净求并。
+    //
+    // ---- 首 token「ad-bidding」的零命中核对结论（实测，非目测）----
+    //   发车前用脚本（`.tmp/api-proxy-zero-hit.mjs`，不入库）把本文件里**全部 368 个既有元素**
+    //   （`prefix` + 正则）逐条抽出来，按 resolve() 的**同构口径**实测
+    //   （path.startsWith(prefix) 收窄服务 → 再测 pattern.test(path.slice(prefix.length))）：
+    //     ad-bidding/capabilities          ad-bidding/options
+    //     ad-bidding/policies              ad-bidding/policies/{uuid}
+    //     ad-bidding/policies/{uuid}/status ad-bidding/keywords
+    //     ad-bidding/suggestions           ad-bidding/suggestions/{uuid}
+    //     ad-bidding/adjustments           ad-bidding/adjustments/{uuid}
+    //     ad-bidding/dispatch              ad-bidding/dispatch/{uuid}/cancel
+    //   **零命中** —— 既有 368 条正则里**没有任何一条**含 `ad-bidding`
+    //   （既有的是 `ad-campaigns` / `ad-keywords` / `ad-rules` / `ad-dayparts` /
+    //     `ad-diagnostics` / `ad-budgets` 一类），且逐条实测过。
+    //   反向核对：另外 12 条别的车道已交付的形状（ad-dayparts / ad-campaigns / ad-rules /
+    //     ad-budgets / ad-diagnostics / ad-keywords / ad-targetings / stock-forecasts /
+    //     compliance-precheck / trade/platform-disputes / identity/roles /
+    //     catalog/products）**全部仍然命中** —— 本条新元素不会遮蔽它们。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   ad-bidding/capabilities               能力声明（三档策略 / 两道闸 / 比率口径 / 未交付维度）
+    //   ad-bidding/options                    建策略要用的下拉项 + 14.1.3.1 的护栏上限
+    //   ad-bidding/policies                   策略清单（GET，真分页 + 真筛选）
+    //   ad-bidding/policies/{uuid}            策略详情（GET）/ 改策略（PUT）
+    //   ad-bidding/policies/{uuid}/status     改策略状态（POST：激活 / 暂停 / 归档）
+    //   ad-bidding/keywords                   竞价候选清单（GET，真分页 + 真筛选）
+    //   ad-bidding/suggestions                生成建议（POST）/ 建议批次列表（GET）
+    //   ad-bidding/suggestions/{uuid}         建议批次详情（GET，含 SKU 级口径 + 关键词级建议）
+    //   ad-bidding/adjustments                提交批量调整（POST）/ 调整任务列表（GET）
+    //   ad-bidding/adjustments/{uuid}         调整任务详情（GET，含逐条明细与上游批量任务 id）
+    //   ad-bidding/dispatch                    待下发队列（GET，真分页 + 真筛选）
+    //   ad-bidding/dispatch/{uuid}/cancel      撤销一条待下发（POST，**本模块唯一**能改队列的动作）
+    //
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   ad-bidding                              —— 裸路径：本模块没有裸集合读，一切入口都带子路径。
+    //   ad-bidding/platform-sync                —— 平台回写队列**未交付**，放行它等于让界面
+    //                                              以为「已经回写平台」（界面只写「待下发」）。
+    //   ad-bidding/dispatch/{uuid}              —— 没有「单条待下发详情」端点；只有「撤销」这一个动作。
+    //   ad-bidding/dispatch/{uuid}/mark-dispatched —— **刻意不提供**「标记已下发」这种假动作。
+    //   ad-bidding/policies/{uuid}/delete       —— 策略是配置事实，撤下走 status=ARCHIVED，
+    //                                              不物理删除（建议 / 调整 / 队列历史还要能复盘）。
+    //   ad-bidding/suggestions/{uuid}/preview   —— 变更预览属 14.1.1.3 批量操作（未交付）。
+    //   ad-bidding/capabilities/extra           —— 字面量子路径刻意不接 id 段。
+    //
+    // id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    // （不是 `[0-9a-f-]+`：后者会把 `not-a-uuid` 这种非 UUID 形状也当成 id 放行）。
+    // 字面量子路径（capabilities / options / keywords / dispatch / policies / suggestions /
+    // adjustments）排在 {uuid} 段**之前**判别 —— alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    // ⚠️ **顶层组不写成可选**（`ad-bidding` 裸路径必须 404：本模块没有顶层汇总列表端点）。
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^ad\-bidding(?:\/(?:capabilities|options|keywords|dispatch(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/cancel)?|policies(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/status)?)?|suggestions(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|adjustments(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?))$/,
+  },
+  {
+    // 13.6.1.2 看板搭建（reporting 服务，卷 13「利润与经营分析」L3 13.6.1 下的第二格）。
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 reporting/ 正则里并分支 ——
+    //   既有条目**一字未改、也不重排、不删除**。本文件是多车道共用的累积型白名单，
+    //   往同一条 alternation 里并分支会让多车道同时并入时 git 必然判冲突。
+    //
+    // ---- 插入锚点选在**第一个真正的 `prefix: 'identity/'` 元素之前**（调度者指定）----
+    //   与同批 13.6.2.1（导出与订阅，改写文件末尾的 custom-report 元素）相距 11800+ 行
+    //   ⇒ 并入时 git 能干净求并。
+    //
+    // ---- 首 token「board」的零命中核对结论（实测，非目测）----
+    //   发车前用脚本（本车道 .tmp/api-proxy-allowlist-check.mjs，一次性，不入库）把本文件里
+    //   **全部 267 个既有元素**（prefix + 正则）逐条抽出来，按 resolve() 的**同构口径**实测
+    //   （path.startsWith(prefix) 收窄服务 → 再测 pattern.test(path.slice(prefix.length))）：
+    //     reporting/board/board
+    //     reporting/board/board-templates
+    //     reporting/board/board-templates/{uuid}/instantiate
+    //     reporting/board/boards
+    //     reporting/board/boards/{uuid}
+    //     reporting/board/boards/{uuid}/components
+    //     reporting/board/boards/{uuid}/components/{uuid}
+    //     reporting/board/boards/{uuid}/defaults
+    //     reporting/board/boards/{uuid}/layout
+    //     reporting/board/boards/{uuid}/shares
+    //     reporting/board/boards/{uuid}/shares/{uuid}
+    //     reporting/board/boards/{uuid}/view
+    //     reporting/board/capabilities
+    //     reporting/board/dimensions
+    //     reporting/board/metrics
+    //   **零命中** —— 既有 23 条 `prefix === 'reporting/'` 的正则都是**按命名空间精确匹配**的
+    //   （首 token 分别是 overview / product-performance / lifecycle-segmentation /
+    //     expense-variance / store-comparison / sales-trend / target-attainment /
+    //     metric-cards / store-overview / targets / store-site / time-pattern /
+    //     profit-report / sku-profit / inventory-analysis / procurement-analysis /
+    //     logistics-analysis / product-sales / traffic-conversion / cost-structure /
+    //     affiliate-marketing / profit-alert / custom-report），
+    //   **没有一条能吃下 `board`** ⇒ 本模块 15 条路径在放行前**全部 404**。
+    //   反向核对：另外 **23 条**别的车道已交付的 reporting 形状命中集合**逐条未变**
+    //   （本条新元素不会遮蔽它们）。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**，契约 `reporting.openapi.json` 里就这 15 条）：
+    //   board                              我的看板（工作台视图：能打开的看板 + 可见组件数）
+    //   boards                             看板清单（GET 真分页 + 真搜索 / POST 新建）
+    //   boards/{uuid}                      看板详情（GET 读 / PUT 改 / DELETE 删）
+    //   boards/{uuid}/components            加组件（POST）
+    //   boards/{uuid}/components/{uuid}     改组件（PUT，含拖拽后的位置与尺寸）/ 删除（DELETE）
+    //   boards/{uuid}/layout                批量保存布局（PUT，拖拽一次 ⇒ 一次提交）
+    //   boards/{uuid}/shares                共享清单（GET）/ 加一条共享（POST）
+    //   boards/{uuid}/shares/{uuid}         撤销一条共享（DELETE）
+    //   boards/{uuid}/defaults              默认值（GET 读 / PUT 保存）
+    //   boards/{uuid}/view                  看板视图（GET，已按角色权限过滤的组件 + 实时数据）
+    //   board-templates                     模板清单（GET）/ 保存模板（POST）
+    //   board-templates/{uuid}/instantiate  用模板建看板（POST）
+    //   capabilities                        能力声明（真能跑什么 / 哪些未交付 / 判定规则）
+    //   metrics                             可用的语义层指标清单（口径唯一的展示形态）
+    //   dimensions                          维度白名单（与 13.6.1.1 完全一致的 5 个）
+    //
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   board                    —— 裸路径：后端**没有**「一条不存在的汇总列表接口」。
+    //   boards/{uuid}/export     —— 🔴 导出属 13.6.2.1（**未交付**），本模块没有导出端点。
+    //   boards/{uuid}/subscriptions —— 定时订阅属 13.6.2.1（**未交付**）。
+    //   boards/{uuid}/deliveries —— 投递队列属 13.6.2.1（**未交付**）。
+    //   boards/{uuid}/unknown    —— 未实现的子路径仍然 404。
+    //
+    // id 段用**完整 UUID 形状** `[0-9a-fA-F]{8}(?:-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}`
+    // （不是 `[0-9a-f-]+`：后者会把 `not-a-uuid` 这种非 UUID 形状也当成 id 放行）。
+    // 字面量子路径（board / board-templates / boards / capabilities / dimensions / metrics）
+    // 排在 {uuid} 段**之前**判别 —— alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    // ⚠️ **顶层组不写成可选**（`board` 裸路径必须 404：本模块没有顶层汇总列表端点）。
+    prefix: 'reporting/',
+    env: 'REPORTING_URL',
+    fallback: 'http://127.0.0.1:8088',
+    pattern:
+      /^board\/(?:board|board\-templates(?:\/[0-9a-fA-F]{8}(?:-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}\/instantiate)?|boards(?:\/[0-9a-fA-F]{8}(?:-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}(?:\/(?:components(?:\/[0-9a-fA-F]{8}(?:-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12})?|defaults|layout|shares(?:\/[0-9a-fA-F]{8}(?:-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12})?|view))?)?|capabilities|dimensions|metrics)$/,
   },
   {
     prefix: 'identity/',
@@ -13586,6 +13789,122 @@ const services: readonly {
     pattern:
       /^profit\-alert\/(?:capabilities|alerts|rules(?:\/(?:SKU_NEGATIVE_GROSS_PROFIT|SHOP_MARGIN_DROP|FEE_RATIO_ANOMALY|AD_LOSS_EXCEEDED|LOSS_ORDER_RATIO_SPIKE))?|notifications(?:\/[0-9a-fA-F\-]{36})?)$/,
   },
+  {
+    // 13.6.1.1 自定义报表（reporting 服务，卷 13「利润与经营分析」L3 13.6.1 下的第一格）。
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 reporting/ 正则里并分支 ——
+    //   既有条目**一字未改、也不重排、不删除**。
+    //
+    // ---- 插入锚点选在**数组末尾**（收尾的 `];` 之前、紧跟 13.4.3.1 profit-alert 那条之后）----
+    //   与同批另一条车道（14.2.1.1，channel，锚在第一个真正的 `prefix: 'identity/'` 之前）
+    //   相距 11000+ 行 ⇒ 并入时 git 能干净求并。
+    //
+    // ---- 首 token「custom-report」的零命中核对结论（**实测，非目测**）----
+    //   发车前用脚本（本车道的 .tmp/ 一次性脚本，不入库）把本文件里**全部既有元素**
+    //   （prefix + 正则）逐条抽出来，按 resolve() 的**同构口径**实测
+    //   （path.startsWith(prefix) 收窄服务 → 再测 pattern.test(path.slice(prefix.length))）：
+    //     reporting/custom-report/capabilities      零命中
+    //     reporting/custom-report/metrics           零命中
+    //     reporting/custom-report/dimensions        零命中
+    //     reporting/custom-report/reports           零命中
+    //     reporting/custom-report/reports/{uuid}            零命中
+    //     reporting/custom-report/reports/{uuid}/run        零命中
+    //     reporting/custom-report/reports/{uuid}/shares     零命中
+    //     reporting/custom-report/reports/{uuid}/subscriptions 零命中
+    //     reporting/custom-report/shares/{uuid}     零命中
+    //     reporting/custom-report/subscriptions/{uuid} 零命中
+    //     reporting/custom-report/deliveries        零命中
+    //     reporting/custom-report/deliveries/tick   零命中
+    //     reporting/custom-report/shared/{token}    零命中
+    //   **零命中** —— 既有 `prefix === 'reporting/'` 的正则都是**按命名空间精确匹配**的
+    //   （首 token 分别是 overview / projection / product-performance / lifecycle-segmentation /
+    //     expense-variance / store-comparison / sales-trend / target-attainment / metric-cards /
+    //     store-overview / targets / store-site / time-pattern / profit-report / product-sales /
+    //     traffic-conversion / cost-structure / affiliate-marketing / profit-alert），
+    //   **没有一条能吃下 `custom-report`** ⇒ 本模块的路径在放行前**全部 404**。
+    //   核对脚本**先把整行注释剥掉再抽元素**（别的车道的注释块里写着 `prefix: 'identity/'`
+    //   这类散文，不剥注释会把散文当成元素）。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**，契约 reporting.openapi.json 里就这些）：
+    //   custom-report/capabilities       能力声明（真能跑什么 / 哪些未交付）
+    //   custom-report/metrics            可用的语义层指标清单（口径唯一）
+    //   custom-report/dimensions         可用维度白名单（只有 5 个）
+    //   custom-report/reports            报表清单（GET）/ 新建（POST）
+    //   custom-report/reports/{uuid}     读 / 改 / 删一份报表配置
+    //   custom-report/reports/{uuid}/run 跑报表（POST，返回结果集）
+    //   custom-report/reports/{uuid}/shares     分享链接（GET 清单 / POST 生成）
+    //   custom-report/reports/{uuid}/subscriptions 订阅计划（GET 清单 / POST 新增）
+    //   custom-report/shares/{uuid}      撤销一条分享链接（DELETE）
+    //   custom-report/subscriptions/{uuid} 切换订阅启停（PUT）/ 删除（DELETE）
+    //   custom-report/deliveries         待投递记录台账（GET）
+    //   custom-report/deliveries/tick    跑一轮：到期的订阅落成待投递记录（POST）
+    //   custom-report/shared/{token}     通过分享链接读报表（GET）
+    //
+    // ==== 13.6.2.1「导出与订阅」补进本元素（2026-10-30）====================
+    //   custom-report/export/sources            导出能力声明（GET）
+    //   custom-report/export/sync               同步导出（小结果集，POST）
+    //   custom-report/export/jobs               发起异步导出（POST）/ 任务清单（GET）
+    //   custom-report/export/jobs/{uuid}        任务详情（GET）
+    //   custom-report/export/jobs/{uuid}/file   下载文件（GET，二进制原样透传）
+    //   custom-report/export/jobs/{uuid}/cancel 作废（POST）
+    //   custom-report/deliveries/{uuid}         单条投递详情（GET）
+    //   custom-report/deliveries/dispatch       真正执行一次投递（POST）
+    //
+    // ⚠️ **字面量子路径排在 {uuid} 段之前判别** —— alternation 是首个命中即返回，
+    //   顺序反了 `deliveries/dispatch` 会被 `{uuid}` 支吃掉半截。
+    //
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   custom-report             —— 裸路径：后端**没有**「一条不存在的汇总列表接口」。
+    //   custom-report/{uuid}       —— 顶层没有 id 段（报表按查询参数 / 子路径定位）。
+    //   custom-report/unknown-sub  —— 多一层仍然 404。
+    //   custom-report/export/{uuid} —— 导出的 id 段在 **jobs 之下**（export/jobs/{uuid}），
+    //                                  顶层 export 下没有 id 段。
+    //   custom-report/export/jobs/{uuid}/unknown —— 多一层仍然 404。
+    //
+    // ⚠️ **顶层组不写成可选** ⇒ 裸路径（只有命名空间、没有子路径）刻意不放行。
+    //
+    // ⚠️ **字面量子路径排在 {uuid} 段之前判别** —— alternation 是首个命中即返回，
+    //   顺序反了会被通配支吃掉半截。
+    prefix: 'reporting/',
+    env: 'REPORTING_URL',
+    fallback: 'http://127.0.0.1:8088',
+    pattern:
+      /^custom\-report\/(?:capabilities|metrics|dimensions|export\/(?:sources|sync|jobs(?:\/[0-9a-fA-F\-]{36}(?:\/(?:file|cancel))?)?)|deliveries(?:\/(?:tick|dispatch)|\/[0-9a-fA-F\-]{36})?|shared\/[0-9a-f]{32}|shares\/[0-9a-fA-F\-]{36}|subscriptions\/[0-9a-fA-F\-]{36}|reports(?:\/[0-9a-fA-F\-]{36}(?:\/(?:run|shares|subscriptions))?)?)$/,
+  },
+  {
+    // 18.1.1.2 接口目录（platform 服务，卷 18「集成开放与智能自动化」L3 18.1.1 API 管理下的第三格）。
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有任何一条里并分支 ——
+    //   既有条目**一字未改、也不重排**。
+    //
+    // ---- 插入锚点选在**数组末尾**（最后一个 services[] 元素之后、收尾的 `];` 之前）----
+    //   同批其它车道把新元素插在数组最开头；本车道落在末尾，并入时 git 能干净求并。
+    //
+    // ---- 首 token「api-catalog」的零命中核对结论 ----
+    //   本仓此前**没有任何** services[] 元素用 `api-catalog` 这个首 token
+    //   （既有 platform/ 前缀下只有 `apps`（18.1.1.1）与 `text`（18.4.2.1）两支，
+    //   `finance-software` 是**第三支** —— 它的首 token 与本条不同）。
+    //   ⇒ resolve() 先按 prefix 过滤再测正则，本条的首 token `api-catalog`
+    //   与既有三支**两两不相交** ⇒ 既有那支吃不到本模块的路径，本模块也吃不到它们的路径。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   platform/api-catalog/capabilities     能力声明（哪些真接通 / 哪些还没交付、归谁）
+    //   platform/api-catalog/overview         概览（几个数）
+    //   platform/api-catalog/domains          业务域清单（按对外路径首段分组）
+    //   platform/api-catalog/interfaces       接口清单（GET，真分页 + 真筛选 + 真搜索）
+    //   platform/api-catalog/interfaces/detail 接口详情（GET：参数 / 返回 / 限流说明 / 示例）
+    //   platform/api-catalog/sandbox/targets  可测试的目标服务清单（GET）
+    //   platform/api-catalog/sandbox/runs     沙箱测试历史（GET）/ 真发一次请求（POST）
+    //
+    // ⚠️ **刻意不放行**：
+    //   platform/api-catalog                        —— 裸路径：后端**没有**汇总端点。
+    //   platform/api-catalog/interfaces/spec        —— spec 由后端自己去各服务取，
+    //                                                  前端**不**代理它（那等于把代理变成任意转发器）。
+    //   platform/api-catalog/sandbox/runs/{id}      —— 后端没有按 id 寻址的端点。
+    //   platform/api-catalog/unknown                —— 多一层仍然 404。
+    prefix: 'platform/',
+    env: 'PLATFORM_URL',
+    fallback: 'http://127.0.0.1:8089',
+    pattern: /^api\-catalog\/(?:capabilities|overview|domains|interfaces(?:\/detail)?|sandbox\/(?:targets|runs))$/,
+  },
 ];
 
 function resolve(path: string) {
@@ -13625,7 +13944,6 @@ export async function proxy(
       cache: 'no-store',
       signal: AbortSignal.timeout(15_000),
     });
-    const text = await upstream.text();
     const contentType = upstream.headers.get('content-type') ?? '';
     // CSV 导出必须原样透传：走 JSON.parse 会把 CSV 解析失败变成 503，而且即使解析成功
     // 也会被重新序列化成 JSON，下载到的是一串引号转义的文本。
@@ -13636,11 +13954,38 @@ export async function proxy(
     // 所以把这两个 content-type 一并纳入原样透传（content-disposition 也一起带走，
     // 否则浏览器会拿不到文件名）。白名单式列举而不是「非 JSON 就透传」：
     // 后者会让上游一个返回 HTML 的错误页被当成文件下载下来，更难排查。
-    const passthrough =
+    //
+    // ⚠️ 13.6.2.1「导出与订阅」的 **XLSX / PDF** 也要原样透传，而且是**二进制**：
+    //   * 白名单里加上 xlsx 与 pdf 的 content-type；
+    //   * 🔴 **二进制不能走 `upstream.text()`** —— 它按 UTF-8 解码，xlsx/pdf 里的
+    //     字节会被替换成 U+FFFD，下载下来的文件**打不开**（现场表现是「下载失败」，
+    //     但服务端明明返回了 200）。所以二进制分支用 `arrayBuffer()` 原样取字节。
+    //   * content-disposition 一起带走，否则浏览器拿不到文件名。
+    const binaryPassthrough =
+      contentType.includes(
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      ) || contentType.includes('application/pdf');
+    const textPassthrough =
       contentType.includes('text/csv') ||
       contentType.includes('text/vnd.zpl') ||
       contentType.includes('text/html');
-    if (text && passthrough) {
+    if (binaryPassthrough) {
+      const raw = new NextResponse(await upstream.arrayBuffer(), {
+        status: upstream.status,
+        headers: {},
+      });
+      raw.headers.set('Content-Type', contentType);
+      const disposition = upstream.headers.get('content-disposition');
+      if (disposition) raw.headers.set('Content-Disposition', disposition);
+      raw.headers.set('Cache-Control', 'no-store');
+      if (upstream.status === 401) {
+        raw.cookies.delete(cookieName);
+        raw.cookies.delete(legacyCookieName);
+      }
+      return raw;
+    }
+    const text = await upstream.text();
+    if (text && textPassthrough) {
       const raw = new NextResponse(text, { status: upstream.status, headers: {} });
       raw.headers.set('Content-Type', contentType);
       const disposition = upstream.headers.get('content-disposition');

@@ -24,3 +24,27 @@ springdoc:
   api-docs:
     version: OPENAPI_3_0
     enabled: true
+# 18.1.1.2 接口目录：对外 API 的目录**真从各服务的活 spec 解析**（/v3/api-docs）。
+#
+# ⚠️ 这张表是「去哪儿取契约」，**不是**「有哪些接口」：
+#   接口清单 = 各服务 spec 里真有的路径与操作，一行都不写死在本服务里。
+#   蓝图原话：「接口契约由后端 spec 生成，文档不手写 —— 手写文档必然与实现漂移。」
+#
+# ⚠️ platform 自己也在这张表里（8089）：开放平台自己的接口（/platform/**）同样是
+#   「对外开放 API」的一部分，目录里必须有它 —— 只列别人的接口不列自己的，
+#   那不叫接口目录，叫别人的目录。
+platform:
+  api-catalog:
+    # 目录页面一次要读全部服务的 spec。九个服务 × 每个页面一次 = 把上游打满。
+    # 缓存 TTL 默认 60 秒（进程内缓存解析结果，不落盘）。
+    spec-ttl-seconds: 60
+    services:
+      identity: ${IDENTITY_URL:http://127.0.0.1:8081}
+      catalog: ${CATALOG_URL:http://127.0.0.1:8082}
+      channel: ${CHANNEL_URL:http://127.0.0.1:8083}
+      warehouse: ${WAREHOUSE_URL:http://127.0.0.1:8084}
+      trade: ${TRADE_URL:http://127.0.0.1:8085}
+      crm: ${CRM_URL:http://127.0.0.1:8086}
+      finance: ${FINANCE_URL:http://127.0.0.1:8087}
+      reporting: ${REPORTING_URL:http://127.0.0.1:8088}
+      platform: ${PLATFORM_URL:http://127.0.0.1:8089}

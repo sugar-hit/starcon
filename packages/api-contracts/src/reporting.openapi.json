@@ -1230,6 +1230,814 @@
         },
         "type": "object"
       },
+      "BoardCapabilities": {
+        "properties": {
+          "boardAvailable": {
+            "type": "boolean"
+          },
+          "notDelivered": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "rules": {
+            "items": {
+              "$ref": "#/components/schemas/BoardRuleNote"
+            },
+            "type": "array"
+          },
+          "templateAvailable": {
+            "type": "boolean"
+          },
+          "upstreamConnected": {
+            "type": "boolean"
+          },
+          "upstreamModules": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "BoardComponentData": {
+        "properties": {
+          "caliberNotes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "chartType": {
+            "type": "string"
+          },
+          "componentId": {
+            "type": "string"
+          },
+          "currencyAware": {
+            "type": "boolean"
+          },
+          "dataUpdatedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "dataUpdatedNote": {
+            "type": "string"
+          },
+          "dimensionCode": {
+            "type": "string"
+          },
+          "dimensionLabel": {
+            "type": "string"
+          },
+          "emptyNote": {
+            "type": "string"
+          },
+          "emptyReason": {
+            "nullable": true,
+            "type": "string"
+          },
+          "metricCode": {
+            "type": "string"
+          },
+          "metricDisplayName": {
+            "type": "string"
+          },
+          "points": {
+            "items": {
+              "$ref": "#/components/schemas/BoardComponentPoint"
+            },
+            "type": "array"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusNote": {
+            "type": "string"
+          },
+          "unit": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "BoardComponentPoint": {
+        "properties": {
+          "dimensionValue": {
+            "type": "string"
+          },
+          "values": {
+            "items": {
+              "$ref": "#/components/schemas/BoardComponentValue"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "BoardComponentSaveRequest": {
+        "properties": {
+          "chartType": {
+            "type": "string"
+          },
+          "dimensionCode": {
+            "type": "string"
+          },
+          "filter": {
+            "items": {
+              "$ref": "#/components/schemas/BoardFilterRequest"
+            },
+            "type": "array"
+          },
+          "layout": {
+            "$ref": "#/components/schemas/BoardLayoutView"
+          },
+          "metricCode": {
+            "type": "string"
+          },
+          "requiredPermission": {
+            "type": "string"
+          },
+          "sortOrder": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "BoardComponentValue": {
+        "properties": {
+          "availability": {
+            "type": "string"
+          },
+          "availabilityNote": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "value": {
+            "nullable": true,
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "BoardComponentView": {
+        "properties": {
+          "boardId": {
+            "type": "string"
+          },
+          "chartType": {
+            "type": "string"
+          },
+          "componentId": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "currencyAware": {
+            "type": "boolean"
+          },
+          "dimensionCode": {
+            "type": "string"
+          },
+          "filter": {
+            "items": {
+              "$ref": "#/components/schemas/BoardFilterView"
+            },
+            "type": "array"
+          },
+          "layout": {
+            "$ref": "#/components/schemas/BoardLayoutView"
+          },
+          "metricCode": {
+            "type": "string"
+          },
+          "metricDisplayName": {
+            "type": "string"
+          },
+          "requiredPermission": {
+            "type": "string"
+          },
+          "sortOrder": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "unit": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "BoardDefaultsRequest": {
+        "properties": {
+          "defaultFilters": {
+            "items": {
+              "$ref": "#/components/schemas/BoardFilterRequest"
+            },
+            "type": "array"
+          },
+          "defaultWindowFrom": {
+            "format": "date",
+            "nullable": true,
+            "type": "string"
+          },
+          "defaultWindowTo": {
+            "format": "date",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "BoardDefaultsView": {
+        "properties": {
+          "boardId": {
+            "type": "string"
+          },
+          "defaultFilters": {
+            "items": {
+              "$ref": "#/components/schemas/BoardFilterView"
+            },
+            "type": "array"
+          },
+          "defaultWindowFrom": {
+            "format": "date",
+            "nullable": true,
+            "type": "string"
+          },
+          "defaultWindowTo": {
+            "format": "date",
+            "nullable": true,
+            "type": "string"
+          },
+          "ownedByMe": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "BoardDimensionView": {
+        "properties": {
+          "dimensionCode": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "valueKind": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "BoardFilterRequest": {
+        "properties": {
+          "dimensionCode": {
+            "type": "string"
+          },
+          "operator": {
+            "type": "string"
+          },
+          "valueText": {
+            "type": "string"
+          },
+          "valueText2": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "BoardFilterView": {
+        "properties": {
+          "dimensionCode": {
+            "type": "string"
+          },
+          "operator": {
+            "type": "string"
+          },
+          "valueText": {
+            "type": "string"
+          },
+          "valueText2": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "BoardLayoutItem": {
+        "properties": {
+          "componentId": {
+            "type": "string"
+          },
+          "h": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "sortOrder": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "w": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "x": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "y": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "BoardLayoutSaveRequest": {
+        "properties": {
+          "components": {
+            "items": {
+              "$ref": "#/components/schemas/BoardLayoutItem"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "BoardLayoutView": {
+        "properties": {
+          "h": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "w": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "x": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "y": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "BoardMetricView": {
+        "properties": {
+          "aggregation": {
+            "type": "string"
+          },
+          "currencyAware": {
+            "type": "boolean"
+          },
+          "denominatorMetricCode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "metricCode": {
+            "type": "string"
+          },
+          "numeratorMetricCode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "unit": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "BoardPage": {
+        "properties": {
+          "keyword": {
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/BoardSummary"
+            },
+            "type": "array"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "visibilityFilter": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "BoardRuleNote": {
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "ruleCode": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "BoardSaveRequest": {
+        "properties": {
+          "boardCode": {
+            "type": "string"
+          },
+          "defaultFilters": {
+            "items": {
+              "$ref": "#/components/schemas/BoardFilterRequest"
+            },
+            "type": "array"
+          },
+          "defaultWindowFrom": {
+            "format": "date",
+            "nullable": true,
+            "type": "string"
+          },
+          "defaultWindowTo": {
+            "format": "date",
+            "nullable": true,
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "visibility": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "BoardShareRequest": {
+        "properties": {
+          "permissionCode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "roleId": {
+            "nullable": true,
+            "type": "string"
+          },
+          "scope": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "BoardShareView": {
+        "properties": {
+          "boardId": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "createdBy": {
+            "type": "string"
+          },
+          "permissionCode": {
+            "type": "string"
+          },
+          "revokedAt": {
+            "nullable": true,
+            "type": "string"
+          },
+          "roleId": {
+            "nullable": true,
+            "type": "string"
+          },
+          "scope": {
+            "type": "string"
+          },
+          "shareId": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "BoardSummary": {
+        "properties": {
+          "boardCode": {
+            "type": "string"
+          },
+          "boardId": {
+            "type": "string"
+          },
+          "componentCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "description": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "ownedByMe": {
+            "type": "boolean"
+          },
+          "ownerUserId": {
+            "type": "string"
+          },
+          "shareCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "updatedAt": {
+            "type": "string"
+          },
+          "visibility": {
+            "type": "string"
+          },
+          "visibleComponentCount": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "BoardTemplateInstantiateRequest": {
+        "properties": {
+          "boardCode": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "visibility": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "BoardTemplateSaveRequest": {
+        "properties": {
+          "components": {
+            "items": {
+              "$ref": "#/components/schemas/BoardComponentSaveRequest"
+            },
+            "type": "array"
+          },
+          "description": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "templateCode": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "BoardTemplateView": {
+        "properties": {
+          "components": {
+            "items": {
+              "$ref": "#/components/schemas/BoardComponentView"
+            },
+            "type": "array"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "createdBy": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "templateCode": {
+            "type": "string"
+          },
+          "templateId": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "BoardView": {
+        "properties": {
+          "boardCode": {
+            "type": "string"
+          },
+          "boardId": {
+            "type": "string"
+          },
+          "components": {
+            "items": {
+              "$ref": "#/components/schemas/BoardComponentView"
+            },
+            "type": "array"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "defaultFilters": {
+            "items": {
+              "$ref": "#/components/schemas/BoardFilterView"
+            },
+            "type": "array"
+          },
+          "defaultWindowFrom": {
+            "format": "date",
+            "nullable": true,
+            "type": "string"
+          },
+          "defaultWindowTo": {
+            "format": "date",
+            "nullable": true,
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "ownedByMe": {
+            "type": "boolean"
+          },
+          "ownerUserId": {
+            "type": "string"
+          },
+          "shareCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "updatedAt": {
+            "type": "string"
+          },
+          "visibility": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "BoardViewResponse": {
+        "properties": {
+          "boardCode": {
+            "type": "string"
+          },
+          "boardId": {
+            "type": "string"
+          },
+          "caliberNotes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "components": {
+            "items": {
+              "$ref": "#/components/schemas/BoardComponentData"
+            },
+            "type": "array"
+          },
+          "dataUpdatedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "dataUpdatedNote": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "from": {
+            "format": "date",
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusNote": {
+            "type": "string"
+          },
+          "to": {
+            "format": "date",
+            "type": "string"
+          },
+          "totalComponentCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "visibility": {
+            "type": "string"
+          },
+          "visibleComponentCount": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "BoardWorkbenchItem": {
+        "properties": {
+          "boardCode": {
+            "type": "string"
+          },
+          "boardId": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "ownedByMe": {
+            "type": "boolean"
+          },
+          "totalComponentCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "updatedAt": {
+            "type": "string"
+          },
+          "visibility": {
+            "type": "string"
+          },
+          "visibleComponentCount": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "BoardWorkbenchResponse": {
+        "properties": {
+          "boards": {
+            "items": {
+              "$ref": "#/components/schemas/BoardWorkbenchItem"
+            },
+            "type": "array"
+          },
+          "dataUpdatedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "dataUpdatedNote": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "Comparison": {
         "properties": {
           "changeAmount": {
@@ -1769,6 +2577,717 @@
         },
         "type": "object"
       },
+      "CustomReportCapabilities": {
+        "properties": {
+          "deliveryAvailable": {
+            "type": "boolean"
+          },
+          "deliveryOwnerModule": {
+            "type": "string"
+          },
+          "deliveryUnavailableReason": {
+            "type": "string"
+          },
+          "exportAvailable": {
+            "type": "boolean"
+          },
+          "exportOwnerModule": {
+            "type": "string"
+          },
+          "exportUnavailableReason": {
+            "type": "string"
+          },
+          "notDelivered": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "reportAvailable": {
+            "type": "boolean"
+          },
+          "rules": {
+            "items": {
+              "$ref": "#/components/schemas/CustomReportRuleNote"
+            },
+            "type": "array"
+          },
+          "subscriptionAvailable": {
+            "type": "boolean"
+          },
+          "upstreamConnected": {
+            "type": "boolean"
+          },
+          "upstreamModules": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "CustomReportCurrencyValue": {
+        "properties": {
+          "availability": {
+            "type": "string"
+          },
+          "availabilityNote": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "value": {
+            "nullable": true,
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "CustomReportDeliveryPage": {
+        "properties": {
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/CustomReportDeliveryView"
+            },
+            "type": "array"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "statusFilter": {
+            "type": "string"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CustomReportDeliveryView": {
+        "properties": {
+          "attemptCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "deliveryId": {
+            "type": "string"
+          },
+          "lastError": {
+            "type": "string"
+          },
+          "reportCode": {
+            "type": "string"
+          },
+          "reportId": {
+            "type": "string"
+          },
+          "scheduledFor": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "subscriptionId": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CustomReportDimensionCell": {
+        "properties": {
+          "dimensionCode": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CustomReportDimensionView": {
+        "properties": {
+          "dimensionCode": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "valueKind": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CustomReportFilterRequest": {
+        "properties": {
+          "dimensionCode": {
+            "type": "string"
+          },
+          "operator": {
+            "type": "string"
+          },
+          "valueText": {
+            "type": "string"
+          },
+          "valueText2": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CustomReportFilterView": {
+        "properties": {
+          "dimensionCode": {
+            "type": "string"
+          },
+          "operator": {
+            "type": "string"
+          },
+          "valueText": {
+            "type": "string"
+          },
+          "valueText2": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CustomReportMeasureCell": {
+        "properties": {
+          "availability": {
+            "type": "string"
+          },
+          "availabilityNote": {
+            "type": "string"
+          },
+          "currencyAware": {
+            "type": "boolean"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "metricCode": {
+            "type": "string"
+          },
+          "unit": {
+            "type": "string"
+          },
+          "values": {
+            "items": {
+              "$ref": "#/components/schemas/CustomReportCurrencyValue"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "CustomReportMetricView": {
+        "properties": {
+          "aggregation": {
+            "type": "string"
+          },
+          "currencyAware": {
+            "type": "boolean"
+          },
+          "denominatorMetricCode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "metricCode": {
+            "type": "string"
+          },
+          "numeratorMetricCode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "unit": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CustomReportPage": {
+        "properties": {
+          "keyword": {
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/CustomReportSummary"
+            },
+            "type": "array"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "visibilityFilter": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CustomReportRow": {
+        "properties": {
+          "dimensions": {
+            "items": {
+              "$ref": "#/components/schemas/CustomReportDimensionCell"
+            },
+            "type": "array"
+          },
+          "measures": {
+            "items": {
+              "$ref": "#/components/schemas/CustomReportMeasureCell"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "CustomReportRuleNote": {
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "ruleCode": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CustomReportRunRequest": {
+        "properties": {
+          "from": {
+            "format": "date",
+            "nullable": true,
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "to": {
+            "format": "date",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CustomReportRunResponse": {
+        "properties": {
+          "caliberNotes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "chartType": {
+            "type": "string"
+          },
+          "dataUpdatedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "dataUpdatedNote": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "dimensions": {
+            "items": {
+              "$ref": "#/components/schemas/CustomReportDimensionCell"
+            },
+            "type": "array"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "emptyNote": {
+            "type": "string"
+          },
+          "emptyReason": {
+            "nullable": true,
+            "type": "string"
+          },
+          "from": {
+            "format": "date",
+            "type": "string"
+          },
+          "measures": {
+            "items": {
+              "$ref": "#/components/schemas/CustomReportMetricView"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "reportCode": {
+            "type": "string"
+          },
+          "reportId": {
+            "type": "string"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/CustomReportRow"
+            },
+            "type": "array"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusNote": {
+            "type": "string"
+          },
+          "to": {
+            "format": "date",
+            "type": "string"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CustomReportSaveRequest": {
+        "properties": {
+          "chartType": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "dimensionCodes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "filters": {
+            "items": {
+              "$ref": "#/components/schemas/CustomReportFilterRequest"
+            },
+            "type": "array"
+          },
+          "measureMetricCodes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "reportCode": {
+            "type": "string"
+          },
+          "visibility": {
+            "type": "string"
+          },
+          "windowFrom": {
+            "format": "date",
+            "nullable": true,
+            "type": "string"
+          },
+          "windowTo": {
+            "format": "date",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CustomReportShareRequest": {
+        "properties": {
+          "visibility": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CustomReportShareView": {
+        "properties": {
+          "createdAt": {
+            "type": "string"
+          },
+          "createdBy": {
+            "type": "string"
+          },
+          "reportId": {
+            "type": "string"
+          },
+          "revokedAt": {
+            "nullable": true,
+            "type": "string"
+          },
+          "shareId": {
+            "type": "string"
+          },
+          "sharePath": {
+            "type": "string"
+          },
+          "shareToken": {
+            "type": "string"
+          },
+          "visibility": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CustomReportSharedResponse": {
+        "properties": {
+          "report": {
+            "$ref": "#/components/schemas/CustomReportView"
+          },
+          "result": {
+            "$ref": "#/components/schemas/CustomReportRunResponse"
+          },
+          "shareVisibility": {
+            "type": "string"
+          },
+          "sharedAt": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CustomReportSubscriptionRequest": {
+        "properties": {
+          "channel": {
+            "type": "string"
+          },
+          "cronExpression": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "target": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CustomReportSubscriptionToggleRequest": {
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "CustomReportSubscriptionView": {
+        "properties": {
+          "channel": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "cronExpression": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "lastEnqueuedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "nextRunAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "reportCode": {
+            "type": "string"
+          },
+          "reportId": {
+            "type": "string"
+          },
+          "reportName": {
+            "type": "string"
+          },
+          "subscriptionId": {
+            "type": "string"
+          },
+          "target": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CustomReportSummary": {
+        "properties": {
+          "chartType": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "dimensionCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "measureCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "ownedByMe": {
+            "type": "boolean"
+          },
+          "ownerUserId": {
+            "type": "string"
+          },
+          "reportCode": {
+            "type": "string"
+          },
+          "reportId": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          },
+          "visibility": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CustomReportTickResult": {
+        "properties": {
+          "advanced": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "enqueued": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CustomReportView": {
+        "properties": {
+          "chartType": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "dimensions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "filters": {
+            "items": {
+              "$ref": "#/components/schemas/CustomReportFilterView"
+            },
+            "type": "array"
+          },
+          "measures": {
+            "items": {
+              "$ref": "#/components/schemas/CustomReportMetricView"
+            },
+            "type": "array"
+          },
+          "ownerUserId": {
+            "type": "string"
+          },
+          "reportCode": {
+            "type": "string"
+          },
+          "reportId": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          },
+          "visibility": {
+            "type": "string"
+          },
+          "windowFrom": {
+            "format": "date",
+            "nullable": true,
+            "type": "string"
+          },
+          "windowTo": {
+            "format": "date",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "DrilldownPage": {
         "properties": {
           "items": {
@@ -2196,6 +3715,362 @@
           "varianceRate": {
             "nullable": true,
             "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "ExportSubscriptionColumnInfo": {
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ExportSubscriptionDeliveryView": {
+        "properties": {
+          "attemptCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "channel": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "deliveryId": {
+            "type": "string"
+          },
+          "lastError": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "reportCode": {
+            "type": "string"
+          },
+          "reportId": {
+            "type": "string"
+          },
+          "reportName": {
+            "type": "string"
+          },
+          "scheduledFor": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "subscriptionId": {
+            "type": "string"
+          },
+          "target": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ExportSubscriptionDispatchRequest": {
+        "properties": {
+          "limit": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ExportSubscriptionDispatchResult": {
+        "properties": {
+          "attempted": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "delivered": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "failed": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/ExportSubscriptionDeliveryView"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "ExportSubscriptionFilterOperatorInfo": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ExportSubscriptionFormatInfo": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "code": {
+            "type": "string"
+          },
+          "contentType": {
+            "type": "string"
+          },
+          "extension": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ExportSubscriptionJobCreateRequest": {
+        "properties": {
+          "fields": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "format": {
+            "type": "string"
+          },
+          "from": {
+            "format": "date",
+            "nullable": true,
+            "type": "string"
+          },
+          "reportId": {
+            "type": "string"
+          },
+          "to": {
+            "format": "date",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ExportSubscriptionJobPage": {
+        "properties": {
+          "formatFilter": {
+            "type": "string"
+          },
+          "keyword": {
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/ExportSubscriptionJobView"
+            },
+            "type": "array"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "statusFilter": {
+            "type": "string"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ExportSubscriptionJobView": {
+        "properties": {
+          "actorId": {
+            "type": "string"
+          },
+          "byteSize": {
+            "nullable": true,
+            "type": "number"
+          },
+          "contentSha256": {
+            "nullable": true,
+            "type": "string"
+          },
+          "downloadNote": {
+            "type": "string"
+          },
+          "downloadable": {
+            "type": "boolean"
+          },
+          "error": {
+            "type": "string"
+          },
+          "expiresAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "fieldHeaders": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "fileName": {
+            "nullable": true,
+            "type": "string"
+          },
+          "finishedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "format": {
+            "type": "string"
+          },
+          "jobId": {
+            "type": "string"
+          },
+          "reportCode": {
+            "type": "string"
+          },
+          "reportId": {
+            "type": "string"
+          },
+          "reportName": {
+            "type": "string"
+          },
+          "requestedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "rowCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "selectedFields": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "startedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ExportSubscriptionSortInfo": {
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ExportSubscriptionSourcesResponse": {
+        "properties": {
+          "columns": {
+            "items": {
+              "$ref": "#/components/schemas/ExportSubscriptionColumnInfo"
+            },
+            "type": "array"
+          },
+          "downloadTtlHours": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "filterOperators": {
+            "items": {
+              "$ref": "#/components/schemas/ExportSubscriptionFilterOperatorInfo"
+            },
+            "type": "array"
+          },
+          "formats": {
+            "items": {
+              "$ref": "#/components/schemas/ExportSubscriptionFormatInfo"
+            },
+            "type": "array"
+          },
+          "maxRows": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "notes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "reportCode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "reportId": {
+            "nullable": true,
+            "type": "string"
+          },
+          "reportName": {
+            "nullable": true,
+            "type": "string"
+          },
+          "sorts": {
+            "items": {
+              "$ref": "#/components/schemas/ExportSubscriptionSortInfo"
+            },
+            "type": "array"
+          },
+          "syncRowThreshold": {
+            "format": "int32",
+            "type": "integer"
           }
         },
         "type": "object"
@@ -13130,6 +15005,980 @@
         ]
       }
     },
+    "/reporting/board/board": {
+      "get": {
+        "description": "🔴 **看得见的组件数是过滤后的真实值** —— 没有权限的组件算不进这个数，分母是看板上的组件总数。",
+        "operationId": "get_reporting_board_board",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BoardWorkbenchResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "我的看板（工作台视图）：我能打开的看板 + 各自看得见的组件数",
+        "tags": [
+          "13.6.1.2 看板搭建"
+        ]
+      }
+    },
+    "/reporting/board/board-templates": {
+      "get": {
+        "operationId": "get_reporting_board_board_templates",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/BoardTemplateView"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "看板模板清单（按当前租户过滤）",
+        "tags": [
+          "13.6.1.2 看板搭建"
+        ]
+      },
+      "post": {
+        "description": "🔴 模板里的组件**同样**只能引用已登记的指标码与白名单维度码。",
+        "operationId": "post_reporting_board_board_templates",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BoardTemplateSaveRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BoardTemplateView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "保存一份看板模板（含模板里的组件）",
+        "tags": [
+          "13.6.1.2 看板搭建"
+        ]
+      }
+    },
+    "/reporting/board/board-templates/{templateId}/instantiate": {
+      "post": {
+        "operationId": "post_reporting_board_board_templates_templateId_instantiate",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "templateId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BoardTemplateInstantiateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BoardView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "用模板实例化一张看板（模板里的组件整份复制过来）",
+        "tags": [
+          "13.6.1.2 看板搭建"
+        ]
+      }
+    },
+    "/reporting/board/boards": {
+      "get": {
+        "operationId": "get_reporting_board_boards",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "visibility",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BoardPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "看板清单（真分页 + 真搜索 + 真筛选）",
+        "tags": [
+          "13.6.1.2 看板搭建"
+        ]
+      },
+      "post": {
+        "description": "🔴 创建者来自**已认证会话**（不在入参里）⇒ 客户端不能把看板「送给」别人当自己的。",
+        "operationId": "post_reporting_board_boards",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BoardSaveRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BoardView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "新建一张看板",
+        "tags": [
+          "13.6.1.2 看板搭建"
+        ]
+      }
+    },
+    "/reporting/board/boards/{boardId}": {
+      "delete": {
+        "operationId": "delete_reporting_board_boards_boardId",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "boardId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "summary": "删除一张看板（连同它的组件与共享）",
+        "tags": [
+          "13.6.1.2 看板搭建"
+        ]
+      },
+      "get": {
+        "operationId": "get_reporting_board_boards_boardId",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "boardId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BoardView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "读一张看板（配置 + 已按权限过滤的组件）",
+        "tags": [
+          "13.6.1.2 看板搭建"
+        ]
+      },
+      "put": {
+        "operationId": "put_reporting_board_boards_boardId",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "boardId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BoardSaveRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BoardView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "更新一张看板（只有创建者能改）",
+        "tags": [
+          "13.6.1.2 看板搭建"
+        ]
+      }
+    },
+    "/reporting/board/boards/{boardId}/components": {
+      "post": {
+        "description": "🔴 指标码必须**已登记**（口径唯一，DB 层有触发器）；维度只能命中白名单；**非法布局直接报错**，不静默丢弃。",
+        "operationId": "post_reporting_board_boards_boardId_components",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "boardId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BoardComponentSaveRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BoardComponentView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "加一个组件（指标 + 维度 + 图表类型 + 布局 + 筛选 + 所需权限）",
+        "tags": [
+          "13.6.1.2 看板搭建"
+        ]
+      }
+    },
+    "/reporting/board/boards/{boardId}/components/{componentId}": {
+      "delete": {
+        "operationId": "delete_reporting_board_boards_boardId_components_componentId",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "boardId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "componentId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "summary": "删一个组件",
+        "tags": [
+          "13.6.1.2 看板搭建"
+        ]
+      },
+      "put": {
+        "operationId": "put_reporting_board_boards_boardId_components_componentId",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "boardId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "componentId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BoardComponentSaveRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BoardComponentView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "改一个组件（含拖拽后的位置与尺寸）",
+        "tags": [
+          "13.6.1.2 看板搭建"
+        ]
+      }
+    },
+    "/reporting/board/boards/{boardId}/defaults": {
+      "get": {
+        "operationId": "get_reporting_board_boards_boardId_defaults",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "boardId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BoardDefaultsView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "读默认值（默认筛选 + 默认时间窗口）",
+        "tags": [
+          "13.6.1.2 看板搭建"
+        ]
+      },
+      "put": {
+        "operationId": "put_reporting_board_boards_boardId_defaults",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "boardId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BoardDefaultsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BoardDefaultsView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "保存默认值（只有创建者能改）",
+        "tags": [
+          "13.6.1.2 看板搭建"
+        ]
+      }
+    },
+    "/reporting/board/boards/{boardId}/layout": {
+      "put": {
+        "description": "🔴 **非法布局直接报错**（位置非负、尺寸为正、不超出 12 栅格宽），**不静默丢弃** —— 悄悄挪回默认位置会让人以为存上了。",
+        "operationId": "put_reporting_board_boards_boardId_layout",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "boardId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BoardLayoutSaveRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/BoardComponentView"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "批量保存布局（拖拽一次 ⇒ 一次提交）",
+        "tags": [
+          "13.6.1.2 看板搭建"
+        ]
+      }
+    },
+    "/reporting/board/boards/{boardId}/shares": {
+      "get": {
+        "operationId": "get_reporting_board_boards_boardId_shares",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "boardId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/BoardShareView"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "一张看板的共享清单（只有创建者能看）",
+        "tags": [
+          "13.6.1.2 看板搭建"
+        ]
+      },
+      "post": {
+        "description": "🔴 角色与权限码**二选一**（DB 层 CHECK 钉死）；共享只决定「谁能打开这张看板」，**组件仍然按权限过滤**。",
+        "operationId": "post_reporting_board_boards_boardId_shares",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "boardId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BoardShareRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BoardShareView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "加一条共享（按角色或按权限码）",
+        "tags": [
+          "13.6.1.2 看板搭建"
+        ]
+      }
+    },
+    "/reporting/board/boards/{boardId}/shares/{shareId}": {
+      "delete": {
+        "operationId": "delete_reporting_board_boards_boardId_shares_shareId",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "boardId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "shareId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "summary": "撤掉一条共享",
+        "tags": [
+          "13.6.1.2 看板搭建"
+        ]
+      }
+    },
+    "/reporting/board/boards/{boardId}/view": {
+      "get": {
+        "description": "🔴 组件上的数字**不落库** —— 由 13.6.1.1 的报表引擎按登记口径现算。🔴 **没有权限的组件不会出现在这里**（库层的规则，不是前端藏起来的）。🔴 **涉币指标按币种分别报**；**算不出来**显示「—」并写明原因，不是 0。",
+        "operationId": "get_reporting_board_boards_boardId_view",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "boardId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BoardViewResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "看板视图：已按权限过滤的组件 + 每个组件的实时数据",
+        "tags": [
+          "13.6.1.2 看板搭建"
+        ]
+      }
+    },
+    "/reporting/board/capabilities": {
+      "get": {
+        "description": "🔴 **看板的导出与定时推送属 13.6.2.1，未交付** —— 界面上写清「未交付」，**不提供假按钮**。",
+        "operationId": "get_reporting_board_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BoardCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "能力声明：哪些真能跑、哪些未交付、判定规则是什么",
+        "tags": [
+          "13.6.1.2 看板搭建"
+        ]
+      }
+    },
+    "/reporting/board/dimensions": {
+      "get": {
+        "description": "🔴 看板**不开放任意列名**：维度只能是这张白名单里的码，它们对应投影事实上真实存在的列。",
+        "operationId": "get_reporting_board_dimensions",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/BoardDimensionView"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "可用维度白名单（只有 5 个，与 13.6.1.1 完全一致）",
+        "tags": [
+          "13.6.1.2 看板搭建"
+        ]
+      }
+    },
+    "/reporting/board/metrics": {
+      "get": {
+        "description": "指标定义是**租户级**的 ⇒ 这里只给**当前租户**登记的指标，别的租户登记的指标不会出现在清单里。",
+        "operationId": "get_reporting_board_metrics",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/BoardMetricView"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "可用的语义层指标清单（口径唯一的展示形态）",
+        "tags": [
+          "13.6.1.2 看板搭建"
+        ]
+      }
+    },
     "/reporting/cost-structure/anomalies": {
       "get": {
         "description": "阈值**不是写死的百分比**：它来自租户自己的规则表（固定百分点 / 基线标准差的若干倍），可在 PUT /reporting/cost-structure/rules/{costCategory} 上改。判不出来（历史期数不足 / 基线无波动）时**不报异常**，而是给出「判不了」的原因。",
@@ -13592,6 +16441,1248 @@
         "summary": "成本占比趋势（按期间粒度）",
         "tags": [
           "13.4.2.1 成本结构"
+        ]
+      }
+    },
+    "/reporting/custom-report/capabilities": {
+      "get": {
+        "description": "🔴 **导出（Excel / CSV / PDF）与邮件 / IM 的实际投递都属 13.6.2.1，未交付** —— 这两项 available=false，并写明归属模块与影响。界面照着显示，**不提供假按钮**。",
+        "operationId": "get_reporting_custom_report_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomReportCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "能力声明：哪些真能跑、哪些未交付、判定规则是什么",
+        "tags": [
+          "13.6.1.1 自定义报表"
+        ]
+      }
+    },
+    "/reporting/custom-report/deliveries": {
+      "get": {
+        "description": "🔴 这些记录是「**待投递**」（PENDING），**不是「已发送」** —— 真正的邮件 / IM 投递属 13.6.2.1（未交付）。",
+        "operationId": "get_reporting_custom_report_deliveries",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomReportDeliveryPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "待投递记录台账（真分页 + 真计数）",
+        "tags": [
+          "13.6.1.1 自定义报表"
+        ]
+      }
+    },
+    "/reporting/custom-report/deliveries/dispatch": {
+      "post": {
+        "description": "⚠️ **本服务不装 @Scheduled**（多副本下自带定时器要做主节点选举与分布式锁）⇒ 这一轮由**外部调度**触发。🔴 **没配置 SMTP / Webhook 时，投递会被记为 FAILED 并写明缺什么** —— 不会假装「已发送」。",
+        "operationId": "post_reporting_custom_report_deliveries_dispatch",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExportSubscriptionDispatchRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExportSubscriptionDispatchResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "跑一轮投递：把待投递记录真的送出去",
+        "tags": [
+          "13.6.2.1 导出与订阅"
+        ]
+      }
+    },
+    "/reporting/custom-report/deliveries/tick": {
+      "post": {
+        "description": "⚠️ **本服务不装 @Scheduled**（与 channel / identity 同一纪律：多副本下自带定时器要做主节点选举与分布式锁）⇒ 这一轮由**外部调度**触发。落的是「待投递」，**不是「已发送」**。",
+        "operationId": "post_reporting_custom_report_deliveries_tick",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomReportTickResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "跑一轮：把到期的订阅计划落成待投递记录",
+        "tags": [
+          "13.6.1.1 自定义报表"
+        ]
+      }
+    },
+    "/reporting/custom-report/deliveries/{deliveryId}": {
+      "get": {
+        "description": "🔴 **「待投递」不是「已发送」**：status 是真的投递结果 —— 只有传输层回报成功才是 DELIVERED，没配置通道或被拒收是 FAILED 并写明原因。",
+        "operationId": "get_reporting_custom_report_deliveries_deliveryId",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "deliveryId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExportSubscriptionDeliveryView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "一条投递记录的详情（真的投了没有、失败原因是什么）",
+        "tags": [
+          "13.6.2.1 导出与订阅"
+        ]
+      }
+    },
+    "/reporting/custom-report/dimensions": {
+      "get": {
+        "description": "🔴 自定义报表**不开放任意列名**：维度只能是这张白名单里的码，它们对应投影事实上真实存在的列。",
+        "operationId": "get_reporting_custom_report_dimensions",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/CustomReportDimensionView"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "可用维度白名单（只有这 5 个）",
+        "tags": [
+          "13.6.1.1 自定义报表"
+        ]
+      }
+    },
+    "/reporting/custom-report/export/jobs": {
+      "get": {
+        "operationId": "get_reporting_custom_report_export_jobs",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "format",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExportSubscriptionJobPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "导出任务清单（真分页 + 真搜索 + 真筛选）",
+        "tags": [
+          "13.6.2.1 导出与订阅"
+        ]
+      },
+      "post": {
+        "description": "🔴 **返回即「已受理」，不是「已完成」** —— 大文件异步导出是蓝图原话。文件与行数要轮询任务详情才拿得到。",
+        "operationId": "post_reporting_custom_report_export_jobs",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExportSubscriptionJobCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExportSubscriptionJobView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "发起一次异步导出（已受理，文件在后台生成）",
+        "tags": [
+          "13.6.2.1 导出与订阅"
+        ]
+      }
+    },
+    "/reporting/custom-report/export/jobs/{jobId}": {
+      "get": {
+        "description": "🔴 **下载就绪标记（downloadable）由服务端算** —— 前端不自己判断过期，过期后下载端点会回 410 Gone。",
+        "operationId": "get_reporting_custom_report_export_jobs_jobId",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "jobId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExportSubscriptionJobView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "导出任务详情（含状态、下载有效期、下载就绪标记）",
+        "tags": [
+          "13.6.2.1 导出与订阅"
+        ]
+      }
+    },
+    "/reporting/custom-report/export/jobs/{jobId}/cancel": {
+      "post": {
+        "operationId": "post_reporting_custom_report_export_jobs_jobId_cancel",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "jobId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExportSubscriptionJobView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "作废一份导出（已生成文件的也不允许再下载）",
+        "tags": [
+          "13.6.2.1 导出与订阅"
+        ]
+      }
+    },
+    "/reporting/custom-report/export/jobs/{jobId}/file": {
+      "get": {
+        "description": "🔴 **有效期由服务端判**：过期回 410 Gone 并把状态推进到 EXPIRED、清理文件 —— 「有效期过了文件还在」等于有效期没生效。⚠️ **这个端点刻意不包在 access.run 的事务里** —— 过期时要在回 410 之前先把「推进到 EXPIRED + 删文件」提交掉；包在事务里那次写会被异常一起回滚。",
+        "operationId": "get_reporting_custom_report_export_jobs_jobId_file",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "jobId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "format": "byte",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "下载导出文件（CSV / XLSX / PDF，带下载有效期）",
+        "tags": [
+          "13.6.2.1 导出与订阅"
+        ]
+      }
+    },
+    "/reporting/custom-report/export/sources": {
+      "get": {
+        "description": "🔴 **大导出走异步任务并给出有效期**：syncRowThreshold 是同步导出的行数上限，超过它同步端点会明确拒绝（409），请改用异步任务。传 reportId 会额外返回这份报表自己的可导出列（**只有它的维度与度量**）。",
+        "operationId": "get_reporting_custom_report_export_sources",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "reportId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExportSubscriptionSourcesResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "导出能力声明：可用格式、可导出字段、排序、筛选与阈值",
+        "tags": [
+          "13.6.2.1 导出与订阅"
+        ]
+      }
+    },
+    "/reporting/custom-report/export/sync": {
+      "post": {
+        "description": "🔴 超过 syncRowThreshold 行会回 **409** 并说清「请改用异步任务」—— **不截断**（截断出来的文件看上去完整，其实少了一半数据）。",
+        "operationId": "post_reporting_custom_report_export_sync",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExportSubscriptionJobCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "format": "byte",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "同步导出（**只允许小结果集**）",
+        "tags": [
+          "13.6.2.1 导出与订阅"
+        ]
+      }
+    },
+    "/reporting/custom-report/metrics": {
+      "get": {
+        "description": "指标定义是**租户级**的 ⇒ 这里只给**当前租户**登记的指标，别的租户登记的指标不会出现在清单里。",
+        "operationId": "get_reporting_custom_report_metrics",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/CustomReportMetricView"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "可用的语义层指标清单（口径唯一的展示形态）",
+        "tags": [
+          "13.6.1.1 自定义报表"
+        ]
+      }
+    },
+    "/reporting/custom-report/reports": {
+      "get": {
+        "operationId": "get_reporting_custom_report_reports",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "visibility",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomReportPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "报表清单（真分页 + 真搜索 + 真筛选）",
+        "tags": [
+          "13.6.1.1 自定义报表"
+        ]
+      },
+      "post": {
+        "description": "🔴 度量只能引用**已登记的 metric_code**（口径唯一），维度只能命中白名单；创建者来自**已认证会话**（不在入参里）。",
+        "operationId": "post_reporting_custom_report_reports",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CustomReportSaveRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomReportView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "新建一份报表配置",
+        "tags": [
+          "13.6.1.1 自定义报表"
+        ]
+      }
+    },
+    "/reporting/custom-report/reports/{reportId}": {
+      "delete": {
+        "operationId": "delete_reporting_custom_report_reports_reportId",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "reportId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "summary": "删除一份报表（连同它的度量 / 维度 / 筛选 / 分享 / 订阅）",
+        "tags": [
+          "13.6.1.1 自定义报表"
+        ]
+      },
+      "get": {
+        "operationId": "get_reporting_custom_report_reports_reportId",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "reportId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomReportView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "读一份报表配置",
+        "tags": [
+          "13.6.1.1 自定义报表"
+        ]
+      },
+      "put": {
+        "operationId": "put_reporting_custom_report_reports_reportId",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "reportId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CustomReportSaveRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomReportView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "更新一份报表配置（只有创建者能改）",
+        "tags": [
+          "13.6.1.1 自定义报表"
+        ]
+      }
+    },
+    "/reporting/custom-report/reports/{reportId}/run": {
+      "post": {
+        "description": "🔴 **派生型指标按登记口径在服务端算**：按口径表里的分子分母分别取数再算，**分母为 0 ⇒ 比率为 NULL（不可比），不是 0**。🔴 **涉币指标按币种分别报**（绝不跨币种相加）；与货币无关的量给一个跨币种合计。报表数字与业务系统冲突时，**以业务系统为准**。",
+        "operationId": "post_reporting_custom_report_reports_reportId_run",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "reportId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CustomReportRunRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomReportRunResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "跑一份报表，返回结果集",
+        "tags": [
+          "13.6.1.1 自定义报表"
+        ]
+      }
+    },
+    "/reporting/custom-report/reports/{reportId}/shares": {
+      "get": {
+        "operationId": "get_reporting_custom_report_reports_reportId_shares",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "reportId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/CustomReportShareView"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "某张报表的分享链接清单（只有创建者能看）",
+        "tags": [
+          "13.6.1.1 自定义报表"
+        ]
+      },
+      "post": {
+        "description": "🔴 **分享链接不等于公开访问**：令牌绑定租户 + 绑定报表归属（个人 / 团队）；未授权访问与「报表不存在」返回**逐字相同**的 404。",
+        "operationId": "post_reporting_custom_report_reports_reportId_shares",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "reportId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CustomReportShareRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomReportShareView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "生成分享链接",
+        "tags": [
+          "13.6.1.1 自定义报表"
+        ]
+      }
+    },
+    "/reporting/custom-report/reports/{reportId}/subscriptions": {
+      "get": {
+        "operationId": "get_reporting_custom_report_reports_reportId_subscriptions",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "reportId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/CustomReportSubscriptionView"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "某张报表的订阅计划清单（只有创建者能看）",
+        "tags": [
+          "13.6.1.1 自定义报表"
+        ]
+      },
+      "post": {
+        "description": "cron 是 5 段式（分 时 日 月 周），只支持明确写死的子集；**不支持的写法直接报错**（不静默回落成「每天一次」）。🔴 **实际投递属 13.6.2.1，未交付** —— 这里只登记计划。",
+        "operationId": "post_reporting_custom_report_reports_reportId_subscriptions",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "reportId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CustomReportSubscriptionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomReportSubscriptionView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "保存一条订阅计划",
+        "tags": [
+          "13.6.1.1 自定义报表"
+        ]
+      }
+    },
+    "/reporting/custom-report/shared/{token}": {
+      "get": {
+        "description": "🔴 未授权访问与「报表不存在」返回**逐字相同**的 404 —— 这个响应体只在**确实有权看**的时候才会出现。",
+        "operationId": "get_reporting_custom_report_shared_token",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "token",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomReportSharedResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "通过分享链接读报表（配置 + 结果）",
+        "tags": [
+          "13.6.1.1 自定义报表"
+        ]
+      }
+    },
+    "/reporting/custom-report/shares/{shareId}": {
+      "delete": {
+        "operationId": "delete_reporting_custom_report_shares_shareId",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "shareId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "summary": "撤销一条分享链接",
+        "tags": [
+          "13.6.1.1 自定义报表"
+        ]
+      }
+    },
+    "/reporting/custom-report/subscriptions/{subscriptionId}": {
+      "delete": {
+        "operationId": "delete_reporting_custom_report_subscriptions_subscriptionId",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "subscriptionId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "summary": "删除一条订阅计划（它的待投递记录收口成 CANCELLED）",
+        "tags": [
+          "13.6.1.1 自定义报表"
+        ]
+      },
+      "put": {
+        "operationId": "put_reporting_custom_report_subscriptions_subscriptionId",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "subscriptionId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CustomReportSubscriptionToggleRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomReportSubscriptionView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "切换一条订阅的启停",
+        "tags": [
+          "13.6.1.1 自定义报表"
         ]
       }
     },
