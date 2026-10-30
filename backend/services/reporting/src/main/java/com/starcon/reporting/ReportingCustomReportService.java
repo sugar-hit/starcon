@@ -81,15 +81,26 @@ public class ReportingCustomReportService {
       String description,
       String ownerModule) {}
 
-  /** 一条筛选条件（维度 + 运算符 + 值）。 */
-  private record FilterSpec(
+  /**
+   * 一条筛选条件（维度 + 运算符 + 值）。
+   *
+   * <p>⚠️ **包内可见**（不是 private）：13.6.1.2 看板搭建的组件筛选**复用同一条解析规则**，
+   * 直接构造本记录复用它的语义，不另起一套筛选解析（两套解析迟早漂移）。
+   */
+  record FilterSpec(
       ReportingCustomReportCatalog.Dimension dimension,
       ReportingCustomReportCatalog.FilterOperator operator,
       String value,
       String value2) {}
 
-  /** 一份报表配置（从库里读出来的形状）。 */
-  private record ReportConfig(
+  /**
+   * 一份报表配置（从库里读出来的形状）。
+   *
+   * <p>⚠️ **包内可见**（不是 private）：13.6.1.2 看板搭建把一个组件当成「一张临时报表」
+   * 交给本类的 {@link #execute} 去算 —— **口径不重算**是本模块的第一纪律，
+   * 看板必须走同一个查询引擎，而不是自己再写一遍聚合逻辑。
+   */
+  record ReportConfig(
       UUID id,
       String code,
       String name,
@@ -540,8 +551,11 @@ public class ReportingCustomReportService {
    *   <li>服务端按登记口径**分别取数再算**派生型；</li>
    *   <li>分母为 0 ⇒ NULL（不可比），不是 0。</li>
    * </ol>
+   *
+   * <p>⚠️ **包内可见**（不是 private）：13.6.1.2 看板搭建的组件数据由本方法算出
+   * （**口径不重算**：看板不另起一套指标计算逻辑）。
    */
-  private ReportingCustomReportModels.CustomReportRunResponse execute(
+  ReportingCustomReportModels.CustomReportRunResponse execute(
       UUID tenantId,
       ReportConfig config,
       LocalDate from,
