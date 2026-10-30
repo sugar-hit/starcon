@@ -73,13 +73,56 @@ cd "$PROJECT_ROOT"      # 之后所有命令都在集成头 worktree 里跑
 
 ### 三层验证
 
-| 层            | 谁跑                    | 跑什么                                                                             | 成本                   |
-| ------------- | ----------------------- | ---------------------------------------------------------------------------------- | ---------------------- |
-| **L0 编译闸** | worker，在自己 worktree | `pnpm typecheck` + 后端 `compile`                                                  | 秒级，无容器           |
-| **L1 模块闸** | worker，在自己 worktree | **只跑本模块自己的测试类**（`-Dtest` 收窄）+ allowlist 反向回归                    | 秒级～分钟级，少量容器 |
-| **L2 批次闸** | **调度器，在集成头上**  | **全量**：`mvnw verify` + `pnpm typecheck/lint/test` + Next build + `sync --check` | 重，**每轮只跑一次**   |
+| 层            | 谁跑                    | 跑什么                                                                                              | 成本                   |
+| ------------- | ----------------------- | --------------------------------------------------------------------------------------------------- | ---------------------- |
+| **L0 编译闸** | worker，在自己 worktree | `pnpm typecheck` + 后端 `compile`                                                                   | 秒级，无容器           |
+| **L1 模块闸** | worker，在自己 worktree | **只跑本模块自己的测试类**（`-Dtest` 收窄）+ allowlist 反向回归                                     | 秒级～分钟级，少量容器 |
+| **L2 批次闸** | **调度器，在集成头上**  | **全量**：`mvnw verify` + `pnpm typecheck/lint/test` + Next build + `sync --check` + **增量格式闸** | 重，**每轮只跑一次**   |
 
 L0/L1 归因精确（在自己分支上跑，红了就是自己的问题），L2 抓跨车道互相破坏。
+
+### 🎨 增量格式闸：为什么不是全仓 `pnpm format:check`（2026-10-30 实测取证）
+
+**问题**：L2 原本**不跑**格式检查，而 `pnpm lint`（ESLint）不含 prettier 插件 ⇒
+格式问题没有任何闸能拦 ⇒ 每批车道带进来的排版债畅通无阻进 main。
+实测：2026-10-30 当天新增的 19 个 `apps/web/src` 文件里 **11 个**不合规。
+
+**为什么不能直接加全仓 `format:check`**：全仓有 **589 个**不合规文件
+（`apps/web/src` 582 + `packages/ui` 3 + `tools/module-progress` 4）。
+把它挂进 L2 ⇒ L2 从第一次运行起就是红的；而 L2 红的协议是
+「不 push → 二分定位 → 连续 3 轮红则本轮零派发」
+⇒ **流水线会被与本批代码无关的历史债彻底堵死**。
+这与「全仓 `spotless:apply` 重排 1360 个 Java 文件」是同构的污染形状：
+用存量债的体量去压垮增量流程。
+
+**增量格式闸怎么做**：只检查**本批**带进来的文件。
+
+```bash
+node tools/module-progress/format-gate.mjs
+```
+
+批次边界 = 集成头上的 **merge commit**（标题形如 `merge(<模块ID>): <名称>`，
+由 `lane.mjs merge-ready` 生成）。闸取本批第一个 merge commit 的第一父作为 base，
+用 `git diff base...head --name-only` 取文件集合，再对其中 prettier 管辖的
+文件跑 `--list-different`。
+
+**核心保证**：存量债**不得**让闸打红（本批新增必须拦、存量不阻塞）。
+这两条都有自测锁住：`node tools/module-progress/format-gate.itest.mjs`。
+
+**闸红了怎么办**：派一个**修复任务**给对应车道，让它在**自己的 worktree** 里
+跑 `pnpm exec prettier --write <该批文件>` 后重新提交。
+**不要在集成头上改**，**更不要全仓 `prettier --write`** ——
+全仓重排 589 个文件会产生巨量 diff，且与在途车道持续冲突。
+
+**存量债怎么还**：589 个历史债文件**单独立项、分批重排**（每批限定模块范围），
+不与闸的接入混在一起做。
+
+**Markdown 为什么不管**：`docs/` 全域已加入 `.prettierignore`。
+仓库对 Markdown 表格的既有约定是**紧凑写法** `| --- | --- |`
+（实测 backlog 近 30 天新增 71 个文件，紧凑写法 46 处、对齐写法 0 处），
+而 prettier 会把表格重排成按列宽对齐的空格填充 ⇒ 两者系统性冲突。
+后果不是代码质量问题，而是「每轮流水线都产出一批新债，永远还不完」。
+排除 `docs/` 后全仓债从 1086 降到 589，剩下的全是真实代码排版债。
 
 ### 🔍 L1 为什么必须收窄到「本模块」（2026-10-17 实测取证）
 
@@ -677,6 +720,11 @@ worker 的 shell 里**没有** `$PROJECT_ROOT` 这个变量（那是调度者自
    cd <WORKTREE>/backend && ./mvnw -q compile
    cd <WORKTREE> && pnpm typecheck
 
+   # L0 格式自检（秒级）：只查**你自己改动过的文件**，不要全仓
+   #   ⚠️ 全仓 `prettier --check` 有 589 个存量不合规文件 ⇒ 永远红 ⇒ 没有意义。
+   #   只查自己的文件，才能把债拦在车道侧，不带进集成头。
+   cd <WORKTREE> && pnpm exec prettier --check $(git diff --name-only origin/integration/module-dev...HEAD -- 'apps/web/src/**' 'packages/ui/**' | tr '\n' ' ')
+
    # L1 模块闸：只跑【你自己新增的测试类】，不要跑整个服务
    #   ⚠️ **两个属性名都要带**：-am 会连带构建依赖模块（tenancy / identity 等），
    #   那些模块没有匹配 -Dtest 的用例，不加开关会直接构建失败。
@@ -695,6 +743,11 @@ worker 的 shell 里**没有** `$PROJECT_ROOT` 这个变量（那是调度者自
    # 前端只跑你自己新增/改动的测试文件（用路径过滤，不要全量）
    cd <WORKTREE> && pnpm vitest run <你改动的测试文件路径>
    ```
+
+   **格式自检红了**：在自己的 worktree 里跑
+   `pnpm exec prettier --write <上面列出的文件>`，然后重新提交。
+   **不要全仓 `--write`** —— 全仓重排 589 个文件会产生巨量 diff，
+   且会与在途车道持续冲突。
 
 - **⚠️ 唯一的例外：你若改了 `apps/web/src/lib/api-proxy.ts`，必须跑全量 allowlist 回归。**
   ```bash
@@ -780,10 +833,15 @@ cd backend && ./mvnw verify
 cd .. && pnpm typecheck && pnpm lint && pnpm test
 cd .. && NEXT_TELEMETRY_DISABLED=1 pnpm --filter @starcon/web build
 node tools/module-progress/sync.mjs --check
+node tools/module-progress/format-gate.mjs          # 增量格式闸（只查本批）
 ```
 
 ⚠️ 这一步很重（2829 后端 + 2163 前端 + Next build），**它是本轮唯一的发热高峰**。
 `NEXT_TELEMETRY_DISABLED=1` 必须加，否则 Next 构建静默挂起。
+
+**增量格式闸**（`format-gate.mjs`）只检查本批带进来的文件，不是全仓检查 ——
+理由与处置见上文「增量格式闸」一节。退出码 1 时派修复任务给对应车道，
+让它在自己的 worktree 里 `--write` 后重新提交。
 
 **L2 红了怎么办**：见上面「批量验证未过时的处置」—— 不 push、二分定位、派修复任务、重跑 L2。
 
