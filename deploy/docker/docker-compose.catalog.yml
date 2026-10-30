@@ -99,6 +99,12 @@ services:
       # target/certification-store ⇒ 解析成 /app/target/... ⇒ UID 10001 无权创建
       # ⇒ 容器启动失败（AccessDeniedException: /app/target）。
       CERTIFICATION_STORAGE_ROOT: /app/data/certification-store
+      # 渠道回调签名主密钥（32 字节的 base64，AES-256）。
+      # WebhookService 构造时注入它，且**没有默认值** —— 缺失会让 channel 起不来。
+      # 用 `:?` 而不是普通 `${X}`：普通写法在变量缺失时会静默代入空串，
+      # 服务能启动、运行时才炸（keyOf 要求恰好 32 字节），属于难查的静默错误。
+      # 这里让 compose 在编排阶段就明确失败。
+      CHANNEL_WEBHOOK_SIGNING_KEY: ${CHANNEL_WEBHOOK_SIGNING_KEY:?CHANNEL_WEBHOOK_SIGNING_KEY 未设置 —— 渠道回调签名主密钥必填}
       INTERNAL_KEY: ${INTERNAL_KEY}
     volumes:
       - channel-secret-data:/app/data/channel-secrets
@@ -281,6 +287,7 @@ services:
       # 存储实现的构造函数照样会执行 ⇒ 这里也必须给可写的绝对路径。
       CREDENTIAL_STORAGE_ROOT: /app/data/credential-store
       CERTIFICATION_STORAGE_ROOT: /app/data/certification-store
+      CHANNEL_WEBHOOK_SIGNING_KEY: ${CHANNEL_WEBHOOK_SIGNING_KEY:?CHANNEL_WEBHOOK_SIGNING_KEY 未设置 —— 渠道回调签名主密钥必填}
       INTERNAL_KEY: ${INTERNAL_KEY}
       LOCAL_BOOTSTRAP_ENABLED: 'false'
   migrate-warehouse:
