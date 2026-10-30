@@ -1,6 +1,583 @@
 {
   "components": {
     "schemas": {
+      "ApiCatalogAppQuota": {
+        "properties": {
+          "appCode": {
+            "type": "string"
+          },
+          "appId": {
+            "type": "string"
+          },
+          "appName": {
+            "type": "string"
+          },
+          "grantedActions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "windows": {
+            "items": {
+              "$ref": "#/components/schemas/ApiCatalogQuotaWindow"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "ApiCatalogCapabilities": {
+        "properties": {
+          "capabilities": {
+            "items": {
+              "$ref": "#/components/schemas/ApiCatalogCapability"
+            },
+            "type": "array"
+          },
+          "downstreamGaps": {
+            "items": {
+              "$ref": "#/components/schemas/ApiCatalogGap"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "ApiCatalogCapability": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "basis": {
+            "type": "string"
+          },
+          "impact": {
+            "type": "string"
+          },
+          "module": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ApiCatalogDomain": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "interfaceCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "pathCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "services": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "ApiCatalogExample": {
+        "properties": {
+          "json": {
+            "nullable": true,
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ApiCatalogField": {
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "example": {
+            "nullable": true,
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ApiCatalogGap": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "group": {
+            "type": "string"
+          },
+          "module": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "ownerService": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ApiCatalogInterface": {
+        "properties": {
+          "deprecated": {
+            "type": "boolean"
+          },
+          "description": {
+            "type": "string"
+          },
+          "domain": {
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "method": {
+            "type": "string"
+          },
+          "parameterCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "path": {
+            "type": "string"
+          },
+          "resourceGroup": {
+            "type": "string"
+          },
+          "responseCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "sandboxTestable": {
+            "type": "boolean"
+          },
+          "service": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "ApiCatalogInterfaceDetail": {
+        "properties": {
+          "api": {
+            "$ref": "#/components/schemas/ApiCatalogInterface"
+          },
+          "parameters": {
+            "items": {
+              "$ref": "#/components/schemas/ApiCatalogParameter"
+            },
+            "type": "array"
+          },
+          "rateLimit": {
+            "$ref": "#/components/schemas/ApiCatalogRateLimit"
+          },
+          "requestBody": {
+            "$ref": "#/components/schemas/ApiCatalogRequestBody"
+          },
+          "requestExample": {
+            "$ref": "#/components/schemas/ApiCatalogExample"
+          },
+          "responseExample": {
+            "$ref": "#/components/schemas/ApiCatalogExample"
+          },
+          "responses": {
+            "items": {
+              "$ref": "#/components/schemas/ApiCatalogResponse"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "ApiCatalogInterfacePage": {
+        "properties": {
+          "domains": {
+            "items": {
+              "$ref": "#/components/schemas/ApiCatalogDomain"
+            },
+            "type": "array"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ApiCatalogInterface"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "services": {
+            "items": {
+              "$ref": "#/components/schemas/ApiCatalogServiceStatus"
+            },
+            "type": "array"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ApiCatalogOverview": {
+        "properties": {
+          "availableServiceCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "completedSandboxRunCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "domainCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "generatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "interfaceCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "sandboxRunCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "sandboxTestableCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "serviceCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "unavailableServiceCount": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ApiCatalogParameter": {
+        "properties": {
+          "deprecated": {
+            "type": "boolean"
+          },
+          "description": {
+            "type": "string"
+          },
+          "example": {
+            "nullable": true,
+            "type": "string"
+          },
+          "location": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ApiCatalogQuotaWindow": {
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "limitCount": {
+            "type": "number"
+          },
+          "windowType": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ApiCatalogRateLimit": {
+        "properties": {
+          "appQuotas": {
+            "items": {
+              "$ref": "#/components/schemas/ApiCatalogAppQuota"
+            },
+            "type": "array"
+          },
+          "grantedResourceCodes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "policy": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ApiCatalogRequestBody": {
+        "properties": {
+          "contentType": {
+            "nullable": true,
+            "type": "string"
+          },
+          "exampleJson": {
+            "nullable": true,
+            "type": "string"
+          },
+          "fields": {
+            "items": {
+              "$ref": "#/components/schemas/ApiCatalogField"
+            },
+            "type": "array"
+          },
+          "present": {
+            "type": "boolean"
+          },
+          "required": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "ApiCatalogResponse": {
+        "properties": {
+          "contentType": {
+            "nullable": true,
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "exampleJson": {
+            "nullable": true,
+            "type": "string"
+          },
+          "fields": {
+            "items": {
+              "$ref": "#/components/schemas/ApiCatalogField"
+            },
+            "type": "array"
+          },
+          "statusCode": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ApiCatalogSandboxInput": {
+        "properties": {
+          "body": {
+            "nullable": true,
+            "type": "string"
+          },
+          "httpMethod": {
+            "type": "string"
+          },
+          "query": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "targetPath": {
+            "type": "string"
+          },
+          "targetService": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ApiCatalogSandboxResult": {
+        "properties": {
+          "bodySummary": {
+            "type": "string"
+          },
+          "contentType": {
+            "nullable": true,
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "durationMs": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "httpMethod": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "outcome": {
+            "type": "string"
+          },
+          "queryString": {
+            "type": "string"
+          },
+          "responseBytes": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "runId": {
+            "type": "string"
+          },
+          "statusCode": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "targetPath": {
+            "type": "string"
+          },
+          "targetService": {
+            "type": "string"
+          },
+          "truncated": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "ApiCatalogSandboxRunPage": {
+        "properties": {
+          "completedCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ApiCatalogSandboxResult"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "refusedCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ApiCatalogSandboxTarget": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "baseUrl": {
+            "type": "string"
+          },
+          "interfaceCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "service": {
+            "type": "string"
+          },
+          "testableInterfaceCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "title": {
+            "type": "string"
+          },
+          "unavailableReason": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ApiCatalogServiceStatus": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "baseUrl": {
+            "type": "string"
+          },
+          "interfaceCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "service": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "unavailableReason": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "FinanceSoftwareAccountInput": {
         "properties": {
           "bookCode": {
@@ -2443,6 +3020,372 @@
   },
   "openapi": "3.0.1",
   "paths": {
+    "/platform/api-catalog/capabilities": {
+      "get": {
+        "operationId": "get_platform_api_catalog_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiCatalogCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "api-catalog-controller"
+        ]
+      }
+    },
+    "/platform/api-catalog/domains": {
+      "get": {
+        "operationId": "get_platform_api_catalog_domains",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ApiCatalogDomain"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "api-catalog-controller"
+        ]
+      }
+    },
+    "/platform/api-catalog/interfaces": {
+      "get": {
+        "operationId": "get_platform_api_catalog_interfaces",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "domain",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "service",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "method",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiCatalogInterfacePage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "api-catalog-controller"
+        ]
+      }
+    },
+    "/platform/api-catalog/interfaces/detail": {
+      "get": {
+        "operationId": "get_platform_api_catalog_interfaces_detail",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "service",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "method",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiCatalogInterfaceDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "api-catalog-controller"
+        ]
+      }
+    },
+    "/platform/api-catalog/overview": {
+      "get": {
+        "operationId": "get_platform_api_catalog_overview",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiCatalogOverview"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "api-catalog-controller"
+        ]
+      }
+    },
+    "/platform/api-catalog/sandbox/runs": {
+      "get": {
+        "operationId": "get_platform_api_catalog_sandbox_runs",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "service",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiCatalogSandboxRunPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "api-catalog-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_platform_api_catalog_sandbox_runs",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApiCatalogSandboxInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiCatalogSandboxResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "api-catalog-controller"
+        ]
+      }
+    },
+    "/platform/api-catalog/sandbox/targets": {
+      "get": {
+        "operationId": "get_platform_api_catalog_sandbox_targets",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ApiCatalogSandboxTarget"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "api-catalog-controller"
+        ]
+      }
+    },
     "/platform/app-quota-usages": {
       "post": {
         "operationId": "post_platform_app_quota_usages",
