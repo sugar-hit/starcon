@@ -6,9 +6,18 @@ FROM eclipse-temurin:21-jre
 ARG SERVICE
 WORKDIR /app
 COPY --from=build /workspace/backend/services/${SERVICE}/target/${SERVICE}-0.1.0-SNAPSHOT.jar /app/service.jar
+# 数据根目录。
+#
+# 为什么必须在镜像里建好并授权：这些存储实现在**构造函数**里就
+# `Files.createDirectories(root)`，失败直接抛 IllegalStateException ⇒ Spring 起不来。
+# 而它们在没配 env 时用相对路径默认值（`target/...`），
+# 相对路径按进程工作目录解析 ⇒ 容器里就是 `/app/target/...`；
+# `/app` 属主是 root 而进程以 UID 10001 运行 ⇒ AccessDeniedException ⇒ 启动失败。
+# 目录必须存在且属于 10001，env 才能把它指向可写的绝对路径。
 RUN mkdir -p /app/data/media /app/data/channel-secrets \
+        /app/data/reporting-export /app/data/credential-store \
     && chown -R 10001:10001 /app/data \
-    && chmod 750 /app/data/media \
-    && chmod 700 /app/data/channel-secrets
+    && chmod 750 /app/data/media /app/data/reporting-export \
+    && chmod 700 /app/data/channel-secrets /app/data/credential-store
 USER 10001
 ENTRYPOINT ["java", "-jar", "/app/service.jar"]
