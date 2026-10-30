@@ -280,14 +280,14 @@ class CustomReportIntegrationTest {
   }
 
   @Test
-  void 能力声明显式标出未交付的导出与投递() {
+  void 能力声明反映导出与投递已交付() {
     var capabilities = reports.capabilities();
-    assertThat(capabilities.exportAvailable()).as("导出属 13.6.2.1，未交付").isFalse();
+    assertThat(capabilities.exportAvailable()).as("导出已由 13.6.2.1 交付").isTrue();
     assertThat(capabilities.exportOwnerModule()).contains("13.6.2.1");
-    assertThat(capabilities.exportUnavailableReason()).isNotBlank();
-    assertThat(capabilities.deliveryAvailable()).as("实际投递属 13.6.2.1，未交付").isFalse();
+    assertThat(capabilities.exportUnavailableReason()).isEmpty();
+    assertThat(capabilities.deliveryAvailable()).as("实际投递已由 13.6.2.1 交付").isTrue();
     assertThat(capabilities.deliveryOwnerModule()).contains("13.6.2.1");
-    assertThat(capabilities.deliveryUnavailableReason()).isNotBlank();
+    assertThat(capabilities.deliveryUnavailableReason()).isEmpty();
     assertThat(capabilities.reportAvailable()).isTrue();
     assertThat(capabilities.subscriptionAvailable()).isTrue();
   }
@@ -862,8 +862,8 @@ class CustomReportIntegrationTest {
   void 能力声明端点可用() throws Exception {
     http.perform(get("/reporting/custom-report/capabilities").header("Authorization", BEARER))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.exportAvailable").value(false))
-        .andExpect(jsonPath("$.deliveryAvailable").value(false));
+        .andExpect(jsonPath("$.exportAvailable").value(true))
+        .andExpect(jsonPath("$.deliveryAvailable").value(true));
   }
 
   @Test
