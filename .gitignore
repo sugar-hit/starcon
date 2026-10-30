@@ -115,3 +115,9 @@ __pycache__/
 
 # 进度看板构建产物
 tools/progress-site/.shots/
+
+# Local private planning documents (not for version control)
+/docs/product/erp-product-thesis.md
+/docs/design/marketing-website-plan.md
+/docs/sessions/2026-10/2026-10-30-erp-thesis-and-marketing.md
+/private-docs/
