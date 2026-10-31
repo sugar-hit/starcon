@@ -3253,6 +3253,466 @@
         },
         "type": "object"
       },
+      "ImportExportCapabilities": {
+        "properties": {
+          "capabilities": {
+            "items": {
+              "$ref": "#/components/schemas/ImportExportCapability"
+            },
+            "type": "array"
+          },
+          "gaps": {
+            "items": {
+              "$ref": "#/components/schemas/ImportExportGap"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "ImportExportCapability": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "basis": {
+            "type": "string"
+          },
+          "limitation": {
+            "type": "string"
+          },
+          "module": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ImportExportColumn": {
+        "properties": {
+          "dataType": {
+            "type": "string"
+          },
+          "fieldKey": {
+            "type": "string"
+          },
+          "header": {
+            "type": "string"
+          },
+          "help": {
+            "type": "string"
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "sampleValue": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ImportExportCreateInput": {
+        "properties": {
+          "domainCode": {
+            "type": "string"
+          },
+          "scope": {
+            "additionalProperties": {
+              "type": "object"
+            },
+            "type": "object"
+          }
+        },
+        "type": "object"
+      },
+      "ImportExportDomainRow": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "code": {
+            "type": "string"
+          },
+          "columns": {
+            "items": {
+              "$ref": "#/components/schemas/ImportExportColumn"
+            },
+            "type": "array"
+          },
+          "direction": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "limitation": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "ownerService": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ImportExportGap": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "module": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "ownerService": {
+            "type": "string"
+          },
+          "relation": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ImportExportImportInput": {
+        "properties": {
+          "contentBase64": {
+            "type": "string"
+          },
+          "domainCode": {
+            "type": "string"
+          },
+          "filename": {
+            "type": "string"
+          },
+          "scope": {
+            "additionalProperties": {
+              "type": "object"
+            },
+            "type": "object"
+          }
+        },
+        "type": "object"
+      },
+      "ImportExportOverview": {
+        "properties": {
+          "exportTasks": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "failedTasks": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "fileCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "importTasks": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "now": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "pendingTasks": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "rowErrorCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "runningTasks": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "succeededTasks": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalTasks": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ImportExportRowErrorPage": {
+        "properties": {
+          "errorCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ImportExportRowErrorRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "warningCount": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ImportExportRowErrorRow": {
+        "properties": {
+          "columnName": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "errorCode": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "rawValue": {
+            "type": "string"
+          },
+          "rowNo": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "severity": {
+            "type": "string"
+          },
+          "taskId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ImportExportTaskPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ImportExportTaskRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ImportExportTaskRow": {
+        "properties": {
+          "actorId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "direction": {
+            "type": "string"
+          },
+          "domainCode": {
+            "type": "string"
+          },
+          "domainLabel": {
+            "type": "string"
+          },
+          "error": {
+            "type": "string"
+          },
+          "errorFileId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "expiresAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "failedRows": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "finishedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "format": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "processedRows": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "requestedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "resultFileId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "scope": {
+            "additionalProperties": {
+              "type": "object"
+            },
+            "type": "object"
+          },
+          "startedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "succeededRows": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "taskNo": {
+            "type": "string"
+          },
+          "totalRows": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "upstreamJobId": {
+            "type": "string"
+          },
+          "upstreamJobRef": {
+            "type": "string"
+          },
+          "upstreamService": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ImportExportTemplateDetail": {
+        "properties": {
+          "columns": {
+            "items": {
+              "$ref": "#/components/schemas/ImportExportColumn"
+            },
+            "type": "array"
+          },
+          "sampleRow": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "template": {
+            "$ref": "#/components/schemas/ImportExportTemplateRow"
+          }
+        },
+        "type": "object"
+      },
+      "ImportExportTemplatePage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ImportExportTemplateRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ImportExportTemplateRow": {
+        "properties": {
+          "builtin": {
+            "type": "boolean"
+          },
+          "code": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "domainCode": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "remark": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "IntegrationAppCapabilities": {
         "properties": {
           "capabilities": {
@@ -8909,6 +9369,691 @@
         },
         "tags": [
           "finance-software-controller"
+        ]
+      }
+    },
+    "/platform/io/capabilities": {
+      "get": {
+        "operationId": "get_platform_io_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportExportCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "import-export-controller"
+        ]
+      }
+    },
+    "/platform/io/domains": {
+      "get": {
+        "operationId": "get_platform_io_domains",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ImportExportDomainRow"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "import-export-controller"
+        ]
+      }
+    },
+    "/platform/io/expire": {
+      "post": {
+        "operationId": "post_platform_io_expire",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "object"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "import-export-controller"
+        ]
+      }
+    },
+    "/platform/io/overview": {
+      "get": {
+        "operationId": "get_platform_io_overview",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportExportOverview"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "import-export-controller"
+        ]
+      }
+    },
+    "/platform/io/tasks": {
+      "get": {
+        "operationId": "get_platform_io_tasks",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "direction",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "domainCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportExportTaskPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "import-export-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_platform_io_tasks",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImportExportCreateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportExportTaskRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "import-export-controller"
+        ]
+      }
+    },
+    "/platform/io/tasks/import": {
+      "post": {
+        "operationId": "post_platform_io_tasks_import",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "domainCode",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "scope",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImportExportImportInput"
+              }
+            },
+            "multipart/form-data": {
+              "schema": {
+                "properties": {
+                  "file": {
+                    "format": "binary",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "file"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportExportTaskRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "import-export-controller"
+        ]
+      }
+    },
+    "/platform/io/tasks/{id}": {
+      "get": {
+        "operationId": "get_platform_io_tasks_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportExportTaskRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "import-export-controller"
+        ]
+      }
+    },
+    "/platform/io/tasks/{id}/cancel": {
+      "post": {
+        "operationId": "post_platform_io_tasks_id_cancel",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportExportTaskRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "import-export-controller"
+        ]
+      }
+    },
+    "/platform/io/tasks/{id}/error-report": {
+      "get": {
+        "operationId": "get_platform_io_tasks_id_error_report",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "text/csv": {
+                "schema": {
+                  "format": "byte",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "import-export-controller"
+        ]
+      }
+    },
+    "/platform/io/tasks/{id}/errors": {
+      "get": {
+        "operationId": "get_platform_io_tasks_id_errors",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "severity",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportExportRowErrorPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "import-export-controller"
+        ]
+      }
+    },
+    "/platform/io/tasks/{id}/file": {
+      "get": {
+        "operationId": "get_platform_io_tasks_id_file",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "text/csv": {
+                "schema": {
+                  "format": "byte",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "import-export-controller"
+        ]
+      }
+    },
+    "/platform/io/templates": {
+      "get": {
+        "operationId": "get_platform_io_templates",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "domainCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportExportTemplatePage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "import-export-controller"
+        ]
+      }
+    },
+    "/platform/io/templates/{id}": {
+      "get": {
+        "operationId": "get_platform_io_templates_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportExportTemplateDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "import-export-controller"
+        ]
+      }
+    },
+    "/platform/io/templates/{id}/file": {
+      "get": {
+        "operationId": "get_platform_io_templates_id_file",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "text/csv": {
+                "schema": {
+                  "format": "byte",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "import-export-controller"
         ]
       }
     },
