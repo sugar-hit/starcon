@@ -6,9 +6,7 @@
 >
 > 状态词表只有三个值，统计逻辑依赖它，不要新增：
 > `已交付`（迁移 + API + 页面 + 测试齐全，无 TODO 残留）· `进行中`（部分交付、未收口，证据列写清缺哪一块）· `未开发`（未开工）。
-
 ## 总览
-
 | 指标 | 数量 |
 | --- | --- |
 | 模块总数 | 465 |
@@ -16,9 +14,7 @@
 | 进行中 | 0 |
 | **未开发** | **21** |
 | 完成率 | 95.5% |
-
 ## 分阶段进度（交付顺序看这里）
-
 | 阶段 | 已交付 | 进行中 | 未开发 | 合计 |
 | --- | --- | --- | --- | --- |
 | **D1–D2** | 80 | 0 | 0 | 80 |
@@ -27,11 +23,8 @@
 | **D5** | 52 | 0 | 0 | 52 |
 | **D6** | 75 | 0 | 3 | 78 |
 | **D7** | 137 | 0 | 18 | 155 |
-
 ## 分系统进度
-
 | 卷 | 系统 | 阶段 | 已交付 | 模块数 |
-| --- | --- | --- | --- | --- |
 | 01 | 工作台与门户系统 | D7 | 23 | 23 |
 | 02 | 渠道与店铺系统 | D1–D2 / D5 | 25 | 25 |
 | 03 | 商品主数据系统 | D1–D2 | 40 | 40 |
@@ -50,30 +43,22 @@
 | 16 | 合规与风控系统 | D7 | 23 | 23 |
 | 17 | 组织权限与系统设置系统 | D1–D2 / D4 / D6 / D7 | 29 | 29 |
 | 18 | 集成开放与智能自动化系统 | D7 | 12 | 24 |
-
 ## 判定「已交付」的标准
-
 一个模块标 `已交付` 当且仅当下面四件都成立，缺一件就是 `未开发` 或 `进行中`：
-
 1. **迁移** — `backend/services/<svc>/src/main/resources/db/migration/V*.sql` 里有真实表结构，
    带 `tenant_id NOT NULL` + RLS 策略，不是注释里的设计。
 2. **API** — 服务里有对应端点，走 jOOQ 显式 SQL，不是返回硬编码常量的桩。
 3. **页面** — `apps/web/src/app/**/page.tsx` 是真实工作区，不是 `DomainPlaceholder`。
 4. **测试** — `cd backend && ./mvnw verify` 绿；涉及租户隔离的必须实跑
    「两租户互不可见 / 伪造 tenant header 无效 / 连接池归还后不串租户」三条断言。
-
 **判定为 `未开发` 的典型形态**（见到就说明没做完，不许算进已交付）：
-
 - `DomainPlaceholder` 占位页
 - 硬编码数组 / 常量当数据源
 - 服务里 `TODO` + `throw new UnsupportedOperationException()`
 - 迁移文件存在但没有 RLS 策略
 - 前端有页面但后端没有对应端点（或反之）
-
 ## 跨期说明
-
 「阶段」列按**依赖就绪顺序**逐模块标注，不是卷归属。跨期卷的拆分如下：
-
 - **01 工作台与门户 → 全部 D7**：它是纯投影聚合层（蓝图原文「不写业务数据，只读投影」），
   聚合 09 订单 / 07 库存 / 02 渠道 / 12 财务 / 15 客户 / 17 审批的投影。
   这些数据源没落地之前建「我的待办」只能造假数据，所以整卷排到最后收口。
@@ -87,9 +72,7 @@
 - **11 售后与退货**：D4 交付售后单、退货授权与实收、退款换货；平台纠纷 / 客诉工单 / 分析排 D7。
 - **17 组织权限**：D1–D2 交付租户、法人、部门、成员、角色、页面权限、数据范围、审计；
   17.4 审批流随单据排 D4，17.6.1.1 账簿与本位币随财务排 D6，17.7 套餐与平台参数排 D7。
-
 ## 模块明细
-
 | 模块 ID | 模块名 | L3 锚点路由 | 阶段 | 状态 | 证据 |
 | --- | --- | --- | --- | --- | --- |
 | 1.1.1.1 | 我的待办 | /dashboard/todo | D7 | 已交付 | **卷 01 第一批**：本模块是**只读投影**（卷 01 卷首写死「不产生新的业务事实，只聚合各系统的投影」「不做：任何写业务数据的操作。工作台只读 + 跳转；一切状态变更回到归属系统完成」+ 蓝图 1.1.1.1 原文「**不写业务数据**，只读投影」）⇒ **不新建任何表、不占用 V370**（Flyway 版本号留给真正需要它的场景）、**不建后端微服务**、**不提供任何写端点**、**对后端零改动**。**迁移**：无（本模块只读六个既有服务的既有事实表）。**端点**：**零新增** —— 本模块是**纯前端聚合层**，读八个**既有**的只读投影端点（蓝图的八类待办 ↔ 八个上游端点一一对应，不多不少）：超期未发货 → `GET trade/fulfillment/timeliness/overdue`（09 订单，权限码 `trade.fulfillment.read`）·待审订单 → `GET trade/order-pending-review/queue`（09 订单，`trade.orders.read`）· 库存缺口 → `GET warehouse/inventory/stockout-alerts/stockouts`（07 库存，`warehouse.inventory.read`）· 待处理同步失败 → `GET channel/sync-failures`（02 渠道，`channel.sync.read`）· 待核对账差异 → `GET finance/supplier-reconciliation`（12 财务，`finance.suppliereconciliation.read`）· 待回复站内信 → `GET crm/message-inbox/messages`（15 客户，`crm.message.read`）· 待审批单据 → `GET identity/approval-todos`（17 审批，沿用 `identity.approval_inbox.read`）· 库存低于安全线 → `GET warehouse/inventory/safety-stock/alerts`（07 库存，`warehouse.inventory.read`）。八个上游系统与蓝图「上游 = 09 订单、07 库存、02 渠道、12 财务、15 客户、17 审批」逐条对上。**api-proxy**：**本车道未改 `api-proxy.ts`**（**k = 0**）—— 发车前用脚本把基线 **225** 条 services[] 正则**逐条编译并实测命中**（与 `resolve()` 同构：先切掉 prefix 再 test，不是目测、不是 `grep -c "prefix: '"`），实测上述八个形状**全部已在基线放行** ⇒ 无需新增元素，**元素数仍 = 225**，该文件**一字未改、未重排** ⇒ 并入集成头时在该文件上**零冲突面**（调度者分给本车道的第 314 行锚点因此未被占用）。**数据范围（法人/店铺/仓库/部门）**：**服务端判定，前端不掺和** —— 租户来自**已认证的成员关系**（`auth/session` → 各服务 `AccessService.require` → 身份服务 `/internal/access`），**不信任任何客户端租户头**（代理只转发会话 cookie 换来的 `Authorization`，`X-Tenant-Id` 根本不会被转发，有专门的反向断言钉住）；法人/店铺/仓库/部门的范围由**归属服务**在服务端判定（`AccessService.run` 绑定 `app.actor` / `app.department` / `app.grants` / `app.permission` 供 RLS 与行级范围使用）；**前端不把范围当成可信输入往下传**（不下发范围参数、不下发租户 id，只读各服务**已经按范围过滤好**的投影）；前端做的那一点是**展示** —— 按 `GrantPermissions.scopeMode` **逐字同式**的判据（取最宽的一条授权 ALL > DEPARTMENT > SELF，DEPARTMENT 需要会话带部门否则退化为 SELF）算出每个来源**实际生效**的数据范围并显示，⚠️ 该判定**只用于「要不要去读」和「怎么措辞」**，**不是授权** —— 服务端会独立地再判一次。**三件「判不了」与「没有」严格分开**：① 严重度判不了（风险分 `null` = 没评估过、审批节点没配时限、上游给了没见过的严重度词）落在独立 `UNKNOWN` 档并**排在 `LOW` 之前**；② 停留时长判不了（起点缺失/格式不认）是 `null` **不是 0**（0 会把「不知道停了多久」显示成「刚发生」）；③ 来源读不到逐类单列、**不计入总数**，也不冒充「0 条」；④ 另加第四件 —— **无权限**与**读不到**分开：无权限的来源**根本不发请求**（发了必然 403 且会把「无权限」说成「服务挂了」），标成「无权限 · 对你不开放」。**严重度按源分别推、不统一硬编码阈值**（各源判据不同：风险分 / 超期秒数 / 上游自带的 severity / 失败原因 / 优先级 / 未结差异条数；统一阈值会重算业务口径）⇒ 严重度**不可跨源直接比大小**，页面按档位展示。**已处置的不再是待办**：已审的单、已解决的预警、已重放的同步失败、已读的站内信、已发的站内信（OUTBOUND 不是「待回复」）、没有未结差异的对账单 —— 一律不进队列（上游默认口径外**显式再挡一次**，免得将来上游改了默认口径而这里悄悄把已处置的报成待办）。**紧急度排序**：严重度降序 → 停留时长降序 → 类型名 → 引用，**最后两级保证同一批数据两次刷新顺序不跳**（顺序乱跳会让人以为待办自己在动）；停留时长判不了的排在同级**之后**（「停了多久不知道」≠「停了很久」，把 `null` 当无穷大会把一批判不了的顶到最前）。**计数与清单同源**：概览的每个数字都由清单**同一份集合**算出。**页面** `/dashboard/todo/my-todos`（`apps/web/src/app/dashboard/todo/my-todos/page.tsx`）+ `apps/web/src/components/dashboard/my-todo-{model,workspace}.tsx`：数据源可达性区（八个来源逐条报「已接通 / 无权限 / 读不到」+ 归属系统 + 上游端点 + **实际生效的数据范围** + 当前工作空间名）+ 待办概览（总数 / **未读计数角标** / 最久停留 / 四档严重度 / **判不了严重度**条数 / 读不到来源数 / 无权限来源数）+ 按类型筛（八类各自条数，点一下就按这一类筛）+ 筛选（严重度 / 停留时长下限 / 关键字）+ 待办队列（按紧急度排序的卡片：类型 / 单据引用 / 严重度 / 停留时长 / 数据范围 / **下一步入口**（跳归属系统处理页并带定位参数，如 `/crm/messages?keyword=MSG-1`、`/inventory/stockout-alerts?skuId=…`）+ 真分页）；加载 / 错误 / 空三态齐全，**禁 mock**；上游取数被页数上限截断时**如实报出「只取回前 N 条（共 M 条）」**。🔴 **工作台不写业务数据**：页面上**没有认领 / 完成 / 转交**任何写动作，每张卡片只有一条出口（跳归属系统）。**不代兄弟模块实现**：1.1.1.2 异常订单队列（`/dashboard/todo`）与 1.1.1.3 审批待办（`/dashboard/todo/approvals`）各有自己的页面，本车道**不碰 `apps/web/src/app/dashboard/todo/page.tsx`**（那是 1.1.1.2 已交付的页面），只挂自己的同层子路由。**契约**：未重新生成（后端零改动 ⇒ 契约不变）。**测试** `my-todo-model.test.ts` **39 例**（八类一一对应 / 「判不了」不被当成「没有」三态 / 已处置的不再是待办 / 读不到与没有是两件事 / 紧急度排序四则 / 计数与清单同源 / 筛选五则 / 归一七则 / 数据范围八则：ALL>DEPARTMENT>SELF 取最宽、「能写不能读」不成立、无部门则 DEPARTMENT 退化为 SELF、八个来源逐个判定、会话读不到时全部判为不可读）+ `my-todo-allowlist.test.ts` **6 例**（真跑 proxy 断言 HTTP 状态码：前端源码里**反向抽取**的真实调用点逐条放行 / 八个上游端点逐条放行 / 查询串不影响放行判定 / **刻意不放行的形状仍然 404**（含 🔴 写形状：sync replay、message reply、alert acknowledge、recon resolve、approval decide）与 / 不误伤兄弟模块与六个上游系统其它车道已交付的形状 / **代理不转发伪造的 X-Tenant-Id 与 X-Internal-Key**，只转发会话 cookie 换来的 Authorization）。**验证** `./mvnw -q compile` exit 0、`pnpm typecheck` 3/3 通过、`pnpm vitest run apps/web/src/app/api` **237 文件 1336 例全绿**、本车道 5 个文件 eslint 无输出 · 2026-10-24 交付 |
@@ -547,7 +530,7 @@
 | 18.3.1.2 | 规则编辑器 | — | D7 | 未开发 | — |
 | 18.3.2.1 | 执行日志 | — | D7 | 未开发 | — |
 | 18.3.2.2 | 规则效果 | — | D7 | 未开发 | — |
-| 18.3.3.1 | 自动审批 | — | D7 | 未开发 | — |
+| 18.3.3.1 | 自动审批 | — | D7 | 已交付 | **边界（本车道亲自查证 identity 17.4 后确定）**：上游只有程序化的 **intake** 通道（`POST /identity/approval-instances`，X-Internal-Key + 已认证会话）；`decide` / `transfer` 都**绑定当前审批人自己的会话**（actor 恒为调用者、取单条件是「这条待办归我」），**没有**程序化通过/驳回通道 ⇒ 本模块形态是「**判定 + 记录 + 经授权端口转交**」，**不在 platform 侧另起一套审批状态机**（那会与 17.4 形成两套真相）。自动通过 / 自动驳回**不建上游实例**（没有待办就没有审批人，与上游「免审 EXEMPT」同义）；必须走人工的单据经 intake **真的**提交上游人工审批。**迁移** `backend/services/platform/src/main/resources/db/migration/V420__auto_approval.sql` 四表（platform_auto_approval_policy 规则配置 / platform_auto_approval_signal 风险信号码表 / platform_auto_approval_decision 决策台账 / platform_auto_approval_escalation 超时升级台账），全部 `tenant_id NOT NULL` + ENABLE **与 FORCE** RLS isolation + `GRANT platform_app`；决策台账是**只追加**的（触发器钉死 UPDATE / DELETE），升级台账只允许 DETECTED → EXECUTED/FAILED **一次**推进且判定依据不可改；金额一律 `numeric(19,6)`、时间一律 `timestamptz`。**权限码** `backend/services/identity/src/main/resources/db/migration/V420__platform_auto_approval_permission.sql` 登记 `platform.auto_approval.read / .create / .update / .decide`（「配置」与「判定」是**两个独立的码** —— 能改规则的人不一定有权让规则替他放行单据），只授 OWNER。**端点 17 条**挂 `/platform/auto-approvals`（`AutoApprovalController.java`，jOOQ 显式 SQL）：GET `/capabilities` / `/overview` / `/policies` / `/policies/{uuid}` / `/signals` / `/decisions` / `/decisions/{uuid}` / `/escalations` / `/escalations/{uuid}`；POST `/policies` / `/policies/{uuid}/disable` / `/signals` / `/signals/{uuid}/disable` / `/decisions` / `/escalations/scan` / `/escalations/{uuid}/execute`；PUT `/policies/{uuid}`。🔴 **五条红线各自落成可执行判定 + 测试断言**：① 自动通过 = 小额 **且** 供应商已验证 **且** 无风险信号（SMALL_AMOUNT / SUPPLIER_VERIFIED / NO_RISK_SIGNAL 三条判定逐条落库，缺一条走人工）；② 自动驳回只对**确定性违规**（金额与币种不成对 / 金额为负 / 金额越硬上限 / 命中登记过的 VIOLATION 信号），主观风险（RISK）**绝不**驳回，且**未登记的码按 RISK 从严** ⇒ 调用方编一个码就能驳单不可能发生；③ 金额分层路由**读上游** `approval_flow_amount_branch`（不另造区间语义），区间口径与上游一致 **左闭右开**、priority desc + id 取第一条，金额比较一律 `BigDecimal.compareTo`（1000.00 与 1000 判相等，1000.00 与 100.00 判不等）；④ 超时自动升级用**上游 DB 钟**的停留秒数与 `timeout_hours` 比较（同一钟域、到点才触发），落库时刻取**注入的 Clock** —— 无 `Timestamp.valueOf(LocalDateTime.now())`、无 sleep；⑤ 决策依据记**快照**（policy / riskSignal / routing / checks 四份 jsonb），规则改了以后回看历史决策，看到的仍是**当初**那条规则。🔴 **跨服务只走授权端口** `IdentityApprovalPort`（identity 8081）：只转发**调用方自己的 bearer**、不传租户号、不建跨库 FK、不读对方的表；读不到一律 **503**（是「读不到」不是「没有数据」）。**页面** `apps/web/src/app/integrations/auto-approvals/page.tsx` + `apps/web/src/components/integrations/auto-approval-{model,workspace}.tsx`：规则配置 / 风险信号码表 / 决策台账 / 超时升级 / 能力声明 五个页签，加载 / 空 / 错误三态齐全；「自动通过」必须**有据可查**（逐条判定 + 当时的规则快照）、「自动驳回」与「走人工」一眼分得开、「上游没有程序化决策通道」写在页面最上面、金额分层显示命中哪一档、提交上游失败如实标「仍需人工」。**api-proxy** `apps/web/src/lib/api-proxy.ts` 新增一条独立 `platform/` 元素（插入锚点**数组最开头**，既有条目一字未改、也不重排；id 段用完整 UUID 形状）；发车前用一次性脚本（`.tmp/auto-approval-allowlist-check.mjs`，不入库）实测：13 条正向路径全放行、10 条负向形状全被拒、与既有 10 条 platform/ 首 token 天然互斥。**契约** `packages/api-contracts` codegen 重生成：13 条路径 + 16 个 `AutoApproval*` 类型，**删除 0 条**，其余 8 个服务的契约逐字节不变。**测试**：后端 `AutoApprovalIntegrationTest`（26 例）+ `AutoApprovalTenancyIntegrationTest`（10 例）= **36 例全过**（真 Testcontainers PostgreSQL 16，FORCE RLS，连接池压到 1 条）；前端 `auto-approval-model.test.ts`（17 例）全过；全量 allowlist 回归 **281 文件 / 1586 例全过**（未误伤兄弟车道）。多租户三条断言齐全：两租户互不可见（列表 + 按主键直查 + 依据快照 + 事务外零行）/ 伪造 tenant header 无效（行仍写入但落在**会话租户**名下）/ 连接池固定 1 条交替 5 轮不串租户。**后续待办**：**上游 17.4 若要支持「服务间程序化审批」，需要在 identity 侧新增一条程序化决策端点**（本车道不碰 identity 的端点，只能在授权端口这一层做转交）；「超时升级」的转交目标若是**岗位**（上游岗位字典不携带成员绑定）或**角色下有多名在职成员**（上游转交通道只接受具体成员），本模块**如实拒绝并写明该由谁来做**，不做「替租户挑一个人」的判断。 |
 | 18.4.1.1 | 对话助手 | — | D7 | 未开发 | — |
 | 18.4.1.2 | 智能查询 | — | D7 | 未开发 | — |
 | 18.4.2.1 | 文本与翻译 | — | D7 | 已交付 | **迁移** `backend/services/platform/src/main/resources/db/migration/V380__text_translation.sql` 七表（platform_text_glossary 术语表 / platform_text_banned_term 违禁词表 / platform_text_rule 长度与字符集规则 / platform_text_template 客服话术模板 / platform_text_task 翻译任务 / platform_text_draft 译文草稿版本 / platform_text_check 确定性检查结论），全部 `tenant_id NOT NULL` + ENABLE **与 FORCE** RLS isolation + `GRANT platform_app` + 发号序列显式授权；版本按调度器预分配取 V380。**「人工确认后发布」落到数据层**：状态机 PENDING → DRAFTED → CONFIRMED → PUBLISHED（另有终态 REJECTED），三条 DB CHECK 把「状态与事实一致」钉死（CONFIRMED/PUBLISHED 必须有 confirmed_at、PUBLISHED 必须有 published_at、有草稿的三个状态必须挂 current_draft_id、被驳回必须写原因）—— 跳步在**数据库层**就写不进去，不依赖服务层记得检查。**置信度是四个可解释维度的加权**（术语覆盖率 0.35 / 占位符完整率 0.25 / 校验通过率 0.30 / 长度合规率 0.10），四列分开存 `numeric(5,4)`（禁浮点）；🔴 **某维度不适用时按剩余维度重新归一**（NULL ≠ 0.0000：没有术语可保护的任务，术语覆盖率**没有信息量**，算成 0 是在惩罚一件本来就不该扣分的事）。**系统零预置行**：术语 / 违禁词 / 长度规则全是**租户数据**，不替用户默认一套词表；内置的只有**语言层面的合规红线**（绝对化用语 / 功效宣称 / 虚假承诺 / 导流联系方式 / 诱导好评 —— 是**规则**不是数据源，照 crm ReplyWordingChecker 的纪律）。**权限码** `backend/services/identity/src/main/resources/db/migration/V380__platform_text_permission.sql` 补上 identity 侧**从来没注册过**的 `platform.text.read / .create / .update / .confirm / .publish / .reject`（端点用 `access.require(bearer, "platform.text." + 权限)` 强制鉴权，但没有角色可能持有 ⇒ 真实环境恒 403）；「人工确认」「发布」「驳回」是**三个独立的码** —— 能改文案的人不该顺手把「已确认」也点了，门槛才真的拦得住人；存量 OWNER 用 `LIKE 'platform.text.%'` 补权（新建租户由 create_child 自动拿到，存量租户不会）。**端点 22 个**挂 `/platform/text`：GET `/capabilities`（九维能力声明，逐条写明「有没有 / 依据是什么 / 缺了归谁」· 🔴 **AI 自动翻译那一维如实答「没有」**，归 18.4 卷）/ GET `/overview` / GET |
@@ -557,3 +540,13 @@
 | 18.4.3.2 | 效果评估 | — | D7 | 未开发 | — |
 | 18.5.1.1 | 模板管理 | — | D7 | 未开发 | — |
 | 18.5.2.1 | 投递记录 | — | D7 | 未开发 | — |
+| 已交付 | 439 |
+| **未开发** | **26** |
+| 完成率 | 94.4% |
+| **D7** | 132 | 0 | 23 | 155 |
+| 18 | 集成开放与智能自动化系统 | D7 | 7 | 24 |
+| 已交付 | 438 |
+| **未开发** | **27** |
+| 完成率 | 94.2% |
+| **D7** | 131 | 0 | 24 | 155 |
+| 18 | 集成开放与智能自动化系统 | D7 | 6 | 24 |

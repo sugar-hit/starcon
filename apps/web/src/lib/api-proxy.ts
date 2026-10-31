@@ -76,6 +76,62 @@ const services: readonly {
       /^automation\-rules\/(?:capabilities|overview|event-types|applicable|rules(?:\/reorder|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:enable|disable|dry\-run|preview|executions))?)?|upstream\/(?:shops|warehouses))$/,
   },
   {
+    // 18.3.3.1 自动审批（platform 服务，卷 18「集成开放与智能自动化」L3 18.3.3 下的第一格）。
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有的 platform/ 分支里并分支 ——
+    //   既有条目**一字未改、也不重排**。
+    //
+    // ---- 插入锚点选在**数组最开头**（本文件第一个元素之前）----
+    //   与同批其它车道（18.2.3.1 插在「数组末尾」）锚点不同，git 并入才能干净求并。
+    //
+    // ---- 首 token「auto-approvals」的零命中核对结论 ----
+    //   本文件里既有的 `prefix: 'platform/'` 条目首 token 分别是
+    //   data-migration（18.1.3.2）/ webhooks（18.1.2.1）/ deliveries（18.1.2.2）/ io（18.1.3.1）/
+    //   text（18.4.2.1）/ apps（18.1.1.1）/ finance-software（18.2.1.1）/ api-catalog（18.1.4.1）/
+    //   call-monitor（18.1.5.1）/ payment-funds（18.2.2.1）/ external-integrations（18.2.3.1）。
+    //   这些首 token 与 `auto-approvals` **全不相同** ⇒ 天然互斥，
+    //   本车道**不需要**改动那十一条里的任何一个字符。
+    //   ⚠️ `external-integrations`（18.2.3.1）与本模块**不是一件事**：
+    //   那边管「1688 / 海外仓 / 物流商这些**外部系统**的连接配置与同步健康」，
+    //   这边管「系统替不替人放行单据」—— 对象、判定口径、风险边界都不同。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   auto-approvals/capabilities                能力声明（能做 / 不能做 / 边界归谁）
+    //   auto-approvals/overview                    概览（几个数）
+    //   auto-approvals/policies                    规则配置列表（GET）/ 登记规则（POST）
+    //   auto-approvals/policies/{uuid}             规则配置详情（GET）/ 修改（PUT）
+    //   auto-approvals/policies/{uuid}/disable     停用规则（**不删**：历史决策要能复现）
+    //   auto-approvals/signals                     风险信号码表（GET）/ 登记信号码（POST）
+    //   auto-approvals/signals/{uuid}/disable      停用信号码（**不删**）
+    //   auto-approvals/decisions                   决策台账列表（GET）/ **发起一次判定**（POST）
+    //   auto-approvals/decisions/{uuid}            决策详情（GET，含**决策依据快照**）
+    //   auto-approvals/escalations                 超时升级台账（GET）
+    //   auto-approvals/escalations/scan            扫描超时（POST；上游只定义规则、不实现定时器）
+    //   auto-approvals/escalations/{uuid}          单条超时升级（GET）
+    //   auto-approvals/escalations/{uuid}/execute  执行一次超时升级（POST）
+    //
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   platform/auto-approvals                            —— 裸路径：后端**没有**汇总端点。
+    //   platform/auto-approvals/unknown                    —— 未实现的子路径仍然 404。
+    //   platform/auto-approvals/policies/not-a-uuid        —— 非 UUID 段不应被 uuid 分支吃掉。
+    //   platform/auto-approvals/decisions/not-a-uuid        —— 同上。
+    //   platform/auto-approvals/signals/not-a-uuid         —— 同上。
+    //   platform/auto-approvals/escalations/not-a-uuid     —— 同上。
+    //   platform/auto-approvals/escalations/scan/extra     —— 多一段仍然 404。
+    //   platform/auto-approvals/decisions/{uuid}/extra     —— 多一段仍然 404。
+    //   platform/auto-approvals/policies/{uuid}/delete     —— 规则**不删**（历史决策要能复现）。
+    //   platform/auto-approvals/decisions/{uuid}/delete    —— 决策台账是**只追加**的，删不了。
+    //
+    // id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //   （不是 `[0-9a-f-]+`）：后者会把 `disable` / `scan` / `execute` 这种非 UUID 形状也当成 id 放行。
+    // 字面量子路径（capabilities / overview / policies / signals / decisions / escalations / scan）
+    //   排在 {uuid} 段**之前**判别 —— alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    prefix: 'platform/',
+    env: 'PLATFORM_URL',
+    fallback: 'http://127.0.0.1:8089',
+    pattern:
+      /^auto\-approvals\/(?:capabilities|overview|policies(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/disable)?)?|signals(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/disable)?|decisions(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|escalations(?:\/scan|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/execute)?)?)$/,
+  },
+  {
     // 18.1.3.2 数据迁移（platform 服务，卷 18「集成开放与智能自动化」L3 18.1.3 下的第三格）。
     // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有的 platform/ 分支里并分支 ——
     //   既有条目**一字未改、也不重排**。
