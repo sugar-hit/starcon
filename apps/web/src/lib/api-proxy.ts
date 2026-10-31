@@ -20,6 +20,56 @@ const services: readonly {
   fallback: string;
 }[] = [
   {
+    // 18.1.3.2 数据迁移（platform 服务，卷 18「集成开放与智能自动化」L3 18.1.3 下的第三格）。
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有的 platform/ 分支里并分支 ——
+    //   既有条目**一字未改、也不重排**。
+    //
+    // ---- 插入锚点选在**数组最开头**（本文件第一个元素之前）----
+    //   同批另一条车道（18.2.3.1）插在「数组末尾」—— 锚点不同，git 并入才能干净求并。
+    //
+    // ---- 首 token「data-migration」的零命中核对结论 ----
+    //   本文件里既有的 `prefix: 'platform/'` 条目共九条，首 token 分别是
+    //   webhooks（18.1.2.1）/ deliveries（18.1.2.2）/ io（18.1.3.1）/ text（18.4.2.1）/
+    //   apps（18.1.1.1）/ finance-software（18.2.1.1）/ api-catalog（18.1.4.1）/
+    //   call-monitor（18.1.5.1）/ payment-funds（18.2.2.1）。
+    //   九条的首 token 与 `data-migration` **全不相同** ⇒ 天然互斥，
+    //   本车道**不需要**改动那九条里的任何一个字符。
+    //   ⚠️ `io`（18.1.3.1 导入导出任务）与本模块**不是一件事**：
+    //   那边管「把本系统的数据导出去 / 把文件导进来」，这边管「把**别的 ERP 的历史数据**
+    //   迁进本系统的业务库」—— 方向、状态机、回滚语义都不同。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   data-migration/capabilities              能力声明（哪些真接通 / 哪些还没交付、归谁）
+    //   data-migration/overview                  概览（几个数）
+    //   data-migration/targets                   目标内部模型目录（没接通的那几个照样出现）
+    //   data-migration/mappings                  映射配置列表（GET 真分页真筛选）/ 新建（POST）
+    //   data-migration/mappings/{uuid}           映射配置详情（GET）/ 修改（PUT）/ 删除（DELETE）
+    //   data-migration/runs                      迁移任务列表（GET 真分页真筛选）/ 发起（POST，**已受理**）
+    //   data-migration/runs/{uuid}               迁移任务详情（GET，**进度跟踪**）
+    //   data-migration/runs/{uuid}/rollback      发起回滚（POST，**已受理**，真去目标库删）
+    //   data-migration/runs/{uuid}/rows          逐行结论（GET，**核对报告的明细**）
+    //   data-migration/runs/{uuid}/report        核对报告 CSV（GET，带下载有效期，过期 410）
+    //   data-migration/runs/{uuid}/rollback-report 回滚报告 CSV（GET）
+    //   data-migration/expire                    清理过期文件（POST）
+    //
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   platform/data-migration                        —— 裸路径：后端**没有**「一条不存在的汇总列表接口」。
+    //   platform/data-migration/unknown                 —— 未实现的子路径仍然 404。
+    //   platform/data-migration/mappings/not-a-uuid     —— 非 UUID 段不应被 uuid 分支吃掉。
+    //   platform/data-migration/runs/not-a-uuid         —— 同上。
+    //   platform/data-migration/runs/{uuid}/not-a-shape —— 多一段仍然 404。
+    //
+    // id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //   （不是 `[0-9a-f-]+`）：后者会把 `rollback` 这种非 UUID 形状也当成 id 放行。
+    // 字面量子路径（capabilities / overview / targets / expire / mappings / runs）
+    //   排在 {uuid} 段**之前**判别 —— alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    prefix: 'platform/',
+    env: 'PLATFORM_URL',
+    fallback: 'http://127.0.0.1:8089',
+    pattern:
+      /^data\-migration\/(?:capabilities|overview|targets|expire|mappings(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|runs(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:rollback|rows|report|rollback\-report))?)?)$/,
+  },
+  {
     // 18.1.2.1 事件订阅（platform 服务，卷 18「集成开放与智能自动化」L3 18.1.2 下的第一格）。
     // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有的 platform/ 分支里并分支 ——
     //   既有条目**一字未改、也不重排**。
