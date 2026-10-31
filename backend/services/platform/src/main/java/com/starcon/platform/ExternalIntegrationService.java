@@ -760,9 +760,11 @@ public class ExternalIntegrationService {
     var category = ExternalIntegrationCategory.parse(connection.category());
     check(
         category != null && taskType.supports(category),
-        "同步类型「"
+        "同步类型 "
+            + taskType.name()
+            + "（"
             + taskType.label()
-            + "」不属于「"
+            + "）不属于「"
             + connection.categoryLabel()
             + "」这一类对接 —— 给"
             + connection.categoryLabel()
