@@ -5,10 +5,10 @@
 
 ## 一、前两任发生了什么
 
-| 轮次 | 结果 | 留下的东西 |
-| --- | --- | --- |
-| 第一任（20:14–20:39） | `net::ERR_CONNECTION_CLOSED`，**只做勘察，0 commit** | 依赖自检结论（见下） |
-| 第二任（20:39–20:57） | `net::ERR_HTTP2_PING_FAILED`，**只读模板代码，0 commit** | 模板位置（见下） |
+| 轮次                  | 结果                                                     | 留下的东西           |
+| --------------------- | -------------------------------------------------------- | -------------------- |
+| 第一任（20:14–20:39） | `net::ERR_CONNECTION_CLOSED`，**只做勘察，0 commit**     | 依赖自检结论（见下） |
+| 第二任（20:39–20:57） | `net::ERR_HTTP2_PING_FAILED`，**只读模板代码，0 commit** | 模板位置（见下）     |
 
 ⇒ **工作区干净、分支上 0 个新 commit ⇒ 没有任何成果丢失，也没有半截改动需要接续。**
 ⇒ 但基础设施已经掐了本车道两次。**第三个你务必先写代码、少勘察、多 commit。**
@@ -25,25 +25,30 @@
 ## 三、照抄模板（前一任已定位，调度者复核）
 
 **后端**（`backend/services/platform/src/main/java/com/starcon/platform/`）：
+
 - `ExternalIntegrationService.java` / `ExternalIntegrationModels.java` / `ExternalIntegrationController.java` ← **18.2.3.1 其他对接**（同卷最新、同服务）
 - `DataMigrationService.java` / `DataMigrationModels.java` / `DataMigrationController.java` ← **18.1.3.2 数据迁移**
 
 **迁移**（`backend/services/platform/src/main/resources/db/migration/`）：
+
 - `V417__data_migration.sql`（586 行，4 表，ENABLE **与** FORCE RLS + GRANT platform_app）← **18.1.3.2**
 - `V418__external_integration.sql`（3 表，同上）← **18.2.3.1**
 
 **前端**：
+
 - `apps/web/src/components/integrations/data-migration-workspace.tsx` + `data-migration-model.ts` ← **18.1.3.2**
 - `apps/web/src/components/integrations/external-integration-workspace.tsx` + `external-integration-model.ts` ← **18.2.3.1**
 - 白名单双向守卫测试：`apps/web/src/app/api/platform/data-migration-allowlist.test.ts` ← **18.1.3.2**
 
 **测试**：
+
 - `backend/services/platform/src/test/java/com/starcon/platform/DataMigrationIntegrationTest.java`（23 例）
 - `.../DataMigrationTenancyIntegrationTest.java`（8 例）← **租户隔离三断言的照抄模板**
 
 ## 四、api-proxy 白名单写法
 
 `apps/web/src/lib/api-proxy.ts` 的 `services[]` **数组最开头**（第一个元素之前）新增一条独立 `platform/` 元素：
+
 - id 段用**完整 UUID 形状**
 - 末尾**刻意不带 `?`**（裸路径不放行）
 - **既有条目一字未改、也不重排**
