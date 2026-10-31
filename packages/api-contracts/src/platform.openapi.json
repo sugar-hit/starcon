@@ -1245,6 +1245,737 @@
         },
         "type": "object"
       },
+      "AutoApprovalCapabilities": {
+        "properties": {
+          "checks": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "decisionOwnership": {
+            "type": "string"
+          },
+          "decisions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "module": {
+            "type": "string"
+          },
+          "permissions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "upstream": {
+            "type": "string"
+          },
+          "upstreamDecisionChannelNote": {
+            "type": "string"
+          },
+          "upstreamIntakeChannel": {
+            "type": "string"
+          },
+          "upstreamProgrammaticDecisionChannel": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "AutoApprovalCheck": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "passed": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "AutoApprovalDecisionRow": {
+        "properties": {
+          "amount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "currencyCode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "decidedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "decision": {
+            "type": "string"
+          },
+          "decisionNo": {
+            "type": "string"
+          },
+          "documentRef": {
+            "type": "string"
+          },
+          "documentTypeCode": {
+            "type": "string"
+          },
+          "executionState": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "reasonCode": {
+            "type": "string"
+          },
+          "sourceSystem": {
+            "type": "string"
+          },
+          "upstreamInstanceId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AutoApprovalDecisionView": {
+        "properties": {
+          "amount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "checks": {
+            "items": {
+              "$ref": "#/components/schemas/AutoApprovalCheck"
+            },
+            "type": "array"
+          },
+          "currencyCode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "decidedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "decision": {
+            "type": "string"
+          },
+          "decisionNo": {
+            "type": "string"
+          },
+          "documentRef": {
+            "type": "string"
+          },
+          "documentTypeCode": {
+            "type": "string"
+          },
+          "escalations": {
+            "items": {
+              "$ref": "#/components/schemas/AutoApprovalEscalationRow"
+            },
+            "type": "array"
+          },
+          "executionState": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "policy": {
+            "$ref": "#/components/schemas/AutoApprovalPolicySnapshot"
+          },
+          "reasonCode": {
+            "type": "string"
+          },
+          "reasonMessage": {
+            "type": "string"
+          },
+          "riskSignals": {
+            "items": {
+              "$ref": "#/components/schemas/AutoApprovalSignalSnapshot"
+            },
+            "type": "array"
+          },
+          "routing": {
+            "$ref": "#/components/schemas/AutoApprovalRoutingSnapshot"
+          },
+          "sourceSystem": {
+            "type": "string"
+          },
+          "supplierId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "supplierVerified": {
+            "type": "boolean"
+          },
+          "upstreamInstanceId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "upstreamInstanceNo": {
+            "nullable": true,
+            "type": "string"
+          },
+          "upstreamNodeKey": {
+            "nullable": true,
+            "type": "string"
+          },
+          "upstreamRoutedBy": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AutoApprovalEscalationRow": {
+        "properties": {
+          "decisionId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "detectedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "elapsedHours": {
+            "type": "number"
+          },
+          "escalateApproverType": {
+            "nullable": true,
+            "type": "string"
+          },
+          "escalateMembershipId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "escalatePositionId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "escalateRoleId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "executedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "executedBy": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "executionDetail": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "nodeKey": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "timeoutAction": {
+            "type": "string"
+          },
+          "timeoutHours": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "upstreamDwellSeconds": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "upstreamFlowId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "upstreamInstanceId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AutoApprovalEscalationScanView": {
+        "properties": {
+          "detected": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "escalations": {
+            "items": {
+              "$ref": "#/components/schemas/AutoApprovalEscalationRow"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "scanned": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AutoApprovalEvaluateInput": {
+        "properties": {
+          "amount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "currencyCode": {
+            "nullable": true,
+            "pattern": "[A-Z]{3}",
+            "type": "string"
+          },
+          "documentRef": {
+            "maxLength": 100,
+            "minLength": 0,
+            "type": "string"
+          },
+          "documentTypeCode": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string"
+          },
+          "riskSignals": {
+            "items": {
+              "$ref": "#/components/schemas/AutoApprovalRiskSignalInput"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "sourceSystem": {
+            "maxLength": 40,
+            "minLength": 0,
+            "type": "string"
+          },
+          "subjectTitle": {
+            "maxLength": 200,
+            "minLength": 0,
+            "nullable": true,
+            "type": "string"
+          },
+          "supplierId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "supplierVerified": {
+            "nullable": true,
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "documentRef",
+          "documentTypeCode",
+          "sourceSystem"
+        ],
+        "type": "object"
+      },
+      "AutoApprovalOverview": {
+        "properties": {
+          "activePolicyCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "autoApprovedCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "autoRejectedCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "decisionCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "executedEscalationCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "manualRequiredCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "pendingEscalationCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "policyCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "signalCount": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AutoApprovalPolicyInput": {
+        "properties": {
+          "amountHardLimit": {
+            "nullable": true,
+            "type": "number"
+          },
+          "autoApproveMaxAmount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "currencyCode": {
+            "minLength": 1,
+            "pattern": "[A-Z]{3}",
+            "type": "string"
+          },
+          "documentTypeCode": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string"
+          },
+          "priority": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "remark": {
+            "maxLength": 500,
+            "minLength": 0,
+            "nullable": true,
+            "type": "string"
+          },
+          "ruleCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "ruleName": {
+            "maxLength": 120,
+            "minLength": 0,
+            "type": "string"
+          },
+          "status": {
+            "nullable": true,
+            "pattern": "ACTIVE|DRAFT|DISABLED",
+            "type": "string"
+          },
+          "upstreamFlowId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "currencyCode",
+          "documentTypeCode",
+          "ruleCode",
+          "ruleName"
+        ],
+        "type": "object"
+      },
+      "AutoApprovalPolicyRow": {
+        "properties": {
+          "amountHardLimit": {
+            "nullable": true,
+            "type": "number"
+          },
+          "autoApproveMaxAmount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdBy": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "currencyCode": {
+            "type": "string"
+          },
+          "documentTypeCode": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "priority": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "remark": {
+            "type": "string"
+          },
+          "ruleCode": {
+            "type": "string"
+          },
+          "ruleName": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "upstreamFlowId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AutoApprovalPolicySnapshot": {
+        "nullable": true,
+        "properties": {
+          "amountHardLimit": {
+            "nullable": true,
+            "type": "number"
+          },
+          "autoApproveMaxAmount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "currencyCode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "documentTypeCode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "found": {
+            "type": "boolean"
+          },
+          "policyId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "ruleCode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "ruleName": {
+            "nullable": true,
+            "type": "string"
+          },
+          "status": {
+            "nullable": true,
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "upstreamFlowId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AutoApprovalRiskSignalInput": {
+        "nullable": true,
+        "properties": {
+          "code": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "detail": {
+            "maxLength": 300,
+            "minLength": 0,
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "code"
+        ],
+        "type": "object"
+      },
+      "AutoApprovalRoutingSnapshot": {
+        "nullable": true,
+        "properties": {
+          "approverType": {
+            "nullable": true,
+            "type": "string"
+          },
+          "branchName": {
+            "nullable": true,
+            "type": "string"
+          },
+          "currencyCode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "flowId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "flowName": {
+            "nullable": true,
+            "type": "string"
+          },
+          "maxAmount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "membershipId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "minAmount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "note": {
+            "type": "string"
+          },
+          "positionId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "roleId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "routed": {
+            "type": "boolean"
+          },
+          "targetNodeKey": {
+            "nullable": true,
+            "type": "string"
+          },
+          "targetNodeName": {
+            "nullable": true,
+            "type": "string"
+          },
+          "upstreamNodeKey": {
+            "nullable": true,
+            "type": "string"
+          },
+          "upstreamRoutedBy": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AutoApprovalSignalInput": {
+        "properties": {
+          "description": {
+            "maxLength": 300,
+            "minLength": 0,
+            "nullable": true,
+            "type": "string"
+          },
+          "signalCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "signalKind": {
+            "pattern": "VIOLATION|RISK",
+            "type": "string"
+          },
+          "signalName": {
+            "maxLength": 120,
+            "minLength": 0,
+            "type": "string"
+          }
+        },
+        "required": [
+          "signalCode",
+          "signalKind",
+          "signalName"
+        ],
+        "type": "object"
+      },
+      "AutoApprovalSignalRow": {
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "signalCode": {
+            "type": "string"
+          },
+          "signalKind": {
+            "type": "string"
+          },
+          "signalName": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AutoApprovalSignalSnapshot": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "registered": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
       "BalanceImportInput": {
         "properties": {
           "availableAmount": {
@@ -9453,6 +10184,772 @@
         },
         "tags": [
           "app-credential-controller"
+        ]
+      }
+    },
+    "/platform/auto-approvals/capabilities": {
+      "get": {
+        "operationId": "get_platform_auto_approvals_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AutoApprovalCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "auto-approval-controller"
+        ]
+      }
+    },
+    "/platform/auto-approvals/decisions": {
+      "get": {
+        "operationId": "get_platform_auto_approvals_decisions",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "documentTypeCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "documentRef",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "decision",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "executionState",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AutoApprovalDecisionRow"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "auto-approval-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_platform_auto_approvals_decisions",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AutoApprovalEvaluateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AutoApprovalDecisionView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "auto-approval-controller"
+        ]
+      }
+    },
+    "/platform/auto-approvals/decisions/{id}": {
+      "get": {
+        "operationId": "get_platform_auto_approvals_decisions_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AutoApprovalDecisionView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "auto-approval-controller"
+        ]
+      }
+    },
+    "/platform/auto-approvals/escalations": {
+      "get": {
+        "operationId": "get_platform_auto_approvals_escalations",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "nodeKey",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AutoApprovalEscalationRow"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "auto-approval-controller"
+        ]
+      }
+    },
+    "/platform/auto-approvals/escalations/scan": {
+      "post": {
+        "operationId": "post_platform_auto_approvals_escalations_scan",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AutoApprovalEscalationScanView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "auto-approval-controller"
+        ]
+      }
+    },
+    "/platform/auto-approvals/escalations/{id}": {
+      "get": {
+        "operationId": "get_platform_auto_approvals_escalations_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AutoApprovalEscalationRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "auto-approval-controller"
+        ]
+      }
+    },
+    "/platform/auto-approvals/escalations/{id}/execute": {
+      "post": {
+        "operationId": "post_platform_auto_approvals_escalations_id_execute",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AutoApprovalEscalationRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "auto-approval-controller"
+        ]
+      }
+    },
+    "/platform/auto-approvals/overview": {
+      "get": {
+        "operationId": "get_platform_auto_approvals_overview",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AutoApprovalOverview"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "auto-approval-controller"
+        ]
+      }
+    },
+    "/platform/auto-approvals/policies": {
+      "get": {
+        "operationId": "get_platform_auto_approvals_policies",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "documentTypeCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "currencyCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AutoApprovalPolicyRow"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "auto-approval-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_platform_auto_approvals_policies",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AutoApprovalPolicyInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AutoApprovalPolicyRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "auto-approval-controller"
+        ]
+      }
+    },
+    "/platform/auto-approvals/policies/{id}": {
+      "get": {
+        "operationId": "get_platform_auto_approvals_policies_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AutoApprovalPolicyRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "auto-approval-controller"
+        ]
+      },
+      "put": {
+        "operationId": "put_platform_auto_approvals_policies_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AutoApprovalPolicyInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AutoApprovalPolicyRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "auto-approval-controller"
+        ]
+      }
+    },
+    "/platform/auto-approvals/policies/{id}/disable": {
+      "post": {
+        "operationId": "post_platform_auto_approvals_policies_id_disable",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AutoApprovalPolicyRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "auto-approval-controller"
+        ]
+      }
+    },
+    "/platform/auto-approvals/signals": {
+      "get": {
+        "operationId": "get_platform_auto_approvals_signals",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "signalKind",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AutoApprovalSignalRow"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "auto-approval-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_platform_auto_approvals_signals",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AutoApprovalSignalInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AutoApprovalSignalRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "auto-approval-controller"
+        ]
+      }
+    },
+    "/platform/auto-approvals/signals/{id}/disable": {
+      "post": {
+        "operationId": "post_platform_auto_approvals_signals_id_disable",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AutoApprovalSignalRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "auto-approval-controller"
         ]
       }
     },
