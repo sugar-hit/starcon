@@ -20,6 +20,62 @@ const services: readonly {
   fallback: string;
 }[] = [
   {
+    // 18.3.1.1 规则列表（platform 服务，卷 18「集成开放与智能自动化」L3 18.3.1「规则管理」下的第一格）。
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有的 platform/ 分支里并分支 ——
+    //   既有条目**一字未改、也不重排**。
+    //
+    // ---- 插入锚点选在**数组最开头**（本文件第一个元素之前）----
+    //   本文件是并行车道共同的累积型文件：既有车道分别落在「数组最开头」
+    //   （18.1.2.1 / 18.1.2.2 / 18.1.3.1 / 18.1.3.2）与「数组末尾」（18.2.3.1），
+    //   本车道落在开头这一段，与数组末尾相距 10000 行以上 ⇒ 并入时 git 能干净求并。
+    //
+    // ---- 首 token「automation-rules」的零命中核对结论 ----
+    //   本文件里既有的 `prefix: 'platform/'` 条目，其首 token 分别是
+    //   webhooks（18.1.2.1）/ deliveries（18.1.2.2）/ io（18.1.3.1）/ data-migration（18.1.3.2）/
+    //   text（18.4.2.1）/ apps（18.1.1.1）/ finance-software（18.2.1.1）/
+    //   api-catalog（18.1.4.1）/ call-monitor（18.1.5.1）/ payment-funds（18.2.2.1）/
+    //   external-integrations（18.2.3.1）。
+    //   它们的正则**没有一个**能吃掉 `automation-rules/...` —— 首 token 全不相同 ⇒ 天然互斥。
+    //   ⚠️ `external-integrations`（18.2.3.1）与本模块**不是一件事**：
+    //   那边管的是「对接外部系统（1688 / 海外仓 / 物流商…）的连接与同步健康」，
+    //   这边管的是「**自动化规则本身**」—— 触发事件、条件、动作、优先级、启用范围与执行统计。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   automation-rules/capabilities                 能力声明（哪些真交付 / 哪些还没交付、归谁）
+    //   automation-rules/overview                     概览（几个数，含「连续失败」这一档）
+    //   automation-rules/event-types                  可用触发事件（来自平台事件注册表）
+    //   automation-rules/rules                        规则列表（GET 真筛选真关键词）/ 新建修改（POST）
+    //   automation-rules/rules/{uuid}                 规则档案详情（GET）
+    //   automation-rules/rules/reorder                排序（POST，真改优先级）
+    //   automation-rules/rules/{uuid}/enable          启用（POST）
+    //   automation-rules/rules/{uuid}/disable         停用（POST，**不删**：历史要能复现）
+    //   automation-rules/rules/{uuid}/dry-run         开关试运行（POST，**独立状态**）
+    //   automation-rules/rules/{uuid}/preview         预演（POST，**求值但不执行**任何动作）
+    //   automation-rules/rules/{uuid}/executions      执行历史（GET）/ 登记执行结果（POST）
+    //   automation-rules/applicable                   范围内生效的规则（GET，**范围是真约束**）
+    //   automation-rules/upstream/shops               上游店铺（只读）
+    //   automation-rules/upstream/warehouses          上游仓库（只读）
+    //
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   platform/automation-rules                     —— 裸路径：后端**没有**「一条不存在的汇总列表接口」。
+    //   platform/automation-rules/unknown             —— 未实现的子路径仍然 404。
+    //   platform/automation-rules/rules/not-a-uuid    —— 非 UUID 段不应被 uuid 分支吃掉。
+    //   platform/automation-rules/rules/{uuid}/not-a-shape —— 多一段仍然 404。
+    //   ⚠️ **刻意不放行** `platform/automation-rules/rules/{uuid}/execute`：
+    //   规则执行引擎归 18.3.2、**尚未交付** ⇒ 没有这个端点 ⇒ 放行它会让界面以为
+    //   「点一下就能跑规则」，而那必然 404。
+    //
+    // id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //   （不是 `[0-9a-f-]+`）：后者会把 `enable` / `reorder` 这种非 UUID 形状也当成 id 放行。
+    // 字面量子路径（capabilities / overview / event-types / applicable）
+    //   与 `rules/reorder` 排在 {uuid} 段**之前**判别 —— alternation 是首个命中即返回。
+    prefix: 'platform/',
+    env: 'PLATFORM_URL',
+    fallback: 'http://127.0.0.1:8089',
+    pattern:
+      /^automation\-rules\/(?:capabilities|overview|event-types|applicable|rules(?:\/reorder|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:enable|disable|dry\-run|preview|executions))?)?|upstream\/(?:shops|warehouses))$/,
+  },
+  {
     // 18.1.3.2 数据迁移（platform 服务，卷 18「集成开放与智能自动化」L3 18.1.3 下的第三格）。
     // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有的 platform/ 分支里并分支 ——
     //   既有条目**一字未改、也不重排**。
