@@ -112,4 +112,113 @@ final class PlatformUpstreamClient {
     return new ResponseStatusException(
         HttpStatus.SERVICE_UNAVAILABLE, serviceName + " " + detail + "（是「读不到」，不是「没有数据」）");
   }
+
+  // ================================================================ 文件型通道
+
+  /**
+   * 以 {@code multipart/form-data} POST 一份文件给上游（18.1.3.1 的**通道 C**：导入委托）。
+   *
+   * <p>⚠️ <b>只转发调用方自己的 bearer</b>，与 {@link #get} 同一纪律：
+   * 上游仍按已认证成员关系解析租户并强制 RLS。
+   *
+   * <p>⚠️ <b>入参里没有租户号</b>：平台不替上游决定租户。
+   */
+  <T> T postMultipart(
+      java.util.function.Function<org.springframework.web.util.UriBuilder, org.springframework.web.util.UriBuilder>
+          uriBuilder,
+      String bearer,
+      org.springframework.util.MultiValueMap<String, Object> parts,
+      Class<T> type) {
+    try {
+      T result =
+          client
+              .post()
+              .uri(builder -> uriBuilder.apply(builder).build())
+              .header("Authorization", bearer)
+              .contentType(org.springframework.http.MediaType.MULTIPART_FORM_DATA)
+              .body(parts)
+              .retrieve()
+              .body(type);
+      if (result == null) throw unavailable("上游没有返回内容");
+      return result;
+    } catch (RestClientResponseException e) {
+      if (e.getStatusCode().value() == 401 || e.getStatusCode().value() == 403) {
+        throw new ResponseStatusException(
+            HttpStatus.SERVICE_UNAVAILABLE,
+            "无权向 " + serviceName + " 提交导入文件，本模块无法代为导入",
+            e);
+      }
+      throw unavailable("上游返回 " + e.getStatusCode().value() + "：导入委托被拒");
+    } catch (org.springframework.web.client.ResourceAccessException e) {
+      throw unavailable("上游不可达");
+    }
+  }
+
+  /**
+   * POST 一个**空体**的 JSON 端点（上游的「推进作业」类端点：预校验 / 执行 / 重投）。
+   *
+   * <p>⚠️ 与 {@link #postMultipart} 分开：这两种端点的**请求体语义不同**
+   * （一个是文件，一个是「请开始做这件事」），混用会让上游按错误的 Content-Type 解析。
+   */
+  <T> T postEmpty(
+      java.util.function.Function<org.springframework.web.util.UriBuilder, org.springframework.web.util.UriBuilder>
+          uriBuilder,
+      String bearer,
+      Class<T> type) {
+    try {
+      T result =
+          client
+              .post()
+              .uri(builder -> uriBuilder.apply(builder).build())
+              .header("Authorization", bearer)
+              .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+              .retrieve()
+              .body(type);
+      if (result == null) throw unavailable("上游没有返回内容");
+      return result;
+    } catch (RestClientResponseException e) {
+      if (e.getStatusCode().value() == 401 || e.getStatusCode().value() == 403) {
+        throw new ResponseStatusException(
+            HttpStatus.SERVICE_UNAVAILABLE,
+            "无权推进 " + serviceName + " 的作业，本模块无法代为执行",
+            e);
+      }
+      throw unavailable("上游返回 " + e.getStatusCode().value() + "：作业推进被拒");
+    } catch (org.springframework.web.client.ResourceAccessException e) {
+      throw unavailable("上游不可达");
+    }
+  }
+
+  /**
+   * 取一份**二进制**文件（模板 CSV 之类的非 JSON 载荷）。
+   *
+   * <p>⚠️ {@code PlatformUpstreamClient} 的 JSON 通道只按 {@code Class<T>} 反序列化，
+   * 裸数组会被 Jackson 拆成 {@code List<Object>}、字段全丢 —— 所以二进制载荷走这一支。
+   */
+  byte[] getBytes(
+      java.util.function.Function<org.springframework.web.util.UriBuilder, org.springframework.web.util.UriBuilder>
+          uriBuilder,
+      String bearer) {
+    try {
+      byte[] result =
+          client
+              .get()
+              .uri(builder -> uriBuilder.apply(builder).build())
+              .header("Authorization", bearer)
+              .retrieve()
+              .body(byte[].class);
+      if (result == null) throw unavailable("上游没有返回文件内容");
+      return result;
+    } catch (RestClientResponseException e) {
+      if (e.getStatusCode().value() == 401 || e.getStatusCode().value() == 403) {
+        throw new ResponseStatusException(
+            HttpStatus.SERVICE_UNAVAILABLE,
+            "无权读取 " + serviceName + " 的文件，本模块无法取回",
+            e);
+      }
+      throw unavailable("上游返回 " + e.getStatusCode().value() + "：文件读不到");
+    } catch (org.springframework.web.client.ResourceAccessException e) {
+      throw unavailable("上游不可达");
+    }
+  }
 }
