@@ -197,19 +197,19 @@ public class DataMigrationController {
    *
    * <p>🔴 <b>mode=DRY_RUN 就是「试运行」</b>：服务端只读不写。
    * 前端**不能**只靠「我选了试运行」来保证不写 —— 保证在服务端与数据库触发器里。
+   *
+   * <p>🔴 <b>提交执行器在事务之外</b>：{@code access.run} 正常返回即代表那笔事务
+   * 已经提交 ⇒ 执行器一定看得见这一行。若把提交动作放进事务里，
+   * 执行线程会与提交抢跑（读不到尚未提交的行）⇒ 任务凭空消失。
    */
   @PostMapping("/data-migration/runs")
   public DataMigrationRunRow createRun(
       @RequestHeader(value = "Authorization", defaultValue = "") String auth,
       @Valid @RequestBody DataMigrationRunInput input) {
-    return call(
-        auth,
-        "create",
-        actor -> {
-          var run = service.createRun(input, actor);
-          executor.submit(run.id(), auth, actor);
-          return run;
-        });
+    var actor = access.require(auth, "platform.migration.create");
+    var run = access.run(actor, "platform.migration.create", () -> service.createRun(input, actor));
+    executor.submit(run.id(), auth, actor);
+    return run;
   }
 
   /**
@@ -222,14 +222,10 @@ public class DataMigrationController {
   public DataMigrationRunRow rollback(
       @RequestHeader(value = "Authorization", defaultValue = "") String auth,
       @PathVariable UUID id) {
-    return call(
-        auth,
-        "execute",
-        actor -> {
-          var run = service.requestRollback(id, actor);
-          executor.submitRollback(run.id(), auth, actor);
-          return run;
-        });
+    var actor = access.require(auth, "platform.migration.execute");
+    var run = access.run(actor, "platform.migration.execute", () -> service.requestRollback(id, actor));
+    executor.submitRollback(run.id(), auth, actor);
+    return run;
   }
 
   /** 逐行结论（**核对报告的明细**：哪一行、什么结论、为什么）。 */

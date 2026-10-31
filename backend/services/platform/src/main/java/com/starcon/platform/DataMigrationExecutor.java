@@ -27,8 +27,10 @@ import org.springframework.stereotype.Service;
  * 恢复扫描会把它标成「执行中断」而不是偷偷重试 ——
  * 因为没有凭据就**写不进目标库**，重试也只会再失败一次。
  *
- * <p>🔴 <b>执行器持有自己的事务边界</b>：每个任务的推进都是**独立提交**的，
- * 所以「迁了 800 行后崩掉」留下的是**已推进 800 行的真实进度**，不是全部回滚。
+ * <p>🔴 <b>执行器自己不持有长事务</b>：它只负责调度，**每一行的事务由服务层开**
+ * （见 {@code DataMigrationService.executeRun}）—— 所以「迁了 800 行后崩掉」
+ * 留下的是**已推进 800 行的真实进度**，那 800 行的上游 id 也已经落库，
+ * 崩掉之后**回滚得掉**。
  */
 @Service
 public class DataMigrationExecutor {
@@ -36,9 +38,6 @@ public class DataMigrationExecutor {
 
   /** 同时跑几个任务（迁移要翻目标库的分页，不能一个任务把线程池占满）。 */
   static final int POOL_SIZE = 2;
-
-  /** 等发起请求的那笔事务提交，最多等这么多次（每次 50ms ⇒ 最多约 3 秒）。 */
-  static final int MAX_COMMIT_WAIT_ATTEMPTS = 60;
 
   private final DataMigrationService service;
   private final AccessService access;
@@ -65,7 +64,7 @@ public class DataMigrationExecutor {
    * @param actor 已认证的成员上下文（租户由它解析）
    */
   public void submit(UUID runId, String bearer, AccessService.Access actor) {
-    pool.submit(() -> run(() -> service.executeRun(runId, bearer), runId, bearer, actor, "迁移任务"));
+    pool.submit(() -> run(runId, bearer, actor, false));
   }
 
   /**
@@ -74,50 +73,52 @@ public class DataMigrationExecutor {
    * <p>⚠️ 回滚也要调用方的 bearer（要写目标库的删除端点）⇒ 同一套纪律。
    */
   public void submitRollback(UUID runId, String bearer, AccessService.Access actor) {
-    pool.submit(
-        () -> run(() -> service.executeRollback(runId, bearer), runId, bearer, actor, "回滚任务"));
+    pool.submit(() -> run(runId, bearer, actor, true));
   }
 
   /**
    * 在租户事务里跑一段工作。
    *
-   * <p>🔴 <b>等发起请求的那笔事务提交</b>：控制器是在**事务里**提交任务的，
-   * 而执行线程可能在事务提交之前就去读那一行 —— 那时它**看不到**这一行
-   * （事务可见性 + RLS）。此时若当成「任务不存在」，任务就永远停在待执行。
-   * ⇒ 先问「可执行了吗」，没提交就等一下（最多 {@link #MAX_COMMIT_WAIT_ATTEMPTS} 次）。
+   * <p>🔴 <b>可见性栅栏</b>：发起请求的那笔事务持有任务级 advisory 锁
+   * （见 {@code DataMigrationService.createRun}）；这里取同一把锁 ——
+   * <b>拿到锁就意味着那笔事务已经提交</b>，任务行一定看得见。
+   * ⇒ 「任务凭空消失」的时序 bug 被消除，而且**不靠 sleep 轮询**。
    *
-   * <p>⚠️ <b>真正的「执行」只做一次</b>：等待只发生在「还不存在」时；
-   * 一旦任务行可见就立刻执行，执行本身由服务层的条件更新（{@code status='PENDING'}）
-   * 原子地认领，重复调用不会跑两遍。
+   * <p>⚠️ <b>真正的「执行」只做一次</b>：认领由服务层的条件更新
+   * （{@code status='PENDING'}）原子地完成，重复调用不会跑两遍。
    */
-  private void run(
-      Runnable work, UUID runId, String bearer, AccessService.Access actor, String what) {
-    for (var attempt = 0; attempt < MAX_COMMIT_WAIT_ATTEMPTS; attempt++) {
+  private void run(UUID runId, String bearer, AccessService.Access actor, boolean rollback) {
+    var what = rollback ? "回滚任务" : "迁移任务";
+    try {
+      access.run(
+          actor,
+          "platform.migration.read",
+          () -> {
+            service.awaitVisible(runId);
+            return null;
+          });
+      if (rollback) {
+        service.executeRollback(runId, bearer, actor);
+      } else {
+        service.executeRun(runId, bearer, actor);
+      }
+    } catch (RuntimeException e) {
+      log.error("{} {} 执行失败", what, runId, e);
       try {
-        var visible =
-            access.run(
-                actor, "platform.migration.read", () -> service.exists(runId));
-        if (!visible) {
-          Thread.sleep(50);
-          continue;
+        if (rollback) {
+          service.markRollbackFailed(runId, actor, message(e));
+        } else {
+          service.markRunFailed(runId, actor, message(e));
         }
-        access.run(
-            actor,
-            "platform.migration.read",
-            () -> {
-              work.run();
-              return null;
-            });
-        return;
-      } catch (InterruptedException e) {
-        Thread.currentThread().interrupt();
-        return;
-      } catch (RuntimeException e) {
-        log.error("{} {} 执行失败", what, runId, e);
-        return;
+      } catch (RuntimeException ignored) {
+        log.error("{} {} 连标记失败都没成功", what, runId, ignored);
       }
     }
-    log.error("{} {} 迟迟不可见（发起请求的事务可能没有提交），本次不执行", what, runId);
+  }
+
+  private static String message(RuntimeException e) {
+    var message = e.getMessage();
+    return message == null || message.isBlank() ? e.getClass().getSimpleName() : message;
   }
 
   /**

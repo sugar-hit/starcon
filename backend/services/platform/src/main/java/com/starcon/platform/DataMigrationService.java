@@ -40,6 +40,9 @@ import org.springframework.web.server.ResponseStatusException;
  *       （试运行的行不许带 {@code upstream_id}）。
  *   <li><b>回滚是真的回滚</b>：按逐行记下的 {@code upstream_id} 去目标库**真删**。
  *       删不掉的行如实记「未删除」并写明原因 —— 不把「提交了删除请求」当成「删掉了」。
+ *   <li><b>每一行一个独立事务</b>：一行迁成之后它的「上游记录 id」<b>立刻落库</b> ——
+ *       中途挂掉时，已经迁进去的记录<b>回滚得掉</b>；整批塞进一笔事务的话，
+ *       崩掉会把「迁了哪些」一起抹掉 —— 那正是蓝图说的「难以回退」。
  *   <li><b>核对报告的三个口径加起来等于处理过的行数</b>（数据库 CHECK 钉死）：
  *       成功 / 失败 / 跳过加不到总数上，那份报告在账上就对不平。
  *   <li><b>「查不清」不等于「不存在」</b>：目标库查询被截断时**跳过**这一行并写明原因，
@@ -69,16 +72,19 @@ public class DataMigrationService {
   private final ImportExportStorage storage;
   private final ObjectMapper json;
   private final DataMigrationCatalogPort catalog;
+  private final AccessService access;
 
   public DataMigrationService(
       DSLContext sql,
       ImportExportStorage storage,
       ObjectMapper json,
-      DataMigrationCatalogPort catalog) {
+      DataMigrationCatalogPort catalog,
+      AccessService access) {
     this.sql = sql;
     this.storage = storage;
     this.json = json;
     this.catalog = catalog;
+    this.access = access;
   }
 
   // ================================================================ 工具
@@ -88,8 +94,8 @@ public class DataMigrationService {
   }
 
   /** 状态冲突（409）：不是「参数不对」，是「当前状态不允许」。 */
-  private static void conflict(String message) {
-    throw new ResponseStatusException(HttpStatus.CONFLICT, message);
+  private static ResponseStatusException conflict(String message) {
+    return new ResponseStatusException(HttpStatus.CONFLICT, message);
   }
 
   private static String required(String value, String label, int max) {
@@ -400,7 +406,7 @@ public class DataMigrationService {
     mapping(id);
     var referenced = count("select count(*) from platform_migration_run where mapping_id = ?", id);
     if (referenced > 0) {
-      conflict(
+      throw conflict(
           "这份映射已经被 "
               + referenced
               + " 个迁移任务引用，不能删 —— 审计要回答的是「当时按什么映射迁的」。"
@@ -561,26 +567,38 @@ public class DataMigrationService {
     var snapshot =
         new DataMigrationMappingSnapshot(
             mapping.code(), mapping.name(), mapping.sourceSystem(), mapping.targetModel(), mapping.fields());
-    sql.execute(
-        "insert into platform_migration_run(id,tenant_id,run_no,mode,target_model,mapping_id,"
-            + " mapping_code,mapping_snapshot,source_filename,source_sha256,status,rollback_status,"
-            + " actor_id,requested_at,created_at,updated_at)"
-            + " values(?,?,?,?,?,?,?,?::jsonb,?,?,'PENDING','NONE',?,?::timestamptz,"
-            + " ?::timestamptz,?::timestamptz)",
-        id,
-        currentTenant(),
-        runNo,
-        mode.name(),
-        model.code(),
-        mapping.id(),
-        mapping.code(),
-        toJson(snapshot),
-        safeFilename(input.filename()),
-        sha256(content),
-        actor.userId(),
-        now,
-        now,
-        now);
+    // 🔴 **先取一把事务级 advisory 锁**：这把锁随**本事务提交**而释放。
+    //   执行器在 {@link #awaitVisible} 里取同一把锁 ⇒ 它拿到锁时任务行一定已可见
+    //   （详见 awaitVisible 的说明：靠阻塞等提交，不靠 sleep 猜时间）。
+    sql.fetchOne("select pg_advisory_xact_lock(?)", advisoryLockKey(id));
+    try {
+      sql.execute(
+          "insert into platform_migration_run(id,tenant_id,run_no,mode,target_model,mapping_id,"
+              + " mapping_code,mapping_snapshot,source_filename,source_sha256,status,rollback_status,"
+              + " actor_id,requested_at,created_at,updated_at)"
+              + " values(?,?,?,?,?,?,?,?::jsonb,?,?,'PENDING','NONE',?,?::timestamptz,"
+              + " ?::timestamptz,?::timestamptz)",
+          id,
+          currentTenant(),
+          runNo,
+          mode.name(),
+          model.code(),
+          mapping.id(),
+          mapping.code(),
+          toJson(snapshot),
+          safeFilename(input.filename()),
+          sha256(content),
+          actor.userId(),
+          now,
+          now,
+          now);
+    } catch (org.springframework.dao.DataIntegrityViolationException e) {
+      // 🔴 撞上「同一租户同时只允许一个迁移任务在跑」这条唯一索引。
+      //   PostgreSQL 里约束违例会**中止整笔事务**，所以这里只能立刻抛出，
+      //   不能再执行任何语句（否则报「current transaction is aborted」）。
+      throw conflict(
+          "当前租户已有一个迁移任务在跑（同一时间只允许一个）—— 等它跑完再发起下一次。");
+    }
     try {
       writeFile(id, "SOURCE", safeFilename(input.filename()), content, null);
     } catch (RuntimeException e) {
@@ -606,14 +624,14 @@ public class DataMigrationService {
   public DataMigrationRunRow requestRollback(UUID id, AccessService.Access actor) {
     var run = run(id);
     if (run.mode().equals(Mode.DRY_RUN.name())) {
-      conflict("试运行没有写任何业务数据，没有可回滚的东西");
+      throw conflict("试运行没有写任何业务数据，没有可回滚的东西");
     }
     if (!run.status().equals(RunStatus.SUCCEEDED.name())
         && !run.status().equals(RunStatus.FAILED.name())) {
-      conflict("迁移还没跑完（当前「" + label(run.status()) + "」），不能回滚");
+      throw conflict("迁移还没跑完（当前「" + label(run.status()) + "」），不能回滚");
     }
     if (!run.rollbackStatus().equals(RollbackStatus.NONE.name())) {
-      conflict("这个任务已经回滚过了（当前「" + rollbackLabel(run.rollbackStatus()) + "」）");
+      throw conflict("这个任务已经回滚过了（当前「" + rollbackLabel(run.rollbackStatus()) + "」）");
     }
     var created =
         count(
@@ -621,7 +639,7 @@ public class DataMigrationService {
                 + " and upstream_id is not null",
             id);
     if (created == 0) {
-      conflict("这个任务没有迁成任何记录，没有可回滚的东西");
+      throw conflict("这个任务没有迁成任何记录，没有可回滚的东西");
     }
     return run;
   }
@@ -704,54 +722,113 @@ public class DataMigrationService {
   // ================================================================ 执行（异步）
 
   /**
-   * 这个任务行**在库里看得见吗**（存在即可，不看状态）。
+   * **可见性栅栏**（给执行器用）：等发起请求的那笔事务提交。
    *
-   * <p>🔴 <b>给执行器用</b>：发起请求的那笔事务**还没提交**时，执行线程
-   * 在库里看不到这一行（RLS + 事务可见性）。执行器据此判断「还没提交，等一下」，
-   * 而不是把一次正常的提交时序差当成「任务不存在」。
+   * <p>🔴 <b>为什么用 advisory 锁而不是轮询</b>：发起请求的那笔事务在
+   * {@link #createRun} 里先取一把<b>事务级 advisory 锁</b>再插入任务行 ——
+   * 那把锁<b>随事务提交而释放</b>。执行器在这里取同一把锁：
    *
-   * <p>⚠️ 必须在**带租户上下文的事务里**调用（RLS 挡住了没绑租户的读）。
+   * <ul>
+   *   <li>锁还没释放 ⇒ 对方事务还没提交 ⇒ 这里<b>阻塞</b>（不是「睡一会儿再看」）；</li>
+   *   <li>拿到锁 ⇒ 对方事务已提交或已回滚 ⇒ 下一条语句（PostgreSQL READ COMMITTED
+   *       每条语句取新快照）<b>一定看得见</b>那一行。</li>
+   * </ul>
+   *
+   * <p>⇒ 「任务凭空消失」这个时序 bug 被消除，而且不靠 sleep 猜时间。
+   *
+   * <p>⚠️ 必须在<b>带租户上下文的事务里</b>调用（RLS 挡住了没绑租户的读）。
    */
-  public boolean exists(UUID runId) {
-    var row = sql.fetchOne("select status from platform_migration_run where id = ?", runId);
-    return row != null;
+  public void awaitVisible(UUID runId) {
+    sql.fetchOne("select pg_advisory_xact_lock(?)", advisoryLockKey(runId));
+    var row = sql.fetchOne("select id from platform_migration_run where id = ?", runId);
+    if (row == null) {
+      throw new IllegalStateException("迁移任务不存在（或者发起它的那笔事务回滚了）：" + runId);
+    }
+  }
+
+  /** 任务级 advisory 锁的键（UUID 两半异或；撞上只会让两个无关任务短暂串行，无害）。 */
+  static long advisoryLockKey(UUID runId) {
+    return runId.getMostSignificantBits() ^ runId.getLeastSignificantBits();
   }
 
   /**
    * 执行一次迁移（**由执行器在独立线程上调用**）。
    *
+   * <p>🔴 <b>每一行一个独立事务</b>：一行迁成之后，它的「上游记录 id」<b>立刻落库</b>。
+   * 这样即使执行到一半崩掉 / catalog 挂掉，已经迁进去的记录也<b>回滚得掉</b>
+   * （回滚的依据就是那一列）。整批塞进一笔事务里的话，崩掉会连带把
+   * 「迁了哪些」的记录一起抹掉 —— 目标库里的记录还在，我们却已经不知道它们是谁了，
+   * 那正是蓝图说的「直接正式跑会产生大量脏数据难以回退」。
+   *
    * <p>🔴 <b>进度是事实，不是承诺</b>：每处理一行就更新一次计数。
    */
-  public void executeRun(UUID runId, String bearer) {
-    var run = run(runId);
-    if (!run.status().equals(RunStatus.PENDING.name())) return;
-    var now = dbNow();
-    var claimed =
-        sql.execute(
-            "update platform_migration_run set status = 'RUNNING', started_at = ?::timestamptz,"
-                + " updated_at = ?::timestamptz where id = ? and status = 'PENDING'",
-            now,
-            now,
-            runId);
-    if (claimed == 0) return;
+  public void executeRun(UUID runId, String bearer, AccessService.Access actor) {
+    MigrationPlan plan;
     try {
-      migrate(runId, bearer);
+      plan = access.run(actor, "platform.migration.execute", () -> plan(runId));
     } catch (RuntimeException e) {
-      fail(runId, e.getMessage() == null ? e.getClass().getSimpleName() : e.getMessage());
+      // 计划阶段失败（源文件读不出来 / 表头缺必填列 …）⇒ 整个任务失败。
+      failRun(runId, actor, messageOf(e));
+      return;
+    }
+    if (plan == null) return; // 已被别的执行器认领（认领是原子的，不会跑两遍）
+    var seenCodes = new LinkedHashSet<String>();
+    for (var i = 0; i < plan.body().size(); i++) {
+      var rowNo = i + 2; // 表头是第 1 行
+      var cells = plan.body().get(i);
+      try {
+        access.run(
+            actor,
+            "platform.migration.execute",
+            () -> {
+              processRow(plan, cells, rowNo, seenCodes, bearer);
+              return null;
+            });
+      } catch (RuntimeException e) {
+        // 🔴 **系统性失败**（catalog 不可达 / 库出问题）：停在这里。
+        //   已完成行的结论**已经各自提交** ⇒ 迁进去的东西回滚得掉。
+        failRun(runId, actor, messageOf(e));
+        return;
+      }
+    }
+    try {
+      access.run(
+          actor,
+          "platform.migration.execute",
+          () -> {
+            finishRun(plan);
+            return null;
+          });
+    } catch (RuntimeException e) {
+      failRun(runId, actor, messageOf(e));
     }
   }
 
-  /** 迁移主体：逐行解析 → 逐行结论 → 写结论 → 出核对报告。 */
-  private void migrate(UUID runId, String bearer) {
+  /** 迁移计划（认领 + 解析源文件 + 校验表头）。 */
+  private record MigrationPlan(
+      DataMigrationRunRow run,
+      Mode mode,
+      DataMigrationTargets.Model model,
+      DataMigrationMappingSnapshot snapshot,
+      String[] header,
+      List<String[]> body) {}
+
+  /**
+   * 认领任务并把源文件解析成可逐行处理的计划（**在一个事务里**）。
+   *
+   * @return 计划；<b>{@code null}</b> 表示这个任务已被别的执行器认领
+   */
+  private MigrationPlan plan(UUID runId) {
     var run = run(runId);
+    if (!run.status().equals(RunStatus.PENDING.name())) return null;
     var mode = Mode.valueOf(run.mode());
     var model = DataMigrationTargets.require(run.targetModel());
     var snapshot = readSnapshot(run);
     var source = sourceFile(runId);
-    var rows = ImportExportCsv.read(source.content());
-    var header = rows.get(0);
-    var body = rows.subList(1, rows.size());
-
+    var parsed = ImportExportCsv.read(source.content());
+    if (parsed.isEmpty()) throw new IllegalStateException("源文件里连表头都没有");
+    var header = parsed.get(0);
+    var body = List.copyOf(parsed.subList(1, parsed.size()));
     // 🔴 **必填列缺了 ⇒ 整个任务失败**（不是「每一行都失败」）：
     //   根因在配置 / 文件结构，不在数据里；逐行报错会让人去查数据，其实该查表头。
     var index = new LinkedHashMap<String, Integer>();
@@ -765,62 +842,159 @@ public class DataMigrationService {
                 + "）—— 这是**文件结构**的问题，不是某一行数据的问题");
       }
     }
-    var unmapped = new ArrayList<String>();
-    for (var h : header) {
-      var name = h.trim();
-      if (name.isEmpty()) continue;
-      var mapped = snapshot.fields().stream().anyMatch(f -> f.source().equals(name));
-      if (!mapped) unmapped.add(name);
-    }
+    var now = dbNow();
+    var claimed =
+        sql.execute(
+            "update platform_migration_run set status = 'RUNNING', started_at = ?::timestamptz,"
+                + " total_rows = ?, updated_at = ?::timestamptz where id = ? and status = 'PENDING'",
+            now,
+            body.size(),
+            now,
+            runId);
+    if (claimed == 0) return null;
+    return new MigrationPlan(run, mode, model, snapshot, header, body);
+  }
 
-    var succeeded = 0;
-    var failed = 0;
-    var skipped = 0;
-    var seenCodes = new LinkedHashSet<String>();
-    for (var i = 0; i < body.size(); i++) {
-      var rowNo = i + 2; // 表头是第 1 行
-      var cells = body.get(i);
-      var decision = decideRow(model, snapshot, header, cells, rowNo, seenCodes, mode, bearer);
-      switch (decision.outcome()) {
-        case SUCCEEDED -> succeeded++;
-        case FAILED -> failed++;
-        case SKIPPED -> skipped++;
-      }
-      insertRow(runId, rowNo, decision);
-      sql.execute(
-          "update platform_migration_run set processed_rows = ?, succeeded_rows = ?, failed_rows = ?,"
-              + " skipped_rows = ?, updated_at = ?::timestamptz where id = ?",
-          succeeded + failed + skipped,
-          succeeded,
-          failed,
-          skipped,
-          dbNow(),
-          runId);
-    }
+  /**
+   * 处理一行（**在自己的事务里**：判定 + 写结论 + 推进计数，一起提交）。
+   */
+  private void processRow(
+      MigrationPlan plan, String[] cells, int rowNo, Set<String> seenCodes, String bearer) {
+    var d =
+        decideRow(
+            plan.model(), plan.snapshot(), plan.header(), cells, rowNo, seenCodes, plan.mode(), bearer);
+    insertRow(plan.run().id(), rowNo, d);
+    // 🔴 计数用**数据库里的自增**（不是内存里的累加）：并发 / 重试都不会算错。
+    sql.execute(
+        "update platform_migration_run set processed_rows = processed_rows + 1,"
+            + " succeeded_rows = succeeded_rows + ?, failed_rows = failed_rows + ?,"
+            + " skipped_rows = skipped_rows + ?, updated_at = ?::timestamptz where id = ?",
+        d.outcome() == RowOutcome.SUCCEEDED ? 1 : 0,
+        d.outcome() == RowOutcome.FAILED ? 1 : 0,
+        d.outcome() == RowOutcome.SKIPPED ? 1 : 0,
+        dbNow(),
+        plan.run().id());
+  }
 
+  /** 收尾：出核对报告 + 标成功（**一个事务**）。 */
+  private void finishRun(MigrationPlan plan) {
+    var run = run(plan.run().id());
+    var counts = counts(run.id());
     var report =
         buildReport(
             run,
-            snapshot,
-            unmapped,
-            succeeded,
-            failed,
-            skipped,
-            mode == Mode.DRY_RUN ? "试运行：未写入目标库" : "正式迁移：已写入目标库");
-    var file = writeFile(runId, "REPORT", "migration-report-" + run.runNo() + ".csv", report, dbNow().plusHours(DEFAULT_EXPIRY_HOURS));
+            plan.snapshot(),
+            plan.mode() == Mode.DRY_RUN ? "试运行：未写入目标库" : "正式迁移：已写入目标库");
+    var file =
+        writeFile(
+            run.id(),
+            "REPORT",
+            "migration-report-" + run.runNo() + ".csv",
+            report,
+            dbNow().plusHours(DEFAULT_EXPIRY_HOURS));
     sql.execute(
         "update platform_migration_run set status = 'SUCCEEDED', total_rows = ?, processed_rows = ?,"
             + " succeeded_rows = ?, failed_rows = ?, skipped_rows = ?, report_file_id = ?,"
             + " finished_at = ?::timestamptz, updated_at = ?::timestamptz where id = ?",
-        succeeded + failed + skipped,
-        succeeded + failed + skipped,
-        succeeded,
-        failed,
-        skipped,
+        counts.total(),
+        counts.processed(),
+        counts.succeeded(),
+        counts.failed(),
+        counts.skipped(),
         file.id(),
         dbNow(),
         dbNow(),
-        runId);
+        run.id());
+  }
+
+  /**
+   * 任务失败（**写明原因，并出一份「到这儿为止」的核对报告**）。
+   *
+   * <p>🔴 **失败也要有报告**：执行到一半挂掉时，运营仍然需要知道
+   * 「已经迁进去多少、迁的是哪些」—— 那正是回滚的依据。
+   */
+  private void failRun(UUID runId, AccessService.Access actor, String reason) {
+    var text = reason == null || reason.isBlank() ? "执行失败" : reason;
+    try {
+      access.run(
+          actor,
+          "platform.migration.execute",
+          () -> {
+            var run = run(runId);
+            if (!run.status().equals(RunStatus.RUNNING.name())
+                && !run.status().equals(RunStatus.PENDING.name())) {
+              return null;
+            }
+            var counts = counts(runId);
+            var report = buildReport(run, readSnapshot(run), "执行中断：" + text);
+            var file =
+                writeFile(
+                    runId,
+                    "REPORT",
+                    "migration-report-" + run.runNo() + ".csv",
+                    report,
+                    dbNow().plusHours(DEFAULT_EXPIRY_HOURS));
+            sql.execute(
+                "update platform_migration_run set status = 'FAILED', error = ?, total_rows = ?,"
+                    + " processed_rows = ?, succeeded_rows = ?, failed_rows = ?, skipped_rows = ?,"
+                    + " report_file_id = ?, finished_at = ?::timestamptz, updated_at = ?::timestamptz"
+                    + " where id = ?",
+                text,
+                counts.total(),
+                counts.processed(),
+                counts.succeeded(),
+                counts.failed(),
+                counts.skipped(),
+                file.id(),
+                dbNow(),
+                dbNow(),
+                runId);
+            return null;
+          });
+    } catch (RuntimeException e) {
+      // 连失败报告都写不出来 ⇒ 至少把状态标成失败（触发器只允许 PENDING / RUNNING → FAILED）。
+      try {
+        access.run(
+            actor,
+            "platform.migration.execute",
+            () -> {
+              sql.execute(
+                  "update platform_migration_run set status = 'FAILED', error = ?,"
+                      + " finished_at = ?::timestamptz, updated_at = ?::timestamptz"
+                      + " where id = ? and status in ('PENDING','RUNNING')",
+                  text + "（连失败报告都没写出来：" + messageOf(e) + "）",
+                  dbNow(),
+                  dbNow(),
+                  runId);
+              return null;
+            });
+      } catch (RuntimeException ignored) {
+        // 数据库都写不进去了 ⇒ 只能靠恢复扫描（failStuck）兜底。
+      }
+    }
+  }
+
+  /** 四个计数（**真数**：核对报告的三个口径 + 处理过的行数）。 */
+  private record Counts(int total, int processed, int succeeded, int failed, int skipped) {}
+
+  private Counts counts(UUID runId) {
+    var row =
+        sql.fetchOne(
+            "select total_rows, processed_rows, succeeded_rows, failed_rows, skipped_rows"
+                + " from platform_migration_run where id = ?",
+            runId);
+    if (row == null) throw new IllegalStateException("迁移任务不存在");
+    return new Counts(
+        intValue(row.get("total_rows", Integer.class)),
+        intValue(row.get("processed_rows", Integer.class)),
+        intValue(row.get("succeeded_rows", Integer.class)),
+        intValue(row.get("failed_rows", Integer.class)),
+        intValue(row.get("skipped_rows", Integer.class)));
+  }
+
+  private static String messageOf(RuntimeException e) {
+    var message = e.getMessage();
+    return message == null || message.isBlank() ? e.getClass().getSimpleName() : message;
   }
 
   /**
@@ -1050,15 +1224,59 @@ public class DataMigrationService {
         now);
   }
 
-  /** 任务失败（写明原因）。 */
-  private void fail(UUID runId, String reason) {
-    sql.execute(
-        "update platform_migration_run set status = 'FAILED', error = ?, finished_at = ?::timestamptz,"
-            + " updated_at = ?::timestamptz where id = ?",
-        reason == null ? "执行失败" : reason,
-        dbNow(),
-        dbNow(),
-        runId);
+  /**
+   * 执行器自己炸了时的兜底：把任务标成失败（**只标还在跑的任务**）。
+   *
+   * <p>🔴 迁移成功 / 失败的**历史**不能被这次兜底改写 ⇒ 带 {@code status in
+   * ('PENDING','RUNNING')} 条件（数据库触发器也钉死了终态不可改）。
+   */
+  public void markRunFailed(UUID runId, AccessService.Access actor, String reason) {
+    try {
+      access.run(
+          actor,
+          "platform.migration.execute",
+          () -> {
+            sql.execute(
+                "update platform_migration_run set status = 'FAILED', error = ?,"
+                    + " finished_at = ?::timestamptz, updated_at = ?::timestamptz"
+                    + " where id = ? and status in ('PENDING','RUNNING')",
+                reason == null ? "执行失败" : reason,
+                dbNow(),
+                dbNow(),
+                runId);
+            return null;
+          });
+    } catch (RuntimeException ignored) {
+      // 数据库都写不进去了 ⇒ 只能靠恢复扫描（failStuck）兜底。
+    }
+  }
+
+  /**
+   * 回滚自己炸了时的兜底：把回滚标成失败。
+   *
+   * <p>🔴 <b>迁移本身的成败不受影响</b>：回滚是第二次动作，它失败不代表迁移失败 ——
+   * 所以这里只动 {@code rollback_status}，并把原因**追加**在 {@code error} 后面，
+   * 不覆盖迁移当时留下的原因。
+   */
+  public void markRollbackFailed(UUID runId, AccessService.Access actor, String reason) {
+    try {
+      access.run(
+          actor,
+          "platform.migration.execute",
+          () -> {
+            sql.execute(
+                "update platform_migration_run set rollback_status = 'FAILED',"
+                    + " error = case when error = '' then ? else error || ' ｜ 回滚失败：' || ? end,"
+                    + " updated_at = ?::timestamptz where id = ? and rollback_status = 'RUNNING'",
+                reason == null ? "回滚失败" : reason,
+                reason == null ? "回滚失败" : reason,
+                dbNow(),
+                runId);
+            return null;
+          });
+    } catch (RuntimeException ignored) {
+      // 数据库都写不进去了 ⇒ 只能靠恢复扫描兜底。
+    }
   }
 
   /**
@@ -1090,78 +1308,140 @@ public class DataMigrationService {
 
   // ================================================================ 回滚
 
+  /** 回滚时要删的一行。 */
+  private record RollbackTarget(
+      UUID rowId, int rowNo, String targetKind, String targetCode, UUID upstreamId, UUID parentId) {}
+
   /**
    * 执行回滚（**由执行器在独立线程上调用**）。
    *
    * <p>🔴 <b>按 upstream_id 真删</b>；删不掉的行如实记「未删除」并写明原因 ——
    * 不把「提交了删除请求」当成「删掉了」。
+   *
+   * <p>🔴 <b>每一行一个独立事务</b>：删掉一行就立刻落账 ——
+   * 中途挂掉时「删了哪些」是准确的；整批塞进一笔事务的话，
+   * 挂掉会连带把「删了哪些」的记录一起抹掉。
    */
-  public void executeRollback(UUID runId, String bearer) {
+  public void executeRollback(UUID runId, String bearer, AccessService.Access actor) {
+    var targets = access.run(actor, "platform.migration.execute", () -> claimRollback(runId));
+    if (targets.isEmpty()) return; // 已被认领 / 没有可回滚的东西
+    var deleted = 0;
+    var failures = 0;
+    // 🔴 **先删 SKU 再删 SPU**：catalog 要求「商品名下没有 SKU」才能删商品。
+    //   一次迁移任务只迁一种目标模型，所以这里按目标类型分两批处理，
+    //   顺序保证「删到最后一条时父商品已经空了」。
+    outer:
+    for (var kind : List.of("SKU", "SPU")) {
+      for (var t : targets) {
+        if (!kind.equals(t.targetKind())) continue;
+        try {
+          access.run(
+              actor,
+              "platform.migration.execute",
+              () -> {
+                deleteTarget(t, bearer);
+                return null;
+              });
+          deleted++;
+        } catch (DataMigrationCatalogPort.RowFailure e) {
+          // 🔴 **行级失败**：这一行删不掉，别的行照删。
+          failures++;
+          markRollbackRow(actor, t, "未删除：" + e.detail);
+        } catch (RuntimeException e) {
+          // 🔴 **系统性失败**（catalog 不可达）：停在这里，已删掉的算数，没删的如实留账。
+          failures++;
+          markRollbackRow(actor, t, "未删除（catalog 不可达：" + messageOf(e) + "）");
+          break outer;
+        }
+      }
+    }
+    var deletedCount = deleted;
+    var failureCount = failures;
+    access.run(
+        actor,
+        "platform.migration.execute",
+        () -> {
+          finishRollback(runId, deletedCount, failureCount);
+          return null;
+        });
+  }
+
+  /** 认领回滚（NONE → RUNNING）并取出待删的行（**在一个事务里**）。 */
+  private List<RollbackTarget> claimRollback(UUID runId) {
     var run = run(runId);
-    if (!run.rollbackStatus().equals(RollbackStatus.NONE.name())) return;
+    if (!run.rollbackStatus().equals(RollbackStatus.NONE.name())) return List.of();
     var claimed =
         sql.execute(
             "update platform_migration_run set rollback_status = 'RUNNING', updated_at = ?::timestamptz"
                 + " where id = ? and rollback_status = 'NONE'",
             dbNow(),
             runId);
-    if (claimed == 0) return;
-    var deleted = 0;
-    var failures = 0;
+    if (claimed == 0) return List.of();
+    var rows =
+        sql.fetch(
+            "select id,row_no,target_kind,target_code,upstream_id,upstream_parent_id"
+                + " from platform_migration_row where run_id = ? and outcome = 'SUCCEEDED'"
+                + " and upstream_id is not null order by row_no",
+            runId);
+    return rows.map(
+        r ->
+            new RollbackTarget(
+                r.get("id", UUID.class),
+                r.get("row_no", Integer.class),
+                r.get("target_kind", String.class),
+                r.get("target_code", String.class),
+                r.get("upstream_id", UUID.class),
+                r.get("upstream_parent_id", UUID.class)));
+  }
+
+  /** 删掉一行的目标记录，并**在同一笔事务里**把回滚结论落账。 */
+  private void deleteTarget(RollbackTarget t, String bearer) {
+    if ("SKU".equals(t.targetKind())) {
+      deleteSku(t.parentId(), t.upstreamId(), bearer);
+    } else {
+      var version = catalog.spuVersion(t.upstreamId(), bearer);
+      catalog.deleteSpu(t.upstreamId(), version, bearer);
+    }
+    sql.execute(
+        "update platform_migration_row set rollback_status = 'DELETED',"
+            + " rollback_message = '已从目标库删除', updated_at = ?::timestamptz where id = ?",
+        dbNow(),
+        t.rowId());
+  }
+
+  /** 一行没删掉：如实记「未删除」并写明原因。 */
+  private void markRollbackRow(AccessService.Access actor, RollbackTarget t, String message) {
+    var text = message.length() > 480 ? message.substring(0, 480) : message;
     try {
-      var rows =
-          sql.fetch(
-              "select id,row_no,target_kind,target_code,upstream_id,upstream_parent_id"
-                  + " from platform_migration_row where run_id = ? and outcome = 'SUCCEEDED'"
-                  + " and upstream_id is not null order by row_no",
-              runId);
-      // 🔴 **先删 SKU 再删 SPU**：catalog 要求「商品名下没有 SKU」才能删商品。
-      //   一次迁移任务只迁一种目标模型，所以这里按目标类型分两批处理，
-      //   顺序保证「删到最后一条时父商品已经空了」。
-      for (var kind : List.of("SKU", "SPU")) {
-        for (var r : rows) {
-          if (!kind.equals(r.get("target_kind", String.class))) continue;
-          var rowId = r.get("id", UUID.class);
-          var rowNo = r.get("row_no", Integer.class);
-          var targetId = r.get("upstream_id", UUID.class);
-          var parentId = r.get("upstream_parent_id", UUID.class);
-          try {
-            if (kind.equals("SKU")) {
-              deleteSku(parentId, targetId, bearer);
-            } else {
-              var version = catalog.spuVersion(targetId, bearer);
-              catalog.deleteSpu(targetId, version, bearer);
-            }
-            sql.execute(
-                "update platform_migration_row set rollback_status = 'DELETED',"
-                    + " rollback_message = '已从目标库删除', updated_at = ?::timestamptz where id = ?",
-                dbNow(),
-                rowId);
-            deleted++;
-          } catch (DataMigrationCatalogPort.RowFailure e) {
-            failures++;
+      access.run(
+          actor,
+          "platform.migration.execute",
+          () -> {
             sql.execute(
                 "update platform_migration_row set rollback_status = 'FAILED', rollback_message = ?,"
                     + " updated_at = ?::timestamptz where id = ?",
-                e.detail.length() > 480 ? e.detail.substring(0, 480) : e.detail,
+                text,
                 dbNow(),
-                rowId);
-          }
-        }
-      }
-    } catch (RuntimeException e) {
-      // 🔴 **系统性失败**（catalog 不可达）：标回滚失败，已删掉的算数，没删的如实留账。
-      failures++;
+                t.rowId());
+            return null;
+          });
+    } catch (RuntimeException ignored) {
+      // 连这一行都记不上 ⇒ 回滚报告显示「未回滚」（诚实：不知道删没删掉）。
     }
+  }
+
+  /** 回滚收尾：写回滚报告 + 标回滚结论（**一个事务**）。 */
+  private void finishRollback(UUID runId, int deleted, int failures) {
+    var status = failures == 0 ? RollbackStatus.SUCCEEDED.name() : RollbackStatus.FAILED.name();
+    writeRollbackReport(runId, deleted, failures, status);
     sql.execute(
         "update platform_migration_run set rollback_status = ?, rolled_back_rows = ?,"
             + " rolled_back_at = ?::timestamptz, updated_at = ?::timestamptz where id = ?",
-        failures == 0 ? RollbackStatus.SUCCEEDED.name() : RollbackStatus.FAILED.name(),
+        status,
         deleted,
         dbNow(),
         dbNow(),
         runId);
-    writeRollbackReport(runId, deleted, failures);
   }
 
   /** 删一个 SKU（版本冲突时重读一次父商品版本再试）。 */
@@ -1175,12 +1455,6 @@ public class DataMigrationService {
       //   只重试一次：连着两次冲突说明真有人在并发改，重试第三次也没意义。
       catalog.deleteSku(parentId, skuId, catalog.spuVersion(parentId, bearer), bearer);
     }
-  }
-
-  private UUID rowIdOf(UUID runId, int rowNo) {
-    var row =
-        sql.fetchOne("select id from platform_migration_row where run_id = ? and row_no = ?", runId, rowNo);
-    return row == null ? null : row.get("id", UUID.class);
   }
 
   // ================================================================ 文件与报告
@@ -1265,13 +1539,9 @@ public class DataMigrationService {
 
   /** 核对报告：摘要块 + 逐行明细。 */
   private byte[] buildReport(
-      DataMigrationRunRow run,
-      DataMigrationMappingSnapshot snapshot,
-      List<String> unmappedColumns,
-      int succeeded,
-      int failed,
-      int skipped,
-      String note) {
+      DataMigrationRunRow run, DataMigrationMappingSnapshot snapshot, String note) {
+    var counts = counts(run.id());
+    var unmappedColumns = unmappedColumns(run, snapshot);
     var header =
         List.of(
             "行号",
@@ -1293,10 +1563,10 @@ public class DataMigrationService {
     body.add(summary("# 外部系统", snapshot.sourceSystem()));
     body.add(summary("# 源文件", run.sourceFilename()));
     body.add(summary("# 源文件指纹", run.sourceSha256()));
-    body.add(summary("# 总行数", String.valueOf(succeeded + failed + skipped)));
-    body.add(summary("# 成功", String.valueOf(succeeded)));
-    body.add(summary("# 失败", String.valueOf(failed)));
-    body.add(summary("# 跳过", String.valueOf(skipped)));
+    body.add(summary("# 总行数", String.valueOf(counts.total())));
+    body.add(summary("# 成功", String.valueOf(counts.succeeded())));
+    body.add(summary("# 失败", String.valueOf(counts.failed())));
+    body.add(summary("# 跳过", String.valueOf(counts.skipped())));
     body.add(
         summary(
             "# 未映射的列（已忽略）",
@@ -1330,14 +1600,38 @@ public class DataMigrationService {
     return ImportExportCsv.write(List.of(), body);
   }
 
+  /**
+   * 源文件里**没被映射**的列（已忽略）。
+   *
+   * <p>🔴 从源文件现算（不缓存）：映射快照是冻结的，源文件也是冻结的，
+   * 两者的差集是确定的。读不出来时返回空列表 —— 报告里写「（无）」比报错诚实。
+   */
+  private List<String> unmappedColumns(
+      DataMigrationRunRow run, DataMigrationMappingSnapshot snapshot) {
+    try {
+      var source = sourceFile(run.id());
+      var parsed = ImportExportCsv.read(source.content());
+      if (parsed.isEmpty()) return List.of();
+      var out = new ArrayList<String>();
+      for (var h : parsed.get(0)) {
+        var name = h.trim();
+        if (name.isEmpty()) continue;
+        if (snapshot.fields().stream().noneMatch(f -> f.source().equals(name))) out.add(name);
+      }
+      return out;
+    } catch (RuntimeException e) {
+      return List.of();
+    }
+  }
+
   /** 回滚报告：删了多少、哪些没删掉、为什么。 */
-  private void writeRollbackReport(UUID runId, int deleted, int failures) {
+  private void writeRollbackReport(UUID runId, int deleted, int failures, String finalStatus) {
     var run = run(runId);
     var body = new ArrayList<String[]>();
     body.add(summary("# 迁移回滚报告", ""));
     body.add(summary("# 迁移任务", run.runNo()));
     body.add(summary("# 模式", modeLabel(run.mode())));
-    body.add(summary("# 回滚结论", rollbackLabel(run.rollbackStatus())));
+    body.add(summary("# 回滚结论", rollbackLabel(finalStatus)));
     body.add(summary("# 实际删除", String.valueOf(deleted)));
     body.add(summary("# 删除失败", String.valueOf(failures)));
     body.add(summary("# 生成时间", dbNow().toString()));
