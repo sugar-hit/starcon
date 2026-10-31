@@ -74,6 +74,12 @@
 `style(prettier)` 提交承担（它已提交），职责不重复。两种并入顺序的合并结果都已实测：
 **0 冲突 + 合并后文件仍 prettier 合规**。
 
+> **补证（收尾复核时补测）**：`prettier --check apps/web/src/lib/api-proxy.ts` 在本车道**报 warn**，
+> 但这是**基线继承的存量债、不是本车道引入的**——实测基线 `9b5a83d` 与本车道 HEAD 的
+> prettier 偏差**完全相同（各 24 处差异行 / 12 处 hunk，同一批 pattern 与 `contentType.includes`）**，
+> 本车道 +56 行**零新增偏差**；并行车道 18.1.1.3 分支上的该文件是 **prettier 合规**的，
+> 两条车道并入后文件即合规。
+
 ### 6. 🔴 修掉一处真实缺陷（前任遗留）
 
 前任写的 api-proxy 正则把 `dead-letters` 挂在字面量分支里、又让 `{uuid}` 段独立跟在后面 ⇒
@@ -136,7 +142,8 @@ V413 合法建出了 `platform_delivery_*` 四张表，而 18.1.2.1 的测试里
   ⇒ **Tests run: 58, Failures: 0, Errors: 0**
   （EventSubscription 25 + DeliveryRecordIntegration 21 + DeliveryRecordTenancy 6 + 其余 6）
 - 后端 L0：`./mvnw -q compile` ⇒ 通过
-- 前端：`pnpm vitest run apps/web/src/app/api` ⇒ **278 files / 1598 tests 全过**（含全量 allowlist 回归）
+- 前端：`pnpm vitest run apps/web/src/app/api` ⇒ **276 files / 1561 tests 全过**（含全量 allowlist 回归）
+  （集成头同命令为 275 files / 1555 tests，差额恰为本车道新增的 `delivery-allowlist.test.ts` 6 例）
 - 本车道两个前端测试文件 ⇒ **25 例全过**（模型 19 + 白名单守卫 6）
 - `pnpm typecheck` ⇒ 全绿
 - 契约：codegen 重跑后 `git diff` 为空（产物与生成器输出逐字节一致）；spec 连续两次导出逐字节相同
