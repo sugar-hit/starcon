@@ -10,9 +10,9 @@ import java.math.BigDecimal;
 import java.net.InetSocketAddress;
 import java.sql.DriverManager;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -204,9 +204,20 @@ class ConsignmentIntegrationTest {
     return tenant.equals(a) ? actorA : actorB;
   }
 
-  static OffsetDateTime now() {
-    return OffsetDateTime.now().truncatedTo(ChronoUnit.MILLIS);
-  }
+  /**
+   * 固定 UTC 瞬间 —— 全用 UTC 固定瞬间，<b>不用 {@code now()}</b>（照 {@code OutboundTimelinessIntegrationTest}
+   * 的做法）。
+   *
+   * <p>理由：{@code now()} 把「今天是哪一天」和「现在几点」一起塞进断言。本地 00:00–08:00 期间墙钟日与 UTC 日不是同一天，
+   * 任何依赖墙钟的夹具都会在那个时段变成假红 —— 这正是「跨钟域第 4 例」的教训。
+   */
+  static final OffsetDateTime T_SALE = OffsetDateTime.of(2026, 3, 2, 1, 0, 0, 0, ZoneOffset.UTC);
+
+  /** 售出事实的 UTC 日历日：结算区间的锚定日取它，区间与事实因此同属一个日历。 */
+  static final LocalDate AS_OF = LocalDate.of(2026, 3, 2);
+
+  /** 同一个事务里看到的三样东西：会话本地日、UTC 日、以及服务算出来的结算区间。 */
+  record ClockProbe(LocalDate localToday, LocalDate utcToday, SettlementWindow window) {}
 
   // ================================================================ 夹具
 
@@ -222,7 +233,7 @@ class ConsignmentIntegrationTest {
             "CNY",
             cycle,
             endTreatment,
-            LocalDate.now().minusDays(3),
+            AS_OF.minusDays(3),
             null,
             "寄售协议",
             List.of(
@@ -350,7 +361,7 @@ class ConsignmentIntegrationTest {
   void 寄售可用量视图如实给出寄售量已售剩余() {
     UUID agreement = activeAgreement("MONTHLY", "RETURN_TO_SUPPLIER");
     UUID line = lineOf(agreement, skuOne);
-    sale(agreement, line, "30", "SO-1", now());
+    sale(agreement, line, "30", "SO-1", T_SALE);
 
     var view = access.run(actorA, "warehouse.inventory.read", () -> service.stockView(agreement));
     assertThat(view.totalConsigned()).isEqualByComparingTo("140.000000");
@@ -369,9 +380,9 @@ class ConsignmentIntegrationTest {
   void 售出不得超过剩余寄售量() {
     UUID agreement = activeAgreement("MONTHLY", "RETURN_TO_SUPPLIER");
     UUID line = lineOf(agreement, skuOne);
-    sale(agreement, line, "90", "SO-1", now());
+    sale(agreement, line, "90", "SO-1", T_SALE);
     // 剩 10 件，卖 11 件：在卖供应商没给我们的货之前不能记销售 —— 那会凭空生成一笔应付。
-    assertThatThrownBy(() -> sale(agreement, line, "11", "SO-2", now()))
+    assertThatThrownBy(() -> sale(agreement, line, "11", "SO-2", T_SALE))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("超过该行剩余寄售量");
   }
@@ -380,9 +391,9 @@ class ConsignmentIntegrationTest {
   void 同一条销售事实不会重复计入() {
     UUID agreement = activeAgreement("MONTHLY", "RETURN_TO_SUPPLIER");
     UUID line = lineOf(agreement, skuOne);
-    sale(agreement, line, "10", "SO-DUP", now());
+    sale(agreement, line, "10", "SO-DUP", T_SALE);
     // 同一 saleRef 重复推送 → 409。数据库的 UNIQUE(tenant_id, agreement_line_id, sale_ref) 兜底。
-    assertThatThrownBy(() -> sale(agreement, line, "10", "SO-DUP", now()))
+    assertThatThrownBy(() -> sale(agreement, line, "10", "SO-DUP", T_SALE))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("已经记过");
     var view = access.run(actorA, "warehouse.inventory.read", () -> service.stockView(agreement));
@@ -401,7 +412,7 @@ class ConsignmentIntegrationTest {
             "CNY",
             "MONTHLY",
             "RETURN_TO_SUPPLIER",
-            LocalDate.now(),
+            AS_OF,
             null,
             null,
             List.of(
@@ -413,7 +424,7 @@ class ConsignmentIntegrationTest {
             .agreement()
             .id();
     UUID line = lineOf(draft, skuOne);
-    assertThatThrownBy(() -> sale(draft, line, "1", "SO-1", now()))
+    assertThatThrownBy(() -> sale(draft, line, "1", "SO-1", T_SALE))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("只有生效中的协议能记销售");
   }
@@ -422,7 +433,7 @@ class ConsignmentIntegrationTest {
   void 关闭协议后明细被数据库冻结() {
     UUID agreement = activeAgreement("MONTHLY", "RETURN_TO_SUPPLIER");
     UUID line = lineOf(agreement, skuOne);
-    sale(agreement, line, "5", "SO-1", now());
+    sale(agreement, line, "5", "SO-1", T_SALE);
     access.run(actorA, "warehouse.inventory.update", () -> service.close(agreement, null, user));
     // 绕过服务层直接改数量：V71 的 consignment_line_frozen 触发器必须挡住。
     assertDbRejects(
@@ -432,7 +443,7 @@ class ConsignmentIntegrationTest {
                 "update consignment_agreement_line set sold_quantity = 999 where tenant_id = ? and id = ?",
                 a,
                 line));
-    assertThatThrownBy(() -> sale(agreement, line, "1", "SO-2", now()))
+    assertThatThrownBy(() -> sale(agreement, line, "1", "SO-2", T_SALE))
         .isInstanceOf(ResponseStatusException.class);
   }
 
@@ -443,9 +454,9 @@ class ConsignmentIntegrationTest {
     UUID agreement = activeAgreement("MONTHLY", "RETURN_TO_SUPPLIER");
     UUID lineOne = lineOf(agreement, skuOne);
     UUID lineTwo = lineOf(agreement, skuTwo);
-    sale(agreement, lineOne, "30", "SO-1", now());
-    sale(agreement, lineOne, "20", "SO-2", now());
-    sale(agreement, lineTwo, "10", "SO-3", now());
+    sale(agreement, lineOne, "30", "SO-1", T_SALE);
+    sale(agreement, lineOne, "20", "SO-2", T_SALE);
+    sale(agreement, lineTwo, "10", "SO-3", T_SALE);
 
     var detail =
         access.run(
@@ -454,8 +465,7 @@ class ConsignmentIntegrationTest {
             () ->
                 service.createSettlement(
                     agreement,
-                    new ConsignmentSettlementInput(
-                        LocalDate.now().minusDays(5), LocalDate.now().plusDays(1), "10 月结算"),
+                    new ConsignmentSettlementInput(AS_OF.minusDays(5), AS_OF.plusDays(1), "3 月结算"),
                     user));
     var settlement = detail.settlement();
     assertThat(settlement.status()).isEqualTo("OPEN");
@@ -476,7 +486,7 @@ class ConsignmentIntegrationTest {
                         service.createSettlement(
                             agreement,
                             new ConsignmentSettlementInput(
-                                LocalDate.now().minusDays(5), LocalDate.now().plusDays(1), null),
+                                AS_OF.minusDays(5), AS_OF.plusDays(1), null),
                             user)))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("没有「已售出且尚未结算」");
@@ -486,9 +496,12 @@ class ConsignmentIntegrationTest {
   void 同一条销售事实不能进两张结算单() {
     UUID agreement = activeAgreement("MONTHLY", "RETURN_TO_SUPPLIER");
     UUID line = lineOf(agreement, skuOne);
-    sale(agreement, line, "10", "SO-1", now());
+    sale(agreement, line, "10", "SO-1", T_SALE);
+    // 锚定日取 AS_OF（与售出事实同一个 UTC 日历日）⇒ 区间是确定的，不依赖墙钟。
+    // 这条断言同时守住两端：区间按哪个日历算、以及区间两端按哪个钟域落边界。
     var window =
-        access.run(actorA, "warehouse.inventory.read", () -> service.settlementWindow(agreement));
+        access.run(
+            actorA, "warehouse.inventory.read", () -> service.settlementWindow(agreement, AS_OF));
     var settlement =
         access
             .run(
@@ -512,8 +525,8 @@ class ConsignmentIntegrationTest {
                 a,
                 "ST-OTHER",
                 agreement,
-                LocalDate.now().minusDays(90),
-                LocalDate.now().minusDays(60),
+                AS_OF.minusDays(90),
+                AS_OF.minusDays(60),
                 user));
     var saleId =
         access
@@ -541,7 +554,7 @@ class ConsignmentIntegrationTest {
   void 已确认结算单明细被数据库冻结() {
     UUID agreement = activeAgreement("MONTHLY", "RETURN_TO_SUPPLIER");
     UUID line = lineOf(agreement, skuOne);
-    sale(agreement, line, "10", "SO-1", now());
+    sale(agreement, line, "10", "SO-1", T_SALE);
     var settlement =
         access
             .run(
@@ -550,8 +563,7 @@ class ConsignmentIntegrationTest {
                 () ->
                     service.createSettlement(
                         agreement,
-                        new ConsignmentSettlementInput(
-                            LocalDate.now().minusDays(5), LocalDate.now().plusDays(1), null),
+                        new ConsignmentSettlementInput(AS_OF.minusDays(5), AS_OF.plusDays(1), null),
                         user))
             .settlement();
     var confirmed =
@@ -598,6 +610,43 @@ class ConsignmentIntegrationTest {
         .isEqualTo(m.periodStart().withDayOfMonth(m.periodStart().lengthOfMonth()));
   }
 
+  @Test
+  void 结算区间的今天按UTC日历而不是会话本地日算() {
+    UUID agreement = activeAgreement("MONTHLY", "RETURN_TO_SUPPLIER");
+    // 会话 TimeZone 故意设成「本地日必然 ≠ UTC 日」的固定偏移区，让断言在任何时刻都成立：
+    //   UTC 时刻 t：偏移 −12（Etc/GMT+12，POSIX 的 Etc/* 符号取反）时本地日 = UTC 日 − 1，成立条件 t < 12；
+    //   偏移 +14（Etc/GMT-14）时本地日 = UTC 日 + 1，成立条件 t ≥ 10。
+    // 两条合起来覆盖一整天 ⇒ 不管什么时候跑，会话本地日与 UTC 日都不可能相同。
+    var utcNow =
+        access.run(
+            actorA,
+            "warehouse.inventory.read",
+            () ->
+                sql.fetchOne("select (now() at time zone 'UTC')::timestamp")
+                    .get(0, LocalDateTime.class));
+    String zone = utcNow.getHour() < 12 ? "Etc/GMT+12" : "Etc/GMT-14";
+    var probe =
+        access.run(
+            actorA,
+            "warehouse.inventory.read",
+            () -> {
+              // 事务内局部生效：只影响这一个连接的这一个事务，不动库级配置。
+              sql.execute("select set_config('TimeZone', ?::text, true)", zone);
+              var localToday = sql.fetchOne("select current_date").get(0, LocalDate.class);
+              var utcToday =
+                  sql.fetchOne("select (now() at time zone 'UTC')::date").get(0, LocalDate.class);
+              return new ClockProbe(localToday, utcToday, service.settlementWindow(agreement));
+            });
+    // 前提先钉死：会话本地日与 UTC 日确实不同 —— 否则下面两条断言等于没断言。
+    assertThat(probe.localToday()).isNotEqualTo(probe.utcToday());
+    // 结算区间的「今天」按 UTC 日历算，不跟着会话时区走。
+    assertThat(probe.window().today()).isEqualTo(probe.utcToday());
+    // 区间两端也是 UTC 日历（本月 1 号 → 本月最后一天）。
+    assertThat(probe.window().periodStart()).isEqualTo(probe.utcToday().withDayOfMonth(1));
+    assertThat(probe.window().periodEnd())
+        .isEqualTo(probe.utcToday().withDayOfMonth(probe.utcToday().lengthOfMonth()));
+  }
+
   // ================================================================ 红线：未售出不产生应付
 
   @Test
@@ -621,7 +670,7 @@ class ConsignmentIntegrationTest {
                         service.createSettlement(
                             agreement,
                             new ConsignmentSettlementInput(
-                                LocalDate.now().minusDays(5), LocalDate.now().plusDays(1), null),
+                                AS_OF.minusDays(5), AS_OF.plusDays(1), null),
                             user)))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("没有「已售出且尚未结算」");
@@ -639,8 +688,8 @@ class ConsignmentIntegrationTest {
                 a,
                 "ST-FORGED",
                 agreement,
-                LocalDate.now().minusDays(5),
-                LocalDate.now().plusDays(1),
+                AS_OF.minusDays(5),
+                AS_OF.plusDays(1),
                 user));
     assertDbRejects(
         "violates foreign key constraint",
@@ -670,7 +719,7 @@ class ConsignmentIntegrationTest {
   void 未售退回不产生应付且退回后剩余减少() {
     UUID agreement = activeAgreement("MONTHLY", "RETURN_TO_SUPPLIER");
     UUID line = lineOf(agreement, skuOne);
-    sale(agreement, line, "30", "SO-1", now());
+    sale(agreement, line, "30", "SO-1", T_SALE);
     var draft =
         access
             .run(
@@ -771,7 +820,7 @@ class ConsignmentIntegrationTest {
   void 退货数量不得超过剩余() {
     UUID agreement = activeAgreement("MONTHLY", "RETURN_TO_SUPPLIER");
     UUID line = lineOf(agreement, skuOne);
-    sale(agreement, line, "95", "SO-1", now());
+    sale(agreement, line, "95", "SO-1", T_SALE);
     var draft =
         access
             .run(
@@ -804,7 +853,7 @@ class ConsignmentIntegrationTest {
   void 售出时刻写回不被时区偏移() {
     UUID agreement = activeAgreement("MONTHLY", "RETURN_TO_SUPPLIER");
     UUID line = lineOf(agreement, skuOne);
-    // 东八区的一个时刻：若用 Timestamp.valueOf(LocalDateTime) 绑定会静默偏 −28800s。
+    // 东八区的一个固定瞬间：若用 Timestamp.valueOf(LocalDateTime) 绑定会静默偏 −28800s。
     var at = OffsetDateTime.of(2026, 10, 7, 15, 30, 0, 0, ZoneOffset.ofHours(8));
     var written = sale(agreement, line, "1", "SO-TZ", at);
     // 断言写回的值，而不是断言「没报错」。
@@ -816,10 +865,40 @@ class ConsignmentIntegrationTest {
             .filter(s -> s.id().equals(written.id()))
             .findFirst()
             .orElseThrow();
+    // 往返断言：「+08:00 传进去，读回来必须还是同一个瞬时」—— 比的是瞬时，不是偏移字面量。
     assertThat(readBack.occurredAt().toInstant()).isEqualTo(at.toInstant());
     assertThat(
             readBack.occurredAt().withOffsetSameInstant(java.time.ZoneOffset.ofHours(8)).getHour())
         .isEqualTo(15);
+  }
+
+  @Test
+  void 售出时刻的偏移不参与落库只保留瞬时() {
+    UUID agreement = activeAgreement("MONTHLY", "RETURN_TO_SUPPLIER");
+    UUID line = lineOf(agreement, skuOne);
+    // 同一个瞬时用四种偏移写法传进去，读回来必须都是**同一个瞬时**：
+    // timestamptz 存的是瞬时，偏移只是写法 —— 绑定链路上把偏移丢掉就是 ±8h 级的平移，
+    // 平移后的瞬时会落到结算区间之外（跨钟域第 4 例）。
+    var instant = OffsetDateTime.of(2026, 3, 2, 1, 0, 0, 0, ZoneOffset.UTC);
+    var offsets =
+        List.of(
+            ZoneOffset.ofHours(8),
+            ZoneOffset.UTC,
+            ZoneOffset.ofHoursMinutes(5, 30),
+            ZoneOffset.ofHours(-3));
+    for (int i = 0; i < offsets.size(); i++) {
+      var at = instant.withOffsetSameInstant(offsets.get(i));
+      var written = sale(agreement, line, "1", "SO-OFF-" + i, at);
+      var readBack =
+          access
+              .run(actorA, "warehouse.inventory.read", () -> service.sales(agreement, null, 0, 10))
+              .sales()
+              .stream()
+              .filter(s -> s.id().equals(written.id()))
+              .findFirst()
+              .orElseThrow();
+      assertThat(readBack.occurredAt().toInstant()).isEqualTo(instant.toInstant());
+    }
   }
 
   // ================================================================ 租户隔离三断言
@@ -828,7 +907,7 @@ class ConsignmentIntegrationTest {
   void 断言一_两租户互不可见() {
     UUID agreement = activeAgreement("MONTHLY", "RETURN_TO_SUPPLIER");
     UUID line = lineOf(agreement, skuOne);
-    sale(agreement, line, "10", "SO-1", now());
+    sale(agreement, line, "10", "SO-1", T_SALE);
 
     // B 看不到 A 的任何东西：连详情都是 404（比返回空集更强 —— 不泄露存在性）。
     assertThatThrownBy(
@@ -874,7 +953,7 @@ class ConsignmentIntegrationTest {
                             agreement,
                             line,
                             new ConsignmentSaleInput(
-                                new BigDecimal("1"), "SO-X", null, null, now(), null),
+                                new BigDecimal("1"), "SO-X", null, null, T_SALE, null),
                             user)))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("404");
@@ -889,7 +968,7 @@ class ConsignmentIntegrationTest {
             "CNY",
             "MONTHLY",
             "RETURN_TO_SUPPLIER",
-            LocalDate.now(),
+            AS_OF,
             null,
             null,
             List.of(
@@ -916,7 +995,7 @@ class ConsignmentIntegrationTest {
   void 断言二_伪造租户头无效() throws Exception {
     UUID agreement = activeAgreement("MONTHLY", "RETURN_TO_SUPPLIER");
     UUID line = lineOf(agreement, skuOne);
-    sale(agreement, line, "10", "SO-1", now());
+    sale(agreement, line, "10", "SO-1", T_SALE);
 
     // 身份是 B，伪造 X-Tenant-Id 指向 A：B 看到的仍然是 B 的（空）。
     http.perform(
@@ -944,8 +1023,7 @@ class ConsignmentIntegrationTest {
                 () ->
                     service.createSettlement(
                         agreement,
-                        new ConsignmentSettlementInput(
-                            LocalDate.now().minusDays(5), LocalDate.now().plusDays(1), null),
+                        new ConsignmentSettlementInput(AS_OF.minusDays(5), AS_OF.plusDays(1), null),
                         user))
             .settlement();
     http.perform(
@@ -970,7 +1048,7 @@ class ConsignmentIntegrationTest {
   @Test
   void 断言三_连接池归还后不串租户() {
     UUID agreement = activeAgreement("MONTHLY", "RETURN_TO_SUPPLIER");
-    sale(agreement, lineOf(agreement, skuOne), "10", "SO-1", now());
+    sale(agreement, lineOf(agreement, skuOne), "10", "SO-1", T_SALE);
     var bInput =
         new ConsignmentAgreementInput(
             "CONSIGNMENT",
@@ -981,7 +1059,7 @@ class ConsignmentIntegrationTest {
             "CNY",
             "MONTHLY",
             "RETURN_TO_SUPPLIER",
-            LocalDate.now(),
+            AS_OF,
             null,
             null,
             List.of(
