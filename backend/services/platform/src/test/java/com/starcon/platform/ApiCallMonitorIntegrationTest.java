@@ -11,7 +11,11 @@ import com.sun.net.httpserver.HttpServer;
 import java.math.BigDecimal;
 import java.net.InetSocketAddress;
 import java.sql.DriverManager;
+import java.time.Clock;
+import java.time.Instant;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -22,6 +26,9 @@ import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -57,6 +64,32 @@ class ApiCallMonitorIntegrationTest {
 
   static final ObjectMapper json =
       new ObjectMapper().registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
+
+  /**
+   * 🔴 **固定时钟**（把配额窗口的边界从测试里拿掉）。
+   *
+   * <p>网关判限流时，窗口起点是「现在」按窗口类型**截断**出来的（MINUTE ⇒ 截断到分钟）。
+   * 若这两次调用**跨过一次分钟边界**，它们就落进两个不同的窗口：上一个窗口的用量看不见了 ⇒
+   * 配额判定被清零 ⇒ 本该 429 的那次反而放过去 ⇒ 测试随机变红。
+   * 典型概率 = 两次调用的间隔 ÷ 60 秒（间隔 50ms ⇒ 约 0.08%/次；跑满一批 CI 就是迟早的事）。
+   *
+   * <p>⚠️ 这**不是**「机器时钟不准」，是「窗口是离散的」—— 截断必然有边界，与准不准无关。
+   * 所以修法是**固定时钟**（把边界从时间里拿掉），不是 sleep、不是重试、不是放宽断言。
+   *
+   * <p>用 {@code @Primary} 覆盖 {@code ApiCallMonitorClockConfiguration} 那一个 Bean
+   * （与 trade 的 {@code ShipmentWritebackClockConfiguration} 同一套纪律）；
+   * 其余 platform 服务**不**注入时钟，本车道不碰它们的写入面。
+   */
+  static final Instant FIXED_NOW = Instant.parse("2026-01-01T00:00:00Z");
+
+  @TestConfiguration
+  static class FixedClockConfiguration {
+    @Bean
+    @Primary
+    Clock fixedApiCallMonitorClock() {
+      return Clock.fixed(FIXED_NOW, ZoneOffset.UTC);
+    }
+  }
 
   static {
     pg.start();
@@ -344,11 +377,38 @@ class ApiCallMonitorIntegrationTest {
     var rows =
         inTenant(() -> sql.fetch("select * from platform_api_call_log order by called_at"));
     assertThat(rows).hasSize(2);
-    assertThat(rows.get(1).get("outcome", String.class)).isEqualTo("RATE_LIMITED");
-    assertThat(rows.get(1).get("status_code", Integer.class)).isEqualTo(429);
-    assertThat(rows.get(1).get("rate_limited", Boolean.class)).isTrue();
-    assertThat(rows.get(1).get("error_code", String.class)).isEqualTo("QUOTA_EXCEEDED");
-    assertThat(rows.get(0).get("rate_limited", Boolean.class)).isFalse();
+
+    // 🔴 断言**按事实列**而不是按行序：called_at 是 DB 时钟，两行可能落在同一微秒，
+    //   「取第 0 行 / 第 1 行」在那一刻就是任意的 ⇒ 换来的红是假红。
+    var limited =
+        rows.stream()
+            .filter(r -> Boolean.TRUE.equals(r.get("rate_limited", Boolean.class)))
+            .toList();
+    assertThat(limited).as("只有被配额挡下的那次记限流命中").hasSize(1);
+    assertThat(limited.get(0).get("outcome", String.class)).isEqualTo("RATE_LIMITED");
+    assertThat(limited.get(0).get("status_code", Integer.class)).isEqualTo(429);
+    assertThat(limited.get(0).get("error_code", String.class)).isEqualTo("QUOTA_EXCEEDED");
+
+    var succeeded =
+        rows.stream().filter(r -> "SUCCESS".equals(r.get("outcome", String.class))).toList();
+    assertThat(succeeded).hasSize(1);
+    assertThat(succeeded.get(0).get("rate_limited", Boolean.class)).isFalse();
+
+    // 🔴 断言**写回的值**：用量行落在被钉死的那一分钟里，且只记了 1 次
+    //   （被限流挡下的那次**不消耗服务**，不进用量表 —— 限流命中次数只看埋点）。
+    var usage =
+        inTenant(
+            () ->
+                sql.fetchOne(
+                    "select window_type, window_started_at, used_count"
+                        + " from platform_app_quota_usage where app_id = ? and window_type = 'MINUTE'",
+                    f.appId()));
+    assertThat(usage.get("window_started_at", OffsetDateTime.class).toInstant())
+        .as("配额窗口起点必须是被钉死的那一分钟")
+        .isEqualTo(FIXED_NOW.atOffset(ZoneOffset.UTC).truncatedTo(ChronoUnit.MINUTES).toInstant());
+    assertThat(usage.get("used_count", BigDecimal.class))
+        .as("只有通过配额判定的那次调用计入用量")
+        .isEqualByComparingTo(BigDecimal.ONE);
   }
 
   @Test
@@ -614,6 +674,8 @@ class ApiCallMonitorIntegrationTest {
         .andExpect(status().isOk());
 
     gateway("/open/v1/ping", f.apiKey(), f.secret()).andExpect(status().isOk());
+    // 🔴 这 10 次必须全部落在**同一个**配额窗口里 —— 固定时钟保证了这一点
+    //   （用真实时钟时，跨过一次分钟边界用量就被清零，第 2 次会放过去 ⇒ 随机红）。
     for (int i = 0; i < (int) ApiCallMonitorService.RATE_LIMIT_WARNING; i++) {
       gateway("/open/v1/ping", f.apiKey(), f.secret()).andExpect(status().isTooManyRequests());
     }
@@ -640,9 +702,13 @@ class ApiCallMonitorIntegrationTest {
     assertThat(alerts.items()).hasSize(1);
     var alert = alerts.items().get(0);
     assertThat(alert.suggestedQuotaWindow()).isEqualTo("MINUTE");
-    assertThat(alert.suggestedQuotaLimit()).isNotNull();
+    // 🔴 断言**算出来的真实数字**：上限 1 + 本窗口被挡下 10 次 = 11（不是「非空」而已）。
+    assertThat(alert.suggestedQuotaLimit()).isEqualByComparingTo(new BigDecimal("11"));
     assertThat(alert.quotaAdjustTarget())
         .isEqualTo("/platform/apps/" + f.appId() + "/quotas");
+    assertThat(alert.metricValue())
+        .as("告警指标 = 本窗口被挡下的次数")
+        .isEqualByComparingTo(BigDecimal.valueOf(ApiCallMonitorService.RATE_LIMIT_WARNING));
   }
 
   @Test

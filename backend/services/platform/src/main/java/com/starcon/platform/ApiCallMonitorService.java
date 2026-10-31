@@ -5,8 +5,8 @@ import com.starcon.platform.ApiCallMonitorModels.*;
 import com.starcon.tenancy.TenantTransactions;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.Clock;
 import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -73,11 +73,14 @@ public class ApiCallMonitorService {
   private final DSLContext sql;
   private final TenantTransactions tenants;
   private final ApiSpecSource specs;
+  private final Clock clock;
 
-  public ApiCallMonitorService(DSLContext sql, TenantTransactions tenants, ApiSpecSource specs) {
+  public ApiCallMonitorService(
+      DSLContext sql, TenantTransactions tenants, ApiSpecSource specs, Clock clock) {
     this.sql = sql;
     this.tenants = tenants;
     this.specs = specs;
+    this.clock = clock;
   }
 
   // ================================================================ 能力声明
@@ -730,7 +733,7 @@ public class ApiCallMonitorService {
       sql.execute(
           "update platform_api_call_alert set status = 'ACKNOWLEDGED', acknowledged_at = ?::timestamptz,"
               + " acknowledged_by = ? where id = ? and status = 'OPEN'",
-          OffsetDateTime.now(ZoneOffset.UTC),
+          OffsetDateTime.now(clock),
           actor.userId(),
           alertId);
     }
@@ -744,7 +747,7 @@ public class ApiCallMonitorService {
       sql.execute(
           "update platform_api_call_alert set status = 'RESOLVED', resolved_at = ?::timestamptz"
               + " where id = ? and status <> 'RESOLVED'",
-          OffsetDateTime.now(ZoneOffset.UTC),
+          OffsetDateTime.now(clock),
           alertId);
     }
     return requireAlert(alertId);
@@ -968,7 +971,7 @@ public class ApiCallMonitorService {
         suggestedQuotaWindow,
         suggestedQuotaLimit,
         quotaAdjustTarget,
-        OffsetDateTime.now(ZoneOffset.UTC));
+        OffsetDateTime.now(clock));
     return !existed;
   }
 
@@ -989,7 +992,7 @@ public class ApiCallMonitorService {
       sql.execute(
           "update platform_api_call_alert set status = 'RESOLVED', resolved_at = ?::timestamptz"
               + " where id = ? and status <> 'RESOLVED'",
-          OffsetDateTime.now(ZoneOffset.UTC),
+          OffsetDateTime.now(clock),
           row.get("id", UUID.class));
       resolved++;
     }
@@ -1004,11 +1007,14 @@ public class ApiCallMonitorService {
    * 限流告警的配额建议：找出**用得最满**的那个已配置窗口，建议把上限提到「上限 + 本窗口被挡下的次数」。
    *
    * <p>🔴 建议值来自**真实数字**：被挡下 N 次说明这批流量本来能过去，把上限提到 上限+N 就够这批流量过。
+   *
+   * <p>🔴 窗口起点按**注入的时钟**算 —— 必须与网关判限流时**同一个**时钟、同一个窗口，
+   * 否则读到的是另一个窗口的用量，「用得最满的窗口」就挑错了。
    */
   private record QuotaSuggestion(String window, BigDecimal limit) {}
 
   private QuotaSuggestion quotaSuggestion(UUID appId, long blocked) {
-    var at = OffsetDateTime.now(ZoneOffset.UTC);
+    var at = OffsetDateTime.now(clock);
     var rows =
         sql.fetch("select window_type, limit_count, enabled from platform_app_quota where app_id = ?", appId);
     String bestWindow = "";
@@ -1046,7 +1052,13 @@ public class ApiCallMonitorService {
 
   // ================================================================ 内部
 
-  /** 判定窗口（起止都用 DB 时钟，与埋点里的 called_at 同一把尺子）。 */
+  /**
+   * 判定窗口（起止都用 **DB 时钟**，与埋点里的 called_at 同一把尺子）。
+   *
+   * <p>🔴 这里**刻意不用**注入的时钟：埋点的 {@code called_at} 取自 DB 的
+   * {@code clock_timestamp()}，统计窗口必须与它同源，否则窗口切分会偏。
+   * 注入的时钟只管**配额窗口**（网关按它截断，见 {@link ApiCallMonitorClockConfiguration}）。
+   */
   private record Window(OffsetDateTime start, OffsetDateTime end, int seconds) {}
 
   private Window window(int windowSeconds) {

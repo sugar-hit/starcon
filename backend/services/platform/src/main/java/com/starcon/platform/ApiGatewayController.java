@@ -4,8 +4,6 @@ import com.starcon.platform.ApiCallMonitorModels.ApiGatewayError;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.servlet.http.HttpServletRequest;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.Function;
@@ -99,8 +97,9 @@ public class ApiGatewayController {
         apiKey,
         secret,
         requestId,
-        session ->
-            gateway.quotaView(session.identity().appId(), OffsetDateTime.now(ZoneOffset.UTC)));
+        // 🔴 配额视图按**网关自己的时钟**算窗口起点（与判限流时同一个）——
+        //    否则对接方看到的「还剩几次」与实际被挡的那个窗口不是同一个。
+        session -> gateway.quotaView(session.identity().appId()));
   }
 
   /** 授权范围自检：外部调用方被授了哪些资源 × 操作。 */
@@ -161,7 +160,7 @@ public class ApiGatewayController {
             Map.of(
                 "message", message,
                 "endpointCode", session.endpointCode(),
-                "receivedAt", OffsetDateTime.now(ZoneOffset.UTC).toString()));
+                "receivedAt", gateway.now().toString()));
   }
 
   /** 调用明细自诊：对接方自己看自己的最近调用。 */

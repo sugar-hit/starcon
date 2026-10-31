@@ -5,8 +5,8 @@ import com.starcon.platform.AppCredentialModels.QuotaWindow;
 import com.starcon.tenancy.TenantTransactions;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.Clock;
 import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -52,10 +52,12 @@ public class ApiGatewayService {
 
   private final DSLContext sql;
   private final TenantTransactions tenants;
+  private final Clock clock;
 
-  public ApiGatewayService(DSLContext sql, TenantTransactions tenants) {
+  public ApiGatewayService(DSLContext sql, TenantTransactions tenants, Clock clock) {
     this.sql = sql;
     this.tenants = tenants;
+    this.clock = clock;
   }
 
   // ================================================================ 模型
@@ -260,7 +262,9 @@ public class ApiGatewayService {
     }
 
     // 配额：按 18.1.1.1 的配置逐窗口判，超了就是 429。
-    var now = OffsetDateTime.now(ZoneOffset.UTC);
+    // 🔴 「现在」取注入的时钟（生产 = 系统时钟）：配额窗口起点是按它截断出来的，
+    //    截断有边界 —— 边界落在两次调用之间会让用量看起来被清零（见 ApiCallMonitorClockConfiguration）。
+    var now = OffsetDateTime.now(clock);
     var quota = quotaDecision(identity.appId(), now);
     if (quota.exceeded()) {
       record(
@@ -442,7 +446,7 @@ public class ApiGatewayService {
   private void incrementUsage(UUID appId, OffsetDateTime at) {
     var configured =
         sql.fetch("select window_type, enabled from platform_app_quota where app_id = ?", appId);
-    var now = OffsetDateTime.now(ZoneOffset.UTC);
+    var now = OffsetDateTime.now(clock);
     for (var window : AppCredentialService.WINDOWS) {
       var row =
           configured.stream()
@@ -471,8 +475,18 @@ public class ApiGatewayService {
   private void touchCredential(UUID credentialId) {
     sql.execute(
         "update platform_app_credential set last_used_at = ?::timestamptz where id = ?",
-        OffsetDateTime.now(ZoneOffset.UTC),
+        OffsetDateTime.now(clock),
         credentialId);
+  }
+
+  /**
+   * 网关的「现在」（与配额窗口、凭证最后使用时刻**同一个**时钟）。
+   *
+   * <p>🔴 配额视图必须按**同一个**「现在」算窗口起点，否则视图显示的用量与网关实际
+   * 判限流的那个窗口不是同一个 —— 对接方看到「还剩 10 次」而实际已经被挡下。
+   */
+  public OffsetDateTime now() {
+    return OffsetDateTime.now(clock);
   }
 
   // ================================================================ 埋点落库
@@ -526,8 +540,11 @@ public class ApiGatewayService {
    *
    * <p>🔴 真读 18.1.1.1 的 {@code platform_app_quota}（配置）与 {@code platform_app_quota_usage}
    * （用量）—— 没配过的窗口显示「未配置 = 不限」，**不是**「限 0 次」。
+   *
+   * <p>🔴 窗口起点按**注入的时钟**算（与判限流时同一个）—— 视图与执行必须是同一个窗口。
    */
-  public Object quotaView(UUID appId, OffsetDateTime at) {
+  public Object quotaView(UUID appId) {
+    var at = OffsetDateTime.now(clock);
     var configured =
         sql.fetch("select window_type, limit_count, enabled from platform_app_quota where app_id = ?", appId);
     var windows = new ArrayList<ApiCallMonitorModels.ApiGatewayQuotaWindow>();
