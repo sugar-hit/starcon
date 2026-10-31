@@ -236,7 +236,7 @@ class AdKeywordTenancyIntegrationTest {
                 "PLATFORM", "src-" + key, key, "",
                 List.of(
                     new AdKeywordMetricInput(
-                        keywordId, LocalDate.of(2026, 10, 1), (long) impressions, 10L, 1,
+                        keywordId, fixtureDay(1), (long) impressions, 10L, 1,
                         new java.math.BigDecimal("10.0000"), new java.math.BigDecimal("50.0000"),
                         "USD", at(1, 3))))));
   }
@@ -250,13 +250,38 @@ class AdKeywordTenancyIntegrationTest {
                 "PLATFORM", "src-" + key, key, "",
                 List.of(
                     new AdSearchTermInput(
-                        keywordId, LocalDate.of(2026, 10, 1), "waste term " + key, "CAMP-1",
+                        keywordId, fixtureDay(1), "waste term " + key, "CAMP-1",
                         900L, 30L, 0, new java.math.BigDecimal("90.0000"),
                         java.math.BigDecimal.ZERO, "USD", at(1, 3))))));
   }
 
+  // ==================================================================
+  // 🔴 夹具时间轴：相对当下（UTC），不写死日历日
+  // ==================================================================
+  //
+  // 服务默认取数窗口是「今天往前 29 天」（见 {@code AdKeywordService#dayRange} 与
+  // {@code KEYWORD_SELECT} 里的 {@code mt.bucket_date >= ? and <= ?}），
+  // 种子一旦写成固定日历日，墙钟翻页就会把它滑出窗口 ⇒ 指标读回 0 ⇒ 假红。
+  // ⇒ 夹具日同时也是指标落库的 bucket_date（两者必须同一日）。
+
+  /** 🔴 夹具锚点：所有夹具日期都相对「今天（UTC）」推。 */
+  static final LocalDate TODAY = LocalDate.now(ZoneOffset.UTC);
+
+  /** 夹具用到的「第几天」总数：day=1 最早 … day=FIXTURE_DAYS 最近（今天-1 天）。 */
+  static final int FIXTURE_DAYS = 1;
+
+  /** 夹具日：day=1 最早 … day=FIXTURE_DAYS 最近（今天-1 天）。 */
+  static LocalDate fixtureDay(int day) {
+    return TODAY.minusDays(FIXTURE_DAYS - day + 1);
+  }
+
+  /**
+   * 🔴 夹具时刻（UTC）：小时/分钟/秒与原先写死的值逐字一致，只把**日历日**换成相对当下。
+   *
+   * <p>day 越大时间越晚（day=1 最早 … day=FIXTURE_DAYS 最近）⇒ 排序语义不变。
+   */
   static OffsetDateTime at(int day, int hour) {
-    return OffsetDateTime.of(2026, 10, day, hour, 0, 0, 0, ZoneOffset.UTC);
+    return fixtureDay(day).atStartOfDay().atOffset(ZoneOffset.UTC).plusHours(hour);
   }
 
   // ==================================================================
