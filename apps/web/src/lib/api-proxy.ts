@@ -13896,6 +13896,51 @@ const services: readonly {
     pattern:
       /^api\-catalog\/(?:capabilities|overview|domains|interfaces(?:\/detail)?|sandbox\/(?:targets|runs))$/,
   },
+  {
+    // 18.1.1.3 调用监控（platform 服务，卷 18「集成开放与智能自动化」L3 18.1.1 API 管理下的第四格）。
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有任何一条里并分支 ——
+    //   既有条目**一字未改、也不重排**。
+    //
+    // ---- 插入锚点选在**数组末尾**（最后一个 services[] 元素之后、收尾的 `];` 之前）----
+    //   同批其它车道把新元素插在数组最开头；本车道落在末尾，并入时 git 能干净求并。
+    //
+    // ---- 首 token「call-monitor」的零命中核对结论 ----
+    //   resolve() 先按 prefix 过滤再测正则。既有 platform/ 前缀下已放行的首 token 有
+    //   `apps`（18.1.1.1）、`text`（18.4.2.1）、`finance-software`（18.2.1.1）、
+    //   `webhooks`（18.1.2.1）、`api-catalog`（18.1.1.2）——
+    //   与 `call-monitor` **全不相同** ⇒ 天然互斥，既有那几支吃不到本模块的路径，
+    //   本模块也吃不到它们的路径。既有那几支里的任何一个字符都不必动。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   platform/call-monitor/capabilities            能力声明
+    //   platform/call-monitor/options                 筛选项 + 阈值口径 + 网关端点清单
+    //   platform/call-monitor/overview                概览（QPS / 错误率 / 限流命中 / 慢调用）
+    //   platform/call-monitor/trend                   趋势（按分钟或按小时分桶）
+    //   platform/call-monitor/apps                    按应用维度分析
+    //   platform/call-monitor/endpoints               按接口维度分析
+    //   platform/call-monitor/slow-calls              慢调用 Top N
+    //   platform/call-monitor/calls                   调用明细（GET，真分页真筛选）
+    //   platform/call-monitor/alerts                  告警列表（GET，真分页真筛选）
+    //   platform/call-monitor/alerts/scan             扫描并开告警（POST）
+    //   platform/call-monitor/alerts/{uuid}/acknowledge  确认告警（POST）
+    //   platform/call-monitor/alerts/{uuid}/resolve      闭环告警（POST）
+    //
+    // ⚠️ **刻意不放行**：
+    //   platform/call-monitor                    —— 裸路径：后端**没有**汇总端点。
+    //   platform/call-monitor/alerts/{uuid}     —— 后端没有「按 id 取单条告警」的端点。
+    //   platform/call-monitor/alerts/export     —— 后端没有导出端点。
+    //   platform/call-monitor/calls/export      —— 同上。
+    //   platform/call-monitor/unknown            —— 多一层仍然 404。
+    //
+    // ⚠️ **网关入口（/open/v1/**）刻意不放行**：那是给**外部系统**调的路径，
+    //   租户来自 API Key 反查而不是浏览器会话。把它放进浏览器白名单等于让任意浏览器
+    //   带着别人的 Key 来打 —— 见 ApiGatewayController 的类注释。
+    prefix: 'platform/',
+    env: 'PLATFORM_URL',
+    fallback: 'http://127.0.0.1:8089',
+    pattern:
+      /^call\-monitor\/(?:capabilities|options|overview|trend|apps|endpoints|slow-calls|calls|alerts|alerts\/scan|alerts\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/(?:acknowledge|resolve))$/,
+  },
 ];
 
 function resolve(path: string) {
