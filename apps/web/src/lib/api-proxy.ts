@@ -13997,6 +13997,77 @@ const services: readonly {
     pattern:
       /^call\-monitor\/(?:capabilities|options|overview|trend|apps|endpoints|slow-calls|calls|alerts|alerts\/scan|alerts\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/(?:acknowledge|resolve))$/,
   },
+  {
+    // 18.2.2.1 支付与资金（platform 服务，卷 18「集成开放与智能自动化」L3 18.2.2 下的第一格）。
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有任何一条里并分支 ——
+    //   既有条目**一字未改、也不重排**。
+    //
+    // ---- 插入锚点选在**数组末尾**（最后一个 services[] 元素之后、收尾的 `];` 之前）----
+    //   同批其它车道把新元素插在数组最开头；本车道落在末尾，并入时 git 能干净求并。
+    //
+    // ---- 首 token「payment-funds」的零命中核对结论（实测，非目测）----
+    //   发车前用脚本（`.tmp/api-proxy-zero-hit.mjs`，不入库）**用 TypeScript 编译器解析**
+    //   本文件里 `services` 变量的**真实数组字面量**（不是文本计数），
+    //   逐条取出 `prefix` 与 `pattern`，按 `resolve()` 的**同构口径**实测
+    //   （`path.startsWith(prefix)` 收窄服务 → 再测 `pattern.test(path.slice(prefix.length))`），
+    //   对本模块的 22 条路径逐条判定：**22/22 零命中** —— 既有 **272** 条元素里
+    //   没有任何一条会吃掉本模块的路径；且别的 prefix 下的正则根本吃不到
+    //   （`resolve()` 先按 prefix 闸门筛）。
+    //   反向也核对了 17 条别的车道已交付的形状（apps / text / finance-software / webhooks /
+    //     deliveries / call-monitor / api-catalog）：本条新正则对它们**零命中**
+    //     ⇒ 本条不会遮蔽别人已交付的路由。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**，后端 PaymentFundsController 里就这 22 条）：
+    //   payment-funds/capabilities              能力声明
+    //   payment-funds/overview                   概览（几个数）
+    //   payment-funds/providers                  服务商配置列表（GET）/ 登记配置（POST）
+    //   payment-funds/providers/availability     逐服务商通道可用性
+    //   payment-funds/providers/{uuid}/disable   停用服务商配置（**不删**）
+    //   payment-funds/payments                   **付款执行**（POST，幂等键必填）
+    //   payment-funds/receipts                   **收款登记**（POST）
+    //   payment-funds/operations                 操作台账列表（GET 真筛选真关键词）
+    //   payment-funds/operations/{uuid}          单条操作（GET）
+    //   payment-funds/operations/{uuid}/attempts 尝试留痕（GET：**查证兜底**的证据）
+    //   payment-funds/operations/{uuid}/retry    重发（POST，**只在查证确认「服务商侧没有」之后才允许**）
+    //   payment-funds/balances                   余额观测列表（GET）
+    //   payment-funds/balances/query             余额查询（POST，服务商直查；未接入 ⇒ 409）
+    //   payment-funds/balances/import            余额导入（POST，账单路径）
+    //   payment-funds/fees                       手续费明细列表（GET）
+    //   payment-funds/fees/sync                  手续费明细同步（POST，服务商直拉；未接入 ⇒ 409）
+    //   payment-funds/fees/import                手续费明细导入（POST，账单路径）
+    //   payment-funds/rates                      汇率观测列表（GET）
+    //   payment-funds/rates/query                汇率查询（POST，真读上游 5.2.2.1 汇率事实）
+    //   payment-funds/flows                      资金流水台账（GET，只追加）
+    //   payment-funds/upstream/fund-accounts     上游 12.7 资金账户（GET，**只读**）
+    //   payment-funds/upstream/payment-orders    上游 12.2 收付款（GET，**只读**）
+    //
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   platform/payment-funds                        —— 裸路径：后端**没有**汇总端点。
+    //   platform/payment-funds/providers/{uuid}        —— 没有「按 id 取单条服务商配置」的端点。
+    //   platform/payment-funds/providers/{uuid}/delete —— 服务商配置**不删**（历史流水要能复现），只有停用。
+    //   platform/payment-funds/payments/{uuid}         —— 没有「按 id 取单条付款」的端点。
+    //   platform/payment-funds/operations/{uuid}/schema —— 操作记录**只读**，没有「改结构」的端点。
+    //   platform/payment-funds/operations/not-a-uuid    —— 非 UUID 段不应被 uuid 分支吃掉。
+    //   platform/payment-funds/balances/{uuid}         —— 余额观测**只读**（append-only 台账）。
+    //   platform/payment-funds/fees/{uuid}             —— 同上。
+    //   platform/payment-funds/rates/{uuid}            —— 同上。
+    //   platform/payment-funds/flows/{uuid}            —— 同上。
+    //   platform/payment-funds/upstream                —— 裸路径：上游两组是**分开的**两个端点。
+    //   platform/payment-funds/secret-keys             —— 🔴 **绝不放行**：库里没有密钥明文，
+    //                                                        也不提供任何「取密钥」的端点。
+    //   platform/payment-funds/not-a-shape             —— 多一层仍然 404。
+    //
+    // id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //   （不是 `[0-9a-f-]+`）：后者会把 `disable` / `retry` 这种非 UUID 形状也当成 id 放行。
+    // 字面量子路径（capabilities / overview / providers / payments / receipts / operations /
+    //   balances / fees / rates / flows / upstream）排在 {uuid} 段**之前**判别 ——
+    //   alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    prefix: 'platform/',
+    env: 'PLATFORM_URL',
+    fallback: 'http://127.0.0.1:8089',
+    pattern:
+      /^payment\-funds\/(?:capabilities|overview|providers(?:\/availability|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/disable)?|payments|receipts|operations(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:attempts|retry))?)?|balances(?:\/(?:query|import))?|fees(?:\/(?:sync|import))?|rates(?:\/query)?|flows|upstream\/(?:fund-accounts|payment-orders))$/,
+  },
 ];
 
 function resolve(path: string) {

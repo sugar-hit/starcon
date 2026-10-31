@@ -1245,6 +1245,62 @@
         },
         "type": "object"
       },
+      "BalanceImportInput": {
+        "properties": {
+          "availableAmount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "balanceAmount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "currency": {
+            "nullable": true,
+            "type": "string"
+          },
+          "note": {
+            "nullable": true,
+            "type": "string"
+          },
+          "observedAt": {
+            "nullable": true,
+            "type": "string"
+          },
+          "providerId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "sourceRef": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "BalanceQueryInput": {
+        "properties": {
+          "currency": {
+            "nullable": true,
+            "type": "string"
+          },
+          "idempotencyKey": {
+            "nullable": true,
+            "type": "string"
+          },
+          "note": {
+            "nullable": true,
+            "type": "string"
+          },
+          "providerId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "DeliveryRecordAttemptRow": {
         "properties": {
           "attemptNo": {
@@ -2424,6 +2480,48 @@
         },
         "type": "object"
       },
+      "FeeImportInput": {
+        "properties": {
+          "amount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "chargedAmount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "currency": {
+            "nullable": true,
+            "type": "string"
+          },
+          "feeType": {
+            "nullable": true,
+            "type": "string"
+          },
+          "occurredAt": {
+            "nullable": true,
+            "type": "string"
+          },
+          "providerId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "providerReference": {
+            "nullable": true,
+            "type": "string"
+          },
+          "providerSerialNo": {
+            "nullable": true,
+            "type": "string"
+          },
+          "summary": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "FinanceSoftwareAccountInput": {
         "properties": {
           "bookCode": {
@@ -3249,6 +3347,82 @@
           "voucherCount": {
             "format": "int64",
             "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FundFlowRow": {
+        "properties": {
+          "amount": {
+            "type": "number"
+          },
+          "baseAmount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "baseCurrency": {
+            "type": "string"
+          },
+          "counterpartyName": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "direction": {
+            "type": "string"
+          },
+          "exchangeRate": {
+            "nullable": true,
+            "type": "number"
+          },
+          "flowNo": {
+            "type": "string"
+          },
+          "flowType": {
+            "type": "string"
+          },
+          "flowTypeLabel": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "occurredAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "operationId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "providerCode": {
+            "type": "string"
+          },
+          "providerId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "providerName": {
+            "type": "string"
+          },
+          "providerSerialNo": {
+            "type": "string"
+          },
+          "reference": {
+            "type": "string"
+          },
+          "remark": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
           }
         },
         "type": "object"
@@ -4450,6 +4624,706 @@
         },
         "type": "object"
       },
+      "PaymentAttemptRow": {
+        "properties": {
+          "attemptKind": {
+            "type": "string"
+          },
+          "attemptKindLabel": {
+            "type": "string"
+          },
+          "attemptNo": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "failureReason": {
+            "type": "string"
+          },
+          "finishedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "idempotencyKey": {
+            "type": "string"
+          },
+          "operationId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "outcome": {
+            "type": "string"
+          },
+          "outcomeLabel": {
+            "type": "string"
+          },
+          "providerSerialNo": {
+            "type": "string"
+          },
+          "requestSummary": {
+            "type": "string"
+          },
+          "responseSummary": {
+            "type": "string"
+          },
+          "startedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PaymentBalanceRow": {
+        "properties": {
+          "availableAmount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "balanceAmount": {
+            "type": "number"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "observedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "providerCode": {
+            "type": "string"
+          },
+          "providerId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "providerName": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "sourceRef": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PaymentExecutionInput": {
+        "properties": {
+          "amount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "baseAmount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "baseCurrency": {
+            "nullable": true,
+            "type": "string"
+          },
+          "counterpartyName": {
+            "nullable": true,
+            "type": "string"
+          },
+          "counterpartyRef": {
+            "nullable": true,
+            "type": "string"
+          },
+          "counterpartyType": {
+            "nullable": true,
+            "type": "string"
+          },
+          "currency": {
+            "nullable": true,
+            "type": "string"
+          },
+          "exchangeRate": {
+            "nullable": true,
+            "type": "number"
+          },
+          "idempotencyKey": {
+            "nullable": true,
+            "type": "string"
+          },
+          "note": {
+            "nullable": true,
+            "type": "string"
+          },
+          "providerId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "reference": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PaymentFeeRow": {
+        "properties": {
+          "amount": {
+            "type": "number"
+          },
+          "chargedAmount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "feeType": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "occurredAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "operationId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "providerCode": {
+            "type": "string"
+          },
+          "providerId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "providerName": {
+            "type": "string"
+          },
+          "providerReference": {
+            "type": "string"
+          },
+          "providerSerialNo": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PaymentFundsCapabilities": {
+        "properties": {
+          "capabilities": {
+            "items": {
+              "$ref": "#/components/schemas/PaymentFundsCapability"
+            },
+            "type": "array"
+          },
+          "gaps": {
+            "items": {
+              "$ref": "#/components/schemas/PaymentFundsGap"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "PaymentFundsCapability": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "evidence": {
+            "type": "string"
+          },
+          "moduleId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PaymentFundsGap": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "moduleId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "relation": {
+            "type": "string"
+          },
+          "service": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PaymentFundsOverview": {
+        "properties": {
+          "activeProviders": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "balances": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "fees": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "fundFlows": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "generatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "operations": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "providers": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "rates": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "unknownOperations": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "PaymentOperationRow": {
+        "properties": {
+          "amount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "attemptCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "baseAmount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "baseCurrency": {
+            "type": "string"
+          },
+          "counterpartyName": {
+            "type": "string"
+          },
+          "counterpartyRef": {
+            "type": "string"
+          },
+          "counterpartyType": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdBy": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "direction": {
+            "type": "string"
+          },
+          "exchangeRate": {
+            "nullable": true,
+            "type": "number"
+          },
+          "failureClass": {
+            "type": "string"
+          },
+          "failureReason": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "idempotencyKey": {
+            "type": "string"
+          },
+          "operationType": {
+            "type": "string"
+          },
+          "operationTypeLabel": {
+            "type": "string"
+          },
+          "providerCode": {
+            "type": "string"
+          },
+          "providerId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "providerLabel": {
+            "type": "string"
+          },
+          "providerNotice": {
+            "type": "string"
+          },
+          "providerNotified": {
+            "type": "boolean"
+          },
+          "providerSerialNo": {
+            "type": "string"
+          },
+          "reference": {
+            "type": "string"
+          },
+          "replayed": {
+            "type": "boolean"
+          },
+          "requestDigest": {
+            "type": "string"
+          },
+          "retryAllowed": {
+            "type": "boolean"
+          },
+          "source": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PaymentProviderAvailability": {
+        "properties": {
+          "connected": {
+            "type": "boolean"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "providerCode": {
+            "type": "string"
+          },
+          "providerLabel": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PaymentProviderInput": {
+        "properties": {
+          "baseUrl": {
+            "nullable": true,
+            "type": "string"
+          },
+          "credentialHint": {
+            "nullable": true,
+            "type": "string"
+          },
+          "credentialRef": {
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "maxAttempts": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "name": {
+            "nullable": true,
+            "type": "string"
+          },
+          "providerCode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "remark": {
+            "nullable": true,
+            "type": "string"
+          },
+          "settlementCurrency": {
+            "nullable": true,
+            "type": "string"
+          },
+          "status": {
+            "nullable": true,
+            "type": "string"
+          },
+          "timeoutSeconds": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "PaymentProviderRow": {
+        "properties": {
+          "baseUrl": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdBy": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "credentialConfigured": {
+            "type": "boolean"
+          },
+          "credentialHint": {
+            "type": "string"
+          },
+          "credentialRef": {
+            "type": "string"
+          },
+          "fundFlowCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "maxAttempts": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "operationCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "providerCode": {
+            "type": "string"
+          },
+          "providerLabel": {
+            "type": "string"
+          },
+          "remark": {
+            "type": "string"
+          },
+          "settlementCurrency": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "timeoutSeconds": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PaymentRateRow": {
+        "properties": {
+          "baseCurrency": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "effectiveDate": {
+            "format": "date",
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "inverted": {
+            "type": "boolean"
+          },
+          "observedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "providerCode": {
+            "type": "string"
+          },
+          "providerId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "providerName": {
+            "type": "string"
+          },
+          "quoteCurrency": {
+            "type": "string"
+          },
+          "rate": {
+            "type": "number"
+          },
+          "source": {
+            "type": "string"
+          },
+          "sourceRef": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "RateQueryInput": {
+        "properties": {
+          "asOf": {
+            "nullable": true,
+            "type": "string"
+          },
+          "baseCurrency": {
+            "nullable": true,
+            "type": "string"
+          },
+          "idempotencyKey": {
+            "nullable": true,
+            "type": "string"
+          },
+          "providerId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "quoteCurrency": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ReceiptRegistrationInput": {
+        "properties": {
+          "amount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "baseAmount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "baseCurrency": {
+            "nullable": true,
+            "type": "string"
+          },
+          "counterpartyName": {
+            "nullable": true,
+            "type": "string"
+          },
+          "counterpartyRef": {
+            "nullable": true,
+            "type": "string"
+          },
+          "counterpartyType": {
+            "nullable": true,
+            "type": "string"
+          },
+          "currency": {
+            "nullable": true,
+            "type": "string"
+          },
+          "exchangeRate": {
+            "nullable": true,
+            "type": "number"
+          },
+          "idempotencyKey": {
+            "nullable": true,
+            "type": "string"
+          },
+          "note": {
+            "nullable": true,
+            "type": "string"
+          },
+          "occurredAt": {
+            "nullable": true,
+            "type": "string"
+          },
+          "providerId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "providerSerialNo": {
+            "nullable": true,
+            "type": "string"
+          },
+          "reference": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "TextBannedTermInput": {
         "properties": {
           "category": {
@@ -5313,6 +6187,85 @@
             "type": "string"
           },
           "suggestion": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "UpstreamFundAccountRow": {
+        "properties": {
+          "accountName": {
+            "type": "string"
+          },
+          "accountNo": {
+            "type": "string"
+          },
+          "accountType": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "currentBalance": {
+            "nullable": true,
+            "type": "number"
+          },
+          "currentBalanceAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "UpstreamPaymentOrderRow": {
+        "properties": {
+          "amount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "baseAmount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "baseCurrency": {
+            "type": "string"
+          },
+          "counterpartyName": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "exchangeRate": {
+            "nullable": true,
+            "type": "number"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "orderNo": {
+            "type": "string"
+          },
+          "paymentAccountName": {
+            "nullable": true,
+            "type": "string"
+          },
+          "paymentMethod": {
+            "type": "string"
+          },
+          "status": {
             "type": "string"
           }
         },
@@ -10054,6 +11007,1050 @@
         },
         "tags": [
           "import-export-controller"
+        ]
+      }
+    },
+    "/platform/payment-funds/balances": {
+      "get": {
+        "operationId": "get_platform_payment_funds_balances",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "providerId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "currency",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/PaymentBalanceRow"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "payment-funds-controller"
+        ]
+      }
+    },
+    "/platform/payment-funds/balances/import": {
+      "post": {
+        "operationId": "post_platform_payment_funds_balances_import",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BalanceImportInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentBalanceRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "payment-funds-controller"
+        ]
+      }
+    },
+    "/platform/payment-funds/balances/query": {
+      "post": {
+        "operationId": "post_platform_payment_funds_balances_query",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BalanceQueryInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentOperationRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "payment-funds-controller"
+        ]
+      }
+    },
+    "/platform/payment-funds/capabilities": {
+      "get": {
+        "operationId": "get_platform_payment_funds_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentFundsCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "payment-funds-controller"
+        ]
+      }
+    },
+    "/platform/payment-funds/fees": {
+      "get": {
+        "operationId": "get_platform_payment_funds_fees",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "providerId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "currency",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/PaymentFeeRow"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "payment-funds-controller"
+        ]
+      }
+    },
+    "/platform/payment-funds/fees/import": {
+      "post": {
+        "operationId": "post_platform_payment_funds_fees_import",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FeeImportInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentFeeRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "payment-funds-controller"
+        ]
+      }
+    },
+    "/platform/payment-funds/fees/sync": {
+      "post": {
+        "operationId": "post_platform_payment_funds_fees_sync",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "providerId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "currency",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "idempotencyKey",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentOperationRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "payment-funds-controller"
+        ]
+      }
+    },
+    "/platform/payment-funds/flows": {
+      "get": {
+        "operationId": "get_platform_payment_funds_flows",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "providerId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "flowType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "currency",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/FundFlowRow"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "payment-funds-controller"
+        ]
+      }
+    },
+    "/platform/payment-funds/operations": {
+      "get": {
+        "operationId": "get_platform_payment_funds_operations",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "providerCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "operationType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/PaymentOperationRow"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "payment-funds-controller"
+        ]
+      }
+    },
+    "/platform/payment-funds/operations/{id}": {
+      "get": {
+        "operationId": "get_platform_payment_funds_operations_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentOperationRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "payment-funds-controller"
+        ]
+      }
+    },
+    "/platform/payment-funds/operations/{id}/attempts": {
+      "get": {
+        "operationId": "get_platform_payment_funds_operations_id_attempts",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/PaymentAttemptRow"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "payment-funds-controller"
+        ]
+      }
+    },
+    "/platform/payment-funds/operations/{id}/retry": {
+      "post": {
+        "operationId": "post_platform_payment_funds_operations_id_retry",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentOperationRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "payment-funds-controller"
+        ]
+      }
+    },
+    "/platform/payment-funds/overview": {
+      "get": {
+        "operationId": "get_platform_payment_funds_overview",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentFundsOverview"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "payment-funds-controller"
+        ]
+      }
+    },
+    "/platform/payment-funds/payments": {
+      "post": {
+        "operationId": "post_platform_payment_funds_payments",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PaymentExecutionInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentOperationRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "payment-funds-controller"
+        ]
+      }
+    },
+    "/platform/payment-funds/providers": {
+      "get": {
+        "operationId": "get_platform_payment_funds_providers",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "providerCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/PaymentProviderRow"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "payment-funds-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_platform_payment_funds_providers",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PaymentProviderInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentProviderRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "payment-funds-controller"
+        ]
+      }
+    },
+    "/platform/payment-funds/providers/availability": {
+      "get": {
+        "operationId": "get_platform_payment_funds_providers_availability",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/PaymentProviderAvailability"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "payment-funds-controller"
+        ]
+      }
+    },
+    "/platform/payment-funds/providers/{id}/disable": {
+      "post": {
+        "operationId": "post_platform_payment_funds_providers_id_disable",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentProviderRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "payment-funds-controller"
+        ]
+      }
+    },
+    "/platform/payment-funds/rates": {
+      "get": {
+        "operationId": "get_platform_payment_funds_rates",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "providerId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "baseCurrency",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quoteCurrency",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/PaymentRateRow"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "payment-funds-controller"
+        ]
+      }
+    },
+    "/platform/payment-funds/rates/query": {
+      "post": {
+        "operationId": "post_platform_payment_funds_rates_query",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RateQueryInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentOperationRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "payment-funds-controller"
+        ]
+      }
+    },
+    "/platform/payment-funds/receipts": {
+      "post": {
+        "operationId": "post_platform_payment_funds_receipts",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReceiptRegistrationInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentOperationRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "payment-funds-controller"
+        ]
+      }
+    },
+    "/platform/payment-funds/upstream/fund-accounts": {
+      "get": {
+        "operationId": "get_platform_payment_funds_upstream_fund_accounts",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "currency",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/UpstreamFundAccountRow"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "payment-funds-controller"
+        ]
+      }
+    },
+    "/platform/payment-funds/upstream/payment-orders": {
+      "get": {
+        "operationId": "get_platform_payment_funds_upstream_payment_orders",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "currency",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/UpstreamPaymentOrderRow"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "payment-funds-controller"
         ]
       }
     },
