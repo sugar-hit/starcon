@@ -77,6 +77,62 @@ const services: readonly {
       /^webhooks\/(?:capabilities|overview|event-types(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/status)?|subscriptions(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:revoke|events(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|signing-secrets(?:\/(?:rotate|revoke))?|signature-preview|deliver))?)?|policies(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|audit-events)$/,
   },
   {
+    // 18.1.2.2 投递记录（platform 服务，卷 18「集成开放与智能自动化」L3 18.1.2 下的第二格）。
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往 18.1.2.1 那条 webhooks 正则里并分支 ——
+    //   18.1.2.1 那条**一字未改、也不重排**。
+    //
+    // ---- 插入锚点选在**18.1.2.1 那条之后**（数组靠前那一段）----
+    //   同批其它车道的插入点是「数组末尾」（收尾的 `];` 之前）；
+    //   本车道落在开头这一段（紧邻 18.1.2.1），与数组末尾相距 13000 行以上 ⇒ 并入时 git 能干净求并。
+    //
+    // ---- 首 token「deliveries」的零命中核对结论（实测，非目测）----
+    //   发车前用脚本（`.tmp/api-proxy-zero-hit.mjs`，不入库）**用 TypeScript 编译器解析**
+    //   本文件里 `services` 变量的**真实数组字面量**（不是文本计数），
+    //   逐条取出 `prefix` 与 `pattern`，按 `resolve()` 的**同构口径**实测
+    //   （`path.startsWith(prefix)` 收窄服务 → 再测 `pattern.test(path.slice(prefix.length))`），
+    //   对本模块的 11 条路径逐条判定：**11/11 零命中** —— 既有 270 条元素里没有任何一条
+    //   会吃掉本模块的路径；且别的 prefix 下的正则根本吃不到（`resolve()` 先按 prefix 闸门筛）。
+    //
+    //   ⚠️ 与 18.1.2.1 的 `webhooks` 首 token **天然互斥**：两个模块是两页、两组权限码、
+    //   两个端点命名空间（18.1.2.1 管订阅配置侧，本条管投递执行与明细侧）。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   deliveries                                   投递记录列表（GET 真分页真筛选）
+    //   deliveries/capabilities                      能力声明
+    //   deliveries/overview                          概览（几个数）
+    //   deliveries/publish                           发布一个事件并**真的**投递（POST）
+    //   deliveries/retry-due                         到期重试扫描（POST，**外部调度**触发的一次入口）
+    //   deliveries/replay-tasks                      重放任务列表（GET 真分页）
+    //   deliveries/dead-letters                      死信列表（GET 真分页真筛选）
+    //   deliveries/dead-letters/{uuid}/replay        死信重放（POST）
+    //   deliveries/{uuid}                            投递详情（GET）
+    //   deliveries/{uuid}/attempts                   投递日志（GET：每一次尝试一行）
+    //   deliveries/{uuid}/replay                     手动重投（POST）
+    //
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   platform/deliveries/{uuid}/schema            —— 投递明细**只读**，没有「改结构」的端点。
+    //   platform/deliveries/{uuid}/not-a-shape        —— 多一段仍然 404。
+    //   platform/deliveries/not-a-uuid               —— 非 UUID 段不应被 uuid 分支吃掉。
+    //   platform/deliveries/dead-letters/{uuid}      —— 后端**没有**「按 id 取单条死信」的端点。
+    //
+    // id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //   （不是 `[0-9a-f-]+`）：后者会把 `replay` / `publish` 这种非 UUID 形状也当成 id 放行。
+    // 字面量子路径（capabilities / overview / publish / retry-due / replay-tasks / dead-letters）
+    //   排在 {uuid} 段**之前**判别 —— alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    //
+    // 🔴 **{uuid} 段与 dead-letters 分支必须互斥**（本次修正的真实缺陷）：
+    //   原写法把 dead-letters 挂在字面量分支里、再让 {uuid} 段独立跟在后面，
+    //   于是 `deliveries/dead-letters/{uuid}`（后端**没有**这个 GET 端点）被放行了 ——
+    //   那正是上面「刻意不放行」清单里明确写着要拒的形状。
+    //   ⇒ 现在改成**三个平级分支**：字面量子路径 / dead-letters（含其 {uuid}/replay）/
+    //     裸 {uuid}（含 attempts / replay）。三者互斥，dead-letters 后面不再跟 {uuid}。
+    prefix: 'platform/',
+    env: 'PLATFORM_URL',
+    fallback: 'http://127.0.0.1:8089',
+    pattern:
+      /^deliveries(?:\/(?:capabilities|overview|publish|retry-due|replay-tasks)|\/dead-letters(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/replay)?|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:attempts|replay))?)?$/,
+  },
+  {
     // 13.1.1.1 经营总览（reporting 服务，卷 13「利润与经营分析」L3 13.1.1 下的第一格）。
     // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 finance / trade 那几条巨型
     //   alternation 里并分支 —— 既有条目**一字未改、也不重排**。
