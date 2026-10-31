@@ -1,6 +1,663 @@
 {
   "components": {
     "schemas": {
+      "ApiCallMonitorAlertPage": {
+        "properties": {
+          "acknowledgedCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ApiCallMonitorAlertRow"
+            },
+            "type": "array"
+          },
+          "openCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "resolvedCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ApiCallMonitorAlertRow": {
+        "properties": {
+          "acknowledgedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "acknowledgedBy": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "alertType": {
+            "type": "string"
+          },
+          "alertTypeLabel": {
+            "type": "string"
+          },
+          "appCode": {
+            "type": "string"
+          },
+          "appId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "endpointCode": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "metricValue": {
+            "type": "number"
+          },
+          "quotaAdjustTarget": {
+            "type": "string"
+          },
+          "resolvedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "severity": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "suggestedAction": {
+            "type": "string"
+          },
+          "suggestedQuotaLimit": {
+            "type": "number"
+          },
+          "suggestedQuotaWindow": {
+            "type": "string"
+          },
+          "thresholdValue": {
+            "type": "number"
+          },
+          "windowEndedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "windowSeconds": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "windowStartedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ApiCallMonitorAppRow": {
+        "properties": {
+          "appCode": {
+            "type": "string"
+          },
+          "appId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "appName": {
+            "type": "string"
+          },
+          "avgDurationMs": {
+            "type": "number"
+          },
+          "errorCalls": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "errorRate": {
+            "type": "number"
+          },
+          "lastCalledAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "p95DurationMs": {
+            "type": "number"
+          },
+          "qps": {
+            "type": "number"
+          },
+          "rateLimitedCalls": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "slowCalls": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalCalls": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ApiCallMonitorCallPage": {
+        "properties": {
+          "errorCalls": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ApiCallMonitorCallRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "rateLimitedCalls": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ApiCallMonitorCallRow": {
+        "properties": {
+          "appCode": {
+            "type": "string"
+          },
+          "appId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "calledAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "clientIp": {
+            "type": "string"
+          },
+          "durationMs": {
+            "type": "number"
+          },
+          "endpointCode": {
+            "type": "string"
+          },
+          "errorCode": {
+            "type": "string"
+          },
+          "httpMethod": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "outcome": {
+            "type": "string"
+          },
+          "outcomeLabel": {
+            "type": "string"
+          },
+          "rateLimited": {
+            "type": "boolean"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "requestPath": {
+            "type": "string"
+          },
+          "statusCode": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ApiCallMonitorCapabilities": {
+        "properties": {
+          "capabilities": {
+            "items": {
+              "$ref": "#/components/schemas/ApiCallMonitorCapability"
+            },
+            "type": "array"
+          },
+          "downstreamGaps": {
+            "items": {
+              "$ref": "#/components/schemas/ApiCallMonitorGap"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "ApiCallMonitorCapability": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "basis": {
+            "type": "string"
+          },
+          "impact": {
+            "type": "string"
+          },
+          "module": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ApiCallMonitorEndpoint": {
+        "properties": {
+          "actionCode": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "method": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "resourceCode": {
+            "type": "string"
+          },
+          "specAvailable": {
+            "type": "boolean"
+          },
+          "specBasis": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ApiCallMonitorEndpointRow": {
+        "properties": {
+          "avgDurationMs": {
+            "type": "number"
+          },
+          "endpointCode": {
+            "type": "string"
+          },
+          "errorCalls": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "errorRate": {
+            "type": "number"
+          },
+          "httpMethod": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "lastCalledAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "p95DurationMs": {
+            "type": "number"
+          },
+          "qps": {
+            "type": "number"
+          },
+          "rateLimitedCalls": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "requestPath": {
+            "type": "string"
+          },
+          "slowCalls": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalCalls": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ApiCallMonitorGap": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "group": {
+            "type": "string"
+          },
+          "module": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "ownerService": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ApiCallMonitorOption": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ApiCallMonitorOptions": {
+        "properties": {
+          "endpoints": {
+            "items": {
+              "$ref": "#/components/schemas/ApiCallMonitorEndpoint"
+            },
+            "type": "array"
+          },
+          "thresholds": {
+            "items": {
+              "$ref": "#/components/schemas/ApiCallMonitorThreshold"
+            },
+            "type": "array"
+          },
+          "windows": {
+            "items": {
+              "$ref": "#/components/schemas/ApiCallMonitorOption"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "ApiCallMonitorOverview": {
+        "properties": {
+          "appCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "avgDurationMs": {
+            "type": "number"
+          },
+          "endpointCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "errorCalls": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "errorRate": {
+            "type": "number"
+          },
+          "maxDurationMs": {
+            "type": "number"
+          },
+          "openAlertCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "p95DurationMs": {
+            "type": "number"
+          },
+          "qps": {
+            "type": "number"
+          },
+          "rateLimitedCalls": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "slowCalls": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalCalls": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "windowEndedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "windowSeconds": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "windowStartedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ApiCallMonitorScanInput": {
+        "properties": {
+          "windowSeconds": {
+            "description": "判定窗口秒数，不传用平台默认 900 秒",
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ApiCallMonitorScanResult": {
+        "properties": {
+          "alertsRaised": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "alertsRefreshed": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "alertsResolved": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "appsScanned": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "endpointsScanned": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "windowEndedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "windowSeconds": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "windowStartedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ApiCallMonitorSlowCall": {
+        "properties": {
+          "appCode": {
+            "type": "string"
+          },
+          "appId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "calledAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "clientIp": {
+            "type": "string"
+          },
+          "durationMs": {
+            "type": "number"
+          },
+          "endpointCode": {
+            "type": "string"
+          },
+          "httpMethod": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "outcome": {
+            "type": "string"
+          },
+          "requestPath": {
+            "type": "string"
+          },
+          "statusCode": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ApiCallMonitorThreshold": {
+        "properties": {
+          "label": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "rule": {
+            "type": "string"
+          },
+          "unit": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ApiCallMonitorTrend": {
+        "properties": {
+          "bucket": {
+            "type": "string"
+          },
+          "points": {
+            "items": {
+              "$ref": "#/components/schemas/ApiCallMonitorTrendPoint"
+            },
+            "type": "array"
+          },
+          "windowEndedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "windowSeconds": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "windowStartedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ApiCallMonitorTrendPoint": {
+        "properties": {
+          "avgDurationMs": {
+            "type": "number"
+          },
+          "bucket": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "calls": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "errorRate": {
+            "type": "number"
+          },
+          "errors": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "p95DurationMs": {
+            "type": "number"
+          },
+          "qps": {
+            "type": "number"
+          },
+          "rateLimitedCalls": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
       "ApiCatalogAppQuota": {
         "properties": {
           "appCode": {
@@ -572,6 +1229,16 @@
             "type": "string"
           },
           "unavailableReason": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ApiGatewayEchoInput": {
+        "properties": {
+          "message": {
+            "description": "要回显的内容；不传则回显空串",
             "nullable": true,
             "type": "string"
           }
@@ -3630,6 +4297,597 @@
   },
   "openapi": "3.0.1",
   "paths": {
+    "/open/v1/**": {
+      "delete": {
+        "description": "一律 404。网关只放行 ApiGatewayEndpoints 里逐条列出的端点，不做路径转发。",
+        "operationId": "delete_open_v1",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Request-Id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "网关放行清单之外的路径",
+        "tags": [
+          "api-gateway-controller"
+        ]
+      },
+      "get": {
+        "description": "一律 404。网关只放行 ApiGatewayEndpoints 里逐条列出的端点，不做路径转发。",
+        "operationId": "get_open_v1",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Request-Id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "网关放行清单之外的路径",
+        "tags": [
+          "api-gateway-controller"
+        ]
+      },
+      "head": {
+        "description": "一律 404。网关只放行 ApiGatewayEndpoints 里逐条列出的端点，不做路径转发。",
+        "operationId": "head_open_v1",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Request-Id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "网关放行清单之外的路径",
+        "tags": [
+          "api-gateway-controller"
+        ]
+      },
+      "options": {
+        "description": "一律 404。网关只放行 ApiGatewayEndpoints 里逐条列出的端点，不做路径转发。",
+        "operationId": "options_open_v1",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Request-Id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "网关放行清单之外的路径",
+        "tags": [
+          "api-gateway-controller"
+        ]
+      },
+      "patch": {
+        "description": "一律 404。网关只放行 ApiGatewayEndpoints 里逐条列出的端点，不做路径转发。",
+        "operationId": "patch_open_v1",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Request-Id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "网关放行清单之外的路径",
+        "tags": [
+          "api-gateway-controller"
+        ]
+      },
+      "post": {
+        "description": "一律 404。网关只放行 ApiGatewayEndpoints 里逐条列出的端点，不做路径转发。",
+        "operationId": "post_open_v1",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Request-Id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "网关放行清单之外的路径",
+        "tags": [
+          "api-gateway-controller"
+        ]
+      },
+      "put": {
+        "description": "一律 404。网关只放行 ApiGatewayEndpoints 里逐条列出的端点，不做路径转发。",
+        "operationId": "put_open_v1",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Request-Id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "网关放行清单之外的路径",
+        "tags": [
+          "api-gateway-controller"
+        ]
+      }
+    },
+    "/open/v1/calls": {
+      "get": {
+        "description": "回显本应用最近的调用记录（状态码、结论码、错误码、耗时、请求号）。对接方自己就能回答「刚才那次为什么被拒」。只看得到本应用的调用。",
+        "operationId": "get_open_v1_calls",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Api-Key",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Api-Secret",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Request-Id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "回显条数（默认 50，最多 200）",
+            "in": "header",
+            "name": "X-Call-Limit",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "调用明细自诊",
+        "tags": [
+          "api-gateway-controller"
+        ]
+      }
+    },
+    "/open/v1/calls/{requestId}": {
+      "get": {
+        "description": "按请求号回显那一次调用的明细。请求号在每次响应里都会回给调用方。",
+        "operationId": "get_open_v1_calls_requestId",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Api-Key",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Api-Secret",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Request-Id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "requestId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "单次调用自诊",
+        "tags": [
+          "api-gateway-controller"
+        ]
+      }
+    },
+    "/open/v1/credential": {
+      "get": {
+        "description": "回显当前凭证的版本、状态、签发时刻与最后使用时刻。没有明文，库里也没有。",
+        "operationId": "get_open_v1_credential",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Api-Key",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Api-Secret",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Request-Id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "凭证状态自检",
+        "tags": [
+          "api-gateway-controller"
+        ]
+      }
+    },
+    "/open/v1/echo": {
+      "post": {
+        "description": "回显请求体，用来确认写路径同样被计量、限流与审计。",
+        "operationId": "post_open_v1_echo",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Api-Key",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Api-Secret",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Request-Id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApiGatewayEchoInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "写路径回声自检",
+        "tags": [
+          "api-gateway-controller"
+        ]
+      }
+    },
+    "/open/v1/ping": {
+      "get": {
+        "description": "回显应用身份与服务端时刻。用来确认「网络通了、凭证对了、租户认得」。",
+        "operationId": "get_open_v1_ping",
+        "parameters": [
+          {
+            "description": "应用 API Key（18.1.1.1 签发的那一版）",
+            "in": "header",
+            "name": "X-Api-Key",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "description": "应用 API Secret",
+            "in": "header",
+            "name": "X-Api-Secret",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "description": "调用方自带的请求号；不传由网关生成，回调时原样带回",
+            "in": "header",
+            "name": "X-Request-Id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "连通性自检",
+        "tags": [
+          "api-gateway-controller"
+        ]
+      }
+    },
+    "/open/v1/quota": {
+      "get": {
+        "description": "回显本应用各窗口的配额上限、已用量与剩余额度。没配过的窗口显示「未配置 = 不限」，不是「限 0 次」。",
+        "operationId": "get_open_v1_quota",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Api-Key",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Api-Secret",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Request-Id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "配额状态自检",
+        "tags": [
+          "api-gateway-controller"
+        ]
+      }
+    },
+    "/open/v1/scopes": {
+      "get": {
+        "description": "回显本应用被授予的资源与操作。",
+        "operationId": "get_open_v1_scopes",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Api-Key",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Api-Secret",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Request-Id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "授权范围自检",
+        "tags": [
+          "api-gateway-controller"
+        ]
+      }
+    },
     "/platform/api-catalog/capabilities": {
       "get": {
         "operationId": "get_platform_api_catalog_capabilities",
@@ -5017,6 +6275,617 @@
         },
         "tags": [
           "app-credential-controller"
+        ]
+      }
+    },
+    "/platform/call-monitor/alerts": {
+      "get": {
+        "description": "按状态 / 类型 / 应用筛选；三种状态各自的条数一并给出。",
+        "operationId": "get_platform_call_monitor_alerts",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "alertType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "appId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiCallMonitorAlertPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "告警列表",
+        "tags": [
+          "api-call-monitor-controller"
+        ]
+      }
+    },
+    "/platform/call-monitor/alerts/scan": {
+      "post": {
+        "description": "按平台固定口径判定三类异常（错误率 / 慢调用 p95 / 限流命中）；未闭环期间同一异常只一行，重复扫描只刷新指标；指标回落后自动闭环。",
+        "operationId": "post_platform_call_monitor_alerts_scan",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApiCallMonitorScanInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiCallMonitorScanResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "扫描并开告警",
+        "tags": [
+          "api-call-monitor-controller"
+        ]
+      }
+    },
+    "/platform/call-monitor/alerts/{alertId}/acknowledge": {
+      "post": {
+        "description": "把告警标为「已确认」。已确认的再确认一次不会报错。",
+        "operationId": "post_platform_call_monitor_alerts_alertId_acknowledge",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "alertId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiCallMonitorAlertRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "确认告警",
+        "tags": [
+          "api-call-monitor-controller"
+        ]
+      }
+    },
+    "/platform/call-monitor/alerts/{alertId}/resolve": {
+      "post": {
+        "description": "把告警标为「已闭环」。已闭环的再闭环一次不会报错。",
+        "operationId": "post_platform_call_monitor_alerts_alertId_resolve",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "alertId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiCallMonitorAlertRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "闭环告警",
+        "tags": [
+          "api-call-monitor-controller"
+        ]
+      }
+    },
+    "/platform/call-monitor/apps": {
+      "get": {
+        "description": "每个应用在窗口内的调用量、错误率、限流命中与耗时。",
+        "operationId": "get_platform_call_monitor_apps",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "windowSeconds",
+            "required": false,
+            "schema": {
+              "default": 900,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ApiCallMonitorAppRow"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "按应用维度分析",
+        "tags": [
+          "api-call-monitor-controller"
+        ]
+      }
+    },
+    "/platform/call-monitor/calls": {
+      "get": {
+        "description": "按应用 / 接口 / 结论码 / 是否限流命中筛选；分页是真的（总数与错误数、限流命中数一并给出）。",
+        "operationId": "get_platform_call_monitor_calls",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "windowSeconds",
+            "required": false,
+            "schema": {
+              "default": 900,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "appId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "endpointCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "outcome",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "rateLimited",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiCallMonitorCallPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "调用明细",
+        "tags": [
+          "api-call-monitor-controller"
+        ]
+      }
+    },
+    "/platform/call-monitor/capabilities": {
+      "get": {
+        "description": "逐维说清「有没有、依据是什么、缺了归谁」。「工作台告警推送」如实答不可用 —— 卷 01 的工作台告警服务至今未交付。",
+        "operationId": "get_platform_call_monitor_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiCallMonitorCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "能力声明",
+        "tags": [
+          "api-call-monitor-controller"
+        ]
+      }
+    },
+    "/platform/call-monitor/endpoints": {
+      "get": {
+        "description": "每个端点在窗口内的调用量、错误率、限流命中与耗时；名称取自活着的契约。",
+        "operationId": "get_platform_call_monitor_endpoints",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "windowSeconds",
+            "required": false,
+            "schema": {
+              "default": 900,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ApiCallMonitorEndpointRow"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "按接口维度分析",
+        "tags": [
+          "api-call-monitor-controller"
+        ]
+      }
+    },
+    "/platform/call-monitor/options": {
+      "get": {
+        "description": "告警阈值是平台固定口径（不替用户预置任何一行配置），但必须显式给出来 —— 运营看到告警要知道是按什么判的。端点的名称与说明取自 platform 服务活着的 OpenAPI 契约。",
+        "operationId": "get_platform_call_monitor_options",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiCallMonitorOptions"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "筛选项、阈值口径与网关端点清单",
+        "tags": [
+          "api-call-monitor-controller"
+        ]
+      }
+    },
+    "/platform/call-monitor/overview": {
+      "get": {
+        "description": "窗口内的调用总数、错误数、限流命中数、慢调用数与未闭环告警数。",
+        "operationId": "get_platform_call_monitor_overview",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "description": "统计窗口秒数（300 / 900 / 3600 / 86400；其它值按 900 处理）",
+            "in": "query",
+            "name": "windowSeconds",
+            "required": false,
+            "schema": {
+              "default": 900,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiCallMonitorOverview"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "概览",
+        "tags": [
+          "api-call-monitor-controller"
+        ]
+      }
+    },
+    "/platform/call-monitor/slow-calls": {
+      "get": {
+        "description": "耗时超过慢调用线的调用，按耗时倒序。",
+        "operationId": "get_platform_call_monitor_slow_calls",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "windowSeconds",
+            "required": false,
+            "schema": {
+              "default": 900,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ApiCallMonitorSlowCall"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "慢调用 Top N",
+        "tags": [
+          "api-call-monitor-controller"
+        ]
+      }
+    },
+    "/platform/call-monitor/trend": {
+      "get": {
+        "description": "按分钟或按小时分桶的调用量、错误率、限流命中与耗时。",
+        "operationId": "get_platform_call_monitor_trend",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "windowSeconds",
+            "required": false,
+            "schema": {
+              "default": 900,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "分桶粒度：MINUTE 或 HOUR",
+            "in": "query",
+            "name": "bucket",
+            "required": false,
+            "schema": {
+              "default": "MINUTE",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiCallMonitorTrend"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "趋势",
+        "tags": [
+          "api-call-monitor-controller"
         ]
       }
     },
