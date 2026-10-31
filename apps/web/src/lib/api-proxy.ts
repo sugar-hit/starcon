@@ -133,6 +133,60 @@ const services: readonly {
       /^deliveries(?:\/(?:capabilities|overview|publish|retry-due|replay-tasks)|\/dead-letters(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/replay)?|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:attempts|replay))?)?$/,
   },
   {
+    // 18.1.3.1 导入导出任务（platform 服务，卷 18「集成开放与智能自动化」L3 18.1.3 下的第一格）。
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往 18.1.2.1 / 18.1.2.2 那两条正则里并分支 ——
+    //   既有条目**一字未改、也不重排**。
+    //
+    // ---- 插入锚点选在**18.1.2.2 投递记录那条之后**（数组靠前那一段，与同为 platform 的两条相邻）----
+    //   同批其它车道的插入点是「数组末尾」（收尾的 `];` 之前）；
+    //   本车道落在开头这一段，与数组末尾相距 13000 行以上 ⇒ 并入时 git 能干净求并。
+    //
+    // ---- 首 token「io」的零命中核对结论（实测，非目测）----
+    //   发车前用脚本（`.tmp/api-proxy-zero-hit.mjs`，不入库）**用 TypeScript 编译器解析**
+    //   本文件里 `services` 变量的**真实数组字面量**（不是文本计数），
+    //   逐条取出 `prefix` 与 `pattern`，按 `resolve()` 的**同构口径**实测
+    //   （`path.startsWith(prefix)` 收窄服务 → 再测 `pattern.test(path.slice(prefix.length))`），
+    //   对本模块的 13 条路径逐条判定：**13/13 零命中** —— 既有 **272 条**元素里没有任何一条
+    //   会吃掉本模块的路径（别的 prefix 下的正则根本吃不到，因为 `resolve()` 先按 prefix 闸门筛）。
+    //   反向也核对了本条新正则对别人已交付形状（webhooks / deliveries / apps / text /
+    //   finance-software / call-monitor / reporting / catalog / trade）的**零命中**
+    //   ⇒ 本条不会遮蔽别人已交付的路由。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   io/capabilities                        能力声明
+    //   io/overview                            概览（几个数）
+    //   io/domains                             数据域目录（两个方向各一行）
+    //   io/tasks                               任务列表（GET 真分页真筛选）/ 发起导出（POST）
+    //   io/tasks/import                        发起导入（POST，**已受理**，异步执行）
+    //   io/tasks/{uuid}                        任务详情（GET，**进度跟踪**）
+    //   io/tasks/{uuid}/file                   结果下载（GET，**带下载有效期**，过期 410）
+    //   io/tasks/{uuid}/error-report           失败行报告 CSV（GET）
+    //   io/tasks/{uuid}/errors                 失败行明细（GET，**逐行逐列**）
+    //   io/tasks/{uuid}/cancel                 作废任务（POST）
+    //   io/templates                           模板列表（GET 真分页）
+    //   io/templates/{uuid}                    模板详情（GET，列定义 + 示例行）
+    //   io/templates/{uuid}/file               模板下载（GET，CSV）
+    //   io/expire                              清理过期任务与文件（POST）
+    //
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   platform/io                            —— 裸路径：后端**没有**「一条不存在的汇总列表接口」。
+    //   platform/io/unknown                    —— 未实现的子路径仍然 404。
+    //   platform/io/tasks/not-a-uuid           —— 非 UUID 段不应被 uuid 分支吃掉。
+    //   platform/io/tasks/{uuid}/not-a-shape   —— 多一段仍然 404。
+    //   platform/io/templates/not-a-uuid       —— 同上。
+    //   platform/io/templates/{uuid}/not-a-shape —— 同上。
+    //
+    // id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //   （不是 `[0-9a-f-]+`）：后者会把 `import` 这种非 UUID 形状也当成 id 放行。
+    // 字面量子路径（capabilities / overview / domains / expire / templates / tasks / import）
+    //   排在 {uuid} 段**之前**判别 —— alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    prefix: 'platform/',
+    env: 'PLATFORM_URL',
+    fallback: 'http://127.0.0.1:8089',
+    pattern:
+      /^io\/(?:capabilities|overview|domains|expire|tasks(?:\/import|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:file|error-report|errors|cancel))?)?|templates(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/file)?)?)$/,
+  },
+  {
     // 13.1.1.1 经营总览（reporting 服务，卷 13「利润与经营分析」L3 13.1.1 下的第一格）。
     // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 finance / trade 那几条巨型
     //   alternation 里并分支 —— 既有条目**一字未改、也不重排**。
