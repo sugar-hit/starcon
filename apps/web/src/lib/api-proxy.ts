@@ -14172,6 +14172,65 @@ const services: readonly {
     pattern:
       /^payment\-funds\/(?:capabilities|overview|providers(?:\/availability|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/disable)?|payments|receipts|operations(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:attempts|retry))?)?|balances(?:\/(?:query|import))?|fees(?:\/(?:sync|import))?|rates(?:\/query)?|flows|upstream\/(?:fund-accounts|payment-orders))$/,
   },
+  {
+    // 18.2.3.1 其他对接（platform 服务，卷 18「集成开放与智能自动化」L3 18.2.3 下的第一格）。
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有任何一条里并分支 ——
+    //   既有条目**一字未改、也不重排**。
+    //
+    // ---- 插入锚点选在**数组末尾**（最后一个 services[] 元素之后、收尾的 `];` 之前）----
+    //   同批其它车道的插入点是「数组最开头」；本车道落在末尾，两个 hunk 各自独立，
+    //   并入时 git 能干净求并。
+    //
+    // ---- 首 token「external-integrations」的零命中核对结论（实测，非目测）----
+    //   发车前用脚本（`.tmp/api-proxy-zero-hit.mjs`，不入库）**用 TypeScript 编译器解析**
+    //   本文件里 `services` 变量的**真实数组字面量**（不是文本计数），
+    //   逐条取出 `prefix` 与 `pattern`，按 `resolve()` 的**同构口径**实测
+    //   （`path.startsWith(prefix)` 收窄服务 → 再测 `pattern.test(path.slice(prefix.length))`）：
+    //   · 本模块后端真实实现的 16 条路径 → 既有 **272** 条元素里**没有任何一条**会吃掉它；
+    //   · 别的车道已交付的形状（apps / text / finance-software / webhooks / deliveries /
+    //     call-monitor / api-catalog / payment-funds）→ 本条新正则对它们**零命中**
+    //     ⇒ 本条不会遮蔽别人已交付的路由。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**，后端 ExternalIntegrationController 里就这些）：
+    //   external-integrations/capabilities                 能力声明
+    //   external-integrations/overview                      概览（几个数）
+    //   external-integrations/adapters/availability          逐个外部系统通道可用性
+    //   external-integrations/connections                   连接配置列表（GET）/ 登记配置（POST）
+    //   external-integrations/connections/{uuid}            单条连接配置（GET）
+    //   external-integrations/connections/{uuid}/disable    停用连接（**不删**）
+    //   external-integrations/connections/{uuid}/health     **这个对接自己**的健康状态（GET）
+    //   external-integrations/connections/{uuid}/health/refresh 重算**这一个**连接的健康（POST）
+    //   external-integrations/sync-tasks                    同步任务列表（GET）/ 登记任务（POST）
+    //   external-integrations/sync-tasks/{uuid}             单条同步任务（GET）
+    //   external-integrations/sync-tasks/{uuid}/disable     停用同步任务（**不删**）
+    //   external-integrations/sync-tasks/{uuid}/run         **经由外部通道发起一次同步**（POST；未接入 ⇒ 409）
+    //   external-integrations/sync-records                  同步记录台账（GET）/ 人工登记（POST）
+    //   external-integrations/sync-records/{uuid}           单条同步记录（GET）
+    //   external-integrations/upstream/platforms           上游 2 渠道机制 · 平台目录（GET，**只读**）
+    //   external-integrations/upstream/shops               上游 2 渠道机制 · 店铺（GET，**只读**）
+    //
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   platform/external-integrations                              —— 裸路径：后端**没有**汇总端点。
+    //   platform/external-integrations/connections/{uuid}/delete    —— 连接**不删**（历史同步记录要能复现），只有停用。
+    //   platform/external-integrations/sync-tasks/{uuid}/schema     —— 同步任务配置**只读地**改，没有「改结构」的端点。
+    //   platform/external-integrations/connections/not-a-uuid       —— 非 UUID 段不应被 uuid 分支吃掉。
+    //   platform/external-integrations/sync-records/{uuid}/delete   —— 同步记录是**只追加**台账，删不了。
+    //   platform/external-integrations/upstream                     —— 裸路径：上游两组是**分开的**两个端点。
+    //   platform/external-integrations/secret-keys                  —— 🔴 **绝不放行**：库里没有密钥明文，
+    //                                                            也不提供任何「取密钥」的端点。
+    //   platform/external-integrations/not-a-shape                  —— 多一层仍然 404。
+    //
+    // id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //   （不是 `[0-9a-f-]+`）：后者会把 `disable` / `run` / `refresh` 这种非 UUID 形状也当成 id 放行。
+    // 字面量子路径（capabilities / overview / adapters / connections / sync-tasks / sync-records /
+    //   upstream）排在 {uuid} 段**之前**判别 ——
+    //   alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    prefix: 'platform/',
+    env: 'PLATFORM_URL',
+    fallback: 'http://127.0.0.1:8089',
+    pattern:
+      /^external\-integrations\/(?:capabilities|overview|adapters\/availability|connections(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:disable|health(?:\/refresh)?))?)?|sync\-tasks(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:disable|run))?)?|sync\-records(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|upstream\/(?:platforms|shops))$/,
+  },
 ];
 
 function resolve(path: string) {
