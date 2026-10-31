@@ -58,6 +58,18 @@ public class AutoApprovalDecisionService {
   private final IdentityApprovalPort upstream;
   private final Clock clock;
 
+  /**
+   * 快照专用的 mapper：🔴 <b>{@code USE_BIG_DECIMAL_FOR_FLOATS}</b> 必须开 ——
+   * Jackson 默认把 JSON 里的数字读成 {@code double}，于是 {@code 1000.000000} 会变成
+   * {@code 1000.0}：金额的**数值**没丢，但**标度**丢了，而标度正是「这条依据当时长什么样」的一部分。
+   */
+  private static final ObjectMapper SNAPSHOT_JSON =
+      com.fasterxml.jackson.databind.json.JsonMapper.builder()
+          .addModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule())
+          .enable(com.fasterxml.jackson.databind.DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS)
+          .disable(com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+          .build();
+
   public AutoApprovalDecisionService(
       DSLContext sql, ObjectMapper json, IdentityApprovalPort upstream, Clock clock) {
     this.sql = sql;
@@ -406,6 +418,9 @@ public class AutoApprovalDecisionService {
         row.get("execution_state", String.class),
         fromJson(row.get("checks", String.class), new com.fasterxml.jackson.core.type.TypeReference<List<AutoApprovalCheck>>() {}),
         fromJson(
+            row.get("policy_snapshot", String.class),
+            new com.fasterxml.jackson.core.type.TypeReference<AutoApprovalPolicySnapshot>() {}),
+        fromJson(
             row.get("risk_signal_snapshot", String.class),
             new com.fasterxml.jackson.core.type.TypeReference<List<AutoApprovalSignalSnapshot>>() {}),
         fromJson(
@@ -466,46 +481,47 @@ public class AutoApprovalDecisionService {
           BigDecimal.valueOf(dwell).divide(BigDecimal.valueOf(3600), 6, RoundingMode.HALF_UP);
       var id = UUID.randomUUID();
       var detectedAt = OffsetDateTime.ofInstant(clock.instant(), java.time.ZoneOffset.UTC);
-      try {
-        sql.execute(
-            "insert into platform_auto_approval_escalation(id,tenant_id,decision_id,"
-                + " upstream_instance_id,upstream_flow_id,node_key,timeout_hours,timeout_action,"
-                + " escalate_approver_type,escalate_role_id,escalate_position_id,escalate_membership_id,"
-                + " elapsed_hours,upstream_dwell_seconds,rule_snapshot,status,execution_detail,"
-                + " detected_at,created_at)"
-                + " values(?,?,?,?,?,?,?,?,?,?,?,?,?::numeric,?,?::jsonb,'DETECTED','',?::timestamptz,"
-                + " ?::timestamptz)",
-            id,
-            tenant(),
-            d.get("id", UUID.class),
-            instanceId,
-            flowId,
-            view.currentNodeKey(),
-            rule.timeoutHours(),
-            rule.timeoutAction(),
-            rule.escalateApproverType(),
-            rule.escalateRoleId(),
-            rule.escalatePositionId(),
-            rule.escalateMembershipId(),
-            elapsed,
-            dwell,
-            toJson(
-                java.util.Map.of(
-                    "ruleId", String.valueOf(rule.id()),
-                    "nodeKey", String.valueOf(rule.nodeKey()),
-                    "timeoutAction", String.valueOf(rule.timeoutAction()),
-                    "timeoutHours", rule.timeoutHours(),
-                    "escalateApproverType", String.valueOf(rule.escalateApproverType()),
-                    "escalateRoleId", String.valueOf(rule.escalateRoleId()),
-                    "escalatePositionId", String.valueOf(rule.escalatePositionId()),
-                    "escalateMembershipId", String.valueOf(rule.escalateMembershipId()),
-                    "escalateLabel", String.valueOf(rule.escalateLabel()))),
-            detectedAt,
-            detectedAt);
-        detected.add(escalation(id));
-      } catch (org.jooq.exception.DataAccessException e) {
-        // 同一张单、同一节点、同一时限只升级一次：重复扫描撞唯一索引 ⇒ 跳过，不算失败。
-      }
+      // 🔴 **用 ON CONFLICT DO NOTHING，而不是「插完再捕获唯一冲突」**：
+      //    PostgreSQL 里一条失败语句会**毒化整个事务**（后续语句全部报 25P02），
+      //    捕获异常再继续跑是跑不动的 —— 同一张单重复扫描会被这一条卡死。
+      var inserted =
+          sql.execute(
+              "insert into platform_auto_approval_escalation(id,tenant_id,decision_id,"
+                  + " upstream_instance_id,upstream_flow_id,node_key,timeout_hours,timeout_action,"
+                  + " escalate_approver_type,escalate_role_id,escalate_position_id,escalate_membership_id,"
+                  + " elapsed_hours,upstream_dwell_seconds,rule_snapshot,status,execution_detail,"
+                  + " detected_at,created_at)"
+                  + " values(?,?,?,?,?,?,?,?,?,?,?,?,?::numeric,?,?::jsonb,'DETECTED','',?::timestamptz,"
+                  + " ?::timestamptz)"
+                  + " on conflict (tenant_id,upstream_instance_id,node_key,timeout_hours) do nothing",
+              id,
+              tenant(),
+              d.get("id", UUID.class),
+              instanceId,
+              flowId,
+              view.currentNodeKey(),
+              rule.timeoutHours(),
+              rule.timeoutAction(),
+              rule.escalateApproverType(),
+              rule.escalateRoleId(),
+              rule.escalatePositionId(),
+              rule.escalateMembershipId(),
+              elapsed,
+              dwell,
+              toJson(
+                  java.util.Map.of(
+                      "ruleId", String.valueOf(rule.id()),
+                      "nodeKey", String.valueOf(rule.nodeKey()),
+                      "timeoutAction", String.valueOf(rule.timeoutAction()),
+                      "timeoutHours", rule.timeoutHours(),
+                      "escalateApproverType", String.valueOf(rule.escalateApproverType()),
+                      "escalateRoleId", String.valueOf(rule.escalateRoleId()),
+                      "escalatePositionId", String.valueOf(rule.escalatePositionId()),
+                      "escalateMembershipId", String.valueOf(rule.escalateMembershipId()),
+                      "escalateLabel", String.valueOf(rule.escalateLabel()))),
+              detectedAt,
+              detectedAt);
+      if (inserted > 0) detected.add(escalation(id));
     }
     return new AutoApprovalEscalationScanView(
         pending.size(),
@@ -753,21 +769,22 @@ public class AutoApprovalDecisionService {
   }
 
   /** 判定当时的规则快照（**不是**事后读当下的规则）。 */
-  private java.util.Map<String, Object> policySnapshot(AutoApprovalPolicyRow policy) {
-    if (policy == null) return java.util.Map.of("found", false);
-    var map = new java.util.LinkedHashMap<String, Object>();
-    map.put("found", true);
-    map.put("policyId", policy.id().toString());
-    map.put("ruleCode", policy.ruleCode());
-    map.put("ruleName", policy.ruleName());
-    map.put("documentTypeCode", policy.documentTypeCode());
-    map.put("currencyCode", policy.currencyCode());
-    map.put("autoApproveMaxAmount", policy.autoApproveMaxAmount());
-    map.put("amountHardLimit", policy.amountHardLimit());
-    map.put("upstreamFlowId", policy.upstreamFlowId() == null ? null : policy.upstreamFlowId().toString());
-    map.put("status", policy.status());
-    map.put("updatedAt", policy.updatedAt());
-    return map;
+  private AutoApprovalPolicySnapshot policySnapshot(AutoApprovalPolicyRow policy) {
+    if (policy == null)
+      return new AutoApprovalPolicySnapshot(
+          false, null, null, null, null, null, null, null, null, null, null);
+    return new AutoApprovalPolicySnapshot(
+        true,
+        policy.id(),
+        policy.ruleCode(),
+        policy.ruleName(),
+        policy.documentTypeCode(),
+        policy.currencyCode(),
+        policy.autoApproveMaxAmount(),
+        policy.amountHardLimit(),
+        policy.upstreamFlowId(),
+        policy.status(),
+        policy.updatedAt());
   }
 
   private List<AutoApprovalEscalationRow> escalationsOfDecision(UUID decisionId) {
@@ -843,7 +860,7 @@ public class AutoApprovalDecisionService {
 
   private String toJson(Object value) {
     try {
-      return json.writeValueAsString(value);
+      return SNAPSHOT_JSON.writeValueAsString(value);
     } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
       throw new IllegalStateException(e);
     }
@@ -852,7 +869,7 @@ public class AutoApprovalDecisionService {
   private <T> T fromJson(String text, com.fasterxml.jackson.core.type.TypeReference<T> type) {
     if (text == null || text.isBlank()) return null;
     try {
-      return json.readValue(text, type);
+      return SNAPSHOT_JSON.readValue(text, type);
     } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
       throw new IllegalStateException(e);
     }

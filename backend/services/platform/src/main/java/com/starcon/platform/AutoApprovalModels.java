@@ -65,9 +65,9 @@ public final class AutoApprovalModels {
       @Schema(nullable = true) BigDecimal autoApproveMaxAmount,
       @Schema(nullable = true) BigDecimal amountHardLimit,
       @Schema(nullable = true) UUID upstreamFlowId,
-      @Pattern(regexp = "ACTIVE|DRAFT|DISABLED") String status,
-      Integer priority,
-      @Size(max = 500) String remark) {}
+      @Schema(nullable = true) @Pattern(regexp = "ACTIVE|DRAFT|DISABLED") String status,
+      @Schema(nullable = true) Integer priority,
+      @Schema(nullable = true) @Size(max = 500) String remark) {}
 
   // ================================================================ 风险信号码表
 
@@ -91,13 +91,13 @@ public final class AutoApprovalModels {
       @NotBlank @Size(max = 64) String signalCode,
       @NotBlank @Size(max = 120) String signalName,
       @NotNull @Pattern(regexp = "VIOLATION|RISK") String signalKind,
-      @Size(max = 300) String description) {}
+      @Schema(nullable = true) @Size(max = 300) String description) {}
 
   // ================================================================ 判定
 
   /** 提交上来的一条风险信号。**只有码**：性质由租户码表决定，不由调用方自称。 */
   public record AutoApprovalRiskSignalInput(
-      @NotBlank @Size(max = 64) String code, @Size(max = 300) String detail) {}
+      @NotBlank @Size(max = 64) String code, @Schema(nullable = true) @Size(max = 300) String detail) {}
 
   /**
    * 一次自动审批判定的入参。
@@ -110,7 +110,7 @@ public final class AutoApprovalModels {
   public record AutoApprovalEvaluateInput(
       @NotBlank @Size(max = 32) String documentTypeCode,
       @NotBlank @Size(max = 100) String documentRef,
-      @Size(max = 200) String subjectTitle,
+      @Schema(nullable = true) @Size(max = 200) String subjectTitle,
       @NotBlank @Size(max = 40) String sourceSystem,
       @Schema(nullable = true) @Pattern(regexp = "[A-Z]{3}") String currencyCode,
       @Schema(nullable = true) BigDecimal amount,
@@ -149,6 +149,20 @@ public final class AutoApprovalModels {
       @Schema(nullable = true) String upstreamRoutedBy,
       String note) {}
 
+  /** 判定当时生效的那条规则（**快照**：不是事后读当下的规则）。 */
+  public record AutoApprovalPolicySnapshot(
+      boolean found,
+      @Schema(nullable = true) UUID policyId,
+      @Schema(nullable = true) String ruleCode,
+      @Schema(nullable = true) String ruleName,
+      @Schema(nullable = true) String documentTypeCode,
+      @Schema(nullable = true) String currencyCode,
+      @Schema(nullable = true) BigDecimal autoApproveMaxAmount,
+      @Schema(nullable = true) BigDecimal amountHardLimit,
+      @Schema(nullable = true) UUID upstreamFlowId,
+      @Schema(nullable = true) String status,
+      @Schema(nullable = true) OffsetDateTime updatedAt) {}
+
   /**
    * 一次自动审批判定的结论（输出）。
    *
@@ -171,6 +185,7 @@ public final class AutoApprovalModels {
       String reasonMessage,
       String executionState,
       List<AutoApprovalCheck> checks,
+      @Schema(nullable = true) AutoApprovalPolicySnapshot policy,
       List<AutoApprovalSignalSnapshot> riskSignals,
       @Schema(nullable = true) AutoApprovalRoutingSnapshot routing,
       @Schema(nullable = true) UUID upstreamInstanceId,
