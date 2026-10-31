@@ -223,8 +223,39 @@ class AdKeywordIntegrationTest {
                 new java.math.BigDecimal(bid), currency, "ACTIVE", null, "")));
   }
 
+  // ==================================================================
+  // 🔴 夹具时间轴：相对当下（UTC），不写死日历日
+  // ==================================================================
+  //
+  // 服务默认取数窗口是「今天往前 29 天」（见 {@code AdKeywordService#dayRange} 与
+  // {@code KEYWORD_SELECT} 里的 {@code mt.bucket_date >= ? and <= ?}），
+  // 种子一旦写成固定日历日，墙钟翻页就会把它滑出窗口 ⇒ 指标读回 0、CTR/ACOS 变 null ⇒ 假红。
+  // ⇒ 夹具日同时也是指标落库的 bucket_date（两者必须同一日）。
+
+  /** 🔴 夹具锚点：所有夹具日期都相对「今天（UTC）」推。 */
+  static final LocalDate TODAY = LocalDate.now(ZoneOffset.UTC);
+
+  /** 夹具用到的「第几天」总数：day=1 最早 … day=FIXTURE_DAYS 最近（今天-1 天）。 */
+  static final int FIXTURE_DAYS = 11;
+
+  /** 夹具日：day=1 最早 … day=FIXTURE_DAYS 最近（今天-1 天）。 */
+  static LocalDate fixtureDay(int day) {
+    return TODAY.minusDays(FIXTURE_DAYS - day + 1);
+  }
+
+  /**
+   * 🔴 夹具时刻（UTC）：小时/分钟/秒与原先写死的值逐字一致，只把**日历日**换成相对当下。
+   *
+   * <p>day 越大时间越晚（day=1 最早 … day=FIXTURE_DAYS 最近）⇒ 排序语义不变。
+   */
   static OffsetDateTime at(int day, int hour) {
-    return OffsetDateTime.of(2026, 10, day, hour, 30, 15, 123456000, ZoneOffset.UTC);
+    return fixtureDay(day)
+        .atStartOfDay()
+        .atOffset(ZoneOffset.UTC)
+        .plusHours(hour)
+        .plusMinutes(30)
+        .plusSeconds(15)
+        .plusNanos(123456000);
   }
 
   // ==================================================================
@@ -320,7 +351,7 @@ class AdKeywordIntegrationTest {
                     "PLATFORM", "batch-1", "idem-m1", "",
                     List.of(
                         new AdKeywordMetricInput(
-                            keyword.keywordId(), LocalDate.of(2026, 10, 1), 1000L, 40L, 0,
+                            keyword.keywordId(), fixtureDay(1), 1000L, 40L, 0,
                             new java.math.BigDecimal("120.0000"), java.math.BigDecimal.ZERO,
                             "USD", syncedAt)))));
 
@@ -360,7 +391,7 @@ class AdKeywordIntegrationTest {
                 "PLATFORM", "batch-2", "idem-m2", "",
                 List.of(
                     new AdKeywordMetricInput(
-                        kw2.keywordId(), LocalDate.of(2026, 10, 1), 500L, 0L, 0,
+                        kw2.keywordId(), fixtureDay(1), 500L, 0L, 0,
                         new java.math.BigDecimal("10.0000"), java.math.BigDecimal.ZERO,
                         "USD", syncedAt)))));
     var page2 = as("channel.operation.read", () -> service.keywords(
@@ -381,7 +412,7 @@ class AdKeywordIntegrationTest {
             "PLATFORM", "batch-idem", "idem-key", "",
             List.of(
                 new AdKeywordMetricInput(
-                    keyword.keywordId(), LocalDate.of(2026, 10, 2), 200L, 10L, 1,
+                    keyword.keywordId(), fixtureDay(2), 200L, 10L, 1,
                     new java.math.BigDecimal("20.0000"), new java.math.BigDecimal("100.0000"),
                     "USD", at(2, 3))));
 
@@ -417,7 +448,7 @@ class AdKeywordIntegrationTest {
                     "PLATFORM", "batch-skip", "idem-skip", "",
                     List.of(
                         new AdKeywordMetricInput(
-                            UUID.randomUUID(), LocalDate.of(2026, 10, 3), 10L, 1L, 0,
+                            UUID.randomUUID(), fixtureDay(3), 10L, 1L, 0,
                             new java.math.BigDecimal("1.0000"), java.math.BigDecimal.ZERO,
                             "USD", at(3, 3))))));
     assertThat(result.appliedCount()).isZero();
@@ -432,7 +463,7 @@ class AdKeywordIntegrationTest {
                 "PLATFORM", "batch-skip-2", "idem-skip-2", "",
                 List.of(
                     new AdKeywordMetricInput(
-                        keyword.keywordId(), LocalDate.of(2026, 10, 3), 10L, 1L, 0,
+                        keyword.keywordId(), fixtureDay(3), 10L, 1L, 0,
                         new java.math.BigDecimal("1.0000"), java.math.BigDecimal.ZERO,
                         "USD", at(3, 3))))));
     var mixed =
@@ -443,7 +474,7 @@ class AdKeywordIntegrationTest {
                     "PLATFORM", "batch-skip-3", "idem-skip-3", "",
                     List.of(
                         new AdKeywordMetricInput(
-                            keyword.keywordId(), LocalDate.of(2026, 10, 4), 10L, 1L, 0,
+                            keyword.keywordId(), fixtureDay(4), 10L, 1L, 0,
                             new java.math.BigDecimal("1.0000"), java.math.BigDecimal.ZERO,
                             "EUR", at(4, 3))))));
     assertThat(mixed.appliedCount()).isZero();
@@ -467,11 +498,11 @@ class AdKeywordIntegrationTest {
                 "PLATFORM", "st-batch", "idem-st", "",
                 List.of(
                     new AdSearchTermInput(
-                        keyword.keywordId(), LocalDate.of(2026, 10, 5), "cheap wrong shoes", "CAMP-1",
+                        keyword.keywordId(), fixtureDay(5), "cheap wrong shoes", "CAMP-1",
                         900L, 30L, 0, new java.math.BigDecimal("90.0000"),
                         java.math.BigDecimal.ZERO, "USD", at(5, 3)),
                     new AdSearchTermInput(
-                        keyword.keywordId(), LocalDate.of(2026, 10, 5), "good shoes", "CAMP-1",
+                        keyword.keywordId(), fixtureDay(5), "good shoes", "CAMP-1",
                         800L, 40L, 6, new java.math.BigDecimal("100.0000"),
                         new java.math.BigDecimal("500.0000"), "USD", at(5, 3))))));
 
@@ -518,7 +549,7 @@ class AdKeywordIntegrationTest {
                 "PLATFORM", "st-neg", "idem-neg", "",
                 List.of(
                     new AdSearchTermInput(
-                        keyword.keywordId(), LocalDate.of(2026, 10, 6), "useless gadget", "CAMP-1",
+                        keyword.keywordId(), fixtureDay(6), "useless gadget", "CAMP-1",
                         1500L, 45L, 0, new java.math.BigDecimal("150.0000"),
                         java.math.BigDecimal.ZERO, "USD", at(6, 3))))));
 
@@ -561,7 +592,7 @@ class AdKeywordIntegrationTest {
                 "PLATFORM", "st-negr", "idem-negr", "",
                 List.of(
                     new AdSearchTermInput(
-                        keyword.keywordId(), LocalDate.of(2026, 10, 7), "waste term", "CAMP-1",
+                        keyword.keywordId(), fixtureDay(7), "waste term", "CAMP-1",
                         700L, 20L, 0, new java.math.BigDecimal("70.0000"),
                         java.math.BigDecimal.ZERO, "USD", at(7, 3))))));
 
@@ -573,7 +604,7 @@ class AdKeywordIntegrationTest {
                     keyword.keywordId(), "waste term", "NEGATIVE_EXACT", "CAMP-1",
                     "高曝光零转化，立刻否定",
                     Map.of("impressions", 999999), // 🔴 调用方自述的依据（只作审计留痕）
-                    LocalDate.of(2026, 10, 1), LocalDate.of(2026, 10, 31), "SYSTEM_SUGGESTION")));
+                    fixtureDay(1), TODAY, "SYSTEM_SUGGESTION")));
 
     assertThat(negative.status()).isEqualTo("DECIDED");
     assertThat(negative.reason()).contains("高曝光零转化");
@@ -792,7 +823,7 @@ class AdKeywordIntegrationTest {
                 "PLATFORM", "bulk-neg-batch", "idem-bulk-neg", "",
                 List.of(
                     new AdKeywordMetricInput(
-                        keyword.keywordId(), LocalDate.of(2026, 10, 8), 1200L, 30L, 0,
+                        keyword.keywordId(), fixtureDay(8), 1200L, 30L, 0,
                         new java.math.BigDecimal("75.0000"), java.math.BigDecimal.ZERO,
                         "USD", at(8, 3))))));
 
@@ -844,11 +875,11 @@ class AdKeywordIntegrationTest {
                 "PLATFORM", "report-batch", "idem-report", "",
                 List.of(
                     new AdKeywordMetricInput(
-                        usd.keywordId(), LocalDate.of(2026, 10, 9), 1000L, 50L, 5,
+                        usd.keywordId(), fixtureDay(9), 1000L, 50L, 5,
                         new java.math.BigDecimal("100.0000"), new java.math.BigDecimal("500.0000"),
                         "USD", at(9, 3)),
                     new AdKeywordMetricInput(
-                        eur.keywordId(), LocalDate.of(2026, 10, 9), 800L, 20L, 0,
+                        eur.keywordId(), fixtureDay(9), 800L, 20L, 0,
                         new java.math.BigDecimal("60.0000"), java.math.BigDecimal.ZERO,
                         "EUR", at(9, 3))))));
 
@@ -924,7 +955,7 @@ class AdKeywordIntegrationTest {
                 "PLATFORM", "freq-batch", "idem-freq", "",
                 List.of(
                     new AdKeywordMetricInput(
-                        keyword.keywordId(), LocalDate.of(2026, 10, 10), 400L, 20L, 2,
+                        keyword.keywordId(), fixtureDay(10), 400L, 20L, 2,
                         new java.math.BigDecimal("40.0000"), new java.math.BigDecimal("200.0000"),
                         "USD", at(10, 3))))));
 
@@ -979,7 +1010,7 @@ class AdKeywordIntegrationTest {
                 "PLATFORM", "arch-batch", "idem-arch", "",
                 List.of(
                     new AdKeywordMetricInput(
-                        keyword.keywordId(), LocalDate.of(2026, 10, 11), 100L, 5L, 0,
+                        keyword.keywordId(), fixtureDay(11), 100L, 5L, 0,
                         new java.math.BigDecimal("5.0000"), java.math.BigDecimal.ZERO,
                         "USD", at(11, 3))))));
 

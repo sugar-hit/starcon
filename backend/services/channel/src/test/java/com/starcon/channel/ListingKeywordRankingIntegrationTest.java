@@ -13,8 +13,10 @@ import java.net.InetSocketAddress;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -261,8 +263,48 @@ class ListingKeywordRankingIntegrationTest {
         listingId, "PLATFORM", "API", crawledAt, window, key, "", Map.of("vendor", "acme"), ranks);
   }
 
+  // ==================================================================
+  // 🔴 夹具时间轴：相对当下（UTC），不写死日历日
+  // ==================================================================
+  //
+  // 服务默认取数窗口是「今天往前 29 天」（见 {@code ListingKeywordRankingService#dayRange}），
+  // 种子一旦写成固定日历日，墙钟翻页就会把它滑出窗口 ⇒ 历史/报表少行 ⇒ 假红。
+  // ⇒ 锚在「今天」上：day=1 是最早的夹具日，day=FIXTURE_DAYS 是最近的（今天-1 天）。
+
+  /** 🔴 夹具锚点：所有夹具日期都相对「今天（UTC）」推。 */
+  static final LocalDate TODAY = LocalDate.now(ZoneOffset.UTC);
+
+  /** 夹具用到的「第几天」总数：day=1 最早 … day=FIXTURE_DAYS 最近（今天-1 天）。 */
+  static final int FIXTURE_DAYS = 5;
+
+  /** 服务默认取数窗口的显式区间（今天往前 29 天 ~ 今天）。 */
+  static String windowFrom() {
+    return TODAY.minusDays(29).toString();
+  }
+
+  static String windowTo() {
+    return TODAY.toString();
+  }
+
+  /** 夹具日：day=1 最早 … day=FIXTURE_DAYS 最近（今天-1 天）。 */
+  static LocalDate fixtureDay(int day) {
+    return TODAY.minusDays(FIXTURE_DAYS - day + 1);
+  }
+
+  /**
+   * 🔴 夹具时刻（UTC）：小时/分钟/秒与原先写死的值逐字一致，只把**日历日**换成相对当下。
+   *
+   * <p>day 越大时间越晚（day=1 最早 … day=FIXTURE_DAYS 最近）⇒ 排序语义不变。
+   */
   static OffsetDateTime at(int day, int hour) {
-    return OffsetDateTime.of(2026, 10, day, hour, 0, 0, 0, ZoneOffset.UTC);
+    return fixtureDay(day).atStartOfDay().atOffset(ZoneOffset.UTC).plusHours(hour);
+  }
+
+  static final DateTimeFormatter TS_LITERAL = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ssxx");
+
+  /** 夹具时刻的字面量（PG timestamptz 文本），用于拼裸 SQL。 */
+  static String tsLiteral(int day, int hour) {
+    return fixtureDay(day).atTime(hour, 0).atOffset(ZoneOffset.UTC).format(TS_LITERAL);
   }
 
   // ==================================================================
@@ -413,7 +455,7 @@ class ListingKeywordRankingIntegrationTest {
 
     // 🔴 +08:00 偏移：Timestamp.valueOf(LocalDateTime) 那条路会静默偏 −28800s
     OffsetDateTime crawledAt =
-        OffsetDateTime.of(2026, 10, 1, 9, 30, 0, 0, ZoneOffset.ofHours(8));
+        fixtureDay(1).atTime(9, 30, 0).atOffset(ZoneOffset.ofHours(8));
     crawl(actorA, crawlReq(listing.id(), "k-tz-1", crawledAt, 30, List.of(rank(keyword.keywordId(), 9, 3))));
 
     Object local =
@@ -421,7 +463,7 @@ class ListingKeywordRankingIntegrationTest {
             "select to_char(crawled_at at time zone 'Asia/Shanghai','YYYY-MM-DD HH24:MI:SS')"
                 + " from listing_keyword_rank_snapshot where keyword_id='"
                 + keyword.keywordId() + "'");
-    assertThat(String.valueOf(local)).isEqualTo("2026-10-01 09:30:00");
+    assertThat(String.valueOf(local)).isEqualTo(fixtureDay(1) + " 09:30:00");
 
     Object epoch =
         scalar(
@@ -679,7 +721,7 @@ class ListingKeywordRankingIntegrationTest {
 
     var trend =
         as(actorA, "channel.operation.read",
-            () -> service.trend(keyword.keywordId().toString(), "2026-10-01", "2026-10-31", "DAY"));
+            () -> service.trend(keyword.keywordId().toString(), windowFrom(), windowTo(), "DAY"));
     assertThat(trend.points()).as("没有数据时是空数组，不是假曲线").isEmpty();
     assertThat(trend.hasData()).isFalse();
     assertThat(trend.accuracyNote()).contains("抓取时间");
@@ -698,9 +740,9 @@ class ListingKeywordRankingIntegrationTest {
 
     var trend =
         as(actorA, "channel.operation.read",
-            () -> service.trend(keyword.keywordId().toString(), "2026-10-01", "2026-10-31", "DAY"));
+            () -> service.trend(keyword.keywordId().toString(), windowFrom(), windowTo(), "DAY"));
     assertThat(trend.points()).hasSize(2);
-    assertThat(trend.points().get(0).bucket()).isEqualTo("2026-10-01");
+    assertThat(trend.points().get(0).bucket()).isEqualTo(fixtureDay(1).toString());
     assertThat(trend.points().get(0).sampleCount()).isEqualTo(2);
     // 🔴 名次数字越小越好
     assertThat(trend.points().get(0).bestNaturalRank()).isEqualTo(4);
@@ -804,7 +846,7 @@ class ListingKeywordRankingIntegrationTest {
             + "  accuracy_window_minutes,source,ingest_channel,last_crawl_id,revision,detail,"
             + "  received_at,created_at,updated_at)"
             + " values (gen_random_uuid(),'" + a + "','" + keywordA.keywordId() + "','"
-            + listingB.id() + "',5,null,'2026-10-01 03:00:00+00',30,'PLATFORM','API','"
+            + listingB.id() + "',5,null,'" + tsLiteral(1, 3) + "',30,'PLATFORM','API','"
             + crawlA.crawlId() + "',1,'{}'::jsonb,now(),now(),now())";
     assertThat(sqlState(crossListing))
         .as("快照引用的抓取批次必须是同一个商品的")
@@ -824,7 +866,7 @@ class ListingKeywordRankingIntegrationTest {
             + "  natural_rank_threshold,ad_rank_threshold,rank_drop_threshold,active,note,"
             + "  created_at,updated_at)"
             + " values (gen_random_uuid(),'" + a + "','" + listingB.id() + "','cross tenant keyword',"
-            + "'AMAZON','US',null,null,null,true,'','2026-10-01 00:00:00+00','2026-10-01 00:00:00+00')";
+            + "'AMAZON','US',null,null,null,true,'','" + tsLiteral(1, 0) + "','" + tsLiteral(1, 0) + "')";
     assertThat(sqlState(crossTenant)).as("跨租户挂引用被复合 FK 拒绝").isEqualTo("23503");
   }
 

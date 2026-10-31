@@ -248,8 +248,40 @@ class ListingHijackerIntegrationTest {
         watchId, observedAt, "PLATFORM", "API", key, "", List.of(records));
   }
 
+  // ==================================================================
+  // 🔴 夹具时间轴：相对当下（UTC），不写死日历日
+  // ==================================================================
+  //
+  // 服务的对比视图默认取数窗口是「今天往前 29 天」（见 {@code ListingHijackerService#comparison}），
+  // 种子一旦写成固定日历日，墙钟翻页就会把它滑出窗口 ⇒ 对比视图为空 ⇒ 假红。
+
+  /** 🔴 夹具锚点：所有夹具日期都相对「今天（UTC）」推。 */
+  static final LocalDate TODAY = LocalDate.now(ZoneOffset.UTC);
+
+  /** 夹具用到的「第几天」总数：day=1 最早 … day=FIXTURE_DAYS 最近（今天-1 天）。 */
+  static final int FIXTURE_DAYS = 16;
+
+  /** 服务默认取数窗口的显式区间（今天往前 29 天 ~ 今天）。 */
+  static String windowFrom() {
+    return TODAY.minusDays(29).toString();
+  }
+
+  static String windowTo() {
+    return TODAY.toString();
+  }
+
+  /** 夹具日：day=1 最早 … day=FIXTURE_DAYS 最近（今天-1 天）。 */
+  static LocalDate fixtureDay(int day) {
+    return TODAY.minusDays(FIXTURE_DAYS - day + 1);
+  }
+
+  /**
+   * 🔴 夹具时刻（UTC）：小时/分钟/秒与原先写死的值逐字一致，只把**日历日**换成相对当下。
+   *
+   * <p>day 越大时间越晚（day=1 最早 … day=FIXTURE_DAYS 最近）⇒ 排序语义不变。
+   */
   static OffsetDateTime at(int day, int hour) {
-    return OffsetDateTime.of(2026, 10, day, hour, 30, 0, 0, ZoneOffset.UTC);
+    return fixtureDay(day).atStartOfDay().atOffset(ZoneOffset.UTC).plusHours(hour).plusMinutes(30);
   }
 
   ListingHijackerWatchRow createWatch(
@@ -694,7 +726,7 @@ class ListingHijackerIntegrationTest {
         as(
             actorA,
             "channel.operation.read",
-            () -> service.comparison(watch.watchId().toString(), "2026-10-01", "2026-10-31", 0, 50));
+            () -> service.comparison(watch.watchId().toString(), windowFrom(), windowTo(), 0, 50));
     assertThat(comparison.items()).hasSize(1);
     assertThat(comparison.items().get(0).priceGapRatio()).isNull();
     assertThat(comparison.maxPriceGapRatio()).isNull();
@@ -813,7 +845,7 @@ class ListingHijackerIntegrationTest {
         as(
             actorA,
             "channel.operation.read",
-            () -> service.comparison(watch.watchId().toString(), "2026-10-01", "2026-10-31", 0, 50));
+            () -> service.comparison(watch.watchId().toString(), windowFrom(), windowTo(), 0, 50));
     assertThat(comparison.hasData()).isTrue();
     assertThat(comparison.total()).as("两个跟卖者 ⇒ 两行").isEqualTo(2);
     assertThat(comparison.hijackerCount()).isEqualTo(2);
@@ -847,7 +879,7 @@ class ListingHijackerIntegrationTest {
         as(
             actorA,
             "channel.operation.read",
-            () -> service.comparison(watch.watchId().toString(), "2026-10-01", "2026-10-31", 1, 1));
+            () -> service.comparison(watch.watchId().toString(), windowFrom(), windowTo(), 1, 1));
     assertThat(page2.items()).hasSize(1);
     assertThat(page2.items().get(0).hijackerSellerId())
         .isNotEqualTo(x.hijackerSellerId());
@@ -865,7 +897,7 @@ class ListingHijackerIntegrationTest {
         as(
             actorA,
             "channel.operation.read",
-            () -> service.comparison(watch.watchId().toString(), "2026-10-01", "2026-10-31", 0, 50));
+            () -> service.comparison(watch.watchId().toString(), windowFrom(), windowTo(), 0, 50));
     assertThat(comparison.hasData()).isFalse();
     assertThat(comparison.items()).isEmpty();
     assertThat(comparison.emptyReason()).isNotBlank();
@@ -909,7 +941,7 @@ class ListingHijackerIntegrationTest {
         as(
             actorA,
             "channel.operation.read",
-            () -> service.comparison(watch.watchId().toString(), "2026-10-01", "2026-10-31", 0, 50));
+            () -> service.comparison(watch.watchId().toString(), windowFrom(), windowTo(), 0, 50));
     assertThat(comparison.dataSource()).isEqualTo("PLATFORM_SCRAPED");
     assertThat(comparison.sourceNote()).contains("仅供参考");
 
@@ -1152,8 +1184,8 @@ class ListingHijackerIntegrationTest {
     http.perform(get("/channel/listing-hijackers/comparison")
             .header("Authorization", bearerA)
             .param("watchId", watchId)
-            .param("from", "2026-10-01")
-            .param("to", "2026-10-31"))
+            .param("from", windowFrom())
+            .param("to", windowTo()))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.hasData").value(true))
         .andExpect(jsonPath("$.total").value(1))

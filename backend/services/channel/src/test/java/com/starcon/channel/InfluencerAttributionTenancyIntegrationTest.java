@@ -13,7 +13,9 @@ import java.net.InetSocketAddress;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -52,8 +54,16 @@ class InfluencerAttributionTenancyIntegrationTest {
   static final Map<String, AccessService.Access> actors = new ConcurrentHashMap<>();
 
   static final UUID AMAZON = UUID.fromString("11111111-1111-1111-1111-111111111111");
-  static final OffsetDateTime STARTED_AT = OffsetDateTime.parse("2026-09-01T00:00:00+08:00");
-  static final OffsetDateTime ENDED_AT = OffsetDateTime.parse("2026-09-30T23:59:59+08:00");
+  /**
+   * 🔴 合作起止**相对当下**：归因窗口按「结束时刻 + 归因窗口天数」判是否还在窗口内
+   * （见 {@code InfluencerAttributionRules#withinWindow}），结束时刻写成固定日历日的话，
+   * 墙钟翻页就会把合作判成「窗口外」⇒ 归因记录 0 条 ⇒ 假红。
+   * ⇒ 结束 = 今天-1 天（窗口内余量 29 天），开始 = 今天-31 天（保持 30 天的合作期）。
+   */
+  static final OffsetDateTime ENDED_AT =
+      LocalDate.now(ZoneOffset.UTC).minusDays(1).atTime(23, 59, 59).atOffset(ZoneOffset.ofHours(8));
+  static final OffsetDateTime STARTED_AT =
+      LocalDate.now(ZoneOffset.UTC).minusDays(31).atStartOfDay().atOffset(ZoneOffset.ofHours(8));
   static final String ALL_SCOPE_GRANTS =
       "[{\"permissions\":[\"channel.operation.read\",\"channel.operation.create\","
           + "\"channel.operation.update\",\"channel.operation.delete\"],\"scopeMode\":\"ALL\"}]";
