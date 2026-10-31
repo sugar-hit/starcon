@@ -167,9 +167,7 @@ export function ApiCatalogWorkspace() {
   // 沙箱历史：切到那一页时再取。
   useEffect(() => {
     if (tab !== 'history') return;
-    fetchSandboxRuns({ size: 20 })
-      .then(setRuns)
-      .catch(fail);
+    fetchSandboxRuns({ size: 20 }).then(setRuns).catch(fail);
   }, [tab]);
 
   // 沙箱可测接口：选了服务就拉它的接口清单。
@@ -247,7 +245,11 @@ export function ApiCatalogWorkspace() {
         description="对外开放 API 的目录与文档：按业务域列出接口、参数、返回、限流说明与示例，并支持在沙箱里真发一次请求。"
         actions={
           <Button variant="outline" size="sm" onClick={() => void load()} disabled={loading}>
-            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+            {loading ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <RefreshCw className="h-4 w-4" />
+            )}
             刷新
           </Button>
         }
@@ -266,8 +268,18 @@ export function ApiCatalogWorkspace() {
 
       {/* 概览 */}
       <div className="grid gap-3 md:grid-cols-4">
-        <StatCard label="业务域" value={overview?.domainCount ?? 0} unit="个" icon={<BookOpen className="h-4 w-4" />} />
-        <StatCard label="对外接口" value={overview?.interfaceCount ?? 0} unit="个" icon={<ScrollText className="h-4 w-4" />} />
+        <StatCard
+          label="业务域"
+          value={overview?.domainCount ?? 0}
+          unit="个"
+          icon={<BookOpen className="h-4 w-4" />}
+        />
+        <StatCard
+          label="对外接口"
+          value={overview?.interfaceCount ?? 0}
+          unit="个"
+          icon={<ScrollText className="h-4 w-4" />}
+        />
         <StatCard
           label="可沙箱测试"
           value={overview?.sandboxTestableCount ?? 0}
@@ -308,7 +320,7 @@ export function ApiCatalogWorkspace() {
             extra={
               <div className="flex flex-wrap items-center gap-2">
                 <select
-                  className="border-control-border h-9 rounded-md border bg-card px-2 text-sm"
+                  className="border-control-border bg-card h-9 rounded-md border px-2 text-sm"
                   value={domain}
                   onChange={(e) => {
                     setDomain(e.target.value);
@@ -323,7 +335,7 @@ export function ApiCatalogWorkspace() {
                   ))}
                 </select>
                 <select
-                  className="border-control-border h-9 rounded-md border bg-card px-2 text-sm"
+                  className="border-control-border bg-card h-9 rounded-md border px-2 text-sm"
                   value={method}
                   onChange={(e) => {
                     setMethod(e.target.value);
@@ -373,11 +385,11 @@ export function ApiCatalogWorkspace() {
                         key={item.key}
                         type="button"
                         onClick={() => void select(item)}
-                        className="flex w-full items-start gap-3 rounded-md border p-3 text-left text-sm hover:bg-muted"
+                        className="hover:bg-muted flex w-full items-start gap-3 rounded-md border p-3 text-left text-sm"
                       >
                         <Badge tone={BADGE_TONE[methodTone(item.method)]}>{item.method}</Badge>
                         <span className="min-w-0 flex-1">
-                          <span className="block font-mono text-[13px] break-all">{item.path}</span>
+                          <span className="block break-all font-mono text-[13px]">{item.path}</span>
                           <span className="text-muted-foreground block truncate">
                             {item.summary || '（spec 未写摘要）'}
                           </span>
@@ -411,8 +423,10 @@ export function ApiCatalogWorkspace() {
             ) : (
               <div className="space-y-4 text-sm">
                 <div className="flex flex-wrap items-center gap-2">
-                  <Badge tone={BADGE_TONE[methodTone(detail.api.method)]}>{detail.api.method}</Badge>
-                  <span className="font-mono text-[13px] break-all">{detail.api.path}</span>
+                  <Badge tone={BADGE_TONE[methodTone(detail.api.method)]}>
+                    {detail.api.method}
+                  </Badge>
+                  <span className="break-all font-mono text-[13px]">{detail.api.path}</span>
                   <Badge tone="neutral">{detail.api.service}</Badge>
                 </div>
                 {detail.api.summary && <div className="font-medium">{detail.api.summary}</div>}
@@ -427,12 +441,17 @@ export function ApiCatalogWorkspace() {
                   ) : (
                     <div className="space-y-1">
                       {detail.parameters.map((p) => (
-                        <div key={`${p.location}-${p.name}`} className="flex flex-wrap gap-2 text-xs">
+                        <div
+                          key={`${p.location}-${p.name}`}
+                          className="flex flex-wrap gap-2 text-xs"
+                        >
                           <Badge tone={p.required ? 'warning' : 'neutral'}>{p.name}</Badge>
                           <span className="text-muted-foreground">{p.location}</span>
                           <span className="text-muted-foreground">{p.type}</span>
                           {p.required && <span className="text-warning">必填</span>}
-                          {p.description && <span className="text-muted-foreground">{p.description}</span>}
+                          {p.description && (
+                            <span className="text-muted-foreground">{p.description}</span>
+                          )}
                         </div>
                       ))}
                     </div>
@@ -441,14 +460,18 @@ export function ApiCatalogWorkspace() {
 
                 {detail.requestBody.present && (
                   <div>
-                    <div className="mb-1 font-medium">请求体（{detail.requestBody.contentType}）</div>
+                    <div className="mb-1 font-medium">
+                      请求体（{detail.requestBody.contentType}）
+                    </div>
                     <div className="space-y-1">
                       {detail.requestBody.fields.map((f) => (
                         <div key={f.name} className="flex flex-wrap gap-2 text-xs">
                           <Badge tone={f.required ? 'warning' : 'neutral'}>{f.name}</Badge>
                           <span className="text-muted-foreground">{f.type}</span>
                           {f.required && <span className="text-warning">必填</span>}
-                          {f.description && <span className="text-muted-foreground">{f.description}</span>}
+                          {f.description && (
+                            <span className="text-muted-foreground">{f.description}</span>
+                          )}
                         </div>
                       ))}
                     </div>
@@ -461,7 +484,9 @@ export function ApiCatalogWorkspace() {
                     {detail.responses.map((r) => (
                       <div key={r.statusCode} className="rounded-md border p-2 text-xs">
                         <div className="flex items-center gap-2">
-                          <Badge tone={BADGE_TONE[statusTone(Number(r.statusCode))]}>{r.statusCode}</Badge>
+                          <Badge tone={BADGE_TONE[statusTone(Number(r.statusCode))]}>
+                            {r.statusCode}
+                          </Badge>
                           <span className="text-muted-foreground">{r.description}</span>
                         </div>
                         {r.fields.length > 0 && (
@@ -533,14 +558,14 @@ export function ApiCatalogWorkspace() {
           >
             <div className="space-y-3">
               <Notice tone="warning" title="沙箱只放行读请求">
-                GET / HEAD 之外的方法会被拒（409）且**一次请求都不发出去** —— 沙箱必须与生产数据隔离。
-                写操作请在「应用与凭证」里用真实凭证对真实环境调用。
+                GET / HEAD 之外的方法会被拒（409）且**一次请求都不发出去** ——
+                沙箱必须与生产数据隔离。 写操作请在「应用与凭证」里用真实凭证对真实环境调用。
               </Notice>
 
               <label className="block space-y-1 text-sm">
                 <span className="text-muted-foreground">目标服务</span>
                 <select
-                  className="border-control-border h-9 w-full rounded-md border bg-card px-2 text-sm"
+                  className="border-control-border bg-card h-9 w-full rounded-md border px-2 text-sm"
                   value={sandboxService}
                   onChange={(e) => {
                     setSandboxService(e.target.value);
@@ -561,7 +586,7 @@ export function ApiCatalogWorkspace() {
               <label className="block space-y-1 text-sm">
                 <span className="text-muted-foreground">接口</span>
                 <select
-                  className="border-control-border h-9 w-full rounded-md border bg-card px-2 text-sm"
+                  className="border-control-border bg-card h-9 w-full rounded-md border px-2 text-sm"
                   value={sandboxPath}
                   onChange={(e) => {
                     const found = sandboxInterfaces.find((i) => i.path === e.target.value);
@@ -597,7 +622,9 @@ export function ApiCatalogWorkspace() {
 
               {detail && detail.parameters.filter((p) => p.location === 'query').length > 0 && (
                 <div className="space-y-2">
-                  <div className="text-muted-foreground text-xs">查询参数（只允许 spec 里声明过的）</div>
+                  <div className="text-muted-foreground text-xs">
+                    查询参数（只允许 spec 里声明过的）
+                  </div>
                   {detail.parameters
                     .filter((p) => p.location === 'query')
                     .map((p) => (
@@ -609,7 +636,9 @@ export function ApiCatalogWorkspace() {
                         <Input
                           value={queryValues[p.name] ?? ''}
                           placeholder={p.example ?? ''}
-                          onChange={(e) => setQueryValues({ ...queryValues, [p.name]: e.target.value })}
+                          onChange={(e) =>
+                            setQueryValues({ ...queryValues, [p.name]: e.target.value })
+                          }
                         />
                       </label>
                     ))}
@@ -617,12 +646,14 @@ export function ApiCatalogWorkspace() {
               )}
 
               <Button
-                disabled={
-                  busy || !sandboxService || !sandboxPath || missingParams.length > 0
-                }
+                disabled={busy || !sandboxService || !sandboxPath || missingParams.length > 0}
                 onClick={() => void submitSandbox()}
               >
-                {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <FlaskConical className="h-4 w-4" />}
+                {busy ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <FlaskConical className="h-4 w-4" />
+                )}
                 发送请求
               </Button>
               {missingParams.length > 0 && (
@@ -633,7 +664,10 @@ export function ApiCatalogWorkspace() {
             </div>
           </SectionCard>
 
-          <SectionCard title="沙箱结果" description="真实状态码 / 响应摘要 / 耗时 —— 不是写死的成功样例。">
+          <SectionCard
+            title="沙箱结果"
+            description="真实状态码 / 响应摘要 / 耗时 —— 不是写死的成功样例。"
+          >
             {!runResult ? (
               <EmptyState
                 icon={<FlaskConical className="h-6 w-6" />}
@@ -651,13 +685,14 @@ export function ApiCatalogWorkspace() {
                       {runResult.statusCode}
                     </Badge>
                   )}
-                  <span className="font-mono text-[13px] break-all">
+                  <span className="break-all font-mono text-[13px]">
                     {runResult.httpMethod} {runResult.targetPath}
                   </span>
                 </div>
                 <div className="text-muted-foreground text-xs">
                   {runResult.message}
-                  {runResult.responseBytes > 0 && ` · ${runResult.responseBytes} 字节 · ${runResult.durationMs} ms`}
+                  {runResult.responseBytes > 0 &&
+                    ` · ${runResult.responseBytes} 字节 · ${runResult.durationMs} ms`}
                 </div>
                 {runResult.bodySummary && (
                   <pre className="bg-muted max-h-80 overflow-auto rounded p-2 text-[11px]">
@@ -692,16 +727,20 @@ export function ApiCatalogWorkspace() {
               {runs.items.map((r) => (
                 <div key={r.runId} className="rounded-md border p-3 text-sm">
                   <div className="flex flex-wrap items-center gap-2">
-                    <Badge tone={BADGE_TONE[outcomeTone(r.outcome)]}>{outcomeLabel(r.outcome)}</Badge>
+                    <Badge tone={BADGE_TONE[outcomeTone(r.outcome)]}>
+                      {outcomeLabel(r.outcome)}
+                    </Badge>
                     {r.statusCode !== null && (
                       <Badge tone={BADGE_TONE[statusTone(r.statusCode)]}>{r.statusCode}</Badge>
                     )}
-                    <span className="font-mono text-[13px] break-all">
+                    <span className="break-all font-mono text-[13px]">
                       {r.httpMethod} {r.targetPath}
                     </span>
                     <span className="text-muted-foreground text-xs">{r.targetService}</span>
                   </div>
-                  {r.message && <div className="text-muted-foreground mt-1 text-xs">{r.message}</div>}
+                  {r.message && (
+                    <div className="text-muted-foreground mt-1 text-xs">{r.message}</div>
+                  )}
                   {r.bodySummary && (
                     <pre className="bg-muted mt-2 max-h-40 overflow-auto rounded p-2 text-[11px]">
                       {r.bodySummary}
@@ -735,7 +774,9 @@ export function ApiCatalogWorkspace() {
                     </div>
                     <div className="text-muted-foreground mt-1 text-xs">依据：{c.basis}</div>
                     {!c.available && c.ownerModule && (
-                      <div className="text-warning mt-1 text-xs">缺在 {c.ownerModule}：{c.impact}</div>
+                      <div className="text-warning mt-1 text-xs">
+                        缺在 {c.ownerModule}：{c.impact}
+                      </div>
                     )}
                     {c.available && c.impact && (
                       <div className="text-muted-foreground mt-1 text-xs">{c.impact}</div>
@@ -764,7 +805,8 @@ export function ApiCatalogWorkspace() {
           <Notice tone="info" title="接口清单从哪来">
             <span className="inline-flex items-center gap-1">
               <CircleAlert className="h-3.5 w-3.5" />
-              每个服务的 <code>/v3/api-docs</code> —— 蓝图原话：「接口契约由后端 spec 生成，文档不手写」。
+              每个服务的 <code>/v3/api-docs</code> —— 蓝图原话：「接口契约由后端 spec
+              生成，文档不手写」。
             </span>
           </Notice>
 
