@@ -346,6 +346,14 @@ public class DataMigrationService {
     check(code.matches("[A-Za-z0-9_-]{1,64}"), "映射编码只能包含英文字母、数字、下划线或短横线");
     var name = required(input.name(), "映射名称", 120);
     var model = DataMigrationTargets.require(input.targetModel());
+    check(
+        DataMigrationTargets.available(model.code()),
+        "目标模型「"
+            + model.code()
+            + "（"
+            + model.label()
+            + "）」没有接通迁移："
+            + model.limitation());
     var fields = validateFields(model, input.fields());
     var sourceSystem =
         input.sourceSystem() == null ? "" : input.sourceSystem().trim();
@@ -380,6 +388,14 @@ public class DataMigrationService {
     check(code.matches("[A-Za-z0-9_-]{1,64}"), "映射编码只能包含英文字母、数字、下划线或短横线");
     var name = required(input.name(), "映射名称", 120);
     var model = DataMigrationTargets.require(input.targetModel());
+    check(
+        DataMigrationTargets.available(model.code()),
+        "目标模型「"
+            + model.code()
+            + "（"
+            + model.label()
+            + "）」没有接通迁移："
+            + model.limitation());
     var fields = validateFields(model, input.fields());
     var sourceSystem = input.sourceSystem() == null ? "" : input.sourceSystem().trim();
     check(sourceSystem.length() <= 64, "外部系统名长度不能超过 64 个字符");
@@ -445,12 +461,19 @@ public class DataMigrationService {
       }
       out.add(new DataMigrationField(source, target, f.required(), transform.name(), defaultValue));
     }
-    for (var requiredKey : DataMigrationTargets.requiredFields(model.code())) {
-      check(
-          mappedTargets.contains(requiredKey),
-          "目标模型 " + model.code() + " 的必填字段「" + requiredKey + "」没有映射 —— "
-              + "缺了它，源文件的每一行都会失败");
-    }
+    // 🔴 **一次把所有缺掉的必填字段都点名**（不是只报第一个）：
+    //   运营建映射时会一次改全 —— 只报第一个的话，要来回提交四五次才知道还缺什么。
+    var missing =
+        DataMigrationTargets.requiredFields(model.code()).stream()
+            .filter(key -> !mappedTargets.contains(key))
+            .toList();
+    check(
+        missing.isEmpty(),
+        "目标模型 "
+            + model.code()
+            + " 的必填字段「"
+            + String.join("」「", missing)
+            + "」没有映射 —— 缺了它，源文件的每一行都会失败");
     return out;
   }
 
@@ -570,7 +593,7 @@ public class DataMigrationService {
     // 🔴 **先取一把事务级 advisory 锁**：这把锁随**本事务提交**而释放。
     //   执行器在 {@link #awaitVisible} 里取同一把锁 ⇒ 它拿到锁时任务行一定已可见
     //   （详见 awaitVisible 的说明：靠阻塞等提交，不靠 sleep 猜时间）。
-    sql.fetchOne("select pg_advisory_xact_lock(?)", advisoryLockKey(id));
+    sql.fetchOne("select pg_advisory_xact_lock(?::bigint)", advisoryLockKey(id));
     try {
       sql.execute(
           "insert into platform_migration_run(id,tenant_id,run_no,mode,target_model,mapping_id,"
@@ -739,7 +762,7 @@ public class DataMigrationService {
    * <p>⚠️ 必须在<b>带租户上下文的事务里</b>调用（RLS 挡住了没绑租户的读）。
    */
   public void awaitVisible(UUID runId) {
-    sql.fetchOne("select pg_advisory_xact_lock(?)", advisoryLockKey(runId));
+    sql.fetchOne("select pg_advisory_xact_lock(?::bigint)", advisoryLockKey(runId));
     var row = sql.fetchOne("select id from platform_migration_run where id = ?", runId);
     if (row == null) {
       throw new IllegalStateException("迁移任务不存在（或者发起它的那笔事务回滚了）：" + runId);
@@ -1593,13 +1616,12 @@ public class DataMigrationService {
             r.get("upstream_parent_id", UUID.class) == null
                 ? ""
                 : r.get("upstream_parent_id", UUID.class).toString(),
-            rollbackLabel(r.get("rollback_status", String.class)),
+            rowRollbackLabel(r.get("rollback_status", String.class)),
             r.get("rollback_message", String.class)
           });
     }
     return ImportExportCsv.write(List.of(), body);
   }
-
   /**
    * 源文件里**没被映射**的列（已忽略）。
    *
@@ -1628,14 +1650,16 @@ public class DataMigrationService {
   private void writeRollbackReport(UUID runId, int deleted, int failures, String finalStatus) {
     var run = run(runId);
     var body = new ArrayList<String[]>();
-    body.add(summary("# 迁移回滚报告", ""));
-    body.add(summary("# 迁移任务", run.runNo()));
-    body.add(summary("# 模式", modeLabel(run.mode())));
-    body.add(summary("# 回滚结论", rollbackLabel(finalStatus)));
-    body.add(summary("# 实际删除", String.valueOf(deleted)));
-    body.add(summary("# 删除失败", String.valueOf(failures)));
-    body.add(summary("# 生成时间", dbNow().toString()));
-    body.add(List.of("行号", "目标类型", "目标编码", "上游记录ID", "回滚结论", "说明").toArray(new String[0]));
+    body.add(summary("# 迁移回滚报告", "", ROLLBACK_REPORT_COLUMNS));
+    body.add(summary("# 迁移任务", run.runNo(), ROLLBACK_REPORT_COLUMNS));
+    body.add(summary("# 模式", modeLabel(run.mode()), ROLLBACK_REPORT_COLUMNS));
+    body.add(summary("# 回滚结论", rollbackLabel(finalStatus), ROLLBACK_REPORT_COLUMNS));
+    body.add(summary("# 实际删除", String.valueOf(deleted), ROLLBACK_REPORT_COLUMNS));
+    body.add(summary("# 删除失败", String.valueOf(failures), ROLLBACK_REPORT_COLUMNS));
+    body.add(summary("# 生成时间", dbNow().toString(), ROLLBACK_REPORT_COLUMNS));
+    body.add(
+        List.of("行号", "目标类型", "目标编码", "上游记录ID", "回滚结论", "说明")
+            .toArray(new String[0]));
     var detail =
         sql.fetch(
             "select row_no,target_kind,target_code,upstream_id,rollback_status,rollback_message"
@@ -1649,7 +1673,7 @@ public class DataMigrationService {
             r.get("target_kind", String.class),
             r.get("target_code", String.class),
             r.get("upstream_id", UUID.class) == null ? "" : r.get("upstream_id", UUID.class).toString(),
-            rollbackLabel(r.get("rollback_status", String.class)),
+            rowRollbackLabel(r.get("rollback_status", String.class)),
             r.get("rollback_message", String.class)
           });
     }
@@ -1665,9 +1689,30 @@ public class DataMigrationService {
         "update platform_migration_run set rollback_report_file_id = ? where id = ?", file.id(), runId);
   }
 
+  /** 核对报告的列数（摘要行与明细行同宽）。 */
+  static final int REPORT_COLUMNS = 10;
+
+  /** 回滚报告的列数（摘要行与明细行同宽）。 */
+  static final int ROLLBACK_REPORT_COLUMNS = 6;
+
   /** 摘要行（两列，补齐成与明细同宽，避免 CSV 里列错位）。 */
   private static String[] summary(String label, String value) {
-    return new String[] {label, value, "", "", "", "", "", "", "", ""};
+    return summary(label, value, REPORT_COLUMNS);
+  }
+
+  /**
+   * 摘要行（**指定宽度**）。
+   *
+   * <p>🔴 宽度必须与明细行一致：两份报告的列数不同（核对报告 10 列、回滚报告 6 列），
+   * 摘要行若都按 10 列写，回滚报告在 Excel 里就是**错位**的（摘要块挤在明细前面，
+   * 看着像两张表拼在一起）。
+   */
+  private static String[] summary(String label, String value, int width) {
+    var cells = new String[width];
+    java.util.Arrays.fill(cells, "");
+    cells[0] = label;
+    cells[1] = value;
+    return cells;
   }
 
   // ================================================================ 过期清理
@@ -1774,6 +1819,22 @@ public class DataMigrationService {
   private static String rollbackLabel(String status) {
     try {
       return RollbackStatus.valueOf(status).label();
+    } catch (IllegalArgumentException e) {
+      return status;
+    }
+  }
+
+  /**
+   * <b>逐行</b>回滚结论的显示口径（**行级**枚举，不是任务级的）。
+   *
+   * <p>🔴 任务级是 {@link RollbackStatus}（未回滚 / 回滚中 / 已回滚 / 回滚失败），
+   * 行级是 {@link RowRollbackStatus}（未回滚 / <b>已删除</b> / 未删除）——
+   * 两者**不是同一套词**。用错的话，报告里的「回滚结论」列会印出原始码
+   * {@code DELETED} 而不是人话「已删除」：审计的人看不懂「已删除」和「未删除」的区别。
+   */
+  private static String rowRollbackLabel(String status) {
+    try {
+      return RowRollbackStatus.valueOf(status).label();
     } catch (IllegalArgumentException e) {
       return status;
     }
