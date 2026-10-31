@@ -692,6 +692,9 @@ public class AutomationRuleService {
 
   /** 某条规则的执行历史（只追加台账，倒序）。 */
   public List<AutomationRuleExecutionRow> executionRows(UUID ruleId, int limit) {
+    // 🔴 先确认这条规则**在当前租户名下存在** —— 否则会返回 200 + 空列表，
+    //    而「这条规则不是你的」与「这条规则还没有执行过」是两件事。
+    ruleRow(ruleId);
     var size = Math.min(Math.max(limit, 1), 200);
     return sql.fetch(
             "select e.id,e.rule_id,r.name as rule_name,e.run_no,e.status,e.source,e.dry_run,"
@@ -754,11 +757,8 @@ public class AutomationRuleService {
         status != AutomationRuleRunStatus.FAILED || !failureReason.isEmpty(),
         "失败必须写清失败原因 —— 否则就是又一种静默失败");
     check(
-        failureClass == null || !failureReason.isEmpty(),
-        "填了失败分类就必须写清失败原因");
-    check(
-        failureClass == null || failureReason.isEmpty(),
-        "写了失败原因就必须给出失败分类");
+        failureReason.isEmpty() == (failureClass == null),
+        "失败原因与失败分类必须同时给或同时不给 —— 只给一半说不清是哪一类失败");
 
     var startedAt = parseTime(input.startedAt(), "开始时间");
     var finishedAt = parseTime(input.finishedAt(), "结束时间");
