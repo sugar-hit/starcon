@@ -53,6 +53,14 @@ class EventSubscriptionIntegrationTest {
   static final Map<String, AccessService.Access> actors = new ConcurrentHashMap<>();
   static HttpServer identity;
 
+  /**
+   * 🔴 **真的收方**（18.1.2.2 的投递执行器已接入 ⇒ 本车道「按订阅投递」端点
+   * 现在会真的把包发出去，所以这里必须有一个**真的 HTTP 服务器**来收。
+   *
+   * <p>用 mock 打桩的发送器就永远验不了「包真的发出去了」这条承诺。
+   */
+  static DeliveryRecordReceiver receiver;
+
   static final ObjectMapper json =
       new ObjectMapper().registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
 
@@ -101,6 +109,8 @@ class EventSubscriptionIntegrationTest {
           });
       identity.setExecutor(Executors.newFixedThreadPool(2));
       identity.start();
+      receiver = new DeliveryRecordReceiver();
+      receiver.start();
     } catch (Exception e) {
       throw new ExceptionInInitializerError(e);
     }
@@ -137,12 +147,17 @@ class EventSubscriptionIntegrationTest {
   void reset() throws Exception {
     try (var c = DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
         var s = c.createStatement()) {
+      // ⚠️ 投递四表（18.1.2.2 的表）也一起清 —— 本车道的「按订阅投递」现在会真的落投递记录，
+      //   不清的话上一轮留下的行会污染这一轮的断言。
       s.execute(
-          "truncate table platform_webhook_audit_event, platform_webhook_policy,"
+          "truncate table platform_delivery_replay_task, platform_delivery_dead_letter,"
+              + " platform_delivery_attempt, platform_delivery_record,"
+              + " platform_webhook_audit_event, platform_webhook_policy,"
               + " platform_webhook_signing_secret, platform_webhook_subscription_event,"
               + " platform_webhook_subscription, platform_webhook_event_type, platform_app"
               + " restart identity cascade");
     }
+    receiver.reset();
   }
 
   /** 插一个应用（订阅必须挂在已注册应用上 —— 真 FK）。 */
@@ -270,19 +285,24 @@ class EventSubscriptionIntegrationTest {
   }
 
   @Test
-  void 本模块不落任何金额也不建任何投递表() {
+  void 本模块不落任何金额且订阅配置侧只有六张表() {
     var amountColumns =
         sql.fetch(
             "select table_name, column_name from information_schema.columns"
                 + " where table_name like 'platform_webhook%'"
+                + " and table_schema = 'public'"
                 + " and (column_name like '%amount%' or column_name like '%price%' or column_name like '%fee%'"
                 + " or column_name like '%balance%' or column_name like '%tax%' or column_name like '%currency%')");
     assertThat(amountColumns).as("事件订阅模块不落金额").isEmpty();
 
-    // 🔴 **投递明细归 18.1.2.2**：本车道不许建任何投递 / 死信表。
+    // ⚠️ **查询必须限定 schema**：`information_schema.tables` 覆盖**全库**，
+    //   不加 `table_schema = 'public'` 就会把别的 schema 下的表也算进来 ——
+    //   那会让「本车道只有六张表」这条断言变成一句「全库恰好没有第二张同名表」，
+    //   别人在自己的 schema 里建一张表就能把它弄红。
     var tables =
         sql.fetch(
-                "select table_name from information_schema.tables where table_name like 'platform_webhook%'")
+                "select table_name from information_schema.tables"
+                    + " where table_name like 'platform_webhook%' and table_schema = 'public'")
             .map(r -> r.get(0, String.class));
     assertThat(tables)
         .as("本车道只有订阅配置侧的六张表")
@@ -838,19 +858,94 @@ class EventSubscriptionIntegrationTest {
   }
 
   @Test
-  void 投递执行未接入时如实答409且不写任何投递记录() throws Exception {
+  void 投递表由18_1_2_2建出且强制rls() {
+    // 🔴 **本车道原来那条「不许建任何投递 / 死信表」的守卫已经被 18.1.2.2 合法推翻**：
+    //   18.1.2.2「投递记录」建出了 platform_delivery_* 四张表，
+    //   而原断言是**全库子串枚举**（`table_name like '%delivery%'`）——
+    //   它把下游模块的表也算进来，于是只要 18.1.2.2 交付就必红。
+    //
+    //   那条断言的**意图**（「投递明细必须带 RLS、必须 tenant_id NOT NULL」）没有错，
+    //   所以这里改成**正面断言**：按显式表名 + schema 限定逐张查，
+    //   而不是靠「全库恰好没有第二张带 delivery 字样的表」来间接表达。
+    for (String table :
+        List.of(
+            "platform_delivery_record",
+            "platform_delivery_attempt",
+            "platform_delivery_dead_letter",
+            "platform_delivery_replay_task")) {
+      var row =
+          sql.fetchOne(
+              "select relrowsecurity, relforcerowsecurity from pg_class"
+                  + " where relname = ? and relnamespace = 'public'::regnamespace",
+              table);
+      assertThat(row).as("V413 必须真的建出 " + table).isNotNull();
+      assertThat(row.get(0, Boolean.class)).as(table + " 未启用 RLS").isTrue();
+      assertThat(row.get(1, Boolean.class))
+          .as(table + " 只有 FORCE 才挡得住「运行角色被误授 owner」")
+          .isTrue();
+
+      var nullable =
+          sql.fetchOne(
+                  "select is_nullable from information_schema.columns"
+                      + " where table_name = ? and column_name = 'tenant_id' and table_schema = 'public'",
+                  table)
+              .get(0, String.class);
+      assertThat(nullable).as(table + " 的 tenant_id 必须是 NOT NULL").isEqualTo("NO");
+    }
+  }
+
+  @Test
+  void 按订阅投递真的发包并把响应码落进投递记录() throws Exception {
     var appId = seedApp("erp-gateway");
-    var subscription = createSubscription(appId, "订单事件", "https://partner.example.com/hooks");
+    registerEventType("SkuProfileSaved", 1, "catalog", "catalog/SkuDetailService.java:435");
+    var subscription = createSubscription(appId, "订单事件", receiver.url("/hook"));
+    // 签名密钥：没有它平台**签不了名** ⇒ 一个包都不发（这是永久性失败，不是网络问题）。
+    perform(post("/platform/webhooks/subscriptions/" + subscription.id() + "/signing-secrets"), Map.of())
+        .andExpect(status().isOk());
 
-    // 🔴 端点如实答 **409**（投递执行器未接入）。
-    perform(
-            post("/platform/webhooks/subscriptions/" + subscription.id() + "/deliver"),
-            new EventSubscriptionDeliveryInput("SkuProfileSaved", 1, "{\"a\":1}"))
-        .andExpect(status().isConflict());
+    var response =
+        perform(
+                post("/platform/webhooks/subscriptions/" + subscription.id() + "/deliver"),
+                new EventSubscriptionDeliveryInput("SkuProfileSaved", 1, "{\"a\":1}"))
+            .andExpect(status().isOk())
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
 
-    // ⚠️ 原因（归 18.1.2.2）走 HTTP 状态短语，本仓的服务层错误约定是
-    //   「ResponseStatusException ⇒ 空 body，原因在状态里」（与 18.2.1.1 直连推送同一约定），
-    //   所以在**服务层**断言原因文本，而不是在 HTTP body 里找。
+    var outcome =
+        json.readValue(
+            response, EventSubscriptionDeliveryPort.EventSubscriptionDeliveryOutcome.class);
+    assertThat(outcome.sent()).as("投递执行器已接入 ⇒ 必须真的把包发出去").isTrue();
+    assertThat(outcome.statusCode()).isEqualTo(200);
+    assertThat(outcome.ownerModule()).isEqualTo("18.1.2.2");
+
+    // 收方**真的**收到了一个 POST（不是「记了一条成功日志」）。
+    var received = receiver.requests();
+    assertThat(received).hasSize(1);
+    assertThat(received.get(0).method()).isEqualTo("POST");
+    assertThat(received.get(0).path()).isEqualTo("/hook");
+
+    // 投递明细落在 18.1.2.2 的表里：状态 DELIVERED、响应码 200、尝试 1 次。
+    var rows =
+        inTenant(
+            () ->
+                sql.fetch(
+                    "select status,status_code,attempt_count from platform_delivery_record"));
+    assertThat(rows).as("真实投递必须留下投递记录").hasSize(1);
+    assertThat(rows.get(0).get("status", String.class)).isEqualTo("DELIVERED");
+    assertThat(rows.get(0).get("status_code", Integer.class)).isEqualTo(200);
+    assertThat(rows.get(0).get("attempt_count", Integer.class)).isEqualTo(1);
+  }
+
+  @Test
+  void 对方端点连不上时如实答409并写明是没送达而不是未接入() throws Exception {
+    var appId = seedApp("erp-gateway");
+    registerEventType("SkuProfileSaved", 1, "catalog", "catalog/SkuDetailService.java:435");
+    // 127.0.0.1:1 —— 一个确定连不上的地址（连接被拒，不是超时）。
+    var subscription = createSubscription(appId, "订单事件", "http://127.0.0.1:1/hooks");
+    perform(post("/platform/webhooks/subscriptions/" + subscription.id() + "/signing-secrets"), Map.of())
+        .andExpect(status().isOk());
+
     var thrown =
         org.assertj.core.api.Assertions.catchThrowable(
             () ->
@@ -860,16 +955,32 @@ class EventSubscriptionIntegrationTest {
                             subscription.id(),
                             new EventSubscriptionDeliveryInput("SkuProfileSaved", 1, "{\"a\":1}"),
                             null)));
-    assertThat(thrown).as("投递未接入必须拒绝").isNotNull();
-    assertThat(thrown.getMessage()).contains("18.1.2.2").contains("未接入");
+    assertThat(thrown).as("连不上对方 ⇒ 端点如实拒绝").isNotNull();
+    // 🔴 **409 不再是「未接入」的代名词**：它现在表示「这次没投出去」，
+    //   原因必须说清是**连不上对方**，而不是「投递能力没接上」。
+    assertThat(thrown.getMessage()).contains("连不上对方").doesNotContain("未接入");
+  }
 
-    // 一次投递都不发生 ⇒ 没有任何投递痕迹。
-    var tables =
-        sql.fetch(
-                "select table_name from information_schema.tables where table_name like '%delivery%'"
-                    + " or table_name like '%dead_letter%' or table_name like '%webhook_delivery%'")
-            .map(r -> r.get(0, String.class));
-    assertThat(tables).as("本车道不建任何投递 / 死信表（归 18.1.2.2）").isEmpty();
+  @Test
+  void 没有生效中的签名密钥时一个包都不发且如实答永久失败() throws Exception {
+    var appId = seedApp("erp-gateway");
+    registerEventType("SkuProfileSaved", 1, "catalog", "catalog/SkuDetailService.java:435");
+    var subscription = createSubscription(appId, "订单事件", receiver.url("/hook"));
+    // ⚠️ **刻意不生成签名密钥**：平台签不了名 ⇒ 发一个没有签名的包比不发更糟
+    //   （对方的验签会失败，而对方分不清「没带签名」与「伪造的」）。
+
+    var thrown =
+        org.assertj.core.api.Assertions.catchThrowable(
+            () ->
+                inTenant(
+                    () ->
+                        service.deliver(
+                            subscription.id(),
+                            new EventSubscriptionDeliveryInput("SkuProfileSaved", 1, "{\"a\":1}"),
+                            null)));
+    assertThat(thrown).as("没有密钥 ⇒ 如实拒绝").isNotNull();
+    assertThat(thrown.getMessage()).contains("签名密钥").doesNotContain("未接入");
+    assertThat(receiver.requests()).as("没有密钥 ⇒ 一个包都不该发出去").isEmpty();
   }
 
   // ================================================================
@@ -1001,14 +1112,38 @@ class EventSubscriptionIntegrationTest {
                 .getContentAsString(),
             EventSubscriptionCapabilities.class);
 
+    // 🔴 **18.1.2.2 投递记录已交付** ⇒ 「事件实际投递」这一维必须如实答 **true**。
+    //   （原断言「投递未接入必须如实答 false」把下游模块的缺口当成了本车道的常态 ——
+    //    18.1.2.2 落地后它就变成了一句假话。）
     var delivery =
         capabilities.capabilities().stream()
             .filter(c -> c.name().contains("事件实际投递"))
             .findFirst()
             .orElseThrow();
-    assertThat(delivery.available()).as("投递未接入必须如实答 false").isFalse();
+    assertThat(delivery.available()).as("投递执行器已由 18.1.2.2 接入 ⇒ 必须如实答 true").isTrue();
     assertThat(delivery.ownerModule()).isEqualTo("18.1.2.2");
     assertThat(delivery.basis()).isNotBlank();
+
+    // 「死信重放」同样由 18.1.2.2 交付 ⇒ 也必须如实答 true。
+    var deadLetterReplay =
+        capabilities.capabilities().stream()
+            .filter(c -> c.name().contains("死信重放"))
+            .findFirst()
+            .orElseThrow();
+    assertThat(deadLetterReplay.available()).as("死信重放已由 18.1.2.2 交付").isTrue();
+
+    // 🔴 **「上游 outbox relay」必须仍然如实答 false** ——
+    //   backend/libraries 下只有 tenancy，没有 event-envelope 库；
+    //   backend/ 的 pom 里也没有任何事件通道依赖；平台没有跨服务读业务服务 outbox 的授权通道。
+    //   🔴 **不许为了让测试绿而写成假的 true**：跨服务读别人的表是模块边界纪律禁止的。
+    var relay =
+        capabilities.capabilities().stream()
+            .filter(c -> c.name().contains("outbox relay"))
+            .findFirst()
+            .orElseThrow();
+    assertThat(relay.available()).as("上游 outbox relay 确实没有通道 ⇒ 必须如实答 false").isFalse();
+    assertThat(relay.basis()).isNotBlank();
+    assertThat(relay.impact()).isNotBlank();
 
     var eventList =
         capabilities.capabilities().stream()
