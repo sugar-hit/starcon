@@ -239,7 +239,7 @@ public final class DataMigrationModels {
       String label,
       String ownerService,
       String ownerModule,
-      List<DataMigrationTargets.Field> fields,
+      List<DataMigrationTargets.DataMigrationTargetField> fields,
       String limitation) {}
 
   // ================================================================ 迁移任务

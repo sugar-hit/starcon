@@ -31,13 +31,19 @@ public final class DataMigrationTargets {
   /**
    * 一个内部模型的字段。
    *
+   * <p>🔴 <b>名字带模块前缀</b>：springdoc 用 record 的**简单名**当 schema 名，
+   * 而这份契约是从 {@code packages/api-contracts} 的桶文件导出的（全局可见）——
+   * 叫 {@code Field} 的话，桶文件里就多一个谁都能 import 的 {@code Field}，
+   * 与别的模块的同名类型迟早撞车。叫 {@code DataMigrationTargetField} 才不会。
+   *
    * @param key 字段键（程序内稳定标识）
    * @param label 中文名
    * @param required 是否必填（源文件缺这一列 / 值为空 ⇒ 该行失败）
    * @param defaultValue 源值为空时的兜底值（只对非必填字段有意义）
    * @param help 填写说明
    */
-  public record Field(String key, String label, boolean required, String defaultValue, String help) {}
+  public record DataMigrationTargetField(
+      String key, String label, boolean required, String defaultValue, String help) {}
 
   /**
    * 一个可迁移的内部模型。
@@ -54,15 +60,15 @@ public final class DataMigrationTargets {
       String label,
       String ownerService,
       String ownerModule,
-      List<Field> fields,
+      List<DataMigrationTargetField> fields,
       String limitation) {}
 
-  private static Field required(String key, String label, String help) {
-    return new Field(key, label, true, "", help);
+  private static DataMigrationTargetField required(String key, String label, String help) {
+    return new DataMigrationTargetField(key, label, true, "", help);
   }
 
-  private static Field optional(String key, String label, String defaultValue, String help) {
-    return new Field(key, label, false, defaultValue, help);
+  private static DataMigrationTargetField optional(String key, String label, String defaultValue, String help) {
+    return new DataMigrationTargetField(key, label, false, defaultValue, help);
   }
 
   // ================================================================ 目录本体
@@ -166,15 +172,15 @@ public final class DataMigrationTargets {
   }
 
   /** 模型的字段表（key → field）。 */
-  public static Map<String, Field> fieldsOf(String code) {
+  public static Map<String, DataMigrationTargetField> fieldsOf(String code) {
     var model = require(code);
-    var map = new LinkedHashMap<String, Field>();
+    var map = new LinkedHashMap<String, DataMigrationTargetField>();
     for (var f : model.fields()) map.put(f.key(), f);
     return map;
   }
 
   /** 这个模型里**必填**的字段键。 */
   public static List<String> requiredFields(String code) {
-    return require(code).fields().stream().filter(Field::required).map(Field::key).toList();
+    return require(code).fields().stream().filter(DataMigrationTargetField::required).map(DataMigrationTargetField::key).toList();
   }
 }

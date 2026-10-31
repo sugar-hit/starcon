@@ -1301,6 +1301,506 @@
         },
         "type": "object"
       },
+      "DataMigrationCapabilities": {
+        "properties": {
+          "capabilities": {
+            "items": {
+              "$ref": "#/components/schemas/DataMigrationCapability"
+            },
+            "type": "array"
+          },
+          "gaps": {
+            "items": {
+              "$ref": "#/components/schemas/DataMigrationGap"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "DataMigrationCapability": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "basis": {
+            "type": "string"
+          },
+          "limitation": {
+            "type": "string"
+          },
+          "module": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "DataMigrationField": {
+        "properties": {
+          "defaultValue": {
+            "type": "string"
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "source": {
+            "type": "string"
+          },
+          "target": {
+            "type": "string"
+          },
+          "transform": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "DataMigrationGap": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "module": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "ownerService": {
+            "type": "string"
+          },
+          "relation": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "DataMigrationMappingInput": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "fields": {
+            "items": {
+              "$ref": "#/components/schemas/DataMigrationField"
+            },
+            "type": "array"
+          },
+          "name": {
+            "type": "string"
+          },
+          "remark": {
+            "type": "string"
+          },
+          "sourceSystem": {
+            "type": "string"
+          },
+          "targetModel": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "DataMigrationMappingPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/DataMigrationMappingRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "DataMigrationMappingRow": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdBy": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "fields": {
+            "items": {
+              "$ref": "#/components/schemas/DataMigrationField"
+            },
+            "type": "array"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "remark": {
+            "type": "string"
+          },
+          "sourceSystem": {
+            "type": "string"
+          },
+          "targetModel": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "DataMigrationOverview": {
+        "properties": {
+          "applyRuns": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "dryRunRuns": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "failedRuns": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "mappingCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "now": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "rolledBackRuns": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "rowCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "runningRuns": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "skippedRuns": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "succeededRuns": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalRuns": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "DataMigrationRowPage": {
+        "properties": {
+          "failedCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/DataMigrationRowRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "skippedCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "succeededCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "DataMigrationRowRow": {
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "outcome": {
+            "type": "string"
+          },
+          "rawValue": {
+            "type": "string"
+          },
+          "reasonCode": {
+            "type": "string"
+          },
+          "rollbackMessage": {
+            "type": "string"
+          },
+          "rollbackStatus": {
+            "type": "string"
+          },
+          "rowNo": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "runId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "targetCode": {
+            "type": "string"
+          },
+          "targetKind": {
+            "type": "string"
+          },
+          "upstreamId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "upstreamParentId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "DataMigrationRunInput": {
+        "properties": {
+          "contentBase64": {
+            "type": "string"
+          },
+          "filename": {
+            "type": "string"
+          },
+          "mappingId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "mode": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "DataMigrationRunPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/DataMigrationRunRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "DataMigrationRunRow": {
+        "properties": {
+          "actorId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "error": {
+            "type": "string"
+          },
+          "failedRows": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "finishedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "mappingCode": {
+            "type": "string"
+          },
+          "mappingId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "mode": {
+            "type": "string"
+          },
+          "processedRows": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "reportFileId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "requestedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "rollbackReportFileId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "rollbackStatus": {
+            "type": "string"
+          },
+          "rolledBackAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "rolledBackRows": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "runNo": {
+            "type": "string"
+          },
+          "skippedRows": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "sourceFilename": {
+            "type": "string"
+          },
+          "sourceSha256": {
+            "type": "string"
+          },
+          "startedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "succeededRows": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "targetModel": {
+            "type": "string"
+          },
+          "totalRows": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "DataMigrationTargetField": {
+        "properties": {
+          "defaultValue": {
+            "type": "string"
+          },
+          "help": {
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "required": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "DataMigrationTargetRow": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "fields": {
+            "items": {
+              "$ref": "#/components/schemas/DataMigrationTargetField"
+            },
+            "type": "array"
+          },
+          "label": {
+            "type": "string"
+          },
+          "limitation": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "ownerService": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "DeliveryRecordAttemptRow": {
         "properties": {
           "attemptNo": {
@@ -8868,6 +9368,707 @@
         "summary": "趋势",
         "tags": [
           "api-call-monitor-controller"
+        ]
+      }
+    },
+    "/platform/data-migration/capabilities": {
+      "get": {
+        "operationId": "get_platform_data_migration_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataMigrationCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "data-migration-controller"
+        ]
+      }
+    },
+    "/platform/data-migration/expire": {
+      "post": {
+        "operationId": "post_platform_data_migration_expire",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "object"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "data-migration-controller"
+        ]
+      }
+    },
+    "/platform/data-migration/mappings": {
+      "get": {
+        "operationId": "get_platform_data_migration_mappings",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "targetModel",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "q",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataMigrationMappingPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "data-migration-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_platform_data_migration_mappings",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DataMigrationMappingInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataMigrationMappingRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "data-migration-controller"
+        ]
+      }
+    },
+    "/platform/data-migration/mappings/{id}": {
+      "delete": {
+        "operationId": "delete_platform_data_migration_mappings_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "object"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "data-migration-controller"
+        ]
+      },
+      "get": {
+        "operationId": "get_platform_data_migration_mappings_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataMigrationMappingRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "data-migration-controller"
+        ]
+      },
+      "put": {
+        "operationId": "put_platform_data_migration_mappings_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DataMigrationMappingInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataMigrationMappingRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "data-migration-controller"
+        ]
+      }
+    },
+    "/platform/data-migration/overview": {
+      "get": {
+        "operationId": "get_platform_data_migration_overview",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataMigrationOverview"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "data-migration-controller"
+        ]
+      }
+    },
+    "/platform/data-migration/runs": {
+      "get": {
+        "operationId": "get_platform_data_migration_runs",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "mode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataMigrationRunPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "data-migration-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_platform_data_migration_runs",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DataMigrationRunInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataMigrationRunRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "data-migration-controller"
+        ]
+      }
+    },
+    "/platform/data-migration/runs/{id}": {
+      "get": {
+        "operationId": "get_platform_data_migration_runs_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataMigrationRunRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "data-migration-controller"
+        ]
+      }
+    },
+    "/platform/data-migration/runs/{id}/report": {
+      "get": {
+        "operationId": "get_platform_data_migration_runs_id_report",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "text/csv": {
+                "schema": {
+                  "format": "byte",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "data-migration-controller"
+        ]
+      }
+    },
+    "/platform/data-migration/runs/{id}/rollback": {
+      "post": {
+        "operationId": "post_platform_data_migration_runs_id_rollback",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataMigrationRunRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "data-migration-controller"
+        ]
+      }
+    },
+    "/platform/data-migration/runs/{id}/rollback-report": {
+      "get": {
+        "operationId": "get_platform_data_migration_runs_id_rollback_report",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "text/csv": {
+                "schema": {
+                  "format": "byte",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "data-migration-controller"
+        ]
+      }
+    },
+    "/platform/data-migration/runs/{id}/rows": {
+      "get": {
+        "operationId": "get_platform_data_migration_runs_id_rows",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "outcome",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataMigrationRowPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "data-migration-controller"
+        ]
+      }
+    },
+    "/platform/data-migration/targets": {
+      "get": {
+        "operationId": "get_platform_data_migration_targets",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/DataMigrationTargetRow"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "data-migration-controller"
         ]
       }
     },
