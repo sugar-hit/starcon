@@ -76,6 +76,52 @@ const services: readonly {
       /^automation\-rules\/(?:capabilities|overview|event-types|applicable|rules(?:\/reorder|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:enable|disable|dry\-run|preview|executions))?)?|upstream\/(?:shops|warehouses))$/,
   },
   {
+    // 18.3.2.1 执行日志（platform 服务，卷 18「集成开放与智能自动化」L3 18.3.2「执行」下的第一格）。
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有的 platform/ 分支里并分支 ——
+    //   既有条目**一字未改、也不重排**。
+    //
+    // ---- 插入锚点选在「18.3.1.1 规则列表」那条之后**（数组靠前那一段）----
+    //   本文件是并行车道共同的累积型文件：同批其它车道（18.4.2.2 / 18.4.3.1 / 18.5.1.1）
+    //   用的是 `platform/ai/**` 系列首 token；本车道落在这条**兄弟模块**之后，
+    //   与它们的插入点相距甚远 ⇒ 并入时 git 能干净求并。
+    //
+    // ---- 首 token「automation/runs」的零命中核对结论 ----
+    //   同为 platform/ 的既有条目首 token 分别是
+    //   automation-rules（18.3.1.1）/ automation-rule-editor（18.3.1.2）/
+    //   auto-approvals（18.3.3.1）/ data-migration（18.1.3.2）/ webhooks（18.1.2.1）/
+    //   deliveries（18.1.2.2）/ io（18.1.3.1）/ text（18.4.2.1）/ apps（18.1.1.1）/
+    //   finance-software（18.2.1.1）/ api-catalog（18.1.4.1）/ call-monitor（18.1.5.1）/
+    //   payment-funds（18.2.2.1）/ external-integrations（18.2.3.1）。
+    //   它们的正则**没有一个**能吃掉 `automation/runs/...` ——
+    //   本条用**斜杠**分隔（`automation/runs`），兄弟模块用**连字符**
+    //   （`automation-rules` / `automation-rule-editor`）⇒ 天然互斥。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   automation/runs                     运行列表（GET 真分页真筛选）/ 登记一次执行（POST，幂等）
+    //   automation/runs/capabilities        能力声明（哪些真交付 / 哪些还没交付、归谁）
+    //   automation/runs/overview            概览（几个数，含「未执行」这一档）
+    //   automation/runs/{uuid}              运行详情（GET，**含逐步明细** ⇒ 失败可下钻到 step）
+    //   automation/runs/{uuid}/rerun        手动重跑（POST，**只登记待执行记录**）
+    //
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   platform/automation/runs/unknown            —— 未实现的子路径仍然 404。
+    //   platform/automation/runs/not-a-uuid         —— 非 UUID 段不应被 uuid 分支吃掉。
+    //   platform/automation/runs/{uuid}/not-a-shape —— 多一段仍然 404。
+    //   ⚠️ **刻意不放行** `platform/automation/runs/{uuid}/execute`：
+    //   规则执行引擎归 18.3.2、**尚未交付** ⇒ 没有这个端点 ⇒ 放行它会让界面以为
+    //   「点一下就能跑规则」，而那必然 404。
+    //
+    // id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //   （不是 `[0-9a-f-]+`）：后者会把 `rerun` 这种非 UUID 形状也当成 id 放行。
+    // 字面量子路径（capabilities / overview）排在 {uuid} 段**之前**判别 ——
+    //   alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    prefix: 'platform/',
+    env: 'PLATFORM_URL',
+    fallback: 'http://127.0.0.1:8089',
+    pattern:
+      /^automation\/runs(?:\/capabilities|\/overview|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/rerun)?)?$/,
+  },
+  {
     // 18.3.3.1 自动审批（platform 服务，卷 18「集成开放与智能自动化」L3 18.3.3 下的第一格）。
     // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有的 platform/ 分支里并分支 ——
     //   既有条目**一字未改、也不重排**。
