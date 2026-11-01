@@ -14343,6 +14343,58 @@ const services: readonly {
     pattern:
       /^external\-integrations\/(?:capabilities|overview|adapters\/availability|connections(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:disable|health(?:\/refresh)?))?)?|sync\-tasks(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:disable|run))?)?|sync\-records(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|upstream\/(?:platforms|shops))$/,
   },
+  {
+    // 18.3.1.2 规则编辑器（platform 服务，卷 18「集成开放与智能自动化」L3 18.3.1「规则管理」下的第二格）。
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有的 platform/ 分支里并分支 ——
+    //   既有条目**一字未改、也不重排**。
+    //
+    // ---- 插入锚点选在**数组末尾**（收尾的 `];` 之前）----
+    //   本文件是并行车道共同的累积型文件：最近四条 platform 车道（18.1.2.1 / 18.1.3.2 /
+    //   18.3.1.1 / 18.3.3.1）都插在「数组最开头」，而数组末尾由 18.2.3.1 的
+    //   external-integrations 占着。本车道落在这里 ⇒ 与开头那一段相距 14000 行以上，
+    //   并入时 git 能干净求并（18.3.1.1 与 18.3.3.1 两条都插开头时已经撞过一次）。
+    //
+    // ---- 首 token「automation-rule-editor」的零命中核对结论 ----
+    //   本文件里既有的 `prefix: 'platform/'` 条目，其首 token 分别是
+    //   automation-rules（18.3.1.1）/ auto-approvals（18.3.3.1）/ data-migration（18.1.3.2）/
+    //   webhooks（18.1.2.1）/ deliveries（18.1.2.2）/ io（18.1.3.1）/ text（18.4.2.1）/
+    //   apps（18.1.1.1）/ finance-software（18.2.1.1）/ api-catalog（18.1.4.1）/
+    //   call-monitor（18.1.5.1）/ payment-funds（18.2.2.1）/ external-integrations（18.2.3.1）。
+    //   ⚠️ 18.3.1.1 的首 token 是 `automation-rules`，本模块是 `automation-rule-editor` ——
+    //   两者**互斥**：`automation\-rules\/` 要求第 14 个字符是 `s`，而这里是 `-`。
+    //   18.3.1.1 管「规则档案 / 执行统计」，本模块管「**编辑器**：选事件 / 配条件 /
+    //   编排动作 / 样本测试」—— 对象与端点命名空间都不同，不要互相调用。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   automation-rule-editor/capabilities            能力声明（哪些真交付 / 哪些还没交付、归谁）
+    //   automation-rule-editor/event-schemas           触发事件的**字段目录**（GET，从事件注册表的
+    //                                                  payload_schema 摊平而来）
+    //   automation-rule-editor/event-schemas/{event}   单个事件的字段目录（GET）
+    //   automation-rule-editor/action-catalog          动作类型目录（五类动作 + 参数规格）
+    //   automation-rule-editor/api-catalog             「调接口」动作可选的目标接口（活 spec 投影）
+    //   automation-rule-editor/save                    保存规则定义（POST，**委托 18.3.1.1**）
+    //   automation-rule-editor/test                    **跑一次样本测试**（POST，真求值、不执行）
+    //   automation-rule-editor/test-runs               样本测试历史（GET，只追加台账）
+    //
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   platform/automation-rule-editor                     —— 裸路径：后端**没有**汇总端点。
+    //   platform/automation-rule-editor/unknown             —— 未实现的子路径仍然 404。
+    //   platform/automation-rule-editor/execute             —— 🔴 **执行规则**：18.3.2 执行引擎
+    //                                                          **尚未交付** ⇒ 后端没有这个端点。
+    //                                                          放行它会让界面以为「点一下就能跑规则」。
+    //   platform/automation-rule-editor/test-runs/extra     —— 多一段仍然 404。
+    //   platform/automation-rule-editor/event-schemas/unknown —— 事件类型是**点分**的
+    //                                                          （order.created），这一段不是事件类型。
+    //
+    // 事件类型段用 `[A-Za-z0-9_-]+(?:\.[A-Za-z0-9_-]+)+`（**至少一个点**）：
+    //   事件注册表里登记的事件类型字面量都是点分的（order.created / sku.updated），
+    //   要求至少一个点就不会把 `unknown` 这类不是事件类型的形状吃进来。
+    prefix: 'platform/',
+    env: 'PLATFORM_URL',
+    fallback: 'http://127.0.0.1:8089',
+    pattern:
+      /^automation\-rule\-editor\/(?:capabilities|event\-schemas(?:\/[A-Za-z0-9_-]+(?:\.[A-Za-z0-9_-]+)+)?|action\-catalog|api\-catalog|save|test|test\-runs)$/,
+  },
 ];
 
 function resolve(path: string) {
