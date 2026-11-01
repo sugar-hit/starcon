@@ -1,6 +1,7 @@
 package com.starcon.platform;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import com.starcon.platform.AutomationRuleModels.AutomationRuleConditionEvaluation;
+import com.starcon.platform.AutomationRuleModels.AutomationRuleInput;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -217,6 +218,14 @@ public final class AutomationRuleEditorModels {
       List<AutomationRuleConditionEvaluation> conditionEvaluations,
       List<AutomationRuleEditorActionPlan> actionPlan,
       String failureReason,
+      /**
+       * 🔴 **被测配置的快照**（JSON 对象文本）—— 「这次测的是哪一版配置」。
+       *
+       * <p>台账里存着它 ⇒ 同一份快照 + 同一个样本 ⇒ 同一个结论（可重放、可核对）。
+       */
+      String configSnapshot,
+      /** 🔴 **样本载荷**（JSON 对象文本）—— 当时喂进去的那份测试数据。 */
+      String samplePayload,
       @Schema(nullable = true) UUID createdBy,
       OffsetDateTime createdAt) {}
 }

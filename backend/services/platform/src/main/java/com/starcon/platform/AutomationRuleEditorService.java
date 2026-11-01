@@ -245,28 +245,19 @@ public class AutomationRuleEditorService {
    */
   public List<AutomationRuleEditorEventSchema> eventSchemas() {
     return sql.fetch(
-            "select event_type,schema_version,status,source_service,source_artifact,payload_schema"
+            "select event_type,schema_version,status,source_service,source_artifact,"
+                + " payload_schema::text as payload_schema"
                 + " from platform_webhook_event_type order by event_type, schema_version desc")
-        .map(
-            row -> {
-              var schema = row.get("payload_schema", JsonNode.class);
-              var declared = schema != null && schema.isObject() && schema.size() > 0;
-              return new AutomationRuleEditorEventSchema(
-                  row.get("event_type", String.class),
-                  row.get("schema_version", Integer.class),
-                  row.get("status", String.class),
-                  row.get("source_service", String.class),
-                  row.get("source_artifact", String.class),
-                  declared,
-                  declared
-                      ? "字段目录来自事件注册表登记的 payload_schema（JSON Schema 摊平）。"
-                      : "这个事件**没有登记字段结构**（payload_schema 是空的）⇒ "
-                          + "字段目录为空；条件仍可自由写字段路径，但没有任何字段可以对照校验。",
-                  declared ? flattenSchema(schema) : List.of());
-            });
+        .map(row -> toEventSchema(row));
   }
 
-  /** 一个事件的字段目录（按事件类型 + 版本）。 */
+  /**
+   * 一个事件的字段目录（按事件类型 + 版本）。
+   *
+   * <p>🔴 **不带版本时取 ACTIVE 的最高版本** —— 与 18.3.1.1 的
+   * {@code resolveTriggerEvent} 同一判据：编辑器展示的字段目录必须是
+   * 「配规则时真正会用上的那一版」，而不是一个已废弃版本的目录。
+   */
   public AutomationRuleEditorEventSchema eventSchema(String eventType, Integer schemaVersion) {
     var where = new StringBuilder(" where event_type = ?");
     var params = new ArrayList<Object>();
@@ -275,15 +266,59 @@ public class AutomationRuleEditorService {
       where.append(" and schema_version = ?");
       params.add(schemaVersion);
     }
-    where.append(" order by schema_version desc limit 1");
+    where.append(" order by (status = 'ACTIVE') desc, schema_version desc limit 1");
     var row =
         sql.fetchOne(
-            "select event_type,schema_version,status,source_service,source_artifact,payload_schema"
+            "select event_type,schema_version,status,source_service,source_artifact,"
+                + " payload_schema::text as payload_schema"
                 + " from platform_webhook_event_type"
                 + where,
             params.toArray());
     if (row == null) notFound("事件类型 " + eventType + " 没有在事件注册表里登记过");
-    var schema = row.get("payload_schema", JsonNode.class);
+    return toEventSchema(row);
+  }
+
+  /**
+   * 🔴 **草稿用的触发事件解析** —— 与 18.3.1.1 的 {@code resolveTriggerEvent} 同一判据。
+   *
+   * <p>区别只在**错误码**：这里解析的是「用户正在编的草稿」，所以
+   * 「这个事件没登记过」是 <b>400</b>（草稿写错了），而不是 404（资源不存在）。
+   *
+   * <p>并且**必须是 ACTIVE 的那一版** —— 配一条永远不会被触发的规则没有意义。
+   */
+  private AutomationRuleEditorEventSchema activeEventSchema(
+      String eventType, Integer schemaVersion) {
+    var where = new StringBuilder(" where event_type = ?");
+    var params = new ArrayList<Object>();
+    params.add(eventType == null ? "" : eventType.trim());
+    if (schemaVersion != null) {
+      where.append(" and schema_version = ?");
+      params.add(schemaVersion);
+    }
+    where.append(" and status = 'ACTIVE'");
+    where.append(" order by schema_version desc limit 1");
+    var row =
+        sql.fetchOne(
+            "select event_type,schema_version,status,source_service,source_artifact,"
+                + " payload_schema::text as payload_schema"
+                + " from platform_webhook_event_type"
+                + where,
+            params.toArray());
+    if (row == null) {
+      check(
+          false,
+          "触发事件 "
+              + eventType
+              + (schemaVersion == null ? "" : " 第 " + schemaVersion + " 版")
+              + " 没有在事件注册表里登记过「可用」的版本 —— "
+              + "配一条永远不会被触发的规则没有意义；先在事件订阅里登记这个事件，再回来配规则");
+    }
+    return toEventSchema(row);
+  }
+
+  /** 一行事件注册表 → 字段目录模型。 */
+  private AutomationRuleEditorEventSchema toEventSchema(org.jooq.Record row) {
+    var schema = readJson(row.get("payload_schema", String.class));
     var declared = schema != null && schema.isObject() && schema.size() > 0;
     return new AutomationRuleEditorEventSchema(
         row.get("event_type", String.class),
@@ -511,8 +546,10 @@ public class AutomationRuleEditorService {
     var runNo = nextRunNo(ruleId);
     var testRunId = UUID.randomUUID();
     var now = dbNow();
-    var snapshot = configSnapshot(draft);
-    var evaluation = evaluationNode(evaluations, plan, scopeHit.applicable(), scopeHit.note());
+    // 🔴 jsonb 列一律**传 JSON 文本**（values 位置写 `?::jsonb`）——
+    //   与 18.3.1.1 落动作参数、18.1.2.1 落事件 schema 同一口径（不把节点对象直接塞进参数）。
+    var snapshot = configSnapshot(draft).toString();
+    var evaluation = evaluationNode(evaluations, plan, scopeHit.applicable(), scopeHit.note()).toString();
     sql.execute(
         "insert into platform_automation_rule_test_run(id,tenant_id,rule_id,rule_name,run_no,"
             + " trigger_event_type,trigger_schema_version,config_snapshot,sample_payload,matched,"
@@ -575,7 +612,10 @@ public class AutomationRuleEditorService {
     return sql.fetch(
             "select t.id,t.rule_id,t.rule_name,t.run_no,t.trigger_event_type,"
                 + " t.trigger_schema_version,t.matched,t.total_conditions,t.matched_conditions,"
-                + " t.planned_actions,t.evaluation,t.failure_reason,t.created_by,t.created_at"
+                + " t.planned_actions,t.evaluation::text as evaluation,"
+                + " t.config_snapshot::text as config_snapshot,"
+                + " t.sample_payload::text as sample_payload,"
+                + " t.failure_reason,t.created_by,t.created_at"
                 + " from platform_automation_rule_test_run t"
                 + where
                 + " order by t.created_at desc, t.id desc limit ?",
@@ -600,7 +640,7 @@ public class AutomationRuleEditorService {
     check(!eventType.isEmpty(), "必须选一个触发事件");
 
     // 触发事件必须登记过（且是可用版本）—— 与 18.3.1.1 同一判据。
-    var schema = eventSchema(eventType, draft.triggerSchemaVersion());
+    var schema = activeEventSchema(eventType, draft.triggerSchemaVersion());
 
     var conditions = draft.conditions() == null ? List.<AutomationRuleConditionInput>of() : draft.conditions();
     var actions = draft.actions() == null ? List.<AutomationRuleActionInput>of() : draft.actions();
@@ -640,6 +680,9 @@ public class AutomationRuleEditorService {
                 + "」比较 —— 这个类型上说得通的操作符："
                 + String.join("、", field.allowedOperators()));
       }
+      // 🔴 **条件值的形状**必须与操作符相符 —— 与 18.3.1.1 落库时的判据**逐字一致**。
+      //   否则「测试通过」与「保存成功」会给出两套结论（保存时才报错 = 试错在生产上）。
+      validateConditionValue(operator, condition);
     }
 
     var catalogEntry = actionCatalog();
@@ -687,6 +730,37 @@ public class AutomationRuleEditorService {
                   + "」不在接口目录里 —— 接口目录是各服务活 spec 的投影，"
                   + "调一个不存在的接口必然失败");
         }
+      }
+    }
+  }
+
+  /**
+   * 🔴 **条件值的形状**必须与操作符相符（与 18.3.1.1 落库时的判据**逐字一致**）。
+   *
+   * <p>为什么编辑器也要查一遍：保存路径（18.3.1.1）会查，
+   * 但**测试路径不经过保存** —— 不查的话，「测试通过」与「保存成功」
+   * 会给出两套结论（保存那一刻才报错 = 试错搬到了生产上）。
+   */
+  private void validateConditionValue(
+      AutomationRuleConditionOperator operator, AutomationRuleConditionInput condition) {
+    var valueText = optional(condition.valueText(), "条件值", 500);
+    var valueNumber = condition.valueNumber();
+    var valueBool = condition.valueBool();
+    switch (operator) {
+      case GT, GE, LT, LE -> check(
+          valueNumber != null,
+          "大小比较类操作符必须给一个数值条件值（" + operator.label() + "）");
+      case BETWEEN -> check(
+          valueText.contains("~") && !valueText.trim().isEmpty(),
+          "区间比较需要两个值（用 ~ 分隔，如 100~500）");
+      case IN -> check(
+          !valueText.trim().isEmpty(), "「属于」至少要有一个候选值（逗号分隔）");
+      case IS_NULL, NOT_NULL, EXISTS -> check(
+          valueText.isEmpty() && valueNumber == null && valueBool == null,
+          "空值类操作符不需要条件值");
+      default -> {
+        // 其余操作符（EQ / NE / CONTAINS / …）：值由字段类型决定，
+        // 类型不符已在**字段目录**那一关查过（allowedOperators）。
       }
     }
   }
@@ -944,7 +1018,7 @@ public class AutomationRuleEditorService {
 
   /** 事件版本（不给时取注册表里可用的最高版本）。 */
   private int resolveSchemaVersion(AutomationRuleInput draft) {
-    var schema = eventSchema(draft.triggerEventType(), draft.triggerSchemaVersion());
+    var schema = activeEventSchema(draft.triggerEventType(), draft.triggerSchemaVersion());
     return schema.schemaVersion();
   }
 
@@ -1048,14 +1122,26 @@ public class AutomationRuleEditorService {
     return head + String.join("；", reasons);
   }
 
-  /** 样本载荷（非法 JSON ⇒ 400，不当成「空载荷」）。 */
+  /**
+   * 样本载荷（非法 JSON ⇒ 400，不当成「空载荷」）。
+   *
+   * <p>🔴 **必须是 JSON 对象**：台账表的 {@code sample_payload} 列有
+   * {@code CHECK(jsonb_typeof(sample_payload) = 'object')} ⇒ 数组 / 标量载荷
+   * 在落库那一刻会被 DB 拒掉（变成一句看不懂的 500）。这里提前拒，并说清为什么。
+   */
   private JsonNode parsePayload(String raw) {
     if (raw == null || raw.isBlank()) return json.createObjectNode();
+    JsonNode node;
     try {
-      return json.readTree(raw.trim());
+      node = json.readTree(raw.trim());
     } catch (Exception e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "样本载荷不是合法的 JSON");
     }
+    if (node == null || !node.isObject()) {
+      throw new ResponseStatusException(
+          HttpStatus.BAD_REQUEST, "样本载荷必须是一个 JSON 对象（事件载荷的顶层就是一个对象）");
+    }
+    return node;
   }
 
   /** 动作参数：必须是 JSON **对象**（不是数组、不是标量）。 */
@@ -1075,7 +1161,7 @@ public class AutomationRuleEditorService {
 
   /** 台账一行 → 传输模型。 */
   private AutomationRuleEditorTestRunRow toTestRunRow(org.jooq.Record row) {
-    var evaluation = row.get("evaluation", JsonNode.class);
+    var evaluation = readJson(row.get("evaluation", String.class));
     var evaluations = new ArrayList<AutomationRuleConditionEvaluation>();
     var plan = new ArrayList<AutomationRuleEditorActionPlan>();
     var scopeApplicable = false;
@@ -1132,7 +1218,24 @@ public class AutomationRuleEditorService {
         List.copyOf(evaluations),
         List.copyOf(plan),
         row.get("failure_reason", String.class),
+        row.get("config_snapshot", String.class),
+        row.get("sample_payload", String.class),
         row.get("created_by", UUID.class),
         row.get("created_at", OffsetDateTime.class));
+  }
+
+  /**
+   * 读 jsonb 列（SQL 侧已 {@code ::text}）：解析成节点，解析失败当作「空」。
+   *
+   * <p>⚠️ 库里存的是**我们自己写进去的** JSON ⇒ 解析失败只可能是历史脏数据，
+   * 此时按空处理（页面显示「无明细」），而不是让整个列表 500。
+   */
+  private JsonNode readJson(String raw) {
+    if (raw == null || raw.isBlank()) return null;
+    try {
+      return json.readTree(raw);
+    } catch (Exception e) {
+      return null;
+    }
   }
 }
