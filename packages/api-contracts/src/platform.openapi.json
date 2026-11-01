@@ -1,6 +1,1192 @@
 {
   "components": {
     "schemas": {
+      "AiForecastAlgorithm": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "params": {
+            "items": {
+              "$ref": "#/components/schemas/AiForecastParam"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "AiForecastCapabilities": {
+        "properties": {
+          "algorithms": {
+            "items": {
+              "$ref": "#/components/schemas/AiForecastAlgorithm"
+            },
+            "type": "array"
+          },
+          "capabilities": {
+            "items": {
+              "$ref": "#/components/schemas/AiForecastCapability"
+            },
+            "type": "array"
+          },
+          "gaps": {
+            "items": {
+              "$ref": "#/components/schemas/AiForecastGap"
+            },
+            "type": "array"
+          },
+          "rules": {
+            "items": {
+              "$ref": "#/components/schemas/AiForecastRuleNote"
+            },
+            "type": "array"
+          },
+          "sources": {
+            "items": {
+              "$ref": "#/components/schemas/AiForecastSource"
+            },
+            "type": "array"
+          },
+          "thresholds": {
+            "items": {
+              "$ref": "#/components/schemas/AiForecastThreshold"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "AiForecastCapability": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "evidence": {
+            "type": "string"
+          },
+          "moduleId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AiForecastElasticityRow": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "basis": {
+            "type": "string"
+          },
+          "currency": {
+            "nullable": true,
+            "type": "string"
+          },
+          "currentPrice": {
+            "nullable": true,
+            "type": "number"
+          },
+          "elasticity": {
+            "nullable": true,
+            "type": "number"
+          },
+          "method": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "samplePairs": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "windowDays": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AiForecastFactorRow": {
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "direction": {
+            "type": "string"
+          },
+          "explanation": {
+            "type": "string"
+          },
+          "factorCode": {
+            "type": "string"
+          },
+          "factorLabel": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "impact": {
+            "type": "number"
+          },
+          "resultId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "value": {
+            "nullable": true,
+            "type": "number"
+          },
+          "valueText": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AiForecastGap": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "moduleId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "relation": {
+            "type": "string"
+          },
+          "service": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AiForecastHistoryInput": {
+        "properties": {
+          "businessDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "channelCode": {
+            "type": "string"
+          },
+          "currency": {
+            "nullable": true,
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "revenue": {
+            "nullable": true,
+            "type": "number"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "sourceRef": {
+            "type": "string"
+          },
+          "unitPrice": {
+            "nullable": true,
+            "type": "number"
+          },
+          "units": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "AiForecastHistoryPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AiForecastHistoryRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalPages": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AiForecastHistoryRow": {
+        "properties": {
+          "businessDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "channelCode": {
+            "type": "string"
+          },
+          "currency": {
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "recordedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "revenue": {
+            "nullable": true,
+            "type": "number"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "sourceRef": {
+            "type": "string"
+          },
+          "unitPrice": {
+            "nullable": true,
+            "type": "number"
+          },
+          "units": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "AiForecastHistorySyncResult": {
+        "properties": {
+          "connected": {
+            "type": "boolean"
+          },
+          "from": {
+            "format": "date",
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "rowsSkipped": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "rowsWritten": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "seriesRead": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "source": {
+            "type": "string"
+          },
+          "sourceEndpoint": {
+            "type": "string"
+          },
+          "to": {
+            "format": "date",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AiForecastHotItemRow": {
+        "properties": {
+          "activeDays": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "basis": {
+            "type": "string"
+          },
+          "detected": {
+            "type": "boolean"
+          },
+          "growthRate": {
+            "nullable": true,
+            "type": "number"
+          },
+          "growthThreshold": {
+            "type": "number"
+          },
+          "previousWindowUnits": {
+            "nullable": true,
+            "type": "number"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "unitsThreshold": {
+            "type": "number"
+          },
+          "windowDays": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "windowUnits": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "AiForecastHotItemView": {
+        "properties": {
+          "growthThreshold": {
+            "type": "number"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AiForecastHotItemRow"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "unitsThreshold": {
+            "type": "number"
+          },
+          "windowDays": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AiForecastOpportunityRow": {
+        "properties": {
+          "basis": {
+            "type": "string"
+          },
+          "coverageDays": {
+            "nullable": true,
+            "type": "number"
+          },
+          "detected": {
+            "type": "boolean"
+          },
+          "forecastPoint": {
+            "nullable": true,
+            "type": "number"
+          },
+          "forecastUpper": {
+            "nullable": true,
+            "type": "number"
+          },
+          "gapQty": {
+            "nullable": true,
+            "type": "number"
+          },
+          "inventoryQty": {
+            "nullable": true,
+            "type": "number"
+          },
+          "minDailyUnitsThreshold": {
+            "type": "number"
+          },
+          "previousDailyUnits": {
+            "nullable": true,
+            "type": "number"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "recentDailyUnits": {
+            "nullable": true,
+            "type": "number"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "trendRatio": {
+            "nullable": true,
+            "type": "number"
+          },
+          "trendThreshold": {
+            "type": "number"
+          },
+          "windowDays": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AiForecastOpportunityView": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AiForecastOpportunityRow"
+            },
+            "type": "array"
+          },
+          "minDailyUnitsThreshold": {
+            "type": "number"
+          },
+          "note": {
+            "type": "string"
+          },
+          "trendThreshold": {
+            "type": "number"
+          },
+          "windowDays": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AiForecastOverview": {
+        "properties": {
+          "adoptedSuggestions": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "forecasts": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "generatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "historyRows": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "historySkus": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "promotions": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "rejectedSuggestions": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "runs": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "suggestions": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AiForecastParam": {
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AiForecastPriceElasticityView": {
+        "properties": {
+          "adjustmentThreshold": {
+            "type": "number"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AiForecastElasticityRow"
+            },
+            "type": "array"
+          },
+          "method": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "windowDays": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AiForecastPromotionInput": {
+        "properties": {
+          "discountRate": {
+            "nullable": true,
+            "type": "number"
+          },
+          "endsAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "expectedLift": {
+            "type": "number"
+          },
+          "name": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "promotionType": {
+            "type": "string"
+          },
+          "scopeType": {
+            "type": "string"
+          },
+          "scopeValue": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "sourceRef": {
+            "type": "string"
+          },
+          "startsAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AiForecastPromotionPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AiForecastPromotionRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalPages": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AiForecastPromotionRow": {
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "discountRate": {
+            "nullable": true,
+            "type": "number"
+          },
+          "endsAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "expectedLift": {
+            "type": "number"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "promotionType": {
+            "type": "string"
+          },
+          "promotionTypeLabel": {
+            "type": "string"
+          },
+          "scopeType": {
+            "type": "string"
+          },
+          "scopeValue": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "sourceRef": {
+            "type": "string"
+          },
+          "startsAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AiForecastResultDetail": {
+        "properties": {
+          "factors": {
+            "items": {
+              "$ref": "#/components/schemas/AiForecastFactorRow"
+            },
+            "type": "array"
+          },
+          "result": {
+            "$ref": "#/components/schemas/AiForecastResultRow"
+          }
+        },
+        "type": "object"
+      },
+      "AiForecastResultPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AiForecastResultRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalPages": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AiForecastResultRow": {
+        "properties": {
+          "algorithm": {
+            "type": "string"
+          },
+          "baselineDaily": {
+            "type": "number"
+          },
+          "confidenceLevel": {
+            "type": "number"
+          },
+          "coverageRate": {
+            "type": "number"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "currency": {
+            "nullable": true,
+            "type": "string"
+          },
+          "dailyPoint": {
+            "type": "number"
+          },
+          "historySource": {
+            "type": "string"
+          },
+          "horizonDays": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "inTransitQty": {
+            "nullable": true,
+            "type": "number"
+          },
+          "inventoryQty": {
+            "nullable": true,
+            "type": "number"
+          },
+          "lower": {
+            "type": "number"
+          },
+          "maWindowDays": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "point": {
+            "type": "number"
+          },
+          "promoFactor": {
+            "type": "number"
+          },
+          "purchasePendingQty": {
+            "nullable": true,
+            "type": "number"
+          },
+          "runId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "sampleDays": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "sigma": {
+            "type": "number"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "smoothingAlpha": {
+            "type": "number"
+          },
+          "unitPrice": {
+            "nullable": true,
+            "type": "number"
+          },
+          "upper": {
+            "type": "number"
+          },
+          "windowDays": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "zValue": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "AiForecastRuleNote": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AiForecastRunDetail": {
+        "properties": {
+          "results": {
+            "items": {
+              "$ref": "#/components/schemas/AiForecastResultDetail"
+            },
+            "type": "array"
+          },
+          "run": {
+            "$ref": "#/components/schemas/AiForecastRunRow"
+          }
+        },
+        "type": "object"
+      },
+      "AiForecastRunInput": {
+        "properties": {
+          "algorithm": {
+            "type": "string"
+          },
+          "confidenceLevel": {
+            "type": "number"
+          },
+          "horizonDays": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "maWindowDays": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "smoothingAlpha": {
+            "type": "number"
+          },
+          "windowDays": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AiForecastRunPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AiForecastRunRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalPages": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AiForecastRunRow": {
+        "properties": {
+          "algorithm": {
+            "type": "string"
+          },
+          "confidenceLevel": {
+            "type": "number"
+          },
+          "evaluatedSkuCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "finishedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "forecastSkuCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "historySource": {
+            "type": "string"
+          },
+          "horizonDays": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "inTransitConnected": {
+            "type": "boolean"
+          },
+          "inventoryConnected": {
+            "type": "boolean"
+          },
+          "maWindowDays": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "purchaseConnected": {
+            "type": "boolean"
+          },
+          "runNo": {
+            "type": "string"
+          },
+          "skippedReason": {
+            "type": "string"
+          },
+          "skippedSkuCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "smoothingAlpha": {
+            "type": "number"
+          },
+          "startedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "windowDays": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "zValue": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "AiForecastSource": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "connected": {
+            "type": "boolean"
+          },
+          "endpoint": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "service": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AiForecastSuggestionDecision": {
+        "properties": {
+          "note": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AiForecastSuggestionPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AiForecastSuggestionRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalPages": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AiForecastSuggestionRow": {
+        "properties": {
+          "basis": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "currency": {
+            "nullable": true,
+            "type": "string"
+          },
+          "currentPrice": {
+            "nullable": true,
+            "type": "number"
+          },
+          "currentQty": {
+            "nullable": true,
+            "type": "number"
+          },
+          "decidedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "decidedBy": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "decisionNote": {
+            "type": "string"
+          },
+          "demandLower": {
+            "nullable": true,
+            "type": "number"
+          },
+          "demandPoint": {
+            "nullable": true,
+            "type": "number"
+          },
+          "demandUpper": {
+            "nullable": true,
+            "type": "number"
+          },
+          "elasticity": {
+            "nullable": true,
+            "type": "number"
+          },
+          "expectedUnitsDeltaRate": {
+            "nullable": true,
+            "type": "number"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "inTransitQty": {
+            "nullable": true,
+            "type": "number"
+          },
+          "priceDeltaRate": {
+            "nullable": true,
+            "type": "number"
+          },
+          "purchasePendingQty": {
+            "nullable": true,
+            "type": "number"
+          },
+          "resultId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "runId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "suggestedPrice": {
+            "nullable": true,
+            "type": "number"
+          },
+          "suggestedQty": {
+            "nullable": true,
+            "type": "number"
+          },
+          "suggestionType": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AiForecastThreshold": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "unit": {
+            "type": "string"
+          },
+          "value": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
       "ApiCallMonitorAlertPage": {
         "properties": {
           "acknowledgedCount": {
@@ -10113,6 +11299,1007 @@
         "summary": "授权范围自检",
         "tags": [
           "api-gateway-controller"
+        ]
+      }
+    },
+    "/platform/ai/forecast/capabilities": {
+      "get": {
+        "operationId": "get_platform_ai_forecast_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiForecastCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ai-forecast-controller"
+        ]
+      }
+    },
+    "/platform/ai/forecast/forecasts": {
+      "get": {
+        "operationId": "get_platform_ai_forecast_forecasts",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "skuCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "runId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "historySource",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiForecastResultPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ai-forecast-controller"
+        ]
+      }
+    },
+    "/platform/ai/forecast/forecasts/{id}": {
+      "get": {
+        "operationId": "get_platform_ai_forecast_forecasts_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiForecastResultDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ai-forecast-controller"
+        ]
+      }
+    },
+    "/platform/ai/forecast/history": {
+      "get": {
+        "operationId": "get_platform_ai_forecast_history",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "skuCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "source",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiForecastHistoryPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ai-forecast-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_platform_ai_forecast_history",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AiForecastHistoryInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiForecastHistoryRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ai-forecast-controller"
+        ]
+      }
+    },
+    "/platform/ai/forecast/history/sync": {
+      "post": {
+        "operationId": "post_platform_ai_forecast_history_sync",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiForecastHistorySyncResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ai-forecast-controller"
+        ]
+      }
+    },
+    "/platform/ai/forecast/history/{id}": {
+      "delete": {
+        "operationId": "delete_platform_ai_forecast_history_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ai-forecast-controller"
+        ]
+      }
+    },
+    "/platform/ai/forecast/hot-items": {
+      "get": {
+        "operationId": "get_platform_ai_forecast_hot_items",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "windowDays",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiForecastHotItemView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ai-forecast-controller"
+        ]
+      }
+    },
+    "/platform/ai/forecast/opportunities": {
+      "get": {
+        "operationId": "get_platform_ai_forecast_opportunities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "windowDays",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiForecastOpportunityView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ai-forecast-controller"
+        ]
+      }
+    },
+    "/platform/ai/forecast/overview": {
+      "get": {
+        "operationId": "get_platform_ai_forecast_overview",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiForecastOverview"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ai-forecast-controller"
+        ]
+      }
+    },
+    "/platform/ai/forecast/price-elasticity": {
+      "get": {
+        "operationId": "get_platform_ai_forecast_price_elasticity",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "skuCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "windowDays",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiForecastPriceElasticityView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ai-forecast-controller"
+        ]
+      }
+    },
+    "/platform/ai/forecast/promotions": {
+      "get": {
+        "operationId": "get_platform_ai_forecast_promotions",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "promotionType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "scopeType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "activeOnly",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiForecastPromotionPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ai-forecast-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_platform_ai_forecast_promotions",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AiForecastPromotionInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiForecastPromotionRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ai-forecast-controller"
+        ]
+      }
+    },
+    "/platform/ai/forecast/promotions/{id}": {
+      "delete": {
+        "operationId": "delete_platform_ai_forecast_promotions_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ai-forecast-controller"
+        ]
+      }
+    },
+    "/platform/ai/forecast/replenish-suggestions": {
+      "get": {
+        "operationId": "get_platform_ai_forecast_replenish_suggestions",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "suggestionType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "skuCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiForecastSuggestionPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ai-forecast-controller"
+        ]
+      }
+    },
+    "/platform/ai/forecast/runs": {
+      "get": {
+        "operationId": "get_platform_ai_forecast_runs",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiForecastRunPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ai-forecast-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_platform_ai_forecast_runs",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AiForecastRunInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiForecastRunDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ai-forecast-controller"
+        ]
+      }
+    },
+    "/platform/ai/forecast/runs/{id}": {
+      "get": {
+        "operationId": "get_platform_ai_forecast_runs_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiForecastRunDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ai-forecast-controller"
+        ]
+      }
+    },
+    "/platform/ai/forecast/suggestions/{id}/adopt": {
+      "post": {
+        "operationId": "post_platform_ai_forecast_suggestions_id_adopt",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AiForecastSuggestionDecision"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiForecastSuggestionRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ai-forecast-controller"
+        ]
+      }
+    },
+    "/platform/ai/forecast/suggestions/{id}/reject": {
+      "post": {
+        "operationId": "post_platform_ai_forecast_suggestions_id_reject",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AiForecastSuggestionDecision"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiForecastSuggestionRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ai-forecast-controller"
         ]
       }
     },
