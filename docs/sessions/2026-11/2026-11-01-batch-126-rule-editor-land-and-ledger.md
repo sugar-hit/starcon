@@ -108,6 +108,11 @@
 ②合并后前端全量 allowlist 回归 + Next 生产构建在**合并后的集成头上**重跑通过
 ③本轮**不 push**，push 必须等 L2 绿（§五）。
 
+**这条偏离已固化成协议条款**：`tools/module-progress/PIPELINE_CRON_PROMPT.md` § **3.3.1**
+「撞闸时的例外：闸龄 > 15 分钟才可以不持闸并入」—— 三个判据（闸龄 > 15 分钟 /
+`holderAlive=false` / 已 land 的 ready 车道）与动作边界（只 `land` + `merge-ready`，
+不清闸、不 `plan`、不 `gc`、不 push）都写进去了，下一轮起不再靠临场判断。
+
 ---
 
 ## 四、环境取证：车道 worktree 的 `sharp` 缺失（**不是代码问题**）
