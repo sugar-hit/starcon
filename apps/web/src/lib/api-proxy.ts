@@ -349,6 +349,67 @@ const services: readonly {
       /^io\/(?:capabilities|overview|domains|expire|tasks(?:\/import|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:file|error-report|errors|cancel))?)?|templates(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/file)?)?)$/,
   },
   {
+    // 18.4.2.2 选品与需求预测（platform 服务，卷 18「集成开放与智能自动化」L3 18.4.2 下的第三格）。
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有的 platform/ 分支里并分支 ——
+    //   既有条目**一字未改、也不重排**。
+    //
+    // ---- 插入锚点选在「platform/ 组的中段」（io 那条之后、reporting/ 那条之前）----
+    //   本文件是并行车道共同的累积型文件：既有车道分别落在「数组最开头」与「数组末尾」，
+    //   本车道落在这两处**之间**，与两端的插入点都相距上千行 ⇒ 并入时 git 能干净求并。
+    //
+    // ---- 首 token「ai」下的第二 token「forecast」的零命中核对结论（实测，非目测）----
+    //   本文件里既有的 `prefix: 'platform/'` 条目，其首 token 分别是
+    //   automation-rules / auto-approvals / data-migration / webhooks / deliveries / io /
+    //   text / apps / finance-software / api-catalog / call-monitor / payment-funds /
+    //   external-integrations / automation-rule-editor。
+    //   ⚠️ **本条目的首 token 是 `ai`**，与同批其它车道（18.4.3.1 的 `ai/usage`、
+    //   18.5.1.1 的 `ai/templates`）**共用首 token** —— 但第二 token 不同
+    //   （forecast / usage / templates）⇒ 三者互斥，谁也不会吃掉谁。
+    //   ⚠️ `text`（18.4.2.1 文本与翻译）与本模块**不是一件事**：
+    //   那边管的是「文案怎么翻、怎么检查、怎么确认后发布」，
+    //   这边管的是「销量怎么预测、补多少货、价怎么调、谁是爆品」。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   ai/forecast/capabilities              能力声明（算法口径 / 阈值 / 来源 / 边界逐条报出）
+    //   ai/forecast/overview                  概览（几个数）
+    //   ai/forecast/promotions                促销日历列表（GET 真分页真筛选）/ 登记（POST）
+    //   ai/forecast/promotions/{uuid}         删除一条促销（DELETE）
+    //   ai/forecast/history                   需求历史台账（GET 真分页真筛选）/ 录入（POST）
+    //   ai/forecast/history/{uuid}            删除一条需求历史（DELETE）
+    //   ai/forecast/history/sync              从 13 分析同步销量（POST）
+    //   ai/forecast/runs                      预测运行列表（GET）/ 发起一次运行（POST）
+    //   ai/forecast/runs/{uuid}               运行详情（结果 + 影响因素）
+    //   ai/forecast/forecasts                 预测结果列表（GET 真分页真筛选）
+    //   ai/forecast/forecasts/{uuid}          预测详情（**点估计 + 置信区间 + 影响因素**）
+    //   ai/forecast/replenish-suggestions     建议列表（补货 / 调价）
+    //   ai/forecast/suggestions/{uuid}/adopt  人工采纳建议（POST，**只记录决定，不执行**）
+    //   ai/forecast/suggestions/{uuid}/reject 人工驳回建议（POST）
+    //   ai/forecast/price-elasticity          价格弹性（算不出来的 SKU 也在列表里）
+    //   ai/forecast/hot-items                 爆品识别（阈值 + 统计窗口）
+    //   ai/forecast/opportunities             机会品发现（阈值 + 统计窗口）
+    //
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   platform/ai/forecast                   —— 裸路径：后端**没有**「一条不存在的汇总端点」。
+    //   platform/ai/forecast/unknown           —— 未实现的子路径仍然 404。
+    //   platform/ai/forecast/promotions/not-a-uuid  —— 非 UUID 段不应被 uuid 分支吃掉。
+    //   platform/ai/forecast/history/sync/extra    —— 多一段仍然 404。
+    //   platform/ai/forecast/forecasts/not-a-uuid   —— 同上。
+    //   platform/ai/forecast/execute           —— 🔴 **执行**（改价 / 建补货单）：
+    //                                                  归 5 定价与 6 采购，**本模块不执行**；
+    //                                                  放行它会让界面以为「点一下就能改价」。
+    //
+    // id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //   （不是 `[0-9a-f-]+`）：后者会把 `adopt` / `reject` / `sync` 这种非 UUID 形状也当成 id 放行。
+    // 字面量子路径（capabilities / overview / promotions / history / sync / runs / forecasts /
+    //   replenish-suggestions / price-elasticity / hot-items / opportunities）
+    //   排在 {uuid} 段**之前**判别 —— alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    prefix: 'platform/',
+    env: 'PLATFORM_URL',
+    fallback: 'http://127.0.0.1:8089',
+    pattern:
+      /^ai\/forecast\/(?:capabilities|overview|promotions(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|history(?:\/sync|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|runs(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|forecasts(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|replenish\-suggestions|suggestions\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/(?:adopt|reject)|price\-elasticity|hot\-items|opportunities)$/,
+  },
+  {
     // 13.1.1.1 经营总览（reporting 服务，卷 13「利润与经营分析」L3 13.1.1 下的第一格）。
     // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 finance / trade 那几条巨型
     //   alternation 里并分支 —— 既有条目**一字未改、也不重排**。
