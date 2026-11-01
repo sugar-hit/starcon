@@ -3,6 +3,7 @@ import { NextRequest } from 'next/server';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { GET, POST } from './[...path]/route';
+import { entriesBySource, matchingEntries, proxyEntries } from '../../../lib/api-proxy-entries';
 
 /**
  * 18.4.2.2 选品与需求预测 的 api-proxy 白名单**双向**断言。
@@ -23,11 +24,16 @@ import { GET, POST } from './[...path]/route';
  * </ul>
  *
  * <p>🔴 负向样本**全部取自本模块自己的前缀** {@code platform/ai/forecast/...}：
- * 拿兄弟车道的前缀当「未交付形状」是假红。
+ * 拿兄弟车道的前缀当「未交付形状」是假红 ——
+ * 本仓的 {@code ai} 命名空间是兄弟车道共用的（18.4.3.1 的 {@code ai/usage}、
+ * 18.5.1.1 的 {@code ai/templates} 各自落在 {@code /platform/ai/…} 的其它第二段上），
+ * 它们交付后本断言就会变红。
  *
  * <p>⚠️ 同批另两条车道（18.4.3.1 的 {@code ai/usage}、18.5.1.1 的 {@code ai/templates}）
- * 与本模块**共用首 token {@code ai}** ⇒ 这里额外断言本车道的前缀**不吃**它们，
- * 且它们**不会**吃掉本车道的路径（求并，不是二选一）。
+ * 与本模块**共用首 token {@code ai}** ⇒ 这里额外断言本车道的前缀**不吃**它们。
+ * ⚠️ **这条断言在正则层做**（见该用例的注释）：在 HTTP 层它**不可表达** ——
+ * 兄弟并入前它们的形状是 404、并入后是 200，同一语义状态码含义相反，
+ * 拿状态码写就等于把断言绑死在「兄弟还没并入」这个分支拓扑上，并入即红。
  */
 
 // 相对**本文件**定位：vitest 从仓库根或 apps/web 跑时 cwd 都不同，用 cwd 会静默读空。
@@ -205,17 +211,39 @@ it('不误伤其余服务已放行的分支（求并，不是二选一）', asyn
  * 本车道的前缀**不吃** `ai/usage` 与 `ai/templates`，
  * 而 `ai/forecast` 的形状也不该被它们那两条误吃（并入时必须求并）。
  */
-it('同批兄弟车道的 ai 前缀互不误吃', async () => {
-  const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('{}')));
-  vi.stubGlobal('fetch', fetcher);
+it('同批兄弟车道的 ai 前缀互不误吃 —— 在正则层断言，与兄弟是否已并入无关', () => {
+  const all = proxyEntries();
+  const mine = entriesBySource(all, '^ai\\/forecast');
+  expect(mine.length, '本模块应当恰好有一条独立条目').toBe(1);
+  const minePattern = mine[0]!.pattern;
 
-  for (const path of ['platform/ai/usage/capabilities', 'platform/ai/templates']) {
-    const response = await GET(request(path), {
-      params: Promise.resolve({ path: path.split('/') }),
-    });
-    // 本分支上还没有那两条 ⇒ 404 是**正确**的；并入后它们会被各自的条目放行。
-    // 这里断言的是「本车道的正则没有把它们误吃」。
-    expect(response.status, `${path} 被本车道的 ai/forecast 条目误放行了`).toBe(404);
+  // 🔴 **为什么这条断言必须在正则层做，不能用 HTTP 状态码做**：
+  //   「本车道的条目不吃兄弟的形状」这条语义，在 HTTP 层是**不可表达**的 ——
+  //   兄弟车道并入**之前**，兄弟的形状没有被任何条目放行 ⇒ 404；
+  //   兄弟车道并入**之后**，它被**兄弟自己的条目**放行 ⇒ 200。
+  //   同一个语义，并入前后 HTTP 状态码**含义相反** ⇒ 拿状态码写这条断言，
+  //   等于把断言绑死在一个分支拓扑上：并入的那一刻它必红，而红的原因与本车道无关。
+  //   正则层才是这条语义的**恒定**表达：无论兄弟在不在，本车道的 pattern 都不匹配它们。
+  for (const path of [
+    'platform/ai/usage/capabilities',
+    'platform/ai/usage/quotas/check',
+    'platform/ai/templates',
+    'platform/ai/templates/capabilities',
+  ]) {
+    expect(
+      minePattern.test(path.slice('platform/'.length)),
+      `${path} 不该被本车道的 ai/forecast 条目吃掉`,
+    ).toBe(false);
+  }
+
+  // 并入后（兄弟已交付）它们必须**各自被兄弟自己那一条**放行，且**恰好一条** ——
+  // 这条断言钉住「求并，不是二选一」，也证明本车道没有把它们**遮蔽**掉。
+  for (const path of ['platform/ai/usage/capabilities', 'platform/ai/templates/capabilities']) {
+    const matched = matchingEntries(path, all);
+    expect(matched.length, `${path} 应当恰好被一条放行`).toBe(1);
+    expect(matched[0]?.pattern.test(path.slice('platform/'.length)), `${path} 应当仍被放行`).toBe(
+      true,
+    );
   }
 });
 

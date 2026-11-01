@@ -1,7 +1,10 @@
-import { readFileSync } from 'node:fs';
-import { join } from 'node:path';
-import ts from 'typescript';
 import { describe, expect, it } from 'vitest';
+import {
+  entriesBySource,
+  matchingEntries,
+  proxyEntries,
+  type ProxyEntry,
+} from '../../lib/api-proxy-entries';
 
 /**
  * 18.5.1.1 模板管理的 api-proxy 白名单回归。
@@ -19,88 +22,19 @@ import { describe, expect, it } from 'vitest';
  *   <li>反向核对：<b>已经交付的兄弟路由</b>（text / webhooks / deliveries / catalog…）
  *       仍然各自被放行，<b>没有被本条遮蔽</b>。
  * </ol>
- */
-
-const API_PROXY = join(__dirname, '..', '..', 'lib', 'api-proxy.ts');
-
-interface Entry {
-  prefix: string;
-  pattern: RegExp;
-  source: string;
-}
-
-/**
- * 从正则字面量里取出**模式本体**。
  *
- * <p>⚠️ TypeScript 的 {@code RegularExpressionLiteral.text} 给的是**带首尾斜杠**的原文
- * （{@code /^ai\/templates…$/}）—— 直接拿去 {@code new RegExp()} 会把那个开头的斜杠
- * 当成字面量去匹配，于是**每条路径都不匹配**，测出来的结论全是假的。
- * 这里按「最后一个**未被转义**的斜杠」切掉尾部（连同 flags），并去掉开头的斜杠。
+ * <p>解析与判定口径抽在 {@code src/lib/api-proxy-entries.ts}（测试侧共用）——
+ * 18.4.2.2 的 {@code ai-forecast-allowlist.test.ts} 用的是**同一套**口径：
+ * 两条车道都在 {@code /platform/ai/…} 命名空间下，白名单是累积型共享文件，
+ * 判定口径必须一致，否则两个车道会得出互相矛盾的结论。
  */
-function regexSource(raw: string): string {
-  const body = raw.startsWith('/') ? raw.slice(1) : raw;
-  for (let i = body.length - 1; i >= 0; i--) {
-    if (body[i] === '/' && body[i - 1] !== '\\') return body.slice(0, i);
-  }
-  return body;
-}
 
-/**
- * 从 api-proxy.ts 的**真实数组字面量**里取出全部条目。
- *
- * <p><b>为什么用 TypeScript 编译器</b>：本文件是并行车道共同的累积型文件，
- * 里面大量注释也写着 `prefix:` / `pattern:` 字样 —— 文本正则会把注释里的字面量
- * 也当成真条目，测出来的结论是假的。解析 AST 才拿得到真的那一份。
- */
-function entries(): Entry[] {
-  const source = readFileSync(API_PROXY, 'utf8');
-  const file = ts.createSourceFile(
-    API_PROXY,
-    source,
-    ts.ScriptTarget.Latest,
-    true,
-    ts.ScriptKind.TS,
-  );
-  let literal: ts.ArrayLiteralExpression | undefined;
-  file.forEachChild((node) => {
-    if (!ts.isVariableStatement(node)) return;
-    for (const declaration of node.declarationList.declarations) {
-      if (!ts.isIdentifier(declaration.name)) continue;
-      if (declaration.name.text !== 'services') continue;
-      if (declaration.initializer && ts.isArrayLiteralExpression(declaration.initializer)) {
-        literal = declaration.initializer;
-      }
-    }
-  });
-  if (!literal) throw new Error('未能从 api-proxy.ts 里定位 services 变量的数组字面量');
+type Entry = ProxyEntry;
 
-  const out: Entry[] = [];
-  for (const element of literal.elements) {
-    if (!ts.isObjectLiteralExpression(element)) continue;
-    let prefix = '';
-    let pattern = '';
-    for (const property of element.properties) {
-      if (!ts.isPropertyAssignment(property) || !ts.isIdentifier(property.name)) continue;
-      if (property.name.text === 'prefix' && ts.isStringLiteral(property.initializer)) {
-        prefix = property.initializer.text;
-      }
-      if (property.name.text === 'pattern' && ts.isRegularExpressionLiteral(property.initializer)) {
-        pattern = regexSource(property.initializer.text);
-      }
-    }
-    if (!prefix || !pattern) continue;
-    out.push({ prefix, pattern: new RegExp(pattern), source: pattern });
-  }
-  if (out.length === 0) throw new Error('未能从 api-proxy.ts 里解析出任何真实条目');
-  return out;
-}
+const entries = (): Entry[] => proxyEntries();
 
 /** `resolve()` 的同构口径：先按 prefix 收窄服务，再测正则。 */
-function matching(path: string, all: Entry[]): Entry[] {
-  return all.filter(
-    (entry) => path.startsWith(entry.prefix) && entry.pattern.test(path.slice(entry.prefix.length)),
-  );
-}
+const matching = (path: string, all: Entry[]): Entry[] => matchingEntries(path, all);
 
 const UUID = '6f1f0e2a-1c3d-4f5a-9b7c-8d9e0f1a2b3c';
 const OTHER_UUID = '11111111-2222-4333-8444-555555555555';
@@ -166,7 +100,7 @@ describe('18.5.1.1 模板管理的 api-proxy 白名单', () => {
 
   it('已经交付的兄弟路由没有被本条遮蔽', () => {
     const all = entries();
-    const mine = all.filter((entry) => entry.pattern.source.startsWith('^ai\\/templates'));
+    const mine = entriesBySource(all, '^ai\\/templates');
     expect(mine.length, '本模块应当恰好有一条独立条目').toBe(1);
     const minePattern = mine[0]!.pattern;
     for (const path of DELIVERED) {
@@ -181,9 +115,9 @@ describe('18.5.1.1 模板管理的 api-proxy 白名单', () => {
 
   it('同批其它车道的形状不被本条吃掉', () => {
     const all = entries();
-    const mine = all.find((entry) => entry.pattern.source.startsWith('^ai\\/templates'));
-    expect(mine).toBeDefined();
-    const pattern = mine!.pattern;
+    const mine = entriesBySource(all, '^ai\\/templates');
+    expect(mine.length, '本模块应当恰好有一条独立条目').toBe(1);
+    const pattern = mine[0]!.pattern;
     // 18.4.2.2 → ai/forecast/…；18.4.3.1 → ai/usage/…；18.3.2.1 → automation/runs/…
     for (const sibling of [
       'platform/ai/forecast/capabilities',
