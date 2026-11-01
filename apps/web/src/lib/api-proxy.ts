@@ -13725,8 +13725,12 @@ const services: readonly {
     //   platform/text/tasks/{uuid}/not-a-shape —— 多一层仍然 404。
     //   platform/text/tasks/not-a-uuid        —— 非 UUID 段不应被 uuid 分支吃掉。
     //   platform/text/glossary/{uuid}/binding —— 变量绑定只属于**模板**，术语表没有这层。
-    //   platform/text/ai-settings              —— 🔴 18.4.3.1 使用与配额**未交付**；
+    //   platform/text/ai-settings              —— 🔴 使用与配额的端点在 **/platform/ai/usage** 下
+    //                                               （18.4.3.1 已交付，契约见 packages/api-contracts 的
+    //                                               AiUsage* 类型），**不是** /platform/text/ai-settings；
     //                                               放行它会让界面以为「能配 AI 供应商」。
+    //                                               （本车道只修正这条**理由**，负向断言本身不变 ——
+    //                                                该路径**仍然**不被放行。）
     //
     // id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
     //   （不是 `[0-9a-f-]+`）：后者会把 `confirm` / `publish` 这种非 UUID 形状也当成 id 放行。
@@ -13738,6 +13742,68 @@ const services: readonly {
     fallback: 'http://127.0.0.1:8089',
     pattern:
       /^text\/(?:capabilities|overview|published|locales|source\-candidates|glossary(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|banned\-terms(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|rules(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|templates(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/binding)?)?|tasks(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:generate|drafts|confirm|publish|reject))?)?)$/,
+  },
+  {
+    // 18.4.3.1 使用与配额（platform 服务，卷 18「集成开放与智能自动化」L3 18.4.3 AI 使用与效果管理下的第一格）。
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有任何一条里并分支 ——
+    //   既有条目**一字未改、也不重排**（18.4.2.1 那条 text 的正则**逐字未动**）。
+    //
+    // ---- 插入锚点选在**18.4.2.1 那条之后**（同卷相邻的 AI 能力）----
+    //   同批其它车道把新元素插在数组最开头或最末尾；本车道落在 18.4.2.1 之后，
+    //   与开头那一段相距 13000 行以上、与末尾那一段相距 700 行以上 ——
+    //   三个 hunk 各自独立，并入时 git 能干净求并。
+    //
+    // ---- 首 token「ai」的零命中核对结论（实测，非目测）----
+    //   resolve() 先按 prefix 过滤再测正则。本条的首 token 是 `ai`，
+    //   而既有 `prefix: 'platform/'` 条目的首 token 分别是
+    //   automation-rules（18.3.1.1）/ automation-rule-editor（18.3.1.2）/ auto-approvals（18.3.3.1）/
+    //   data-migration（18.1.3.2）/ webhooks（18.1.2.1）/ deliveries（18.1.2.2）/ io（18.1.3.1）/
+    //   text（18.4.2.1）/ apps（18.1.1.1）/ finance-software（18.2.1.1）/ api-catalog（18.1.4.1）/
+    //   call-monitor（18.1.5.1）/ payment-funds（18.2.2.1）/ external-integrations（18.2.3.1）——
+    //   **没有一支以 `ai` 开头** ⇒ 天然互斥，既有那几支吃不到本模块的路径，
+    //   本模块也吃不到它们的路径。既有那几支里的任何一个字符都不必动。
+    //
+    //   发车前用一次性脚本（`.tmp/api-proxy-ai-usage-check.mjs`，不入库）**用 TypeScript 编译器解析**
+    //   本文件里 `services` 变量的**真实数组字面量**（不是文本计数），
+    //   按 `resolve()` 的**同构口径**实测：`services[]` 共 **280** 条元素，
+    //   本条目落在第 **265** 条；本模块的 **9** 条正向路径 **9/9** 命中本条目
+    //   （**没有一条被别的条目抢先命中 = 没有遮蔽**）；
+    //   **9** 条负向形状 **9/9** 无命中；其余 **279** 条既有条目对本模块路径**零命中**。
+    //
+    //   ⚠️ 本仓的 `ai` 命名空间是**兄弟车道共用**的（18.4.3.2 效果评估、18.5.1.1 模板管理
+    //   分别落在 /platform/ai/… 的其它第二段上）—— 本条的正则**只**匹配 `ai/usage/…`，
+    //   第二段写死，不吃兄弟车道的第二段。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   platform/ai/usage/capabilities            能力声明（哪些真交付 / 哪些还没交付、归谁）
+    //   platform/ai/usage/models                  模型目录列表（GET）/ 登记或修改（POST）
+    //   platform/ai/usage/records                 用量台账列表（GET，真分页真筛选）/ 记一次用量（POST）
+    //   platform/ai/usage/summary                 用量报表（GET，**可计费口径**）
+    //   platform/ai/usage/quotas                  配额列表（GET）/ 登记租户级配额（POST）
+    //   platform/ai/usage/quotas/check            配额预检（POST，**读快照不占位**）
+    //   platform/ai/usage/members/{uuid}/quotas   登记用户级配额（POST，主体成员走**路径**）
+    //   platform/ai/usage/policies                敏感数据策略列表（GET）/ 登记或修改（POST）
+    //   platform/ai/usage/policies/effective      查生效的那条敏感策略（GET）
+    //
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   platform/ai/usage                     —— 裸路径：后端**没有**汇总端点。
+    //   platform/ai/usage/unknown             —— 未实现的子路径仍然 404。
+    //   platform/ai/usage/records/export      —— 后端没有导出端点。
+    //   platform/ai/usage/quotas/{uuid}       —— 后端没有「按 id 取单条配额」的端点。
+    //   platform/ai/usage/models/{uuid}       —— 后端没有「按 id 取单条模型」的端点。
+    //   platform/ai/usage/policies/{uuid}     —— 后端没有「按 id 取单条策略」的端点。
+    //   platform/ai/usage/members/not-a-uuid/quotas —— 非 UUID 段不应被 uuid 分支吃掉。
+    //   platform/ai/usage/quotas/check/extra  —— 多一段仍然 404。
+    //
+    // id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //   （不是 `[0-9a-f-]+`）：后者会把 `not-a-uuid` 这种非 UUID 形状也当成 id 放行。
+    // 字面量子路径（capabilities / models / records / summary / quotas / policies）排在
+    //   {uuid} 段**之前**判别 —— alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    prefix: 'platform/',
+    env: 'PLATFORM_URL',
+    fallback: 'http://127.0.0.1:8089',
+    pattern:
+      /^ai\/usage\/(?:capabilities|models|records|summary|policies(?:\/effective)?|quotas(?:\/check)?|members\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/quotas)$/,
   },
   {
     // 18.1.1.1 应用与凭证（platform 服务，卷 18「集成开放与智能自动化」L3 18.1.1 API 管理下的第一格）。

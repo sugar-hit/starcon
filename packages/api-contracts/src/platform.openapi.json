@@ -1187,6 +1187,632 @@
         },
         "type": "object"
       },
+      "AiModelInput": {
+        "properties": {
+          "contextLimit": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "enabled": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "modelCode": {
+            "type": "string"
+          },
+          "modelName": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "provider": {
+            "type": "string"
+          },
+          "unit": {
+            "type": "string"
+          },
+          "unitCost": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AiModelRow": {
+        "properties": {
+          "contextLimit": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "modelCode": {
+            "type": "string"
+          },
+          "modelName": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "provider": {
+            "type": "string"
+          },
+          "unit": {
+            "type": "string"
+          },
+          "unitCost": {
+            "type": "string"
+          },
+          "unitDescription": {
+            "type": "string"
+          },
+          "unitLabel": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AiQuotaCheckInput": {
+        "properties": {
+          "callCount": {
+            "format": "int64",
+            "nullable": true,
+            "type": "integer"
+          },
+          "capabilityCode": {
+            "type": "string"
+          },
+          "modelCode": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AiQuotaEvaluation": {
+        "properties": {
+          "allowed": {
+            "type": "boolean"
+          },
+          "evaluatedAt": {
+            "type": "string"
+          },
+          "mode": {
+            "type": "string"
+          },
+          "violations": {
+            "items": {
+              "$ref": "#/components/schemas/AiQuotaViolation"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "AiQuotaInput": {
+        "properties": {
+          "capabilityCode": {
+            "type": "string"
+          },
+          "currency": {
+            "nullable": true,
+            "type": "string"
+          },
+          "enabled": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "limitCost": {
+            "type": "string"
+          },
+          "limitCount": {
+            "format": "int64",
+            "nullable": true,
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "period": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AiQuotaRow": {
+        "properties": {
+          "capabilityCode": {
+            "type": "string"
+          },
+          "costConfigured": {
+            "type": "boolean"
+          },
+          "countConfigured": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "exceeded": {
+            "type": "boolean"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "limitCost": {
+            "type": "string"
+          },
+          "limitCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "membershipId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "period": {
+            "type": "string"
+          },
+          "periodEnd": {
+            "type": "string"
+          },
+          "periodLabel": {
+            "type": "string"
+          },
+          "periodStart": {
+            "type": "string"
+          },
+          "scope": {
+            "type": "string"
+          },
+          "scopeLabel": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "usedCost": {
+            "type": "string"
+          },
+          "usedCount": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AiQuotaViolation": {
+        "properties": {
+          "capabilityCode": {
+            "type": "string"
+          },
+          "currentUsage": {
+            "type": "string"
+          },
+          "limitKind": {
+            "type": "string"
+          },
+          "limitValue": {
+            "type": "string"
+          },
+          "membershipId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "period": {
+            "type": "string"
+          },
+          "periodEnd": {
+            "type": "string"
+          },
+          "periodLabel": {
+            "type": "string"
+          },
+          "periodStart": {
+            "type": "string"
+          },
+          "quotaId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "resetAt": {
+            "type": "string"
+          },
+          "scope": {
+            "type": "string"
+          },
+          "scopeLabel": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AiSensitivePolicyInput": {
+        "properties": {
+          "action": {
+            "type": "string"
+          },
+          "capabilityCode": {
+            "type": "string"
+          },
+          "enabled": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "modelCode": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AiSensitivePolicyRow": {
+        "properties": {
+          "action": {
+            "type": "string"
+          },
+          "actionLabel": {
+            "type": "string"
+          },
+          "capabilityCode": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "modelCode": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AiSensitivePolicyView": {
+        "properties": {
+          "action": {
+            "type": "string"
+          },
+          "actionLabel": {
+            "type": "string"
+          },
+          "basis": {
+            "type": "string"
+          },
+          "capabilityCode": {
+            "type": "string"
+          },
+          "configured": {
+            "type": "boolean"
+          },
+          "modelCode": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AiUsageCapabilities": {
+        "properties": {
+          "capabilities": {
+            "items": {
+              "$ref": "#/components/schemas/AiUsageCapability"
+            },
+            "type": "array"
+          },
+          "downstreamGaps": {
+            "items": {
+              "$ref": "#/components/schemas/AiUsageGap"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "AiUsageCapability": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "basis": {
+            "type": "string"
+          },
+          "impact": {
+            "type": "string"
+          },
+          "module": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AiUsageCurrencyRow": {
+        "properties": {
+          "calls": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "cost": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AiUsageGap": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "group": {
+            "type": "string"
+          },
+          "module": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "ownerService": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AiUsageMemberRow": {
+        "properties": {
+          "calls": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "cost": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "membershipId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AiUsageRecordInput": {
+        "properties": {
+          "capabilityCode": {
+            "type": "string"
+          },
+          "featureCode": {
+            "type": "string"
+          },
+          "modelCode": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "string"
+          },
+          "requestRef": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AiUsageRecordPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AiUsageRecordRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AiUsageRecordResult": {
+        "properties": {
+          "evaluation": {
+            "$ref": "#/components/schemas/AiQuotaEvaluation"
+          },
+          "record": {
+            "$ref": "#/components/schemas/AiUsageRecordRow"
+          }
+        },
+        "type": "object"
+      },
+      "AiUsageRecordRow": {
+        "properties": {
+          "capabilityCode": {
+            "type": "string"
+          },
+          "cost": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "featureCode": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "membershipId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "modelCode": {
+            "type": "string"
+          },
+          "occurredAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "quantity": {
+            "type": "string"
+          },
+          "requestRef": {
+            "type": "string"
+          },
+          "unit": {
+            "type": "string"
+          },
+          "unitCost": {
+            "type": "string"
+          },
+          "unitLabel": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AiUsageSummary": {
+        "properties": {
+          "billableBasis": {
+            "type": "string"
+          },
+          "byCapability": {
+            "items": {
+              "$ref": "#/components/schemas/AiUsageSummaryRow"
+            },
+            "type": "array"
+          },
+          "byCurrency": {
+            "items": {
+              "$ref": "#/components/schemas/AiUsageCurrencyRow"
+            },
+            "type": "array"
+          },
+          "byMember": {
+            "items": {
+              "$ref": "#/components/schemas/AiUsageMemberRow"
+            },
+            "type": "array"
+          },
+          "periodEnd": {
+            "type": "string"
+          },
+          "periodStart": {
+            "type": "string"
+          },
+          "totalCalls": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AiUsageSummaryRow": {
+        "properties": {
+          "calls": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "capabilityCode": {
+            "type": "string"
+          },
+          "cost": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "modelCode": {
+            "type": "string"
+          },
+          "modelName": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "string"
+          },
+          "unit": {
+            "type": "string"
+          },
+          "unitLabel": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "ApiCallMonitorAlertPage": {
         "properties": {
           "acknowledgedCount": {
@@ -12852,6 +13478,632 @@
         },
         "tags": [
           "ai-forecast-controller"
+        ]
+      }
+    },
+    "/platform/ai/usage/capabilities": {
+      "get": {
+        "description": "逐维说清「有没有、依据是什么、缺了归谁」。「全局 AI 拦截点」如实答不可用 —— 本仓没有统一的 AI 出站网关，敏感数据策略的**执行点**是各个 AI 能力自己在调用前查。",
+        "operationId": "get_platform_ai_usage_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiUsageCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "能力声明",
+        "tags": [
+          "ai-usage-quota-controller"
+        ]
+      }
+    },
+    "/platform/ai/usage/members/{memberId}/quotas": {
+      "post": {
+        "description": "主体是路径里指定的那一个成员。请求体里**没有** membershipId —— 客户端不能自称归属。⚠️ 本仓 identity 侧没有成员归属查询端点，配给非本租户成员的配额会永远匹配不到用量（惰性行），不会越权。",
+        "operationId": "post_platform_ai_usage_members_memberId_quotas",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "memberId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AiQuotaInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiQuotaRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "登记 / 修改用户级配额",
+        "tags": [
+          "ai-usage-quota-controller"
+        ]
+      }
+    },
+    "/platform/ai/usage/models": {
+      "get": {
+        "description": "租户可维护的模型清单：模型名、单位成本（**每 1 个量纲单位**的成本）、上下文上限、是否可用。平台零预置 —— 单价是商业条款，归租户定。",
+        "operationId": "get_platform_ai_usage_models",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "enabled",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AiModelRow"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "模型目录",
+        "tags": [
+          "ai-usage-quota-controller"
+        ]
+      },
+      "post": {
+        "description": "单价改价**不影响历史台账** —— 台账里存的是记这一行那一刻的单价快照。",
+        "operationId": "post_platform_ai_usage_models",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AiModelInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiModelRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "登记 / 修改模型",
+        "tags": [
+          "ai-usage-quota-controller"
+        ]
+      }
+    },
+    "/platform/ai/usage/policies": {
+      "get": {
+        "description": "按能力 × 模型登记的敏感数据处理动作（禁传 / 脱敏 / 允许）。🔴 **执行点是各个 AI 能力自己**（调用前查本表）—— 本仓没有全局 AI 拦截点。",
+        "operationId": "get_platform_ai_usage_policies",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "capabilityCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "modelCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AiSensitivePolicyRow"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "敏感数据策略列表",
+        "tags": [
+          "ai-usage-quota-controller"
+        ]
+      },
+      "post": {
+        "description": "模型标识留空 = 该能力下**全部模型**；对个别模型加严时，更具体的那条（能力 × 模型）生效。",
+        "operationId": "post_platform_ai_usage_policies",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AiSensitivePolicyInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiSensitivePolicyRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "登记 / 修改敏感数据策略",
+        "tags": [
+          "ai-usage-quota-controller"
+        ]
+      }
+    },
+    "/platform/ai/usage/policies/effective": {
+      "get": {
+        "description": "先找「能力 × 该模型」，找不到再退回「能力 × 全部模型」；都没有登记 ⇒ 落到默认档「允许」，并如实说明「库里没登记」。",
+        "operationId": "get_platform_ai_usage_policies_effective",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "capabilityCode",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "modelCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiSensitivePolicyView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "查生效的敏感数据策略",
+        "tags": [
+          "ai-usage-quota-controller"
+        ]
+      }
+    },
+    "/platform/ai/usage/quotas": {
+      "get": {
+        "description": "租户级与用户级配额，含**当前周期**的已用量、阈值与重置时刻。",
+        "operationId": "get_platform_ai_usage_quotas",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AiQuotaRow"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "配额列表",
+        "tags": [
+          "ai-usage-quota-controller"
+        ]
+      },
+      "post": {
+        "description": "主体是**整个租户**。次数上限与成本上限至少配一个；两者都配时**任一越线即超限**。",
+        "operationId": "post_platform_ai_usage_quotas",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AiQuotaInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiQuotaRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "登记 / 修改租户级配额",
+        "tags": [
+          "ai-usage-quota-controller"
+        ]
+      }
+    },
+    "/platform/ai/usage/quotas/check": {
+      "post": {
+        "description": "回答「按当前用量算，还放得下吗」。超限会给出：超了哪一条配额、当前用量、阈值、周期、什么时候重置。⚠️ 这是**预检快照**，并发下的权威判定发生在**记用量**那一次的数据库原子递增。",
+        "operationId": "post_platform_ai_usage_quotas_check",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AiQuotaCheckInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiQuotaEvaluation"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "配额预检",
+        "tags": [
+          "ai-usage-quota-controller"
+        ]
+      }
+    },
+    "/platform/ai/usage/records": {
+      "get": {
+        "description": "一次 AI 调用一行（**只追加**）：主体成员、能力、模型、量纲、调用量、成本快照、发生时刻、请求关联 id。",
+        "operationId": "get_platform_ai_usage_records",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "capabilityCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "membershipId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "modelCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "起始时刻（ISO-8601，含）",
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "结束时刻（ISO-8601，不含）",
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiUsageRecordPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "用量台账",
+        "tags": [
+          "ai-usage-quota-controller"
+        ]
+      },
+      "post": {
+        "description": "主体成员由服务端从已认证会话解析（请求体不接受 membershipId）。成本 = 调用量 × **快照**下来的目录单价；同一次调用里的配额计数由数据库**原子**递增，返回的判定即递增后的累计值。",
+        "operationId": "post_platform_ai_usage_records",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AiUsageRecordInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiUsageRecordResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "记一次用量",
+        "tags": [
+          "ai-usage-quota-controller"
+        ]
+      }
+    },
+    "/platform/ai/usage/summary": {
+      "get": {
+        "description": "粒度 = 能力 × 模型 × 币种；不同模型与不同币种**不混算**。本模块只提供可计费口径的汇总，**不直连 finance 库、不写 finance 表** —— 计费（17.6.1）自行取数或由事件消费。",
+        "operationId": "get_platform_ai_usage_summary",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiUsageSummary"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "用量报表",
+        "tags": [
+          "ai-usage-quota-controller"
         ]
       }
     },
