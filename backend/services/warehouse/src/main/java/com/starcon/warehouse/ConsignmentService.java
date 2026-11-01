@@ -46,6 +46,11 @@ import org.springframework.web.server.ResponseStatusException;
  *
  * <p><b>时间绑定纪律</b>：{@code ?::timestamptz} 一律出现在语句最前面的 {@code t} CTE 里， 后面全是普通绑定，cast 永远不在绑定序列末位。写入用
  * {@link OffsetDateTime} 绑定， 不走 {@code Timestamp.valueOf} —— 后者按 JVM 本地时区解释裸本地时间，在东八区会静默偏 −28800s。
+ *
+ * <p><b>日历口径纪律</b>：本模块的「今天」一律按 <b>UTC 日历</b>算 —— {@code (now() at time zone 'UTC')::date}，
+ * <b>不</b>用 {@code current_date}（后者跟着会话时区走，同一份数据在两个时区的库里会差一天）。售出事实按<b>瞬时</b>落库 （{@code occurred_at}
+ * 绑定前归一到 UTC），结算区间的两端按 <b>UTC 零点</b>落边界 —— 三者必须同属 UTC 日历： 「DB 的本地日期 + UTC
+ * 零点」这种混口径会把当天的售出事实挤到区间之外，让结算单凭空出不来。
  */
 @Service
 public class ConsignmentService {
@@ -469,6 +474,9 @@ public class ConsignmentService {
     }
     UUID id = UUID.randomUUID();
     String source = notBlank(input.sourceSystem()) ? input.sourceSystem().trim() : "MANUAL";
+    // 售出时刻按**瞬时**落库：调用方给什么偏移都先归一到 UTC 再绑，
+    // 免得同一瞬时在不同调用方手里落成不同的墙钟字面量（timestamptz 存的是瞬时，偏移只是写法）。
+    var occurredAt = input.occurredAt().withOffsetSameInstant(ZoneOffset.UTC);
     // t CTE 让 ?::timestamptz 成为第 1 个绑定，cast 不落在绑定序列末位。
     try {
       sql.execute(
@@ -476,7 +484,7 @@ public class ConsignmentService {
               + "insert into consignment_sale(id,tenant_id,agreement_line_id,sold_quantity,sale_ref,"
               + "source_system,sale_price,currency,occurred_at,recorded_by_user_id,created_at) "
               + "select ?,?,?,?,?,?,?,?,t.at,?,t.at from t",
-          input.occurredAt(),
+          occurredAt,
           id,
           tenant,
           lineId,
@@ -571,6 +579,10 @@ public class ConsignmentService {
     }
     // 结算周期给出**默认**区间，但允许显式改期（补结算、跨期合并都要用得到）；
     // 这里只提示，不硬拦。
+    // 区间两端按 **UTC 零点**落成边界：与售出事实（occurred_at 的 UTC 日历）同属一个日历。
+    // 拿会话本地日去配 UTC 零点就是「跨钟域第 4 例」的根因 —— 当天的售出会被挤到区间之外。
+    var periodLo = input.periodStart().atStartOfDay().atOffset(ZoneOffset.UTC);
+    var periodHi = input.periodEnd().plusDays(1).atStartOfDay().atOffset(ZoneOffset.UTC);
     var pending =
         sql.fetch(
             "select s.id, s.agreement_line_id, s.sold_quantity, l.settlement_price"
@@ -583,11 +595,19 @@ public class ConsignmentService {
                 + " order by s.occurred_at, s.id limit ?",
             agreementId,
             tenant,
-            input.periodStart().atStartOfDay().atOffset(ZoneOffset.UTC),
-            input.periodEnd().plusDays(1).atStartOfDay().atOffset(ZoneOffset.UTC),
+            periodLo,
+            periodHi,
             MAX_SETTLEMENT_LINES + 1L);
     if (pending.isEmpty()) {
-      throw bad("该区间内没有「已售出且尚未结算」的销售事实，结算触发单必须是空的单据时，" + "说明这期根本没卖出东西 —— 未售出不产生应付，这正是寄售该有的结果。");
+      // 把区间边界写进报错：这句话原本把「区间算错」说成了「业务上没卖出东西」，
+      // 运营看到的是误导性的业务结论 —— 边界可见才谈得上可诊断。
+      throw bad(
+          "该区间 ["
+              + periodLo
+              + ", "
+              + periodHi
+              + ") 内没有「已售出且尚未结算」的销售事实（区间按 UTC 日历算，与售出事实的钟域一致），"
+              + "结算触发单必须是空的单据时，说明这期根本没卖出东西 —— 未售出不产生应付，这正是寄售该有的结果。");
     }
     if (pending.size() > MAX_SETTLEMENT_LINES) {
       throw bad("该区间待结算的销售事实超过 " + MAX_SETTLEMENT_LINES + " 条，请把结算区间拆小后分批出单。");
@@ -1026,12 +1046,24 @@ public class ConsignmentService {
    *
    * <p>它是真算出来的（WEEKLY 取周一至周日、SEMI_MONTHLY 按上下半月、MONTHLY 按自然月）， 不是写死的字符串。ON_DEMAND
    * 没有固定周期，给出今天到明天的一日窗口作为可编辑起点。
+   *
+   * <p>「今天」按 <b>UTC 日历</b>算（{@code (now() at time zone 'UTC')::date}）， <b>不</b>用 {@code
+   * current_date}： 后者跟着会话时区走， 同一份数据在两个时区的库里会差一天；而区间两端又按 UTC 零点落边界 —— 混口径会把当天的售出事实挤到区间之外。
    */
   public SettlementWindow settlementWindow(UUID agreementId) {
+    return settlementWindow(agreementId, utcToday());
+  }
+
+  /**
+   * 按协议的结算周期 + 指定锚定日算出结算区间。
+   *
+   * <p>锚定日让区间成为纯函数（周期 + 锚定日）： 补结算 / 跨期合并可以按历史锚定日重算同一套区间， 不用去猜「当时是几号」， 也让测试不必依赖墙钟。
+   */
+  public SettlementWindow settlementWindow(UUID agreementId, LocalDate asOf) {
     var tenant = tenant();
     var head = requireHead(tenant, agreementId);
     String cycle = head.get("settlement_cycle", String.class);
-    var today = sql.fetchOne("select current_date").get(0, LocalDate.class);
+    var today = asOf;
     var start = today;
     var end = today;
     switch (cycle) {
@@ -1429,8 +1461,18 @@ public class ConsignmentService {
     } else {
       seq = sql.fetchOne("select nextval('consignment_return_code_seq')").get(0, Long.class);
     }
-    var today = sql.fetchOne("select current_date").get(0, LocalDate.class);
+    var today = utcToday();
     return prefix + "-" + today.toString().replace("-", "") + "-" + String.format("%06d", seq);
+  }
+
+  /**
+   * 「今天」按 <b>UTC 日历</b>算。
+   *
+   * <p>{@code current_date} 跟着会话时区走 —— 同一份数据在两个时区的库里会差一天， 结算区间与单号日期必须用同一个日历， 所以这里显式把时钟钉在 UTC 上（与
+   * trade 模块 {@code (now() at time zone 'UTC')::date} 同一口径）。
+   */
+  private LocalDate utcToday() {
+    return sql.fetchOne("select (now() at time zone 'UTC')::date").get(0, LocalDate.class);
   }
 
   private static String label(Enum<?>[] values, String name) {
