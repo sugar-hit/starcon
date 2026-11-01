@@ -528,6 +528,8 @@ class AutomationRuleEditorIntegrationTest {
         .hasStackTraceContaining("permission denied");
 
     // ② owner 身份直连：绕开权限码，但**绕不开触发器**。
+    //    ⚠️ run_no 取 99（不是 1）：台账的 UNIQUE NULLS NOT DISTINCT(tenant_id, rule_id, run_no)
+    //    把草稿测试（rule_id 为空）的序号也算进唯一性 ⇒ run_no=1 已被上面的草稿测试占用。
     try (var c =
             DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
         var s = c.prepareStatement(
@@ -535,7 +537,7 @@ class AutomationRuleEditorIntegrationTest {
                 + " trigger_event_type,trigger_schema_version,config_snapshot,sample_payload,matched,"
                 + " total_conditions,matched_conditions,planned_actions,evaluation,failure_reason,"
                 + " created_by,created_at)"
-                + " values(?,?,null,'owner 直连',1,'order.created',1,'{}'::jsonb,'{}'::jsonb,true,"
+                + " values(?,?,null,'owner 直连',99,'order.created',1,'{}'::jsonb,'{}'::jsonb,true,"
                 + " 0,0,0,'{}'::jsonb,'',null,now())")) {
       s.setObject(1, UUID.randomUUID());
       s.setObject(2, tenant);
