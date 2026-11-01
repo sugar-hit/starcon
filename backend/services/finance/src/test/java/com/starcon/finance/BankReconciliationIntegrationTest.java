@@ -12,6 +12,7 @@ import com.sun.net.httpserver.HttpServer;
 import java.math.BigDecimal;
 import java.net.InetSocketAddress;
 import java.sql.DriverManager;
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
@@ -132,6 +133,40 @@ class BankReconciliationIntegrationTest {
     return UUID.nameUUIDFromBytes(("starcon-finance-bank-recon-" + tag).getBytes());
   }
 
+  // ================================================================ 夹具时间轴
+  //
+  // 🔴 为什么夹具不能写死日历日：
+  // 对账期间原本写死 2026-10-01 ~ 2026-10-31，而建档余额的 {@code recorded_at} 取**墙钟** now()。
+  // 服务按期间边界取账面余额（{@code BankReconciliationService#bookBalanceAt}）：
+  // 期初 cutoff = 期初日 00:00:00Z；期末 cutoff = 期末日+1 的 00:00:00Z 减 1 纳秒；查询条件
+  // {@code recorded_at <= cutoff}。
+  // ⇒ 墙钟一旦越过 2026-10-31T23:59:59.999Z（＝本地 2026-11-01 08:00），建档余额那行就掉出
+  //   期末 cutoff ⇒ bookClosing = null ⇒ bookBalanceAvailable = false
+  //   ⇒「账面余额读得到」这条断言假红（服务的语义「读不到 ≠ 没有」是对的，不改服务）。
+  // ⇒ 期间与建档时刻都改成**相对锚点**推（与服务同基准，与运行机器时区无关），断言一条不放宽。
+
+  /** 夹具锚点：所有夹具日期都相对「今天（UTC）」推（与服务取数窗口同基准）。 */
+  static final LocalDate TODAY = LocalDate.now(ZoneOffset.UTC);
+
+  /** 对账期间：期初 = 今天-30 天、期末 = 今天（跨度 31 天，与原写死区间一致，不放大）。 */
+  static final LocalDate PERIOD_START = TODAY.minusDays(30);
+  static final LocalDate PERIOD_END = TODAY;
+
+  /**
+   * 夹具日：day=1 → 期初当天 … day=31 → 期末当天。
+   *
+   * <p>与原先写死的日历日**逐位对应**（原 2026-10-05 → 现在 {@code PERIOD_START + 4 天}），
+   * 「day 越大时间越晚」的排序语义、以及各行之间的天数差（匹配窗口）全部不变。
+   */
+  static LocalDate fixtureDay(int day) {
+    return PERIOD_START.plusDays(day - 1);
+  }
+
+  /** 夹具日（ISO 日期串）：给 CSV / JSON 里的日期位占位用；**时分秒与时区偏移留在夹具原文里不动**。 */
+  static String fixtureDate(int day) {
+    return fixtureDay(day).toString();
+  }
+
   // ================================================================ 夹具
 
   @BeforeEach
@@ -155,6 +190,12 @@ class BankReconciliationIntegrationTest {
         tenant,
         () -> {
           var now = OffsetDateTime.now(ZoneOffset.UTC);
+          // 🔴 建档余额的**事实时刻**：必须落在对账期间内，否则期末 cutoff 读不到这一行
+          //   ⇒ bookClosing = null ⇒ bookBalanceAvailable = false（墙钟一翻页就假红）。
+          //   取期初那一天的零点 ⇒ 同时满足「<= 期初 cutoff」与「<= 期末 cutoff」。
+          //   ⚠️ 账户档案上的 current_balance_at / created_at / updated_at 语义是「建档时刻」，
+          //   继续用墙钟，不动。
+          var recordedAt = PERIOD_START.atStartOfDay().atOffset(ZoneOffset.UTC);
           var accountId = idOf("account-" + no);
           sql.execute(
               "insert into finance_fund_account(id,tenant_id,account_no,account_name,account_type,"
@@ -192,7 +233,7 @@ class BankReconciliationIntegrationTest {
               "LE_A",
               new BigDecimal(balance),
               UUID.randomUUID(),
-              now,
+              recordedAt,
               now);
           return null;
         });
@@ -266,15 +307,20 @@ class BankReconciliationIntegrationTest {
 
   // ================================================================ 夹具辅助
 
-  /** 建对账批次（走真实服务层，在可信租户事务里）。 */
-  FinanceBankReconSessionRow createSession(String accountNo, String periodStart, String periodEnd) {
+  /**
+   * 建对账批次（走真实服务层，在可信租户事务里）。
+   *
+   * <p>期间固定 = 夹具锚点推导的 31 天窗口（{@link #PERIOD_START} ~ {@link #PERIOD_END}），
+   * 与原写死的 2026-10-01 ~ 2026-10-31 跨度一致 —— 单一来源，不会各调用点各写各的。
+   */
+  FinanceBankReconSessionRow createSession(String accountNo) {
     return as(
         () ->
             recon.createSession(
                 new FinanceBankReconSessionCreateInput(
                     idOf("account-" + accountNo),
-                    java.time.LocalDate.parse(periodStart),
-                    java.time.LocalDate.parse(periodEnd),
+                    PERIOD_START,
+                    PERIOD_END,
                     new BigDecimal("1000"),
                     new BigDecimal("1000"),
                     "bank",
@@ -308,16 +354,22 @@ class BankReconciliationIntegrationTest {
   // ==========================================================================
   @Test
   void 导入csv真入库且逐行告警不静默丢弃() {
-    var session = createSession("FA-USD", "2026-10-01", "2026-10-31");
+    var session = createSession("FA-USD");
     var csv =
         """
         occurredAt,direction,amount,currency,bankReference,externalReference,counterparty,memo
-        2026-10-05T10:00:00+08:00,IN,1200.50,USD,BK-001,SO-1001,ACME Ltd,平台回款
-        2026-10-06T09:00:00+08:00,IN,300,USD,BK-002,,,只有金额
-        2026-10-07T09:00:00,IN,50,USD,BK-003,,,没有时区
-        2026-10-08T09:00:00+08:00,IN,60,EUR,BK-004,,,币种不对
-        2026-10-09T09:00:00+08:00,IN,70,USD,BK-001,,,重复流水号
-        """;
+        %sT10:00:00+08:00,IN,1200.50,USD,BK-001,SO-1001,ACME Ltd,平台回款
+        %sT09:00:00+08:00,IN,300,USD,BK-002,,,只有金额
+        %sT09:00:00,IN,50,USD,BK-003,,,没有时区
+        %sT09:00:00+08:00,IN,60,EUR,BK-004,,,币种不对
+        %sT09:00:00+08:00,IN,70,USD,BK-001,,,重复流水号
+        """
+            .formatted(
+                fixtureDate(5),
+                fixtureDate(6),
+                fixtureDate(7),
+                fixtureDate(8),
+                fixtureDate(9));
 
     var result = importCsv(session.id(), csv, new BigDecimal("1210.50"));
 
@@ -350,19 +402,21 @@ class BankReconciliationIntegrationTest {
                             "select occurred_at from finance_bank_recon_statement_line"
                                 + " where bank_reference = 'BK-001'")
                         .get(0, OffsetDateTime.class));
+    // ⚠️ 夹具日相对锚点 ⇒ 期望瞬间也跟着推；**+08:00 偏移逐字保留**（本地 10:00 = UTC 02:00）。
     assertThat(occurredAt.toInstant())
-        .isEqualTo(java.time.Instant.parse("2026-10-05T02:00:00Z"));
+        .isEqualTo(fixtureDay(5).atTime(10, 0).atOffset(ZoneOffset.ofHours(8)).toInstant());
   }
 
   @Test
   void 导入json真入库() {
-    var session = createSession("FA-USD", "2026-10-01", "2026-10-31");
+    var session = createSession("FA-USD");
     var content =
         """
-        [{"occurredAt":"2026-10-11T08:00:00Z","direction":"OUT","amount":250.25,
+        [{"occurredAt":"%sT08:00:00Z","direction":"OUT","amount":250.25,
           "currency":"USD","bankReference":"BK-JSON-1","externalReference":"PO-2001",
           "counterparty":"SUPPLIER A","memo":"采购付款"}]
-        """;
+        """
+            .formatted(fixtureDate(11));
     var result =
         as(
             () ->
@@ -379,7 +433,7 @@ class BankReconciliationIntegrationTest {
 
   @Test
   void csv表头缺列时整份拒收而不是猜列序() {
-    var session = createSession("FA-USD", "2026-10-01", "2026-10-31");
+    var session = createSession("FA-USD");
     var csv = "a,b,c\n1,2,3\n";
     var thrown =
         catchThrowable(
@@ -402,12 +456,13 @@ class BankReconciliationIntegrationTest {
 
   @Test
   void 重复导入同一份流水是幂等的() {
-    var session = createSession("FA-USD", "2026-10-01", "2026-10-31");
+    var session = createSession("FA-USD");
     var csv =
         """
         occurredAt,direction,amount,currency,bankReference
-        2026-10-05T10:00:00+08:00,IN,100,USD,BK-IDEM
-        """;
+        %sT10:00:00+08:00,IN,100,USD,BK-IDEM
+        """
+            .formatted(fixtureDate(5));
     var first = importCsv(session.id(), csv, null);
     var second = importCsv(session.id(), csv, null);
     assertThat(first.importedCount()).isEqualTo(1);
@@ -423,13 +478,14 @@ class BankReconciliationIntegrationTest {
   // ==========================================================================
   @Test
   void 单号精确相等才配上() {
-    insertReceipt("RC-1", "1000", "USD", "SO-777", "ACME Ltd", "2026-10-05T10:00:00+08:00");
-    var session = createSession("FA-USD", "2026-10-01", "2026-10-31");
+    insertReceipt("RC-1", "1000", "USD", "SO-777", "ACME Ltd", fixtureDate(5) + "T10:00:00+08:00");
+    var session = createSession("FA-USD");
     var csv =
         """
         occurredAt,direction,amount,currency,bankReference,externalReference,counterparty
-        2026-10-05T10:00:00+08:00,IN,1000,USD,BK-1,SO-777,别的名字
-        """;
+        %sT10:00:00+08:00,IN,1000,USD,BK-1,SO-777,别的名字
+        """
+            .formatted(fixtureDate(5));
     importCsv(session.id(), csv, null);
 
     var result = match(session.id());
@@ -447,13 +503,15 @@ class BankReconciliationIntegrationTest {
 
   @Test
   void 对手方相等也能配上() {
-    insertReceipt("RC-2", "800", "USD", "REF-XYZ", "ACME Co., Ltd.", "2026-10-05T10:00:00+08:00");
-    var session = createSession("FA-USD", "2026-10-01", "2026-10-31");
+    insertReceipt(
+        "RC-2", "800", "USD", "REF-XYZ", "ACME Co., Ltd.", fixtureDate(5) + "T10:00:00+08:00");
+    var session = createSession("FA-USD");
     var csv =
         """
         occurredAt,direction,amount,currency,bankReference,externalReference,counterparty
-        2026-10-05T11:00:00+08:00,IN,800,USD,BK-2,别的单号,ACME CO LTD
-        """;
+        %sT11:00:00+08:00,IN,800,USD,BK-2,别的单号,ACME CO LTD
+        """
+            .formatted(fixtureDate(5));
     importCsv(session.id(), csv, null);
 
     var result = match(session.id());
@@ -465,13 +523,14 @@ class BankReconciliationIntegrationTest {
   @Test
   void 金额相同但既无单号也无对手方且日期超窗口时不配() {
     // 🔴 卷 12 硬约束：「金额相同只是候选，必须结合订单号、日期、类型」。
-    insertReceipt("RC-3", "500", "USD", "SO-888", "ACME Ltd", "2026-10-05T10:00:00+08:00");
-    var session = createSession("FA-USD", "2026-10-01", "2026-10-31");
+    insertReceipt("RC-3", "500", "USD", "SO-888", "ACME Ltd", fixtureDate(5) + "T10:00:00+08:00");
+    var session = createSession("FA-USD");
     var csv =
         """
         occurredAt,direction,amount,currency,bankReference,externalReference,counterparty
-        2026-10-25T10:00:00+08:00,IN,500,USD,BK-3,,
-        """;
+        %sT10:00:00+08:00,IN,500,USD,BK-3,,
+        """
+            .formatted(fixtureDate(25));
     importCsv(session.id(), csv, null);
 
     var result = match(session.id());
@@ -482,13 +541,14 @@ class BankReconciliationIntegrationTest {
 
   @Test
   void 方向不同不配() {
-    insertReceipt("RC-4", "500", "USD", "SO-889", "ACME Ltd", "2026-10-05T10:00:00+08:00");
-    var session = createSession("FA-USD", "2026-10-01", "2026-10-31");
+    insertReceipt("RC-4", "500", "USD", "SO-889", "ACME Ltd", fixtureDate(5) + "T10:00:00+08:00");
+    var session = createSession("FA-USD");
     var csv =
         """
         occurredAt,direction,amount,currency,bankReference,externalReference,counterparty
-        2026-10-05T10:00:00+08:00,OUT,500,USD,BK-4,SO-889,ACME Ltd
-        """;
+        %sT10:00:00+08:00,OUT,500,USD,BK-4,SO-889,ACME Ltd
+        """
+            .formatted(fixtureDate(5));
     importCsv(session.id(), csv, null);
 
     var result = match(session.id());
@@ -498,13 +558,15 @@ class BankReconciliationIntegrationTest {
 
   @Test
   void 付款单也能进入系统侧候选并与流出匹配() {
-    insertPaymentOrder("PO-1", "300", "USD", "SUPPLIER A", "2026-10-12T08:00:00+08:00");
-    var session = createSession("FA-USD", "2026-10-01", "2026-10-31");
+    insertPaymentOrder(
+        "PO-1", "300", "USD", "SUPPLIER A", fixtureDate(12) + "T08:00:00+08:00");
+    var session = createSession("FA-USD");
     var csv =
         """
         occurredAt,direction,amount,currency,bankReference,externalReference,counterparty
-        2026-10-12T09:00:00+08:00,OUT,300,USD,BK-PO,PO-1,SUPPLIER A
-        """;
+        %sT09:00:00+08:00,OUT,300,USD,BK-PO,PO-1,SUPPLIER A
+        """
+            .formatted(fixtureDate(12));
     importCsv(session.id(), csv, null);
 
     var result = match(session.id());
@@ -531,8 +593,8 @@ class BankReconciliationIntegrationTest {
                         recon.createSession(
                             new FinanceBankReconSessionCreateInput(
                                 idOf("account-FA-USD"),
-                                java.time.LocalDate.parse("2026-10-01"),
-                                java.time.LocalDate.parse("2026-10-31"),
+                                PERIOD_START,
+                                PERIOD_END,
                                 null,
                                 null,
                                 "bank",
@@ -547,13 +609,14 @@ class BankReconciliationIntegrationTest {
   // ==========================================================================
   @Test
   void 未匹配项两边都列出来() {
-    insertReceipt("RC-5", "100", "USD", "SO-1", "ACME", "2026-10-05T10:00:00+08:00");
-    var session = createSession("FA-USD", "2026-10-01", "2026-10-31");
+    insertReceipt("RC-5", "100", "USD", "SO-1", "ACME", fixtureDate(5) + "T10:00:00+08:00");
+    var session = createSession("FA-USD");
     var csv =
         """
         occurredAt,direction,amount,currency,bankReference
-        2026-10-20T10:00:00+08:00,IN,999,USD,BK-X
-        """;
+        %sT10:00:00+08:00,IN,999,USD,BK-X
+        """
+            .formatted(fixtureDate(20));
     importCsv(session.id(), csv, null);
     match(session.id());
 
@@ -569,13 +632,14 @@ class BankReconciliationIntegrationTest {
 
   @Test
   void 认领到真实存在的收款单才成功() {
-    insertReceipt("RC-6", "100", "USD", "SO-1", "ACME", "2026-10-05T10:00:00+08:00");
-    var session = createSession("FA-USD", "2026-10-01", "2026-10-31");
+    insertReceipt("RC-6", "100", "USD", "SO-1", "ACME", fixtureDate(5) + "T10:00:00+08:00");
+    var session = createSession("FA-USD");
     var csv =
         """
         occurredAt,direction,amount,currency,bankReference
-        2026-10-20T10:00:00+08:00,IN,999,USD,BK-Y
-        """;
+        %sT10:00:00+08:00,IN,999,USD,BK-Y
+        """
+            .formatted(fixtureDate(20));
     importCsv(session.id(), csv, null);
     match(session.id());
 
@@ -627,12 +691,13 @@ class BankReconciliationIntegrationTest {
 
   @Test
   void 认领到不存在的单据被拒() {
-    var session = createSession("FA-USD", "2026-10-01", "2026-10-31");
+    var session = createSession("FA-USD");
     var csv =
         """
         occurredAt,direction,amount,currency,bankReference
-        2026-10-20T10:00:00+08:00,IN,999,USD,BK-Z
-        """;
+        %sT10:00:00+08:00,IN,999,USD,BK-Z
+        """
+            .formatted(fixtureDate(20));
     importCsv(session.id(), csv, null);
     match(session.id());
     var unmatched = unmatchedOf(session.id(), "OPEN", "BANK").items().get(0);
@@ -659,12 +724,13 @@ class BankReconciliationIntegrationTest {
 
   @Test
   void 排除必须写理由() {
-    var session = createSession("FA-USD", "2026-10-01", "2026-10-31");
+    var session = createSession("FA-USD");
     var csv =
         """
         occurredAt,direction,amount,currency,bankReference
-        2026-10-20T10:00:00+08:00,IN,999,USD,BK-E
-        """;
+        %sT10:00:00+08:00,IN,999,USD,BK-E
+        """
+            .formatted(fixtureDate(20));
     importCsv(session.id(), csv, null);
     match(session.id());
     var unmatched = unmatchedOf(session.id(), "OPEN", "BANK").items().get(0);
@@ -687,14 +753,15 @@ class BankReconciliationIntegrationTest {
   // ==========================================================================
   @Test
   void 对账报告算出余额调节与差额() {
-    insertReceipt("RC-7", "1000", "USD", "SO-7", "ACME", "2026-10-05T10:00:00+08:00");
-    var session = createSession("FA-USD", "2026-10-01", "2026-10-31");
+    insertReceipt("RC-7", "1000", "USD", "SO-7", "ACME", fixtureDate(5) + "T10:00:00+08:00");
+    var session = createSession("FA-USD");
     var csv =
         """
         occurredAt,direction,amount,currency,bankReference,externalReference
-        2026-10-05T10:00:00+08:00,IN,1000,USD,BK-R,SO-7
-        2026-10-20T10:00:00+08:00,IN,200,USD,BK-R2,
-        """;
+        %sT10:00:00+08:00,IN,1000,USD,BK-R,SO-7
+        %sT10:00:00+08:00,IN,200,USD,BK-R2,
+        """
+            .formatted(fixtureDate(5), fixtureDate(20));
     importCsv(session.id(), csv, new BigDecimal("1200"));
 
     // 银行已收 200 未入账（系统侧没有）⇒ 调节后余额 = 银行期末 1200 + 200 = 1400；
@@ -724,12 +791,13 @@ class BankReconciliationIntegrationTest {
   void 账面余额读不到时差额恒为null而不是零() {
     // 余额历史是 append-only（DB 拒绝 DELETE）⇒ 用一个**压根没有余额历史**的账户。
     insertAccount("FA-NOBAL", "没有余额历史的户", "USD", null);
-    var session = createSession("FA-NOBAL", "2026-10-01", "2026-10-31");
+    var session = createSession("FA-NOBAL");
     var csv =
         """
         occurredAt,direction,amount,currency,bankReference
-        2026-10-20T10:00:00+08:00,IN,200,USD,BK-NB
-        """;
+        %sT10:00:00+08:00,IN,200,USD,BK-NB
+        """
+            .formatted(fixtureDate(20));
     importCsv(session.id(), csv, new BigDecimal("1000"));
     match(session.id());
     var report = as(() -> recon.reconcile(session.id(), actor()));
@@ -745,12 +813,13 @@ class BankReconciliationIntegrationTest {
   // ==========================================================================
   @Test
   void 银行流水是append_only改写被db拒绝() {
-    var session = createSession("FA-USD", "2026-10-01", "2026-10-31");
+    var session = createSession("FA-USD");
     var csv =
         """
         occurredAt,direction,amount,currency,bankReference
-        2026-10-05T10:00:00+08:00,IN,100,USD,BK-FROZEN
-        """;
+        %sT10:00:00+08:00,IN,100,USD,BK-FROZEN
+        """
+            .formatted(fixtureDate(5));
     importCsv(session.id(), csv, null);
 
     var thrown =
@@ -780,7 +849,7 @@ class BankReconciliationIntegrationTest {
         .as("规则表里一行都不该预置")
         .isZero();
 
-    createSession("FA-USD", "2026-10-01", "2026-10-31");
+    createSession("FA-USD");
 
     var rules = as(() -> recon.rules(0, 20));
     assertThat(rules.items()).hasSize(3);
@@ -793,7 +862,7 @@ class BankReconciliationIntegrationTest {
 
   @Test
   void 规则编码不可改因为它是历史匹配的追溯依据() {
-    createSession("FA-USD", "2026-10-01", "2026-10-31");
+    createSession("FA-USD");
     var rule = as(() -> recon.rules(0, 20)).items().get(0);
 
     var thrown =
@@ -843,7 +912,7 @@ class BankReconciliationIntegrationTest {
 
   @Test
   void 对账批次的状态只能向前不能回退() {
-    var session = createSession("FA-USD", "2026-10-01", "2026-10-31");
+    var session = createSession("FA-USD");
     match(session.id());
     assertThat(as(() -> recon.getSession(session.id())).status()).isEqualTo("MATCHED");
 
@@ -865,12 +934,13 @@ class BankReconciliationIntegrationTest {
 
   @Test
   void 事件流留痕了每一步() {
-    var session = createSession("FA-USD", "2026-10-01", "2026-10-31");
+    var session = createSession("FA-USD");
     var csv =
         """
         occurredAt,direction,amount,currency,bankReference
-        2026-10-05T10:00:00+08:00,IN,100,USD,BK-EV
-        """;
+        %sT10:00:00+08:00,IN,100,USD,BK-EV
+        """
+            .formatted(fixtureDate(5));
     importCsv(session.id(), csv, null);
     match(session.id());
 
@@ -889,8 +959,8 @@ class BankReconciliationIntegrationTest {
         json.writeValueAsString(
             Map.of(
                 "accountId", accountId.toString(),
-                "periodStart", "2026-10-01",
-                "periodEnd", "2026-10-31",
+                "periodStart", PERIOD_START.toString(),
+                "periodEnd", PERIOD_END.toString(),
                 "sourceSystem", "bank"));
     var created =
         http.perform(
@@ -912,7 +982,8 @@ class BankReconciliationIntegrationTest {
                 "format", "CSV",
                 "content",
                     "occurredAt,direction,amount,currency,bankReference\n"
-                        + "2026-10-05T10:00:00+08:00,IN,100,USD,BK-HTTP\n"));
+                        + fixtureDate(5)
+                        + "T10:00:00+08:00,IN,100,USD,BK-HTTP\n"));
     http.perform(
             post("/finance/bank-reconciliation/sessions/" + session.id() + "/import")
                 .header("Authorization", "session")
