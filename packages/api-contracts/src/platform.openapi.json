@@ -2266,6 +2266,432 @@
         },
         "type": "object"
       },
+      "AutomationRuleEditorActionCatalog": {
+        "properties": {
+          "actionTypes": {
+            "items": {
+              "$ref": "#/components/schemas/AutomationRuleEditorActionType"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "AutomationRuleEditorActionPlan": {
+        "properties": {
+          "actionType": {
+            "type": "string"
+          },
+          "actionTypeLabel": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "params": {
+            "type": "string"
+          },
+          "remark": {
+            "type": "string"
+          },
+          "seq": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "targetRef": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AutomationRuleEditorActionType": {
+        "properties": {
+          "actionType": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "params": {
+            "items": {
+              "$ref": "#/components/schemas/AutomationRuleEditorParamSpec"
+            },
+            "type": "array"
+          },
+          "targetLabel": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AutomationRuleEditorApiCatalog": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "endpoints": {
+            "items": {
+              "$ref": "#/components/schemas/AutomationRuleEditorApiEndpoint"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AutomationRuleEditorApiEndpoint": {
+        "properties": {
+          "domain": {
+            "type": "string"
+          },
+          "method": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "service": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AutomationRuleEditorCapabilities": {
+        "properties": {
+          "capabilities": {
+            "items": {
+              "$ref": "#/components/schemas/AutomationRuleEditorCapability"
+            },
+            "type": "array"
+          },
+          "gaps": {
+            "items": {
+              "$ref": "#/components/schemas/AutomationRuleEditorGap"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "AutomationRuleEditorCapability": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "evidence": {
+            "type": "string"
+          },
+          "moduleId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AutomationRuleEditorEventSchema": {
+        "properties": {
+          "eventType": {
+            "type": "string"
+          },
+          "fields": {
+            "items": {
+              "$ref": "#/components/schemas/AutomationRuleEditorField"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "schemaDeclared": {
+            "type": "boolean"
+          },
+          "schemaVersion": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "sourceArtifact": {
+            "type": "string"
+          },
+          "sourceService": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AutomationRuleEditorField": {
+        "properties": {
+          "allowedOperators": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "enumValues": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "label": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AutomationRuleEditorGap": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "moduleId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "relation": {
+            "type": "string"
+          },
+          "service": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AutomationRuleEditorParamSpec": {
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "enumValues": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "label": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AutomationRuleEditorTestInput": {
+        "properties": {
+          "payload": {
+            "nullable": true,
+            "type": "string"
+          },
+          "rule": {
+            "$ref": "#/components/schemas/AutomationRuleInput"
+          },
+          "shopId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "warehouseId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AutomationRuleEditorTestResult": {
+        "properties": {
+          "actionPlan": {
+            "items": {
+              "$ref": "#/components/schemas/AutomationRuleEditorActionPlan"
+            },
+            "type": "array"
+          },
+          "conditionEvaluations": {
+            "items": {
+              "$ref": "#/components/schemas/AutomationRuleConditionEvaluation"
+            },
+            "type": "array"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "draft": {
+            "type": "boolean"
+          },
+          "failureReason": {
+            "type": "string"
+          },
+          "matched": {
+            "type": "boolean"
+          },
+          "matchedConditions": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "plannedActions": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "ruleId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "ruleName": {
+            "type": "string"
+          },
+          "runNo": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "scopeApplicable": {
+            "type": "boolean"
+          },
+          "scopeNote": {
+            "type": "string"
+          },
+          "sideEffectsApplied": {
+            "type": "boolean"
+          },
+          "testRunId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "totalConditions": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AutomationRuleEditorTestRunRow": {
+        "properties": {
+          "actionPlan": {
+            "items": {
+              "$ref": "#/components/schemas/AutomationRuleEditorActionPlan"
+            },
+            "type": "array"
+          },
+          "conditionEvaluations": {
+            "items": {
+              "$ref": "#/components/schemas/AutomationRuleConditionEvaluation"
+            },
+            "type": "array"
+          },
+          "configSnapshot": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdBy": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "draft": {
+            "type": "boolean"
+          },
+          "failureReason": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "matched": {
+            "type": "boolean"
+          },
+          "matchedConditions": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "plannedActions": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "ruleId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "ruleName": {
+            "type": "string"
+          },
+          "runNo": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "samplePayload": {
+            "type": "string"
+          },
+          "scopeApplicable": {
+            "type": "boolean"
+          },
+          "scopeNote": {
+            "type": "string"
+          },
+          "sideEffectsApplied": {
+            "type": "boolean"
+          },
+          "totalConditions": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "triggerEventType": {
+            "type": "string"
+          },
+          "triggerSchemaVersion": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
       "AutomationRuleEventTypeRow": {
         "properties": {
           "eventType": {
@@ -11843,6 +12269,316 @@
         },
         "tags": [
           "auto-approval-controller"
+        ]
+      }
+    },
+    "/platform/automation-rule-editor/action-catalog": {
+      "get": {
+        "operationId": "get_platform_automation_rule_editor_action_catalog",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AutomationRuleEditorActionCatalog"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "automation-rule-editor-controller"
+        ]
+      }
+    },
+    "/platform/automation-rule-editor/api-catalog": {
+      "get": {
+        "operationId": "get_platform_automation_rule_editor_api_catalog",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AutomationRuleEditorApiCatalog"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "automation-rule-editor-controller"
+        ]
+      }
+    },
+    "/platform/automation-rule-editor/capabilities": {
+      "get": {
+        "operationId": "get_platform_automation_rule_editor_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AutomationRuleEditorCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "automation-rule-editor-controller"
+        ]
+      }
+    },
+    "/platform/automation-rule-editor/event-schemas": {
+      "get": {
+        "operationId": "get_platform_automation_rule_editor_event_schemas",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AutomationRuleEditorEventSchema"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "automation-rule-editor-controller"
+        ]
+      }
+    },
+    "/platform/automation-rule-editor/event-schemas/{eventType}": {
+      "get": {
+        "operationId": "get_platform_automation_rule_editor_event_schemas_eventType",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "eventType",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "schemaVersion",
+            "required": false,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AutomationRuleEditorEventSchema"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "automation-rule-editor-controller"
+        ]
+      }
+    },
+    "/platform/automation-rule-editor/save": {
+      "post": {
+        "operationId": "post_platform_automation_rule_editor_save",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AutomationRuleInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AutomationRuleDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "automation-rule-editor-controller"
+        ]
+      }
+    },
+    "/platform/automation-rule-editor/test": {
+      "post": {
+        "operationId": "post_platform_automation_rule_editor_test",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AutomationRuleEditorTestInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AutomationRuleEditorTestResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "automation-rule-editor-controller"
+        ]
+      }
+    },
+    "/platform/automation-rule-editor/test-runs": {
+      "get": {
+        "operationId": "get_platform_automation_rule_editor_test_runs",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "ruleId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AutomationRuleEditorTestRunRow"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "automation-rule-editor-controller"
         ]
       }
     },
