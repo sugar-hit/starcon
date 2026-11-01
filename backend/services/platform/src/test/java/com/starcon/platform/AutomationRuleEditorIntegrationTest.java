@@ -530,16 +530,16 @@ class AutomationRuleEditorIntegrationTest {
     // ② owner 身份直连：绕开权限码，但**绕不开触发器**。
     try (var c =
             DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
-        var s = c.createStatement()) {
-      s.execute(
-          "insert into platform_automation_rule_test_run(id,tenant_id,rule_id,rule_name,run_no,"
-              + " trigger_event_type,trigger_schema_version,config_snapshot,sample_payload,matched,"
-              + " total_conditions,matched_conditions,planned_actions,evaluation,failure_reason,"
-              + " created_by,created_at)"
-              + " values(?,?,null,'owner 直连',1,'order.created',1,'{}'::jsonb,'{}'::jsonb,true,"
-              + " 0,0,0,'{}'::jsonb,'',null,now())",
-          UUID.randomUUID(),
-          tenant);
+        var s = c.prepareStatement(
+            "insert into platform_automation_rule_test_run(id,tenant_id,rule_id,rule_name,run_no,"
+                + " trigger_event_type,trigger_schema_version,config_snapshot,sample_payload,matched,"
+                + " total_conditions,matched_conditions,planned_actions,evaluation,failure_reason,"
+                + " created_by,created_at)"
+                + " values(?,?,null,'owner 直连',1,'order.created',1,'{}'::jsonb,'{}'::jsonb,true,"
+                + " 0,0,0,'{}'::jsonb,'',null,now())")) {
+      s.setObject(1, UUID.randomUUID());
+      s.setObject(2, tenant);
+      s.execute();
     } catch (Exception e) {
       throw new AssertionError("owner 直连插入测试台账失败", e);
     }
