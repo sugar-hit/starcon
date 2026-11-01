@@ -1,11 +1,11 @@
-# starcon 集成分支并入 main · cron 任务书（每半小时）
+# starcon 集成分支并入 main · cron 任务书（每天两次：10:30 / 18:30）
 
 > **本文件是 cron 任务的 prompt 来源。协议只存这一份，且在版本控制里。**
 > 改策略改文件，不要改 cron prompt 字段。
 >
 > 本任务与「并行车道开发流水线」（`PIPELINE_CRON_PROMPT.md`）是**两个独立任务**：
-> 流水线负责在 `integration/module-dev` 上开发，本任务负责把集成分支**通过 Pull Request 合入 `main`**。
-> 两者不共享车道、不共享派发逻辑，但**共享同一个仓库** —— 并发时必须互不干扰。
+> 流水线负责在 `integration/module-dev` 上开发，本任务负责把集成分支**通过 Pull Request 合入 `main`**，
+> 并在合完之后**刷新交付进度看板**。两者不共享车道、不共享派发逻辑，但**共享同一个仓库与同一个调度闸** —— 并发时必须互不干扰。
 
 你每次运行是**全新的独立会话**，不继承任何上下文。
 **所有判断必须从仓库现状重新取证，不能凭记忆。**
@@ -14,17 +14,38 @@
 
 ## 0. 项目与一句话职责
 
-项目：`/Users/tommy/Project/starcon`（Java Spring Boot 微服务 + Next.js 双栈，遵守根 `AGENTS.md`）。
+项目：`/Users/guan/Projects/starcon`（Java Spring Boot 微服务 + Next.js 双栈，遵守根 `AGENTS.md`）。
 
 **你的职责：把 `integration/module-dev` 合入 `main` —— 具体做法是开一个 Pull Request，
-逐个审查并解决冲突，跑完验证，等 CI 绿了再把 PR 合进 `main`，然后如实汇报。**
+逐个审查并解决冲突，跑完验证，等 CI 绿了再把 PR 合进 `main`；合完顺手刷新交付进度看板，然后如实汇报。**
 
-源分支：`integration/module-dev`（远端 `upstream/integration/module-dev`）
-目标分支：`main`（远端 `upstream/main`）
+源分支：`integration/module-dev`（远端 `origin/integration/module-dev`）
+目标分支：`main`（远端 `origin/main`）
 PR 分支：`chore/sync-module-dev`（固定名，复用同一个分支，不每轮新建）
 
-**节奏：每半小时触发一次。** 这意味着**大多数轮次什么都不会发生** ——
+**节奏：每天 10:30 与 18:30 各触发一次。** 这意味着**大多数轮次什么都不会发生** ——
 没有新交付就安静收工，这是正常且正确的状态，不是失败。
+**本轮无事可做时安静收工，不要重跑全量验证来「确认没事」。**
+
+### 0.5 本机绑定（2026-11-01 重规划后，**先读这段再执行后面的命令**）
+
+| 项                                | 值                                                                                                                    |
+| --------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| 仓库根（git / gh 命令的执行位置） | `/Users/guan/Projects/starcon`（主工作区，**只在这里跑 git/gh，不要在这里 checkout 别的东西**）                       |
+| 远端名                            | `origin`（本文件里所有 `origin/` 都指它；历史上写过的 `upstream/` 一律读作 `origin/`）                                |
+| 集成头 worktree                   | 从 `.dev-agent/PIPELINE.local.md` 的 `PROJECT_ROOT` 读（本机为 `/Users/guan/Projects/starcon-worktrees/integration`） |
+| PR 分支                           | `chore/sync-module-dev`（固定名，复用）                                                                               |
+| 看板协议                          | `/Users/guan/Projects/starcon/tools/progress-site/REFRESH.md`（**在主工作区跑**）                                     |
+
+⚠️ **闸目录只存在于集成头 worktree**（`$PROJECT_ROOT/.dev-agent/dispatch.gate`）。
+**所有 `gate status` / `gate acquire` / `gate release` / `gate touch` 必须在 `$PROJECT_ROOT` 里跑**：
+
+```bash
+cd "$PROJECT_ROOT" && node tools/module-progress/lane.mjs gate status
+```
+
+在主工作区跑 `gate status` 会永远显示 `free`（那里根本没有闸目录）——
+那不是「闸空闲」，那是**读错了地方**，照着它去 acquire 就会和流水线撞车。
 
 ---
 
@@ -34,7 +55,7 @@ PR 分支：`chore/sync-module-dev`（固定名，复用同一个分支，不每
 
 根 `AGENTS.md` 的禁令是「**不要直接 push `main`**」。本任务**始终遵守**它：
 
-- ❌ 不许 `git push upstream HEAD:main`
+- ❌ 不许 `git push origin HEAD:main`
 - ❌ 不许 `gh pr merge` 之外的任何直推 main 的手段
 - ✅ `main` 的每一次变化，都必须来自**一个被合上的 PR**
 
@@ -70,8 +91,8 @@ PR 分支：`chore/sync-module-dev`（固定名，复用同一个分支，不每
 且注册的是**相对路径** `node tools/module-progress/merge-union.mjs %O %A %B`。
 git 执行合并驱动时的工作目录 = **工作树顶层** ⇒ 跑的是**当前检出分支**那份驱动。
 
-第 7.1 节的流程是「从 `upstream/main` 建 worktree → `git checkout -B chore/sync-module-dev`
-→ `git merge upstream/integration/module-dev`」。此刻检出的分支基于 `main`，
+第 7.1 节的流程是「从 `origin/main` 建 worktree → `git checkout -B chore/sync-module-dev`
+→ `git merge origin/integration/module-dev`」。此刻检出的分支基于 `main`，
 **跑的是 `main` 那份驱动**。若 `main` 上的驱动还是旧版（横幅写末行 + 类型名不排序），
 这次合并会把集成分支里已经 canonical 化的 11 个契约产物**重新写回 JS 形态** ——
 结果就是「合进去了，但 CI 的契约校验照样红」。
@@ -95,7 +116,7 @@ git 执行合并驱动时的工作目录 = **工作树顶层** ⇒ 跑的是**�
 **放行判据（开 PR#2 之前必须为真）**：
 
 ```bash
-git show upstream/main:tools/module-progress/merge-union.mjs | grep -q 'json-format.py'
+git show origin/main:tools/module-progress/merge-union.mjs | grep -q 'json-format.py'
 ```
 
 为 **假** ⇒ `main` 上还是旧驱动 ⇒ **STOP，不许开 PR#2**，先把 PR#1 合了再回来。
@@ -104,7 +125,7 @@ git show upstream/main:tools/module-progress/merge-union.mjs | grep -q 'json-for
 把第 7.1 节的 ②③ 换成「不 merge，直接把同步分支指到集成分支」：
 
 ```bash
-git checkout -B chore/sync-module-dev upstream/integration/module-dev
+git checkout -B chore/sync-module-dev origin/integration/module-dev
 ```
 
 这样驱动根本不跑，产物原样搬运。**但 CI 的 `contracts:generate` 要求 `main` 上的
@@ -114,11 +135,11 @@ git checkout -B chore/sync-module-dev upstream/integration/module-dev
 
 ```bash
 # 横幅在首行
-git show upstream/main:packages/api-contracts/src/catalog.openapi.json | head -1
+git show origin/main:packages/api-contracts/src/catalog.openapi.json | head -1
 # JS 形态指纹：任何服务都必须为 0
 for s in catalog channel crm trade warehouse identity; do
   printf '%s %s\n' "$s" \
-    "$(git show upstream/main:packages/api-contracts/src/$s.openapi.json | grep -c '0\.000001')"
+    "$(git show origin/main:packages/api-contracts/src/$s.openapi.json | grep -c '0\.000001')"
 done
 ```
 
@@ -139,8 +160,10 @@ paths identity 112 / catalog 494 / channel 710 / warehouse 518 / trade 789 / crm
 ### 2.1 先读闸状态（只读，永远第一步）
 
 ```bash
-cd /Users/tommy/Project/starcon && node tools/module-progress/lane.mjs gate status
+cd "$PROJECT_ROOT" && node tools/module-progress/lane.mjs gate status
 ```
+
+⚠️ **必须在 `$PROJECT_ROOT`（集成头 worktree）里跑** —— 闸目录只在那里，主工作区跑会永远显示 `free`（读错地方，不是闸空闲）。
 
 输出含 `gate / ageSeconds / ttlSeconds / stale`，**四个都要看**。
 
@@ -182,7 +205,7 @@ node tools/module-progress/lane.mjs gate release     # 收尾必须放，无论�
 ### 2.4 静默窗口
 
 开发流水线的静默窗口是 **20:30 → 次日 08:00**（见 `.dev-agent/PIPELINE.local.md`）。
-本任务**全天 24 小时每半小时触发**，必然有一半落在静默窗口内。
+本任务**每天 10:30 / 18:30 触发两次**，两次都在静默窗口之外。
 
 **静默窗口管的是「派发新车道」和「跑 L2 发热高峰」，管不住「合入 main」** ——
 后者是发布动作。但因此**你要格外节制资源**：
@@ -220,20 +243,20 @@ pnpm exec prettier --check <本 PR 改动的 .md / .ts / .json / .yaml>
 ## 3. 合并前的只读体检（先做，别急着合）
 
 ```bash
-cd /Users/tommy/Project/starcon
-git fetch upstream --prune
+cd /Users/guan/Projects/starcon
+git fetch origin --prune
 echo "=== 两分支关系（左=main 独有，右=集成分支独有）==="
-git rev-list --left-right --count upstream/main...upstream/integration/module-dev
+git rev-list --left-right --count origin/main...origin/integration/module-dev
 echo "=== 真实增量（看树差异，不看提交数）==="
-git diff --stat upstream/main upstream/integration/module-dev | tail -3
-git diff --quiet upstream/main upstream/integration/module-dev \
+git diff --stat origin/main origin/integration/module-dev | tail -3
+git diff --quiet origin/main origin/integration/module-dev \
   && echo "树差异为空" || echo "树差异非空（仍要过本节末尾的落地树判定）"
 echo "=== 合并预演（无副作用，不碰工作区）==="
-git merge-tree --write-tree --name-only upstream/main upstream/integration/module-dev
+git merge-tree --write-tree --name-only origin/main origin/integration/module-dev
 echo "=== 落地树 vs main 树（两者相同 = 零变更）==="
-MT_OUT=$(git merge-tree --write-tree --name-only upstream/main upstream/integration/module-dev 2>&1)
+MT_OUT=$(git merge-tree --write-tree --name-only origin/main origin/integration/module-dev 2>&1)
 MT_TREE=$(printf '%s\n' "$MT_OUT" | head -1)
-MAIN_TREE=$(git rev-parse upstream/main^{tree})
+MAIN_TREE=$(git rev-parse origin/main^{tree})
 echo "落地树: $MT_TREE"
 echo "main 树: $MAIN_TREE"
 [ "$MT_TREE" = "$MAIN_TREE" ] \
@@ -248,11 +271,11 @@ echo "main 树: $MAIN_TREE"
 所以 `main` 的 tip **是**集成分支 tip 的真后代 ⇒ 提交数口径基本准确。
 
 但**历史里仍有 squash 时代的提交**（2026-10-21 之前合入的那些），
-那些提交与集成分支**没有共同祖先** ⇒ `git rev-list --count upstream/main...upstream/integration/module-dev`
+那些提交与集成分支**没有共同祖先** ⇒ `git rev-list --count origin/main...origin/integration/module-dev`
 仍可能报出**上百个提交**，而**实际内容差异可能只有几十个文件**
 （实测：提交数口径报 142，内容口径是 83 个文件）。
 
-⇒ **判断有没有新内容，优先看树差异**（`git diff --quiet upstream/main upstream/integration/module-dev`）。
+⇒ **判断有没有新内容，优先看树差异**（`git diff --quiet origin/main origin/integration/module-dev`）。
 用提交数判断的后果是：**每一轮都以为有大增量**，于是每轮都开一个内容其实没变的 PR。
 
 同理，第 3.2 节的「可快进」判据**在双父形态下成立**；
@@ -267,8 +290,8 @@ echo "main 树: $MAIN_TREE"
 而**把集成分支合进来，`main` 一个字节都不会变**。
 
 ⚠️ 2026-10-22 实测：树差异 31 个文件、12 万行增删，但**落地树哈希与 `main` 完全相同**
-（`git merge-tree --write-tree` 的输出 == `git rev-parse upstream/main^{tree}`），
-真合并后 `git diff upstream/main HEAD` 为空 ⇒ **零变更，不该开 PR**。
+（`git merge-tree --write-tree` 的输出 == `git rev-parse origin/main^{tree}`），
+真合并后 `git diff origin/main HEAD` 为空 ⇒ **零变更，不该开 PR**。
 
 ⇒ **判断该不该开 PR，最终看落地树哈希**：
 
@@ -283,7 +306,7 @@ echo "main 树: $MAIN_TREE"
 ⇒ **树差异只用来提示「值得看一眼」，落地树哈希才是「该不该开 PR」的判据。**
 
 ⚠️ **只跑 `merge-tree` 不够**：它给出的是**预演**结果。
-真合并后必须再核一次 `git write-tree` == `git rev-parse upstream/main^{tree}`，
+真合并后必须再核一次 `git write-tree` == `git rev-parse origin/main^{tree}`，
 确认落地树确实等于 `main`，才敢断言「零变更」。
 
 ### 3.1 同步 PR 的现状（决定本轮走哪条路）
@@ -304,16 +327,16 @@ gh pr list --base main --head chore/sync-module-dev --state open
 ⚠️ **并发会话可能在同一轮内把 PR 合掉 —— 远端跟踪 ref「消失」是成功信号，不是故障。**
 
 共享仓库的另一个执行者（并发会话、人工操作）可能在你核验期间完成合并。
-合并后远端分支被删除，本地 `upstream/<pr-branch>` 立刻解析不出来：
+合并后远端分支被删除，本地 `origin/<pr-branch>` 立刻解析不出来：
 
 ```
-fatal: ambiguous argument 'upstream/chore/sync-module-dev': unknown revision
+fatal: ambiguous argument 'origin/chore/sync-module-dev': unknown revision
 ```
 
 这个报错看起来像 ref 损坏，**实际是合并已经成功**。判据顺序：
 
 1. `gh pr view <PR号> --json state,mergedAt,mergeCommit` —— 显示 `MERGED` 就是合上了。
-2. `upstream/main` 的指针是否已前进到合并提交。
+2. `origin/main` 的指针是否已前进到合并提交。
 3. 确认后再判断「这一轮还剩什么没做」。
 
 ⚠️ **不要因为 ref 解析失败就重跑合并流程** —— 那会造出第二个 PR。
@@ -361,8 +384,8 @@ fatal: ambiguous argument 'upstream/chore/sync-module-dev': unknown revision
 **用工具判，不要靠眼睛：**
 
 ```bash
-cd /Users/tommy/Project/starcon
-node tools/module-progress/merge-resolve.mjs --base upstream/main --head upstream/integration/module-dev
+cd /Users/guan/Projects/starcon
+node tools/module-progress/merge-resolve.mjs --base origin/main --head origin/integration/module-dev
 ```
 
 输出逐个文件给出：
@@ -457,8 +480,8 @@ fatal: path '<file>' is in the index, but not at stage 2
 若已经 `add` 过了，改用显式 ref 取同一份数据（结果等价）：
 
 ```bash
-git show upstream/main:<file> | sort -u > /tmp/side_main.txt        # main 侧
-git show upstream/integration/module-dev:<file> | sort -u > /tmp/side_head.txt   # 集成分支侧
+git show origin/main:<file> | sort -u > /tmp/side_main.txt        # main 侧
+git show origin/integration/module-dev:<file> | sort -u > /tmp/side_head.txt   # 集成分支侧
 comm -23 /tmp/side_head.txt /tmp/side_main.txt      # 集成分支侧独有行
 comm -13 /tmp/side_head.txt /tmp/side_main.txt      # main 侧独有行
 ```
@@ -507,7 +530,7 @@ git show :3:<file> | norm | sort -u > /tmp/side_head.txt
 ### 5.2 定向验证清单
 
 ```bash
-cd /Users/tommy/Project/starcon
+cd /Users/guan/Projects/starcon
 
 # ① 静态预检：已知互相破坏形状
 grep -rn 'ADD COLUMN' backend/services/*/src/main/resources/db/migration/ | grep -v 'DEFAULT'
@@ -532,7 +555,7 @@ cd apps/web && pnpm vitest run src/app/api/\[...path\]/route.test.ts
 
 ```bash
 for pat in 'ADD COLUMN' 'SET NOT NULL' 'ADD CONSTRAINT.*CHECK'; do
-  a=$(git grep -E "$pat" upstream/main -- backend/services | wc -l)
+  a=$(git grep -E "$pat" origin/main -- backend/services | wc -l)
   b=$(git grep -E "$pat" HEAD -- backend/services | wc -l)
   echo "$pat main=$a HEAD=$b 增量=$((b-a))"
 done
@@ -601,15 +624,15 @@ cd backend && ./mvnw -pl services/<被改的服务> -am test -Dtest='<那个测�
 
 **`sync.mjs --check` 红了要分清两种情况**：
 
-| 情况                 | 判据                                                                  | 处理                                                                                                                                                                |
-| -------------------- | --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **合并引入的**       | 在**源分支**（`upstream/integration/module-dev`）上跑同一个检查是绿的 | 真缺陷 → 阻塞，报告                                                                                                                                                 |
-| **源分支本来就红的** | 源分支上也是红的                                                      | **不是本次合入的责任**。台账是 `sync.mjs` 的生成物，跑一次 `node tools/module-progress/sync.mjs` 重新生成即可（实测它只改汇总表与行内空白，不动交付状态），然后继续 |
+| 情况                 | 判据                                                                | 处理                                                                                                                                                                |
+| -------------------- | ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **合并引入的**       | 在**源分支**（`origin/integration/module-dev`）上跑同一个检查是绿的 | 真缺陷 → 阻塞，报告                                                                                                                                                 |
+| **源分支本来就红的** | 源分支上也是红的                                                    | **不是本次合入的责任**。台账是 `sync.mjs` 的生成物，跑一次 `node tools/module-progress/sync.mjs` 重新生成即可（实测它只改汇总表与行内空白，不动交付状态），然后继续 |
 
 源分支基线的查法（只读，不碰工作区）：
 
 ```bash
-git worktree add --detach .worktrees/sync-baseline upstream/integration/module-dev
+git worktree add --detach .worktrees/sync-baseline origin/integration/module-dev
 cd .worktrees/sync-baseline && node tools/module-progress/sync.mjs --check; cd ../..
 git worktree remove --force .worktrees/sync-baseline
 ```
@@ -623,8 +646,8 @@ git worktree remove --force .worktrees/sync-baseline
 ### 6.1 摘要工具：功能增量从台账出，不要从提交信息出
 
 ```bash
-cd /Users/tommy/Project/starcon
-node tools/module-progress/merge-summary.mjs --base upstream/main --head upstream/integration/module-dev
+cd /Users/guan/Projects/starcon
+node tools/module-progress/merge-summary.mjs --base origin/main --head origin/integration/module-dev
 ```
 
 它输出**本次新交付 / 新推进的功能**（按业务系统分组，带功能名与模块 ID），
@@ -691,15 +714,15 @@ git commit -m "feat: 订单变更取消与退货授权单交付"
 ### 7.1 建分支、合并、解冲突、验证、推送
 
 ```bash
-cd /Users/tommy/Project/starcon
-git fetch upstream --prune
+cd /Users/guan/Projects/starcon
+git fetch origin --prune
 
 # ① 建专用 worktree（从 main 出发）
 #    ⚠️ 路径必须**带唯一后缀**。固定路径（如 `.worktrees/main-merge`）是共享地，
 #    任何别的执行者（人工演练、另一台机器、另一个任务）用同一个路径建/删 worktree，
 #    都会把你**进行中**的合并状态一起删掉 —— 2026-10-21 08:30 那轮就是这么被打断的。
 WT=".worktrees/main-merge-$(date +%H%M%S)"
-git worktree add --detach "$WT" upstream/main
+git worktree add --detach "$WT" origin/main
 cd "$WT"
 
 # ①' 硬校验：确认这里确实是 git 登记的 linked worktree
@@ -719,15 +742,15 @@ git checkout -B chore/sync-module-dev
 # ③ 合并集成分支
 #    ⚠️ 本轮若要带 packages/api-contracts/ 的产物，先过 1.5 的放行判据！
 #       否则会用 main 那份旧驱动把产物写回 JS 形态（合了也白合，CI 照样红）。
-git merge --no-ff --no-commit upstream/integration/module-dev
+git merge --no-ff --no-commit origin/integration/module-dev
 
 # ④ 看冲突
 git diff --name-only --diff-filter=U
 
 # ⑤ 解冲突（按第 4 节）
 #    先跑判定工具，它逐个文件给出「取集成分支侧」还是「并入（人工）」：
-cd /Users/tommy/Project/starcon
-node tools/module-progress/merge-resolve.mjs --base upstream/main --head upstream/integration/module-dev
+cd /Users/guan/Projects/starcon
+node tools/module-progress/merge-resolve.mjs --base origin/main --head origin/integration/module-dev
 cd .worktrees/main-merge
 #    判「取集成分支侧」的文件：
 #      git checkout --theirs <file> && git add <file>
@@ -740,13 +763,13 @@ cd .worktrees/main-merge
 git add -A && git commit -m "feat: <功能概述>"
 
 # ⑧ 推 PR 分支
-git push --force-with-lease upstream chore/sync-module-dev
+git push --force-with-lease origin chore/sync-module-dev
 ```
 
 ### 7.2 建 PR
 
 ```bash
-cd /Users/tommy/Project/starcon
+cd /Users/guan/Projects/starcon
 gh pr create \
   --base main \
   --head chore/sync-module-dev \
@@ -762,7 +785,7 @@ CI 定义在 `.github/workflows/ci.yml`（`pull_request` 触发，会跑 lint / 
 security / 后端 verify / 端到端）。
 
 ```bash
-cd /Users/tommy/Project/starcon
+cd /Users/guan/Projects/starcon
 gh pr checks <PR号> --watch --interval 30   # 有界等待，超时上限约 15 分钟
 ```
 
@@ -772,7 +795,7 @@ gh pr checks <PR号> --watch --interval 30   # 有界等待，超时上限约 15
 
 ```bash
 # ① 确认自己拿到的这份带「PR 侧没跑到出结果那一步」的识别能力（必须 > 0）
-git show upstream/chore/sync-module-dev:tools/module-progress/ci-gate.mjs | grep -c unreachedJobs
+git show origin/chore/sync-module-dev:tools/module-progress/ci-gate.mjs | grep -c unreachedJobs
 # ② 在 PR 头的 worktree 里跑（那份才是修复版）
 cd <PR 头 worktree> && node tools/module-progress/ci-gate.mjs --pr <PR号>
 ```
@@ -840,7 +863,7 @@ PR 头那份给**「阻塞」**并点名失败作业 ⇒ **结论相反**。
 **合并前重新取闸**（短持有），避免两轮同时合同一个 PR：
 
 ```bash
-cd /Users/tommy/Project/starcon
+cd /Users/guan/Projects/starcon
 node tools/module-progress/lane.mjs gate acquire   # 退出码 3 = 撞闸 ⇒ 本轮不合，下轮再合
 gh pr merge <PR号> --merge --delete-branch
 node tools/module-progress/lane.mjs gate release
@@ -866,11 +889,11 @@ node tools/module-progress/lane.mjs gate release
 **合并后必须核验**（缺任何一项都说明形态没生效）：
 
 ```bash
-git fetch upstream main
-git cat-file -p upstream/main | grep -c '^parent '      # 必须是 2
-git diff --stat upstream/main upstream/integration/module-dev   # 必须为空（树逐字节相同）
-git merge-base --is-ancestor upstream/integration/module-dev upstream/main  # 退出码 0
-git merge-tree --write-tree upstream/integration/module-dev upstream/main  # 只输出一个树哈希 = 零冲突
+git fetch origin main
+git cat-file -p origin/main | grep -c '^parent '      # 必须是 2
+git diff --stat origin/main origin/integration/module-dev   # 必须为空（树逐字节相同）
+git merge-base --is-ancestor origin/integration/module-dev origin/main  # 退出码 0
+git merge-tree --write-tree origin/integration/module-dev origin/main  # 只输出一个树哈希 = 零冲突
 ```
 
 ⚠️ **别用 `git log --format='%p' | awk 'NF==3'` 数父提交** —— `%p` 是换行分隔的，
@@ -885,7 +908,7 @@ git merge-tree --write-tree upstream/integration/module-dev upstream/main  # 只
 ### 7.5 收尾
 
 ```bash
-cd /Users/tommy/Project/starcon
+cd /Users/guan/Projects/starcon
 git worktree remove --force "$WT"     # 只删**你自己**这一轮建的那个
 node tools/module-progress/lane.mjs gate release
 ```
@@ -900,7 +923,7 @@ node tools/module-progress/lane.mjs gate release
 
 ```bash
 git log --oneline -3          # 确认提交内容对
-git diff upstream/main...HEAD --stat | tail -3   # 确认合并进来的东西符合预期
+git diff origin/main...HEAD --stat | tail -3   # 确认合并进来的东西符合预期
 ```
 
 ⚠️ **推之前确认 worktree 里没有未提交的改动**（`git status --porcelain` 为空）——
@@ -908,7 +931,36 @@ git diff upstream/main...HEAD --stat | tail -3   # 确认合并进来的东西�
 
 ---
 
-## 8. 汇报（12 行以内）
+## 8. 刷新交付进度看板（合完就刷，与合并同一轮）
+
+**看板是观测面，不是发布面** —— 即使本轮没合上 PR，只要台账数字变了也要刷。
+
+协议在 `/Users/guan/Projects/starcon/tools/progress-site/REFRESH.md`，**严格按它执行**：
+
+```bash
+cd /Users/guan/Projects/starcon && bash tools/progress-site/refresh.sh
+```
+
+| 退出码 | 你要做的                                                       |
+| ------ | -------------------------------------------------------------- |
+| 0      | `READY` → 继续发布                                             |
+| 1      | 构建/自检失败 → **立刻停止，不发布**，旧站点保持不动，如实汇报 |
+| 2      | 环境不满足 → 立刻停止，汇报缺什么                              |
+
+发布用 `website_deploy`，参数固定：`path=tools/progress-site/dist`、
+`source_path=tools/progress-site`、`project_name=starcon 交付进度看板`、
+**`node_id=454096010989704`（必须带，URL 保持 `https://338k302h0q2ii.space.mcode.cn` 不变；省略会新建站点，是错的）**。
+
+部署报 401 invalid access token ⇒ 等 30 秒重试，**最多 3 次**；仍失败就如实报告发布失败，
+不要改用新建站点绕过。发布后 `curl -s https://338k302h0q2ii.space.mcode.cn/data.json`
+的 `delivered/total/rate` 必须与构建产物一致，不一致要如实报出来。
+
+> 授权：用户已明确授权**每天两次**原地更新本看板（复用现有 node_id，链接不变），不需要每次再确认。
+> 另有「看板兜底刷新」任务在 12:00 / 20:00 兜底（数据没变就不发布），所以本步失败不要重试超过 3 次。
+
+---
+
+## 9. 汇报（12 行以内）
 
 - **本轮动作**：无动作（无新内容）/ 新建 PR / 更新 PR / 合并 PR
 - **合并形态**：可快进 / 真合并无冲突 / 真合并有冲突
@@ -926,7 +978,7 @@ git diff upstream/main...HEAD --stat | tail -3   # 确认合并进来的东西�
 
 ---
 
-## 9. 最高优先级禁令
+## 10. 最高优先级禁令
 
 - **不许直推 `main`**（只经 PR）
 - **不许在没有证据的情况下「取一边」** —— 必须先跑 4.2 的判定工具
@@ -955,8 +1007,10 @@ git diff upstream/main...HEAD --stat | tail -3   # 确认合并进来的东西�
 
 ---
 
-## 10. 参考：本地运行参数
+## 11. 参考：本地运行参数
 
-本任务**没有需要本地覆盖的运行参数**（固定每半小时、固定分支名）。
-若将来要加（例如「合并前必须等某个外部信号」），**放本地 gitignored 文件，不要写进本文件** ——
-写进版本化文档会让每次调参都产生一个噪音 commit。
+本任务的本地绑定见 **§ 0.5**（仓库根 / 远端名 / 集成头 worktree / PR 分支 / 看板协议）。
+机器相关的参数一律从 `.dev-agent/PIPELINE.local.md` 读（`PROJECT_ROOT` / `PUSH_REMOTE`），
+**不要写进本文件** —— 写进版本化文档会让每次调参都产生一个噪音 commit。
+
+固定项：每天 10:30 / 18:30 各一次、PR 分支固定 `chore/sync-module-dev`、看板 node_id 固定 `454096010989704`。

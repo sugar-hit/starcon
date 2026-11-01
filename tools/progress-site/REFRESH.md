@@ -11,17 +11,17 @@
 
 ## 0. 固定参数
 
-| 项                 | 值                                                            |
-| ------------------ | ------------------------------------------------------------- |
-| 仓库路径           | `/Users/guan/Projects/starcon`                                |
-| 站点目录           | `tools/progress-site`                                         |
-| 部署产物 `path`    | `tools/progress-site/dist`（根目录须有普通文件 `index.html`） |
-| 源码 `source_path` | `tools/progress-site`（在仓库内，允许与 `path` 同级）         |
-| 站点名             | `starcon 交付进度看板`                                        |
-| **node_id**        | `454096010989704`                                             |
-| 公开 URL           | `https://338k302h0q2ii.space.mcode.cn`                        |
-| 运行时长           | `Asia/Shanghai`                                               |
-| 执行时刻           | 每天 08:00                                                    |
+| 项                 | 值                                                                             |
+| ------------------ | ------------------------------------------------------------------------------ |
+| 仓库路径           | `/Users/guan/Projects/starcon`                                                 |
+| 站点目录           | `tools/progress-site`                                                          |
+| 部署产物 `path`    | `tools/progress-site/dist`（根目录须有普通文件 `index.html`）                  |
+| 源码 `source_path` | `tools/progress-site`（在仓库内，允许与 `path` 同级）                          |
+| 站点名             | `starcon 交付进度看板`                                                         |
+| **node_id**        | `454096010989704`                                                              |
+| 公开 URL           | `https://338k302h0q2ii.space.mcode.cn`                                         |
+| 运行时长           | `Asia/Shanghai`                                                                |
+| 执行时刻           | 每天 12:00 / 20:00（兜底）；主路径是「每日合 main」任务 10:30 / 18:30 合完即刷 |
 
 > ⚠️ **`node_id` 是既定值，绝不能改，也不能省略。** 省略 `node_id` 会新建站点，
 > 每天堆一个云盘节点并产生一个新 URL，已分发的链接会停留在旧数据上。
