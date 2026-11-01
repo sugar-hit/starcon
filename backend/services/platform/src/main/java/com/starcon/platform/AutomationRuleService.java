@@ -1189,8 +1189,15 @@ public class AutomationRuleService {
     return current == null || current.isMissingNode() ? null : current;
   }
 
-  /** 条件求值（逐条给出命中与否与原因）。 */
-  private AutomationRuleConditionEvaluation evaluate(AutomationRuleConditionRow condition, JsonNode payload) {
+  /**
+   * 条件求值（逐条给出命中与否与原因）。
+   *
+   * <p>🔴 <b>包级可见（不是 private）</b>：18.3.1.2「规则编辑器」的样本测试
+   * <b>复用这一个求值器</b> —— 操作符语义必须<strong>只有一套</strong>，
+   * 否则「编辑器里测过」与「执行引擎里跑」会出现两套判定结果。
+   * （同包的 {@code AutomationRuleEditorService} 直接调用本方法。）
+   */
+  AutomationRuleConditionEvaluation evaluate(AutomationRuleConditionRow condition, JsonNode payload) {
     var operator = AutomationRuleConditionOperator.parse(condition.operator());
     var node = resolvePath(payload, condition.fieldPath());
     var actual = node == null ? "" : (node.isValueNode() ? node.asText() : node.toString());
@@ -1322,8 +1329,13 @@ public class AutomationRuleService {
     }
   }
 
-  /** 范围命中（真约束的判定）。 */
-  private ScopeHit scopeHit(List<AutomationRuleScopeRow> scopes, UUID shopId, UUID warehouseId) {
+  /**
+   * 范围命中（真约束的判定）。
+   *
+   * <p>🔴 <b>包级可见（不是 private）</b>：18.3.1.2「规则编辑器」的样本测试
+   * <b>复用这一个范围判定</b> —— 「范围没命中」的口径必须只有一套。
+   */
+  ScopeHit scopeHit(List<AutomationRuleScopeRow> scopes, UUID shopId, UUID warehouseId) {
     for (var scope : scopes) {
       if ("TENANT".equals(scope.scopeType())) {
         return new ScopeHit(true, "范围是整个租户");
@@ -1349,7 +1361,13 @@ public class AutomationRuleService {
     return new ScopeHit(false, "范围没有命中给定的店铺 / 仓库");
   }
 
-  private record ScopeHit(boolean applicable, String note) {}
+  /**
+   * 范围判定结论（🔴 <b>包级可见</b>：18.3.1.2「规则编辑器」复用同一个判定器）。
+   *
+   * @param applicable 这条规则对给定的店铺 / 仓库**是否生效**
+   * @param note 人可读理由（页面与台账都直接用它）
+   */
+  record ScopeHit(boolean applicable, String note) {}
 
   // ================================================================ 行映射
 
