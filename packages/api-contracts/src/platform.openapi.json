@@ -3205,6 +3205,558 @@
         },
         "type": "object"
       },
+      "AutomationRuleRunCapabilities": {
+        "properties": {
+          "capabilities": {
+            "items": {
+              "$ref": "#/components/schemas/AutomationRuleRunCapability"
+            },
+            "type": "array"
+          },
+          "gaps": {
+            "items": {
+              "$ref": "#/components/schemas/AutomationRuleRunGap"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "AutomationRuleRunCapability": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "evidence": {
+            "type": "string"
+          },
+          "moduleId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AutomationRuleRunDetail": {
+        "properties": {
+          "rerunCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "run": {
+            "$ref": "#/components/schemas/AutomationRuleRunRow"
+          },
+          "steps": {
+            "items": {
+              "$ref": "#/components/schemas/AutomationRuleRunStepRow"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "AutomationRuleRunGap": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "moduleId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "relation": {
+            "type": "string"
+          },
+          "service": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AutomationRuleRunInput": {
+        "properties": {
+          "durationMs": {
+            "format": "int64",
+            "nullable": true,
+            "type": "integer"
+          },
+          "errorCode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "errorMessage": {
+            "nullable": true,
+            "type": "string"
+          },
+          "eventId": {
+            "nullable": true,
+            "type": "string"
+          },
+          "eventPayload": {
+            "nullable": true,
+            "type": "string"
+          },
+          "executedActions": {
+            "format": "int64",
+            "nullable": true,
+            "type": "integer"
+          },
+          "failureClass": {
+            "nullable": true,
+            "type": "string"
+          },
+          "failureReason": {
+            "nullable": true,
+            "type": "string"
+          },
+          "finishedAt": {
+            "nullable": true,
+            "type": "string"
+          },
+          "matchedConditions": {
+            "format": "int64",
+            "nullable": true,
+            "type": "integer"
+          },
+          "notAttemptedReason": {
+            "nullable": true,
+            "type": "string"
+          },
+          "outcome": {
+            "nullable": true,
+            "type": "string"
+          },
+          "plannedActions": {
+            "format": "int64",
+            "nullable": true,
+            "type": "integer"
+          },
+          "ruleId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "sideEffectsApplied": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "source": {
+            "nullable": true,
+            "type": "string"
+          },
+          "startedAt": {
+            "nullable": true,
+            "type": "string"
+          },
+          "steps": {
+            "items": {
+              "$ref": "#/components/schemas/AutomationRuleRunStepInput"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "triggerEventType": {
+            "nullable": true,
+            "type": "string"
+          },
+          "triggeredBy": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AutomationRuleRunOverview": {
+        "properties": {
+          "failedRuns": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "failedSteps": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "generatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "notAttemptedRuns": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "reruns": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "runs": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "sideEffectRuns": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "skippedRuns": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "succeededRuns": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "timeoutRuns": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalDurationMs": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AutomationRuleRunPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AutomationRuleRunRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AutomationRuleRunRerunInput": {
+        "properties": {
+          "idempotencyKey": {
+            "nullable": true,
+            "type": "string"
+          },
+          "reason": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AutomationRuleRunRerunResult": {
+        "properties": {
+          "detail": {
+            "$ref": "#/components/schemas/AutomationRuleRunDetail"
+          },
+          "duplicate": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AutomationRuleRunRow": {
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdBy": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "dryRun": {
+            "type": "boolean"
+          },
+          "durationMs": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "errorCode": {
+            "type": "string"
+          },
+          "errorMessage": {
+            "type": "string"
+          },
+          "eventId": {
+            "type": "string"
+          },
+          "eventPayload": {
+            "type": "string"
+          },
+          "executedActions": {
+            "type": "number"
+          },
+          "failureClass": {
+            "type": "string"
+          },
+          "failureClassLabel": {
+            "type": "string"
+          },
+          "failureReason": {
+            "type": "string"
+          },
+          "finishedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "idempotencyKey": {
+            "type": "string"
+          },
+          "matchedConditions": {
+            "type": "number"
+          },
+          "notAttemptedReason": {
+            "type": "string"
+          },
+          "outcome": {
+            "type": "string"
+          },
+          "outcomeLabel": {
+            "type": "string"
+          },
+          "plannedActions": {
+            "type": "number"
+          },
+          "rerunOfRunId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "rerunReason": {
+            "type": "string"
+          },
+          "rerunRequestedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "rerunRequestedBy": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "rerunSeq": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "ruleId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "ruleName": {
+            "type": "string"
+          },
+          "sideEffectsApplied": {
+            "type": "boolean"
+          },
+          "source": {
+            "type": "string"
+          },
+          "sourceLabel": {
+            "type": "string"
+          },
+          "startedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "triggerEventType": {
+            "type": "string"
+          },
+          "triggeredBy": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AutomationRuleRunStepInput": {
+        "nullable": true,
+        "properties": {
+          "actionType": {
+            "nullable": true,
+            "type": "string"
+          },
+          "actualValue": {
+            "nullable": true,
+            "type": "string"
+          },
+          "conditionId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "conditionSeq": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "durationMs": {
+            "format": "int64",
+            "nullable": true,
+            "type": "integer"
+          },
+          "errorCode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "errorMessage": {
+            "nullable": true,
+            "type": "string"
+          },
+          "expectedValue": {
+            "nullable": true,
+            "type": "string"
+          },
+          "fieldPath": {
+            "nullable": true,
+            "type": "string"
+          },
+          "matched": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "operator": {
+            "nullable": true,
+            "type": "string"
+          },
+          "params": {
+            "nullable": true,
+            "type": "string"
+          },
+          "result": {
+            "nullable": true,
+            "type": "string"
+          },
+          "sideEffectApplied": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "stepKind": {
+            "nullable": true,
+            "type": "string"
+          },
+          "stepNo": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "targetRef": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AutomationRuleRunStepRow": {
+        "properties": {
+          "actionType": {
+            "type": "string"
+          },
+          "actualValue": {
+            "type": "string"
+          },
+          "conditionId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "conditionSeq": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "durationMs": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "errorCode": {
+            "type": "string"
+          },
+          "errorMessage": {
+            "type": "string"
+          },
+          "expectedValue": {
+            "type": "string"
+          },
+          "fieldPath": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "matched": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "operator": {
+            "type": "string"
+          },
+          "params": {
+            "type": "string"
+          },
+          "result": {
+            "type": "string"
+          },
+          "resultLabel": {
+            "type": "string"
+          },
+          "runId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "sideEffectApplied": {
+            "type": "boolean"
+          },
+          "stepKind": {
+            "type": "string"
+          },
+          "stepKindLabel": {
+            "type": "string"
+          },
+          "stepNo": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "targetRef": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "AutomationRuleScopeInput": {
         "nullable": true,
         "properties": {
@@ -13298,6 +13850,321 @@
         },
         "tags": [
           "automation-rule-controller"
+        ]
+      }
+    },
+    "/platform/automation/runs": {
+      "get": {
+        "operationId": "get_platform_automation_runs",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "ruleId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "outcome",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "source",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "eventType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "eventId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dryRun",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AutomationRuleRunPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "automation-rule-run-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_platform_automation_runs",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AutomationRuleRunInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AutomationRuleRunDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "automation-rule-run-controller"
+        ]
+      }
+    },
+    "/platform/automation/runs/capabilities": {
+      "get": {
+        "operationId": "get_platform_automation_runs_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AutomationRuleRunCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "automation-rule-run-controller"
+        ]
+      }
+    },
+    "/platform/automation/runs/overview": {
+      "get": {
+        "operationId": "get_platform_automation_runs_overview",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AutomationRuleRunOverview"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "automation-rule-run-controller"
+        ]
+      }
+    },
+    "/platform/automation/runs/{id}": {
+      "get": {
+        "operationId": "get_platform_automation_runs_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AutomationRuleRunDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "automation-rule-run-controller"
+        ]
+      }
+    },
+    "/platform/automation/runs/{id}/rerun": {
+      "post": {
+        "operationId": "post_platform_automation_runs_id_rerun",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AutomationRuleRunRerunInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AutomationRuleRunRerunResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "automation-rule-run-controller"
         ]
       }
     },
