@@ -10184,6 +10184,670 @@
         },
         "type": "object"
       },
+      "NotifyTemplateCapabilities": {
+        "properties": {
+          "capabilities": {
+            "items": {
+              "$ref": "#/components/schemas/NotifyTemplateCapability"
+            },
+            "type": "array"
+          },
+          "conventions": {
+            "$ref": "#/components/schemas/NotifyTemplateConventions"
+          },
+          "gaps": {
+            "items": {
+              "$ref": "#/components/schemas/NotifyTemplateGap"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "NotifyTemplateCapability": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "evidence": {
+            "type": "string"
+          },
+          "moduleId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "NotifyTemplateContentAssetRow": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "pattern": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "version": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "NotifyTemplateContentAssetView": {
+        "properties": {
+          "connected": {
+            "type": "boolean"
+          },
+          "descriptions": {
+            "items": {
+              "$ref": "#/components/schemas/NotifyTemplateContentAssetRow"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "titles": {
+            "items": {
+              "$ref": "#/components/schemas/NotifyTemplateContentAssetRow"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "NotifyTemplateConventions": {
+        "properties": {
+          "languageExamples": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "languageRule": {
+            "type": "string"
+          },
+          "renderErrorCodes": {
+            "items": {
+              "$ref": "#/components/schemas/NotifyTemplateRenderErrorCode"
+            },
+            "type": "array"
+          },
+          "scenes": {
+            "items": {
+              "$ref": "#/components/schemas/NotifyTemplateSceneOption"
+            },
+            "type": "array"
+          },
+          "variableTypes": {
+            "items": {
+              "$ref": "#/components/schemas/NotifyTemplateVariableTypeOption"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "NotifyTemplateDetail": {
+        "properties": {
+          "enabledVersion": {
+            "$ref": "#/components/schemas/NotifyTemplateVersionRow"
+          },
+          "template": {
+            "$ref": "#/components/schemas/NotifyTemplateRow"
+          },
+          "versions": {
+            "items": {
+              "$ref": "#/components/schemas/NotifyTemplateVersionRow"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "NotifyTemplateGap": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "moduleId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "relation": {
+            "type": "string"
+          },
+          "service": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "NotifyTemplateInput": {
+        "properties": {
+          "body": {
+            "type": "string"
+          },
+          "changeNote": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "language": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "scene": {
+            "type": "string"
+          },
+          "subject": {
+            "type": "string"
+          },
+          "templateKey": {
+            "type": "string"
+          },
+          "variables": {
+            "items": {
+              "$ref": "#/components/schemas/NotifyTemplateVariableDefinition"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "NotifyTemplateMetadataInput": {
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "NotifyTemplateOverview": {
+        "properties": {
+          "activeTemplates": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "archivedTemplates": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "generatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "languages": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "scenes": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "templates": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "versions": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "NotifyTemplatePage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/NotifyTemplateRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalPages": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "NotifyTemplateRenderError": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "variables": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "NotifyTemplateRenderErrorCode": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "NotifyTemplateRenderInput": {
+        "properties": {
+          "body": {
+            "type": "string"
+          },
+          "subject": {
+            "type": "string"
+          },
+          "templateId": {
+            "type": "string"
+          },
+          "values": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "variables": {
+            "items": {
+              "$ref": "#/components/schemas/NotifyTemplateVariableDefinition"
+            },
+            "type": "array"
+          },
+          "versionId": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "NotifyTemplateRenderResult": {
+        "properties": {
+          "errors": {
+            "items": {
+              "$ref": "#/components/schemas/NotifyTemplateRenderError"
+            },
+            "type": "array"
+          },
+          "language": {
+            "nullable": true,
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "ok": {
+            "type": "boolean"
+          },
+          "renderedBody": {
+            "nullable": true,
+            "type": "string"
+          },
+          "renderedSubject": {
+            "nullable": true,
+            "type": "string"
+          },
+          "templateId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "templateKey": {
+            "nullable": true,
+            "type": "string"
+          },
+          "variables": {
+            "items": {
+              "$ref": "#/components/schemas/NotifyTemplateVariableDefinition"
+            },
+            "type": "array"
+          },
+          "versionId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "versionNo": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "NotifyTemplateResolved": {
+        "properties": {
+          "activatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "body": {
+            "type": "string"
+          },
+          "deactivatedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "language": {
+            "type": "string"
+          },
+          "resolvedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "scene": {
+            "type": "string"
+          },
+          "subject": {
+            "type": "string"
+          },
+          "templateId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "templateKey": {
+            "type": "string"
+          },
+          "variables": {
+            "items": {
+              "$ref": "#/components/schemas/NotifyTemplateVariableDefinition"
+            },
+            "type": "array"
+          },
+          "versionId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "versionNo": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "NotifyTemplateRow": {
+        "properties": {
+          "archived": {
+            "type": "boolean"
+          },
+          "archivedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "enabledVersionId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "enabledVersionNo": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "language": {
+            "type": "string"
+          },
+          "latestVersionNo": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "scene": {
+            "type": "string"
+          },
+          "sceneLabel": {
+            "type": "string"
+          },
+          "templateKey": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "versionCount": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "NotifyTemplateSceneOption": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "NotifyTemplateVariableDefinition": {
+        "properties": {
+          "defaultValue": {
+            "nullable": true,
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "NotifyTemplateVariableTypeOption": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "NotifyTemplateVersionDetail": {
+        "properties": {
+          "language": {
+            "type": "string"
+          },
+          "scene": {
+            "type": "string"
+          },
+          "templateKey": {
+            "type": "string"
+          },
+          "templateName": {
+            "type": "string"
+          },
+          "version": {
+            "$ref": "#/components/schemas/NotifyTemplateVersionRow"
+          }
+        },
+        "type": "object"
+      },
+      "NotifyTemplateVersionInput": {
+        "properties": {
+          "body": {
+            "type": "string"
+          },
+          "changeNote": {
+            "type": "string"
+          },
+          "subject": {
+            "type": "string"
+          },
+          "variables": {
+            "items": {
+              "$ref": "#/components/schemas/NotifyTemplateVariableDefinition"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "NotifyTemplateVersionPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/NotifyTemplateVersionRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalPages": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "NotifyTemplateVersionRow": {
+        "properties": {
+          "activatedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "body": {
+            "type": "string"
+          },
+          "changeNote": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdBy": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "deactivatedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "subject": {
+            "type": "string"
+          },
+          "templateId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "variables": {
+            "items": {
+              "$ref": "#/components/schemas/NotifyTemplateVariableDefinition"
+            },
+            "type": "array"
+          },
+          "versionNo": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
       "PaymentAttemptRow": {
         "properties": {
           "attemptKind": {
@@ -13478,6 +14142,717 @@
         },
         "tags": [
           "ai-forecast-controller"
+        ]
+      }
+    },
+    "/platform/ai/templates": {
+      "get": {
+        "operationId": "get_platform_ai_templates",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "scene",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "language",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "enabled",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "default": "ACTIVE",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotifyTemplatePage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "notification-template-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_platform_ai_templates",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NotifyTemplateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotifyTemplateRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "notification-template-controller"
+        ]
+      }
+    },
+    "/platform/ai/templates/capabilities": {
+      "get": {
+        "operationId": "get_platform_ai_templates_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotifyTemplateCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "notification-template-controller"
+        ]
+      }
+    },
+    "/platform/ai/templates/overview": {
+      "get": {
+        "operationId": "get_platform_ai_templates_overview",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotifyTemplateOverview"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "notification-template-controller"
+        ]
+      }
+    },
+    "/platform/ai/templates/render-preview": {
+      "post": {
+        "operationId": "post_platform_ai_templates_render_preview",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NotifyTemplateRenderInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotifyTemplateRenderResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "notification-template-controller"
+        ]
+      }
+    },
+    "/platform/ai/templates/resolve": {
+      "get": {
+        "operationId": "get_platform_ai_templates_resolve",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "templateKey",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "scene",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "language",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "at",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotifyTemplateResolved"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "notification-template-controller"
+        ]
+      }
+    },
+    "/platform/ai/templates/upstream/content-assets": {
+      "get": {
+        "operationId": "get_platform_ai_templates_upstream_content_assets",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotifyTemplateContentAssetView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "notification-template-controller"
+        ]
+      }
+    },
+    "/platform/ai/templates/{templateId}": {
+      "delete": {
+        "operationId": "delete_platform_ai_templates_templateId",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "templateId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotifyTemplateRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "notification-template-controller"
+        ]
+      },
+      "get": {
+        "operationId": "get_platform_ai_templates_templateId",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "templateId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotifyTemplateDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "notification-template-controller"
+        ]
+      }
+    },
+    "/platform/ai/templates/{templateId}/metadata": {
+      "post": {
+        "operationId": "post_platform_ai_templates_templateId_metadata",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "templateId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NotifyTemplateMetadataInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotifyTemplateRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "notification-template-controller"
+        ]
+      }
+    },
+    "/platform/ai/templates/{templateId}/versions": {
+      "get": {
+        "operationId": "get_platform_ai_templates_templateId_versions",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "templateId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotifyTemplateVersionPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "notification-template-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_platform_ai_templates_templateId_versions",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "templateId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NotifyTemplateVersionInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotifyTemplateVersionDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "notification-template-controller"
+        ]
+      }
+    },
+    "/platform/ai/templates/{templateId}/versions/{versionId}": {
+      "get": {
+        "operationId": "get_platform_ai_templates_templateId_versions_versionId",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "templateId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "versionId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotifyTemplateVersionDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "notification-template-controller"
+        ]
+      }
+    },
+    "/platform/ai/templates/{templateId}/versions/{versionId}/disable": {
+      "post": {
+        "operationId": "post_platform_ai_templates_templateId_versions_versionId_disable",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "templateId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "versionId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotifyTemplateDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "notification-template-controller"
+        ]
+      }
+    },
+    "/platform/ai/templates/{templateId}/versions/{versionId}/enable": {
+      "post": {
+        "operationId": "post_platform_ai_templates_templateId_versions_versionId_enable",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "templateId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "versionId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotifyTemplateDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "notification-template-controller"
         ]
       }
     },

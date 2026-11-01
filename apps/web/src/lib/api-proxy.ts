@@ -2716,6 +2716,67 @@ const services: readonly {
       /^data-governance(?:\/capabilities|\/domains|\/transfers(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:suspend|end))?)?|\/retention-policies|\/retention-conflicts|\/deletion-requests(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:approve|reject|execute))?)?|\/cleanup-orders(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/execute)?)?|\/cleanup-records)$/,
   },
   {
+    // 18.5.1.1 模板管理（platform 服务，卷 18「集成开放与智能自动化」L3 18.5.1「模板管理」）。
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有的 platform/ 分支里并分支 ——
+    //   既有条目**一字未改、也不重排**。
+    //
+    // ---- 插入锚点选在文件**中段**（data-governance 那条之后，约第 2610 行）----
+    //   本文件是并行车道共同的累积型文件：最近几条 platform 车道分别落在「数组最开头」
+    //   （18.1.2.1 / 18.1.3.2 / 18.3.1.1 / 18.3.3.1）与「数组末尾」（18.2.3.1 / 18.3.1.2），
+    //   本车道落在中段，与两端各相距 12000 行以上 ⇒ 并入时 git 能干净求并。
+    //
+    // ---- 首 token「ai/templates」的零命中核对结论 ----
+    //   本文件里既有的 `prefix: 'platform/'` 条目，其首 token 分别是
+    //   automation-rules（18.3.1.1）/ auto-approvals（18.3.3.1）/ data-migration（18.1.3.2）/
+    //   webhooks（18.1.2.1）/ deliveries（18.1.2.2）/ io（18.1.3.1）/ text（18.4.2.1）/
+    //   apps（18.1.1.1）/ finance-software（18.2.1.1）/ api-catalog（18.1.4.1）/
+    //   call-monitor（18.1.5.1）/ payment-funds（18.2.2.1）/ external-integrations（18.2.3.1）/
+    //   automation-rule-editor（18.3.1.2）。
+    //   🔴 **没有一条的首 token 是 `ai`** ⇒ 本条与它们**天然互斥**，
+    //   本车道**不需要**改动那一条里的任何一个字符。
+    //   ⚠️ `text`（18.4.2.1）与本模块**不是一件事**：
+    //   那边管的是「AI 翻译链路的产物（客服话术草稿 + 置信度 + 人工确认后发布）」，
+    //   这边管的是「**通知与消息模板**：按场景 × 语言组织、版本化、可按时刻解析」。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   ai/templates                              模板列表（GET 真分页真筛选）/ 新建（POST）
+    //   ai/templates/capabilities                 能力声明（场景词表 / 语言写法 / 变量约定 / 边界）
+    //   ai/templates/overview                     概览（几个数）
+    //   ai/templates/{uuid}                       模板详情（GET）/ 归档（DELETE，**不物理删**）
+    //   ai/templates/{uuid}/metadata              改名称与说明（POST，**改不了内容**）
+    //   ai/templates/{uuid}/versions              版本列表（GET）/ **新增版本 = 编辑**（POST）
+    //   ai/templates/{uuid}/versions/{uuid}       版本详情（GET）
+    //   ai/templates/{uuid}/versions/{uuid}/enable  启用某个版本（POST）
+    //   ai/templates/{uuid}/versions/{uuid}/disable 停用某个版本（POST，**版本行不动**）
+    //   ai/templates/render-preview               渲染预览（POST，**不落库**）
+    //   ai/templates/resolve                      按时刻解析当时生效的那一版（GET）
+    //   ai/templates/upstream/content-assets      上游 3.4.2 文案资产（GET，只读）
+    //
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   platform/ai/templates/unknown             —— 未实现的子路径仍然 404。
+    //   platform/ai/templates/not-a-uuid          —— 非 UUID 段不应被 uuid 分支吃掉。
+    //   platform/ai/templates/{uuid}/extra        —— 多一段仍然 404。
+    //   platform/ai/templates/{uuid}/versions/{uuid}/update —— 🔴 版本行**不可改**：
+    //                                                          后端没有「改某一版」的端点，
+    //                                                          编辑只有「新增版本」这一条路。
+    //   platform/ai/templates/{uuid}/versions/{uuid}/delete —— 版本**不删**（历史通知要能解释）。
+    //
+    // id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //   （不是 `[0-9a-f-]+`）：后者会把 `enable` / `disable` 这种非 UUID 形状也当成 id 放行。
+    // 字面量子路径（capabilities / overview / resolve / render-preview / upstream/content-assets）
+    //   排在 {uuid} 段**之前**判别 —— alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    //
+    // ⚠️ 正则写成**两段各自可选**（字面量段 + {uuid} 段），而不是一个大 alternation：
+    //   大 alternation 里再套 {uuid} 段时，括号层级很容易多出一层 ——
+    //   多出来的那层会让 {uuid} 段整体变成可选，于是 `ai/templates/{uuid}` **匹配不上**
+    //   （实测踩过：页面 404，而界面上看不出是白名单写错了）。
+    prefix: 'platform/',
+    env: 'PLATFORM_URL',
+    fallback: 'http://127.0.0.1:8089',
+    pattern:
+      /^ai\/templates(?:\/(?:capabilities|overview|resolve|render\-preview|upstream\/content\-assets))?(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/metadata|\/versions(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:enable|disable))?)?)?)?$/,
+  },
+  {
     // 5.5.1.1 价格历史（**本条目是新增一条 services[] 元素**，不是往既有 catalog 分支的
     // alternation 里并**）。同批多车道共享这一个文件，而每个服务在 services[] 里
     // 是**一段超长单行正则**：只要两条车道都往同一服务的 alternation 里并分支，git 必然判冲突
