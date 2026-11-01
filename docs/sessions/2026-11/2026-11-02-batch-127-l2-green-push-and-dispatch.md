@@ -166,3 +166,12 @@ L2 r153 在 00:08 启动时，集成头里只有 batch-126 的 18.3.1.2；4 条�
 | L2 脚本 / 守护 | `.dev-agent/l2-r153.sh`、`.dev-agent/keepalive-r153.sh`、`.dev-agent/l2/l2-r153-*.log`、`.dev-agent/l2/l2-r153-summary.txt` |
 | 熔断清单 | `.dev-agent/blocked-modules.md` |
 | 车道 worktree | `.worktrees/18.3.2.1` / `.worktrees/18.4.2.2` / `.worktrees/18.4.3.1` / `.worktrees/18.5.1.1`（各含自己的会话日志，**未并入**） |
+
+---
+
+## 十、收尾动作（节流闸落盘 + 放闸 + push 记录）
+
+1. **节流闸时间戳落盘**：`.dev-agent/last-batch-at` = **1793549100**（2026-11-02 **00:05:00** CST）。
+   取值理由：时间戳记的是**本批派发时刻**（4 条车道 `createdAt` 落在 00:02:53–00:04:56），不是收尾时刻 —— 写成收尾时刻会把下一批的放行窗口凭空后推 25 分钟。落盘发生在**通过节流闸之后**（本轮 ELAPSED 116 分钟 ≥ 阈值 50）。
+2. **放闸**：`lane.mjs gate release` → `{"ok":true,"gate":"released"}`（令牌一致，删掉整个闸目录含 keepalive 文件）；续期守护随之触发退出条件③（闸目录已不存在）自行退出，**不留孤儿进程**。放闸后 `gate status` = `gate:free` ⇒ 下一轮 tick 可直接取闸。
+3. **push**：`git push origin integration/module-dev` → `9b090d7f..3b98628d`（本轮新增 2 个提交：`0299114c` 协议排版归一 + `3b98628d` 本说明与台账熔断注记；此前 8 个提交是 batch-126 的 18.3.1.2 全链，第一次上远端）。**只推集成头，未碰 `main`。**
