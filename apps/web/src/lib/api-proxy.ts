@@ -14629,6 +14629,58 @@ const services: readonly {
     pattern:
       /^automation\-rule\-editor\/(?:capabilities|event\-schemas(?:\/[A-Za-z0-9_-]+(?:\.[A-Za-z0-9_-]+)+)?|action\-catalog|api\-catalog|save|test|test\-runs)$/,
   },
+  {
+    // 18.4.2.3 异常诊断（platform 服务，卷 18「集成开放与智能自动化」L3 18.4.2「AI 业务能力」下的第三格）。
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有的 platform/ 分支里并分支 ——
+    //   既有条目**一字未改、也不重排**。
+    //
+    // ---- 插入锚点选在**数组末尾**（收尾的 `];` 之前）----
+    //   本文件是并行车道共同的累积型文件：同批其它车道分别落在「数组开头」
+    //   （18.3.1.1 / 18.3.3.1 等）、中段（18.4.2.2 的 ai/forecast，行 452）与
+    //   靠后（18.4.3.1 的 ai/usage，约行 13770 / 18.5.1.1 的 ai/templates，行 2719）。
+    //   本车道落在数组末尾 ⇒ 与最近的一条（ai/usage）也相距 800 行以上，
+    //   并入时 git 能干净求并（18.3.1.1 与 18.3.3.1 两条都插开头时已经撞过一次）。
+    //
+    // ---- 首 token「ai」下的第二 token「diagnosis」的零命中核对结论 ----
+    //   本文件里既有的 `prefix: 'platform/'` 条目里，带 `ai/` 首 token 的只有三条，
+    //   第二段分别是 usage（18.4.3.1）/ templates（18.5.1.1）/ forecast（18.4.2.2）。
+    //   ⚠️ **本条目的首 token 是 `ai`**，与这三条**共用首 token** —— 但第二 token 不同
+    //   （diagnosis / usage / templates / forecast）⇒ 四者互斥，谁也不会吃掉谁。
+    //   ⚠️ `ai/forecast`（18.4.2.2 选品与需求预测）与本模块**不是一件事**：
+    //   那边管的是「销量怎么预测、补多少货、价怎么调」，这边管的是「出了什么异常、
+    //   原因是什么、依据是什么、该谁去处理」。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   ai/diagnosis/capabilities            能力声明（归因规则 / 阈值 / 事实源 / 边界逐条报出）
+    //   ai/diagnosis/overview                概览（几个数）
+    //   ai/diagnosis/events                  异常事件列表（GET 真分页真筛选真搜索）/ 登记（POST）
+    //   ai/diagnosis/events/sync             从平台内部失败源同步异常事件（POST，**幂等**）
+    //   ai/diagnosis/events/{uuid}           事件详情（GET，事件 + 它的历史运行）
+    //   ai/diagnosis/events/{uuid}/diagnose  对一个事件发起一次诊断（POST）
+    //   ai/diagnosis/events/{uuid}/resolve   人工标记已处置（POST，**只记人的决定**）
+    //   ai/diagnosis/runs/{uuid}             运行详情（GET，**结论 + 依据的唯一入口**）
+    //
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   platform/ai/diagnosis                          —— 裸路径：后端**没有**汇总端点。
+    //   platform/ai/diagnosis/unknown                  —— 未实现的子路径仍然 404。
+    //   platform/ai/diagnosis/events/not-a-uuid        —— 非 UUID 段不应被 uuid 分支吃掉。
+    //   platform/ai/diagnosis/events/{uuid}/execute    —— 🔴 **执行处置动作**：
+    //                                                       补货归 6 采购、调价归 5 定价、停广告归 14 广告，
+    //                                                       **本模块只给建议、不执行**；
+    //                                                       放行它会让界面以为「点一下就能改价」。
+    //   platform/ai/diagnosis/events/{uuid}/extra      —— 多一段仍然 404。
+    //   platform/ai/diagnosis/runs/not-a-uuid          —— 同上。
+    //
+    // id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //   （不是 `[0-9a-f-]+`）：后者会把 `diagnose` / `resolve` / `sync` 这种非 UUID 形状也当成 id 放行。
+    // 字面量子路径（capabilities / overview / events / sync / runs）排在 {uuid} 段**之前**判别 ——
+    //   alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    prefix: 'platform/',
+    env: 'PLATFORM_URL',
+    fallback: 'http://127.0.0.1:8089',
+    pattern:
+      /^ai\/diagnosis\/(?:capabilities|overview|events(?:\/sync|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:diagnose|resolve))?)?|runs\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})$/,
+  },
 ];
 
 function resolve(path: string) {
