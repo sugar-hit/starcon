@@ -151,13 +151,13 @@ it('未交付 / 不该存在的形状仍然 404（放行它们比 404 更糟）'
   for (const path of [
     // 裸路径：本模块没有裸集合读，放行它就是凭空多出一条 GET。
     'catalog/price-lists',
-    // 价目项（`price_list_item`）是 **5.1.1.2 的写入所有权**，本模块不建那张表
-    // ⇒ 后端没有这个端点。
-    `catalog/price-lists/lists/${ID}/items`,
     // 优先级与冲突检测是 **5.1.2.1**（本表的下游守门员），本模块不实现冲突判定
     // ⇒ 后端没有这个端点。
     `catalog/price-lists/lists/${ID}/conflicts`,
-    // 价目项的批量维护形状同样属于 5.1.1.2。
+    // 价目项的批量维护形状同样属于 5.1.1.2 —— 🔴 **5.1.1.2 已交付**（2026-11-02）：
+    //   下面那条 `lists/{id}/items` 已由 5.1.1.2 的**独立一条 services[] 元素**放行，
+    //   形状与本模块的互不相交；本模块（5.1.1.1）仍然**不实现**那些端点。
+    //   `items/batch` 这个形状**仍然**不存在（5.1.1.2 的批量形状叫 preview / apply）⇒ 保留 404 断言。
     `catalog/price-lists/lists/${ID}/items/batch`,
     // 不存在的子路径。
     'catalog/price-lists/conflicts',

@@ -23127,6 +23127,740 @@
         ],
         "type": "object"
       },
+      "PriceListItemBatchLine": {
+        "properties": {
+          "action": {
+            "type": "string"
+          },
+          "basePrice": {
+            "nullable": true,
+            "type": "number"
+          },
+          "brand": {
+            "nullable": true,
+            "type": "string"
+          },
+          "category": {
+            "nullable": true,
+            "type": "string"
+          },
+          "conflict": {
+            "type": "boolean"
+          },
+          "minQuantity": {
+            "type": "number"
+          },
+          "newPrice": {
+            "nullable": true,
+            "type": "number"
+          },
+          "priority": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "reason": {
+            "nullable": true,
+            "type": "string"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PriceListItemBatchPreview": {
+        "properties": {
+          "conflictSkus": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "conflicts": {
+            "items": {
+              "$ref": "#/components/schemas/PriceListItemConflict"
+            },
+            "type": "array"
+          },
+          "createdItems": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "lineLimit": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "lines": {
+            "items": {
+              "$ref": "#/components/schemas/PriceListItemBatchLine"
+            },
+            "type": "array"
+          },
+          "matchedSkus": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "mode": {
+            "type": "string"
+          },
+          "modeLabel": {
+            "type": "string"
+          },
+          "scope": {
+            "type": "string"
+          },
+          "scopeLabel": {
+            "type": "string"
+          },
+          "skippedSkus": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "truncated": {
+            "type": "boolean"
+          },
+          "updatedItems": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "PriceListItemBatchRequest": {
+        "properties": {
+          "brand": {
+            "nullable": true,
+            "type": "string"
+          },
+          "category": {
+            "nullable": true,
+            "type": "string"
+          },
+          "categoryPrices": {
+            "items": {
+              "$ref": "#/components/schemas/PriceListItemCategoryPrice"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "minQuantity": {
+            "nullable": true,
+            "type": "number"
+          },
+          "mode": {
+            "enum": [
+              "FIXED",
+              "PERCENTAGE",
+              "CATEGORY_UNIFIED"
+            ],
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "percent": {
+            "nullable": true,
+            "type": "number"
+          },
+          "priority": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "scope": {
+            "enum": [
+              "CATEGORY",
+              "BRAND",
+              "SKU_SET"
+            ],
+            "nullable": true,
+            "type": "string"
+          },
+          "skuCodes": {
+            "items": {
+              "nullable": true,
+              "type": "string"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "unitPrice": {
+            "nullable": true,
+            "type": "number"
+          },
+          "validFrom": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "validTo": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "mode",
+          "validFrom"
+        ],
+        "type": "object"
+      },
+      "PriceListItemBatchResult": {
+        "properties": {
+          "conflictSkus": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "conflicts": {
+            "items": {
+              "$ref": "#/components/schemas/PriceListItemConflict"
+            },
+            "type": "array"
+          },
+          "createdItems": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "matchedSkus": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "mode": {
+            "type": "string"
+          },
+          "skippedSkus": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "updatedItems": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "PriceListItemCandidate": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "minQuantity": {
+            "type": "number"
+          },
+          "priority": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "selectionState": {
+            "type": "string"
+          },
+          "selectionStateLabel": {
+            "type": "string"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "unitPrice": {
+            "type": "number"
+          },
+          "validFrom": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "validTo": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PriceListItemCapabilities": {
+        "properties": {
+          "conflictNote": {
+            "type": "string"
+          },
+          "currencyNote": {
+            "type": "string"
+          },
+          "downstreamNote": {
+            "type": "string"
+          },
+          "exportNote": {
+            "type": "string"
+          },
+          "importNote": {
+            "type": "string"
+          },
+          "modes": {
+            "items": {
+              "enum": [
+                "FIXED",
+                "PERCENTAGE",
+                "CATEGORY_UNIFIED"
+              ],
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "notes": {
+            "items": {
+              "$ref": "#/components/schemas/CapabilityNote"
+            },
+            "type": "array"
+          },
+          "priorityNote": {
+            "type": "string"
+          },
+          "scopes": {
+            "items": {
+              "enum": [
+                "CATEGORY",
+                "BRAND",
+                "SKU_SET"
+              ],
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "selectionStates": {
+            "items": {
+              "enum": [
+                "SELECTED",
+                "AMBIGUOUS",
+                "LOWER_PRIORITY",
+                "NOT_APPLICABLE"
+              ],
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "tierNote": {
+            "type": "string"
+          },
+          "upstreamNote": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PriceListItemCategoryPrice": {
+        "nullable": true,
+        "properties": {
+          "category": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "unitPrice": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "category",
+          "unitPrice"
+        ],
+        "type": "object"
+      },
+      "PriceListItemConflict": {
+        "properties": {
+          "candidates": {
+            "items": {
+              "$ref": "#/components/schemas/PriceListItemCandidate"
+            },
+            "type": "array"
+          },
+          "minQuantity": {
+            "type": "number"
+          },
+          "overlapFrom": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "overlapTo": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "priority": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PriceListItemImportReport": {
+        "properties": {
+          "applied": {
+            "type": "boolean"
+          },
+          "appliedRows": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "batchId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "errorRows": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "fileName": {
+            "type": "string"
+          },
+          "okRows": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/PriceListItemImportRowReport"
+            },
+            "type": "array"
+          },
+          "status": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "totalRows": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "warningRows": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "PriceListItemImportRequest": {
+        "properties": {
+          "apply": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "contentBase64": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "fileName": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "contentBase64",
+          "fileName"
+        ],
+        "type": "object"
+      },
+      "PriceListItemImportRowReport": {
+        "properties": {
+          "declaredCurrency": {
+            "nullable": true,
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "messages": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "minQuantity": {
+            "type": "number"
+          },
+          "priority": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "rowNo": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "nullable": true,
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "unitPrice": {
+            "nullable": true,
+            "type": "number"
+          },
+          "validFrom": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "validTo": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PriceListItemInput": {
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "minQuantity": {
+            "nullable": true,
+            "type": "number"
+          },
+          "note": {
+            "type": "string"
+          },
+          "priority": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "skuCode": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "unitPrice": {
+            "type": "number"
+          },
+          "validFrom": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "validTo": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "version": {
+            "format": "int64",
+            "nullable": true,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "skuCode",
+          "unitPrice",
+          "validFrom"
+        ],
+        "type": "object"
+      },
+      "PriceListItemPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/PriceListItemView"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "PriceListItemResolution": {
+        "properties": {
+          "ambiguityProblem": {
+            "nullable": true,
+            "type": "string"
+          },
+          "ambiguous": {
+            "type": "boolean"
+          },
+          "at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "candidates": {
+            "items": {
+              "$ref": "#/components/schemas/PriceListItemCandidate"
+            },
+            "type": "array"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "priceListCode": {
+            "type": "string"
+          },
+          "priceListId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "quantity": {
+            "nullable": true,
+            "type": "number"
+          },
+          "selected": {
+            "$ref": "#/components/schemas/PriceListItemView"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "unitPrice": {
+            "nullable": true,
+            "type": "number"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "PriceListItemView": {
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdBy": {
+            "nullable": true,
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "effectiveNow": {
+            "type": "boolean"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "minQuantity": {
+            "type": "number"
+          },
+          "note": {
+            "type": "string"
+          },
+          "priceListCode": {
+            "type": "string"
+          },
+          "priceListId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "priority": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "priorityLabel": {
+            "type": "string"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "unitPrice": {
+            "type": "number"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "validFrom": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "validTo": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "version": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
       "PriceListLegalEntity": {
         "properties": {
           "baseCurrency": {
@@ -58185,6 +58919,37 @@
         ]
       }
     },
+    "/catalog/price-lists/item-capabilities": {
+      "get": {
+        "operationId": "get_catalog_price_lists_item_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PriceListItemCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "price-list-item-controller"
+        ]
+      }
+    },
     "/catalog/price-lists/lists": {
       "get": {
         "operationId": "get_catalog_price_lists_lists",
@@ -58437,6 +59202,589 @@
         },
         "tags": [
           "price-list-controller"
+        ]
+      }
+    },
+    "/catalog/price-lists/lists/{priceListId}/items": {
+      "get": {
+        "operationId": "get_catalog_price_lists_lists_priceListId_items",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "priceListId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "skuCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "enabled",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "effectiveNow",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PriceListItemPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "price-list-item-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_catalog_price_lists_lists_priceListId_items",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "priceListId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PriceListItemInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PriceListItemView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "price-list-item-controller"
+        ]
+      }
+    },
+    "/catalog/price-lists/lists/{priceListId}/items/apply": {
+      "post": {
+        "operationId": "post_catalog_price_lists_lists_priceListId_items_apply",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "priceListId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PriceListItemBatchRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PriceListItemBatchResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "price-list-item-controller"
+        ]
+      }
+    },
+    "/catalog/price-lists/lists/{priceListId}/items/conflicts": {
+      "get": {
+        "operationId": "get_catalog_price_lists_lists_priceListId_items_conflicts",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "priceListId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/PriceListItemConflict"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "price-list-item-controller"
+        ]
+      }
+    },
+    "/catalog/price-lists/lists/{priceListId}/items/export": {
+      "get": {
+        "operationId": "get_catalog_price_lists_lists_priceListId_items_export",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "priceListId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "format": "byte",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "price-list-item-controller"
+        ]
+      }
+    },
+    "/catalog/price-lists/lists/{priceListId}/items/import": {
+      "post": {
+        "operationId": "post_catalog_price_lists_lists_priceListId_items_import",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "priceListId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PriceListItemImportRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PriceListItemImportReport"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "price-list-item-controller"
+        ]
+      }
+    },
+    "/catalog/price-lists/lists/{priceListId}/items/preview": {
+      "post": {
+        "operationId": "post_catalog_price_lists_lists_priceListId_items_preview",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "priceListId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PriceListItemBatchRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PriceListItemBatchPreview"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "price-list-item-controller"
+        ]
+      }
+    },
+    "/catalog/price-lists/lists/{priceListId}/items/resolve": {
+      "get": {
+        "operationId": "get_catalog_price_lists_lists_priceListId_items_resolve",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "priceListId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "skuCode",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quantity",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "in": "query",
+            "name": "at",
+            "required": false,
+            "schema": {
+              "format": "date-time",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PriceListItemResolution"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "price-list-item-controller"
+        ]
+      }
+    },
+    "/catalog/price-lists/lists/{priceListId}/items/{itemId}": {
+      "delete": {
+        "operationId": "delete_catalog_price_lists_lists_priceListId_items_itemId",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "priceListId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "itemId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "price-list-item-controller"
+        ]
+      },
+      "get": {
+        "operationId": "get_catalog_price_lists_lists_priceListId_items_itemId",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "priceListId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "itemId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PriceListItemView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "price-list-item-controller"
+        ]
+      },
+      "put": {
+        "operationId": "put_catalog_price_lists_lists_priceListId_items_itemId",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "priceListId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "itemId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PriceListItemInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PriceListItemView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "price-list-item-controller"
         ]
       }
     },

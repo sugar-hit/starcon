@@ -14877,6 +14877,49 @@ const services: readonly {
     pattern:
       /^ai\/diagnosis\/(?:capabilities|overview|events(?:\/sync|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:diagnose|resolve))?)?|runs\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})$/,
   },
+  {
+    // 5.1.1.2 价目项批量维护（catalog 服务，卷 05「定价与价目」L3 5.1.1「价目表」下的第二格）。
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，**追加在数组末尾**（收尾的 `];` 之前）——
+    //   既有条目一字未改、也不重排（并入时 git 按前缀求并，取错一侧不会丢掉别人已交付的路由）。
+    //
+    // 🔴 **锚点选在末尾是为避开同批另外三条车道的锚点**：本文件是并行车道共同的累积型文件，
+    //   同批另外三条车道分别被指定了 catalog 中段（5.1.1.1 的 price-lists）/
+    //   crm 中段（15.3.1.2）/ identity 中段（15.6.2.1）三个锚点 —— 四条车道必须占四个
+    //   相距万行的锚点，否则下轮并入时又会在同一个锚点撞车、成果全卡在冲突里。
+    //
+    // 🔴 ---- 为什么用 `price-lists` 这个前缀（零命中核对）----
+    //   本模块的端点挂在 5.1.1.1 的**同一个命名空间**下（`price-lists/lists/{uuid}/items`）——
+    //   价目项是价目表的明细，不是另一个服务。
+    //   既有那条 `price-lists` 元素（5.1.1.1）的正则以 `$` 收尾且**不含** `/items` 段，
+    //   所以 `price-lists/lists/{uuid}/items/**` 在它那里**零命中** ⇒ 两���元素互不遮蔽。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   price-lists/item-capabilities                能力声明（三模式 / 三范围 / 八条口径）
+    //   price-lists/lists/{uuid}/items               价目项列表（GET 真分页 + 筛选）/ 新建（POST）
+    //   price-lists/lists/{uuid}/items/{uuid}        单条价目项（GET 详情 / PUT 修改 / DELETE 删除）
+    //   price-lists/lists/{uuid}/items/conflicts     本表内的冲突清单（同优先级 + 区间重叠）
+    //   price-lists/lists/{uuid}/items/resolve       解析「这个 SKU 此刻该卖多少」（歧义 ⇒ 409）
+    //   price-lists/lists/{uuid}/items/preview       批量设价的**影响范围预览**（不落库）
+    //   price-lists/lists/{uuid}/items/apply         批量设价**执行**
+    //   price-lists/lists/{uuid}/items/export        导出 xlsx（真实工作簿，代理二进制原样透传）
+    //   price-lists/lists/{uuid}/items/import        Excel 导入（先出校验报告，有错整批不落库）
+    //
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   price-lists/lists/{uuid}/conflicts —— 🔴 **优先级与冲突检测是 5.1.2.1**（5.1.1.1 的下游守门员），
+    //     本模块**不**实现跨价目表的优先级判定 ⇒ 后端没有这个端点 ⇒ 放行它只会让界面 404。
+    //   price-lists/lists/{uuid}/items/{非 UUID 段} —— 非 UUID 段不应被 uuid 分支吃掉。
+    //   price-lists/lists/{uuid}/items/{uuid}/extra —— 多一段仍然 404。
+    //
+    // ⚠️ 判别顺序：**字面量子路径（conflicts / resolve / preview / apply / export / import）排在
+    //   {uuid} 段之前** —— alternation 是首个命中即返回，顺序反了会被 uuid 支吃掉半截。
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //   （不是 `[0-9a-f-]+`）：后者会把 `items` / `conflicts` 这种非 UUID 形状当成 id 放行。
+    prefix: 'catalog/',
+    env: 'CATALOG_URL',
+    fallback: 'http://127.0.0.1:8082',
+    pattern:
+      /^price\-lists(?:\/item\-capabilities|\/lists\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/items(?:\/(?:conflicts|resolve|preview|apply|export|import)|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?)$/,
+  },
 ];
 
 function resolve(path: string) {
