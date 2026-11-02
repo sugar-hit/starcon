@@ -2750,6 +2750,45 @@ const services: readonly {
       /^price\-lists(?:\/(?:capabilities|scope\-directory|coverage)|\/lists(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?)$/,
   },
   {
+    // 5.1.2.1 优先级与冲突检测（catalog 服务，卷 05「定价与价目」L3 5.1.2「适用范围」下的第一格）。
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，**紧接在 5.1.1.1 的 `price-lists`
+    //   那条元素之后** —— 既有条目一字未改、也不重排。
+    //
+    // 🔴 **锚点为什么选在 catalog 中段（而不是数组末尾）**：同批另外三条车道分别被指定了
+    //   末尾 / crm 中段 / identity 中段三个锚点 —— 四条车道必须占四个**相距万行**的锚点，
+    //   否则下一轮并入时又会落在同一个锚点上，git 判冲突、成果全卡在冲突里。
+    //   本车道落在 catalog 中段（`price-lists` 元素之后），与另外三条车道的锚点彼此错开。
+    //
+    // 🔴 为什么仍然用 `price-lists` 这个前缀（而不是另起一个 token）：
+    //   * 蓝图 5.1.1.1 的白名单注释已经写明「`price-lists/lists/{uuid}/conflicts` 是
+    //     **5.1.2.1** 的形状」—— 本模块就是实现这一段。
+    //   * 既有正则全部**锚定**（`/^token(...)?$/`），且既有分支里 `price-lists/**` 零命中
+    //     ⇒ 本条目不会被既有分支抢走。
+    //   * 5.1.1.1 的元素在**数组里排在本条目之前** ⇒ 它自己的形状
+    //     （capabilities / scope-directory / coverage / lists / lists/{uuid}）由它自己命中，
+    //     本条目**只**放行 5.1.2.1 自己实现的那几条（下列清单里没有 `price-lists/lists` 裸集合、
+    //     也没有 `price-lists/lists/{uuid}` 裸详情 —— 那两条不是本模块实现的）。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   price-lists/priority/capabilities     能力声明（优先级语义 + 六个维度的覆盖情况）
+    //   price-lists/priority/rules           本租户全部优先级规则（GET）
+    //   price-lists/lists/{uuid}/priority     某张价目表的优先级规则（GET）+ 保存（POST）
+    //   price-lists/lists/{uuid}/conflicts    某张价目表的冲突明细（GET）
+    //   price-lists/conflicts                 全租户冲突概览（GET）
+    //   price-lists/resolve                   解析「这个 SKU 在这个店铺此刻该卖多少」（POST）
+    //
+    // ⚠️ 判别顺序：**字面量子路径（priority / conflicts / resolve）排在 {uuid} 段之前** ——
+    //    alternation 是首个命中即返回，顺序反了会被 uuid 支吃掉半截。
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //   （不是 `[0-9a-f-]+`）：后者会把 `lists` 这种非 UUID 形状也当成 id 放行。
+    // ⚠️ `price-lists/lists/{uuid}/items` —— 价目项是 **5.1.1.2 的写入所有权**，未交付 ⇒ 不放行。
+    prefix: 'catalog/',
+    env: 'CATALOG_URL',
+    fallback: 'http://127.0.0.1:8082',
+    pattern:
+      /^price\-lists(?:\/priority\/(?:capabilities|rules)|\/conflicts|\/resolve|\/lists\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/(?:priority|conflicts))$/,
+  },
+  {
     // 16.6.2.1 数据出境与留存（**本条目是新增一条独立的 services[] 元素**，
     // 不是往既有 channel 巨型 alternation 里并分支 —— 同批多车道共享这一个文件，
     // 往同一段超长单行正则里并分支会让 git 必然判冲突，retry 不会自愈）。

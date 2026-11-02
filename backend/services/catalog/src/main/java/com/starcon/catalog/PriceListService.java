@@ -85,11 +85,18 @@ public class PriceListService {
   private final DSLContext sql;
   private final PriceListScopePort scope;
   private final ChannelPlatformPort platforms;
+  /** 🔴 5.1.2.1 守门员（优先级与冲突检测）。见 {@link #save} 里的调用点。 */
+  private final PriceListPriorityService priorityGate;
 
-  public PriceListService(DSLContext sql, PriceListScopePort scope, ChannelPlatformPort platforms) {
+  public PriceListService(
+      DSLContext sql,
+      PriceListScopePort scope,
+      ChannelPlatformPort platforms,
+      PriceListPriorityService priorityGate) {
     this.sql = sql;
     this.scope = scope;
     this.platforms = platforms;
+    this.priorityGate = priorityGate;
   }
 
   // ================================================================ 能力声明
@@ -323,6 +330,10 @@ public class PriceListService {
           normalized.note(),
           actor.userId());
       replaceScopes(newId, actor, normalized.scopes(), directory);
+      // 🔴 5.1.2.1 守门员：适用范围刚落库（**还没提交**）就跑冲突检测 ——
+      //    检出阻断级冲突 ⇒ 抛 409 ⇒ 整个保存事务回滚 ⇒ 什么都没存下。
+      //    本租户一张优先级规则都没有时，这个调用直接返回（不读上游目录）。
+      priorityGate.assertNoBlockingConflict(newId, bearer);
       return detail(newId);
     }
     var current =
@@ -362,6 +373,8 @@ public class PriceListService {
         normalized.note(),
         id);
     replaceScopes(id, actor, normalized.scopes(), directory);
+    // 🔴 5.1.2.1 守门员：同上 —— 改适用范围也可能撞出不可解析的并列。
+    priorityGate.assertNoBlockingConflict(id, bearer);
     return detail(id);
   }
 
