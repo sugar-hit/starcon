@@ -14132,6 +14132,1086 @@
         },
         "type": "object"
       },
+      "CrmPointsAccountDetail": {
+        "properties": {
+          "account": {
+            "$ref": "#/components/schemas/CrmPointsAccountRow"
+          },
+          "lots": {
+            "items": {
+              "$ref": "#/components/schemas/CrmPointsLotRow"
+            },
+            "type": "array"
+          },
+          "recentLedger": {
+            "items": {
+              "$ref": "#/components/schemas/CrmPointsLedgerRow"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "CrmPointsAccountPage": {
+        "properties": {
+          "dataScope": {
+            "type": "string"
+          },
+          "dataScopeNote": {
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/CrmPointsAccountRow"
+            },
+            "type": "array"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "stats": {
+            "$ref": "#/components/schemas/CrmPointsStats"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalPages": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CrmPointsAccountRow": {
+        "properties": {
+          "accountKey": {
+            "type": "string"
+          },
+          "balance": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "customerName": {
+            "type": "string"
+          },
+          "customerRef": {
+            "type": "string"
+          },
+          "earnedTotal": {
+            "type": "string"
+          },
+          "expiredTotal": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "lastEarnedAt": {
+            "nullable": true,
+            "type": "string"
+          },
+          "lastSpentAt": {
+            "nullable": true,
+            "type": "string"
+          },
+          "memberKey": {
+            "type": "string"
+          },
+          "sourceShop": {
+            "type": "string"
+          },
+          "spentTotal": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmPointsCapabilities": {
+        "properties": {
+          "boundaryNote": {
+            "type": "string"
+          },
+          "dimensions": {
+            "items": {
+              "$ref": "#/components/schemas/CrmPointsCapabilityDimension"
+            },
+            "type": "array"
+          },
+          "directions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "earnSources": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "highlight": {
+            "type": "string"
+          },
+          "liabilityPolicy": {
+            "type": "string"
+          },
+          "pointsPolicy": {
+            "type": "string"
+          },
+          "ruleTypes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "CrmPointsCapabilityDimension": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "description": {
+            "type": "string"
+          },
+          "dimension": {
+            "type": "string"
+          },
+          "impact": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmPointsEarnInput": {
+        "properties": {
+          "earnSource": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "memberKey": {
+            "maxLength": 160,
+            "minLength": 0,
+            "type": "string"
+          },
+          "note": {
+            "maxLength": 600,
+            "minLength": 0,
+            "nullable": true,
+            "type": "string"
+          },
+          "occurredAt": {
+            "nullable": true,
+            "type": "string"
+          },
+          "points": {
+            "exclusiveMinimum": false,
+            "minimum": 0,
+            "nullable": true,
+            "type": "number"
+          },
+          "referenceId": {
+            "maxLength": 128,
+            "minLength": 0,
+            "nullable": true,
+            "type": "string"
+          },
+          "ruleCode": {
+            "maxLength": 48,
+            "minLength": 0,
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "earnSource",
+          "memberKey"
+        ],
+        "type": "object"
+      },
+      "CrmPointsEarnResult": {
+        "properties": {
+          "accountId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "accountKey": {
+            "type": "string"
+          },
+          "balanceAfter": {
+            "type": "string"
+          },
+          "balanceBefore": {
+            "type": "string"
+          },
+          "expiresAt": {
+            "nullable": true,
+            "type": "string"
+          },
+          "memberKey": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "points": {
+            "type": "string"
+          },
+          "ruleCode": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmPointsEntitlementInput": {
+        "properties": {
+          "benefitCurrency": {
+            "nullable": true,
+            "pattern": "[A-Za-z]{3}",
+            "type": "string"
+          },
+          "benefitType": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "benefitValue": {
+            "exclusiveMinimum": false,
+            "minimum": 0,
+            "nullable": true,
+            "type": "number"
+          },
+          "effectiveFrom": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "effectiveTo": {
+            "nullable": true,
+            "type": "string"
+          },
+          "enabled": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "entitlementCode": {
+            "maxLength": 48,
+            "minLength": 0,
+            "type": "string"
+          },
+          "entitlementName": {
+            "maxLength": 96,
+            "minLength": 0,
+            "type": "string"
+          },
+          "note": {
+            "maxLength": 600,
+            "minLength": 0,
+            "nullable": true,
+            "type": "string"
+          },
+          "perMemberLimit": {
+            "format": "int32",
+            "minimum": 1,
+            "nullable": true,
+            "type": "integer"
+          },
+          "pointCost": {
+            "exclusiveMinimum": false,
+            "minimum": 0,
+            "type": "number"
+          },
+          "stock": {
+            "format": "int32",
+            "minimum": 0,
+            "nullable": true,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "benefitType",
+          "effectiveFrom",
+          "entitlementCode",
+          "entitlementName",
+          "pointCost"
+        ],
+        "type": "object"
+      },
+      "CrmPointsEntitlementPage": {
+        "properties": {
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/CrmPointsEntitlementRow"
+            },
+            "type": "array"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalPages": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CrmPointsEntitlementRow": {
+        "properties": {
+          "benefitCurrency": {
+            "nullable": true,
+            "type": "string"
+          },
+          "benefitType": {
+            "type": "string"
+          },
+          "benefitTypeLabel": {
+            "type": "string"
+          },
+          "benefitValue": {
+            "nullable": true,
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "effectiveFrom": {
+            "type": "string"
+          },
+          "effectiveNow": {
+            "type": "boolean"
+          },
+          "effectiveTo": {
+            "nullable": true,
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "entitlementCode": {
+            "type": "string"
+          },
+          "entitlementName": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "perMemberLimit": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "pointCost": {
+            "type": "string"
+          },
+          "stock": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CrmPointsExpireResult": {
+        "properties": {
+          "expiredLotCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "expiredPoints": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "totalExpiredPoints": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmPointsLedgerPage": {
+        "properties": {
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/CrmPointsLedgerRow"
+            },
+            "type": "array"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalPages": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CrmPointsLedgerRow": {
+        "properties": {
+          "accountKey": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "string"
+          },
+          "balanceAfter": {
+            "type": "string"
+          },
+          "balanceBefore": {
+            "type": "string"
+          },
+          "customerName": {
+            "type": "string"
+          },
+          "direction": {
+            "type": "string"
+          },
+          "directionLabel": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "memberKey": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "occurredAt": {
+            "type": "string"
+          },
+          "operatorId": {
+            "nullable": true,
+            "type": "string"
+          },
+          "reasonCode": {
+            "type": "string"
+          },
+          "reasonLabel": {
+            "type": "string"
+          },
+          "referenceId": {
+            "nullable": true,
+            "type": "string"
+          },
+          "referenceType": {
+            "nullable": true,
+            "type": "string"
+          },
+          "ruleCode": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmPointsLiability": {
+        "properties": {
+          "accountsWithBalance": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "asOf": {
+            "type": "string"
+          },
+          "bookedInFinance": {
+            "type": "boolean"
+          },
+          "expiringPoints": {
+            "type": "string"
+          },
+          "expiringWithin": {
+            "nullable": true,
+            "type": "string"
+          },
+          "financeNote": {
+            "type": "string"
+          },
+          "liabilityAmount": {
+            "nullable": true,
+            "type": "string"
+          },
+          "liabilityCurrency": {
+            "nullable": true,
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "outstandingPoints": {
+            "type": "string"
+          },
+          "pointValueRate": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmPointsLotRow": {
+        "properties": {
+          "accountKey": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "expired": {
+            "type": "boolean"
+          },
+          "expiresAt": {
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "remaining": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmPointsRedeemInput": {
+        "properties": {
+          "entitlementCode": {
+            "maxLength": 48,
+            "minLength": 0,
+            "type": "string"
+          },
+          "memberKey": {
+            "maxLength": 160,
+            "minLength": 0,
+            "type": "string"
+          },
+          "note": {
+            "maxLength": 600,
+            "minLength": 0,
+            "nullable": true,
+            "type": "string"
+          },
+          "occurredAt": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "entitlementCode",
+          "memberKey"
+        ],
+        "type": "object"
+      },
+      "CrmPointsRedeemResult": {
+        "properties": {
+          "accountId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "accountKey": {
+            "type": "string"
+          },
+          "balanceAfter": {
+            "type": "string"
+          },
+          "balanceBefore": {
+            "type": "string"
+          },
+          "benefitSnapshot": {
+            "additionalProperties": {
+              "type": "object"
+            },
+            "type": "object"
+          },
+          "entitlementCode": {
+            "type": "string"
+          },
+          "entitlementName": {
+            "type": "string"
+          },
+          "memberKey": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "pointCost": {
+            "type": "string"
+          },
+          "redemptionId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "redemptionNo": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmPointsRedemptionPage": {
+        "properties": {
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/CrmPointsRedemptionRow"
+            },
+            "type": "array"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalPages": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CrmPointsRedemptionRow": {
+        "properties": {
+          "accountKey": {
+            "type": "string"
+          },
+          "benefitSnapshot": {
+            "additionalProperties": {
+              "type": "object"
+            },
+            "type": "object"
+          },
+          "entitlementCode": {
+            "type": "string"
+          },
+          "entitlementName": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "memberKey": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "orderRef": {
+            "nullable": true,
+            "type": "string"
+          },
+          "pointCost": {
+            "type": "string"
+          },
+          "redeemedAt": {
+            "type": "string"
+          },
+          "redemptionNo": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "usedAt": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmPointsRuleInput": {
+        "properties": {
+          "earnSource": {
+            "nullable": true,
+            "type": "string"
+          },
+          "effectiveFrom": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "effectiveTo": {
+            "nullable": true,
+            "type": "string"
+          },
+          "enabled": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "fixedPoints": {
+            "exclusiveMinimum": false,
+            "minimum": 0,
+            "nullable": true,
+            "type": "number"
+          },
+          "liabilityCurrency": {
+            "nullable": true,
+            "pattern": "[A-Za-z]{3}",
+            "type": "string"
+          },
+          "maxDeductRate": {
+            "exclusiveMaximum": false,
+            "exclusiveMinimum": false,
+            "maximum": 1,
+            "minimum": 0,
+            "nullable": true,
+            "type": "number"
+          },
+          "maxPerDay": {
+            "exclusiveMinimum": false,
+            "minimum": 0,
+            "nullable": true,
+            "type": "number"
+          },
+          "minDeductPoints": {
+            "exclusiveMinimum": false,
+            "minimum": 0,
+            "nullable": true,
+            "type": "number"
+          },
+          "note": {
+            "maxLength": 600,
+            "minLength": 0,
+            "nullable": true,
+            "type": "string"
+          },
+          "pointValueRate": {
+            "exclusiveMinimum": false,
+            "minimum": 0,
+            "nullable": true,
+            "type": "number"
+          },
+          "pointsPerUnit": {
+            "exclusiveMinimum": false,
+            "minimum": 0,
+            "nullable": true,
+            "type": "number"
+          },
+          "ruleCode": {
+            "maxLength": 48,
+            "minLength": 0,
+            "type": "string"
+          },
+          "ruleName": {
+            "maxLength": 96,
+            "minLength": 0,
+            "type": "string"
+          },
+          "ruleType": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "thresholdAmount": {
+            "exclusiveMinimum": false,
+            "minimum": 0,
+            "nullable": true,
+            "type": "number"
+          },
+          "thresholdCurrency": {
+            "nullable": true,
+            "pattern": "[A-Za-z]{3}",
+            "type": "string"
+          },
+          "validMonths": {
+            "format": "int32",
+            "maximum": 1200,
+            "minimum": 1,
+            "nullable": true,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "effectiveFrom",
+          "ruleCode",
+          "ruleName",
+          "ruleType"
+        ],
+        "type": "object"
+      },
+      "CrmPointsRulePage": {
+        "properties": {
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/CrmPointsRuleRow"
+            },
+            "type": "array"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalPages": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CrmPointsRuleRow": {
+        "properties": {
+          "createdAt": {
+            "type": "string"
+          },
+          "earnSource": {
+            "nullable": true,
+            "type": "string"
+          },
+          "effectiveFrom": {
+            "type": "string"
+          },
+          "effectiveNow": {
+            "type": "boolean"
+          },
+          "effectiveTo": {
+            "nullable": true,
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "fixedPoints": {
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "liabilityCurrency": {
+            "nullable": true,
+            "type": "string"
+          },
+          "maxDeductRate": {
+            "nullable": true,
+            "type": "string"
+          },
+          "maxPerDay": {
+            "nullable": true,
+            "type": "string"
+          },
+          "minDeductPoints": {
+            "nullable": true,
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "pointValueRate": {
+            "nullable": true,
+            "type": "string"
+          },
+          "pointsPerUnit": {
+            "nullable": true,
+            "type": "string"
+          },
+          "ruleCode": {
+            "type": "string"
+          },
+          "ruleName": {
+            "type": "string"
+          },
+          "ruleType": {
+            "type": "string"
+          },
+          "thresholdAmount": {
+            "nullable": true,
+            "type": "string"
+          },
+          "thresholdCurrency": {
+            "nullable": true,
+            "type": "string"
+          },
+          "validMonths": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CrmPointsSpendInput": {
+        "properties": {
+          "memberKey": {
+            "maxLength": 160,
+            "minLength": 0,
+            "type": "string"
+          },
+          "note": {
+            "maxLength": 600,
+            "minLength": 0,
+            "nullable": true,
+            "type": "string"
+          },
+          "occurredAt": {
+            "nullable": true,
+            "type": "string"
+          },
+          "orderId": {
+            "maxLength": 128,
+            "minLength": 0,
+            "type": "string"
+          },
+          "points": {
+            "exclusiveMinimum": false,
+            "minimum": 0,
+            "nullable": true,
+            "type": "number"
+          },
+          "ruleCode": {
+            "maxLength": 48,
+            "minLength": 0,
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "memberKey",
+          "orderId"
+        ],
+        "type": "object"
+      },
+      "CrmPointsSpendResult": {
+        "properties": {
+          "accountId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "accountKey": {
+            "type": "string"
+          },
+          "balanceAfter": {
+            "type": "string"
+          },
+          "balanceBefore": {
+            "type": "string"
+          },
+          "maxDeductPoints": {
+            "nullable": true,
+            "type": "string"
+          },
+          "memberKey": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "orderId": {
+            "nullable": true,
+            "type": "string"
+          },
+          "points": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmPointsStats": {
+        "properties": {
+          "accountsWithBalance": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "expiringLotCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "expiringPoints": {
+            "type": "string"
+          },
+          "ledgerCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "outstandingPoints": {
+            "type": "string"
+          },
+          "totalAccounts": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CrmPointsUseInput": {
+        "properties": {
+          "note": {
+            "maxLength": 600,
+            "minLength": 0,
+            "nullable": true,
+            "type": "string"
+          },
+          "orderRef": {
+            "maxLength": 64,
+            "minLength": 0,
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "CrmProductReviewCapabilities": {
         "properties": {
           "boundaryNote": {
@@ -31666,6 +32746,877 @@
         },
         "tags": [
           "negative-review-controller"
+        ]
+      }
+    },
+    "/crm/points/accounts": {
+      "get": {
+        "operationId": "get_crm_points_accounts",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "memberKey",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sourceShop",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "onlyWithBalance",
+            "required": false,
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmPointsAccountPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "points-controller"
+        ]
+      }
+    },
+    "/crm/points/accounts/{accountId}": {
+      "get": {
+        "operationId": "get_crm_points_accounts_accountId",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "accountId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmPointsAccountDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "points-controller"
+        ]
+      }
+    },
+    "/crm/points/capabilities": {
+      "get": {
+        "operationId": "get_crm_points_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmPointsCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "points-controller"
+        ]
+      }
+    },
+    "/crm/points/earn": {
+      "post": {
+        "operationId": "post_crm_points_earn",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmPointsEarnInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmPointsEarnResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "points-controller"
+        ]
+      }
+    },
+    "/crm/points/entitlements": {
+      "get": {
+        "operationId": "get_crm_points_entitlements",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "entitlementCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmPointsEntitlementPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "points-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_crm_points_entitlements",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmPointsEntitlementInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmPointsEntitlementRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "points-controller"
+        ]
+      }
+    },
+    "/crm/points/entitlements/{entitlementId}": {
+      "get": {
+        "operationId": "get_crm_points_entitlements_entitlementId",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "entitlementId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmPointsEntitlementRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "points-controller"
+        ]
+      }
+    },
+    "/crm/points/expire": {
+      "post": {
+        "operationId": "post_crm_points_expire",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmPointsExpireResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "points-controller"
+        ]
+      }
+    },
+    "/crm/points/ledger": {
+      "get": {
+        "operationId": "get_crm_points_ledger",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "memberKey",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "direction",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "reasonCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmPointsLedgerPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "points-controller"
+        ]
+      }
+    },
+    "/crm/points/liability": {
+      "get": {
+        "operationId": "get_crm_points_liability",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmPointsLiability"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "points-controller"
+        ]
+      }
+    },
+    "/crm/points/redeem": {
+      "post": {
+        "operationId": "post_crm_points_redeem",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmPointsRedeemInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmPointsRedeemResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "points-controller"
+        ]
+      }
+    },
+    "/crm/points/redemptions": {
+      "get": {
+        "operationId": "get_crm_points_redemptions",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "memberKey",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "entitlementCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmPointsRedemptionPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "points-controller"
+        ]
+      }
+    },
+    "/crm/points/redemptions/{redemptionId}/use": {
+      "post": {
+        "operationId": "post_crm_points_redemptions_redemptionId_use",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "redemptionId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmPointsUseInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmPointsRedemptionRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "points-controller"
+        ]
+      }
+    },
+    "/crm/points/rules": {
+      "get": {
+        "operationId": "get_crm_points_rules",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "ruleType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "ruleCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmPointsRulePage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "points-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_crm_points_rules",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmPointsRuleInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmPointsRuleRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "points-controller"
+        ]
+      }
+    },
+    "/crm/points/rules/{ruleId}": {
+      "get": {
+        "operationId": "get_crm_points_rules_ruleId",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "ruleId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmPointsRuleRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "points-controller"
+        ]
+      },
+      "put": {
+        "operationId": "put_crm_points_rules_ruleId",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "ruleId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmPointsRuleInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmPointsRuleRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "points-controller"
+        ]
+      }
+    },
+    "/crm/points/spend": {
+      "post": {
+        "operationId": "post_crm_points_spend",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmPointsSpendInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmPointsSpendResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "points-controller"
         ]
       }
     },

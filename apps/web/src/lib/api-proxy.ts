@@ -6896,6 +6896,69 @@ const services: readonly {
       /^customer\-membership(?:\/capabilities|\/members(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|\/levels(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|\/benefits|\/level\-changes|\/compute|\/runs)$/,
   },
   {
+    // 15.6.1.2 积分与权益（crm 服务，卷 15「客户与客服」L3 15.6.1「会员体系」下的第二格）。
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 crm 分支里并分支 ——
+    //   既有 crm 条目**一字未改、也不重排**。
+    //
+    // ---- 插入锚点选在 **`^customer\-membership...$`（15.6.1.1 会员与等级）那条之后** ----
+    //   本文件是并行车道共同的累积型文件。本车道与 15.6.1.1 是**同卷同 L3 的兄弟**，
+    //   锚在它后面 ⇒ 语义相邻，且与数组末尾（约 15341 行）相距 8000 行以上，
+    //   与落在末尾/开头的其它车道互不重叠，并入时 git 能干净求并。
+    //
+    // ---- 首 token「points」的零命中核对结论（**实测**，非目测）----
+    //   脚本从本文件里抽出既有全部 **258 条** services[] 正则，逐条对本模块的 16 个
+    //   path shape 实测 `new RegExp(pat).test(shape)`：**命中数 = 0**。
+    //   且既有正则都是**锚定**的（`^token(...)?$`），而 `resolve()` 先按
+    //   `path.startsWith(service.prefix)` 收窄服务、再判别正则 ⇒ 只有 prefix='crm/'
+    //   的元素才有机会吃到 `crm/points/...`，而 prefix='crm/' 的另外几条正则
+    //   **不可能**匹配 `points/...` ⇒ 首 token 不同即可，互不遮蔽。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   points/capabilities            能力声明（逐维 available + ownerModule + impact）
+    //   points/accounts                积分账户集合读（GET，真分页 + 真筛选）
+    //   points/accounts/{uuid}         单个积分账户详情（GET：账户 + 批次 + 最近流水）
+    //   points/rules                   积分规则集合读（GET，真分页 + 真筛选）/ 新建（POST）
+    //   points/rules/{uuid}            单条规则（GET）/ 改启用与备注（PUT）
+    //   points/entitlements            权益目录集合读（GET，真分页 + 真筛选）/ 新建（POST）
+    //   points/entitlements/{uuid}     单项权益（GET）
+    //   points/ledger                  积分流水集合读（GET，真分页 + 方向/事由/会员筛选）
+    //   points/redemptions             权益核销记录集合读（GET，真分页 + 真筛选）
+    //   points/redemptions/{uuid}/use  权益核销（POST：REDEEMED → USD，单向）
+    //   points/earn                    积分获取（POST：消费 / 评价 / 签到 / 人工）
+    //   points/spend                   积分消耗（POST：订单抵扣）
+    //   points/redeem                  权益兑换（POST）
+    //   points/expire                  到期结算（POST：按**绝对时刻**清零过期批次）
+    //   points/liability               积分负债汇总（GET，**只输出**给 12 财务，不代劳入账）
+    //
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   points（裸路径）                        —— 后端第一个子路径就是 capabilities。
+    //   points/points                           —— 前缀重复，不是任何端点。
+    //   points/accounts/not-a-uuid              —— 非 UUID 段不应被 uuid 分支吃掉。
+    //   points/rules/not-a-uuid                 —— 同上。
+    //   points/entitlements/not-a-uuid          —— 同上。
+    //   points/redemptions/{uuid}               —— 核销记录**没有**单条详情端点
+    //                                              （核销走 POST /redemptions/{uuid}/use）。
+    //   points/redemptions/{uuid}/cancel        —— 🔴 **没有「撤销核销」**：核销是**单向**的，
+    //                                              已核销的事实不许撤回。
+    //   points/redemptions/{uuid}/extra         —— 多一段仍然 404。
+    //   points/reversal                         —— 🔴 积分冲正（退货回退）**本轮未交付**；
+    //                                              放行它会让界面以为「可以退回已发的积分」。
+    //   points/finance/booking                  —— 🔴 **12 财务侧的入账不在本服务**：
+    //                                              本模块只**输出**负债汇总，不代劳建科目。
+    //   points/expire/{uuid}                    —— 到期结算是**批量**动作，没有单条形态。
+    //
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //   （不是 `[0-9a-f-]+`）：后者会把 `cancel` / `reversal` 这种非 UUID 形状也当成 id 放行。
+    // ⚠️ 末尾**刻意不带 `?`**：带了就等于放行裸路径 `points`。
+    // ⚠️ **`/redemptions/{uuid}/use` 分支排在 `/redemptions` 之前** ——
+    //   alternation 是首个命中即返回，长分支在前才不会被短分支吃掉半截。
+    prefix: 'crm/',
+    env: 'CRM_URL',
+    fallback: 'http://127.0.0.1:8086',
+    pattern:
+      /^points(?:\/capabilities|\/accounts(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|\/rules(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|\/entitlements(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|\/ledger|\/redemptions\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/use|\/redemptions|\/earn|\/spend|\/redeem|\/expire|\/liability)$/,
+  },
+  {
     // 4.4.1.3 采集箱（channel 服务）。本条目是**新增一条 services[] 元素**，
     // 不是往既有 channel 分支的超长 alternation 里并分支 —— 那一支是单行超长正则，
     // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
