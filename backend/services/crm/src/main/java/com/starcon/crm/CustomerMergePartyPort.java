@@ -83,21 +83,23 @@ public class CustomerMergePartyPort {
    */
   public AddressLookup addresses(UUID partyId, String bearer) {
     if (partyId == null) {
-      return new AddressLookup(
-          false, List.of(), "上游订单没有带客户档案标识", "NONE");
+      return new AddressLookup(false, List.of(), "上游订单没有带客户档案标识", "NONE");
     }
     try {
-      String raw =
+      // 🔴 取 **JsonNode** 而不是 String：上游回的是 JSON **对象**
+      //   （{"items":[...]}），Jackson 没法把一个 JSON 对象读成 String ——
+      //   那样会抛 "Cannot deserialize value of type java.lang.String from Object value"。
+      JsonNode node =
           client
               .get()
               .uri(ADDRESS_PATH + partyId + "/addresses?page=0&size=50")
               .header("Authorization", bearer)
               .retrieve()
-              .body(String.class);
-      if (raw == null) {
+              .body(JsonNode.class);
+      if (node == null) {
         return new AddressLookup(false, List.of(), "catalog 服务没有返回客户地址", "NONE");
       }
-      return new AddressLookup(true, parseAddresses(raw), "", "CATALOG_PARTY");
+      return new AddressLookup(true, parseAddresses(node), "", "CATALOG_PARTY");
     } catch (RestClientResponseException e) {
       int code = e.getStatusCode().value();
       if (code == 404) {
@@ -121,22 +123,17 @@ public class CustomerMergePartyPort {
    * （版本、用途、选择阻断……），本模块只关心 {@code oneLine}。
    * 强绑会让上游加字段 / 改字段直接**编译失败**，而这里只需要「取不到就说取不到」。
    */
-  static List<String> parseAddresses(String raw) {
+  static List<String> parseAddresses(JsonNode root) {
     List<String> out = new ArrayList<>();
-    try {
-      JsonNode root = JSON.readTree(raw);
-      JsonNode items = root.path("items");
-      if (!items.isArray()) items = root.path("rows");
-      if (!items.isArray()) return List.of();
-      for (JsonNode item : items) {
-        if (item.path("deleted").asBoolean(false)) continue;
-        String oneLine = item.path("oneLine").asText("");
-        if (oneLine.isBlank()) continue;
-        if (!out.contains(oneLine)) out.add(oneLine);
-      }
-    } catch (Exception e) {
-      // 上游形状变了 ⇒ 当作「读不到」，由调用方如实记进运行台账。
-      return List.of();
+    if (root == null) return List.of();
+    JsonNode items = root.path("items");
+    if (!items.isArray()) items = root.path("rows");
+    if (!items.isArray()) return List.of();
+    for (JsonNode item : items) {
+      if (item.path("deleted").asBoolean(false)) continue;
+      String oneLine = item.path("oneLine").asText("");
+      if (oneLine.isBlank()) continue;
+      if (!out.contains(oneLine)) out.add(oneLine);
     }
     return List.copyOf(new LinkedHashSet<>(out));
   }

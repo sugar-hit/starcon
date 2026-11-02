@@ -466,10 +466,14 @@ BEGIN
     RAISE EXCEPTION '候选的左侧必须小于右侧（% >= %）：顺序变了同一对客户就会变成两行候选',
       NEW.left_customer_id, NEW.right_customer_id USING ERRCODE='23514';
   END IF;
-  IF NEW.left_customer_id IS DISTINCT FROM OLD.left_customer_id
-     OR NEW.right_customer_id IS DISTINCT FROM OLD.right_customer_id THEN
-    RAISE EXCEPTION '候选的两侧不可改（候选 %）：改了它就不是同一对客户了',
-      OLD.id USING ERRCODE='23514';
+  -- 🔴 「两侧不可改」**只在 UPDATE 时检查**：INSERT 时 OLD 全是 NULL，
+  --   与 NEW 比必然「不同」，那样会连正常的插入一起挡掉。
+  IF TG_OP = 'UPDATE' THEN
+    IF NEW.left_customer_id IS DISTINCT FROM OLD.left_customer_id
+       OR NEW.right_customer_id IS DISTINCT FROM OLD.right_customer_id THEN
+      RAISE EXCEPTION '候选的两侧不可改（候选 %）：改了它就不是同一对客户了',
+        OLD.id USING ERRCODE='23514';
+    END IF;
   END IF;
   RETURN NEW;
 END $$;
@@ -481,8 +485,22 @@ CREATE TRIGGER crm_customer_merge_candidate_order_trg
 -- ---------------------------------------------------------------------------
 -- 6.5 guard_crm_customer_merge_candidate_review · 人工确认必须留痕，且只能向前推
 -- ---------------------------------------------------------------------------
+-- 🔴 「只给建议不自动执行」在候选表上的落点：**候选只能以 SUGGESTED 诞生**。
+--   直接 INSERT 一条 status='CONFIRMED' 的候选（绕过服务层）会被挡下来 ——
+--   没有人工复核就没有 CONFIRMED。
 CREATE FUNCTION guard_crm_customer_merge_candidate_review() RETURNS trigger LANGUAGE plpgsql AS $$
 BEGIN
+  IF TG_OP = 'INSERT' THEN
+    IF NEW.status IS DISTINCT FROM 'SUGGESTED' THEN
+      RAISE EXCEPTION '候选只能以 SUGGESTED（待确认）状态创建（候选 %）：确认与拒绝只能由人工复核动作写出',
+        NEW.id USING ERRCODE='23514';
+    END IF;
+    IF NEW.reviewed_by IS NOT NULL OR NEW.reviewed_at IS NOT NULL THEN
+      RAISE EXCEPTION '候选刚创建时不应带复核留痕（候选 %）：复核是人工动作，创建只是机器建议',
+        NEW.id USING ERRCODE='23514';
+    END IF;
+    RETURN NEW;
+  END IF;
   IF NEW.status IS DISTINCT FROM OLD.status THEN
     IF OLD.status <> 'SUGGESTED' THEN
       RAISE EXCEPTION '候选 % 已经复核过（%），不能再改状态：复核结论是终态',
@@ -499,8 +517,49 @@ BEGIN
 END $$;
 
 CREATE TRIGGER crm_customer_merge_candidate_review_trg
-  BEFORE UPDATE ON crm_customer_merge_candidate
+  BEFORE INSERT OR UPDATE ON crm_customer_merge_candidate
   FOR EACH ROW EXECUTE FUNCTION guard_crm_customer_merge_candidate_review();
+
+-- ---------------------------------------------------------------------------
+-- 6.5.1 guard_crm_customer_merge_mapping_confirmation · 映射必须由人工确认产生
+-- ---------------------------------------------------------------------------
+-- 🔴 「只给建议不自动执行」的**第二道**钉子：
+--   一条 ACTIVE 映射等于「这两个人被合并了」，而合并**只能**由人工确认触发。
+--   所以映射行插入时必须能找到一个**已被人工确认**的候选（该来源行是它的一侧）。
+--   绕过服务层直接 INSERT 映射 ⇒ 找不到 CONFIRMED 候选 ⇒ 被挡。
+CREATE FUNCTION guard_crm_customer_merge_mapping_confirmation() RETURNS trigger LANGUAGE plpgsql AS $$
+DECLARE v_confirmed integer;
+BEGIN
+  SELECT count(*) INTO v_confirmed FROM crm_customer_merge_candidate c
+   WHERE c.tenant_id = NEW.tenant_id
+     AND c.status = 'CONFIRMED'
+     AND (c.left_customer_id = NEW.customer_profile_id OR c.right_customer_id = NEW.customer_profile_id);
+  IF v_confirmed = 0 THEN
+    RAISE EXCEPTION '来源客户行 % 没有一条**已人工确认**的候选：合并映射只能由人工确认动作写出（直接写 SQL 同样被挡）',
+      NEW.customer_profile_id USING ERRCODE='23514';
+  END IF;
+  RETURN NEW;
+END $$;
+
+CREATE TRIGGER crm_customer_merge_mapping_confirmation_trg
+  BEFORE INSERT ON crm_customer_merge_mapping
+  FOR EACH ROW EXECUTE FUNCTION guard_crm_customer_merge_mapping_confirmation();
+
+-- ---------------------------------------------------------------------------
+-- 6.5.2 guard_crm_customer_merge_mapping_no_delete · 映射行不删，只标 SPLIT
+-- ---------------------------------------------------------------------------
+-- 🔴 「保留合并前映射可拆分」的落点：映射行**不可删除**。
+--   删一行就等于「把合并痕迹抹掉」—— 那既不是拆分（拆分是 ACTIVE → SPLIT 并留痕），
+--   也会让「这个人被合并过、后来拆开、又合并过」在审计流水里查不到。
+CREATE FUNCTION guard_crm_customer_merge_mapping_no_delete() RETURNS trigger LANGUAGE plpgsql AS $$
+BEGIN
+  RAISE EXCEPTION '合并映射行不可删除（%）：拆分是把 state 改成 SPLIT 并留痕，不是抹掉痕迹',
+    OLD.id USING ERRCODE='23514';
+END $$;
+
+CREATE TRIGGER crm_customer_merge_mapping_no_delete_trg
+  BEFORE DELETE ON crm_customer_merge_mapping
+  FOR EACH ROW EXECUTE FUNCTION guard_crm_customer_merge_mapping_no_delete();
 
 -- ---------------------------------------------------------------------------
 -- 6.6 guard_crm_customer_merge_operation_append_only · 操作记录只追加

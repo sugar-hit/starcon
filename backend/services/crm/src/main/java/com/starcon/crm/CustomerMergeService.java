@@ -574,8 +574,12 @@ public class CustomerMergeService {
         for (int j = i + 1; j < members.size(); j++) {
           SourceCustomer a = members.get(i);
           SourceCustomer b = members.get(j);
-          SourceCustomer left = a.id().compareTo(b.id()) <= 0 ? a : b;
-          SourceCustomer right = a.id().compareTo(b.id()) <= 0 ? b : a;
+          // 🔴 顺序必须按 **PostgreSQL 的 uuid 比较口径**（16 字节无符号逐字节比），
+          //   不能用 UUID.compareTo —— 它按**有符号 long** 比高位，
+          //   两者在高位 bit 为 1 时结论相反 ⇒ 会把 (left >= right) 的行写进候选表，
+          //   然后被数据库的 CHECK 约束挡下（而且只在**部分**候选上发生，极难排查）。
+          SourceCustomer left = compareUuid(a.id(), b.id()) <= 0 ? a : b;
+          SourceCustomer right = compareUuid(a.id(), b.id()) <= 0 ? b : a;
           String key = left.id() + "|" + right.id();
           if (!pairs.containsKey(key)) {
             pairs.put(key, judge(left, right));
@@ -877,8 +881,26 @@ public class CustomerMergeService {
           nextLogicalRef());
     }
 
-    // ---- 写映射（只写 ACTIVE；已拆分的映射不能改回 ACTIVE，所以是新行）----
+    // ---- 候选落终态 ------------------------------------------------------
+    // 🔴 顺序很要紧：**先把候选标成 CONFIRMED，再写映射**。
+    //   DB 层的 guard_crm_customer_merge_mapping_confirmation 要求「这条来源行
+    //   有一条已人工确认的候选」才允许写映射 —— 先落候选，映射才写得进去，
+    //   而绕过服务层直接 INSERT 映射会被当场挡下。
     OffsetDateTime mergedAt = now();
+    sql.execute(
+        "update crm_customer_merge_candidate"
+            + " set status = 'CONFIRMED', logical_customer_id = ?, reviewed_by = ?,"
+            + " reviewed_at = ?::timestamptz, review_note = ?, updated_at = ?::timestamptz"
+            + " where tenant_id = ? and id = ?",
+        logicalId,
+        actor.userId(),
+        mergedAt,
+        input.reason().trim(),
+        mergedAt,
+        currentTenant(),
+        candidateId);
+
+    // ---- 写映射（只写 ACTIVE；已拆分的映射不能改回 ACTIVE，所以是新行）----
     int added = 0;
     for (Record profile : List.of(left, right)) {
       UUID customerId = profile.get("id", UUID.class);
@@ -904,20 +926,6 @@ public class CustomerMergeService {
           actor.userId());
       added++;
     }
-
-    // ---- 候选落终态 ------------------------------------------------------
-    sql.execute(
-        "update crm_customer_merge_candidate"
-            + " set status = 'CONFIRMED', logical_customer_id = ?, reviewed_by = ?,"
-            + " reviewed_at = ?::timestamptz, review_note = ?, updated_at = ?::timestamptz"
-            + " where tenant_id = ? and id = ?",
-        logicalId,
-        actor.userId(),
-        mergedAt,
-        input.reason().trim(),
-        mergedAt,
-        currentTenant(),
-        candidateId);
 
     // ---- 重算逻辑客户聚合 --------------------------------------------------
     refreshLogical(logicalId);
@@ -1615,6 +1623,30 @@ public class CustomerMergeService {
   }
 
   // ================================================================ 归一化
+
+  /**
+   * PostgreSQL 的 uuid 比较口径：16 字节**无符号**逐字节比（{@code uuid_send} 的字节序）。
+   *
+   * <p>🔴 <b>不能用 {@link UUID#compareTo}</b>：它先按**有符号 long** 比高位、
+   * 再比低位，而 PostgreSQL 的 uuid 类型比的是**无符号字节**。
+   * 两者在高位 bit 为 1 时结论相反 —— 而随机 UUID 有一半的高位 bit 是 1，
+   * 也就是说「用 Java 排序」会随机地在一半的候选对上与数据库的 CHECK 约束打架。
+   */
+  static int compareUuid(UUID a, UUID b) {
+    for (int i = 0; i < 16; i++) {
+      int left = Byte.toUnsignedInt(byteAt(a, i));
+      int right = Byte.toUnsignedInt(byteAt(b, i));
+      if (left != right) return Integer.compare(left, right);
+    }
+    return 0;
+  }
+
+  private static byte byteAt(UUID uuid, int index) {
+    long msb = uuid.getMostSignificantBits();
+    long lsb = uuid.getLeastSignificantBits();
+    if (index < 8) return (byte) (msb >>> (8 * (7 - index)));
+    return (byte) (lsb >>> (8 * (15 - index)));
+  }
 
   static String normalizeEmail(String email) {
     return email == null ? "" : email.trim().toLowerCase(Locale.ROOT);
