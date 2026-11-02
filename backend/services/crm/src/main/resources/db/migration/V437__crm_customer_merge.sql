@@ -123,6 +123,8 @@ GRANT USAGE ON SCHEMA public TO starcon_app;
 -- 运行号序列单独建、单独授权：GRANT ... ON ALL TABLES 不覆盖序列，
 -- 漏授权会变成「第一次生成候选就报权限不足」。
 CREATE SEQUENCE crm_customer_merge_run_no_seq START 1;
+-- 逻辑客户号序列（LC-yyyyMMdd-000001）：同样单独授权。
+CREATE SEQUENCE crm_customer_merge_logical_no_seq START 1;
 
 -- ===========================================================================
 -- 1. crm_customer_merge_logical —— 逻辑客户主表
@@ -295,8 +297,11 @@ CREATE TABLE crm_customer_merge_operation (
   id uuid PRIMARY KEY,
   tenant_id uuid NOT NULL,
 
-  -- MERGE 合并 / SPLIT 拆分。
-  operation varchar(16) NOT NULL CHECK (operation IN ('MERGE','SPLIT')),
+  -- MERGE 合并 / SPLIT 拆分 / REJECT 拒绝候选。
+  -- 🔴 REJECT 也在流水里：拒绝**也是**一个人的决定 ——
+  --   事后要能回答「为什么不是同一个人」，而候选行只留最后一次复核结论，
+  --   流水留的是「谁在什么时候拒的、理由是什么」。
+  operation varchar(16) NOT NULL CHECK (operation IN ('MERGE','SPLIT','REJECT')),
 
   logical_customer_id uuid,
   -- 由哪个候选确认而来（拆分时为空）。
@@ -561,6 +566,8 @@ GRANT SELECT,INSERT,UPDATE,DELETE ON
 -- 「第一次生成候选就报权限不足」。
 GRANT USAGE, SELECT ON SEQUENCE crm_customer_merge_run_no_seq TO crm_app;
 GRANT USAGE, SELECT ON SEQUENCE crm_customer_merge_run_no_seq TO starcon_app;
+GRANT USAGE, SELECT ON SEQUENCE crm_customer_merge_logical_no_seq TO crm_app;
+GRANT USAGE, SELECT ON SEQUENCE crm_customer_merge_logical_no_seq TO starcon_app;
 REVOKE ALL ON flyway_schema_history FROM crm_app;
 
 -- ===========================================================================
