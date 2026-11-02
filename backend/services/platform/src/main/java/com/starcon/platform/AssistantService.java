@@ -267,7 +267,8 @@ public class AssistantService {
     if (sessionId != null && session == null) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "会话不存在或不属于当前租户");
     }
-    if (session == null) {
+    var newSession = session == null;
+    if (newSession) {
       sessionId = UUID.randomUUID();
       session = new SessionRow(sessionId, "", "", "COMPANY", AssistantIntentCatalog.DEFAULT_PERIOD, null, null, 0);
     }
@@ -282,7 +283,7 @@ public class AssistantService {
     var window = window(periodCode);
 
     // 新会话：先把会话行落下来（**租户由 RLS + 触发器钉死**，不是客户端自称的）。
-    if (session == null) {
+    if (newSession) {
       insertSession(tenantId, sessionId, window);
     }
 
