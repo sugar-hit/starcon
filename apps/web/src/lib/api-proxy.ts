@@ -2974,6 +2974,62 @@ const services: readonly {
       /^ai\/templates(?:\/(?:capabilities|overview|resolve|render\-preview|upstream\/content\-assets))?(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/metadata|\/versions(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:enable|disable))?)?)?)?$/,
   },
   {
+    // 18.5.2.1 投递记录（platform 服务，卷 18「集成开放与智能自动化」L3 18.5.2「投递记录」）。
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有任何一条里并分支 ——
+    //   既有条目**一字未改、也不重排**。
+    //
+    // ---- 插入锚点选在「18.5.1.1 模板管理」那条**紧后面**（同 L3 兄弟旁边）----
+    //   本文件是并行车道共同的累积型文件：既有车道分别落在「数组最开头」
+    //   （18.1.2.1 / 18.1.2.2 / 18.1.3.1 / 18.1.3.2 / 18.3.1.1 / 18.3.2.1 / 18.3.3.1）、
+    //   「数组中段」（18.4.2.2 的 ai/forecast、18.5.1.1 的 ai/templates、18.4.3.1 的 ai/usage）
+    //   与「中后段 / 末尾」（18.4.3.2 的 ai/diagnosis、5.1.1.2 的 price-lists），
+    //   本车道落在 18.5.1.1 那条**紧后面** —— 18.5.2.1 与 18.5.1.1 是同一个 L3 下的兄弟，
+    //   语义上该挨着，且与数组两端各相距万行以上 ⇒ 并入时 git 能干净求并。
+    //
+    // ---- 首 token「notifications」的零命中核对结论 ----
+    //   本文件里既有的 `prefix: 'platform/'` 条目首 token 分别是
+    //   automation-rules / automation/runs / automation/effect / auto-approvals /
+    //   data-migration / webhooks / deliveries / io / ai/forecast / ai/templates /
+    //   text / ai/usage / ai/effects / apps / finance-software / api-catalog /
+    //   call-monitor / payment-funds / external-integrations / automation-rule-editor /
+    //   ai/diagnosis —— **没有一个**是 `notifications` ⇒ 天然互斥。
+    //   ⚠️ `deliveries`（18.1.2.2）与本模块**不是一件事**：
+    //   那边是 **webhook 投递**（事件 → 订阅方，路由 `platform/deliveries`），
+    //   这边是**通知投递**（模板 → 收件人，路由 `platform/notifications/deliveries`）。
+    //   首 token 不同 ⇒ 两条正则谁也吃不掉谁。
+    //   ⚠️ `ai/templates`（18.5.1.1）是**通知模板**（模板内容与版本），
+    //     本模块是**通知投递**（投递结果与退订）—— 前者是内容，后者是送达。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   notifications/capabilities            能力声明（哪些真交付 / 哪些还没交付、归谁）
+    //   notifications/deliveries               投递记录列表（GET 真筛选真关键词）/ 登记一次投递（POST）
+    //   notifications/deliveries/statistics    投递统计（触达率 / 退订率 / 拦截数）
+    //   notifications/deliveries/{uuid}        投递记录详情（GET：记录 + 逐次尝试 + 拦截留痕）
+    //   notifications/deliveries/{uuid}/retry  发起一次重试（POST）
+    //   notifications/unsubscribes             退订清单（GET）/ 登记一条退订（POST，先查后登记）
+    //   notifications/unsubscribes/blocks      退订拦截留痕清单（GET）
+    //   notifications/unsubscribes/{uuid}/revoke 撤销一条退订（POST，软撤销）
+    //
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   platform/notifications                      —— 裸路径：后端**没有**汇总端点。
+    //   platform/notifications/deliveries/export    —— 后端没有导出端点。
+    //   platform/notifications/deliveries/{uuid}/delete —— 投递记录**不删**（是「发生过」的证据）。
+    //   platform/notifications/deliveries/not-a-uuid —— 非 UUID 段不应被 uuid 分支吃掉。
+    //   platform/notifications/deliveries/{uuid}/extra —— 多一段仍然 404。
+    //   platform/notifications/unsubscribes/{uuid}/delete —— 退订**软撤销**（revoke），不物理删。
+    //   platform/notifications/unknown              —— 未实现的子路径仍然 404。
+    //
+    // id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //   （不是 `[0-9a-f-]+`）：后者会把 `retry` / `revoke` 这种非 UUID 形状也当成 id 放行。
+    // 字面量子路径（capabilities / statistics / blocks）排在 {uuid} 段**之前**判别 ——
+    //   alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    prefix: 'platform/',
+    env: 'PLATFORM_URL',
+    fallback: 'http://127.0.0.1:8089',
+    pattern:
+      /^notifications\/(?:capabilities|deliveries(?:\/statistics|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/retry)?)?|unsubscribes(?:\/blocks|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/revoke)?)$/,
+  },
+  {
     // 5.5.1.1 价格历史（**本条目是新增一条 services[] 元素**，不是往既有 catalog 分支的
     // alternation 里并**）。同批多车道共享这一个文件，而每个服务在 services[] 里
     // 是**一段超长单行正则**：只要两条车道都往同一服务的 alternation 里并分支，git 必然判冲突
