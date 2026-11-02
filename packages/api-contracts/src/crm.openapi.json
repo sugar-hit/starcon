@@ -4113,6 +4113,602 @@
         },
         "type": "object"
       },
+      "CrmCustomerListAmount": {
+        "properties": {
+          "avgOrderAmount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "orderCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "totalAmount": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "CrmCustomerListCapabilities": {
+        "properties": {
+          "boundaryNote": {
+            "type": "string"
+          },
+          "dimensions": {
+            "items": {
+              "$ref": "#/components/schemas/CrmCustomerListCapabilityDimension"
+            },
+            "type": "array"
+          },
+          "filterOptions": {
+            "$ref": "#/components/schemas/CrmCustomerListFilterOptions"
+          },
+          "highlight": {
+            "type": "string"
+          },
+          "maskingPolicy": {
+            "type": "string"
+          },
+          "riskFlags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "valueTiers": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "CrmCustomerListCapabilityDimension": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "description": {
+            "type": "string"
+          },
+          "dimension": {
+            "type": "string"
+          },
+          "impact": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmCustomerListContactInput": {
+        "properties": {
+          "customerRef": {
+            "maxLength": 128,
+            "minLength": 0,
+            "type": "string"
+          },
+          "email": {
+            "format": "email",
+            "maxLength": 254,
+            "minLength": 0,
+            "nullable": true,
+            "type": "string"
+          },
+          "phone": {
+            "maxLength": 64,
+            "minLength": 0,
+            "nullable": true,
+            "type": "string"
+          },
+          "sourceShop": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          }
+        },
+        "required": [
+          "customerRef",
+          "sourceShop"
+        ],
+        "type": "object"
+      },
+      "CrmCustomerListCurrencyAmount": {
+        "properties": {
+          "amount": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "customerCount": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CrmCustomerListFilterOptions": {
+        "properties": {
+          "currencies": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "riskFlags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "sourceShops": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "tagCodes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "valueTiers": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "CrmCustomerListPage": {
+        "properties": {
+          "dataScope": {
+            "type": "string"
+          },
+          "dataScopeNote": {
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/CrmCustomerListRow"
+            },
+            "type": "array"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "stats": {
+            "$ref": "#/components/schemas/CrmCustomerListStats"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalPages": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CrmCustomerListRiskBucket": {
+        "properties": {
+          "customerCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "orderCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "riskFlag": {
+            "type": "string"
+          },
+          "riskFlagLabel": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmCustomerListRow": {
+        "properties": {
+          "amounts": {
+            "items": {
+              "$ref": "#/components/schemas/CrmCustomerListAmount"
+            },
+            "type": "array"
+          },
+          "avgOrderAmount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "contactEmail": {
+            "type": "string"
+          },
+          "contactMasked": {
+            "type": "boolean"
+          },
+          "contactPhone": {
+            "type": "string"
+          },
+          "contactSource": {
+            "type": "string"
+          },
+          "contactSourceLabel": {
+            "type": "string"
+          },
+          "customerName": {
+            "type": "string"
+          },
+          "customerRef": {
+            "type": "string"
+          },
+          "firstOrderAt": {
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "lastOrderAt": {
+            "nullable": true,
+            "type": "string"
+          },
+          "optOutState": {
+            "type": "string"
+          },
+          "optOutStateLabel": {
+            "type": "string"
+          },
+          "orderCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "refundCaseCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "refundRate": {
+            "nullable": true,
+            "type": "number"
+          },
+          "riskFlag": {
+            "type": "string"
+          },
+          "riskFlagLabel": {
+            "type": "string"
+          },
+          "riskReason": {
+            "type": "string"
+          },
+          "sourceShop": {
+            "type": "string"
+          },
+          "syncedAt": {
+            "nullable": true,
+            "type": "string"
+          },
+          "tags": {
+            "items": {
+              "$ref": "#/components/schemas/CrmCustomerListTag"
+            },
+            "type": "array"
+          },
+          "totalOrderAmount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "totalOrderCurrency": {
+            "nullable": true,
+            "type": "string"
+          },
+          "valueTier": {
+            "type": "string"
+          },
+          "valueTierLabel": {
+            "type": "string"
+          },
+          "windowFrom": {
+            "nullable": true,
+            "type": "string"
+          },
+          "windowTo": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmCustomerListShopBucket": {
+        "properties": {
+          "customerCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "orderCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "sourceShop": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmCustomerListStats": {
+        "properties": {
+          "amountsByCurrency": {
+            "items": {
+              "$ref": "#/components/schemas/CrmCustomerListCurrencyAmount"
+            },
+            "type": "array"
+          },
+          "byRiskFlag": {
+            "items": {
+              "$ref": "#/components/schemas/CrmCustomerListRiskBucket"
+            },
+            "type": "array"
+          },
+          "bySourceShop": {
+            "items": {
+              "$ref": "#/components/schemas/CrmCustomerListShopBucket"
+            },
+            "type": "array"
+          },
+          "byValueTier": {
+            "items": {
+              "$ref": "#/components/schemas/CrmCustomerListTierBucket"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "totalCustomers": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalOrders": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalRefundCases": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CrmCustomerListSyncInput": {
+        "properties": {
+          "windowFrom": {
+            "nullable": true,
+            "type": "string"
+          },
+          "windowTo": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmCustomerListSyncResult": {
+        "properties": {
+          "baseline": {
+            "nullable": true,
+            "type": "number"
+          },
+          "caseCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "contactResolvedCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "contactUnavailableCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "customerCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "failureReason": {
+            "type": "string"
+          },
+          "finishedAt": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "orderCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "runId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "runNo": {
+            "type": "string"
+          },
+          "startedAt": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "truncated": {
+            "type": "boolean"
+          },
+          "unattributedCaseCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "windowFrom": {
+            "type": "string"
+          },
+          "windowTo": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmCustomerListSyncRunPage": {
+        "properties": {
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/CrmCustomerListSyncRunRow"
+            },
+            "type": "array"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalPages": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CrmCustomerListSyncRunRow": {
+        "properties": {
+          "baseline": {
+            "nullable": true,
+            "type": "number"
+          },
+          "caseCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "contactResolvedCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "contactUnavailableCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "customerCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "facts": {
+            "additionalProperties": {
+              "type": "object"
+            },
+            "type": "object"
+          },
+          "failureReason": {
+            "type": "string"
+          },
+          "finishedAt": {
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "operatorId": {
+            "nullable": true,
+            "type": "string"
+          },
+          "orderCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "runNo": {
+            "type": "string"
+          },
+          "startedAt": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "truncated": {
+            "type": "boolean"
+          },
+          "unattributedCaseCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "windowFrom": {
+            "type": "string"
+          },
+          "windowTo": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmCustomerListTag": {
+        "properties": {
+          "category": {
+            "type": "string"
+          },
+          "categoryLabel": {
+            "type": "string"
+          },
+          "tagCode": {
+            "type": "string"
+          },
+          "tagName": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmCustomerListTierBucket": {
+        "properties": {
+          "customerCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "orderCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "valueTier": {
+            "type": "string"
+          },
+          "valueTierLabel": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "CrmCustomerOptOutCheck": {
         "properties": {
           "customerName": {
@@ -21329,6 +21925,302 @@
         },
         "tags": [
           "customer-tag-controller"
+        ]
+      }
+    },
+    "/crm/customers": {
+      "get": {
+        "operationId": "get_crm_customers",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sourceShop",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "tagCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "valueTier",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "riskFlag",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "minOrderCount",
+            "required": false,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "minTotalAmount",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "in": "query",
+            "name": "currency",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "revealContact",
+            "required": false,
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCustomerListPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "customer-list-controller"
+        ]
+      }
+    },
+    "/crm/customers/capabilities": {
+      "get": {
+        "operationId": "get_crm_customers_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCustomerListCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "customer-list-controller"
+        ]
+      }
+    },
+    "/crm/customers/contact": {
+      "put": {
+        "operationId": "put_crm_customers_contact",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmCustomerListContactInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCustomerListRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "customer-list-controller"
+        ]
+      }
+    },
+    "/crm/customers/runs": {
+      "get": {
+        "operationId": "get_crm_customers_runs",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCustomerListSyncRunPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "customer-list-controller"
+        ]
+      }
+    },
+    "/crm/customers/sync": {
+      "post": {
+        "operationId": "post_crm_customers_sync",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmCustomerListSyncInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCustomerListSyncResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "customer-list-controller"
         ]
       }
     },
