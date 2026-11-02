@@ -155,9 +155,7 @@ export function membershipThresholdsText(rule: {
 }): string {
   const parts: string[] = [];
   if (rule.minTotalSpend !== null && rule.minTotalSpend !== undefined) {
-    parts.push(
-      `累计消费 ≥ ${rule.minTotalSpend} ${rule.minTotalSpendCurrency ?? ''}`.trim(),
-    );
+    parts.push(`累计消费 ≥ ${rule.minTotalSpend} ${rule.minTotalSpendCurrency ?? ''}`.trim());
   }
   if (rule.minOrderCount !== null && rule.minOrderCount !== undefined) {
     parts.push(`订单数 ≥ ${rule.minOrderCount}`);
@@ -168,16 +166,46 @@ export function membershipThresholdsText(rule: {
   return parts.length ? parts.join(' 且 ') : '无门槛（任何有真实消费的会员都命中）';
 }
 
-/** 等级权益的显示文本（折扣 / 免邮 / 优先发货）。 */
+/**
+ * 比率（十进制文本）→ 百分比文本（**字符串移位，不碰浮点**）。
+ *
+ * <p>🔴 为什么不用 `Number(rate) * 100`：那是浮点乘法，
+ * {@code 0.07 * 100} 在 IEEE 754 下是 {@code 7.000000000000001} ——
+ * 界面上就会出现「减免 7.000000000000001%」。
+ * 比率是**判定口径**，显示出来的那个数必须与后端给的十进制文本一致。
+ *
+ * <p>移位规则：把小数点右移两位（不足补零），再去掉多余的尾零。
+ * {@code 0.05 → 5}、{@code 0.075 → 7.5}、{@code 0.07 → 7}、{@code 1.5 → 150}。
+ */
+export function membershipPercentText(rate: string | number | null | undefined): string {
+  if (rate === null || rate === undefined || rate === '') return '—';
+  const text = String(rate).trim();
+  const match = /^([+-]?)(\d*)(?:\.(\d*))?$/.exec(text);
+  if (!match) return text;
+  const sign = match[1] === '-' ? '-' : '';
+  const intPart = match[2] ?? '';
+  const fracPart = match[3] ?? '';
+  let digits = intPart + fracPart;
+  const pointAt = intPart.length + 2;
+  if (digits.length < pointAt) digits = digits.padEnd(pointAt, '0');
+  const head = digits.slice(0, pointAt).replace(/^0+(?=\d)/, '');
+  const tail = digits.slice(pointAt).replace(/0+$/, '');
+  return `${sign}${head}${tail ? `.${tail}` : ''}`;
+}
+
+/**
+ * 等级权益的显示文本（折扣 / 免邮 / 优先发货）。
+ *
+ * <p>🔴 折扣走 {@link membershipPercentText}（字符串移位），**不**做浮点乘法。
+ */
 export function membershipBenefitText(row: {
   discountRate?: string | number | null;
   freeShipping?: boolean;
   priorityShipping?: boolean;
 }): string {
   const parts: string[] = [];
-  if (row.discountRate !== null && row.discountRate !== undefined) {
-    const percent = Number(row.discountRate) * 100;
-    parts.push(`减免 ${percent}%`);
+  if (row.discountRate !== null && row.discountRate !== undefined && row.discountRate !== '') {
+    parts.push(`减免 ${membershipPercentText(row.discountRate)}%`);
   }
   if (row.freeShipping) parts.push('免邮');
   if (row.priorityShipping) parts.push('优先发货');

@@ -65,9 +65,9 @@ export function MembershipWorkspace() {
   const [page, setPage] = useState<CrmMembershipMemberPage | null>(null);
   const [rules, setRules] = useState<CrmMembershipLevelRulePage | null>(null);
   const [changes, setChanges] = useState<CrmMembershipLevelChangePage | null>(null);
-  const [benefits, setBenefits] = useState<Awaited<ReturnType<typeof fetchMembershipBenefits>> | null>(
-    null,
-  );
+  const [benefits, setBenefits] = useState<Awaited<
+    ReturnType<typeof fetchMembershipBenefits>
+  > | null>(null);
   const [runs, setRuns] = useState<CrmMembershipRunPage | null>(null);
 
   const [loading, setLoading] = useState(false);
@@ -300,7 +300,8 @@ export function MembershipWorkspace() {
                 ) : (
                   stats.spendByCurrency.map((amount) => (
                     <div key={amount.currency} className="text-copy-13">
-                      {membershipMonetaryText(amount.totalSpend, amount.currency)}（{amount.orderCount} 单）
+                      {membershipMonetaryText(amount.totalSpend, amount.currency)}（
+                      {amount.orderCount} 单）
                     </div>
                   ))
                 )}
@@ -317,7 +318,7 @@ export function MembershipWorkspace() {
       <SectionCard
         title="会员档案"
         description="等级**只能**由真实消费数据算出 —— 本页面没有任何「手工指定等级」的入口。"
-        action={
+        extra={
           <Button onClick={() => void runCompute()} disabled={!canUpdate || computing}>
             <RefreshCw className={computing ? 'h-4 w-4 animate-spin' : 'h-4 w-4'} />
             重算会员等级
@@ -414,7 +415,7 @@ export function MembershipWorkspace() {
                             {membershipLevelLabel(row.levelCode)}
                           </Badge>
                         </td>
-                        <td className="text-muted-foreground px-2 py-1 text-copy-12">
+                        <td className="text-muted-foreground text-copy-12 px-2 py-1">
                           {membershipOriginLabel(row.levelOrigin)}
                         </td>
                         <td className="px-2 py-1">
@@ -423,8 +424,10 @@ export function MembershipWorkspace() {
                             {row.orderCount} 单
                           </div>
                         </td>
-                        <td className="px-2 py-1">{membershipRepurchaseText(row.repurchaseRate)}</td>
-                        <td className="text-muted-foreground px-2 py-1 text-copy-12">
+                        <td className="px-2 py-1">
+                          {membershipRepurchaseText(row.repurchaseRate)}
+                        </td>
+                        <td className="text-muted-foreground text-copy-12 px-2 py-1">
                           {row.levelReason}
                         </td>
                       </tr>
@@ -432,7 +435,7 @@ export function MembershipWorkspace() {
                   </tbody>
                 </table>
               </div>
-              <div className="text-muted-foreground flex items-center gap-2 text-copy-12">
+              <div className="text-muted-foreground text-copy-12 flex items-center gap-2">
                 <span>
                   第 {page.page + 1} / {Math.max(page.totalPages, 1)} 页 · 共 {page.total} 位
                 </span>
@@ -486,7 +489,7 @@ export function MembershipWorkspace() {
                       </td>
                       <td className="px-2 py-1">{membershipThresholdsText(rule)}</td>
                       <td className="px-2 py-1">{membershipBenefitText(rule)}</td>
-                      <td className="text-muted-foreground px-2 py-1 text-copy-12">
+                      <td className="text-muted-foreground text-copy-12 px-2 py-1">
                         {rule.effectiveNow ? '生效中' : rule.enabled ? '未生效' : '已停用'}
                         <div>{rule.effectiveFrom}</div>
                       </td>
@@ -633,7 +636,7 @@ export function MembershipWorkspace() {
                       </td>
                       <td className="px-2 py-1">{row.benefitSummary}</td>
                       <td className="px-2 py-1">{row.appliesTo}</td>
-                      <td className="text-muted-foreground px-2 py-1 text-copy-12">
+                      <td className="text-muted-foreground text-copy-12 px-2 py-1">
                         {row.downstreamConsumers.join('、')}
                       </td>
                     </tr>
@@ -692,11 +695,13 @@ export function MembershipWorkspace() {
                         {membershipLevelLabel(row.toLevelCode)}
                       </div>
                     </td>
-                    <td className="text-muted-foreground px-2 py-1 text-copy-12">
+                    <td className="text-muted-foreground text-copy-12 px-2 py-1">
                       {membershipOriginLabel(row.origin)}
                     </td>
-                    <td className="text-muted-foreground px-2 py-1 text-copy-12">{row.reason}</td>
-                    <td className="text-muted-foreground px-2 py-1 text-copy-12">{row.changedAt}</td>
+                    <td className="text-muted-foreground text-copy-12 px-2 py-1">{row.reason}</td>
+                    <td className="text-muted-foreground text-copy-12 px-2 py-1">
+                      {row.changedAt}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -729,13 +734,13 @@ export function MembershipWorkspace() {
                 {runs.rows.map((run) => (
                   <tr key={run.id} className="border-control-border border-t">
                     <td className="px-2 py-1">{run.runNo}</td>
-                    <td className="text-muted-foreground px-2 py-1 text-copy-12">
+                    <td className="text-muted-foreground text-copy-12 px-2 py-1">
                       {run.windowFrom ?? '全部历史'} → {run.windowTo}
                     </td>
                     <td className="px-2 py-1">{run.memberCount}</td>
                     <td className="px-2 py-1">{run.levelChangedCount}</td>
                     <td className="px-2 py-1">{run.unmatchedCount}</td>
-                    <td className="text-muted-foreground px-2 py-1 text-copy-12">
+                    <td className="text-muted-foreground text-copy-12 px-2 py-1">
                       {run.failureReason || '—'}
                     </td>
                   </tr>
@@ -748,7 +753,7 @@ export function MembershipWorkspace() {
 
       {/* ---------------- 规则说明 ---------------- */}
       <SectionCard title="规则说明">
-        <ul className="text-muted-foreground space-y-1 text-copy-12">
+        <ul className="text-muted-foreground text-copy-12 space-y-1">
           <li>
             等级来源恒为「规则算出来的」；人工覆盖通道**本轮未交付**，页面与后端都**没有**写入口。
           </li>
