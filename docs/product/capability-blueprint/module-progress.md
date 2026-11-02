@@ -6,15 +6,19 @@
 >
 > 状态词表只有三个值，统计逻辑依赖它，不要新增：
 > `已交付`（迁移 + API + 页面 + 测试齐全，无 TODO 残留）· `进行中`（部分交付、未收口，证据列写清缺哪一块）· `未开发`（未开工）。
+
 ## 总览
+
 | 指标 | 数量 |
 | --- | --- |
 | 模块总数 | 465 |
-| 已交付 | 458 |
+| 已交付 | 462 |
 | 进行中 | 0 |
-| **未开发** | **7** |
-| 完成率 | 98.5% |
+| **未开发** | **3** |
+| 完成率 | 99.4% |
+
 ## 分阶段进度（交付顺序看这里）
+
 | 阶段 | 已交付 | 进行中 | 未开发 | 合计 |
 | --- | --- | --- | --- | --- |
 | **D1–D2** | 80 | 0 | 0 | 80 |
@@ -22,9 +26,12 @@
 | **D4** | 60 | 0 | 0 | 60 |
 | **D5** | 52 | 0 | 0 | 52 |
 | **D6** | 78 | 0 | 0 | 78 |
-| **D7** | 148 | 0 | 7 | 155 |
+| **D7** | 152 | 0 | 3 | 155 |
+
 ## 分系统进度
+
 | 卷 | 系统 | 阶段 | 已交付 | 模块数 |
+| --- | --- | --- | --- | --- |
 | 01 | 工作台与门户系统 | D7 | 23 | 23 |
 | 02 | 渠道与店铺系统 | D1–D2 / D5 | 25 | 25 |
 | 03 | 商品主数据系统 | D1–D2 | 40 | 40 |
@@ -39,26 +46,34 @@
 | 12 | 财务核算系统 | D6 | 32 | 32 |
 | 13 | 利润与经营分析系统 | D7 | 23 | 23 |
 | 14 | 广告与增长系统 | D7 | 22 | 22 |
-| 15 | 客户与客服系统 | D7 | 20 | 24 |
+| 15 | 客户与客服系统 | D7 | 22 | 24 |
 | 16 | 合规与风控系统 | D7 | 23 | 23 |
 | 17 | 组织权限与系统设置系统 | D1–D2 / D4 / D6 / D7 | 29 | 29 |
-| 18 | 集成开放与智能自动化系统 | D7 | 21 | 24 |
+| 18 | 集成开放与智能自动化系统 | D7 | 23 | 24 |
+
 ## 判定「已交付」的标准
+
 一个模块标 `已交付` 当且仅当下面四件都成立，缺一件就是 `未开发` 或 `进行中`：
+
 1. **迁移** — `backend/services/<svc>/src/main/resources/db/migration/V*.sql` 里有真实表结构，
    带 `tenant_id NOT NULL` + RLS 策略，不是注释里的设计。
 2. **API** — 服务里有对应端点，走 jOOQ 显式 SQL，不是返回硬编码常量的桩。
 3. **页面** — `apps/web/src/app/**/page.tsx` 是真实工作区，不是 `DomainPlaceholder`。
 4. **测试** — `cd backend && ./mvnw verify` 绿；涉及租户隔离的必须实跑
    「两租户互不可见 / 伪造 tenant header 无效 / 连接池归还后不串租户」三条断言。
+
 **判定为 `未开发` 的典型形态**（见到就说明没做完，不许算进已交付）：
+
 - `DomainPlaceholder` 占位页
 - 硬编码数组 / 常量当数据源
 - 服务里 `TODO` + `throw new UnsupportedOperationException()`
 - 迁移文件存在但没有 RLS 策略
 - 前端有页面但后端没有对应端点（或反之）
+
 ## 跨期说明
+
 「阶段」列按**依赖就绪顺序**逐模块标注，不是卷归属。跨期卷的拆分如下：
+
 - **01 工作台与门户 → 全部 D7**：它是纯投影聚合层（蓝图原文「不写业务数据，只读投影」），
   聚合 09 订单 / 07 库存 / 02 渠道 / 12 财务 / 15 客户 / 17 审批的投影。
   这些数据源没落地之前建「我的待办」只能造假数据，所以整卷排到最后收口。
@@ -72,7 +87,9 @@
 - **11 售后与退货**：D4 交付售后单、退货授权与实收、退款换货；平台纠纷 / 客诉工单 / 分析排 D7。
 - **17 组织权限**：D1–D2 交付租户、法人、部门、成员、角色、页面权限、数据范围、审计；
   17.4 审批流随单据排 D4，17.6.1.1 账簿与本位币随财务排 D6，17.7 套餐与平台参数排 D7。
+
 ## 模块明细
+
 | 模块 ID | 模块名 | L3 锚点路由 | 阶段 | 状态 | 证据 |
 | --- | --- | --- | --- | --- | --- |
 | 1.1.1.1 | 我的待办 | /dashboard/todo | D7 | 已交付 | **卷 01 第一批**：本模块是**只读投影**（卷 01 卷首写死「不产生新的业务事实，只聚合各系统的投影」「不做：任何写业务数据的操作。工作台只读 + 跳转；一切状态变更回到归属系统完成」+ 蓝图 1.1.1.1 原文「**不写业务数据**，只读投影」）⇒ **不新建任何表、不占用 V370**（Flyway 版本号留给真正需要它的场景）、**不建后端微服务**、**不提供任何写端点**、**对后端零改动**。**迁移**：无（本模块只读六个既有服务的既有事实表）。**端点**：**零新增** —— 本模块是**纯前端聚合层**，读八个**既有**的只读投影端点（蓝图的八类待办 ↔ 八个上游端点一一对应，不多不少）：超期未发货 → `GET trade/fulfillment/timeliness/overdue`（09 订单，权限码 `trade.fulfillment.read`）·待审订单 → `GET trade/order-pending-review/queue`（09 订单，`trade.orders.read`）· 库存缺口 → `GET warehouse/inventory/stockout-alerts/stockouts`（07 库存，`warehouse.inventory.read`）· 待处理同步失败 → `GET channel/sync-failures`（02 渠道，`channel.sync.read`）· 待核对账差异 → `GET finance/supplier-reconciliation`（12 财务，`finance.suppliereconciliation.read`）· 待回复站内信 → `GET crm/message-inbox/messages`（15 客户，`crm.message.read`）· 待审批单据 → `GET identity/approval-todos`（17 审批，沿用 `identity.approval_inbox.read`）· 库存低于安全线 → `GET warehouse/inventory/safety-stock/alerts`（07 库存，`warehouse.inventory.read`）。八个上游系统与蓝图「上游 = 09 订单、07 库存、02 渠道、12 财务、15 客户、17 审批」逐条对上。**api-proxy**：**本车道未改 `api-proxy.ts`**（**k = 0**）—— 发车前用脚本把基线 **225** 条 services[] 正则**逐条编译并实测命中**（与 `resolve()` 同构：先切掉 prefix 再 test，不是目测、不是 `grep -c "prefix: '"`），实测上述八个形状**全部已在基线放行** ⇒ 无需新增元素，**元素数仍 = 225**，该文件**一字未改、未重排** ⇒ 并入集成头时在该文件上**零冲突面**（调度者分给本车道的第 314 行锚点因此未被占用）。**数据范围（法人/店铺/仓库/部门）**：**服务端判定，前端不掺和** —— 租户来自**已认证的成员关系**（`auth/session` → 各服务 `AccessService.require` → 身份服务 `/internal/access`），**不信任任何客户端租户头**（代理只转发会话 cookie 换来的 `Authorization`，`X-Tenant-Id` 根本不会被转发，有专门的反向断言钉住）；法人/店铺/仓库/部门的范围由**归属服务**在服务端判定（`AccessService.run` 绑定 `app.actor` / `app.department` / `app.grants` / `app.permission` 供 RLS 与行级范围使用）；**前端不把范围当成可信输入往下传**（不下发范围参数、不下发租户 id，只读各服务**已经按范围过滤好**的投影）；前端做的那一点是**展示** —— 按 `GrantPermissions.scopeMode` **逐字同式**的判据（取最宽的一条授权 ALL > DEPARTMENT > SELF，DEPARTMENT 需要会话带部门否则退化为 SELF）算出每个来源**实际生效**的数据范围并显示，⚠️ 该判定**只用于「要不要去读」和「怎么措辞」**，**不是授权** —— 服务端会独立地再判一次。**三件「判不了」与「没有」严格分开**：① 严重度判不了（风险分 `null` = 没评估过、审批节点没配时限、上游给了没见过的严重度词）落在独立 `UNKNOWN` 档并**排在 `LOW` 之前**；② 停留时长判不了（起点缺失/格式不认）是 `null` **不是 0**（0 会把「不知道停了多久」显示成「刚发生」）；③ 来源读不到逐类单列、**不计入总数**，也不冒充「0 条」；④ 另加第四件 —— **无权限**与**读不到**分开：无权限的来源**根本不发请求**（发了必然 403 且会把「无权限」说成「服务挂了」），标成「无权限 · 对你不开放」。**严重度按源分别推、不统一硬编码阈值**（各源判据不同：风险分 / 超期秒数 / 上游自带的 severity / 失败原因 / 优先级 / 未结差异条数；统一阈值会重算业务口径）⇒ 严重度**不可跨源直接比大小**，页面按档位展示。**已处置的不再是待办**：已审的单、已解决的预警、已重放的同步失败、已读的站内信、已发的站内信（OUTBOUND 不是「待回复」）、没有未结差异的对账单 —— 一律不进队列（上游默认口径外**显式再挡一次**，免得将来上游改了默认口径而这里悄悄把已处置的报成待办）。**紧急度排序**：严重度降序 → 停留时长降序 → 类型名 → 引用，**最后两级保证同一批数据两次刷新顺序不跳**（顺序乱跳会让人以为待办自己在动）；停留时长判不了的排在同级**之后**（「停了多久不知道」≠「停了很久」，把 `null` 当无穷大会把一批判不了的顶到最前）。**计数与清单同源**：概览的每个数字都由清单**同一份集合**算出。**页面** `/dashboard/todo/my-todos`（`apps/web/src/app/dashboard/todo/my-todos/page.tsx`）+ `apps/web/src/components/dashboard/my-todo-{model,workspace}.tsx`：数据源可达性区（八个来源逐条报「已接通 / 无权限 / 读不到」+ 归属系统 + 上游端点 + **实际生效的数据范围** + 当前工作空间名）+ 待办概览（总数 / **未读计数角标** / 最久停留 / 四档严重度 / **判不了严重度**条数 / 读不到来源数 / 无权限来源数）+ 按类型筛（八类各自条数，点一下就按这一类筛）+ 筛选（严重度 / 停留时长下限 / 关键字）+ 待办队列（按紧急度排序的卡片：类型 / 单据引用 / 严重度 / 停留时长 / 数据范围 / **下一步入口**（跳归属系统处理页并带定位参数，如 `/crm/messages?keyword=MSG-1`、`/inventory/stockout-alerts?skuId=…`）+ 真分页）；加载 / 错误 / 空三态齐全，**禁 mock**；上游取数被页数上限截断时**如实报出「只取回前 N 条（共 M 条）」**。🔴 **工作台不写业务数据**：页面上**没有认领 / 完成 / 转交**任何写动作，每张卡片只有一条出口（跳归属系统）。**不代兄弟模块实现**：1.1.1.2 异常订单队列（`/dashboard/todo`）与 1.1.1.3 审批待办（`/dashboard/todo/approvals`）各有自己的页面，本车道**不碰 `apps/web/src/app/dashboard/todo/page.tsx`**（那是 1.1.1.2 已交付的页面），只挂自己的同层子路由。**契约**：未重新生成（后端零改动 ⇒ 契约不变）。**测试** `my-todo-model.test.ts` **39 例**（八类一一对应 / 「判不了」不被当成「没有」三态 / 已处置的不再是待办 / 读不到与没有是两件事 / 紧急度排序四则 / 计数与清单同源 / 筛选五则 / 归一七则 / 数据范围八则：ALL>DEPARTMENT>SELF 取最宽、「能写不能读」不成立、无部门则 DEPARTMENT 退化为 SELF、八个来源逐个判定、会话读不到时全部判为不可读）+ `my-todo-allowlist.test.ts` **6 例**（真跑 proxy 断言 HTTP 状态码：前端源码里**反向抽取**的真实调用点逐条放行 / 八个上游端点逐条放行 / 查询串不影响放行判定 / **刻意不放行的形状仍然 404**（含 🔴 写形状：sync replay、message reply、alert acknowledge、recon resolve、approval decide）与 / 不误伤兄弟模块与六个上游系统其它车道已交付的形状 / **代理不转发伪造的 X-Tenant-Id 与 X-Internal-Key**，只转发会话 cookie 换来的 Authorization）。**验证** `./mvnw -q compile` exit 0、`pnpm typecheck` 3/3 通过、`pnpm vitest run apps/web/src/app/api` **237 文件 1336 例全绿**、本车道 5 个文件 eslint 无输出 · 2026-10-24 交付 |
@@ -540,32 +557,3 @@
 | 18.4.3.2 | 效果评估 | — | D7 | 已交付 | **迁移** `backend/services/platform/src/main/resources/db/migration/V430__ai_effect_evaluation.sql` 五表（`platform_ai_effect_adoption` 采纳台账 / `_feedback` 有用性反馈台账 / `_backtest` 预测回测快照 / `_threshold` 租户级阈值一行 / `_suggestion` 改进建议台账），全部 `tenant_id NOT NULL` + ENABLE **与 FORCE** RLS isolation + 租户守卫触发器 + 事实不可改触发器（只允许受控的 `ACTIVE → WITHDRAWN` 撤回）；**权限码** `backend/services/identity/src/main/resources/db/migration/V430__platform_ai_effect_permission.sql` 登记 `platform.ai-effect.read / .record / .update` 三个码（读 / 录一条采纳·反馈·跑回测 / 维护阈值·生成建议·记录决策是**三个独立的码**）并回填存量 OWNER。**端点 16 条**挂 `/platform/ai/effects`（`AiEffectEvaluationController.java`，platform 服务，jOOQ 显式 SQL）：GET `/capabilities` / `/overview` / `/adoptions` / `/adoption-report` / `/feedback` / `/backtests` / `/thresholds` / `/suggestions`；POST `/adoptions` / `/adoptions/{uuid}/withdraw` / `/feedback` / `/feedback/{uuid}/withdraw` / `/backtests/run` / `/suggestions/generate` / `/suggestions/{uuid}/decision`；POST `/thresholds`（**局部更新**）。🔴 **蓝图加粗句「采纳率是 AI 功能唯一诚实的指标」在数据层被钉成物理事实**：① **分母只有一个来源** —— 18.4.3.1 的 `platform_ai_usage_record`（本模块**只读**，一个字都不写），本模块只贡献**分子**；分母为 0 ⇒ 比率是 **null**（不是 0、不是 Infinity）——「没有调用记录」与「调用了但没人用」是两件完全不同的事；② **三态不是布尔** —— `ACCEPTED` / `MODIFIED` / `REJECTED`，**前两者都计入分子**（只存一个布尔值会把「改了才用」误判成「没用」）；③ 报表行的**分子 / 分母 / 比率 / 口径四件齐全**，且分子里「已关联 / 未关联调用记录」**分开列**（两者单位可能不同，混算会得出假的比率）；④ **样本不足不下低价值结论** —— 判定低价值要求调用次数 ≥ 门槛（默认 20），不拿 3 次调用判死刑；⑤ **回测的实际值来自真实销量**（18.4.2.2 的 `platform_forecast_demand_history` 求和），**绝不拿预测值自己当实际值**；一条销量都没有的 SKU 如实记 `NO_ACTUAL_SOURCE`（**不记 0**），实际值为 0 时相对误差为 null 且不计入 MAPE。🔴 **只出建议，不执行下线**：本仓**没有**按能力粒度的 AI 功能开关 ⇒ **没有 /disable 端点**，决策端点只记录 `ACCEPTED` / `REJECTED`（放行一个不存在的下线动作比不做更糟）。🔴 **助手答案有用性反馈如实答不可用**：18.4.1.1 对话助手已熔断未交付 ⇒ 上游不存在助手答案与助手使用数据 ⇒ 本模块只提供反馈登记的**载体**，能力声明里逐条报 `available=false` + 未接通原因 + 归属模块，**绝不伪造助手的使用 / 反馈数据**。🔴 **请求体不含 tenantId / userId / membershipId** —— 归属一律由服务端从已认证会话解析（Jackson fail-on-unknown-properties ⇒ 客户端自称的字段直接 400）。**页面** `apps/web/src/app/ai/effects/page.tsx` + `apps/web/src/components/ai/ai-effect-model.ts`（纯函数口径层）+ `ai-effect-workspace.tsx`（**真实工作区**，非占位页）：八个页签（效果总览 / 采纳率报表 / 采纳记录 / 有用性反馈 / 预测回测 / 改进建议 / 评估阈值 / 能力声明），每页**加载 / 空 / 错误三态齐全**，空态区分「筛选无结果」与「还没有数据」；🔴 **比率全程不碰浮点** —— 后端给的是 `NUMERIC` 十进制文本，前端用**字符串移位**算百分比（转成 number 再 ×100 会掉精度，而比率是判定口径）；🔴 `null`（没有分母）与 `0`（真的是 0%）**必须分开**，前者显示「—」，绝不画成 0% 的柱子；🔴 **阈值表单清空一格 = 沿用当前值**（发 null，不是空串），非法值本地就拦下（口径与后端一致）；🔴 建议的**四件事**（针对哪个功能 / 当前指标 / 建议做什么 / 依据）与采纳率的**四件套**缺一不可。**api-proxy 白名单** `apps/web/src/lib/api-proxy.ts` 新增**一条独立** `platform/` 条目（`^ai/effects/…`，第二 token 与兄弟车道的 `ai/forecast` / `ai/usage` / `ai/templates` 各不相同 ⇒ 天然互斥）；🔴 **刻意不放行** `ai/effects` 裸路径 / `…/unknown` / 非 UUID 段 / `thresholds/{uuid}` / `adoptions/{uuid}` / `suggestions/{uuid}/disable`（**本模块没有下线端点**）。🔴 **集成修正（本车道自查发现）**：原后端把阈值端点写成 `PUT /thresholds`，但浏览器侧的 `apps/web/src/app/api/platform/[...path]/route.ts` **刻意不导出 PUT** ⇒ 浏览器根本调不到（405）⇒ 功能等于没交付；已按 platform 服务既有的 upsert 约定（同窗口类型重复设置 = 覆盖）改成 **POST**（**局部更新**，留空沿用当前值），同步改了 `AiEffectEvaluationIntegrationTest` 的 2 处调用，并用 `python3 tools/codegen/catalog-contracts.py --spec-dir backend/target/openapi` 重新生成契约（codegen 产物未手改；`platform.openapi.json` 只变 `put → post` 三行，其余 8 个服务的契约因 worktree 里 spec 快照陈旧会产生纯键序抖动，已**逐个还原**，避免误伤别的车道）。**测试** `AiEffectEvaluationIntegrationTest`（22 例）+ `AiEffectEvaluationTenancyIntegrationTest`（9 例）= **31 例全过**（真 Testcontainers PostgreSQL 16，FORCE RLS，连接池压到 1 条）；前端 `ai-effect-model.test.ts`（30 例）+ `ai-effect-allowlist.test.ts`（4 例）= **34 例全过**；全量 allowlist 回归 **288 文件 / 1620 例全过**（未误伤兄弟车道）。多租户三条断言齐全：两租户互不可见（列表 + 按主键直查 + 事务外零行）/ 伪造 tenant header 无效（行仍写入但落在**会话租户**名下，且主体成员也来自会话）/ 连接池固定 1 条交替 5 轮不串租户。**后续待办**：① 上游 18.4 的其它 AI 能力（对话助手 / 智能查询 / 异常诊断）尚未交付 ⇒ 用量台账里**还没有真实调用记录** ⇒ **采纳率的分母目前是 0、比率恒为 null**（如实显示「—」，不谎称 0%）；② **助手答案这一维无法评估**（上游 18.4.1.1 已熔断未交付），只有反馈登记载体；③ 「建议下线」**没有执行路径** —— 真正下线需人工执行（待 18.4.3.1 补按能力粒度的功能开关）。 |
 | 18.5.1.1 | 模板管理 | — | D7 | 已交付 | **迁移 platform V427__notification_template.sql（三张表，都归本车道）**：① `platform_notify_template`（模板主记录：tenant_id NOT NULL + template_key（租户内小写机器名，CHECK `^[a-z0-9][a-z0-9._-]{0,63}$`）+ **适用场景 scene（受控词表 CHECK：ORDER_STATUS / STOCK / PRICE / LOGISTICS / CUSTOMER_SERVICE / MARKETING / SYSTEM）** + **language（IANA 形状 CHECK `^[a-z]{2,3}(-[A-Za-z0-9]{2,8})*$`，同一 key × 场景 × 语言 = 一条主记录 ⇒ 不同语言各有独立版本链）** + name / description / archived_at（**归档 = 软删除**：不物理删）+ UNIQUE(tenant_id, template_key, scene, language)）；② `platform_notify_template_version`（**不可变版本行**：version_no + subject + body + variables(jsonb 变量定义) + change_note + created_by + created_at，UNIQUE(tenant_id, template_id, version_no)，FK ON DELETE RESTRICT ⇒ 删主记录前必须先处理版本行）；③ `platform_notify_template_activation`（**启用事件日志**：template_id + version_id + activated_at + deactivated_at，**部分唯一索引 `platform_notify_template_activation_one_open`（WHERE deactivated_at IS NULL）⇒ 同一模板同时只允许一个启用版本，这是数据库层写不进去的，不是服务层记得检查**）。三表 tenant_id NOT NULL + ENABLE **与 FORCE** RLS isolation + **租户触发器兜底**（platform_notify_template_tenant_guard 等三道，直连 SQL 也写不出跨租户的行）+ GRANT platform_app + 索引；🔴 **版本行只给 SELECT / INSERT，不给 UPDATE / DELETE** ⇒ 版本不可篡改由**权限层**兜底，再加 **BEFORE UPDATE OR DELETE 触发器**（platform_notify_template_version_immutable，报错写明「编辑请新增一个版本」）双保险；启用日志的**指向不可改**（platform_notify_template_activation_immutable：只允许填 deactivated_at）。**权限码**：identity V427__platform_template_permission.sql 登记 page_resource `platform.template`（模板管理）+ 4 个码 platform.template.read / create / update / delete（**delete 是「停用 + 归档」，不是物理删**，但仍独立成码）+ 存量 OWNER 补权（LIKE 'platform.template.%'，幂等）；沿用 **platform + identity 同号**惯例（照抄 18.4.2.1 的 V380/V380 同构）。**后端**（platform 服务，jOOQ 显式 SQL，**租户与操作人只从已认证会话解析**，X-Tenant-Id 头从头到尾没出现过，请求体**不接受** tenantId/userId/membershipId ⇒ Jackson fail-on-unknown-properties 直接 400 拒掉）：NotificationTemplate{Models,Renderer,Service,Controller} + CatalogContentAssetPort（3.4.2 文案资产只读端口）。**端点 12 个形状挂 `/platform/ai/templates`**：GET `/capabilities`（场景词表 / 语言写法 / 变量约定 / 渲染报错口径 + 边界，逐条写明归谁）· GET `/overview` · GET `/`（**真分页 + 真筛选**：关键词 / 场景 / 语言 / 启用状态 / 归档状态 ACTIVE·ARCHIVED·ALL）· POST `/`（新建，**同时落下第 1 版**，不自动启用）· GET `/{uuid}`（详情：主记录 + 版本列表 + 当前生效版本）· POST `/{uuid}/metadata`（只改名称与说明，**内容改不了**）· DELETE `/{uuid}`（**归档 = 停用 + 归档，不物理删**）· GET `/{uuid}/versions` · GET `/{uuid}/versions/{uuid}` · POST `/{uuid}/versions`（**编辑 = 新增版本**，模板当前有生效版本时新版本接管）· POST `/{uuid}/versions/{uuid}/enable` · POST `/{uuid}/versions/{uuid}/disable`（只收口生效区间，**版本行不动**）· POST `/render-preview`（**不落库**）· GET `/resolve?templateKey&scene&language&at`（**按时刻解析当时生效的那一版**）· GET `/upstream/content-assets`（3.4.2 只读）。**🔴 版本模型**：编辑 = 追加一行 version_no+1，老版本一个字节都不动（GRANT + 触发器双保险）；「历史通知保留当时内容」由**启用事件日志**支撑 —— resolve 取的是「那一刻仍在有效期内」的版本并返回 **version id + 内容快照**（不是「当前版本」），下游 18.5.2.1 引用这个版本 id，后来改模板篡改不了已经发出的通知；同一 key × 场景 × 语言的启用版本唯一性由**部分唯一索引**在数据库层保证。**🔴 渲染引擎的报错语义**（NotificationTemplateRenderer，纯规则、不依赖任何外部系统）：**缺变量 MISSING_VARIABLE**（点名缺哪个变量）、**未知变量 UNKNOWN_VARIABLE**（正文里用了但没声明的变量，点名）、**多余变量 EXTRA_VARIABLE**（给了没声明的取值，点名）、**模板语法错误 SYNTAX_ERROR**（占位符没闭合 / 落单的 }} / 变量名非法）、**取值与类型不符 INVALID_VALUE**（NUMBER / DATE / CURRENCY 解析不了）、**变量定义有误 INVALID_DECLARATION**（重名 / 类型非法 / 必填又带默认值）；渲染失败时 renderedBody 一律为 **null**（**绝不**渲染成空串，**绝不**留下 `{{xxx}}` 残渣）；登记模板时正文里的未声明变量当场 400 拒收（不留一行在库里）。**上游 3.4.2 文案资产**：CatalogContentAssetPort 走 catalog 服务 8082 的 `/catalog/titles/templates`（标题库）与 `/catalog/description-templates/templates`（描述与卖点库），**只转发调用方自己的 bearer**（不传租户号，上游仍按已认证成员关系解析并强制 RLS），**取不到一律 503**（消息写明「是读不到，不是没有数据」），**本服务不抄一份**。**🔴 与 18.4.2.1 的区别（不重复造同一个东西）**：18.4.2.1 的 `platform_text_template` 是「**客服回复草稿**」（AI 翻译链路的产物：术语保护 / 违禁词检查 / 置信度 / 人工确认后发布，变量是**封闭词表**）；本模块是「**通知与消息模板**」（按场景 × 语言组织、**版本化**、可按时刻解析出当时生效的一版）。对象、生命周期与下游都不同 ⇒ **各建各的表，一个字也不去 ALTER 对方的表**；契约命名空间也分开（本模块全部 `NotifyTemplate*` 前缀，catalog 的 `Template*` 是价格模板的词汇，扁平契约里同名会被 codegen 判「字段级覆盖」并中止）。**页面 `/ai/templates`**（apps/web/src/app/ai/templates/page.tsx + components/ai/notification-template-{model,workspace}.tsx，**真实工作区**：能力与边界（逐条写明已接通 / 未接通与归谁）+ 概览 + 模板清单（真分页真筛选）+ 模板详情与**版本历史（带生效区间）** + **新增版本 = 编辑**（页面**没有**「覆盖保存」这条路）+ 变量定义编辑器（当场提示「正文里用了还没声明的变量」）+ **渲染预览**（按变量逐条填值，失败时**逐条显示**缺哪个变量 / 未声明变量 / 多余取值 / 语法错误，**不是**一段空白）+ **按时刻解析**（翻到那一刻生效的那一版）+ 上游文案资产（读不到就显示「读不到」）+ **加载·空·错误三态齐全**（空态区分「筛选无结果」与「还没建过模板」）；**禁 mock**）。**api-proxy 新增一条独立 services[] 元素**（prefix `platform/`、首 token `ai/templates`、既有条目**一字未改、也不重排**：diff **+61 / −0 行**；插入锚点 = 文件**中段** data-governance 那条之后（约第 2610 行），与同批兄弟车道的开头/末尾锚点各相距 12000 行以上 ⇒ 并入时 git 能干净求并；id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`，字面量子路径（capabilities / overview / resolve / render-preview / upstream/content-assets）排在 {uuid} 段**之前**判别；**实测取证**：测试用 **TypeScript 编译器解析 api-proxy.ts 的真实数组字面量**（不是文本计数），按 resolve() 的同构口径逐条判定 —— 本模块 12 条形状**恰好各被放行一条**、刻意不放行的 6 条形状仍 404、**已经交付的兄弟路由**（text / webhooks / deliveries / automation-rules / automation-rule-editor / external-integrations / catalog / identity / channel / finance）**未被遮蔽**、同批其它车道的形状（ai/forecast、ai/usage、automation/runs）**不被本条吃掉**）。**契约**：packages/api-contracts/src/contracts/platform.ts 由 codegen 重新生成（**新增 24 个 `NotifyTemplate*` 类型**，可空字段用 `@Schema(nullable = true)` 标注 ⇒ 生成的 TS 类型里可空字段为 `null` 联合；codegen 产物**未手改**）。**测试**：后端 **40 例全绿**（NotificationTemplateRendererTest 12 + NotificationTemplateIntegrationTest 22 + NotificationTemplateTenancyIntegrationTest 6，实跑 Testcontainers PostgreSQL 16、连接池压到 1；三条隔离断言跑在**本模块自己的三张表**上：两租户互不可见（含**按主键直查对方行读到零行**）/ 伪造 X-Tenant-Id 无效（且断言行落在**会话租户**名下）/ 连接池归还后不串租户（5 轮交替）；另有断言：改版后**按旧时刻解析仍是旧内容**（旧版本 id + 旧正文）、版本行直连 SQL **改不动**（权限层 permission denied）、第二个「生效中」版本**数据库层写不进去**、**时间写回值按 instant 断言**（不偏 8 小时）、渲染四类错误各自点名、渲染预览**不落库**、场景枚举与 DB CHECK **逐字同表**；前端 **16 例全绿**（notification-template-model.test.ts 12 + notification-template-allowlist.test.ts 4）+ **全量 allowlist 回归 `pnpm vitest run apps/web/src/app/api` 284 文件 / 1600 例全绿**（本车道改了共享白名单 api-proxy.ts，必须跑全量）。**验证**：L0 `./mvnw -q compile` EXIT=0；L1 `Tests run: 40, Failures: 0, Errors: 0` BUILD SUCCESS；`pnpm typecheck` 3/3 successful；`pnpm lint` 3/3 successful（本车道新增文件零告警）；prettier 自检只查本车道改动文件全绿。**下游缺口如实标注**：18.5.2.1 投递记录（**未交付**）—— 本模块**不造投递结果表**，只保证「按时刻取到当时那一版 + 版本 id 可引用」；1.3.1.1 通知列表（identity）与 15.1.1.2 发送（crm）**跨服务**：本模块**不跨库读写对方表**，下游按 key + 场景 + 语言来取内容。⚠️ **导航注册缺口**：packages/ui/src/lib/task-pages.ts **刻意未登记**（多条车道并发改同一文件必然冲突）⇒ 待调度者统一处理。 |
 | 18.5.2.1 | 投递记录 | — | D7 | 已交付 | **迁移 platform V439__platform_notify_delivery.sql（四张表，都归本车道）**：① `platform_notify_delivery_record`（通知投递事实表：template_id **真 FK** → 18.5.1.1 的 `platform_notify_template`（ON DELETE RESTRICT —— 历史通知的模板依据不能随模板一起消失）+ template_version_id / template_key **快照** + scope_type(SINGLE/SEGMENT/SUBSCRIBERS) + channel(EMAIL/SMS/PUSH/IN_APP/WEBHOOK) + status（**五个码** PENDING/DELIVERED/PARTIAL/FAILED/**BLOCKED**（全部命中退订 ⇒ 一次都没发出去））+ recipient_count / blocked_count / targeted_count / delivered_count / failed_count / attempt_count **全部 NUMERIC(19,6)（禁浮点）** + delivery_rate **NUMERIC(7,4)（比率也不是浮点）** + failure_reason + next_retry_at / first_attempt_at / last_attempt_at / delivered_at **timestamptz** + **CHECK(blocked_count + targeted_count = recipient_count)**（收件人 = 被拦下的 + 实际投的 ⇒ 触达率的分母不会算错）② `platform_notify_delivery_record_attempt`（投递日志：attempt_no 在本次投递内**全局递增** + recipient_ref + status_code（**0 = 没拿到响应**）+ outcome（**三态 DELIVERED/FAILED/PENDING**，不是布尔 —— 「已受理未出结果」与「尝试过但失败」在 success 位上都是 false，混成一个数后触达率不可信）+ attempt_source(INITIAL/RETRY/MANUAL) + duration_ms bigint + **CHECK(outcome 与 status_code 不自相矛盾**，不许记下「已送达 + 500」这种编造出来的事实）③ `platform_notify_unsubscribe`（退订登记：recipient_ref + channel（含 'ALL'）+ scope_type(TEMPLATE/SCENE/GLOBAL) + scope_key + reason + source(USER_REQUEST/COMPLAINT/ADMIN) + unsubscribed_at + revoked_at；🔴 **「先查后登记」的兜底是*部分*唯一索引** `platform_notify_unsubscribe_one_active ON (tenant_id, recipient_ref, channel, scope_type, scope_key) WHERE revoked_at IS NULL` —— 表级 UNIQUE 会让「撤销后再退订」只能改回老行、抹掉那段「曾订阅」的区间，部分索引让重新退订落成**新行**、历史区间原样留着）④ `platform_notify_unsubscribe_block`（**拦截留痕**：delivery_id + unsubscribe_id + recipient_ref + 命中的退订范围（抄一份下来，退订后来被撤销也不改这一行的历史）+ blocked_at；UNIQUE(tenant_id, delivery_id, recipient_ref) ⇒ 同一收件人在同一次投递里最多记一次拦截，重试不重复计）。**🔴 命名纪律（本模块最容易踩的坑）**：集成头里已有 18.1.2.2 的 `platform_delivery_record` / `_attempt` / `_dead_letter` / `_replay_task`（V413，**webhook 投递**事实表）⇒ 本模块是**通知**投递，必须走 `platform_notify_*` 命名空间：**只建 platform_notify_* 表，18.1.2.2 的表一个字不改、不抢它的路由**（api-proxy 首 token `notifications` 与 `deliveries` 天然互斥，白名单守卫反验两者同时放行）。**四张表 tenant_id NOT NULL + UNIQUE(tenant_id, id) + ENABLE **与 FORCE** RLS isolation**（FORCE 是必须的：owner 身份一连就会绕过隔离）+ **DB 触发器兜底**（`platform_notify_delivery_tenant_guard`：缺 app.current_tenant ⇒ 28000，tenant_id 与上下文不符 ⇒ 42501）+ GRANT platform_app（**一律不给 DELETE** —— 投递明细与退订登记是「这件事发生过」的证据，删掉它就等于让「投没投出去」「谁退订过」变成一个答不出来的问题；撤销退订用 revoked_at 软撤销）。**权限码 identity V439__platform_notify_delivery_permission.sql**：`platform.notify_delivery.read / .create / .retry / .unsubscribe` 四个码 + page_resource `platform.notify_delivery` + 存量 OWNER 补权（幂等三段式）；🔴 **不碰 platform.template.***（18.5.1.1，V427）与 **platform.delivery.***（18.1.2.2）—— 前缀必须带 notify，否则审计时会与 webhook 投递混成一件事；「登记退订」与「发起重试」独立成码：前者错了就是「本该被拦下的收件人被反复触达」（投诉与合规风险），后者会**真的再发一次通知**。**端点 10 个挂 `/platform/notifications`**（platform 服务，jOOQ 显式 SQL，**租户与操作人只从已认证会话解析**，X-Tenant-Id 头从头到尾没出现过，请求体**不接受** tenantId/userId/membershipId ⇒ Jackson 全局 fail-on-unknown-properties 直接 400）：GET `/capabilities`（**投递执行器如实答「未交付」** —— 真正发消息的是下游 1.3.2.2 与 15.5.2，本模块只登记结果）· GET `/deliveries`（真筛选 + 真关键词 + **全序**排序 created_at DESC, id DESC）· GET `/deliveries/statistics`（**触达率 / 退订率 / 拦截数**）· GET `/deliveries/{id}`（记录 + 逐次尝试 + 拦截留痕）· POST `/deliveries`（**唯一**的投递写入口）· POST `/deliveries/{id}/retry` · GET `/unsubscribes` · POST `/unsubscribes`（**先查后登记**）· GET `/unsubscribes/blocks` · POST `/unsubscribes/{id}/revoke`（软撤销）。**🔴 蓝图加粗句「退订必须被尊重并生效」的四个落点**：① **先查后登记** —— 登记投递时逐个收件人先查退订表，命中退订的收件人**不进投递尝试**（没发出去的东西不能出现在投递日志里），改写一行拦截留痕；② **不许静默丢弃** —— blocked_count 落在投递记录上并进租户级统计 ⇒「因为退订少发了几百条」是**看得见**的数字，不是「反正没人知道」；③ **重试也要重查退订** —— 第一次投递之后才退订的收件人，重试必须被拦下，否则「退订必须被尊重并生效」就只在第一次成立（重试全部被拦下时**如实返回** 200 + 状态变 BLOCKED + 拦截数上涨，**不抛 409** —— 抛错会让事务回滚，刚写下的拦截留痕一起没了，而那行留痕正是「为什么这个收件人没收到」的证据）；④ **触达率的分母不含被退订拦下的人**（分母 = 实际投递人数，分子 = 触达成功人数，分母为 0 记 0，不记 1、不记 null）。**结果三态**：DELIVERED / FAILED / PENDING 分开记，「已受理未出结果」不算失败。**模板版本是快照**：template_version_id 与 template_key 都记下来，没指定版本时按 18.5.1.1 的 activation 表解析**当前生效的那一版**，模板后来改版也不影响历史投递记录的事实。**🔴 迁移实测**：V427 + V439 在真实 PostgreSQL 16 上两次全量 apply 均 exit 0，并实跑校验「UNIQUE 兜底 / CHECK 兜底 / RLS 隔离（t1 见 1 行、t2 见 0 行）」。**测试 27 例实跑全绿**（Testcontainers 真实 PostgreSQL 16 + FORCE RLS，无内存替身）：功能 19 例（退订先查后登记 / 撤销后再登记落新行 / 撤销后不再拦截 / 退订命中拦截且不进尝试 / 拦截数进租户级统计 / 模板级与场景级退订各自命中 / 触达率分母口径 / 分母为零记零 / 结果三态 / 重试失败后重投成功 / 重试没点名时只重试失败与待出结果的 / **重试重查退订** / 模板版本快照 / 真分页真筛选 / 时间没被时区吃掉 / 请求体带 tenantId 直接 400 / 模板不存在 404 / 退订与拦截清单可查）+ 租户隔离 8 例（**AGENTS.md 明文的三条断言，跑在本模块自己的四张表与本模块的端点上**：① 两租户互不可见 —— 列表 + 按主键直查 + 端点返回 + 退订名单 + 拦截名单；② 伪造租户上下文无效 —— 无上下文写入被挡，**且伪造 X-Tenant-Id 头后行确实落在会话租户名下**（不是被全表拒掉）；③ 连接池归还后不串租户 —— 池固定为 1 条连接，A→B→A→B 交替 5 轮；另断言四张表真的 ENABLE **与 FORCE** RLS、tenant_id NOT NULL、platform_app **没有 DELETE** 权限）。**前端**：入口 `/notifications/deliveries`（`apps/web/src/app/notifications/deliveries/page.tsx`）+ 三件套 `apps/web/src/components/platform/notify-delivery-model.ts` / `-model.test.ts`（35 例）/ `-workspace.tsx`；页面把「投过 ≠ 送达」拆成五态、触达率旁边**必须**同时显示「实际投递 N 人 / 被退订拦截 M 人」、拦截留痕单独一档能回答「为什么这个收件人没收到」、重试结果如实显示（全被拦下时不显示成「重试成功」）、加载 / 空 / 错误三态齐全；api-proxy 白名单**外科式追加**一条独立 services[] 元素（既有条目一字未改、不重排），带 allowlist 守卫反验 18.1.2.2 `platform/deliveries` 与 18.5.1.1 `platform/ai/templates` 等已交付形状**一个都没被挤掉**。 |
-| 已交付 | 456 |
-| **未开发** | **9** |
-| 完成率 | 98.1% |
-| **D6** | 77 | 0 | 1 | 78 |
-| **D7** | 147 | 0 | 8 | 155 |
-| 05 | 定价与价目系统 | D6 | 18 | 19 |
-| 15 | 客户与客服系统 | D7 | 19 | 24 |
-| 已交付 | 453 |
-| **未开发** | **12** |
-| 完成率 | 97.4% |
-| **D6** | 75 | 0 | 3 | 78 |
-| **D7** | 146 | 0 | 9 | 155 |
-| 05 | 定价与价目系统 | D6 | 16 | 19 |
-| 15 | 客户与客服系统 | D7 | 18 | 24 |
-| 已交付 | 451 |
-| **未开发** | **14** |
-| 完成率 | 97.0% |
-| **D7** | 144 | 0 | 11 | 155 |
-| 18 | 集成开放与智能自动化系统 | D7 | 19 | 24 |
-| 已交付 | 446 |
-| **未开发** | **19** |
-| 完成率 | 95.9% |
-| **D7** | 139 | 0 | 16 | 155 |
-| 18 | 集成开放与智能自动化系统 | D7 | 14 | 24 |
-| 已交付 | 450 |
-| **未开发** | **15** |
-| 完成率 | 96.8% |
-| **D7** | 143 | 0 | 12 | 155 |
-| 18 | 集成开放与智能自动化系统 | D7 | 18 | 24 |
