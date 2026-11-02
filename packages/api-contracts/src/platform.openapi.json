@@ -4595,6 +4595,352 @@
         },
         "type": "object"
       },
+      "AssistantAnswer": {
+        "properties": {
+          "answer": {
+            "type": "string"
+          },
+          "answered": {
+            "type": "boolean"
+          },
+          "caliber": {
+            "type": "string"
+          },
+          "evidence": {
+            "items": {
+              "$ref": "#/components/schemas/AssistantEvidence"
+            },
+            "type": "array"
+          },
+          "intentCode": {
+            "type": "string"
+          },
+          "intentName": {
+            "type": "string"
+          },
+          "matchMode": {
+            "type": "string"
+          },
+          "nextActions": {
+            "items": {
+              "$ref": "#/components/schemas/AssistantNextAction"
+            },
+            "type": "array"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "periodCode": {
+            "type": "string"
+          },
+          "periodFrom": {
+            "format": "date",
+            "type": "string"
+          },
+          "periodTo": {
+            "format": "date",
+            "type": "string"
+          },
+          "question": {
+            "type": "string"
+          },
+          "scopeType": {
+            "type": "string"
+          },
+          "sessionId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "shopCode": {
+            "type": "string"
+          },
+          "sourceEndpoint": {
+            "type": "string"
+          },
+          "sourceService": {
+            "type": "string"
+          },
+          "turnId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "turnNo": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "unavailableReason": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AssistantAskInput": {
+        "properties": {
+          "intentCode": {
+            "description": "显式指定受控意图码（可选；不传则按关键词确定性匹配）",
+            "type": "string"
+          },
+          "question": {
+            "description": "中文问句（受控问题形态；自由问句会如实答「AI 通道未接通」）",
+            "type": "string"
+          },
+          "sessionId": {
+            "description": "会话 id；不传则新开一个会话（追问时传上一轮的会话 id）",
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AssistantCapabilities": {
+        "properties": {
+          "capabilities": {
+            "items": {
+              "$ref": "#/components/schemas/AssistantCapability"
+            },
+            "type": "array"
+          },
+          "gaps": {
+            "items": {
+              "$ref": "#/components/schemas/AssistantGap"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "AssistantCapability": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "evidence": {
+            "type": "string"
+          },
+          "moduleId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AssistantEvidence": {
+        "properties": {
+          "caliberNote": {
+            "type": "string"
+          },
+          "detailLabel": {
+            "type": "string"
+          },
+          "detailRoute": {
+            "type": "string"
+          },
+          "factField": {
+            "type": "string"
+          },
+          "factLabel": {
+            "type": "string"
+          },
+          "factRef": {
+            "type": "string"
+          },
+          "factService": {
+            "type": "string"
+          },
+          "factTable": {
+            "type": "string"
+          },
+          "metricCode": {
+            "type": "string"
+          },
+          "metricUnit": {
+            "type": "string"
+          },
+          "metricValue": {
+            "nullable": true,
+            "type": "string"
+          },
+          "snapshotAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AssistantGap": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "moduleId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "relation": {
+            "type": "string"
+          },
+          "service": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AssistantIntentView": {
+        "properties": {
+          "detailRoute": {
+            "type": "string"
+          },
+          "intentCode": {
+            "type": "string"
+          },
+          "intentName": {
+            "type": "string"
+          },
+          "nextActions": {
+            "items": {
+              "$ref": "#/components/schemas/AssistantNextAction"
+            },
+            "type": "array"
+          },
+          "questionExamples": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "sourceCaliber": {
+            "type": "string"
+          },
+          "sourceEndpoint": {
+            "type": "string"
+          },
+          "sourceService": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AssistantNextAction": {
+        "properties": {
+          "label": {
+            "type": "string"
+          },
+          "moduleId": {
+            "type": "string"
+          },
+          "route": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AssistantSessionView": {
+        "properties": {
+          "intentCode": {
+            "type": "string"
+          },
+          "intentName": {
+            "type": "string"
+          },
+          "periodCode": {
+            "type": "string"
+          },
+          "periodFrom": {
+            "format": "date",
+            "type": "string"
+          },
+          "periodTo": {
+            "format": "date",
+            "type": "string"
+          },
+          "scopeType": {
+            "type": "string"
+          },
+          "sessionId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "shopCode": {
+            "type": "string"
+          },
+          "turnCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "turns": {
+            "items": {
+              "$ref": "#/components/schemas/AssistantTurnView"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "AssistantTurnView": {
+        "properties": {
+          "answer": {
+            "type": "string"
+          },
+          "answered": {
+            "type": "boolean"
+          },
+          "caliber": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "evidence": {
+            "items": {
+              "$ref": "#/components/schemas/AssistantEvidence"
+            },
+            "type": "array"
+          },
+          "intentCode": {
+            "type": "string"
+          },
+          "intentName": {
+            "type": "string"
+          },
+          "matchMode": {
+            "type": "string"
+          },
+          "periodFrom": {
+            "format": "date",
+            "type": "string"
+          },
+          "periodTo": {
+            "format": "date",
+            "type": "string"
+          },
+          "question": {
+            "type": "string"
+          },
+          "turnId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "turnNo": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
       "AutoApprovalCapabilities": {
         "properties": {
           "checks": {
@@ -20393,6 +20739,152 @@
         },
         "tags": [
           "app-credential-controller"
+        ]
+      }
+    },
+    "/platform/assistant/ask": {
+      "post": {
+        "operationId": "post_platform_assistant_ask",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssistantAskInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssistantAnswer"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "assistant-controller"
+        ]
+      }
+    },
+    "/platform/assistant/capabilities": {
+      "get": {
+        "operationId": "get_platform_assistant_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssistantCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "assistant-controller"
+        ]
+      }
+    },
+    "/platform/assistant/intents": {
+      "get": {
+        "operationId": "get_platform_assistant_intents",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AssistantIntentView"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "assistant-controller"
+        ]
+      }
+    },
+    "/platform/assistant/sessions/{sessionId}": {
+      "get": {
+        "operationId": "get_platform_assistant_sessions_sessionId",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "sessionId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssistantSessionView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "assistant-controller"
         ]
       }
     },
