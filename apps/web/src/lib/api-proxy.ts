@@ -6834,6 +6834,68 @@ const services: readonly {
       /^customer\-merge(?:\/capabilities|\/scan|\/runs|\/operations|\/candidates(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:confirm|reject))?)?|\/logical(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/split)?)?)$/,
   },
   {
+    // 15.6.1.1 会员与等级（crm 服务，卷 15「客户与客服」L3 锚点 15.6.1「会员体系」下的会员与等级子域）。
+    //
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有的 `prefix: 'crm/'` 分支里并分支 ——
+    //   既有条目**一字未改、也不重排**。
+    //
+    // ---- 插入锚点：紧跟 15.3.1.3 `customer-merge` 那条元素之后 ----
+    //   本文件是并行车道共同的累积型文件：同批另外三条车道的锚点分别是
+    //   「15.6.2.1 生命周期（2588 行附近）」「15.3.1.2 客户详情（10466 行附近）」
+    //   与「数组末尾」。本车道落在这里，与那三个锚点**都相距 3500 行以上** ⇒ 并入时 git 能干净求并。
+    //
+    // ---- 首 token「customer-membership」的零命中核对结论（**实测**，非目测）----
+    //   本文件里 `prefix: 'crm/'` 的既有条目首 token 分别是 buyer-emails / email-rules /
+    //   knowledge / message-inbox / message-sends / message-classifications / review-requests /
+    //   reviews / review-replies / negative-reviews / review-rules / customer-tags /
+    //   customer-contacts / care-reminders / auto-replies / service-tickets / cart-recovery /
+    //   service-ticket-process / customers / customer-detail / customer-merge /
+    //   customer-lifecycle —— **没有一条**是 `customer-membership`。
+    //   ⚠️ 特别核对四个容易混的（都只差「customer-」后面的一个字符）：
+    //   * `customer-lifecycle`（15.6.2.1）：第 10 个字符是 `l`；
+    //   * `customer-detail`（15.3.1.2）：第 10 个字符是 `d`；
+    //   * `customer-merge`（15.3.1.3）：第 10 个字符是 `m`；
+    //   * `customer-tags`（15.3.2.1）：第 10 个字符是 `t`；
+    //   而本模块是 `customer-membership`：第 10 个字符是 `m` —— 与 `customer-merge` 的 `m`
+    //   相同，但**第 11 个字符**不同（`e` vs `r`）⇒ 两条互斥，谁也不会吃掉谁。
+    //   （实测：本文件全部 284 条 services 正则对 `customer-membership/capabilities` **零命中**。）
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   customer-membership/capabilities        能力声明（哪几维有 / 哪几维未交付 + 判据口径）
+    //   customer-membership/members             会员档案列表（GET 真分页 + 等级 / 店铺 / 关键词筛选）
+    //   customer-membership/members/{uuid}      单个会员详情（会员档案 + 该会员的等级变更记录）
+    //   customer-membership/levels              等级规则列表（GET 真分页）/ 新建等级规则（POST）
+    //   customer-membership/levels/{uuid}       单条等级规则（GET）/ 改启用状态与备注（PUT）
+    //   customer-membership/benefits            权益生效配置（**只输出**给 5 定价 / 14 促销）
+    //   customer-membership/level-changes       等级变更记录（GET 真分页 + 类型 / 会员 / 关键词筛选）
+    //   customer-membership/compute             从上游真实订单事实重算会员等级（POST）
+    //   customer-membership/runs                重算运行记录（GET 真分页：扫了多少 / 变了多少级）
+    //
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   customer-membership/members/{uuid}/level        —— 🔴 **没有「手工挂等级」的写路径**：
+    //     蓝图加粗句「会员等级必须由真实消费数据驱动，手工挂等级会导致权益成本失控」。
+    //     后端**没有**任何接受等级代码的端点，DB 层触发器也拒绝 level_origin='MANUAL_OVERRIDE'。
+    //   customer-membership/members/{uuid}/set-level   —— 同上（另一个常见叫法，仍然不存在）。
+    //   customer-membership/members/{uuid}/override    —— 同上（人工覆盖通道本轮未交付）。
+    //   customer-membership/points                   —— 积分与权益核销归 **15.6.1.2**（未交付）。
+    //   customer-membership/platform-sync            —— 平台会员体系对接**未交付**（channel 侧没有这个接口）。
+    //   customer-membership/export                   —— 没有导出端点。
+    //   customer-membership（裸路径）                 —— 后端第一个子路径就是 capabilities，
+    //     没有裸路径端点 ⇒ 放行它只会让代理转发到一个必然 404 的地址。
+    //   customer-membership/level-changes/{uuid}      —— 等级变更记录**按会员**读，不按单条记录寻址。
+    //   customer-membership/members/not-a-uuid        —— 非 UUID 段不应被 uuid 分支吃掉。
+    //
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //   （不是 `[0-9a-f-]+`）：后者会把 `level` / `set-level` 这种非 UUID 形状也当成 id 放行 ——
+    //   那等于**间接放行了手工挂等级**。
+    // ⚠️ 末尾**刻意不带 `?`**：带了就等于放行裸路径 `customer-membership`。
+    prefix: 'crm/',
+    env: 'CRM_URL',
+    fallback: 'http://127.0.0.1:8086',
+    pattern:
+      /^customer\-membership(?:\/capabilities|\/members(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|\/levels(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|\/benefits|\/level\-changes|\/compute|\/runs)$/,
+  },
+  {
     // 4.4.1.3 采集箱（channel 服务）。本条目是**新增一条 services[] 元素**，
     // 不是往既有 channel 分支的超长 alternation 里并分支 —— 那一支是单行超长正则，
     // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。

@@ -9377,6 +9377,784 @@
         },
         "type": "object"
       },
+      "CrmMembershipAmount": {
+        "properties": {
+          "currency": {
+            "type": "string"
+          },
+          "orderCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "totalSpend": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmMembershipBenefitConfig": {
+        "properties": {
+          "downstreamConsumers": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "generatedAt": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/CrmMembershipBenefitConfigRow"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "CrmMembershipBenefitConfigRow": {
+        "properties": {
+          "appliesTo": {
+            "type": "string"
+          },
+          "benefitSummary": {
+            "type": "string"
+          },
+          "discountRate": {
+            "nullable": true,
+            "type": "string"
+          },
+          "downstreamConsumers": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "effectiveFrom": {
+            "type": "string"
+          },
+          "effectiveNow": {
+            "type": "boolean"
+          },
+          "effectiveTo": {
+            "nullable": true,
+            "type": "string"
+          },
+          "freeShipping": {
+            "type": "boolean"
+          },
+          "levelCode": {
+            "type": "string"
+          },
+          "levelName": {
+            "type": "string"
+          },
+          "levelRank": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "priorityShipping": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "CrmMembershipCapabilities": {
+        "properties": {
+          "boundaryNote": {
+            "type": "string"
+          },
+          "changeKinds": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "dimensions": {
+            "items": {
+              "$ref": "#/components/schemas/CrmMembershipCapabilityDimension"
+            },
+            "type": "array"
+          },
+          "highlight": {
+            "type": "string"
+          },
+          "levelOrigins": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "levelRulePolicy": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmMembershipCapabilityDimension": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "description": {
+            "type": "string"
+          },
+          "dimension": {
+            "type": "string"
+          },
+          "impact": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmMembershipComputeInput": {
+        "properties": {
+          "windowFrom": {
+            "nullable": true,
+            "type": "string"
+          },
+          "windowTo": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmMembershipComputeResult": {
+        "properties": {
+          "currencySkippedCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "failureReason": {
+            "type": "string"
+          },
+          "finishedAt": {
+            "nullable": true,
+            "type": "string"
+          },
+          "levelChangedCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "memberCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "ruleCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "runId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "runNo": {
+            "type": "string"
+          },
+          "startedAt": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "truncated": {
+            "type": "boolean"
+          },
+          "unmatchedCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "windowFrom": {
+            "nullable": true,
+            "type": "string"
+          },
+          "windowTo": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmMembershipLevelBucket": {
+        "properties": {
+          "levelCode": {
+            "type": "string"
+          },
+          "levelName": {
+            "type": "string"
+          },
+          "memberCount": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CrmMembershipLevelChangePage": {
+        "properties": {
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/CrmMembershipLevelChangeRow"
+            },
+            "type": "array"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalPages": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CrmMembershipLevelChangeRow": {
+        "properties": {
+          "basis": {
+            "additionalProperties": {
+              "type": "object"
+            },
+            "type": "object"
+          },
+          "changeKind": {
+            "type": "string"
+          },
+          "changeKindLabel": {
+            "type": "string"
+          },
+          "changedAt": {
+            "type": "string"
+          },
+          "customerName": {
+            "type": "string"
+          },
+          "customerRef": {
+            "type": "string"
+          },
+          "fromLevelCode": {
+            "type": "string"
+          },
+          "fromLevelRank": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "memberKey": {
+            "type": "string"
+          },
+          "operatorId": {
+            "nullable": true,
+            "type": "string"
+          },
+          "origin": {
+            "type": "string"
+          },
+          "originLabel": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "ruleId": {
+            "nullable": true,
+            "type": "string"
+          },
+          "sourceShop": {
+            "type": "string"
+          },
+          "toLevelCode": {
+            "type": "string"
+          },
+          "toLevelRank": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CrmMembershipLevelRuleInput": {
+        "properties": {
+          "discountRate": {
+            "exclusiveMaximum": false,
+            "exclusiveMinimum": false,
+            "maximum": 0.999999,
+            "minimum": 0,
+            "nullable": true,
+            "type": "number"
+          },
+          "effectiveFrom": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "effectiveTo": {
+            "nullable": true,
+            "type": "string"
+          },
+          "enabled": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "freeShipping": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "levelCode": {
+            "maxLength": 24,
+            "minLength": 0,
+            "type": "string"
+          },
+          "levelName": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "levelRank": {
+            "format": "int32",
+            "maximum": 9999,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "minOrderCount": {
+            "format": "int32",
+            "minimum": 0,
+            "nullable": true,
+            "type": "integer"
+          },
+          "minRepurchaseRate": {
+            "exclusiveMaximum": false,
+            "exclusiveMinimum": false,
+            "maximum": 1,
+            "minimum": 0,
+            "nullable": true,
+            "type": "number"
+          },
+          "minTotalSpend": {
+            "exclusiveMinimum": false,
+            "minimum": 0,
+            "nullable": true,
+            "type": "number"
+          },
+          "minTotalSpendCurrency": {
+            "nullable": true,
+            "pattern": "[A-Za-z]{3}",
+            "type": "string"
+          },
+          "note": {
+            "maxLength": 600,
+            "minLength": 0,
+            "nullable": true,
+            "type": "string"
+          },
+          "priorityShipping": {
+            "nullable": true,
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "effectiveFrom",
+          "levelCode",
+          "levelName",
+          "levelRank"
+        ],
+        "type": "object"
+      },
+      "CrmMembershipLevelRulePage": {
+        "properties": {
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/CrmMembershipLevelRuleRow"
+            },
+            "type": "array"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalPages": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CrmMembershipLevelRuleRow": {
+        "properties": {
+          "createdAt": {
+            "type": "string"
+          },
+          "discountRate": {
+            "nullable": true,
+            "type": "string"
+          },
+          "effectiveFrom": {
+            "type": "string"
+          },
+          "effectiveNow": {
+            "type": "boolean"
+          },
+          "effectiveTo": {
+            "nullable": true,
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "freeShipping": {
+            "type": "boolean"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "levelCode": {
+            "type": "string"
+          },
+          "levelName": {
+            "type": "string"
+          },
+          "levelRank": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "minOrderCount": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "minRepurchaseRate": {
+            "nullable": true,
+            "type": "string"
+          },
+          "minTotalSpend": {
+            "nullable": true,
+            "type": "string"
+          },
+          "minTotalSpendCurrency": {
+            "nullable": true,
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "priorityShipping": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "CrmMembershipMemberDetail": {
+        "properties": {
+          "levelChanges": {
+            "items": {
+              "$ref": "#/components/schemas/CrmMembershipLevelChangeRow"
+            },
+            "type": "array"
+          },
+          "member": {
+            "$ref": "#/components/schemas/CrmMembershipMemberRow"
+          }
+        },
+        "type": "object"
+      },
+      "CrmMembershipMemberPage": {
+        "properties": {
+          "dataScope": {
+            "type": "string"
+          },
+          "dataScopeNote": {
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/CrmMembershipMemberRow"
+            },
+            "type": "array"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "stats": {
+            "$ref": "#/components/schemas/CrmMembershipStats"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalPages": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CrmMembershipMemberRow": {
+        "properties": {
+          "amounts": {
+            "items": {
+              "$ref": "#/components/schemas/CrmMembershipAmount"
+            },
+            "type": "array"
+          },
+          "customerName": {
+            "type": "string"
+          },
+          "customerRef": {
+            "type": "string"
+          },
+          "firstOrderAt": {
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "lastOrderAt": {
+            "nullable": true,
+            "type": "string"
+          },
+          "levelCode": {
+            "type": "string"
+          },
+          "levelEvaluatedAt": {
+            "type": "string"
+          },
+          "levelOrigin": {
+            "type": "string"
+          },
+          "levelOriginLabel": {
+            "type": "string"
+          },
+          "levelRank": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "levelReason": {
+            "type": "string"
+          },
+          "levelRuleId": {
+            "nullable": true,
+            "type": "string"
+          },
+          "logicalRef": {
+            "nullable": true,
+            "type": "string"
+          },
+          "memberCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "memberKey": {
+            "type": "string"
+          },
+          "orderCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "registeredAt": {
+            "type": "string"
+          },
+          "repurchaseRate": {
+            "nullable": true,
+            "type": "string"
+          },
+          "sourceShop": {
+            "type": "string"
+          },
+          "sourceShops": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "spendCurrency": {
+            "nullable": true,
+            "type": "string"
+          },
+          "totalSpend": {
+            "nullable": true,
+            "type": "string"
+          },
+          "windowFrom": {
+            "nullable": true,
+            "type": "string"
+          },
+          "windowTo": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmMembershipRunPage": {
+        "properties": {
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/CrmMembershipRunRow"
+            },
+            "type": "array"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalPages": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CrmMembershipRunRow": {
+        "properties": {
+          "currencySkippedCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "facts": {
+            "additionalProperties": {
+              "type": "object"
+            },
+            "type": "object"
+          },
+          "failureReason": {
+            "type": "string"
+          },
+          "finishedAt": {
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "levelChangedCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "memberCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "operatorId": {
+            "nullable": true,
+            "type": "string"
+          },
+          "ruleCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "runNo": {
+            "type": "string"
+          },
+          "startedAt": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "truncated": {
+            "type": "boolean"
+          },
+          "unmatchedCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "windowFrom": {
+            "nullable": true,
+            "type": "string"
+          },
+          "windowTo": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmMembershipStats": {
+        "properties": {
+          "byLevel": {
+            "items": {
+              "$ref": "#/components/schemas/CrmMembershipLevelBucket"
+            },
+            "type": "array"
+          },
+          "downgradedMembers": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "spendByCurrency": {
+            "items": {
+              "$ref": "#/components/schemas/CrmMembershipAmount"
+            },
+            "type": "array"
+          },
+          "totalMembers": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "unmatchedMembers": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "upgradedMembers": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
       "CrmMessageAttachment": {
         "properties": {
           "contentType": {
@@ -23465,6 +24243,535 @@
         },
         "tags": [
           "customer-lifecycle-controller"
+        ]
+      }
+    },
+    "/crm/customer-membership/benefits": {
+      "get": {
+        "operationId": "get_crm_customer_membership_benefits",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmMembershipBenefitConfig"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "membership-controller"
+        ]
+      }
+    },
+    "/crm/customer-membership/capabilities": {
+      "get": {
+        "operationId": "get_crm_customer_membership_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmMembershipCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "membership-controller"
+        ]
+      }
+    },
+    "/crm/customer-membership/compute": {
+      "post": {
+        "operationId": "post_crm_customer_membership_compute",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmMembershipComputeInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmMembershipComputeResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "membership-controller"
+        ]
+      }
+    },
+    "/crm/customer-membership/level-changes": {
+      "get": {
+        "operationId": "get_crm_customer_membership_level_changes",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "memberKey",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "changeKind",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmMembershipLevelChangePage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "membership-controller"
+        ]
+      }
+    },
+    "/crm/customer-membership/levels": {
+      "get": {
+        "operationId": "get_crm_customer_membership_levels",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "levelCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmMembershipLevelRulePage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "membership-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_crm_customer_membership_levels",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmMembershipLevelRuleInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmMembershipLevelRuleRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "membership-controller"
+        ]
+      }
+    },
+    "/crm/customer-membership/levels/{ruleId}": {
+      "get": {
+        "operationId": "get_crm_customer_membership_levels_ruleId",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "ruleId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmMembershipLevelRuleRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "membership-controller"
+        ]
+      },
+      "put": {
+        "operationId": "put_crm_customer_membership_levels_ruleId",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "ruleId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmMembershipLevelRuleInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmMembershipLevelRuleRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "membership-controller"
+        ]
+      }
+    },
+    "/crm/customer-membership/members": {
+      "get": {
+        "operationId": "get_crm_customer_membership_members",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "levelCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sourceShop",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmMembershipMemberPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "membership-controller"
+        ]
+      }
+    },
+    "/crm/customer-membership/members/{memberId}": {
+      "get": {
+        "operationId": "get_crm_customer_membership_members_memberId",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "memberId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmMembershipMemberDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "membership-controller"
+        ]
+      }
+    },
+    "/crm/customer-membership/runs": {
+      "get": {
+        "operationId": "get_crm_customer_membership_runs",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmMembershipRunPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "membership-controller"
         ]
       }
     },
