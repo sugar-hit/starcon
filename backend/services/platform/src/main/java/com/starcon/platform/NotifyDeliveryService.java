@@ -335,11 +335,17 @@ public class NotifyDeliveryService {
   }
 
   private NotifyDeliveryRow deliveryRow(org.jooq.Record r) {
-    var recipientCount = r.get(8, BigDecimal.class);
-    var blockedCount = r.get(9, BigDecimal.class);
-    var targetedCount = r.get(10, BigDecimal.class);
-    var deliveredCount = r.get(11, BigDecimal.class);
-    var failedCount = r.get(12, BigDecimal.class);
+    // 🔴 列序与上面的 SELECT 严格一一对应（0 起）：
+    //   0 id / 1 template_id / 2 template_key / 3 scope_type / 4 scope_ref / 5 channel / 6 status
+    //   7 recipient_count / 8 blocked_count / 9 targeted_count / 10 delivered_count / 11 failed_count
+    //   12 attempt_count / 13 failure_reason / 14 delivery_rate
+    //   15 next_retry_at / 16 first_attempt_at / 17 last_attempt_at / 18 delivered_at
+    //   19 created_at / 20 updated_at
+    var recipientCount = r.get(7, BigDecimal.class);
+    var blockedCount = r.get(8, BigDecimal.class);
+    var targetedCount = r.get(9, BigDecimal.class);
+    var deliveredCount = r.get(10, BigDecimal.class);
+    var failedCount = r.get(11, BigDecimal.class);
     // 待出结果的人数 = 实际投递 − 已送达 − 失败（推导值，不另存一列）。
     var pendingCount = targetedCount.subtract(deliveredCount).subtract(failedCount);
     if (pendingCount.signum() < 0) pendingCount = BigDecimal.ZERO.setScale(6);
@@ -357,15 +363,15 @@ public class NotifyDeliveryService {
         deliveredCount,
         failedCount,
         pendingCount,
-        r.get(13, Integer.class),
-        r.get(14, String.class),
-        r.get(15, BigDecimal.class),
+        r.get(12, Integer.class),
+        r.get(13, String.class),
+        r.get(14, BigDecimal.class),
+        r.get(15, OffsetDateTime.class),
         r.get(16, OffsetDateTime.class),
         r.get(17, OffsetDateTime.class),
         r.get(18, OffsetDateTime.class),
         r.get(19, OffsetDateTime.class),
-        r.get(20, OffsetDateTime.class),
-        r.get(21, OffsetDateTime.class));
+        r.get(20, OffsetDateTime.class));
   }
 
   // ================================================================ 投递记录：写
@@ -534,16 +540,16 @@ public class NotifyDeliveryService {
     var failureReason = optional(input.failureReason(), 1000);
 
     var attemptNo = currentMaxAttemptNo(deliveryId);
-    var blocked = 0;
+    var inserted = 0;
     for (var ref : targets) {
       var hit = findUnsubscribe(ref, channel, templateKey, scene);
       if (hit != null) {
         // 🔴 重试也要尊重退订：这一次不投了，记拦截留痕。
         insertBlock(deliveryId, hit, ref, channel, now);
-        blocked++;
         continue;
       }
       attemptNo++;
+      inserted++;
       insertAttempt(
           deliveryId,
           attemptNo,
@@ -556,9 +562,14 @@ public class NotifyDeliveryService {
           failureReason,
           now);
     }
-    if (attemptNo == currentMaxAttemptNo(deliveryId)) {
-      // 一个都没投出去（全部被退订拦下）—— 不是错误，但要让调用方知道。
-      conflict("本次重试的收件人全部命中退订，已拦截，未发出任何通知");
+    if (inserted == 0) {
+      // 🔴 一个都没投出去（全部命中退订）**不抛错**：抛错会让事务回滚，
+      //   刚写下的拦截留痕一起没了 —— 而那行留痕正是「为什么这个收件人没收到」的证据。
+      //   改成**如实返回**：拦截数已经涨上去了，投递记录的状态会变成 BLOCKED，
+      //   调用方从 blocks 与 blockedCount 上看得出「这一次一个都没发出去」。
+      //   （这不是静默丢弃：拦截行 + 统计都落库了。）
+      recompute(deliveryId, null);
+      return deliveryDetail(deliveryId);
     }
 
     recompute(deliveryId, outcomeKnown ? null : input.nextRetryAt());
