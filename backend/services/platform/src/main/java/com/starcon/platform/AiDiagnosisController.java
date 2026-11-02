@@ -97,12 +97,31 @@ public class AiDiagnosisController {
     return call(auth, "create", actor -> diagnosis.submit(input, actor.userId()));
   }
 
-  /** 事件详情：事件 + 历史运行 + 最近一次运行的结论与依据。 */
+  /**
+   * 事件详情：事件 + 它的历史运行。
+   *
+   * <p>🔴 **结论与依据不在这里**：它们属于**某一次运行**，走
+   * {@code GET /platform/ai/diagnosis/runs/{id}}。拆开是因为「还没诊断过」
+   * 与「诊断了但没命中规则」是两件事 —— 内嵌一个可空对象会让契约说不清这件事。
+   */
   @GetMapping("/events/{id}")
   public AiDiagnosisEventDetail event(
       @RequestHeader(value = "Authorization", defaultValue = "") String auth,
       @PathVariable UUID id) {
     return call(auth, "read", actor -> diagnosis.eventDetail(id));
+  }
+
+  /**
+   * 运行详情：这一次运行的结论 + 每条结论的依据。
+   *
+   * <p>🔴 这是**依据**的唯一入口 —— 蓝图加粗句「诊断要给依据」的落点：
+   * 每条结论都带事实表 / 字段 / 数值 / 快照时间 / 下钻引用。
+   */
+  @GetMapping("/runs/{id}")
+  public AiDiagnosisRunDetail run(
+      @RequestHeader(value = "Authorization", defaultValue = "") String auth,
+      @PathVariable UUID id) {
+    return call(auth, "read", actor -> diagnosis.runDetail(id));
   }
 
   /**

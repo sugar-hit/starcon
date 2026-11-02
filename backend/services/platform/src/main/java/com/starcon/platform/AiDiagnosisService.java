@@ -900,7 +900,13 @@ public class AiDiagnosisService {
     return eventRow(id);
   }
 
-  /** 事件详情：事件 + 历史运行 + 最近一次运行的结论与依据。 */
+  /**
+   * 事件详情：事件 + 它的历史运行（**不含**最近一次运行的结论与依据）。
+   *
+   * <p>🔴 结论与依据走**运行详情**（{@code GET /platform/ai/diagnosis/runs/{id}}）：
+   * 「还没跑过诊断」与「跑了但没命中规则」是两件事，摊平成两个端点后，
+   * 前端用 {@code runs} 是否为空就能分清，不依赖一个可能为 null 的嵌套对象。
+   */
   public AiDiagnosisEventDetail eventDetail(UUID id) {
     var event = eventRow(id);
     var runs =
@@ -910,14 +916,7 @@ public class AiDiagnosisService {
                     + " from platform_diagnosis_run where event_id = ? order by started_at desc",
                 id)
             .map(AiDiagnosisService::toRunRow);
-    // 🔴 **还没跑过诊断的事件**：查询返回 null（不是「一行 id 为空的行」）——
-    //   直接 .get(...) 会在此 NPE，事件详情页整个打不开。
-    var latest =
-        sql.fetchOne(
-            "select id from platform_diagnosis_run where event_id = ? order by started_at desc limit 1",
-            id);
-    var latestId = latest == null ? null : latest.get("id", UUID.class);
-    return new AiDiagnosisEventDetail(event, runs, latestId == null ? null : runDetail(latestId));
+    return new AiDiagnosisEventDetail(event, runs);
   }
 
   private AiDiagnosisEventRow eventRow(UUID id) {

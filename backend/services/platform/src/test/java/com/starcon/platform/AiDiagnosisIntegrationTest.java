@@ -985,6 +985,78 @@ class AiDiagnosisIntegrationTest {
     assertThat(detail.event().note()).isEqualTo("已联系仓库补货");
   }
 
+  // ================================================================ 事件详情 / 运行详情
+
+  /**
+   * 事件详情给「事件 + 历史运行」，结论与依据走**运行详情**。
+   *
+   * <p>🔴 这条用例钉住两件事：
+   *
+   * <ol>
+   *   <li><b>还没诊断过的事件，事件详情照样 200</b>（运行列表为空）——
+   *       「没诊断过」不是「查不到」，更不该是 500（上一任 worker 的实现在这里 NPE）。</li>
+   *   <li><b>诊断过的运行能从运行详情端点取到结论与依据</b> ——
+   *       依据不是内嵌在事件详情里的可空对象（契约表达不了），
+   *       它有自己的一条路径，且必须真的带事实表 / 字段 / 快照时间。</li>
+   * </ol>
+   */
+  @Test
+  void 事件详情给运行列表且运行详情带结论与依据() throws Exception {
+    var eventId = submitEvent("INVENTORY", "SKU", SKU);
+
+    // ---- 还没诊断过：运行列表为空，但端点必须正常返回 ----
+    var before =
+        json.readValue(
+            http.perform(
+                    get("/platform/ai/diagnosis/events/{id}", eventId)
+                        .header("Authorization", "session-a"))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString(),
+            AiDiagnosisEventDetail.class);
+    assertThat(before.event().id()).isEqualTo(eventId);
+    assertThat(before.runs()).isEmpty();
+
+    // ---- 诊断过：运行列表有一行，运行详情带结论与依据 ----
+    var run = diagnose(eventId);
+    var after =
+        json.readValue(
+            http.perform(
+                    get("/platform/ai/diagnosis/events/{id}", eventId)
+                        .header("Authorization", "session-a"))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString(),
+            AiDiagnosisEventDetail.class);
+    assertThat(after.runs()).hasSize(1);
+    assertThat(after.runs().get(0).id()).isEqualTo(run.run().id());
+    assertThat(after.runs().get(0).conclusionCount()).isEqualTo(run.conclusions().size());
+
+    var runDetail =
+        json.readValue(
+            http.perform(
+                    get("/platform/ai/diagnosis/runs/{id}", run.run().id())
+                        .header("Authorization", "session-a"))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString(),
+            AiDiagnosisRunDetail.class);
+    assertThat(runDetail.conclusions()).isNotEmpty();
+    assertThat(runDetail.conclusions())
+        .allSatisfy(
+            c -> {
+              assertThat(c.evidences()).as("每条结论至少一条依据").isNotEmpty();
+              assertThat(c.evidences()).allSatisfy(e -> {
+                assertThat(e.factTable()).isNotBlank();
+                assertThat(e.factField()).isNotBlank();
+                assertThat(e.snapshotAt()).isNotNull();
+              });
+            });
+  }
+
   // ================================================================ 库层不变量
 
   @Test

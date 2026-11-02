@@ -150,7 +150,7 @@ public final class AiDiagnosisModels {
       String subjectType,
       String subjectRef,
       String subjectLabel,
-      OffsetDateTime occurredAt,
+      @Schema(nullable = true) OffsetDateTime occurredAt,
       @Schema(nullable = true) BigDecimal reportedValue,
       String reportedUnit,
       String severity,
@@ -236,9 +236,16 @@ public final class AiDiagnosisModels {
   /** 一次运行 + 它的全部结论与依据。 */
   public record AiDiagnosisRunDetail(AiDiagnosisRunRow run, List<AiDiagnosisConclusionDetail> conclusions) {}
 
-  /** 事件详情：事件 + 历史运行 + 最近一次运行的结论与依据。 */
-  public record AiDiagnosisEventDetail(
-      AiDiagnosisEventRow event, List<AiDiagnosisRunRow> runs, AiDiagnosisRunDetail latestRun) {}
+  /**
+   * 事件详情：事件 + 它的历史运行。
+   *
+   * <p>🔴 <b>这里刻意不内嵌「最近一次运行」</b>：还没跑过诊断的事件没有最近一次运行，
+   * 而契约（OpenAPI）对「可为 null 的嵌套对象」表达不了（springdoc 会把 {@code $ref}
+   * 上的 {@code nullable} 丢掉）⇒ 一旦内嵌，契约就会把「还没诊断过」谎报成「有运行」。
+   * 所以拆成两个端点：事件详情给事件与运行列表，<b>运行详情</b>（{@code GET /runs/{id}}）
+   * 给结论与依据。前端用 {@code runs} 是否为空判断「诊断过没有」，不需要猜。
+   */
+  public record AiDiagnosisEventDetail(AiDiagnosisEventRow event, List<AiDiagnosisRunRow> runs) {}
 
   // ================================================================ 内部失败源同步
 
