@@ -1,6 +1,593 @@
 {
   "components": {
     "schemas": {
+      "AiDiagnosisAnomalyCount": {
+        "properties": {
+          "anomalyType": {
+            "type": "string"
+          },
+          "anomalyTypeLabel": {
+            "type": "string"
+          },
+          "count": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AiDiagnosisCapabilities": {
+        "properties": {
+          "capabilities": {
+            "items": {
+              "$ref": "#/components/schemas/AiDiagnosisCapability"
+            },
+            "type": "array"
+          },
+          "gaps": {
+            "items": {
+              "$ref": "#/components/schemas/AiDiagnosisGap"
+            },
+            "type": "array"
+          },
+          "rules": {
+            "items": {
+              "$ref": "#/components/schemas/AiDiagnosisRule"
+            },
+            "type": "array"
+          },
+          "sources": {
+            "items": {
+              "$ref": "#/components/schemas/AiDiagnosisSource"
+            },
+            "type": "array"
+          },
+          "thresholds": {
+            "items": {
+              "$ref": "#/components/schemas/AiDiagnosisThreshold"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "AiDiagnosisCapability": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "evidence": {
+            "type": "string"
+          },
+          "moduleId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AiDiagnosisConclusionDetail": {
+        "properties": {
+          "conclusion": {
+            "$ref": "#/components/schemas/AiDiagnosisConclusionRow"
+          },
+          "evidences": {
+            "items": {
+              "$ref": "#/components/schemas/AiDiagnosisEvidenceRow"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "AiDiagnosisConclusionRow": {
+        "properties": {
+          "actionOwner": {
+            "type": "string"
+          },
+          "actionRef": {
+            "type": "string"
+          },
+          "anomalyType": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "eventId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "evidenceLevel": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "impact": {
+            "nullable": true,
+            "type": "number"
+          },
+          "impactText": {
+            "type": "string"
+          },
+          "impactUnit": {
+            "type": "string"
+          },
+          "recommendation": {
+            "type": "string"
+          },
+          "ruleCode": {
+            "type": "string"
+          },
+          "ruleLabel": {
+            "type": "string"
+          },
+          "runId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "severity": {
+            "type": "string"
+          },
+          "subjectRef": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AiDiagnosisEventDetail": {
+        "properties": {
+          "event": {
+            "$ref": "#/components/schemas/AiDiagnosisEventRow"
+          },
+          "runs": {
+            "items": {
+              "$ref": "#/components/schemas/AiDiagnosisRunRow"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "AiDiagnosisEventInput": {
+        "properties": {
+          "anomalyType": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "occurredAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "reportedUnit": {
+            "type": "string"
+          },
+          "reportedValue": {
+            "nullable": true,
+            "type": "number"
+          },
+          "severity": {
+            "type": "string"
+          },
+          "subjectLabel": {
+            "type": "string"
+          },
+          "subjectRef": {
+            "type": "string"
+          },
+          "subjectType": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AiDiagnosisEventPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AiDiagnosisEventRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalPages": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AiDiagnosisEventRow": {
+        "properties": {
+          "anomalyType": {
+            "type": "string"
+          },
+          "anomalyTypeLabel": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "detectedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "eventNo": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "occurredAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "reportedUnit": {
+            "type": "string"
+          },
+          "reportedValue": {
+            "nullable": true,
+            "type": "number"
+          },
+          "severity": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "sourceRef": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "subjectLabel": {
+            "type": "string"
+          },
+          "subjectRef": {
+            "type": "string"
+          },
+          "subjectType": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AiDiagnosisEvidenceRow": {
+        "properties": {
+          "conclusionId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "explanation": {
+            "type": "string"
+          },
+          "factField": {
+            "type": "string"
+          },
+          "factOccurredAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "factRef": {
+            "type": "string"
+          },
+          "factService": {
+            "type": "string"
+          },
+          "factTable": {
+            "type": "string"
+          },
+          "factUnit": {
+            "type": "string"
+          },
+          "factValue": {
+            "nullable": true,
+            "type": "number"
+          },
+          "factValueText": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "snapshotAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AiDiagnosisGap": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "moduleId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "relation": {
+            "type": "string"
+          },
+          "service": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AiDiagnosisOverview": {
+        "properties": {
+          "byAnomalyType": {
+            "items": {
+              "$ref": "#/components/schemas/AiDiagnosisAnomalyCount"
+            },
+            "type": "array"
+          },
+          "conclusions": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "diagnosedEvents": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "events": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "evidences": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "generatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "openEvents": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "resolvedEvents": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "runs": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AiDiagnosisResolveInput": {
+        "properties": {
+          "note": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AiDiagnosisRule": {
+        "properties": {
+          "actionOwner": {
+            "type": "string"
+          },
+          "anomalyType": {
+            "type": "string"
+          },
+          "anomalyTypeLabel": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "basis": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "recommendation": {
+            "type": "string"
+          },
+          "trigger": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AiDiagnosisRunDetail": {
+        "properties": {
+          "conclusions": {
+            "items": {
+              "$ref": "#/components/schemas/AiDiagnosisConclusionDetail"
+            },
+            "type": "array"
+          },
+          "run": {
+            "$ref": "#/components/schemas/AiDiagnosisRunRow"
+          }
+        },
+        "type": "object"
+      },
+      "AiDiagnosisRunRow": {
+        "properties": {
+          "conclusionCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "eventId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "evidenceCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "finishedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "requestedBy": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "ruleVersion": {
+            "type": "string"
+          },
+          "runNo": {
+            "type": "string"
+          },
+          "sourcesRead": {
+            "type": "string"
+          },
+          "sourcesUnavailable": {
+            "type": "string"
+          },
+          "startedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AiDiagnosisSource": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "connected": {
+            "type": "boolean"
+          },
+          "endpoint": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "service": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AiDiagnosisSyncResult": {
+        "properties": {
+          "created": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "scanned": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "skipped": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "sources": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "AiDiagnosisThreshold": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "unit": {
+            "type": "string"
+          },
+          "value": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
       "AiForecastAlgorithm": {
         "properties": {
           "code": {
@@ -13849,6 +14436,382 @@
         "summary": "授权范围自检",
         "tags": [
           "api-gateway-controller"
+        ]
+      }
+    },
+    "/platform/ai/diagnosis/capabilities": {
+      "get": {
+        "operationId": "get_platform_ai_diagnosis_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiDiagnosisCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ai-diagnosis-controller"
+        ]
+      }
+    },
+    "/platform/ai/diagnosis/events": {
+      "get": {
+        "operationId": "get_platform_ai_diagnosis_events",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "anomalyType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiDiagnosisEventPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ai-diagnosis-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_platform_ai_diagnosis_events",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AiDiagnosisEventInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiDiagnosisEventRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ai-diagnosis-controller"
+        ]
+      }
+    },
+    "/platform/ai/diagnosis/events/sync": {
+      "post": {
+        "operationId": "post_platform_ai_diagnosis_events_sync",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiDiagnosisSyncResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ai-diagnosis-controller"
+        ]
+      }
+    },
+    "/platform/ai/diagnosis/events/{id}": {
+      "get": {
+        "operationId": "get_platform_ai_diagnosis_events_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiDiagnosisEventDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ai-diagnosis-controller"
+        ]
+      }
+    },
+    "/platform/ai/diagnosis/events/{id}/diagnose": {
+      "post": {
+        "operationId": "post_platform_ai_diagnosis_events_id_diagnose",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiDiagnosisRunDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ai-diagnosis-controller"
+        ]
+      }
+    },
+    "/platform/ai/diagnosis/events/{id}/resolve": {
+      "post": {
+        "operationId": "post_platform_ai_diagnosis_events_id_resolve",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AiDiagnosisResolveInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiDiagnosisEventRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ai-diagnosis-controller"
+        ]
+      }
+    },
+    "/platform/ai/diagnosis/overview": {
+      "get": {
+        "operationId": "get_platform_ai_diagnosis_overview",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiDiagnosisOverview"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ai-diagnosis-controller"
+        ]
+      }
+    },
+    "/platform/ai/diagnosis/runs/{id}": {
+      "get": {
+        "operationId": "get_platform_ai_diagnosis_runs_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiDiagnosisRunDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ai-diagnosis-controller"
         ]
       }
     },
