@@ -279,13 +279,22 @@ public class AiEffectEvaluationController {
     return call(auth, "read", actor -> effects.thresholds());
   }
 
-  /** 登记 / 修改评估阈值。 */
-  @PutMapping("/thresholds")
+  /**
+   * 登记 / 修改评估阈值。
+   *
+   * <p>🔴 <b>用 POST 而不是 PUT</b>：阈值是**租户级一行**的**局部更新**
+   * （留空的字段沿用当前值），语义是「同一条覆盖」而不是「整份替换」——
+   * 这与 platform 服务既有的 upsert 约定一致（配额 / 模型 / 敏感策略都走 POST）。
+   * 另一个硬约束：浏览器侧的 <code>/api/platform/…</code> 代理**刻意不导出 PUT**
+   * （见 {@code apps/web/src/app/api/platform/[...path]/route.ts}）⇒
+   * 挂一个 PUT 端点等于让浏览器**根本调不到**它（405），功能等于没交付。
+   */
+  @PostMapping("/thresholds")
   @Operation(
       summary = "登记 / 修改评估阈值",
       description =
-          "留空的字段沿用当前值。判定「样本不足」的门槛很重要 —— "
-              + "**不拿 3 次调用判死刑**。")
+          "留空的字段沿用当前值（局部更新，不是整份替换）。"
+              + "判定「样本不足」的门槛很重要 —— **不拿 3 次调用判死刑**。")
   public AiEffectThresholdRow saveThreshold(
       @RequestHeader(value = "Authorization", defaultValue = "") String auth,
       @RequestBody AiEffectThresholdInput input) {

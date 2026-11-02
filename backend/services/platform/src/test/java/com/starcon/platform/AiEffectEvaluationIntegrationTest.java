@@ -568,7 +568,7 @@ class AiEffectEvaluationIntegrationTest {
     assertThat(before.minCalls()).isEqualTo(20L);
 
     http.perform(
-            put("/platform/ai/effects/thresholds")
+            post("/platform/ai/effects/thresholds")
                 .header("Authorization", "session-admin")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"minCalls\":5,\"lowAdoptionRate\":\"0.5\"}"))
@@ -637,7 +637,7 @@ class AiEffectEvaluationIntegrationTest {
     // 把门槛降到 1 次调用 ⇒ 采纳率 0/25 = 0 仍 < 0.2，条件仍成立 ⇒ 不该关。
     // 反过来：把低价值阈值抬到 0 ⇒ 采纳率 0 ≥ 0，条件不再成立 ⇒ 自动关闭。
     http.perform(
-            put("/platform/ai/effects/thresholds")
+            post("/platform/ai/effects/thresholds")
                 .header("Authorization", "session-admin")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"lowAdoptionRate\":\"0\"}"))

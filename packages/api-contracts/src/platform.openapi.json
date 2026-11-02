@@ -14955,9 +14955,9 @@
           "ai-effect-evaluation-controller"
         ]
       },
-      "put": {
-        "description": "留空的字段沿用当前值。判定「样本不足」的门槛很重要 —— **不拿 3 次调用判死刑**。",
-        "operationId": "put_platform_ai_effects_thresholds",
+      "post": {
+        "description": "留空的字段沿用当前值（局部更新，不是整份替换）。判定「样本不足」的门槛很重要 —— **不拿 3 次调用判死刑**。",
+        "operationId": "post_platform_ai_effects_thresholds",
         "parameters": [
           {
             "in": "header",
