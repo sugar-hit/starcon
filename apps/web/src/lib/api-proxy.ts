@@ -14980,6 +14980,49 @@ const services: readonly {
       /^ai\/diagnosis\/(?:capabilities|overview|events(?:\/sync|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:diagnose|resolve))?)?|runs\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})$/,
   },
   {
+    // 18.4.1.1 对话助手（platform 服务，卷 18「集成开放与智能自动化」L3 18.4.1「智能问答」下的第一格）。
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，既有条目**一字未改、也不重排**。
+    //
+    // ---- 插入锚点选在「18.4.2.3 异常诊断（ai/diagnosis）」那条**之后**、数组末尾之前 ----
+    //   本文件是并行车道共同的累积型文件：同批其它车道分别落在「数组开头」
+    //   （18.3.1.1 / 18.3.3.1）与「数组末尾」（5.1.1.2 / 18.5.2.1 等）——
+    //   本车道落在中段，与上面两个锚点都相距甚远 ⇒ 并入时 git 能干净求并。
+    //
+    // ---- 首 token「assistant」的零命中核对结论 ----
+    //   本文件里既有的 `prefix: 'platform/'` 条目首 token 分别是
+    //   automation-rules / automation / automation / automation-rule-editor / auto-approvals /
+    //   data-migration / webhooks / deliveries / io / ai / text / apps / finance-software /
+    //   api-catalog / call-monitor / payment-funds / external-integrations。
+    //   **没有一个**能吃掉 `assistant/...` ⇒ 天然互斥。
+    //   ⚠️ `assistant`（18.4.1.1）与 `ai/*`（18.4.2.x / 18.4.3.x / 18.5.1.1）**不是一件事**：
+    //   `ai/*` 那些是「把一个已经确定的问题算出来」（预测、诊断、用量、模板），
+    //   本条是「用一句中文问业务问题，并给出带可点明细链接的答案」。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   assistant/capabilities       能力声明（哪些真接通 / 哪些还没交付、归谁）
+    //   assistant/intents            受控意图目录（问题形态 / 数据源 / 口径 / 建议的下一步）
+    //   assistant/ask                提一个问题（POST；命中意图 ⇒ 走真实只读查询 + 明细链接）
+    //   assistant/sessions/{uuid}    会话上下文 + 问答历史（含每轮的明细链接）
+    //
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   platform/assistant                              —— 裸路径：后端**没有**汇总端点。
+    //   platform/assistant/unknown                      —— 未实现的子路径仍然 404。
+    //   platform/assistant/sessions/not-a-uuid          —— 非 UUID 段不应被 uuid 分支吃掉。
+    //   platform/assistant/sessions/{uuid}/turns        —— 后端**没有**这个端点（历史在 session 里）。
+    //   ⚠️ **刻意不放行** `platform/assistant/ask/execute` 之类的形状：
+    //   本模块**只读**（蓝图关系句：下游 = 无），不存在任何执行动作的端点。
+    //
+    // id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //   （不是 `[0-9a-f-]+`）：后者会把 `ask` 这种非 UUID 形状也当成 id 放行。
+    // 字面量子路径（capabilities / intents / ask）排在 {uuid} 段**之前**判别 ——
+    //   alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    prefix: 'platform/',
+    env: 'PLATFORM_URL',
+    fallback: 'http://127.0.0.1:8089',
+    pattern:
+      /^assistant\/(?:capabilities|intents|ask|sessions\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})$/,
+  },
+  {
     // 5.1.1.2 价目项批量维护（catalog 服务，卷 05「定价与价目」L3 5.1.1「价目表」下的第二格）。
     // ⚠️ 本条目是**新增一条独立的 services[] 元素**，**追加在数组末尾**（收尾的 `];` 之前）——
     //   既有条目一字未改、也不重排（并入时 git 按前缀求并，取错一侧不会丢掉别人已交付的路由）。
