@@ -247,9 +247,16 @@ class MembershipIntegrationTest {
     tradeDown = false;
     try (var c = admin();
         var s = c.createStatement()) {
+      // 🔴 每个用例前把**本模块与 15.3.1.3 合并口径**的表一起清空。
+      //   合并用例会往 crm_customer_merge_* 里写真实的合并映射（V437 的纪律：
+      //   候选 → 人工确认 → 映射），而那些行**不会**被本模块的表 truncate 带走 ——
+      //   漏清的后果是：合并用例跑完之后，后面每个用例都看到「甲和乙是同一个人」，
+      //   于是会员数从 4 变 3、甲被判成 BRONZE —— 症状离病因很远。
       s.execute(
           "truncate table crm_membership_level_rule, crm_membership_profile,"
-              + " crm_membership_level_change, crm_membership_run cascade");
+              + " crm_membership_level_change, crm_membership_run,"
+              + " crm_customer_merge_mapping, crm_customer_merge_candidate,"
+              + " crm_customer_merge_logical, crm_customer_profile cascade");
     }
 
     // 会员甲：4 单 USD，金额 0.10 / 0.20 / 0.30 / 0.40 ⇒ 合计 1.00（浮点会得到 0.9999…）。
@@ -424,32 +431,6 @@ class MembershipIntegrationTest {
     throw new AssertionError("会员档案里找不到客户 " + customerRef);
   }
 
-
-  // ===== 临时排查探针（用完即删）=====
-  @Autowired MembershipService membershipService;
-  @Autowired com.starcon.tenancy.TenantTransactions tenants;
-
-  @Test
-  void 临时排查_compute真实异常() {
-    var ex = catchThrowable(
-        () ->
-            tenants.run(
-                tenant,
-                () ->
-                    membershipService.compute(
-                        new MembershipModels.CrmMembershipComputeInput(
-                            T0.minusDays(365).toString(), T0.toString()),
-                        userId,
-                        "session")));
-    System.out.println("PROBE >>> " + ex);
-    if (ex != null) {
-      Throwable t = ex;
-      while (t != null) {
-        System.out.println("PROBE cause >>> " + t.getClass().getName() + " : " + t.getMessage());
-        t = t.getCause();
-      }
-    }
-  }
 
   // ================================================================ 等级由真实消费数据算出
 
@@ -637,11 +618,13 @@ class MembershipIntegrationTest {
 
     // 把窗口收窄到**不含**会员甲的订单 ⇒ 他不在本次扫描里 ⇒ 等级与指标保持不变。
     //   （「窗口口径变了」不是「消费下降了」—— 误降级会误导运营。）
+    //   窗口取最近 10 天：里面只有会员丙的一单（5 天前），会员甲的订单都在 40 天前 ⇒
+    //   本次扫描 1 位会员（丙），会员甲**不在**其中。
     String result =
         postJson(
             "/crm/customer-membership/compute",
             Map.of(
-                "windowFrom", T0.minusDays(2).toString(),
+                "windowFrom", T0.minusDays(10).toString(),
                 "windowTo", T0.toString()),
             200);
     assertThat(json.readTree(result).get("memberCount").asInt()).isEqualTo(1);
@@ -840,7 +823,10 @@ class MembershipIntegrationTest {
     assertThat(gold.get("rows").get(0).get("customerRef").asText()).isEqualTo(partyA.toString());
 
     var none = json.readTree(body("/crm/customer-membership/members?levelCode=NONE&size=100"));
-    assertThat(none.get("total").asLong()).isEqualTo(3);
+    // 🔴 未达任何等级的会员是 **2 位**：会员丙（1 单 5000 USD，没到任何一档门槛）
+    //   与会员丁（1 单 66.60 USD，BRONZE 的门槛带 EUR ⇒ 跨币种不能比，不适用）。
+    //   会员甲 = GOLD（1 位）、会员乙 = BRONZE（1 位），1 + 1 + 2 = 4 位会员。
+    assertThat(none.get("total").asLong()).isEqualTo(2);
 
     var keyword = json.readTree(body("/crm/customer-membership/members?keyword=" + partyB + "&size=100"));
     assertThat(keyword.get("total").asLong()).isEqualTo(1);
@@ -856,6 +842,14 @@ class MembershipIntegrationTest {
     UUID logicalId = UUID.randomUUID();
     UUID profileA = UUID.randomUUID();
     UUID profileB = UUID.randomUUID();
+    // 🔴 15.3.1.3 的纪律：**合并只能由人工确认产生**。
+    //   V437 的触发器 guard_crm_customer_merge_mapping_confirmation 会挡住
+    //   「没有已确认候选就写映射」—— 所以这里必须走完整三步：
+    //   ① 建候选（SUGGESTED）② 人工复核（CONFIRMED + 复核人 + 复核时刻）
+    //   ③ 写合并映射。直接插映射会被 DB 层挡下来（那正是它要拦的事）。
+    UUID leftId = profileA.compareTo(profileB) < 0 ? profileA : profileB;
+    UUID rightId = profileA.compareTo(profileB) < 0 ? profileB : profileA;
+    UUID candidateId = UUID.randomUUID();
     try (var c = admin()) {
       try (var s = c.createStatement()) {
         s.execute(
@@ -895,6 +889,40 @@ class MembershipIntegrationTest {
                 + "','SHOPIFY','"
                 + partyB
                 + "','买家乙',2,'HIGH',now())");
+        // ① 候选诞生：只能是 SUGGESTED（V437 的触发器只允许 SUGGESTED 起手）。
+        s.execute(
+            "insert into crm_customer_merge_candidate"
+                + "(id,tenant_id,left_customer_id,right_customer_id,left_source_shop,left_customer_ref,"
+                + " left_customer_name,right_source_shop,right_customer_ref,right_customer_name,"
+                + " match_type,confidence,signal_summary,status,detected_at)"
+                + " values ('"
+                + candidateId
+                + "','"
+                + tenant
+                + "','"
+                + leftId
+                + "','"
+                + rightId
+                + "','AMAZON','"
+                + partyA
+                + "','买家甲','SHOPIFY','"
+                + partyB
+                + "','买家乙','PLATFORM_BUYER_ID',0.9000,'测试用候选','SUGGESTED',now())");
+        // ② 人工复核：确认候选（复核人与复核时刻缺一不可）。
+        s.execute(
+            "update crm_customer_merge_candidate set status = 'CONFIRMED',"
+                + " reviewed_by = '"
+                + userId
+                + "', reviewed_at = now(), logical_customer_id = '"
+                + logicalId
+                + "', review_note = '测试用人工确认'"
+                + " where id = '"
+                + candidateId
+                + "'");
+      }
+    }
+    try (var c = admin()) {
+      try (var s = c.createStatement()) {
         s.execute(
             "insert into crm_customer_merge_mapping"
                 + "(id,tenant_id,logical_customer_id,customer_profile_id,source_shop,customer_ref,"

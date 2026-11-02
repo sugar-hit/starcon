@@ -45,6 +45,14 @@ import java.util.UUID;
  * <p><b>命名</b>：统一用 {@code CrmMembership*} 前缀。全仓 grep 确认与既有类型零重叠 ——
  * 契约被 codegen 合并进一个扁平文件、同名 key 后者覆盖前者且不报冲突，
  * 故不按前缀扫而是逐个名字精确比对。
+ *
+ * <p><b>🔴 十进制一律走文本</b>（与仓里 1.3.2.1 预警阈值、15.1.1.3 AI 效果评估同一口径）：
+ * 出参里的金额与比率是 <b>{@code String}</b>（十进制文本），不是 JSON number。
+ * 理由不是洁癖，是 JSON number <b>装不下</b>「显示标度」——
+ * {@code 1.0000} 走 JSON number 会被解析成 {@code 1}、{@code 300.0000} 会被解析成 {@code 3E+2}，
+ * 前端拿到的是「数值」而不是「那个数的十进制写法」；而权益生效配置是要交给
+ * <b>5 定价 / 14 促销</b> 用的，{@code 3E+2} 这种写法会一路传下去。
+ * 入参仍是 {@link BigDecimal}（Jackson 按 token 原文解析，<b>不经过 double</b>）。
  */
 public final class MembershipModels {
 
@@ -154,8 +162,12 @@ public final class MembershipModels {
       String boundaryNote,
       String highlight) {}
 
-  /** 分币种的一行消费明细（**一币种一行**，跨币种绝不合并）。 */
-  public record CrmMembershipAmount(String currency, int orderCount, BigDecimal totalSpend) {}
+  /**
+   * 分币种的一行消费明细（**一币种一行**，跨币种绝不合并）。
+   *
+   * @param totalSpend 该币种下的累计消费，**十进制文本**（如 {@code 300.00}）
+   */
+  public record CrmMembershipAmount(String currency, int orderCount, String totalSpend) {}
 
   /**
    * 会员档案的一行。
@@ -164,7 +176,9 @@ public final class MembershipModels {
    * @param levelCode 当前等级代码；{@code NONE} = 未达任何等级
    * @param levelOrigin 等级来源（本轮恒为 {@code RULE} = 规则算出来的）
    * @param levelReason 判定理由（凭什么落这一级）
-   * @param repurchaseRate 复购率；窗口内没有订单时为 null（**不可判定**，不是 0）
+   * @param totalSpend 主币种下的累计消费，**十进制文本**（如 {@code 1.00}）
+   * @param repurchaseRate 复购率，**十进制文本**（如 {@code 0.750000}）；
+   *     窗口内没有订单时为 null（**不可判定**，不是 0）
    */
   public record CrmMembershipMemberRow(
       UUID id,
@@ -176,10 +190,10 @@ public final class MembershipModels {
       int memberCount,
       List<String> sourceShops,
       int orderCount,
-      @Schema(nullable = true) BigDecimal totalSpend,
+      @Schema(nullable = true) String totalSpend,
       @Schema(nullable = true) String spendCurrency,
       List<CrmMembershipAmount> amounts,
-      @Schema(nullable = true) BigDecimal repurchaseRate,
+      @Schema(nullable = true) String repurchaseRate,
       @Schema(nullable = true) String firstOrderAt,
       @Schema(nullable = true) String lastOrderAt,
       String levelCode,
@@ -259,6 +273,9 @@ public final class MembershipModels {
   /**
    * 等级规则的一行。
    *
+   * @param minTotalSpend 累计消费门槛，**十进制文本**（如 {@code 1.00}）
+   * @param minRepurchaseRate 复购率门槛，**十进制文本**（如 {@code 0.5}）
+   * @param discountRate 折扣率，**十进制文本**（如 {@code 0.05}）
    * @param effectiveNow 该规则此刻是否生效（**按数据库的 now() 判定**，不拿 JVM 墙钟比大小）
    */
   public record CrmMembershipLevelRuleRow(
@@ -266,11 +283,11 @@ public final class MembershipModels {
       String levelCode,
       String levelName,
       int levelRank,
-      @Schema(nullable = true) BigDecimal minTotalSpend,
+      @Schema(nullable = true) String minTotalSpend,
       @Schema(nullable = true) String minTotalSpendCurrency,
       @Schema(nullable = true) Integer minOrderCount,
-      @Schema(nullable = true) BigDecimal minRepurchaseRate,
-      @Schema(nullable = true) BigDecimal discountRate,
+      @Schema(nullable = true) String minRepurchaseRate,
+      @Schema(nullable = true) String discountRate,
       boolean freeShipping,
       boolean priorityShipping,
       boolean enabled,
@@ -288,6 +305,7 @@ public final class MembershipModels {
    * 权益生效配置的一行 —— 这是本模块交给 **5 定价 / 14 促销** 的东西。
    *
    * @param benefitSummary 人可读的权益摘要（如「减免 5% · 免邮 · 优先发货」）
+   * @param discountRate 折扣率，**十进制文本**（如 {@code 0.05}）
    * @param appliesTo 生效条件（人可读，如「累计消费 ≥ 5000 USD 且订单数 ≥ 3」）
    * @param downstreamConsumers 该配置的下游消费方（模块 ID）
    */
@@ -295,7 +313,7 @@ public final class MembershipModels {
       String levelCode,
       String levelName,
       int levelRank,
-      @Schema(nullable = true) BigDecimal discountRate,
+      @Schema(nullable = true) String discountRate,
       boolean freeShipping,
       boolean priorityShipping,
       String benefitSummary,

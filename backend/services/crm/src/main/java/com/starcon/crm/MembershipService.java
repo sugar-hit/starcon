@@ -3,6 +3,7 @@ package com.starcon.crm;
 import static com.starcon.crm.MembershipModels.*;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -10,6 +11,10 @@ import com.starcon.crm.MembershipOrderFactsPort.OrderFact;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import java.time.temporal.ChronoField;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -72,6 +77,31 @@ public class MembershipService {
 
   /** 金额与比率的标度（与 15.3.2.1 的同一口径）。 */
   static final int RATE_SCALE = 6;
+
+  /**
+   * 金额出参的**最少小数位**。
+   *
+   * <p>金额的业务精度是「分」，所以至少给两位；但库里 {@code numeric(19,4)} 可能存着
+   * {@code 66.605} 这种更细的值 —— 那时**照原样出**（去尾零后仍有三位就出三位），
+   * <b>不四舍五入</b>：出参显示的必须是「库里那个数」，不是「四舍五入后的另一个数」。
+   */
+  static final int MONEY_MIN_SCALE = 2;
+
+  /**
+   * 时刻出参格式：**统一换算成 UTC**，秒必写，毫秒/微秒有值才写，结尾恒为 {@code Z}。
+   *
+   * <p>🔴 为什么换算成 UTC：同一个绝对时刻用不同偏移量写出来会是两个字符串
+   * （{@code 2026-10-10T08:00+08:00} 与 {@code 2026-10-10T00:00Z} 是同一时刻），
+   * 拿字符串比大小 / 比相等都会得出「不是同一个时刻」的错结论。
+   * 换算成 UTC 之后，<b>同一时刻只有一种写法</b>，跨时区协作不会踩坑。
+   */
+  private static final DateTimeFormatter MOMENT_TEXT =
+      new DateTimeFormatterBuilder()
+          .appendPattern("yyyy-MM-dd'T'HH:mm:ss")
+          .appendFraction(ChronoField.NANO_OF_SECOND, 0, 9, true)
+          .appendLiteral('Z')
+          .toFormatter()
+          .withZone(ZoneOffset.UTC);
 
   private final DSLContext sql;
   private final MembershipOrderFactsPort orders;
@@ -154,7 +184,7 @@ public class MembershipService {
                 "manual_level_override",
                 "人工覆盖等级（直接指定某人是黄金会员）",
                 false,
-                "**本轮未交付** —— 蓝图加粗句「手工挂等级会导致权益成本失控」",
+                "人工覆盖等级本轮未交付 —— 蓝图加粗句「手工挂等级会导致权益成本失控」",
                 "15.6.1.1",
                 "本模块**没有**任何能直接写等级的端点；DB 层触发器也拒绝 "
                     + "level_origin='MANUAL_OVERRIDE'。等级来源恒为 RULE"),
@@ -349,7 +379,7 @@ public class MembershipService {
                     new CrmMembershipAmount(
                         nz(r.get("currency", String.class)),
                         r.get("order_count", Integer.class) == null ? 0 : r.get("order_count", Integer.class),
-                        r.get("total_spend", BigDecimal.class)))
+                        moneyText(r.get("total_spend", BigDecimal.class))))
             .toList();
 
     return new CrmMembershipStats(
@@ -527,17 +557,21 @@ public class MembershipService {
     if (input.levelRank() != existing.levelRank()) {
       throw conflict("等级序不可就地修改：请新建一条规则（新的生效起点）。");
     }
-    if (!sameDecimal(input.minTotalSpend(), existing.minTotalSpend())
+    if (!sameDecimal(input.minTotalSpend(), decimalOf(existing.minTotalSpend()))
         || !sameText(input.minTotalSpendCurrency(), existing.minTotalSpendCurrency())) {
       throw conflict("消费门槛不可就地修改：请新建一条规则（新的生效起点）。");
     }
     if (!sameInteger(input.minOrderCount(), existing.minOrderCount())) {
       throw conflict("订单数门槛不可就地修改：请新建一条规则（新的生效起点）。");
     }
-    if (!sameDecimal(input.minRepurchaseRate(), existing.minRepurchaseRate())) {
+    if (!sameDecimal(input.minRepurchaseRate(), decimalOf(existing.minRepurchaseRate()))) {
       throw conflict("复购率门槛不可就地修改：请新建一条规则（新的生效起点）。");
     }
-    if (!sameDecimal(input.discountRate(), existing.discountRate())) {
+    // 🔴 权益字段：**没给 = 不改**（局部更新），给了不同值 = 不可就地修改。
+    //   「没给」与「要置空」在这里不是一回事：置空权益没有意义（那是一条新规则的事），
+    //   而「只改启用状态」是运营最常见的动作 —— 它不该因为没重复抄一遍权益就被拒。
+    if (input.discountRate() != null
+        && !sameDecimal(input.discountRate(), decimalOf(existing.discountRate()))) {
       throw conflict("折扣权益不可就地修改：请新建一条规则（新的生效起点）—— 权益改动也要留生效区间。");
     }
     if (input.freeShipping() != null
@@ -548,8 +582,15 @@ public class MembershipService {
         && input.priorityShipping() != existing.priorityShipping()) {
       throw conflict("优先发货权益不可就地修改：请新建一条规则（新的生效起点）。");
     }
-    OffsetDateTime effectiveTo =
-        blankToNull(input.effectiveTo()) == null ? null : parseMoment(input.effectiveTo(), "生效终点");
+    // 🔴 生效终点：**没给 = 保持原样**。清空它等于「把一条已经关掉的规则重新打开」，
+    //   那是改口径（不可变优先），不是「改启用状态」。
+    String existingTo = blankToNull(existing.effectiveTo());
+    OffsetDateTime effectiveTo;
+    if (blankToNull(input.effectiveTo()) == null) {
+      effectiveTo = existingTo == null ? null : parseMoment(existingTo, "生效终点");
+    } else {
+      effectiveTo = parseMoment(input.effectiveTo(), "生效终点");
+    }
     if (effectiveTo != null && !effectiveTo.isAfter(parseMoment(existing.effectiveFrom(), "生效起点"))) {
       throw bad("生效终点必须晚于生效起点。");
     }
@@ -589,7 +630,7 @@ public class MembershipService {
               nz(r.get("level_code", String.class)),
               nz(r.get("level_name", String.class)),
               r.get("level_rank", Integer.class) == null ? 0 : r.get("level_rank", Integer.class),
-              discount,
+              rateText(discount),
               freeShipping,
               priority,
               benefitSummary(discount, freeShipping, priority),
@@ -837,7 +878,11 @@ public class MembershipService {
             reason,
             basis,
             matched,
-            windowTo,
+            // 🔴 changed_at = **这次判定发生的时刻**（startedAt），不是窗口终点。
+            //   窗口终点是「按哪一刻的口径算」，两件事；用它当变更时刻的话，
+            //   同一窗口的多次重算会落在同一个时间点上，列表排序只能靠随机 id 排 ——
+            //   「最新的变更排在最前」就变成了掷骰子。
+            startedAt,
             actorId);
         levelChanged++;
       }
@@ -860,8 +905,8 @@ public class MembershipService {
     factsSnapshot.put("negativeAmountSkipped", negativeAmountSkipped);
     factsSnapshot.put("untouchedMembers", untouched);
     factsSnapshot.put("truncated", truncated);
-    factsSnapshot.put("windowFrom", windowFrom == null ? "ALL" : windowFrom.toString());
-    factsSnapshot.put("windowTo", windowTo.toString());
+    factsSnapshot.put("windowFrom", windowFrom == null ? "ALL" : momentText(windowFrom));
+    factsSnapshot.put("windowTo", momentText(windowTo));
 
     String failureReason =
         truncated
@@ -905,8 +950,8 @@ public class MembershipService {
         runId,
         runNo,
         "SUCCEEDED",
-        windowFrom == null ? null : windowFrom.toString(),
-        windowTo.toString(),
+        momentText(windowFrom),
+        momentText(windowTo),
         scoped.size(),
         levelChanged,
         rules.size(),
@@ -914,14 +959,14 @@ public class MembershipService {
         currencySkipped,
         truncated,
         failureReason,
-        startedAt.toString(),
-        now().toString(),
+        momentText(startedAt),
+        momentText(now()),
         "会员等级**全部**由上游 trade 的**真实订单事实**算出（授权 HTTP API 只读），"
             + "没有任何手工挂等级的入口。"
             + "本次判定窗口："
-            + (windowFrom == null ? "全部历史" : windowFrom.toString())
+            + (windowFrom == null ? "全部历史" : momentText(windowFrom))
             + " → "
-            + windowTo.toString()
+            + momentText(windowTo)
             + "。"
             + (rules.isEmpty()
                 ? "🔴 租户**还没有配置任何生效中的等级规则**，所有会员都是「未达任何等级」。"
@@ -1192,7 +1237,7 @@ public class MembershipService {
     }
 
     /** 分币种明细：一币种一行，绝不跨币种相加。 */
-    List<CrmMembershipAmount> amounts() {
+    List<CurrencyAmount> amounts() {
       Map<String, int[]> counts = new TreeMap<>();
       Map<String, BigDecimal> spends = new TreeMap<>();
       for (SourceAgg source : sources) {
@@ -1205,10 +1250,10 @@ public class MembershipService {
           spends.merge(currency, amount, BigDecimal::add);
         }
       }
-      List<CrmMembershipAmount> out = new ArrayList<>();
+      List<CurrencyAmount> out = new ArrayList<>();
       for (Map.Entry<String, int[]> entry : counts.entrySet()) {
         out.add(
-            new CrmMembershipAmount(
+            new CurrencyAmount(
                 entry.getKey(),
                 entry.getValue()[0],
                 spends.getOrDefault(entry.getKey(), BigDecimal.ZERO).setScale(4, RoundingMode.HALF_UP)));
@@ -1218,10 +1263,10 @@ public class MembershipService {
 
     /** 主币种 = 窗口内消费最多的那个币种（并列时比单数，再并列按字母序）。 */
     String primaryCurrency() {
-      List<CrmMembershipAmount> amounts = amounts();
+      List<CurrencyAmount> amounts = amounts();
       if (amounts.isEmpty()) return null;
-      CrmMembershipAmount best = amounts.get(0);
-      for (CrmMembershipAmount candidate : amounts) {
+      CurrencyAmount best = amounts.get(0);
+      for (CurrencyAmount candidate : amounts) {
         int cmp = candidate.totalSpend().compareTo(best.totalSpend());
         if (cmp > 0) {
           best = candidate;
@@ -1236,7 +1281,7 @@ public class MembershipService {
     BigDecimal totalSpend() {
       String currency = primaryCurrency();
       if (currency == null) return BigDecimal.ZERO.setScale(4, RoundingMode.HALF_UP);
-      for (CrmMembershipAmount amount : amounts()) {
+      for (CurrencyAmount amount : amounts()) {
         if (amount.currency().equals(currency)) return amount.totalSpend();
       }
       return BigDecimal.ZERO.setScale(4, RoundingMode.HALF_UP);
@@ -1283,6 +1328,16 @@ public class MembershipService {
   }
 
   private record MergeInfo(UUID logicalId, String logicalRef, String displayName, boolean primary) {}
+
+  /**
+   * 内部分币种明细（<b>BigDecimal</b>）。
+   *
+   * <p>🔴 与出参的 {@link CrmMembershipAmount}（<b>十进制文本</b>）分开：
+   * 聚合与判定要在 Java 里做十进制运算（跨币种不能加、主币种要按金额挑），
+   * 出参才转文本。中间那一步如果提前变成文本，就得反复 parse 回来 ——
+   * 那是把「算」与「显示」搅在一起。
+   */
+  private record CurrencyAmount(String currency, int orderCount, BigDecimal totalSpend) {}
 
   private record MergeIndex(Map<String, MergeInfo> bySource) {}
 
@@ -1375,19 +1430,21 @@ public class MembershipService {
   private Map<String, Object> levelBasis(MemberAgg member, RuleView matched) {
     Map<String, Object> basis = new LinkedHashMap<>();
     basis.put("orderCount", member.orderCount());
-    basis.put("totalSpend", member.totalSpend());
+    // 🔴 快照里的金额与比率也是**十进制文本**：快照要能逐位复核，
+    //   而 JSON number 会在解析时把 1.0000 归一成 1、把 300.0000 归一成 3E+2。
+    basis.put("totalSpend", moneyText(member.totalSpend()));
     basis.put("spendCurrency", member.primaryCurrency());
-    basis.put("repurchaseRate", member.repurchaseRate());
+    basis.put("repurchaseRate", computedRateText(member.repurchaseRate()));
     basis.put("memberCount", member.memberCount());
     basis.put("sourceShops", member.sourceShops());
     Map<String, Object> thresholds = new LinkedHashMap<>();
     if (matched != null) {
       thresholds.put("ruleId", matched.id().toString());
       thresholds.put("levelCode", matched.code());
-      thresholds.put("minTotalSpend", matched.minTotalSpend());
+      thresholds.put("minTotalSpend", moneyText(matched.minTotalSpend()));
       thresholds.put("minTotalSpendCurrency", matched.minTotalSpendCurrency());
       thresholds.put("minOrderCount", matched.minOrderCount());
-      thresholds.put("minRepurchaseRate", matched.minRepurchaseRate());
+      thresholds.put("minRepurchaseRate", rateText(matched.minRepurchaseRate()));
     }
     basis.put("thresholds", thresholds);
     return basis;
@@ -1413,10 +1470,10 @@ public class MembershipService {
         nzInt(r.get("member_count", Integer.class)),
         readStringList(r.get("source_shops", String.class)),
         nzInt(r.get("order_count", Integer.class)),
-        r.get("total_spend", BigDecimal.class),
+        moneyText(r.get("total_spend", BigDecimal.class)),
         blankToNull(r.get("spend_currency", String.class)),
         readAmounts(r.get("amounts", String.class)),
-        r.get("repurchase_rate", BigDecimal.class),
+        computedRateText(r.get("repurchase_rate", BigDecimal.class)),
         momentText(r.get("first_order_at", OffsetDateTime.class)),
         momentText(r.get("last_order_at", OffsetDateTime.class)),
         nz(r.get("level_code", String.class)),
@@ -1466,11 +1523,11 @@ public class MembershipService {
         nz(r.get("level_code", String.class)),
         nz(r.get("level_name", String.class)),
         nzInt(r.get("level_rank", Integer.class)),
-        r.get("min_total_spend", BigDecimal.class),
+        moneyText(r.get("min_total_spend", BigDecimal.class)),
         blankToNull(r.get("min_total_spend_currency", String.class)),
         r.get("min_order_count", Integer.class),
-        r.get("min_repurchase_rate", BigDecimal.class),
-        r.get("discount_rate", BigDecimal.class),
+        rateText(r.get("min_repurchase_rate", BigDecimal.class)),
+        rateText(r.get("discount_rate", BigDecimal.class)),
         Boolean.TRUE.equals(r.get("free_shipping", Boolean.class)),
         Boolean.TRUE.equals(r.get("priority_shipping", Boolean.class)),
         Boolean.TRUE.equals(r.get("enabled", Boolean.class)),
@@ -1574,6 +1631,16 @@ public class MembershipService {
     return left.compareTo(right) == 0;
   }
 
+  /** 十进制文本 → BigDecimal（出参是文本，比较时得还原成数比，别比字符串）。 */
+  private static BigDecimal decimalOf(String text) {
+    if (text == null || text.isBlank()) return null;
+    try {
+      return new BigDecimal(text.trim());
+    } catch (NumberFormatException e) {
+      return null;
+    }
+  }
+
   private static boolean sameInteger(Integer left, Integer right) {
     if (left == null || right == null) return left == null && right == null;
     return left.equals(right);
@@ -1585,8 +1652,16 @@ public class MembershipService {
     return a == null ? b == null : a.equalsIgnoreCase(b);
   }
 
+  /**
+   * 时刻 → 出参文本（<b>统一换算成 UTC</b>，秒必写，秒以下有值才写）。
+   *
+   * <p>🔴 为什么换算成 UTC：同一个绝对时刻用不同偏移量写出来会是两个字符串
+   * （{@code 2026-10-10T08:00+08:00} 与 {@code 2026-10-10T00:00Z} 是同一时刻），
+   * 拿字符串比相等会得出「不是同一个时刻」的错结论。换算成 UTC 之后，
+   * <b>同一时刻只有一种写法</b>。
+   */
   private static String momentText(OffsetDateTime moment) {
-    return moment == null ? null : moment.toString();
+    return moment == null ? null : MOMENT_TEXT.format(moment);
   }
 
   private static OffsetDateTime parseMoment(String value, String label) {
@@ -1609,22 +1684,54 @@ public class MembershipService {
   private static Map<String, Object> readJsonObject(String raw) {
     if (raw == null || raw.isBlank()) return Map.of();
     try {
-      Object parsed = JSON.readValue(raw, Object.class);
-      return parsed instanceof Map ? (Map<String, Object>) parsed : Map.of();
+      JsonNode root = JSON.readTree(raw);
+      if (root == null || !root.isObject()) return Map.of();
+      Map<String, Object> out = new LinkedHashMap<>();
+      root.fields().forEachRemaining(e -> out.put(e.getKey(), toPlainValue(e.getValue())));
+      return out;
     } catch (Exception e) {
       return Map.of();
     }
   }
 
-  @SuppressWarnings("unchecked")
+  /** jsonb 节点 → Java 值（**数字一律 BigDecimal，绝不 double**）。 */
+  private static Object toPlainValue(JsonNode node) {
+    if (node == null || node.isNull()) return null;
+    if (node.isNumber()) return node.decimalValue();
+    if (node.isTextual()) return node.textValue();
+    if (node.isBoolean()) return node.booleanValue();
+    if (node.isArray()) {
+      List<Object> out = new ArrayList<>();
+      for (JsonNode item : node) out.add(toPlainValue(item));
+      return out;
+    }
+    if (node.isObject()) {
+      Map<String, Object> out = new LinkedHashMap<>();
+      node.fields().forEachRemaining(e -> out.put(e.getKey(), toPlainValue(e.getValue())));
+      return out;
+    }
+    return node.asText();
+  }
+
+  /**
+   * jsonb 数组 → 列表。
+   *
+   * <p>🔴 <b>走 {@code readTree} 而不是 {@code readValue(raw, Object.class)}</b>：
+   * 后者把 JSON 数字读成 {@code double} —— 那会让金额在读回来的时候**先走一遍浮点**，
+   * 而本模块的金额口径是「禁浮点」。{@code readTree} + {@code USE_BIG_DECIMAL_FOR_FLOATS}
+   * 读出来的是 {@link BigDecimal}，全程不碰浮点。
+   */
   private static List<Map<String, Object>> readObjectList(String raw) {
     if (raw == null || raw.isBlank()) return List.of();
     try {
-      Object parsed = JSON.readValue(raw, Object.class);
-      if (!(parsed instanceof List)) return List.of();
+      JsonNode parsed = JSON.readTree(raw);
+      if (parsed == null || !parsed.isArray()) return List.of();
       List<Map<String, Object>> out = new ArrayList<>();
-      for (Object item : (List<Object>) parsed) {
-        if (item instanceof Map) out.add((Map<String, Object>) item);
+      for (JsonNode item : parsed) {
+        if (!item.isObject()) continue;
+        Map<String, Object> map = new LinkedHashMap<>();
+        item.fields().forEachRemaining(e -> map.put(e.getKey(), toPlainValue(e.getValue())));
+        out.add(map);
       }
       return out;
     } catch (Exception e) {
@@ -1635,11 +1742,11 @@ public class MembershipService {
   private static List<String> readStringList(String raw) {
     if (raw == null || raw.isBlank()) return List.of();
     try {
-      Object parsed = JSON.readValue(raw, Object.class);
-      if (!(parsed instanceof List)) return List.of();
+      JsonNode parsed = JSON.readTree(raw);
+      if (parsed == null || !parsed.isArray()) return List.of();
       List<String> out = new ArrayList<>();
-      for (Object item : (List<Object>) parsed) {
-        if (item != null) out.add(String.valueOf(item));
+      for (JsonNode item : parsed) {
+        if (item != null && !item.isNull()) out.add(item.asText());
       }
       return out;
     } catch (Exception e) {
@@ -1664,7 +1771,9 @@ public class MembershipService {
       }
       BigDecimal spend = null;
       Object rawSpend = item.get("totalSpend");
-      if (rawSpend instanceof Number number) {
+      if (rawSpend instanceof BigDecimal number) {
+        spend = number;
+      } else if (rawSpend instanceof Number number) {
         spend = new BigDecimal(number.toString());
       } else if (rawSpend != null) {
         try {
@@ -1673,9 +1782,47 @@ public class MembershipService {
           spend = null;
         }
       }
-      out.add(new CrmMembershipAmount(currency, count, spend));
+      out.add(new CrmMembershipAmount(currency, count, moneyText(spend)));
     }
     return out;
+  }
+
+  // ================================================================ 十进制文本口径
+
+  /**
+   * 金额 → 十进制文本（去尾零 + <b>至少两位小数</b>，<b>不四舍五入</b>）。
+   *
+   * <p>出参显示的必须是「库里那个数」：{@code 1.0000} → {@code 1.00}，
+   * {@code 66.6050} → {@code 66.605}（多位就出多位），{@code 0} → {@code 0.00}。
+   */
+  private static String moneyText(BigDecimal value) {
+    if (value == null) return null;
+    BigDecimal stripped = value.stripTrailingZeros();
+    int scale = Math.max(stripped.scale(), MONEY_MIN_SCALE);
+    return stripped.setScale(scale, RoundingMode.UNNECESSARY).toPlainString();
+  }
+
+  /**
+   * 配置来的比率 → 十进制文本（<b>去尾零</b>：运营写 {@code 0.05} 就是 {@code 0.05}，
+   * 不显示成库里补零后的 {@code 0.050000}）。
+   */
+  private static String rateText(BigDecimal value) {
+    if (value == null) return null;
+    BigDecimal stripped = value.stripTrailingZeros();
+    if (stripped.signum() == 0) return "0";
+    return stripped.toPlainString();
+  }
+
+  /**
+   * 判定算出来的比率（复购率）→ 十进制文本（<b>固定 6 位小数</b>）。
+   *
+   * <p>🔴 与配置来的比率**故意不同标度**：复购率是<b>算出来的判定口径</b>，
+   * 固定 6 位才能逐位复核（{@code 0.750000} 而不是 {@code 0.75}）；
+   * 配置里的比率是<b>运营写下的意图</b>，照原样显示。
+   */
+  private static String computedRateText(BigDecimal value) {
+    if (value == null) return null;
+    return value.setScale(RATE_SCALE, RoundingMode.HALF_UP).toPlainString();
   }
 
   /** 刷新运行号：MB-yyyyMMdd-000001（序列单独授权，见 V440 授权段）。 */
