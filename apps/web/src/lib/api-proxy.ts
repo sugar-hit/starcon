@@ -6741,7 +6741,6 @@ const services: readonly {
     //   而本模块是 `customer-merge`：第 9 个字符是 `-` ⇒ **四者互斥**，谁也不会吃掉谁。
     //
     // 形状逐个列出（**只放行本模块真实实现的路径**）：
-    //   customer-merge                                逻辑客户列表（GET；真分页）
     //   customer-merge/capabilities                   能力声明（哪些真交付 / 归谁 / 两条硬规矩）
     //   customer-merge/scan                           生成候选建议（POST；🔴 **只给建议，不合并**）
     //   customer-merge/candidates                     候选队列（GET；真分页 + 状态 / 依据 / 关键词筛选）
@@ -6754,6 +6753,9 @@ const services: readonly {
     //   customer-merge/runs                           候选生成运行台账（GET；真分页）
     //
     // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   customer-merge（裸路径）                      —— 逻辑客户列表的真身是 `customer-merge/logical`，
+    //                                                      后端**没有**裸路径端点（`@RequestMapping("/crm/customer-merge")`
+    //                                                      下面第一个子路径就是 capabilities）⇒ 裸路径不放行。
     //   customer-merge/bulk                          —— 没有批量合并端点：合并**必须**逐条人工确认。
     //   customer-merge/export                        —— 🔴 **不导出**：证据里只有脱敏形态的联系方式。
     //   customer-merge/auto-merge                    —— 🔴 **自动合并永不开放**：蓝图加粗句「自动合并风险高」。
@@ -6763,13 +6765,17 @@ const services: readonly {
     //
     // ⚠️ 判别顺序：字面量子路径（capabilities / scan / runs / operations / candidates / logical）
     //   排在 {uuid} 段**之前** —— alternation 是首个命中即返回，顺序反了会被 uuid 支吃掉半截。
+    // ⚠️ 外层子路径组**不可省**（末尾没有 `?`）⇒ 裸路径 `customer-merge` 不匹配：
+    //   后端没有裸路径端点，放行它只会让代理转发到一个必然 404 的地址。
+    //   （candidates / logical 两个子组**各自**带 `?` —— `customer-merge/candidates` 与
+    //   `customer-merge/logical` 本身就是后端真有的列表端点，必须放行。）
     // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
     //   （不是 `[0-9a-f-]+`）：后者会把 `confirm` / `reject` / `split` 这种非 UUID 形状也当成 id 放行。
     prefix: 'crm/',
     env: 'CRM_URL',
     fallback: 'http://127.0.0.1:8086',
     pattern:
-      /^customer\-merge(?:\/capabilities|\/scan|\/runs|\/operations|\/candidates(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:confirm|reject))?)?|\/logical(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/split)?)?)?$/,
+      /^customer\-merge(?:\/capabilities|\/scan|\/runs|\/operations|\/candidates(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:confirm|reject))?)?|\/logical(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/split)?)?)$/,
   },
   {
     // 4.4.1.3 采集箱（channel 服务）。本条目是**新增一条 services[] 元素**，

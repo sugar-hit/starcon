@@ -139,6 +139,8 @@ it('未交付 / 不该存在的形状仍然被拒 —— 放行不该存在的�
   const fetcher = vi.fn();
   vi.stubGlobal('fetch', fetcher);
   for (const path of [
+    // 🔴 **裸路径不放行**：后端没有裸路径端点，逻辑客户列表的真身是 logical。
+    'crm/customer-merge',
     // 🔴 **没有批量合并**：合并必须逐条人工确认。
     'crm/customer-merge/bulk',
     // 🔴 **不导出**：证据里只有脱敏形态的联系方式。
