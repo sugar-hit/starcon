@@ -10206,6 +10206,46 @@ const services: readonly {
       /^customer\-contacts(?:\/(?:capabilities|opt-out-check|timeline|ingest)|\/contacts(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|\/opt-outs(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:revoke|events))?)?)$/,
   },
   {
+    // 15.3.1.1 客户列表（crm 服务，卷 15 客户与客服 L3 锚点 15.3.1「客户主档」下的第一格）。
+    //
+    // 本条目是**新增一条独立的 services[] 元素**，不是往既有的 `prefix: 'crm/'` 分支里并分支 ——
+    //   既有的 crm 条目**一字未改、也不重排**。
+    //
+    // ---- 插入锚点：紧跟 `crm/customer-contacts`（15.3.2.2 接触记录）那条元素之后 ----
+    //   ⚠️ 本车道原先落在**数组末尾**（收尾的 `];` 之前），与 18.4.2.3 落在同一锚点 ⇒
+    //   并入集成头时 git 判同锚点冲突。整块搬到 crm 中段这条锚点之后：
+    //   与数组末尾相距 4500 行以上、与 18.4.3.2 的锚点相距 3800 行以上 ⇒ 能干净求并。
+    //   既有条目**一字未改、也不重排**；本元素的 pattern / prefix / env / fallback 原样保留。
+    //
+    // ---- 首 token「customers」的零命中核对结论 ----
+    //   本文件里 `prefix: 'crm/'` 的既有条目首 token 分别是 buyer-emails / email-rules /
+    //   knowledge / message-inbox / message-sends / message-classifications / review-requests /
+    //   reviews / review-replies / negative-reviews / review-rules / customer-tags /
+    //   customer-contacts / care-reminders / auto-replies / service-tickets / cart-recovery /
+    //   service-ticket-process —— **没有一条**首 token 是 `customers`。
+    //   ⚠️ 特别核对两个容易混的：`customer-tags`（15.3.2.1 客户标签）与
+    //   `customer-contacts`（15.3.2.2 接触记录）的正则要求第 9 个字符是 `-`，
+    //   而本模块是 `customers`（第 9 个字符是 `s`）—— **两者互斥**，不会互相吃掉。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   customers                     客户列表（GET；真分页 + 多维筛选 + 分层统计）
+    //   customers/capabilities        能力声明（哪些真交付 / 哪些还没交付、归谁）
+    //   customers/runs                刷新运行记录（GET，只读台账）
+    //   customers/sync                从上游刷新客户档案（POST；真拉事实、真落库）
+    //   customers/contact             登记 / 修正联系方式（PUT）
+    //
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   crm/customers/{uuid}          —— **客户详情是 15.3.1.2 的职责**，本模块没有这个端点。
+    //   crm/customers/unknown          —— 未实现的子路径仍然 404。
+    //   crm/customers/export           —— 🔴 **不导出联系方式**：买家联系方式属敏感数据，
+    //                                    蓝图 15 卷明写「不进导出默认字段」。
+    //   crm/customers/bulk             —— 没有批量端点。
+    prefix: 'crm/',
+    env: 'CRM_URL',
+    fallback: 'http://127.0.0.1:8086',
+    pattern: /^customers(?:\/(?:capabilities|runs|sync|contact))?$/,
+  },
+  {
     // 15.5.2.1 关怀与催办（crm 服务，卷 15 L3 锚点 15.5.2 下的触达子域）。
     //
     // ⚠️ 本条目是**新增一条独立的 `services[]` 元素**，不是往既有 crm 那几条巨型 alternation 里
