@@ -14569,6 +14569,666 @@
         },
         "type": "object"
       },
+      "SmartQueryAskInput": {
+        "properties": {
+          "dimensionCode": {
+            "description": "显式指定受控维度码（可选）",
+            "nullable": true,
+            "type": "string"
+          },
+          "metricCode": {
+            "description": "显式指定受控指标码（可选）",
+            "nullable": true,
+            "type": "string"
+          },
+          "question": {
+            "description": "中文问句（受控问法；解析不到受控条目会如实答「不支持这个问法」）",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SmartQueryCapabilities": {
+        "properties": {
+          "capabilities": {
+            "items": {
+              "$ref": "#/components/schemas/SmartQueryCapability"
+            },
+            "type": "array"
+          },
+          "gaps": {
+            "items": {
+              "$ref": "#/components/schemas/SmartQueryGap"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "SmartQueryCapability": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "evidence": {
+            "type": "string"
+          },
+          "moduleId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SmartQueryConditions": {
+        "nullable": true,
+        "properties": {
+          "aggregation": {
+            "type": "string"
+          },
+          "caliber": {
+            "type": "string"
+          },
+          "currencyAware": {
+            "type": "boolean"
+          },
+          "dimensionCode": {
+            "type": "string"
+          },
+          "dimensionName": {
+            "type": "string"
+          },
+          "filters": {
+            "items": {
+              "$ref": "#/components/schemas/SmartQueryFilter"
+            },
+            "type": "array"
+          },
+          "metricCode": {
+            "type": "string"
+          },
+          "metricName": {
+            "type": "string"
+          },
+          "periodCode": {
+            "type": "string"
+          },
+          "periodFrom": {
+            "format": "date",
+            "type": "string"
+          },
+          "periodTo": {
+            "format": "date",
+            "type": "string"
+          },
+          "sort": {
+            "$ref": "#/components/schemas/SmartQuerySort"
+          },
+          "unit": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SmartQueryCurrencyValue": {
+        "properties": {
+          "availability": {
+            "type": "string"
+          },
+          "availabilityNote": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "value": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SmartQueryDimensionColumn": {
+        "properties": {
+          "dimensionCode": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SmartQueryDimensionValue": {
+        "properties": {
+          "dimensionCode": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SmartQueryDimensionView": {
+        "properties": {
+          "allowedOperators": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "dimensionCode": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "strongKeywords": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "unavailableReason": {
+            "type": "string"
+          },
+          "valueKind": {
+            "type": "string"
+          },
+          "weakKeywords": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "SmartQueryEvidence": {
+        "properties": {
+          "caliberNote": {
+            "type": "string"
+          },
+          "detailLabel": {
+            "type": "string"
+          },
+          "detailRoute": {
+            "type": "string"
+          },
+          "factField": {
+            "type": "string"
+          },
+          "factLabel": {
+            "type": "string"
+          },
+          "factRef": {
+            "type": "string"
+          },
+          "factService": {
+            "type": "string"
+          },
+          "factTable": {
+            "type": "string"
+          },
+          "metricCode": {
+            "type": "string"
+          },
+          "metricUnit": {
+            "type": "string"
+          },
+          "metricValue": {
+            "nullable": true,
+            "type": "string"
+          },
+          "snapshotAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SmartQueryFilter": {
+        "properties": {
+          "dimensionCode": {
+            "type": "string"
+          },
+          "operator": {
+            "type": "string"
+          },
+          "valueText": {
+            "type": "string"
+          },
+          "valueText2": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SmartQueryGap": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "moduleId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "relation": {
+            "type": "string"
+          },
+          "service": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SmartQueryMeasureValue": {
+        "properties": {
+          "availability": {
+            "type": "string"
+          },
+          "availabilityNote": {
+            "type": "string"
+          },
+          "currencyAware": {
+            "type": "boolean"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "metricCode": {
+            "type": "string"
+          },
+          "unit": {
+            "type": "string"
+          },
+          "values": {
+            "items": {
+              "$ref": "#/components/schemas/SmartQueryCurrencyValue"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "SmartQueryMetricColumn": {
+        "properties": {
+          "currencyAware": {
+            "type": "boolean"
+          },
+          "description": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "metricCode": {
+            "type": "string"
+          },
+          "unit": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SmartQueryMetricView": {
+        "properties": {
+          "aggregation": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "currencyAware": {
+            "type": "boolean"
+          },
+          "detailRoute": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "metricCode": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "sourceCaliber": {
+            "type": "string"
+          },
+          "sourceEndpoint": {
+            "type": "string"
+          },
+          "sourceService": {
+            "type": "string"
+          },
+          "strongKeywords": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "unavailableReason": {
+            "type": "string"
+          },
+          "unit": {
+            "type": "string"
+          },
+          "weakKeywords": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "SmartQueryNextAction": {
+        "properties": {
+          "label": {
+            "type": "string"
+          },
+          "moduleId": {
+            "type": "string"
+          },
+          "route": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SmartQueryPage": {
+        "properties": {
+          "keyword": {
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/SmartQueryQueryView"
+            },
+            "type": "array"
+          },
+          "saved": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "SmartQueryQueryView": {
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "dimensionCode": {
+            "type": "string"
+          },
+          "dimensionName": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "evidenceCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "matchMode": {
+            "type": "string"
+          },
+          "metricCode": {
+            "type": "string"
+          },
+          "metricName": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "ownerUserId": {
+            "type": "string"
+          },
+          "periodCode": {
+            "type": "string"
+          },
+          "periodFrom": {
+            "format": "date",
+            "type": "string"
+          },
+          "periodTo": {
+            "format": "date",
+            "type": "string"
+          },
+          "queryId": {
+            "type": "string"
+          },
+          "question": {
+            "type": "string"
+          },
+          "reportCode": {
+            "type": "string"
+          },
+          "reportId": {
+            "type": "string"
+          },
+          "resolved": {
+            "type": "boolean"
+          },
+          "saved": {
+            "type": "boolean"
+          },
+          "unavailableReason": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SmartQueryResult": {
+        "properties": {
+          "caliberNotes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "conditions": {
+            "$ref": "#/components/schemas/SmartQueryConditions"
+          },
+          "dataUpdatedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "dataUpdatedNote": {
+            "type": "string"
+          },
+          "dimensionColumns": {
+            "items": {
+              "$ref": "#/components/schemas/SmartQueryDimensionColumn"
+            },
+            "type": "array"
+          },
+          "evidence": {
+            "items": {
+              "$ref": "#/components/schemas/SmartQueryEvidence"
+            },
+            "type": "array"
+          },
+          "matchMode": {
+            "type": "string"
+          },
+          "metricColumns": {
+            "items": {
+              "$ref": "#/components/schemas/SmartQueryMetricColumn"
+            },
+            "type": "array"
+          },
+          "nextActions": {
+            "items": {
+              "$ref": "#/components/schemas/SmartQueryNextAction"
+            },
+            "type": "array"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "queryId": {
+            "type": "string"
+          },
+          "question": {
+            "type": "string"
+          },
+          "reportCode": {
+            "type": "string"
+          },
+          "reportId": {
+            "type": "string"
+          },
+          "resolved": {
+            "type": "boolean"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/SmartQueryResultRow"
+            },
+            "type": "array"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusNote": {
+            "type": "string"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "unavailableReason": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SmartQueryResultRow": {
+        "properties": {
+          "dimensions": {
+            "items": {
+              "$ref": "#/components/schemas/SmartQueryDimensionValue"
+            },
+            "type": "array"
+          },
+          "measures": {
+            "items": {
+              "$ref": "#/components/schemas/SmartQueryMeasureValue"
+            },
+            "type": "array"
+          },
+          "seq": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "SmartQuerySaveInput": {
+        "properties": {
+          "displayName": {
+            "description": "常用查询的名字（1–120 字）",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SmartQuerySemanticLayer": {
+        "properties": {
+          "dimensions": {
+            "items": {
+              "$ref": "#/components/schemas/SmartQueryDimensionView"
+            },
+            "type": "array"
+          },
+          "gaps": {
+            "items": {
+              "$ref": "#/components/schemas/SmartQueryGap"
+            },
+            "type": "array"
+          },
+          "metrics": {
+            "items": {
+              "$ref": "#/components/schemas/SmartQueryMetricView"
+            },
+            "type": "array"
+          },
+          "rules": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "SmartQuerySort": {
+        "properties": {
+          "by": {
+            "type": "string"
+          },
+          "direction": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "TextBannedTermInput": {
         "properties": {
           "category": {
@@ -30073,6 +30733,412 @@
         },
         "tags": [
           "payment-funds-controller"
+        ]
+      }
+    },
+    "/platform/smart-query/capabilities": {
+      "get": {
+        "operationId": "get_platform_smart_query_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SmartQueryCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "smart-query-controller"
+        ]
+      }
+    },
+    "/platform/smart-query/dimensions": {
+      "get": {
+        "operationId": "get_platform_smart_query_dimensions",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/SmartQueryDimensionView"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "smart-query-controller"
+        ]
+      }
+    },
+    "/platform/smart-query/metrics": {
+      "get": {
+        "operationId": "get_platform_smart_query_metrics",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/SmartQueryMetricView"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "smart-query-controller"
+        ]
+      }
+    },
+    "/platform/smart-query/queries": {
+      "get": {
+        "operationId": "get_platform_smart_query_queries",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "saved",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SmartQueryPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "smart-query-controller"
+        ]
+      }
+    },
+    "/platform/smart-query/queries/{queryId}": {
+      "get": {
+        "operationId": "get_platform_smart_query_queries_queryId",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "queryId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SmartQueryQueryView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "smart-query-controller"
+        ]
+      }
+    },
+    "/platform/smart-query/queries/{queryId}/run": {
+      "post": {
+        "operationId": "post_platform_smart_query_queries_queryId_run",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "queryId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SmartQueryResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "smart-query-controller"
+        ]
+      }
+    },
+    "/platform/smart-query/queries/{queryId}/save": {
+      "delete": {
+        "operationId": "delete_platform_smart_query_queries_queryId_save",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "queryId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SmartQueryQueryView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "smart-query-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_platform_smart_query_queries_queryId_save",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "queryId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SmartQuerySaveInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SmartQueryQueryView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "smart-query-controller"
+        ]
+      }
+    },
+    "/platform/smart-query/query": {
+      "post": {
+        "operationId": "post_platform_smart_query_query",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SmartQueryAskInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SmartQueryResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "smart-query-controller"
+        ]
+      }
+    },
+    "/platform/smart-query/semantic-layer": {
+      "get": {
+        "operationId": "get_platform_smart_query_semantic_layer",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SmartQuerySemanticLayer"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "smart-query-controller"
         ]
       }
     },

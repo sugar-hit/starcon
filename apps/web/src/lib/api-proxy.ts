@@ -15183,6 +15183,57 @@ const services: readonly {
       /^assistant\/(?:capabilities|intents|ask|sessions\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})$/,
   },
   {
+    // 18.4.1.2 智能查询（platform 服务，卷 18「集成开放与智能自动化」L3 18.4.1「智能问答」下的第二格）。
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，既有条目**一字未改、也不重排**。
+    //
+    // ---- 插入锚点选在「18.4.1.1 对话助手（assistant）」那条**之后**（本模块的上游紧邻）----
+    //   本文件是并行车道共同的累积型文件：同批其它车道分别落在「数组开头」
+    //   （18.3.1.1 / 18.3.3.1）与「数组末尾」（5.1.1.2 / 18.5.2.1 等）——
+    //   本车道落在中段，与上面两个锚点都相距甚远 ⇒ 并入时 git 能干净求并。
+    //
+    // ---- 首 token「smart-query」的零命中核对结论 ----
+    //   本文件里既有的 `prefix: 'platform/'` 条目首 token 分别是
+    //   automation-rules / automation / automation / automation-rule-editor / auto-approvals /
+    //   data-migration / webhooks / deliveries / io / ai / text / apps / finance-software /
+    //   api-catalog / call-monitor / payment-funds / external-integrations / assistant。
+    //   **没有一个**能吃掉 `smart-query/...` ⇒ 天然互斥。
+    //   ⚠️ `smart-query`（18.4.1.2）与 `assistant`（18.4.1.1）**不是一件事**：
+    //   那一页是「问一句话得一个答案 + 明细链接」，本条是「把一句话变成
+    //   **可执行的查询条件**（筛选 / 聚合 / 排序）+ 报表草稿 + 常用查询」。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   smart-query/capabilities             能力声明（哪些真接通 / 哪些还没交付、归谁）
+    //   smart-query/semantic-layer           受控语义层目录（**能问什么**的唯一真相）
+    //   smart-query/metrics                  指标清单（前端下拉用的简表）
+    //   smart-query/dimensions               维度清单（13.6.1.1 的 5 个白名单维度）
+    //   smart-query/query                    提一个问题（POST；解析 ⇒ 受控条件 + 结果表 + 明细依据）
+    //   smart-query/queries                  查询台账 / 常用查询清单（GET 真分页真搜索真计数）
+    //   smart-query/queries/{uuid}           读一条查询（GET）
+    //   smart-query/queries/{uuid}/save      存为常用查询（POST）/ 取消常用（DELETE）
+    //   smart-query/queries/{uuid}/run       重跑（POST；**沿用**当初解析出来的受控条件）
+    //
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   platform/smart-query                          —— 裸路径：后端**没有**汇总端点。
+    //   platform/smart-query/unknown                   —— 未实现的子路径仍然 404。
+    //   platform/smart-query/queries/not-a-uuid        —— 非 UUID 段不应被 uuid 分支吃掉。
+    //   platform/smart-query/queries/{uuid}/delete     —— 台账是**只追加**的，删不了。
+    //   platform/smart-query/queries/{uuid}/export     —— 后端**没有**导出端点。
+    //   platform/smart-query/sql                       —— 🔴 **没有自由 SQL 入口**：
+    //     蓝图加粗句「自然语言只映射到受控语义层指标，不生成任意 SQL」——
+    //     放行一条「自己下 SQL」的路径，等于把这条加粗句从后端搬到前端再拆掉。
+    //   platform/smart-query/queries/{uuid}/extra      —— 多一段仍然 404。
+    //
+    // id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //   （不是 `[0-9a-f-]+`）：后者会把 `save` / `run` 这种非 UUID 形状也当成 id 放行。
+    // 字面量子路径（capabilities / semantic-layer / metrics / dimensions / query / queries）
+    //   排在 {uuid} 段**之前**判别 —— alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    prefix: 'platform/',
+    env: 'PLATFORM_URL',
+    fallback: 'http://127.0.0.1:8089',
+    pattern:
+      /^smart\-query\/(?:capabilities|semantic\-layer|metrics|dimensions|query|queries(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:save|run))?)?)$/,
+  },
+  {
     // 5.1.1.2 价目项批量维护（catalog 服务，卷 05「定价与价目」L3 5.1.1「价目表」下的第二格）。
     // ⚠️ 本条目是**新增一条独立的 services[] 元素**，**追加在数组末尾**（收尾的 `];` 之前）——
     //   既有条目一字未改、也不重排（并入时 git 按前缀求并，取错一侧不会丢掉别人已交付的路由）。
