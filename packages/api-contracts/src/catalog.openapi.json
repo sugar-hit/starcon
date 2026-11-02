@@ -4855,6 +4855,17 @@
         },
         "type": "object"
       },
+      "CapabilityNote": {
+        "properties": {
+          "content": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "CartonCalcInput": {
         "properties": {
           "cartonMaxGrossWeightG": {
@@ -8117,6 +8128,118 @@
           },
           "version": {
             "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CoverageEntry": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "coverage": {
+            "$ref": "#/components/schemas/CoverageSummary"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "effectiveNow": {
+            "type": "boolean"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "itemCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CoverageOverview": {
+        "properties": {
+          "currencies": {
+            "items": {
+              "$ref": "#/components/schemas/CurrencyCoverage"
+            },
+            "type": "array"
+          },
+          "effectiveNowCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "enabledCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "listCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "lists": {
+            "items": {
+              "$ref": "#/components/schemas/CoverageEntry"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "scopeTypes": {
+            "items": {
+              "$ref": "#/components/schemas/ScopeTypeCoverage"
+            },
+            "type": "array"
+          },
+          "totalItemCount": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CoverageSummary": {
+        "properties": {
+          "appliesToWholeTenant": {
+            "type": "boolean"
+          },
+          "legalEntityCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "scopeTotal": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "shopCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "siteCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "text": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CurrencyCoverage": {
+        "properties": {
+          "currency": {
+            "type": "string"
+          },
+          "listCount": {
+            "format": "int32",
             "type": "integer"
           }
         },
@@ -22860,6 +22983,299 @@
         },
         "type": "object"
       },
+      "PriceListCapabilities": {
+        "properties": {
+          "conflictNote": {
+            "type": "string"
+          },
+          "currencyNote": {
+            "type": "string"
+          },
+          "downstreamNote": {
+            "type": "string"
+          },
+          "itemCountNote": {
+            "type": "string"
+          },
+          "notes": {
+            "items": {
+              "$ref": "#/components/schemas/CapabilityNote"
+            },
+            "type": "array"
+          },
+          "scopeNote": {
+            "type": "string"
+          },
+          "scopeTypes": {
+            "items": {
+              "enum": [
+                "LEGAL_ENTITY",
+                "SHOP",
+                "SITE"
+              ],
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "upstreamNote": {
+            "type": "string"
+          },
+          "validityNote": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PriceListDetail": {
+        "properties": {
+          "coverage": {
+            "$ref": "#/components/schemas/CoverageSummary"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          },
+          "scopes": {
+            "items": {
+              "$ref": "#/components/schemas/ScopeView"
+            },
+            "type": "array"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/PriceListSummary"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "validFrom": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "validTo": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "version": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "PriceListInput": {
+        "properties": {
+          "code": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "currency": {
+            "pattern": "^[A-Za-z]{3}$",
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "name": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "scopes": {
+            "items": {
+              "$ref": "#/components/schemas/ScopeInput"
+            },
+            "type": "array"
+          },
+          "validFrom": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "validTo": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "version": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "code",
+          "currency",
+          "name",
+          "validFrom"
+        ],
+        "type": "object"
+      },
+      "PriceListLegalEntity": {
+        "properties": {
+          "baseCurrency": {
+            "nullable": true,
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PriceListPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/PriceListSummary"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "PriceListShop": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "legalEntityCode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "legalEntityName": {
+            "nullable": true,
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "siteCodes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PriceListSite": {
+        "properties": {
+          "countryCode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "defaultCurrency": {
+            "nullable": true,
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "platformName": {
+            "type": "string"
+          },
+          "siteCode": {
+            "type": "string"
+          },
+          "siteName": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PriceListSummary": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "coverage": {
+            "$ref": "#/components/schemas/CoverageSummary"
+          },
+          "createdBy": {
+            "nullable": true,
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "effectiveNow": {
+            "type": "boolean"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "itemCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "validFrom": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "validTo": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "PricingCostAllocationAdjustmentInput": {
         "nullable": true,
         "properties": {
@@ -25753,6 +26169,32 @@
         },
         "type": "object"
       },
+      "ScopeDirectory": {
+        "properties": {
+          "legalEntities": {
+            "items": {
+              "$ref": "#/components/schemas/PriceListLegalEntity"
+            },
+            "type": "array"
+          },
+          "shops": {
+            "items": {
+              "$ref": "#/components/schemas/PriceListShop"
+            },
+            "type": "array"
+          },
+          "sites": {
+            "items": {
+              "$ref": "#/components/schemas/PriceListSite"
+            },
+            "type": "array"
+          },
+          "sourceNote": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "ScopeInput": {
         "properties": {
           "platformCode": {
@@ -25774,6 +26216,26 @@
           "ref",
           "type"
         ],
+        "type": "object"
+      },
+      "ScopeTypeCoverage": {
+        "properties": {
+          "listCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "type": {
+            "enum": [
+              "LEGAL_ENTITY",
+              "SHOP",
+              "SITE"
+            ],
+            "type": "string"
+          },
+          "typeLabel": {
+            "type": "string"
+          }
+        },
         "type": "object"
       },
       "ScopeView": {
@@ -57658,6 +58120,354 @@
         },
         "tags": [
           "price-history-controller"
+        ]
+      }
+    },
+    "/catalog/price-lists/capabilities": {
+      "get": {
+        "operationId": "get_catalog_price_lists_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PriceListCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "price-list-controller"
+        ]
+      }
+    },
+    "/catalog/price-lists/coverage": {
+      "get": {
+        "operationId": "get_catalog_price_lists_coverage",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CoverageOverview"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "price-list-controller"
+        ]
+      }
+    },
+    "/catalog/price-lists/lists": {
+      "get": {
+        "operationId": "get_catalog_price_lists_lists",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "currency",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "scopeType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "scopeRef",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "enabled",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "effectiveNow",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PriceListPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "price-list-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_catalog_price_lists_lists",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PriceListInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PriceListDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "price-list-controller"
+        ]
+      }
+    },
+    "/catalog/price-lists/lists/{priceListId}": {
+      "delete": {
+        "operationId": "delete_catalog_price_lists_lists_priceListId",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "priceListId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "price-list-controller"
+        ]
+      },
+      "get": {
+        "operationId": "get_catalog_price_lists_lists_priceListId",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "priceListId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PriceListDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "price-list-controller"
+        ]
+      },
+      "put": {
+        "operationId": "put_catalog_price_lists_lists_priceListId",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "priceListId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PriceListInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PriceListDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "price-list-controller"
+        ]
+      }
+    },
+    "/catalog/price-lists/scope-directory": {
+      "get": {
+        "operationId": "get_catalog_price_lists_scope_directory",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScopeDirectory"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "price-list-controller"
         ]
       }
     },

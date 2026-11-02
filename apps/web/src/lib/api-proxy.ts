@@ -14683,6 +14683,42 @@ const services: readonly {
     pattern:
       /^automation\-rule\-editor\/(?:capabilities|event\-schemas(?:\/[A-Za-z0-9_-]+(?:\.[A-Za-z0-9_-]+)+)?|action\-catalog|api\-catalog|save|test|test\-runs)$/,
   },
+  {
+    // 5.1.1.1 价目表列表（catalog 服务，卷 05「定价与价目」L3 5.1.1「价目表」下的第一格）。
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，追加在**数组末尾** ——
+    //   既有条目一字未改、也不重排（并入时 git 按前缀求并，取错一侧不会丢掉别人已交付的路由）。
+    //
+    // 🔴 为什么用 `price-lists` 这个独立前缀：
+    //   * 既有 catalog 分支是**一条**覆盖全服务的长 alternation，里面没有 `price-lists`；
+    //     已逐条核对本文件里全部既有正则：`price-lists/**` **零命中**（既有分支不会先把它吃掉）。
+    //   * 5.1.1.2 价目项批量维护与 5.1.2.1 优先级与冲突检测是**别的模块**：
+    //     本车道只交付 5.1.1.1，不代未交付的兄弟模块开形状。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   price-lists/capabilities        能力声明（一价目一币种 / 半开区间 / 价目项数量来源 / 上下游）
+    //   price-lists/scope-directory     适用范围目录（法人 + 店铺 + 站点，来自上游授权只读端点）
+    //   price-lists/coverage            覆盖范围摘要（模块级：币种分布 + 范围类型分布 + 每张表的摘要）
+    //   price-lists/lists               价目表集合（GET 真分页 + 筛选 / POST 新建）
+    //   price-lists/lists/{uuid}        价目表详情（GET）/ 修改（PUT，乐观锁）/ 删除（DELETE）
+    //
+    // ⚠️ 判别顺序：**字面量子路径（capabilities / scope-directory / coverage）排在 {uuid} 段之前** ——
+    //    alternation 是首个命中即返回，顺序反了会被 uuid 支吃掉半截。
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //   （不是 `[0-9a-f-]+`）：后者会把 `lists` 这种非 UUID 形状也当成 id 放行。
+    // ⚠️ 外层分组**不带 `?`**：本模块没有裸集合读，放行裸路径 `price-lists` 就是凭空多出一条 GET。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸路径 `price-lists` —— 本模块没有裸路径资源。
+    //   * `price-lists/lists/{uuid}/items` —— 价目项（`price_list_item`）是 **5.1.1.2 的写入所有权**，
+    //     本模块**不建**那张表 ⇒ 后端没有这个端点 ⇒ 放行它只会让界面 404。
+    //   * `price-lists/lists/{uuid}/conflicts` —— 优先级与冲突检测是 **5.1.2.1**（本表的下游守门员），
+    //     本模块**不**实现冲突判定 ⇒ 后端没有这个端点。
+    prefix: 'catalog/',
+    env: 'CATALOG_URL',
+    fallback: 'http://127.0.0.1:8082',
+    pattern:
+      /^price\-lists(?:\/(?:capabilities|scope\-directory|coverage)|\/lists(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?)$/,
+  },
 ];
 
 function resolve(path: string) {
