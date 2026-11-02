@@ -87,7 +87,7 @@
 - `apps/web/src/components/crm/customer-list-model.test.ts`
 - `apps/web/src/components/crm/customer-list-workspace.tsx`
 - `apps/web/src/app/api/crm/customers-allowlist.test.ts`
-- `apps/web/src/lib/api-proxy.ts`（**只在数组末尾追加一条** `services[]` 元素）
+- `apps/web/src/lib/api-proxy.ts`（**新增一条独立的 `services[]` 元素**；锚点见下方「锚点搬家」小节）
 - `packages/api-contracts/src/contracts/crm.ts` + `packages/api-contracts/src/crm.openapi.json`
   （codegen 产物，`python3 tools/codegen/catalog-contracts.py --spec-dir backend/target/openapi`）
 - `docs/product/capability-blueprint/module-progress.md`（**只改 15.3.1.1 那一行**）
@@ -103,6 +103,31 @@
   apps/web/src/app/api/crm/customers-allowlist.test.ts` ⇒ 19/19 绿
 - `pnpm vitest run apps/web/src/app/api/trade` ⇒ 71 文件 / 394 用例全绿（改了 api-proxy 的全量回归）
 - `pnpm exec prettier --check`（只查本车道改动过的前端文件）绿
+
+## 追加：并入集成头的同锚点冲突与「锚点搬家」
+
+第一轮并入集成头时 `apps/web/src/lib/api-proxy.ts` 报 **CONFLICT**，车道状态被标成 `conflict`
+（**成果没丢**，是位置冲突不是内容冲突）。
+
+- **成因**：本车道原先把新的 `services[]` 元素插在**数组末尾**（收尾的 `];` 之前，
+  18.3.1.2 `automation-rule-editor` 之后），而已并入集成的 **18.4.2.3** 插在**同一位置**
+  ⇒ 三方求并在同一锚点撞车。18.4.3.2 也落在数组末尾附近。
+- **解法**：冲突处**取集成分支一侧**（18.4.2.3 / 18.4.3.2 的元素与注释**一字不改、不重排**），
+  把本车道的 15.3.1.1 元素（注释块 + `pattern` + `prefix` + `env` + `fallback`）**整块搬家**到
+  **紧接在 `prefix: 'crm/'` 且首 token 是 `customer-contacts`（15.3.2.2 接触记录）的那条元素之后**
+  —— 该元素在集成头里结束于第 **10166** 行（`  },`），本车道的元素落在 **10167–10206** 行。
+- **选这条锚点的理由**：与数组末尾（≈14790 行）相距 4500 行以上、与 18.4.3.2 的锚点
+  （≈13964 行）相距 3800 行以上 ⇒ git 能干净求并。
+- **本元素的功能字段一个字未改**：`pattern: /^customers(?:\/(?:capabilities|runs|sync|contact))?$/`、
+  `prefix: 'crm/'`、`env: 'CRM_URL'`、`fallback: 'http://127.0.0.1:8086'` 逐字保留
+  （首 token `customers` 与 `customer-tags` / `customer-contacts` 在第 9 个字符分叉的核对结论
+  仍写在注释里）。**只有那段描述锚点的注释**从「数组末尾」改成新锚点 —— 留着旧描述就是
+  一句假话，注释必须跟着事实走。
+- **与集成头文件的整体差分**：40 行新增、0 行删除 —— 即本车道的这一条元素，
+  集成头既有内容**一字未动**。
+- **并入后 L0/L1 全绿**：`./mvnw -q compile`（backend）绿；`pnpm typecheck` 绿；
+  `prettier --check` 绿；api-proxy **全量 allowlist 回归 291 文件 / 1638 用例全绿**
+  （含 trade 71 文件 / 394 用例）。
 
 ## 后续待办
 
