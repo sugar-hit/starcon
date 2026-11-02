@@ -278,13 +278,17 @@ CREATE INDEX platform_notify_delivery_record_attempt_by_recipient
 --
 -- 一行 = 一个收件人的一条**生效中**的退订。
 --
--- 🔴 UNIQUE(tenant_id, recipient_ref, channel, scope_type, scope_key)：
---   同一个收件人在同一个（渠道 × 范围）下**只可能有一条**退订登记。
---   ⇒ 服务层的「**先查后登记**」由这条唯一键兜底：并发两个请求同时登记，
---   一个成功、另一个撞唯一键 ⇒ 退订**不会**被登记两遍。
+-- 🔴 **「先查后登记」的数据库层兜底是这条*部分*唯一索引**：
+--   同一个收件人在同一个（渠道 × 范围）下**同时只能有一条生效中的**退订。
+--   ⇒ 并发两个请求同时登记，一个成功、另一个撞索引 ⇒ 退订**不会**被登记两遍。
 --
--- ⚠️ 撤销退订用 `revoked_at`（软撤销），**不物理删**：
---   「曾经退订过、后来又订阅了」本身是一条事实。
+-- ⚠️ 为什么是**部分**索引而不是表级 UNIQUE：
+--   撤销退订用 `revoked_at`（软撤销），**不物理删** —— 「曾经退订过、后来又订阅了」
+--   本身是一条事实。如果用表级 UNIQUE，后来再退订就只能**改回老行**，
+--   那一段「曾订阅」的区间就永远查不到了。部分索引让「重新退订」落成**新行**，
+--   历史区间原样留着。
+--
+-- ⚠️ 撤销退订后**不**再算「命中退订」：退订判定只看 {@code revoked_at is null} 的行。
 CREATE TABLE platform_notify_unsubscribe (
   id uuid PRIMARY KEY,
   tenant_id uuid NOT NULL,
@@ -325,8 +329,6 @@ CREATE TABLE platform_notify_unsubscribe (
   created_at timestamptz NOT NULL DEFAULT now(),
 
   UNIQUE(tenant_id, id),
-  -- 🔴 「先查后登记」的唯一键兜底。
-  UNIQUE(tenant_id, recipient_ref, channel, scope_type, scope_key),
 
   FOREIGN KEY(tenant_id, template_id)
     REFERENCES platform_notify_template(tenant_id, id) ON DELETE RESTRICT,
@@ -336,6 +338,11 @@ CREATE TABLE platform_notify_unsubscribe (
   CHECK(scope_type <> 'TEMPLATE' OR btrim(scope_key) <> ''),
   CHECK(revoked_at IS NULL OR revoked_at >= unsubscribed_at)
 );
+
+-- 🔴 「先查后登记」的数据库层兜底：**生效中**的退订，同一（收件人 × 渠道 × 范围）只许一条。
+CREATE UNIQUE INDEX platform_notify_unsubscribe_one_active
+  ON platform_notify_unsubscribe(tenant_id, recipient_ref, channel, scope_type, scope_key)
+  WHERE revoked_at IS NULL;
 
 -- 按收件人查（「这个人退订过什么」）。
 CREATE INDEX platform_notify_unsubscribe_by_recipient
