@@ -12776,6 +12776,357 @@
         },
         "type": "object"
       },
+      "NotifyAttemptRow": {
+        "properties": {
+          "attemptNo": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "attemptSource": {
+            "type": "string"
+          },
+          "channel": {
+            "type": "string"
+          },
+          "deliveryId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "durationMs": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "failureReason": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "occurredAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "outcome": {
+            "type": "string"
+          },
+          "recipientRef": {
+            "type": "string"
+          },
+          "statusCode": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "NotifyBlockRow": {
+        "properties": {
+          "blockedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "channel": {
+            "type": "string"
+          },
+          "deliveryId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "recipientRef": {
+            "type": "string"
+          },
+          "unsubscribeId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "unsubscribeScopeKey": {
+            "type": "string"
+          },
+          "unsubscribeScopeType": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "NotifyDeliveryCapabilities": {
+        "properties": {
+          "capabilities": {
+            "items": {
+              "$ref": "#/components/schemas/NotifyDeliveryCapability"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "NotifyDeliveryCapability": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "evidence": {
+            "type": "string"
+          },
+          "moduleId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "NotifyDeliveryDetail": {
+        "properties": {
+          "attempts": {
+            "items": {
+              "$ref": "#/components/schemas/NotifyAttemptRow"
+            },
+            "type": "array"
+          },
+          "blocks": {
+            "items": {
+              "$ref": "#/components/schemas/NotifyBlockRow"
+            },
+            "type": "array"
+          },
+          "delivery": {
+            "$ref": "#/components/schemas/NotifyDeliveryRow"
+          }
+        },
+        "type": "object"
+      },
+      "NotifyDeliveryInput": {
+        "properties": {
+          "channel": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "recipients": {
+            "items": {
+              "$ref": "#/components/schemas/NotifyRecipientInput"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "scopeRef": {
+            "type": "string"
+          },
+          "scopeType": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "templateId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "templateVersionId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "channel",
+          "recipients",
+          "scopeType",
+          "templateId"
+        ],
+        "type": "object"
+      },
+      "NotifyDeliveryRow": {
+        "properties": {
+          "attemptCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "blockedCount": {
+            "type": "number"
+          },
+          "channel": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "deliveredAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "deliveredCount": {
+            "type": "number"
+          },
+          "deliveryRate": {
+            "type": "number"
+          },
+          "failedCount": {
+            "type": "number"
+          },
+          "failureReason": {
+            "type": "string"
+          },
+          "firstAttemptAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "lastAttemptAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "nextRetryAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "pendingCount": {
+            "type": "number"
+          },
+          "recipientCount": {
+            "type": "number"
+          },
+          "scopeRef": {
+            "type": "string"
+          },
+          "scopeType": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "targetedCount": {
+            "type": "number"
+          },
+          "templateId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "templateKey": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "NotifyDeliveryStatistics": {
+        "properties": {
+          "blockedAttempts": {
+            "type": "number"
+          },
+          "deliveryRate": {
+            "type": "number"
+          },
+          "distinctRecipients": {
+            "type": "number"
+          },
+          "generatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "totalBlocked": {
+            "type": "number"
+          },
+          "totalDelivered": {
+            "type": "number"
+          },
+          "totalDeliveries": {
+            "type": "number"
+          },
+          "totalFailed": {
+            "type": "number"
+          },
+          "totalRecipients": {
+            "type": "number"
+          },
+          "totalTargeted": {
+            "type": "number"
+          },
+          "unsubscribeRate": {
+            "type": "number"
+          },
+          "unsubscribedRecipients": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "NotifyRecipientInput": {
+        "properties": {
+          "durationMs": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "failureReason": {
+            "type": "string"
+          },
+          "outcome": {
+            "type": "string"
+          },
+          "ref": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "statusCode": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "ref"
+        ],
+        "type": "object"
+      },
+      "NotifyRetryInput": {
+        "properties": {
+          "durationMs": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "failureReason": {
+            "type": "string"
+          },
+          "nextRetryAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "outcomeKnown": {
+            "type": "boolean"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "recipients": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "statusCode": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "success": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
       "NotifyTemplateCapabilities": {
         "properties": {
           "capabilities": {
@@ -13436,6 +13787,84 @@
           "versionNo": {
             "format": "int32",
             "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "NotifyUnsubscribeInput": {
+        "properties": {
+          "channel": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "recipientRef": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "scopeKey": {
+            "type": "string"
+          },
+          "scopeType": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "templateId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "channel",
+          "recipientRef",
+          "scopeType"
+        ],
+        "type": "object"
+      },
+      "NotifyUnsubscribeRow": {
+        "properties": {
+          "channel": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "recipientRef": {
+            "type": "string"
+          },
+          "revokedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "scopeKey": {
+            "type": "string"
+          },
+          "scopeType": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "templateId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "unsubscribedAt": {
+            "format": "date-time",
+            "type": "string"
           }
         },
         "type": "object"
@@ -28062,6 +28491,544 @@
         },
         "tags": [
           "import-export-controller"
+        ]
+      }
+    },
+    "/platform/notifications/capabilities": {
+      "get": {
+        "operationId": "get_platform_notifications_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotifyDeliveryCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "notify-delivery-controller"
+        ]
+      }
+    },
+    "/platform/notifications/deliveries": {
+      "get": {
+        "operationId": "get_platform_notifications_deliveries",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "templateId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "channel",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "scopeType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/NotifyDeliveryRow"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "notify-delivery-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_platform_notifications_deliveries",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NotifyDeliveryInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotifyDeliveryDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "notify-delivery-controller"
+        ]
+      }
+    },
+    "/platform/notifications/deliveries/statistics": {
+      "get": {
+        "operationId": "get_platform_notifications_deliveries_statistics",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotifyDeliveryStatistics"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "notify-delivery-controller"
+        ]
+      }
+    },
+    "/platform/notifications/deliveries/{id}": {
+      "get": {
+        "operationId": "get_platform_notifications_deliveries_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotifyDeliveryDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "notify-delivery-controller"
+        ]
+      }
+    },
+    "/platform/notifications/deliveries/{id}/retry": {
+      "post": {
+        "operationId": "post_platform_notifications_deliveries_id_retry",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NotifyRetryInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotifyDeliveryDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "notify-delivery-controller"
+        ]
+      }
+    },
+    "/platform/notifications/unsubscribes": {
+      "get": {
+        "operationId": "get_platform_notifications_unsubscribes",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "recipientRef",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "channel",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "scopeType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "active",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/NotifyUnsubscribeRow"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "notify-delivery-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_platform_notifications_unsubscribes",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NotifyUnsubscribeInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotifyUnsubscribeRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "notify-delivery-controller"
+        ]
+      }
+    },
+    "/platform/notifications/unsubscribes/blocks": {
+      "get": {
+        "operationId": "get_platform_notifications_unsubscribes_blocks",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "recipientRef",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "deliveryId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/NotifyBlockRow"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "notify-delivery-controller"
+        ]
+      }
+    },
+    "/platform/notifications/unsubscribes/{id}/revoke": {
+      "post": {
+        "operationId": "post_platform_notifications_unsubscribes_id_revoke",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotifyUnsubscribeRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "notify-delivery-controller"
         ]
       }
     },
