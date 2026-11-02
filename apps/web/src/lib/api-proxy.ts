@@ -14683,6 +14683,45 @@ const services: readonly {
     pattern:
       /^automation\-rule\-editor\/(?:capabilities|event\-schemas(?:\/[A-Za-z0-9_-]+(?:\.[A-Za-z0-9_-]+)+)?|action\-catalog|api\-catalog|save|test|test\-runs)$/,
   },
+  {
+    // 15.3.1.1 客户列表（crm 服务，卷 15 客户与客服 L3 锚点 15.3.1「客户主档」下的第一格）。
+    //
+    // 本条目是**新增一条独立的 services[] 元素**，不是往既有的 `prefix: 'crm/'` 分支里并分支 ——
+    //   既有的 crm 条目**一字未改、也不重排**。
+    //
+    // ---- 插入锚点选在**数组末尾**（收尾的 `];` 之前）----
+    //   本文件是多车道共用的累积型白名单：数组末尾由 18.3.1.2 的
+    //   automation-rule-editor 占着，本车道落在这里 ⇒ 与其它车道的锚点相距甚远，
+    //   并入时 git 能干净求并（既有条目一字未动、也不重排）。
+    //
+    // ---- 首 token「customers」的零命中核对结论 ----
+    //   本文件里 `prefix: 'crm/'` 的既有条目首 token 分别是 buyer-emails / email-rules /
+    //   knowledge / message-inbox / message-sends / message-classifications / review-requests /
+    //   reviews / review-replies / negative-reviews / review-rules / customer-tags /
+    //   customer-contacts / care-reminders / auto-replies / service-tickets / cart-recovery /
+    //   service-ticket-process —— **没有一条**首 token 是 `customers`。
+    //   ⚠️ 特别核对两个容易混的：`customer-tags`（15.3.2.1 客户标签）与
+    //   `customer-contacts`（15.3.2.2 接触记录）的正则要求第 9 个字符是 `-`，
+    //   而本模块是 `customers`（第 9 个字符是 `s`）—— **两者互斥**，不会互相吃掉。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   customers                     客户列表（GET；真分页 + 多维筛选 + 分层统计）
+    //   customers/capabilities        能力声明（哪些真交付 / 哪些还没交付、归谁）
+    //   customers/runs                刷新运行记录（GET，只读台账）
+    //   customers/sync                从上游刷新客户档案（POST；真拉事实、真落库）
+    //   customers/contact             登记 / 修正联系方式（PUT）
+    //
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   crm/customers/{uuid}          —— **客户详情是 15.3.1.2 的职责**，本模块没有这个端点。
+    //   crm/customers/unknown          —— 未实现的子路径仍然 404。
+    //   crm/customers/export           —— 🔴 **不导出联系方式**：买家联系方式属敏感数据，
+    //                                    蓝图 15 卷明写「不进导出默认字段」。
+    //   crm/customers/bulk             —— 没有批量端点。
+    prefix: 'crm/',
+    env: 'CRM_URL',
+    fallback: 'http://127.0.0.1:8086',
+    pattern: /^customers(?:\/(?:capabilities|runs|sync|contact))?$/,
+  },
 ];
 
 function resolve(path: string) {
