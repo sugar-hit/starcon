@@ -125,8 +125,10 @@ it('未交付 / 不该存在的形状仍然被拒 —— 放行不该存在的�
   const fetcher = vi.fn();
   vi.stubGlobal('fetch', fetcher);
   for (const path of [
-    // 🔴 **客户详情是 15.3.1.2 的职责**（未交付）：放行它会让界面以为详情页已经通了。
-    `crm/customers/${ID}`,
+    // ⚠️ `crm/customers/{uuid}` **已被 15.3.1.2 客户详情放行**（同一业务对象的另一个面）：
+    //   15.3.1.1 交付时它还是 404（那时 15.3.1.2 未交付），现在这条断言已经过期 ——
+    //   继续钉住 404 就会把**已交付**的详情页判成红。
+    //   15.3.1.2 自己的白名单测试（customer-detail-allowlist.test.ts）反向钉住它被放行。
     'crm/customers/detail',
     // 🔴 **不导出联系方式**：买家联系方式属敏感数据，蓝图 15 卷明写「不进导出默认字段」。
     'crm/customers/export',

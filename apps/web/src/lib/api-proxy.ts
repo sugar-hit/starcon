@@ -10404,6 +10404,51 @@ const services: readonly {
     pattern: /^customers(?:\/(?:capabilities|runs|sync|contact))?$/,
   },
   {
+    // 15.3.1.2 客户详情（crm 服务，卷 15 客户与客服 L3 锚点 15.3.1「客户主档」下的客户详情子域）。
+    //
+    // 本条目是**新增一条独立的 services[] 元素**，不是往既有的 `prefix: 'crm/'` 分支里并分支 ——
+    //   既有的 crm 条目**一字未改、也不重排**。
+    //
+    // ---- 插入锚点：紧跟 `customers`（15.3.1.1 客户列表）那条元素之后 ----
+    //   本车道原先落在**数组末尾**（收尾的 `];` 之前），与同批其它车道撞同一锚点 ⇒
+    //   整块搬到 crm 中段这条锚点之后：与数组末尾相距 4600 行以上、
+    //   与 crm 中段其它既有条目相距 3800 行以上 ⇒ 能干净求并。
+    //   既有条目**一字未改、也不重排**；本元素的 pattern / prefix / env / fallback 原样保留。
+    //
+    // ---- 与 15.3.1.1 客户列表那条的**零命中核对**（两条首 token 都是 `customers`）----
+    //   15.3.1.1 的正则是 `^customers(?:\/(?:capabilities|runs|sync|contact))?$`：
+    //     * 它**不吃** `customers/{uuid}` —— uuid 段不在那四个字面量子路径里；
+    //     * 它也**不吃** `customers/{uuid}/timeline`。
+    //   本条的正则是 `^customers\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/timeline…)?$`：
+    //     * 它**不吃** `customers`（裸路径）、`customers/capabilities`、`customers/runs`、
+    //       `customers/sync`、`customers/contact` —— id 段必须是完整 UUID 形状。
+    //   ⇒ 两条**互不遮蔽**，各自只吃自己的形状。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   customers/{uuid}                 客户详情视图（GET；基本信息 + 金额 + 标签 +
+    //                                    跨店铺身份线索 + 逐段接入状态 + 时间线概要）
+    //   customers/{uuid}/timeline        统一时间线（GET；真分页 + 按来源筛选）
+    //   customers/{uuid}/timeline/rebuild 重建统一时间线（POST；真拉五个来源、幂等）
+    //
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   customers/{uuid}/merge          —— 🔴 跨店合并是 **15.3.1.3** 的职责（未交付）；
+    //                                    放行它会让界面以为「已经合并过了」。
+    //   customers/{uuid}/export          —— 🔴 **不导出联系方式**：买家联系方式属敏感数据。
+    //   customers/{uuid}/timeline/{uuid} —— 时间线没有「单条详情」形状（时间线按来源筛，不按 id 取）。
+    //   customers/not-a-uuid             —— 非 UUID 段不应被 uuid 分支吃掉。
+    //   customers/{uuid}/extra           —— 多一段仍然 404。
+    //
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //   （不是 `[0-9a-f-]+`）：后者会把 `merge` / `export` 这种非 UUID 形状也当成 id 放行。
+    // ⚠️ 字面量子路径（timeline）排在 {uuid} 段**之后**判别 —— 本模块的 id 段后面只跟
+    //   `timeline`，两者不会互相吃掉半截。
+    prefix: 'crm/',
+    env: 'CRM_URL',
+    fallback: 'http://127.0.0.1:8086',
+    pattern:
+      /^customers\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/timeline(?:\/rebuild)?)?$/,
+  },
+  {
     // 15.5.2.1 关怀与催办（crm 服务，卷 15 L3 锚点 15.5.2 下的触达子域）。
     //
     // ⚠️ 本条目是**新增一条独立的 `services[]` 元素**，不是往既有 crm 那几条巨型 alternation 里
