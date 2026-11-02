@@ -114,7 +114,10 @@ public final class SmartQueryModels {
    * @param operator 13.6.1.1 的同一套白名单：EQ / IN / GTE / LTE / BETWEEN
    */
   public record SmartQueryFilter(
-      String dimensionCode, String operator, String valueText, String valueText2) {}
+      String dimensionCode,
+      String operator,
+      String valueText,
+      @Schema(nullable = true) String valueText2) {}
 
   /**
    * 排序。
@@ -160,8 +163,8 @@ public final class SmartQueryModels {
   public record SmartQueryAskInput(
       @Schema(description = "中文问句（受控问法；解析不到受控条目会如实答「不支持这个问法」）")
           String question,
-      @Schema(description = "显式指定受控指标码（可选）") String metricCode,
-      @Schema(description = "显式指定受控维度码（可选）") String dimensionCode) {}
+      @Schema(nullable = true, description = "显式指定受控指标码（可选）") String metricCode,
+      @Schema(nullable = true, description = "显式指定受控维度码（可选）") String dimensionCode) {}
 
   // ================================================================ 结果
 
@@ -232,7 +235,7 @@ public final class SmartQueryModels {
       String question,
       String matchMode,
       boolean resolved,
-      SmartQueryConditions conditions,
+      @Schema(nullable = true) SmartQueryConditions conditions,
       String reportId,
       String reportCode,
       List<SmartQueryDimensionColumn> dimensionColumns,
@@ -288,5 +291,10 @@ public final class SmartQueryModels {
 
   /** 查询台账 / 常用查询清单（**真分页 + 真计数**）。 */
   public record SmartQueryPage(
-      List<SmartQueryQueryView> rows, long total, int page, int size, String keyword, Boolean saved) {}
+      List<SmartQueryQueryView> rows,
+      long total,
+      int page,
+      int size,
+      String keyword,
+      @Schema(nullable = true) Boolean saved) {}
 }
