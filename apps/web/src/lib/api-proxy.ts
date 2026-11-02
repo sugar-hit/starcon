@@ -6775,6 +6775,65 @@ const services: readonly {
       /^listing\-bulk\-collects(?:\/capabilities|\/plugin\-reports|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/run|\/results)?|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?$/,
   },
   {
+    // 15.3.1.3 跨店合并（crm 服务，卷 15「客户与客服」L3 锚点 15.3.1「客户主档」下的跨店合并子域）。
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有的 `prefix: 'crm/'` 分支里并分支 ——
+    //   既有条目**一字未改、也不重排**。
+    //
+    // ---- 插入锚点：紧跟 4.4.1.2 `listing-bulk-collects`（channel）那条元素之后 ----
+    //   本文件是并行车道共同的累积型文件：同批另外三条车道的锚点分别是
+    //   「identity 中段（15.6.2.1）」「catalog 中段（5.1.1.1 的 price-lists）」「crm 中段（15.3.1.2）」
+    //   与「数组末尾（5.1.1.2）」。本车道落在这里，与那四个锚点**都相距 3500 行以上** ⇒ 并入时 git 能干净求并。
+    //
+    // ---- 首 token「customer-merge」的零命中核对结论（**实测**，非目测）----
+    //   本文件里 `prefix: 'crm/'` 的既有条目首 token 分别是 buyer-emails / email-rules /
+    //   knowledge / message-inbox / message-sends / message-classifications / review-requests /
+    //   reviews / review-replies / negative-reviews / review-rules / customer-tags /
+    //   customer-contacts / care-reminders / auto-replies / service-tickets / cart-recovery /
+    //   service-ticket-process / customers —— **没有一条**是 `customer-merge`。
+    //   ⚠️ 特别核对三个容易混的：
+    //   * `customer-tags`（15.3.2.1 客户标签）：第 9 个字符是 `t`；
+    //   * `customer-contacts`（15.3.2.2 接触记录）：第 9 个字符是 `c`；
+    //   * `customers`（15.3.1.1 客户列表）：第 9 个字符是 `s`；
+    //   而本模块是 `customer-merge`：第 9 个字符是 `-` ⇒ **四者互斥**，谁也不会吃掉谁。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   customer-merge/capabilities                   能力声明（哪些真交付 / 归谁 / 两条硬规矩）
+    //   customer-merge/scan                           生成候选建议（POST；🔴 **只给建议，不合并**）
+    //   customer-merge/candidates                     候选队列（GET；真分页 + 状态 / 依据 / 关键词筛选）
+    //   customer-merge/candidates/{uuid}              候选详情（GET；证据全文 + 联系方式口径）
+    //   customer-merge/candidates/{uuid}/confirm      人工确认合并（POST；理由必填）
+    //   customer-merge/candidates/{uuid}/reject       拒绝候选（POST；理由必填）
+    //   customer-merge/logical/{uuid}                 逻辑客户详情（GET；成员 + 按币种分行的金额 + 操作记录）
+    //   customer-merge/logical/{uuid}/split           拆分一个成员（POST；理由必填，映射行不删）
+    //   customer-merge/operations                     操作记录（GET；只追加流水，真分页）
+    //   customer-merge/runs                           候选生成运行台账（GET；真分页）
+    //
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   customer-merge（裸路径）                      —— 逻辑客户列表的真身是 `customer-merge/logical`，
+    //                                                      后端**没有**裸路径端点（`@RequestMapping("/crm/customer-merge")`
+    //                                                      下面第一个子路径就是 capabilities）⇒ 裸路径不放行。
+    //   customer-merge/bulk                          —— 没有批量合并端点：合并**必须**逐条人工确认。
+    //   customer-merge/export                        —— 🔴 **不导出**：证据里只有脱敏形态的联系方式。
+    //   customer-merge/auto-merge                    —— 🔴 **自动合并永不开放**：蓝图加粗句「自动合并风险高」。
+    //   customer-merge/candidates/{uuid}/undo        —— 拆分的正名是 `logical/{uuid}/split`，这里没有 undo。
+    //   customer-merge/candidates/not-a-uuid          —— 非 UUID 段不应被 uuid 支吃掉。
+    //   customer-merge/candidates/{uuid}/extra        —— 多一段仍然 404。
+    //
+    // ⚠️ 判别顺序：字面量子路径（capabilities / scan / runs / operations / candidates / logical）
+    //   排在 {uuid} 段**之前** —— alternation 是首个命中即返回，顺序反了会被 uuid 支吃掉半截。
+    // ⚠️ 外层子路径组**不可省**（末尾没有 `?`）⇒ 裸路径 `customer-merge` 不匹配：
+    //   后端没有裸路径端点，放行它只会让代理转发到一个必然 404 的地址。
+    //   （candidates / logical 两个子组**各自**带 `?` —— `customer-merge/candidates` 与
+    //   `customer-merge/logical` 本身就是后端真有的列表端点，必须放行。）
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //   （不是 `[0-9a-f-]+`）：后者会把 `confirm` / `reject` / `split` 这种非 UUID 形状也当成 id 放行。
+    prefix: 'crm/',
+    env: 'CRM_URL',
+    fallback: 'http://127.0.0.1:8086',
+    pattern:
+      /^customer\-merge(?:\/capabilities|\/scan|\/runs|\/operations|\/candidates(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:confirm|reject))?)?|\/logical(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/split)?)?)$/,
+  },
+  {
     // 4.4.1.3 采集箱（channel 服务）。本条目是**新增一条 services[] 元素**，
     // 不是往既有 channel 分支的超长 alternation 里并分支 —— 那一支是单行超长正则，
     // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。

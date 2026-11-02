@@ -5102,6 +5102,754 @@
         },
         "type": "object"
       },
+      "CrmCustomerMergeAmount": {
+        "properties": {
+          "avgOrderAmount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "orderCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "totalAmount": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "CrmCustomerMergeCandidateDetail": {
+        "properties": {
+          "candidate": {
+            "$ref": "#/components/schemas/CrmCustomerMergeCandidateRow"
+          },
+          "contactMasked": {
+            "type": "boolean"
+          },
+          "evidence": {
+            "additionalProperties": {
+              "type": "object"
+            },
+            "type": "object"
+          },
+          "leftEmail": {
+            "type": "string"
+          },
+          "leftPhone": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "rightEmail": {
+            "type": "string"
+          },
+          "rightPhone": {
+            "type": "string"
+          },
+          "signals": {
+            "items": {
+              "$ref": "#/components/schemas/CrmCustomerMergeSignal"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "CrmCustomerMergeCandidatePage": {
+        "properties": {
+          "confirmedCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "rejectedCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/CrmCustomerMergeCandidateRow"
+            },
+            "type": "array"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "suggestedCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalPages": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CrmCustomerMergeCandidateRow": {
+        "properties": {
+          "confidence": {
+            "type": "number"
+          },
+          "detectedAt": {
+            "type": "string"
+          },
+          "exclusionFlags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "leftCustomerName": {
+            "type": "string"
+          },
+          "leftCustomerRef": {
+            "type": "string"
+          },
+          "leftSourceShop": {
+            "type": "string"
+          },
+          "logicalCustomerId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "logicalRef": {
+            "nullable": true,
+            "type": "string"
+          },
+          "matchType": {
+            "type": "string"
+          },
+          "matchTypeLabel": {
+            "type": "string"
+          },
+          "optOutInvolved": {
+            "type": "boolean"
+          },
+          "reviewNote": {
+            "type": "string"
+          },
+          "reviewedAt": {
+            "nullable": true,
+            "type": "string"
+          },
+          "reviewedBy": {
+            "nullable": true,
+            "type": "string"
+          },
+          "rightCustomerName": {
+            "type": "string"
+          },
+          "rightCustomerRef": {
+            "type": "string"
+          },
+          "rightSourceShop": {
+            "type": "string"
+          },
+          "signalSummary": {
+            "type": "string"
+          },
+          "signals": {
+            "items": {
+              "$ref": "#/components/schemas/CrmCustomerMergeSignal"
+            },
+            "type": "array"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmCustomerMergeCapabilities": {
+        "properties": {
+          "boundaryNote": {
+            "type": "string"
+          },
+          "confirmationPolicy": {
+            "type": "string"
+          },
+          "dimensions": {
+            "items": {
+              "$ref": "#/components/schemas/CrmCustomerMergeCapabilityDimension"
+            },
+            "type": "array"
+          },
+          "highlight": {
+            "type": "string"
+          },
+          "maskingPolicy": {
+            "type": "string"
+          },
+          "matchTypes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "signalPolicy": {
+            "type": "string"
+          },
+          "splitPolicy": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmCustomerMergeCapabilityDimension": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "description": {
+            "type": "string"
+          },
+          "dimension": {
+            "type": "string"
+          },
+          "impact": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmCustomerMergeConfirmInput": {
+        "properties": {
+          "logicalCustomerId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "reason": {
+            "maxLength": 600,
+            "minLength": 0,
+            "type": "string"
+          }
+        },
+        "required": [
+          "reason"
+        ],
+        "type": "object"
+      },
+      "CrmCustomerMergeLogicalDetail": {
+        "properties": {
+          "amounts": {
+            "items": {
+              "$ref": "#/components/schemas/CrmCustomerMergeAmount"
+            },
+            "type": "array"
+          },
+          "logical": {
+            "$ref": "#/components/schemas/CrmCustomerMergeLogicalRow"
+          },
+          "members": {
+            "items": {
+              "$ref": "#/components/schemas/CrmCustomerMergeMember"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "operations": {
+            "items": {
+              "$ref": "#/components/schemas/CrmCustomerMergeOperationRow"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "CrmCustomerMergeLogicalPage": {
+        "properties": {
+          "mergedCustomerCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/CrmCustomerMergeLogicalRow"
+            },
+            "type": "array"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "splitCustomerCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalPages": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CrmCustomerMergeLogicalRow": {
+        "properties": {
+          "createdAt": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "firstOrderAt": {
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "lastOrderAt": {
+            "nullable": true,
+            "type": "string"
+          },
+          "logicalRef": {
+            "type": "string"
+          },
+          "memberCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "optOutState": {
+            "type": "string"
+          },
+          "optOutStateLabel": {
+            "type": "string"
+          },
+          "sourceShopCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "sourceShops": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "totalOrderCount": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CrmCustomerMergeMember": {
+        "properties": {
+          "customerName": {
+            "type": "string"
+          },
+          "customerProfileId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "customerRef": {
+            "type": "string"
+          },
+          "mappingId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "mergedAt": {
+            "nullable": true,
+            "type": "string"
+          },
+          "mergedBy": {
+            "nullable": true,
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          },
+          "sourceShop": {
+            "type": "string"
+          },
+          "splitAt": {
+            "nullable": true,
+            "type": "string"
+          },
+          "splitBy": {
+            "nullable": true,
+            "type": "string"
+          },
+          "splitReason": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string"
+          },
+          "stateLabel": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmCustomerMergeOperationPage": {
+        "properties": {
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/CrmCustomerMergeOperationRow"
+            },
+            "type": "array"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalPages": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CrmCustomerMergeOperationRow": {
+        "properties": {
+          "candidateId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "details": {
+            "additionalProperties": {
+              "type": "object"
+            },
+            "type": "object"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "logicalCustomerId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "logicalRef": {
+            "nullable": true,
+            "type": "string"
+          },
+          "memberCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "occurredAt": {
+            "type": "string"
+          },
+          "operation": {
+            "type": "string"
+          },
+          "operationLabel": {
+            "type": "string"
+          },
+          "operatorId": {
+            "nullable": true,
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "targetCustomerId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmCustomerMergeRejectInput": {
+        "properties": {
+          "reason": {
+            "maxLength": 600,
+            "minLength": 0,
+            "type": "string"
+          }
+        },
+        "required": [
+          "reason"
+        ],
+        "type": "object"
+      },
+      "CrmCustomerMergeRunPage": {
+        "properties": {
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/CrmCustomerMergeRunRow"
+            },
+            "type": "array"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalPages": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CrmCustomerMergeRunRow": {
+        "properties": {
+          "addressResolvedCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "addressUnavailableCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "belowThresholdCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "candidateCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "excludedAlreadyMergedCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "excludedSameShopCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "facts": {
+            "additionalProperties": {
+              "type": "object"
+            },
+            "type": "object"
+          },
+          "failureReason": {
+            "type": "string"
+          },
+          "finishedAt": {
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "operatorId": {
+            "nullable": true,
+            "type": "string"
+          },
+          "optOutCandidateCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "partyUnavailableCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "runNo": {
+            "type": "string"
+          },
+          "scannedCustomerCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "startedAt": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "truncated": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "CrmCustomerMergeScanInput": {
+        "properties": {
+          "force": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "maxCustomers": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CrmCustomerMergeScanResult": {
+        "properties": {
+          "addressResolvedCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "addressUnavailableCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "belowThresholdCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "candidateCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "excludedAlreadyMergedCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "excludedSameShopCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "failureReason": {
+            "type": "string"
+          },
+          "finishedAt": {
+            "nullable": true,
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "optOutCandidateCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "partyUnavailableCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "runId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "runNo": {
+            "type": "string"
+          },
+          "scannedCustomerCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "startedAt": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "truncated": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "CrmCustomerMergeSignal": {
+        "properties": {
+          "detail": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "maskedValue": {
+            "type": "string"
+          },
+          "matched": {
+            "type": "boolean"
+          },
+          "signalType": {
+            "type": "string"
+          },
+          "strength": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "CrmCustomerMergeSplitInput": {
+        "properties": {
+          "customerProfileId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "reason": {
+            "maxLength": 600,
+            "minLength": 0,
+            "type": "string"
+          }
+        },
+        "required": [
+          "customerProfileId",
+          "reason"
+        ],
+        "type": "object"
+      },
       "CrmCustomerOptOutCheck": {
         "properties": {
           "customerName": {
@@ -22717,6 +23465,553 @@
         },
         "tags": [
           "customer-lifecycle-controller"
+        ]
+      }
+    },
+    "/crm/customer-merge/candidates": {
+      "get": {
+        "operationId": "get_crm_customer_merge_candidates",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "matchType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCustomerMergeCandidatePage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "customer-merge-controller"
+        ]
+      }
+    },
+    "/crm/customer-merge/candidates/{id}": {
+      "get": {
+        "operationId": "get_crm_customer_merge_candidates_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "revealContact",
+            "required": false,
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCustomerMergeCandidateDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "customer-merge-controller"
+        ]
+      }
+    },
+    "/crm/customer-merge/candidates/{id}/confirm": {
+      "post": {
+        "operationId": "post_crm_customer_merge_candidates_id_confirm",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmCustomerMergeConfirmInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCustomerMergeLogicalDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "customer-merge-controller"
+        ]
+      }
+    },
+    "/crm/customer-merge/candidates/{id}/reject": {
+      "post": {
+        "operationId": "post_crm_customer_merge_candidates_id_reject",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmCustomerMergeRejectInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCustomerMergeCandidateRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "customer-merge-controller"
+        ]
+      }
+    },
+    "/crm/customer-merge/capabilities": {
+      "get": {
+        "operationId": "get_crm_customer_merge_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCustomerMergeCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "customer-merge-controller"
+        ]
+      }
+    },
+    "/crm/customer-merge/logical": {
+      "get": {
+        "operationId": "get_crm_customer_merge_logical",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCustomerMergeLogicalPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "customer-merge-controller"
+        ]
+      }
+    },
+    "/crm/customer-merge/logical/{id}": {
+      "get": {
+        "operationId": "get_crm_customer_merge_logical_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCustomerMergeLogicalDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "customer-merge-controller"
+        ]
+      }
+    },
+    "/crm/customer-merge/logical/{id}/split": {
+      "post": {
+        "operationId": "post_crm_customer_merge_logical_id_split",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmCustomerMergeSplitInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCustomerMergeLogicalDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "customer-merge-controller"
+        ]
+      }
+    },
+    "/crm/customer-merge/operations": {
+      "get": {
+        "operationId": "get_crm_customer_merge_operations",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "logicalCustomerId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCustomerMergeOperationPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "customer-merge-controller"
+        ]
+      }
+    },
+    "/crm/customer-merge/runs": {
+      "get": {
+        "operationId": "get_crm_customer_merge_runs",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCustomerMergeRunPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "customer-merge-controller"
+        ]
+      }
+    },
+    "/crm/customer-merge/scan": {
+      "post": {
+        "operationId": "post_crm_customer_merge_scan",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmCustomerMergeScanInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCustomerMergeScanResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "customer-merge-controller"
         ]
       }
     },
