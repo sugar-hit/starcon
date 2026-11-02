@@ -1192,7 +1192,8 @@ public class AssistantService {
         draft.factRef(),
         draft.factLabel(),
         draft.metricCode(),
-        draft.metricValue(),
+        // 🔴 **十进制文本**：走 JSON number 会在浏览器里掉精度（金额是判定口径）。
+        draft.metricValue() == null ? null : draft.metricValue().toPlainString(),
         draft.metricUnit(),
         draft.detailRoute(),
         draft.detailLabel(),
@@ -1208,7 +1209,9 @@ public class AssistantService {
         r.get("fact_ref", String.class),
         r.get("fact_label", String.class),
         r.get("metric_code", String.class),
-        r.get("metric_value", BigDecimal.class),
+        r.get("metric_value", BigDecimal.class) == null
+            ? null
+            : r.get("metric_value", BigDecimal.class).toPlainString(),
         r.get("metric_unit", String.class),
         r.get("detail_route", String.class),
         r.get("detail_label", String.class),

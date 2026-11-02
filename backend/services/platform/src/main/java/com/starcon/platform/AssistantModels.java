@@ -108,7 +108,10 @@ public final class AssistantModels {
    * @param factTable **真表名**（下钻的第一跳）
    * @param factField **真字段名**（下钻的第二跳）
    * @param detailRoute 前端**真实存在**的页面（可点的明细链接）
-   * @param metricValue {@code null} = 这个数算不出来（**不是 0**）
+   * @param metricValue {@code null} = 这个数算不出来（**不是 0**）。
+   *   ⚠️ **十进制文本**（不是 JSON 数字）：金额与数量是判定口径，
+   *   走 JSON number 会在浏览器里被解析成 double 而掉精度 ——
+   *   「差一分钱」在报表上是查不出来的。同 18.4.3.1 的 quantity / unitCost 口径。
    */
   public record AssistantEvidence(
       String factService,
@@ -117,7 +120,7 @@ public final class AssistantModels {
       String factRef,
       String factLabel,
       String metricCode,
-      @Schema(nullable = true) BigDecimal metricValue,
+      @Schema(nullable = true) String metricValue,
       String metricUnit,
       String detailRoute,
       String detailLabel,

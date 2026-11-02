@@ -256,7 +256,9 @@ class AssistantIntegrationTest {
     assertThat(answer.answered()).isTrue();
     assertThat(answer.evidence()).isNotEmpty();
     assertThat(answer.evidence().get(0).factTable()).isEqualTo("reporting_sales_trend_fact");
-    assertThat(answer.evidence().get(0).metricValue()).isEqualByComparingTo("20");
+    assertThat(answer.evidence().get(0).metricValue())
+        .as("金额与数量全程十进制文本（走 JSON number 会在浏览器里掉精度）")
+        .isEqualTo("20.000000");
     assertThat(answer.evidence().get(0).detailRoute()).startsWith("/analytics/sales/products");
   }
 
