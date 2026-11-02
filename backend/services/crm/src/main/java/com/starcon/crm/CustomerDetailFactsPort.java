@@ -202,8 +202,8 @@ public class CustomerDetailFactsPort {
                   uriBuilder ->
                       uriBuilder
                           .path(CASES_PATH)
-                          .queryParam("receivedFrom", from.toString())
-                          .queryParam("receivedTo", to.toString())
+                          .queryParam("receivedFrom", utc(from))
+                          .queryParam("receivedTo", utc(to))
                           .queryParam("page", Math.max(page, 0))
                           .queryParam("size", PAGE_SIZE)
                           .build())
@@ -223,6 +223,22 @@ public class CustomerDetailFactsPort {
     } catch (org.springframework.web.client.ResourceAccessException e) {
       throw unavailable("trade 服务不可达");
     }
+  }
+
+  /**
+   * 🔴 时间窗一律发 **UTC** 的 ISO-8601。
+   *
+   * <p>为什么不能直接发 {@code OffsetDateTime.toString()}：
+   * 东八区会给出 {@code 2026-10-09T08:00+08:00}，其中的 {@code '+'} 在查询串里
+   * 是**字面加号**（URI 的 query 允许 sub-delim，编码器不会动它），
+   * 而上游用 {@code URLDecoder} 解码时把 {@code '+'} 当成**空格** ——
+   * 上游拿到的是 {@code 2026-10-09T08:00 08:00}，解析失败，窗口整个作废。
+   *
+   * <p>换成 UTC 之后时刻形如 {@code 2026-10-09T00:00:00Z}，没有 {@code '+'}，
+   * 而且 {@code withOffsetSameInstant} **保持同一个绝对时刻** —— 窗口语义不变。
+   */
+  private static String utc(OffsetDateTime moment) {
+    return moment.withOffsetSameInstant(java.time.ZoneOffset.UTC).toString();
   }
 
   /** 上游不可用一律 503，理由写明「读不到」而不是「没有数据」。 */

@@ -82,12 +82,25 @@ public class CustomerDetailService {
   static final int MAX_IDENTITY_CANDIDATES = 20;
 
   /**
-   * 售后归因扫描窗口相对客户首末订单时刻的**前后各放宽**的天数。
+   * 售后归因扫描窗口：订单时刻**之前**放宽的天数。
    *
    * <p>放宽是必要的：订单时刻与售后受理时刻不在同一天、且上游用不同的时区偏移，
    * 卡死窗口会把「下了一单、第二天申请退货」这种最常见的组合漏掉。
    */
-  static final int AFTERSALES_WINDOW_PADDING_DAYS = 1;
+  static final int AFTERSALES_LOOKBACK_DAYS = 7;
+
+  /**
+   * 售后归因扫描窗口：最后一张订单之后**继续放宽**的天数。
+   *
+   * <p>🔴 这一段是**退货期**，不是缓冲：买家下单后**几周**才申请退货是常态
+   * （跨境物流更久）。如果窗口只按「订单时刻 ± 1 天」算，
+   * 「这一单后来退了」这条事实**根本不会出现在时间线上** ——
+   * 而售后恰恰是客服最需要看到的那一段。
+   *
+   * <p>窗口越宽 ⇒ 一次扫描要翻的页越多 ⇒ 触到 {@code MAX_PAGES} 时如实报
+   * {@code truncated}（时间线不是全量），而不是悄悄少算。
+   */
+  static final int AFTERSALES_RETURN_WINDOW_DAYS = 90;
 
   /** 客户没有首末订单时刻时的兜底扫描窗口（天）。 */
   static final int FALLBACK_WINDOW_DAYS = 365;
@@ -533,8 +546,8 @@ public class CustomerDetailService {
     OffsetDateTime now = dbNow();
     if (lo == null) lo = now.minusDays(FALLBACK_WINDOW_DAYS);
     if (hi == null) hi = now;
-    lo = lo.minusDays(AFTERSALES_WINDOW_PADDING_DAYS);
-    hi = hi.plusDays(AFTERSALES_WINDOW_PADDING_DAYS);
+    lo = lo.minusDays(AFTERSALES_LOOKBACK_DAYS);
+    hi = hi.plusDays(AFTERSALES_RETURN_WINDOW_DAYS);
 
     List<CaseRow> mine = new ArrayList<>();
     boolean truncated = false;
