@@ -7415,6 +7415,827 @@
         },
         "type": "object"
       },
+      "CrmLifecycleAlertDetail": {
+        "properties": {
+          "alert": {
+            "$ref": "#/components/schemas/CrmLifecycleAlertRow"
+          },
+          "riskFactors": {
+            "items": {
+              "$ref": "#/components/schemas/CrmLifecycleRiskFactor"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "CrmLifecycleAlertPage": {
+        "properties": {
+          "note": {
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/CrmLifecycleAlertRow"
+            },
+            "type": "array"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalPages": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CrmLifecycleAlertRow": {
+        "properties": {
+          "categoryCode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "customerBaselineDays": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "customerBaselineSamples": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "customerName": {
+            "type": "string"
+          },
+          "customerRef": {
+            "type": "string"
+          },
+          "daysSinceLastOrder": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "detectedAt": {
+            "type": "string"
+          },
+          "expectedRepurchaseDays": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "lastOrderAt": {
+            "nullable": true,
+            "type": "string"
+          },
+          "overdueDays": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "recallSuggestion": {
+            "type": "string"
+          },
+          "riskFactors": {
+            "items": {
+              "$ref": "#/components/schemas/CrmLifecycleRiskFactor"
+            },
+            "type": "array"
+          },
+          "riskLevel": {
+            "type": "string"
+          },
+          "riskLevelLabel": {
+            "type": "string"
+          },
+          "riskScore": {
+            "type": "number"
+          },
+          "sourceShop": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "statusNote": {
+            "type": "string"
+          },
+          "suggestionOwner": {
+            "type": "string"
+          },
+          "suggestionOwnerLabel": {
+            "type": "string"
+          },
+          "thresholdSource": {
+            "type": "string"
+          },
+          "thresholdSourceLabel": {
+            "type": "string"
+          },
+          "toleranceDays": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CrmLifecycleAlertStatusInput": {
+        "properties": {
+          "note": {
+            "maxLength": 600,
+            "minLength": 0,
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmLifecycleCapabilities": {
+        "properties": {
+          "alertStatuses": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "boundaryNote": {
+            "type": "string"
+          },
+          "dimensions": {
+            "items": {
+              "$ref": "#/components/schemas/CrmLifecycleCapabilityDimension"
+            },
+            "type": "array"
+          },
+          "highlight": {
+            "type": "string"
+          },
+          "riskLevels": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "segments": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "thresholdPolicy": {
+            "type": "string"
+          },
+          "thresholdSources": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "CrmLifecycleCapabilityDimension": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "description": {
+            "type": "string"
+          },
+          "dimension": {
+            "type": "string"
+          },
+          "impact": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmLifecycleCategoryBucket": {
+        "properties": {
+          "alertCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "categoryCode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "customerCount": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CrmLifecycleComputeInput": {
+        "properties": {
+          "windowFrom": {
+            "nullable": true,
+            "type": "string"
+          },
+          "windowTo": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmLifecycleComputeResult": {
+        "properties": {
+          "alertCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "categoryLookupTruncated": {
+            "type": "boolean"
+          },
+          "categoryPolicyHitCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "categoryUnresolvedCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "customerCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "failureReason": {
+            "type": "string"
+          },
+          "finishedAt": {
+            "nullable": true,
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "policyCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "runId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "runNo": {
+            "type": "string"
+          },
+          "startedAt": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "thresholdUnavailableCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "truncated": {
+            "type": "boolean"
+          },
+          "windowFrom": {
+            "type": "string"
+          },
+          "windowTo": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmLifecyclePage": {
+        "properties": {
+          "dataScope": {
+            "type": "string"
+          },
+          "dataScopeNote": {
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/CrmLifecycleRow"
+            },
+            "type": "array"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "stats": {
+            "$ref": "#/components/schemas/CrmLifecycleStats"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalPages": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CrmLifecyclePolicyInput": {
+        "properties": {
+          "categoryCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "nullable": true,
+            "type": "string"
+          },
+          "effectiveFrom": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "effectiveTo": {
+            "nullable": true,
+            "type": "string"
+          },
+          "enabled": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "expectedRepurchaseDays": {
+            "format": "int32",
+            "maximum": 3650,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "frequencyMinOrders": {
+            "format": "int32",
+            "maximum": 100000,
+            "minimum": 1,
+            "nullable": true,
+            "type": "integer"
+          },
+          "monetaryCurrency": {
+            "nullable": true,
+            "pattern": "[A-Z]{3}",
+            "type": "string"
+          },
+          "monetaryMinAmount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "note": {
+            "maxLength": 600,
+            "minLength": 0,
+            "nullable": true,
+            "type": "string"
+          },
+          "recencyScoreDays": {
+            "format": "int32",
+            "maximum": 3650,
+            "minimum": 1,
+            "nullable": true,
+            "type": "integer"
+          },
+          "rfmWindowDays": {
+            "format": "int32",
+            "maximum": 3650,
+            "minimum": 1,
+            "nullable": true,
+            "type": "integer"
+          },
+          "scope": {
+            "minLength": 1,
+            "pattern": "CATEGORY|GLOBAL",
+            "type": "string"
+          },
+          "toleranceDays": {
+            "format": "int32",
+            "maximum": 3650,
+            "minimum": 0,
+            "nullable": true,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "effectiveFrom",
+          "expectedRepurchaseDays",
+          "scope"
+        ],
+        "type": "object"
+      },
+      "CrmLifecyclePolicyPage": {
+        "properties": {
+          "note": {
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/CrmLifecyclePolicyRow"
+            },
+            "type": "array"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalPages": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CrmLifecyclePolicyRow": {
+        "properties": {
+          "categoryCode": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "effectiveFrom": {
+            "type": "string"
+          },
+          "effectiveNow": {
+            "type": "boolean"
+          },
+          "effectiveTo": {
+            "nullable": true,
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "expectedRepurchaseDays": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "frequencyMinOrders": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "monetaryCurrency": {
+            "nullable": true,
+            "type": "string"
+          },
+          "monetaryMinAmount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "note": {
+            "type": "string"
+          },
+          "recencyScoreDays": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "rfmWindowDays": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "scope": {
+            "type": "string"
+          },
+          "scopeLabel": {
+            "type": "string"
+          },
+          "toleranceDays": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CrmLifecycleRiskFactor": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "explanation": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "points": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "rawValue": {
+            "type": "string"
+          },
+          "weight": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CrmLifecycleRow": {
+        "properties": {
+          "baselineSource": {
+            "type": "string"
+          },
+          "categoryCode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "categorySource": {
+            "type": "string"
+          },
+          "computedAt": {
+            "nullable": true,
+            "type": "string"
+          },
+          "currency": {
+            "nullable": true,
+            "type": "string"
+          },
+          "customerBaselineDays": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "customerBaselineSamples": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "customerName": {
+            "type": "string"
+          },
+          "customerRef": {
+            "type": "string"
+          },
+          "expectedRepurchaseDays": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "fScore": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "firstOrderAt": {
+            "nullable": true,
+            "type": "string"
+          },
+          "frequency": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "lastOrderAt": {
+            "nullable": true,
+            "type": "string"
+          },
+          "mScore": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "monetary": {
+            "nullable": true,
+            "type": "number"
+          },
+          "orderCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "overdueDays": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "policyId": {
+            "nullable": true,
+            "type": "string"
+          },
+          "rScore": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "recencyDays": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "scoreBasis": {
+            "additionalProperties": {
+              "type": "object"
+            },
+            "type": "object"
+          },
+          "segment": {
+            "type": "string"
+          },
+          "segmentLabel": {
+            "type": "string"
+          },
+          "segmentReason": {
+            "type": "string"
+          },
+          "sourceShop": {
+            "type": "string"
+          },
+          "thresholdSource": {
+            "type": "string"
+          },
+          "thresholdSourceLabel": {
+            "type": "string"
+          },
+          "toleranceDays": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "windowFrom": {
+            "nullable": true,
+            "type": "string"
+          },
+          "windowTo": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmLifecycleRunPage": {
+        "properties": {
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/CrmLifecycleRunRow"
+            },
+            "type": "array"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalPages": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CrmLifecycleRunRow": {
+        "properties": {
+          "alertCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "categoryLookupTruncated": {
+            "type": "boolean"
+          },
+          "categoryPolicyHitCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "categoryUnresolvedCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "customerCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "facts": {
+            "additionalProperties": {
+              "type": "object"
+            },
+            "type": "object"
+          },
+          "failureReason": {
+            "type": "string"
+          },
+          "finishedAt": {
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "operatorId": {
+            "nullable": true,
+            "type": "string"
+          },
+          "policyCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "runNo": {
+            "type": "string"
+          },
+          "startedAt": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "thresholdUnavailableCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "truncated": {
+            "type": "boolean"
+          },
+          "windowFrom": {
+            "type": "string"
+          },
+          "windowTo": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmLifecycleSegmentBucket": {
+        "properties": {
+          "customerCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "segment": {
+            "type": "string"
+          },
+          "segmentLabel": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CrmLifecycleStats": {
+        "properties": {
+          "byCategory": {
+            "items": {
+              "$ref": "#/components/schemas/CrmLifecycleCategoryBucket"
+            },
+            "type": "array"
+          },
+          "bySegment": {
+            "items": {
+              "$ref": "#/components/schemas/CrmLifecycleSegmentBucket"
+            },
+            "type": "array"
+          },
+          "note": {
+            "type": "string"
+          },
+          "overdueCustomers": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalAlerts": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalCustomers": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
       "CrmMessageAttachment": {
         "properties": {
           "contentType": {
@@ -20883,6 +21704,626 @@
         },
         "tags": [
           "customer-contact-controller"
+        ]
+      }
+    },
+    "/crm/customer-lifecycle/alerts": {
+      "get": {
+        "operationId": "get_crm_customer_lifecycle_alerts",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "riskLevel",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "categoryCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmLifecycleAlertPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "customer-lifecycle-controller"
+        ]
+      }
+    },
+    "/crm/customer-lifecycle/alerts/{alertId}": {
+      "get": {
+        "operationId": "get_crm_customer_lifecycle_alerts_alertId",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "alertId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmLifecycleAlertDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "customer-lifecycle-controller"
+        ]
+      }
+    },
+    "/crm/customer-lifecycle/alerts/{alertId}/acknowledge": {
+      "post": {
+        "operationId": "post_crm_customer_lifecycle_alerts_alertId_acknowledge",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "alertId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmLifecycleAlertStatusInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmLifecycleAlertRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "customer-lifecycle-controller"
+        ]
+      }
+    },
+    "/crm/customer-lifecycle/alerts/{alertId}/resolve": {
+      "post": {
+        "operationId": "post_crm_customer_lifecycle_alerts_alertId_resolve",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "alertId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmLifecycleAlertStatusInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmLifecycleAlertRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "customer-lifecycle-controller"
+        ]
+      }
+    },
+    "/crm/customer-lifecycle/capabilities": {
+      "get": {
+        "operationId": "get_crm_customer_lifecycle_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmLifecycleCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "customer-lifecycle-controller"
+        ]
+      }
+    },
+    "/crm/customer-lifecycle/compute": {
+      "post": {
+        "operationId": "post_crm_customer_lifecycle_compute",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmLifecycleComputeInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmLifecycleComputeResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "customer-lifecycle-controller"
+        ]
+      }
+    },
+    "/crm/customer-lifecycle/policies": {
+      "get": {
+        "operationId": "get_crm_customer_lifecycle_policies",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "scope",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "categoryCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmLifecyclePolicyPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "customer-lifecycle-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_crm_customer_lifecycle_policies",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmLifecyclePolicyInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmLifecyclePolicyRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "customer-lifecycle-controller"
+        ]
+      }
+    },
+    "/crm/customer-lifecycle/policies/{policyId}": {
+      "get": {
+        "operationId": "get_crm_customer_lifecycle_policies_policyId",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "policyId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmLifecyclePolicyRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "customer-lifecycle-controller"
+        ]
+      },
+      "put": {
+        "operationId": "put_crm_customer_lifecycle_policies_policyId",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "policyId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmLifecyclePolicyInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmLifecyclePolicyRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "customer-lifecycle-controller"
+        ]
+      }
+    },
+    "/crm/customer-lifecycle/runs": {
+      "get": {
+        "operationId": "get_crm_customer_lifecycle_runs",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmLifecycleRunPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "customer-lifecycle-controller"
+        ]
+      }
+    },
+    "/crm/customer-lifecycle/segments": {
+      "get": {
+        "operationId": "get_crm_customer_lifecycle_segments",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "segment",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sourceShop",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "categoryCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmLifecyclePage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "customer-lifecycle-controller"
         ]
       }
     },

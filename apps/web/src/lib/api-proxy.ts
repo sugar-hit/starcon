@@ -2585,6 +2585,69 @@ const services: readonly {
       /^alert\-rules(?:\/capabilities|\/hits|(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:disable|enable|reset))?)?)$/,
   },
   {
+    // 15.6.2.1 生命周期与流失预警（crm 服务，卷 15「客户与客服」L3 15.6.2「复购与留存」下的第一格）。
+    //
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 crm 支里并分支 ——
+    //   既有条目**一字未改、也不重排**。
+    //
+    // ---- 插入锚点 = **identity 中段**（紧邻 `prefix: 'identity/'` 的 1.3.2.1 预警规则那条**之后**）----
+    //   本文件是并行车道共同的累积型文件：同批另外三条车道分别锚在
+    //   「数组末尾」「catalog 中段」「crm 中段」—— 四条车道必须占四个相距万行的锚点，
+    //   否则下轮并入时又会在同一个锚点撞车、成果全卡在冲突里。
+    //   ⚠️ **白名单条目位置无语义**：本条虽然插在 identity 那一段里，但**路由前缀仍是 crm**
+    //   （`resolve()` 按 `services[]` 顺序逐条试、首个命中即返回，位置不影响转发目标）。
+    //   本文件**不在** merge-union 驱动器的覆盖范围内（.gitattributes 只给
+    //   `packages/api-contracts/src/**` 与 `module-progress.md` 配了驱动）⇒ 它走**普通 git merge**，
+    //   所以插入点必须彼此错开。
+    //
+    // ---- 首 token「customer-lifecycle」的零命中核对结论 ----
+    //   本文件里既有 `prefix: 'crm/'` 的条目首 token 分别是
+    //   buyer-emails（15.1.2.1）/ email-rules（15.2.2.2）/ knowledge（15.4.2.1）/
+    //   message-inbox（15.1.1.1）/ message-sends（15.1.1.2）/ message-classifications（15.1.3.1）/
+    //   review-requests（15.2.2.1）/ reviews（15.2.1.2）/ review-replies（15.2.2.3）/
+    //   negative-reviews（15.2.1.3）/ review-rules（15.2.2.2）/ customer-tags（15.3.2.1）/
+    //   customer-contacts（15.3.2.2）/ customers（15.3.1.1）/ care-reminders（15.4.1.1）/
+    //   auto-replies（15.4.1.2）/ service-tickets（15.1.4.1）/ cart-recovery（15.6.2.2）。
+    //   它们的正则**没有一个**能吃掉 `customer-lifecycle/...` ——
+    //   `customers`（15.3.1.1）用的是 `^customers(?:\/...)?$`（**带尾锚**），
+    //   `customer-tags` / `customer-contacts` 用的首 token 也都**不等于** `customer-lifecycle`
+    //   ⇒ 天然互斥，本条**不需要**改动那些条目里的任何一个字符。
+    //   ⚠️ `cart-recovery`（15.6.2.2）与本模块**不是一件事**：
+    //   那边管的是「独立站加购 / 结账没走完」，这边管的是「**买过、该回购却没回购**」。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   customer-lifecycle/capabilities            能力声明（哪些真交付 / 哪些还没交付、归谁）
+    //   customer-lifecycle/segments                生命周期分层结果（GET，真分页 + 真筛选）
+    //   customer-lifecycle/alerts                  流失预警清单（GET，真分页 + 真筛选）
+    //   customer-lifecycle/alerts/{uuid}           单条预警详情（GET，**含风险因子明细**）
+    //   customer-lifecycle/alerts/{uuid}/acknowledge 标记已知悉（POST，状态只能向前）
+    //   customer-lifecycle/alerts/{uuid}/resolve   标记已处理（POST，状态只能向前）
+    //   customer-lifecycle/policies                阈值策略列表（GET）/ 新建（POST）
+    //   customer-lifecycle/policies/{uuid}         单条阈值策略（GET）/ 修改（PUT）
+    //   customer-lifecycle/compute                 重算分层与预警（POST）
+    //   customer-lifecycle/runs                    重算运行记录（GET）
+    //
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   customer-lifecycle                            —— 裸路径：后端**没有**汇总端点。
+    //   customer-lifecycle/unknown                    —— 未实现的子路径仍然 404。
+    //   customer-lifecycle/alerts/not-a-uuid          —— 非 UUID 段不应被 uuid 分支吃掉。
+    //   customer-lifecycle/policies/not-a-uuid        —— 同上。
+    //   customer-lifecycle/alerts/{uuid}/send         —— 🔴 **触达归 15.5.2，未交付**：
+    //                                                      放行它会让界面以为「点一下就能发召回消息」。
+    //   customer-lifecycle/alerts/{uuid}/extra        —— 服务端没有这一层。
+    //   customer-lifecycle/policies/{uuid}/delete    —— 阈值策略**不删**：历史判定引用着它。
+    //
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //   （不是 `[0-9a-f-]+`）：后者会把 `acknowledge` / `resolve` 这种非 UUID 形状也当成 id 放行。
+    // ⚠️ 字面量子路径（capabilities / segments / alerts / policies / compute / runs）
+    //   排在 {uuid} 段**之前**判别 —— alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    prefix: 'crm/',
+    env: 'CRM_URL',
+    fallback: 'http://127.0.0.1:8086',
+    pattern:
+      /^customer\-lifecycle\/(?:capabilities|segments|compute|runs|policies(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|alerts(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:acknowledge|resolve))?)?)$/,
+  },
+  {
     // 14.5.1.2 建联与样品（channel 服务，卷 14 广告与增长 / L3 14.5.1 达人管理下的第二格）。
     //
     // 本条目是**新增一条独立的 services[] 元素**，不是往既有 channel 分支的 alternation 里
