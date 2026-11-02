@@ -835,9 +835,71 @@ class MembershipIntegrationTest {
 
   // ================================================================ 合并口径
 
+  /**
+   * 🔴 钉死 uuid 的排序口径：<b>compareUuid 的结论必须与 PostgreSQL 的 uuid 顺序一致</b>。
+   *
+   * <p>PostgreSQL 的 uuid 是 16 字节<b>无符号</b>逐字节比；{@link UUID#compareTo} 先按<b>有符号
+   * long</b>比高位 —— 高位 bit 为 1 时两者结论<b>相反</b>。这里用的正是「一端高位全 0、另一端高位全
+   * 1」的极端对（外加 L2 r165 实测报错的那一对），在它们上面 {@code UUID.compareTo} 与 PostgreSQL
+   * <b>必然给出相反结论</b> ⇒ 下面的断言<b>能区分</b>两种排序（否则它就是一条假断言）。
+   *
+   * <p>没有这一条，将来有人把 helper 换回 {@code UUID.compareTo}，合并用例会**重新变成随机红**，
+   * 而症状（DB 触发器报错）离病因（排序口径）很远。
+   */
+  private void assertUuidOrderMatchesPostgres() throws Exception {
+    // 极端对：一端高位全 0、另一端高位全 1。
+    UUID highBitZero = UUID.fromString("00000000-0000-0000-0000-000000000000");
+    UUID highBitOne = UUID.fromString("ffffffff-ffff-ffff-ffff-ffffffffffff");
+    // L2 r165 实测报错的那一对（按 PostgreSQL 口径，较小的在前）。
+    UUID reportedSmaller = UUID.fromString("5c1fd149-1d09-4fdd-b7a4-e8e5d5e1e1d4");
+    UUID reportedLarger = UUID.fromString("9742f694-e9e3-40fa-94ae-f06fc7507d8a");
+
+    for (var pair :
+        List.of(
+            List.of(highBitZero, highBitOne), List.of(reportedSmaller, reportedLarger))) {
+      UUID smaller = pair.get(0);
+      UUID larger = pair.get(1);
+      // compareUuid 必须给出 PostgreSQL 的结论：smaller 在前。
+      assertThat(CustomerMergeService.compareUuid(smaller, larger))
+          .as("compareUuid 必须与 PostgreSQL 的 uuid 顺序一致：%s vs %s", smaller, larger)
+          .isNegative();
+      assertThat(CustomerMergeService.compareUuid(larger, smaller))
+          .as("compareUuid 必须与 PostgreSQL 的 uuid 顺序一致：%s vs %s", larger, smaller)
+          .isPositive();
+      // ⚠️ 同一个对，UUID.compareTo 的结论**相反** —— 这一条保证上面的断言不是恒真：
+      //   若有人把 helper 换回 compareTo，上面两条立刻红。
+      assertThat(smaller.compareTo(larger))
+          .as("这一对必须能区分两种排序口径（UUID.compareTo 的结论必须与 PostgreSQL 相反）")
+          .isPositive();
+      assertThat(larger.compareTo(smaller)).as("同上").isNegative();
+      // 与**真实 PostgreSQL** 对账（不靠人肉推理口径）。
+      assertThat(postgresUuidLt(smaller, larger))
+          .as("compareUuid 必须与真实 PostgreSQL 的 uuid 顺序一致：%s < %s", smaller, larger)
+          .isTrue();
+      assertThat(postgresUuidLt(larger, smaller))
+          .as("compareUuid 必须与真实 PostgreSQL 的 uuid 顺序一致：%s < %s", larger, smaller)
+          .isFalse();
+    }
+  }
+
+  /** 真实 PostgreSQL 说 a &lt; b 吗（16 字节无符号逐字节比）。 */
+  private static boolean postgresUuidLt(UUID a, UUID b) throws Exception {
+    try (var c = admin();
+        var ps = c.prepareStatement("select ?::uuid < ?::uuid as lt")) {
+      ps.setObject(1, a);
+      ps.setObject(2, b);
+      try (var rs = ps.executeQuery()) {
+        rs.next();
+        return rs.getBoolean("lt");
+      }
+    }
+  }
+
   @Test
   void 合并后的来源店铺客户合成一个会员() throws Exception {
     createAllLevels();
+    // 🔴 先钉死排序口径（纯口径断言，与数据库无关，但顺带与真实 PostgreSQL 对账）。
+    assertUuidOrderMatchesPostgres();
     // 造一条 15.3.1.3 的合并：会员甲（AMAZON）与会员乙（SHOPIFY）合并成一个逻辑客户。
     UUID logicalId = UUID.randomUUID();
     UUID profileA = UUID.randomUUID();
@@ -847,8 +909,22 @@ class MembershipIntegrationTest {
     //   「没有已确认候选就写映射」—— 所以这里必须走完整三步：
     //   ① 建候选（SUGGESTED）② 人工复核（CONFIRMED + 复核人 + 复核时刻）
     //   ③ 写合并映射。直接插映射会被 DB 层挡下来（那正是它要拦的事）。
-    UUID leftId = profileA.compareTo(profileB) < 0 ? profileA : profileB;
-    UUID rightId = profileA.compareTo(profileB) < 0 ? profileB : profileA;
+    // 🔴 候选表强制 left < right（V437 触发器 guard_crm_customer_merge_candidate_order），
+    //   而 PostgreSQL 的 uuid 是 **16 字节无符号**逐字节比；UUID.compareTo 却先按
+    //   **有符号 long**比高位 ⇒ 高位 bit 为 1 时两者结论相反。随机 UUID 有一半高位 bit 为 1，
+    //   用 compareTo 排 ⇒ 这个用例约 50% 概率随机红。必须用与生产代码同源的 compareUuid。
+    //   ⚠️ 排序的是**整个来源客户**（id + 店铺 + 客户号 + 姓名），不能只排 id ——
+    //   否则 left_source_shop/left_customer_ref/left_customer_name 会与 left_customer_id 对不上
+    //   （DB 不校验，但数据自相矛盾）。服务层 CustomerMergeService.buildPairs 也是整个排的。
+    boolean aIsLeft = CustomerMergeService.compareUuid(profileA, profileB) <= 0;
+    UUID leftId = aIsLeft ? profileA : profileB;
+    UUID rightId = aIsLeft ? profileB : profileA;
+    String leftShop = aIsLeft ? "AMAZON" : "SHOPIFY";
+    String leftRef = aIsLeft ? partyA.toString() : partyB.toString();
+    String leftName = aIsLeft ? "买家甲" : "买家乙";
+    String rightShop = aIsLeft ? "SHOPIFY" : "AMAZON";
+    String rightRef = aIsLeft ? partyB.toString() : partyA.toString();
+    String rightName = aIsLeft ? "买家乙" : "买家甲";
     UUID candidateId = UUID.randomUUID();
     try (var c = admin()) {
       try (var s = c.createStatement()) {
@@ -903,11 +979,19 @@ class MembershipIntegrationTest {
                 + leftId
                 + "','"
                 + rightId
-                + "','AMAZON','"
-                + partyA
-                + "','买家甲','SHOPIFY','"
-                + partyB
-                + "','买家乙','PLATFORM_BUYER_ID',0.9000,'测试用候选','SUGGESTED',now())");
+                + "','"
+                + leftShop
+                + "','"
+                + leftRef
+                + "','"
+                + leftName
+                + "','"
+                + rightShop
+                + "','"
+                + rightRef
+                + "','"
+                + rightName
+                + "','PLATFORM_BUYER_ID',0.9000,'测试用候选','SUGGESTED',now())");
         // ② 人工复核：确认候选（复核人与复核时刻缺一不可）。
         s.execute(
             "update crm_customer_merge_candidate set status = 'CONFIRMED',"
@@ -953,6 +1037,29 @@ class MembershipIntegrationTest {
     }
 
     compute();
+
+    // 🔴 回读候选行，钉死「两侧的展示列必须与排序后的 id 对得上」：
+    //   DB 不校验 left_source_shop/left_customer_ref/left_customer_name 与 left_customer_id 是否同源，
+    //   但数据自相矛盾就是错的（排序换边后展示列必须跟着换边）。
+    try (var c = admin();
+        var ps =
+            c.prepareStatement(
+                "select left_customer_id, right_customer_id, left_source_shop, left_customer_ref,"
+                    + " left_customer_name, right_source_shop, right_customer_ref, right_customer_name"
+                    + " from crm_customer_merge_candidate where id = ?")) {
+      ps.setObject(1, candidateId);
+      try (var rs = ps.executeQuery()) {
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getObject("left_customer_id", UUID.class)).isEqualTo(leftId);
+        assertThat(rs.getObject("right_customer_id", UUID.class)).isEqualTo(rightId);
+        assertThat(rs.getString("left_source_shop")).isEqualTo(leftShop);
+        assertThat(rs.getString("left_customer_ref")).isEqualTo(leftRef);
+        assertThat(rs.getString("left_customer_name")).isEqualTo(leftName);
+        assertThat(rs.getString("right_source_shop")).isEqualTo(rightShop);
+        assertThat(rs.getString("right_customer_ref")).isEqualTo(rightRef);
+        assertThat(rs.getString("right_customer_name")).isEqualTo(rightName);
+      }
+    }
 
     var merged = memberRow(partyA.toString());
     assertThat(merged.get("memberKey").asText()).isEqualTo("LC-TEST-000001");
