@@ -873,7 +873,7 @@ public class AiDiagnosisService {
         occurredAt,
         OffsetDateTime.now(ZoneOffset.UTC),
         value,
-        unit.isBlank() ? null : unit,
+        unit,
         severity,
         note,
         actorId,
@@ -910,11 +910,13 @@ public class AiDiagnosisService {
                     + " from platform_diagnosis_run where event_id = ? order by started_at desc",
                 id)
             .map(AiDiagnosisService::toRunRow);
-    var latestId =
+    // 🔴 **还没跑过诊断的事件**：查询返回 null（不是「一行 id 为空的行」）——
+    //   直接 .get(...) 会在此 NPE，事件详情页整个打不开。
+    var latest =
         sql.fetchOne(
-                "select id from platform_diagnosis_run where event_id = ? order by started_at desc limit 1",
-                id)
-            .get("id", UUID.class);
+            "select id from platform_diagnosis_run where event_id = ? order by started_at desc limit 1",
+            id);
+    var latestId = latest == null ? null : latest.get("id", UUID.class);
     return new AiDiagnosisEventDetail(event, runs, latestId == null ? null : runDetail(latestId));
   }
 
@@ -1127,7 +1129,7 @@ public class AiDiagnosisService {
         now,
         sourceRef,
         reportedValue,
-        reportedUnit.isBlank() ? null : reportedUnit,
+        reportedUnit,
         severity,
         note,
         actorId,
@@ -1166,7 +1168,40 @@ public class AiDiagnosisService {
     var runId = UUID.randomUUID();
 
     var conclusionCount = ctx.findings.size();
-    var evidenceCount = 0;
+    // 🔴 **依据条数在写库之前就算得出来**（依据已在内存里组装好）——
+    //   运行行必须**先于**结论与依据落库（结论对运行有外键 run_id），
+    //   所以计数不能等到插完才知道。
+    var evidenceCount = ctx.findings.stream().mapToInt(f -> f.evidences().size()).sum();
+    var note =
+        conclusionCount == 0
+            ? "本次运行**没有命中任何归因规则**"
+                + (ctx.unavailable.isEmpty()
+                    ? "（读到的事实都不满足触发条件）"
+                    : "；读不到的事实源：" + String.join("、", ctx.unavailable))
+            : "命中 " + conclusionCount + " 条归因规则，产出 " + evidenceCount + " 条依据";
+
+    // 🔴 **运行行先落库**：platform_diagnosis_conclusion 与 platform_diagnosis_evidence
+    //   都对 platform_diagnosis_run 有外键（tenant_id, run_id）⇒ 运行不存在时，
+    //   插结论会直接撞外键（一次真实的 409），不是「先插结论再补运行」能绕过去的。
+    sql.execute(
+        "insert into platform_diagnosis_run(id,tenant_id,run_no,event_id,status,rule_version,"
+            + " conclusion_count,evidence_count,sources_read,sources_unavailable,note,requested_by,"
+            + " started_at,finished_at) values(?,?,?,?,'COMPLETED',?,?,?,?,?,?,?,?::timestamptz,"
+            + "?::timestamptz)",
+        runId,
+        tenant,
+        runNo,
+        eventId,
+        RULE_VERSION,
+        conclusionCount,
+        evidenceCount,
+        String.join(",", ctx.read),
+        String.join(";", ctx.unavailable),
+        note,
+        actorId,
+        now,
+        OffsetDateTime.now(ZoneOffset.UTC));
+
     for (var finding : ctx.findings) {
       var conclusionId = UUID.randomUUID();
       sql.execute(
@@ -1215,35 +1250,9 @@ public class AiDiagnosisService {
             OffsetDateTime.now(ZoneOffset.UTC),
             e.explanation(),
             OffsetDateTime.now(ZoneOffset.UTC));
-        evidenceCount++;
       }
     }
 
-    var note =
-        conclusionCount == 0
-            ? "本次运行**没有命中任何归因规则**"
-                + (ctx.unavailable.isEmpty()
-                    ? "（读到的事实都不满足触发条件）"
-                    : "；读不到的事实源：" + String.join("、", ctx.unavailable))
-            : "命中 " + conclusionCount + " 条归因规则，产出 " + evidenceCount + " 条依据";
-    sql.execute(
-        "insert into platform_diagnosis_run(id,tenant_id,run_no,event_id,status,rule_version,"
-            + " conclusion_count,evidence_count,sources_read,sources_unavailable,note,requested_by,"
-            + " started_at,finished_at) values(?,?,?,?,'COMPLETED',?,?,?,?,?,?,?,?::timestamptz,"
-            + "?::timestamptz)",
-        runId,
-        tenant,
-        runNo,
-        eventId,
-        RULE_VERSION,
-        conclusionCount,
-        evidenceCount,
-        String.join(",", ctx.read),
-        String.join(";", ctx.unavailable),
-        note,
-        actorId,
-        now,
-        OffsetDateTime.now(ZoneOffset.UTC));
     sql.execute(
         "update platform_diagnosis_event set status = case when status = 'OPEN' then 'DIAGNOSED'"
             + " else status end, updated_at = ?::timestamptz where id = ?",
@@ -1655,7 +1664,10 @@ public class AiDiagnosisService {
                       + priorPrice.toPlainString() + " 下跌 " + percentText(rate),
                   "均价 = 成交金额 ÷ 销量（近 7 天 ÷ 前 7 天 = " + ratio.toPlainString()
                       + " 倍，低于阈值 " + PRICE_DROP_RATIO.toPlainString() + " 倍）。同样的销量换来更少的钱。",
-                  recentPrice.subtract(priorPrice),
+                  // 🔴 **impact 是幅度（不是带符号的差值）**：库里的 CHECK 是 impact >= 0，
+                  //   方向由 impactText（带符号百分比，如 -40.00%）承担 ——
+                  //   「跌了 2.00/件（-40.00%）」既不丢方向，也不违反幅度口径。
+                  priorPrice.subtract(recentPrice),
                   salesCurrency == null ? "金额/件" : salesCurrency + "/件",
                   percentText(rate),
                   "核对是否有促销或竞品降价：若销量同步上来了，判断这波是不是「用价格换量」。",

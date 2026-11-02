@@ -172,7 +172,7 @@ class AiDiagnosisTenancyIntegrationTest {
               "insert into platform_diagnosis_event(id,tenant_id,event_no,anomaly_type,subject_type,"
                   + " subject_ref,subject_label,occurred_at,detected_at,source,source_ref,severity,"
                   + " status,note,created_at,updated_at)"
-                  + " values(?,?,?,?,?,?,?,?::timestamptz,?::timestamptz,'SUBMITTED','','',"
+                  + " values(?,?,?,?,?,?,?,?::timestamptz,?::timestamptz,'SUBMITTED','',"
                   + " 'WARNING','OPEN','',?::timestamptz,?::timestamptz)",
               eventId,
               tenant,
