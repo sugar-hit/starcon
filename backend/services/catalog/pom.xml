@@ -58,6 +58,23 @@
       <artifactId>tenancy</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <!--
+      5.1.1.2 价目项的 Excel 导入导出依赖。
+      ⚠️ 这两个库是**真实生成文件字节**的正路：XLSX 由 POI 生成/解析 OOXML 工作簿。
+      **不手搓「假 xlsx」** —— 下载下来打不开的文件比不提供这个格式更糟（用户会以为导坏了）。
+      版本号固定在这里（不跟 Spring Boot 的 BOM），与 reporting 服务 13.6.2.1 同一版本，
+      保证构建可复现。
+    -->
+    <dependency>
+      <groupId>org.apache.poi</groupId>
+      <artifactId>poi</artifactId>
+      <version>5.2.3</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.poi</groupId>
+      <artifactId>poi-ooxml</artifactId>
+      <version>5.2.3</version>
+    </dependency>
   </dependencies>
   <build>
     <plugins>
