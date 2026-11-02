@@ -814,14 +814,23 @@ class AutomationRuleEditorIntegrationTest {
                 "select table_name from information_schema.tables"
                     + " where table_name like 'platform_automation_rule%'")
             .map(r -> r.get(0, String.class));
+    // ① 编辑器**复用** 18.3.1.1 的规则表（没有另建影子表）—— 这六张必须都在。
     assertThat(editorTables)
-        .containsExactlyInAnyOrder(
+        .contains(
             "platform_automation_rule",
             "platform_automation_rule_action",
             "platform_automation_rule_condition",
             "platform_automation_rule_execution",
             "platform_automation_rule_scope",
             "platform_automation_rule_test_run");
+    // ② 编辑器**独占的命名空间**里只有它自己那一张测试台账 ⇒ 编辑器自己的足迹 = 一张表。
+    // ⚠️ 刻意**不**断言「同族表的全量精确集合」：兄弟模块会在同一个命名空间里加自己的表
+    //   （18.3.2.1 执行日志 = _run / _run_step；18.3.2.2 规则效果 = _effect_baseline /
+    //   _effect_feedback / _effect_advice）⇒ 那种断言把本测试绑死在「兄弟还没并入」的
+    //   分支拓扑上，兄弟并入的那一刻必红，而红的原因与本模块无关。
+    //   与前端 ai-forecast 白名单假红（b986b716）同构 ⇒ 修法一致：断言挪到「本车道独占层」。
+    assertThat(editorTables.stream().filter(t -> t.startsWith("platform_automation_rule_test")).toList())
+        .containsExactly("platform_automation_rule_test_run");
   }
 
   @Test
