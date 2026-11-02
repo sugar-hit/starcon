@@ -2709,6 +2709,47 @@ const services: readonly {
       /^price-anomaly-alerts(?:\/capabilities|\/observations|\/events(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:acknowledge|resolve))?)?|\/rules|\/notifications|\/detect)$/,
   },
   {
+    // 5.1.1.1 价目表列表（catalog 服务，卷 05「定价与价目」L3 5.1.1「价目表」下的第一格）。
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，**紧接在 `price-anomaly-alerts`
+    //   （5.5.2.1 异常告警，`prefix: 'catalog/'`）那条元素之后** ——
+    //   既有条目一字未改、也不重排（并入时 git 按前缀求并，取错一侧不会丢掉别人已交付的路由）。
+    //
+    // 🔴 锚点为什么在这里：第一次并入时本条目插在**数组末尾**，与 18.4.2.3（异常诊断）
+    //   撞在同一个锚点 ⇒ git 判冲突（成果没丢，只是位置撞了）。搬到 catalog 中段后
+    //   与数组末尾相距 1.1 万行 ⇒ git 能干净求并。
+    //
+    // 🔴 为什么用 `price-lists` 这个独立前缀：
+    //   * 既有 catalog 分支是**一条**覆盖全服务的长 alternation，里面没有 `price-lists`；
+    //     已逐条核对本文件里全部既有正则：`price-lists/**` **零命中**（既有分支不会先把它吃掉）。
+    //   * 5.1.1.2 价目项批量维护与 5.1.2.1 优先级与冲突检测是**别的模块**：
+    //     本车道只交付 5.1.1.1，不代未交付的兄弟模块开形状。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   price-lists/capabilities        能力声明（一价目一币种 / 半开区间 / 价目项数量来源 / 上下游）
+    //   price-lists/scope-directory     适用范围目录（法人 + 店铺 + 站点，来自上游授权只读端点）
+    //   price-lists/coverage            覆盖范围摘要（模块级：币种分布 + 范围类型分布 + 每张表的摘要）
+    //   price-lists/lists               价目表集合（GET 真分页 + 筛选 / POST 新建）
+    //   price-lists/lists/{uuid}        价目表详情（GET）/ 修改（PUT，乐观锁）/ 删除（DELETE）
+    //
+    // ⚠️ 判别顺序：**字面量子路径（capabilities / scope-directory / coverage）排在 {uuid} 段之前** ——
+    //    alternation 是首个命中即返回，顺序反了会被 uuid 支吃掉半截。
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //   （不是 `[0-9a-f-]+`）：后者会把 `lists` 这种非 UUID 形状也当成 id 放行。
+    // ⚠️ 外层分组**不带 `?`**：本模块没有裸集合读，放行裸路径 `price-lists` 就是凭空多出一条 GET。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸路径 `price-lists` —— 本模块没有裸路径资源。
+    //   * `price-lists/lists/{uuid}/items` —— 价目项（`price_list_item`）是 **5.1.1.2 的写入所有权**，
+    //     本模块**不建**那张表 ⇒ 后端没有这个端点 ⇒ 放行它只会让界面 404。
+    //   * `price-lists/lists/{uuid}/conflicts` —— 优先级与冲突检测是 **5.1.2.1**（本表的下游守门员），
+    //     本模块**不**实现冲突判定 ⇒ 后端没有这个端点。
+    prefix: 'catalog/',
+    env: 'CATALOG_URL',
+    fallback: 'http://127.0.0.1:8082',
+    pattern:
+      /^price\-lists(?:\/(?:capabilities|scope\-directory|coverage)|\/lists(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?)$/,
+  },
+  {
     // 16.6.2.1 数据出境与留存（**本条目是新增一条独立的 services[] 元素**，
     // 不是往既有 channel 巨型 alternation 里并分支 —— 同批多车道共享这一个文件，
     // 往同一段超长单行正则里并分支会让 git 必然判冲突，retry 不会自愈）。
@@ -13921,6 +13962,67 @@ const services: readonly {
       /^ai\/usage\/(?:capabilities|models|records|summary|policies(?:\/effective)?|quotas(?:\/check)?|members\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/quotas)$/,
   },
   {
+    // 18.4.3.2 效果评估（platform 服务，卷 18「集成开放与智能自动化」L3 18.4.3 AI 使用与效果管理下的第二格）。
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有任何一条里并分支 ——
+    //   既有条目**一字未改、也不重排**。
+    //
+    // ---- 插入锚点选在「18.4.3.1 使用与配额」那条之后**（同 L3 兄弟旁边）**----
+    //   本文件是并行车道共同的累积型文件：既有车道分别落在「数组最开头」
+    //   （18.1.2.1 / 18.1.3.1 / 18.1.3.2 / 18.3.1.1 / 18.3.2.1 / 18.3.3.1）、
+    //   「数组中段」（18.4.2.2 的 ai/forecast、18.5.1.1 的 ai/templates）
+    //   与「中后段」（18.4.3.1 的 ai/usage），
+    //   本车道落在 18.4.3.1 那条**紧后面**，与数组两端各相距 12000 行以上 ⇒ 并入时 git 能干净求并。
+    //
+    // ---- 首 token「ai/effects」的零命中核对结论 ----
+    //   本仓的 `ai` 命名空间是**兄弟车道共用**的（18.4.2.2 的 `ai/forecast`、
+    //   18.4.3.1 的 `ai/usage`、18.5.1.1 的 `ai/templates`）—— 它们与本模块
+    //   **第二 token 不同**（effects / forecast / usage / templates）
+    //   ⇒ 四条正则互斥，谁也不会吃掉谁。
+    //   ⚠️ `ai/usage`（18.4.3.1）与本模块**不是一件事**：
+    //   那边管「AI 花了多少、谁花的、额度还剩多少」，
+    //   这边管「**生成了之后有没有人真的用**」—— 分子分母与判定对象都不同。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   ai/effects/capabilities                能力声明（哪些真交付 / 哪些还没交付、归谁）
+    //   ai/effects/overview                    效果总览（采纳率 / 回测误差 / 有用性，三块各带分子分母与口径）
+    //   ai/effects/adoptions                   采纳记录台账（GET 真分页真筛选）/ 录入一次处置（POST）
+    //   ai/effects/adoptions/{uuid}/withdraw   撤回一条采纳记录（POST，**只允许 ACTIVE → WITHDRAWN**）
+    //   ai/effects/adoption-report             采纳率报表（GET，真分页真筛选）
+    //   ai/effects/feedback                    有用性反馈台账（GET 真分页真筛选）/ 登记一次（POST）
+    //   ai/effects/feedback/{uuid}/withdraw    撤回一条有用性反馈（POST）
+    //   ai/effects/backtests                   回测结果台账（GET 真分页真筛选）
+    //   ai/effects/backtests/run               跑一次回测（POST，**实际值取自真实销量**）
+    //   ai/effects/thresholds                  评估阈值（GET）/ 登记或修改（POST，**局部更新**：留空沿用当前值）
+    //   ai/effects/suggestions                 改进建议清单（GET 真分页真筛选）
+    //   ai/effects/suggestions/generate        生成改进建议（POST，重新生成 = 刷新同一条）
+    //   ai/effects/suggestions/{uuid}/decision 记录对一条建议的决策（POST，**只记录决定、不执行下线**）
+    //
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   platform/ai/effects                      —— 裸路径：后端**没有**「一条不存在的汇总端点」。
+    //   platform/ai/effects/unknown              —— 未实现的子路径仍然 404。
+    //   platform/ai/effects/adoptions/not-a-uuid —— 非 UUID 段不应被 uuid 分支吃掉。
+    //   platform/ai/effects/feedback/not-a-uuid  —— 同上。
+    //   platform/ai/effects/suggestions/not-a-uuid —— 同上。
+    //   platform/ai/effects/adoptions/{uuid}/extra —— 多一段仍然 404。
+    //   platform/ai/effects/thresholds/{uuid}    —— 阈值是**租户级一行**，没有「按 id 取单条」的端点。
+    //   platform/ai/effects/adoptions/{uuid}     —— 后端没有「按 id 取单条采纳记录」的端点。
+    //   platform/ai/effects/suggestions/{uuid}/disable —— 🔴 **本模块没有下线端点**：
+    //                                                      本仓没有按能力粒度的 AI 功能开关 ⇒
+    //                                                      放行它会让界面以为「点一下就能下线」，
+    //                                                      而那必然 404。
+    //
+    // id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //   （不是 `[0-9a-f-]+`）：后者会把 `withdraw` / `run` / `generate` 这种非 UUID 形状也当成 id 放行。
+    // 字面量子路径（capabilities / overview / adoption-report / backtests / thresholds）与
+    //   `backtests/run`、`suggestions/generate` 排在 {uuid} 段**之前**判别 ——
+    //   alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    prefix: 'platform/',
+    env: 'PLATFORM_URL',
+    fallback: 'http://127.0.0.1:8089',
+    pattern:
+      /^ai\/effects\/(?:capabilities|overview|adoptions(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/withdraw)?|adoption\-report|feedback(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/withdraw)?|backtests(?:\/run)?|thresholds|suggestions(?:\/generate|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/decision)?)$/,
+  },
+  {
     // 18.1.1.1 应用与凭证（platform 服务，卷 18「集成开放与智能自动化」L3 18.1.1 API 管理下的第一格）。
     // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有任何一条里并分支 ——
     //   既有条目**一字未改、也不重排**。
@@ -14684,40 +14786,56 @@ const services: readonly {
       /^automation\-rule\-editor\/(?:capabilities|event\-schemas(?:\/[A-Za-z0-9_-]+(?:\.[A-Za-z0-9_-]+)+)?|action\-catalog|api\-catalog|save|test|test\-runs)$/,
   },
   {
-    // 5.1.1.1 价目表列表（catalog 服务，卷 05「定价与价目」L3 5.1.1「价目表」下的第一格）。
-    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，追加在**数组末尾** ——
-    //   既有条目一字未改、也不重排（并入时 git 按前缀求并，取错一侧不会丢掉别人已交付的路由）。
+    // 18.4.2.3 异常诊断（platform 服务，卷 18「集成开放与智能自动化」L3 18.4.2「AI 业务能力」下的第三格）。
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有的 platform/ 分支里并分支 ——
+    //   既有条目**一字未改、也不重排**。
     //
-    // 🔴 为什么用 `price-lists` 这个独立前缀：
-    //   * 既有 catalog 分支是**一条**覆盖全服务的长 alternation，里面没有 `price-lists`；
-    //     已逐条核对本文件里全部既有正则：`price-lists/**` **零命中**（既有分支不会先把它吃掉）。
-    //   * 5.1.1.2 价目项批量维护与 5.1.2.1 优先级与冲突检测是**别的模块**：
-    //     本车道只交付 5.1.1.1，不代未交付的兄弟模块开形状。
+    // ---- 插入锚点选在**数组末尾**（收尾的 `];` 之前）----
+    //   本文件是并行车道共同的累积型文件：同批其它车道分别落在「数组开头」
+    //   （18.3.1.1 / 18.3.3.1 等）、中段（18.4.2.2 的 ai/forecast，行 452）与
+    //   靠后（18.4.3.1 的 ai/usage，约行 13770 / 18.5.1.1 的 ai/templates，行 2719）。
+    //   本车道落在数组末尾 ⇒ 与最近的一条（ai/usage）也相距 800 行以上，
+    //   并入时 git 能干净求并（18.3.1.1 与 18.3.3.1 两条都插开头时已经撞过一次）。
+    //
+    // ---- 首 token「ai」下的第二 token「diagnosis」的零命中核对结论 ----
+    //   本文件里既有的 `prefix: 'platform/'` 条目里，带 `ai/` 首 token 的只有三条，
+    //   第二段分别是 usage（18.4.3.1）/ templates（18.5.1.1）/ forecast（18.4.2.2）。
+    //   ⚠️ **本条目的首 token 是 `ai`**，与这三条**共用首 token** —— 但第二 token 不同
+    //   （diagnosis / usage / templates / forecast）⇒ 四者互斥，谁也不会吃掉谁。
+    //   ⚠️ `ai/forecast`（18.4.2.2 选品与需求预测）与本模块**不是一件事**：
+    //   那边管的是「销量怎么预测、补多少货、价怎么调」，这边管的是「出了什么异常、
+    //   原因是什么、依据是什么、该谁去处理」。
     //
     // 形状逐个列出（**只放行本模块真实实现的路径**）：
-    //   price-lists/capabilities        能力声明（一价目一币种 / 半开区间 / 价目项数量来源 / 上下游）
-    //   price-lists/scope-directory     适用范围目录（法人 + 店铺 + 站点，来自上游授权只读端点）
-    //   price-lists/coverage            覆盖范围摘要（模块级：币种分布 + 范围类型分布 + 每张表的摘要）
-    //   price-lists/lists               价目表集合（GET 真分页 + 筛选 / POST 新建）
-    //   price-lists/lists/{uuid}        价目表详情（GET）/ 修改（PUT，乐观锁）/ 删除（DELETE）
+    //   ai/diagnosis/capabilities            能力声明（归因规则 / 阈值 / 事实源 / 边界逐条报出）
+    //   ai/diagnosis/overview                概览（几个数）
+    //   ai/diagnosis/events                  异常事件列表（GET 真分页真筛选真搜索）/ 登记（POST）
+    //   ai/diagnosis/events/sync             从平台内部失败源同步异常事件（POST，**幂等**）
+    //   ai/diagnosis/events/{uuid}           事件详情（GET，事件 + 它的历史运行）
+    //   ai/diagnosis/events/{uuid}/diagnose  对一个事件发起一次诊断（POST）
+    //   ai/diagnosis/events/{uuid}/resolve   人工标记已处置（POST，**只记人的决定**）
+    //   ai/diagnosis/runs/{uuid}             运行详情（GET，**结论 + 依据的唯一入口**）
     //
-    // ⚠️ 判别顺序：**字面量子路径（capabilities / scope-directory / coverage）排在 {uuid} 段之前** ——
-    //    alternation 是首个命中即返回，顺序反了会被 uuid 支吃掉半截。
-    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
-    //   （不是 `[0-9a-f-]+`）：后者会把 `lists` 这种非 UUID 形状也当成 id 放行。
-    // ⚠️ 外层分组**不带 `?`**：本模块没有裸集合读，放行裸路径 `price-lists` 就是凭空多出一条 GET。
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   platform/ai/diagnosis                          —— 裸路径：后端**没有**汇总端点。
+    //   platform/ai/diagnosis/unknown                  —— 未实现的子路径仍然 404。
+    //   platform/ai/diagnosis/events/not-a-uuid        —— 非 UUID 段不应被 uuid 分支吃掉。
+    //   platform/ai/diagnosis/events/{uuid}/execute    —— 🔴 **执行处置动作**：
+    //                                                       补货归 6 采购、调价归 5 定价、停广告归 14 广告，
+    //                                                       **本模块只给建议、不执行**；
+    //                                                       放行它会让界面以为「点一下就能改价」。
+    //   platform/ai/diagnosis/events/{uuid}/extra      —— 多一段仍然 404。
+    //   platform/ai/diagnosis/runs/not-a-uuid          —— 同上。
     //
-    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
-    //   * 裸路径 `price-lists` —— 本模块没有裸路径资源。
-    //   * `price-lists/lists/{uuid}/items` —— 价目项（`price_list_item`）是 **5.1.1.2 的写入所有权**，
-    //     本模块**不建**那张表 ⇒ 后端没有这个端点 ⇒ 放行它只会让界面 404。
-    //   * `price-lists/lists/{uuid}/conflicts` —— 优先级与冲突检测是 **5.1.2.1**（本表的下游守门员），
-    //     本模块**不**实现冲突判定 ⇒ 后端没有这个端点。
-    prefix: 'catalog/',
-    env: 'CATALOG_URL',
-    fallback: 'http://127.0.0.1:8082',
+    // id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //   （不是 `[0-9a-f-]+`）：后者会把 `diagnose` / `resolve` / `sync` 这种非 UUID 形状也当成 id 放行。
+    // 字面量子路径（capabilities / overview / events / sync / runs）排在 {uuid} 段**之前**判别 ——
+    //   alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    prefix: 'platform/',
+    env: 'PLATFORM_URL',
+    fallback: 'http://127.0.0.1:8089',
     pattern:
-      /^price\-lists(?:\/(?:capabilities|scope\-directory|coverage)|\/lists(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?)$/,
+      /^ai\/diagnosis\/(?:capabilities|overview|events(?:\/sync|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:diagnose|resolve))?)?|runs\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})$/,
   },
 ];
 

@@ -15,7 +15,7 @@
 5.3.2.1 定价模板。**一价目一币种**是硬约束——混币种的价目表会让利润计算失效。」
 
 交付物：两张新表 + 7 个端点（`/catalog/price-lists`）+ 一个真实工作区页面（`/pricing/lists`）+
-37 个后端测试 + 24 个前端测试。
+37 个后端测试 + 24 个前端模型测试 + 5 个白名单回归测试。
 
 ## 决策 / 结论
 
@@ -85,15 +85,44 @@ identity 权限迁移**，也就不会与并行车道撞版本号。
 沿用 V227 / V231 的手法（batch-37 的坑：给既有表加 FK 会打破既有测试的 TRUNCATE ⇒ 整批红）。
 `price_list_scope → price_list` 用触发器 `guard_price_list_scope` 校验，报 23514。
 
-### 8. 前端：真实工作区 + api-proxy 白名单**追加**在数组末尾
+### 8. 前端：真实工作区 + api-proxy 白名单新增一条独立 `price-lists/` 元素
 
 `/pricing/lists`（蓝图 05 卷「5.1 价目表 → /pricing/lists」，台账路由列也是它）。
 页面：能力声明（七条口径说明固定在顶部）+ 覆盖范围摘要 + 台账（真分页 + 五个筛选）+ 表单 +
 详情 + 适用范围目录 + 加载 / 错误 / 空三态。
 
-api-proxy：**新增一条独立的 `price-lists/` 元素，追加在数组末尾**，既有条目一字未改、不重排。
+api-proxy：**新增一条独立的 `price-lists/` 元素**，既有条目一字未改、不重排。
 刻意**不放行** `price-lists/lists/{uuid}/items`（价目项是 5.1.1.2 的写入所有权，后端没这个端点）
 与 `price-lists/lists/{uuid}/conflicts`（冲突检测是 5.1.2.1）。
+
+### 9. 🔴 白名单锚点搬家 + 补白名单回归测试（并入冲突修复）
+
+**冲突成因**：第一次并入集成头时，本条目插在 `services[]` **数组末尾**，而已并入的
+**18.4.2.3（异常诊断）** 也插在同一位置 ⇒ 同锚点 ⇒ git 判冲突（**成果没丢**，只是位置撞了）。
+
+**解法**：冲突处取**集成分支一侧**（18.4.2.3 / 18.4.3.2 的元素与正则一字不改），
+把自己的 5.1.1.1 元素**整块搬家**到「`prefix: 'catalog/'` 且首 token 是 `price-anomaly-alerts`
+（5.5.2.1 异常告警）那条元素之后」。选它的理由：与数组末尾相距 1.1 万行 ⇒ git 能干净求并。
+搬家前后 `pattern` / `prefix` / `env` / `fallback` **一个字未改**（只有注释里的锚点说明跟着改了）。
+
+**补测试**：仓库约定是「每个在 api-proxy 登记路由的模块都要有一条**双向**断言的
+`<module>-allowlist.test.ts`」，本车道原先缺这一条 ⇒ 补
+`apps/web/src/app/api/catalog/price-list-allowlist.test.ts`（5 例）：
+
+- **放行**：从本模块自己的 `price-list-model.ts` **反向抽取真实调用点**（5 个形状），
+  再**真跑 route handler** 断言不是 404（不是眼看正则，也不是自己再写一份正则去比）。
+- **写动作**：真的转发到 8082，且**不转发伪造的 `X-Tenant-Id`**。
+- **拒绝**：负向样本**全部取自本模块自己的前缀** `catalog/price-lists/...`
+  （裸路径 / `lists/{uuid}/items` = 5.1.1.2 未交付 / `lists/{uuid}/conflicts` = 5.1.2.1 未交付 /
+  非 UUID 段）仍然 404 —— 拿兄弟车道的前缀当负向样本是 batch-32 的教训（并入后必然假红）。
+- **不误伤**：兄弟车道的 catalog 路由（含**紧邻锚点** `price-anomaly-alerts`）仍然被放行 ——
+  这是「下一次并入取错一侧时会静默删掉已交付模块的路由」这件事唯一的守门人。
+
+**🔴 顺带发现（合并驱动的台账求并有缺陷）**：并入时 `merge-union` 对台账按模块 ID 求并集是对的
+（465 行模块行折叠正确），但**汇总块是按整行去重**的 —— 两侧都改过汇总块时，两份都会被留下
+⇒ 台账尾部出现**重复的汇总块**（本车道合并后出现 3 份：集成头的顶栏、集成头的尾栏、本车道的尾栏）。
+本车道的处理（台账只改自己那一行，不重排整表）：**基线取集成头已提交的台账**，只替换
+5.1.1.1 那一行（状态 + 证据）⇒ 与集成头的差异**恰好 1 行**。
 
 ## 涉及文件
 
@@ -116,10 +145,12 @@ api-proxy：**新增一条独立的 `price-lists/` 元素，追加在数组末�
 - `apps/web/src/components/pricing/price-list-model.ts`
 - `apps/web/src/components/pricing/price-list-model.test.ts`
 - `apps/web/src/components/pricing/price-list-workspace.tsx`
+- `apps/web/src/app/api/catalog/price-list-allowlist.test.ts`（**本轮补**：白名单双向断言，5 例）
 
 **前端 / 台账（改）**
 
-- `apps/web/src/lib/api-proxy.ts`（**追加**一条 `price-lists/` 元素，既有条目一字未改）
+- `apps/web/src/lib/api-proxy.ts`（**新增**一条 `price-lists/` 元素 —— 锚点 =
+  `price-anomaly-alerts` 那条之后；既有条目一字未改）
 - `docs/product/capability-blueprint/module-progress.md`（**只改 5.1.1.1 那一行**的状态与证据两格）
 
 ## 后续待办
@@ -134,3 +165,8 @@ api-proxy：**新增一条独立的 `price-lists/` 元素，追加在数组末�
 4. **本仓没有 ISO 4217 币种字典**：币种只校验三位大写字母的形状；页面上的币种提示
    来自上游主数据里的本位币与站点默认币种，**不是权威字典**。真要做权威字典需要一张新表 + 一个写入所有者。
 5. **已知缺口（如实记录）**：价目项未交付 ⇒ `item_count` 恒为 0；冲突检测未交付 ⇒ 保存价目表不做冲突校验。
+6. **合并驱动的台账汇总块有缺陷**（跨模块，不属本车道）：`merge-union` 对台账的**模块行**按 ID 求并是对的，
+   但**汇总块按整行去重** ⇒ 两侧都改过汇总块时两份都留下（重复汇总块）。
+   本车道已按「只改自己那一行」重建（与集成头差异恰好 1 行），
+   汇总块的**数字本身在集成头就已过期**（顶栏写 451/14，行数实际是 453/12）——
+   重新生成台账是 `node tools/module-progress/sync.mjs` 的职责，不在本车道范围内。
