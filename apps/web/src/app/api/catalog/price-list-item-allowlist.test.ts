@@ -23,9 +23,11 @@ import { GET, POST, PUT, DELETE } from './[...path]/route';
  * <p>🔴 负向样本**全部取自本模块自己的形状**（`catalog/price-lists/lists/{id}/items/...`）：
  * 拿兄弟车道的前缀当「未交付形状」是 batch-32 的教训。
  *
- * <p>🔴 最要紧的一条负向样本：{@code price-lists/lists/{id}/conflicts} ——
- * 优先级与冲突检测是 **5.1.2.1**（本表的下游守门员），本模块**不**实现跨价目表的冲突判定。
- * 放行它 ⇒ 界面会以为「冲突检测已交付」。
+ * <p>🔧 **2026-11-02（batch-134 L2 红修复）**：原先「最要紧的一条负向样本」
+ * {@code price-lists/lists/{id}/conflicts} —— 优先级与冲突检测是 **5.1.2.1**
+ * （本表的下游守门员）—— **已由 5.1.2.1 交付**（它自己那条独立的 `services[]` 元素放行
+ * `price-lists/lists/{uuid}/conflicts`）⇒ 它现在是**正向样本**（必须被放行），
+ * 不再断言 404。
  *
  * <p><b>不误伤其他车道已登记的分支</b>：白名单是多车道共用的**累积型**文件。
  * 本车道只**新增**一条 catalog/ services 条目（锚点 = 数组末尾），
@@ -151,9 +153,6 @@ it('🔴 未交付 / 不该存在的形状仍然 404（放行它们比 404 更�
   vi.stubGlobal('fetch', fetcher);
 
   for (const path of [
-    // 🔴 优先级与冲突检测是 **5.1.2.1**（本表的下游守门员），本模块**不**实现跨表冲突判定
-    //    ⇒ 后端没有这个端点 ⇒ 放行它只会让界面 404。
-    `price-lists/lists/${ID}/conflicts`,
     // 本模块的批量形状叫 preview / apply；`batch` 这个形状不存在。
     `price-lists/lists/${ID}/items/batch`,
     // 不存在的子路径。
@@ -194,6 +193,9 @@ it('🔴 兄弟车道已交付的 catalog 路由未被本车道挤掉或污染',
     'price-anomaly-alerts/capabilities',
     // 5.4.1.1 平台价格同步
     'price-sync/capabilities',
+    // 5.1.2.1 优先级与冲突检测（**已交付**）—— 冲突明细端点由它自己那条
+    // `services[]` 元素放行 ⇒ 正向样本（不是 404）。
+    `price-lists/lists/${ID}/conflicts`,
   ];
   for (const path of siblings) {
     const response = await callProxy(path);

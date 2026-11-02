@@ -19,7 +19,10 @@ import { GET, POST } from './[...path]/route';
  *       写死一份清单只会验证「清单与白名单一致」，而真正会出事的是
  *       「源码加了新形状、白名单忘了登记」。</li>
  *   <li><b>拒绝</b>：刻意不放行的形状仍然 404。价目项（`price_list_item`）是
- *       **5.1.1.2 的写入所有权**，尚未交付 ⇒ 放行 `…/items` 只会让界面以为价目项已接通。</li>
+ *       **5.1.1.2 的写入所有权**，**5.1.1.2 已交付**（2026-11-02）—— 它自己的
+ *       `services[]` 元素放行 `…/items`；本模块不实现价目项，也不重复放行 ⇒
+ *       负向样本只留**确实不存在**的形状（`…/items/batch`）。
+ *       `…/items` 本身由**正向**断言钉住（必须被放行）—— 断言它 404 是过期断言。</li>
  * </ul>
  */
 
@@ -118,8 +121,11 @@ it('刻意不放行的形状仍然被拒 —— 放行后端不存在的映射�
   vi.stubGlobal('fetch', fetcher);
 
   for (const path of [
-    // 价目项（price_list_item）是 5.1.1.2 的写入所有权，未交付。
-    `catalog/price-lists/lists/${ID}/items`,
+    // 🔴 价目项（price_list_item）是 **5.1.1.2 的写入所有权**，**5.1.1.2 已交付**：
+    //   它自己的 `services[]` 元素放行 `…/items` ⇒ 那条形状**不是**「刻意不放行」的，
+    //   本模块不实现价目项、也不重复放行它。
+    //   `…/items/batch` 这个形状**确实不存在**（5.1.1.2 的批量形状叫 preview / apply）⇒ 仍应 404。
+    `catalog/price-lists/lists/${ID}/items/batch`,
     // 非 UUID 形状不该被 uuid 分支吃掉。
     `catalog/price-lists/lists/not-a-uuid/priority`,
     // 本模块没有裸的 priority 资源（只有 capabilities / rules 两条子路径）。
@@ -152,5 +158,21 @@ it('5.1.1.1 自己的形状仍然归它自己放行', async () => {
       params: Promise.resolve({ path: path.split('/') }),
     });
     expect(response.status, `${path} 未被放行（5.1.1.1 的形状被本车道挤掉了）`).toBe(200);
+  }
+});
+
+it('🔴 兄弟车道（5.1.1.2）已交付的价目项形状仍然被放行 —— 断言它 404 是过期断言', async () => {
+  const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('{}')));
+  vi.stubGlobal('fetch', fetcher);
+
+  // 🔴 `price-lists/lists/{uuid}/items` 是 **5.1.1.2 价目项批量维护**的形状，**已交付**
+  //   （2026-11-02）—— 由 5.1.1.2 自己那条独立的 `services[]` 元素放行。
+  //   本模块（5.1.2.1）不实现价目项、也不重复放行它；但「它已被放行」这件事必须被断言钉住 ——
+  //   batch-134 L2 的假红正是「断言它 404」这条**过期断言**造成的（实测 503/200，不是 404）。
+  for (const path of [`catalog/price-lists/lists/${ID}/items`]) {
+    const response = await GET(request(path), {
+      params: Promise.resolve({ path: path.split('/') }),
+    });
+    expect(response.status, `${path} 未被放行（5.1.1.2 已交付的形状）`).toBe(200);
   }
 });
