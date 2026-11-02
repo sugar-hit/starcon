@@ -1,6 +1,420 @@
 {
   "components": {
     "schemas": {
+      "AiAdoptionInput": {
+        "properties": {
+          "artifactId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "artifactRef": {
+            "type": "string"
+          },
+          "artifactType": {
+            "type": "string"
+          },
+          "artifactVersion": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "capabilityCode": {
+            "type": "string"
+          },
+          "decision": {
+            "type": "string"
+          },
+          "editNote": {
+            "type": "string"
+          },
+          "featureCode": {
+            "type": "string"
+          },
+          "rejectReason": {
+            "type": "string"
+          },
+          "usageRecordId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AiAdoptionPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AiAdoptionRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AiAdoptionReportPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AiAdoptionReportRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "windowEnd": {
+            "type": "string"
+          },
+          "windowStart": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AiAdoptionReportRow": {
+        "properties": {
+          "acceptedCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "adoptedCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "adoptionRate": {
+            "nullable": true,
+            "type": "string"
+          },
+          "calls": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "capabilityCode": {
+            "type": "string"
+          },
+          "denominatorSource": {
+            "type": "string"
+          },
+          "featureCode": {
+            "type": "string"
+          },
+          "linkedAdoptedCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "modifiedCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "numeratorSource": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "rejectedCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "unlinkedAdoptedCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "verdict": {
+            "type": "string"
+          },
+          "verdictLabel": {
+            "type": "string"
+          },
+          "windowEnd": {
+            "type": "string"
+          },
+          "windowStart": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AiAdoptionRow": {
+        "properties": {
+          "artifactId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "artifactRef": {
+            "type": "string"
+          },
+          "artifactType": {
+            "type": "string"
+          },
+          "artifactTypeLabel": {
+            "type": "string"
+          },
+          "artifactVersion": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "capabilityCode": {
+            "type": "string"
+          },
+          "decision": {
+            "type": "string"
+          },
+          "decisionLabel": {
+            "type": "string"
+          },
+          "editNote": {
+            "type": "string"
+          },
+          "featureCode": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "membershipId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "occurredAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "rejectReason": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "usageRecordId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "withdrawnReason": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AiAdoptionSummary": {
+        "properties": {
+          "adoptedCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "adoptionRate": {
+            "nullable": true,
+            "type": "string"
+          },
+          "basis": {
+            "type": "string"
+          },
+          "calls": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "denominatorSource": {
+            "type": "string"
+          },
+          "featuresEvaluated": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "lowValueFeatures": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "numeratorSource": {
+            "type": "string"
+          },
+          "rejectedCount": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AiBacktestPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AiBacktestRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AiBacktestRow": {
+        "properties": {
+          "absoluteError": {
+            "nullable": true,
+            "type": "string"
+          },
+          "actualRecordDays": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "actualSource": {
+            "type": "string"
+          },
+          "actualUnits": {
+            "nullable": true,
+            "type": "string"
+          },
+          "actualWindowEnd": {
+            "nullable": true,
+            "type": "string"
+          },
+          "actualWindowStart": {
+            "nullable": true,
+            "type": "string"
+          },
+          "evaluatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "forecastLower": {
+            "type": "string"
+          },
+          "forecastPoint": {
+            "type": "string"
+          },
+          "forecastResultId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "forecastUpper": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "relativeError": {
+            "nullable": true,
+            "type": "string"
+          },
+          "runId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "runNo": {
+            "type": "string"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "withinInterval": {
+            "nullable": true,
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "AiBacktestRunInput": {
+        "properties": {
+          "runId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AiBacktestRunResult": {
+        "properties": {
+          "basis": {
+            "type": "string"
+          },
+          "comparedCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "evaluatedCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "hitRate": {
+            "nullable": true,
+            "type": "string"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AiBacktestRow"
+            },
+            "type": "array"
+          },
+          "mape": {
+            "nullable": true,
+            "type": "string"
+          },
+          "noActualSourceCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "runId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "runNo": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "AiDiagnosisAnomalyCount": {
         "properties": {
           "anomalyType": {
@@ -588,6 +1002,287 @@
         },
         "type": "object"
       },
+      "AiEffectCapabilities": {
+        "properties": {
+          "capabilities": {
+            "items": {
+              "$ref": "#/components/schemas/AiEffectCapability"
+            },
+            "type": "array"
+          },
+          "downstreamGaps": {
+            "items": {
+              "$ref": "#/components/schemas/AiEffectGap"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "AiEffectCapability": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "basis": {
+            "type": "string"
+          },
+          "impact": {
+            "type": "string"
+          },
+          "module": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AiEffectGap": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "group": {
+            "type": "string"
+          },
+          "module": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "ownerService": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AiEffectOverview": {
+        "properties": {
+          "adoption": {
+            "$ref": "#/components/schemas/AiAdoptionSummary"
+          },
+          "basis": {
+            "type": "string"
+          },
+          "forecast": {
+            "$ref": "#/components/schemas/AiForecastBacktestSummary"
+          },
+          "lowValueFeatures": {
+            "items": {
+              "$ref": "#/components/schemas/AiLowValueFeature"
+            },
+            "type": "array"
+          },
+          "thresholds": {
+            "$ref": "#/components/schemas/AiEffectThresholdRow"
+          },
+          "usefulness": {
+            "$ref": "#/components/schemas/AiUsefulnessSummary"
+          },
+          "windowEnd": {
+            "type": "string"
+          },
+          "windowStart": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AiEffectThresholdInput": {
+        "properties": {
+          "lowAdoptionRate": {
+            "nullable": true,
+            "type": "string"
+          },
+          "lowUsefulRate": {
+            "nullable": true,
+            "type": "string"
+          },
+          "maxMape": {
+            "nullable": true,
+            "type": "string"
+          },
+          "minCalls": {
+            "format": "int64",
+            "nullable": true,
+            "type": "integer"
+          },
+          "minFeedbackCount": {
+            "format": "int64",
+            "nullable": true,
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AiEffectThresholdRow": {
+        "properties": {
+          "basis": {
+            "type": "string"
+          },
+          "configured": {
+            "type": "boolean"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "lowAdoptionRate": {
+            "type": "string"
+          },
+          "lowUsefulRate": {
+            "type": "string"
+          },
+          "maxMape": {
+            "type": "string"
+          },
+          "minCalls": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "minFeedbackCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AiFeedbackInput": {
+        "properties": {
+          "artifactId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "artifactRef": {
+            "type": "string"
+          },
+          "artifactType": {
+            "type": "string"
+          },
+          "artifactVersion": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "capabilityCode": {
+            "type": "string"
+          },
+          "featureCode": {
+            "type": "string"
+          },
+          "reasonCode": {
+            "type": "string"
+          },
+          "reasonText": {
+            "type": "string"
+          },
+          "usefulness": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AiFeedbackPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AiFeedbackRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AiFeedbackRow": {
+        "properties": {
+          "artifactId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "artifactRef": {
+            "type": "string"
+          },
+          "artifactType": {
+            "type": "string"
+          },
+          "artifactTypeLabel": {
+            "type": "string"
+          },
+          "artifactVersion": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "capabilityCode": {
+            "type": "string"
+          },
+          "featureCode": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "membershipId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "occurredAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "reasonCode": {
+            "type": "string"
+          },
+          "reasonCodeLabel": {
+            "type": "string"
+          },
+          "reasonText": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "usefulness": {
+            "type": "string"
+          },
+          "usefulnessLabel": {
+            "type": "string"
+          },
+          "withdrawnReason": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "AiForecastAlgorithm": {
         "properties": {
           "code": {
@@ -604,6 +1299,34 @@
               "$ref": "#/components/schemas/AiForecastParam"
             },
             "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "AiForecastBacktestSummary": {
+        "properties": {
+          "basis": {
+            "type": "string"
+          },
+          "comparedCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "evaluatedCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "hitRate": {
+            "nullable": true,
+            "type": "string"
+          },
+          "mape": {
+            "nullable": true,
+            "type": "string"
+          },
+          "noActualSourceCount": {
+            "format": "int64",
+            "type": "integer"
           }
         },
         "type": "object"
@@ -1774,6 +2497,34 @@
         },
         "type": "object"
       },
+      "AiLowValueFeature": {
+        "properties": {
+          "adoptionRate": {
+            "nullable": true,
+            "type": "string"
+          },
+          "calls": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "capabilityCode": {
+            "type": "string"
+          },
+          "featureCode": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "verdict": {
+            "type": "string"
+          },
+          "verdictLabel": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "AiModelInput": {
         "properties": {
           "contextLimit": {
@@ -2133,6 +2884,158 @@
         },
         "type": "object"
       },
+      "AiSuggestionDecisionInput": {
+        "properties": {
+          "note": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AiSuggestionGenerateInput": {
+        "properties": {
+          "from": {
+            "nullable": true,
+            "type": "string"
+          },
+          "to": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AiSuggestionGenerateResult": {
+        "properties": {
+          "basis": {
+            "type": "string"
+          },
+          "created": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "refreshed": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "resolved": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "windowEnd": {
+            "type": "string"
+          },
+          "windowStart": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AiSuggestionPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AiSuggestionRow"
+            },
+            "type": "array"
+          },
+          "lowValueCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AiSuggestionRow": {
+        "properties": {
+          "actionOwner": {
+            "type": "string"
+          },
+          "capabilityCode": {
+            "type": "string"
+          },
+          "currentMetric": {
+            "type": "string"
+          },
+          "decidedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "decidedBy": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "decisionNote": {
+            "type": "string"
+          },
+          "evidence": {
+            "type": "string"
+          },
+          "featureCode": {
+            "type": "string"
+          },
+          "generatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "offlineAction": {
+            "type": "string"
+          },
+          "recommendation": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string"
+          },
+          "severityLabel": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "suggestionType": {
+            "type": "string"
+          },
+          "suggestionTypeLabel": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "windowEnd": {
+            "type": "string"
+          },
+          "windowStart": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "AiUsageCapabilities": {
         "properties": {
           "capabilities": {
@@ -2395,6 +3298,54 @@
             "type": "string"
           },
           "unitLabel": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AiUsefulnessSummary": {
+        "properties": {
+          "basis": {
+            "type": "string"
+          },
+          "notUsefulCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "notUsefulRate": {
+            "nullable": true,
+            "type": "string"
+          },
+          "partiallyUsefulCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "partiallyUsefulRate": {
+            "nullable": true,
+            "type": "string"
+          },
+          "positiveRate": {
+            "nullable": true,
+            "type": "string"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "usefulCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "usefulRate": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AiWithdrawInput": {
+        "properties": {
+          "reason": {
             "type": "string"
           }
         },
@@ -14812,6 +15763,908 @@
         },
         "tags": [
           "ai-diagnosis-controller"
+        ]
+      }
+    },
+    "/platform/ai/effects/adoption-report": {
+      "get": {
+        "description": "粒度 = 能力 × 子功能。**分子**：本模块的采纳条数（直接采用 + 修改后采用，剔除已撤回）；**分母**：18.4.3.1 用量台账里的 AI 调用次数（本模块只读）。🔴 分母为 0 ⇒ 比率是 **null**；样本不足（调用次数 < 门槛）⇒ 判定「数据不足」，**不下低价值结论**。",
+        "operationId": "get_platform_ai_effects_adoption_report",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "capabilityCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiAdoptionReportPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "采纳率报表",
+        "tags": [
+          "ai-effect-evaluation-controller"
+        ]
+      }
+    },
+    "/platform/ai/effects/adoptions": {
+      "get": {
+        "description": "一次人工处置一行：**直接采用 / 修改后采用 / 拒绝** 三态。事实不可改，但填错了可以撤回（只允许 ACTIVE → WITHDRAWN）。",
+        "operationId": "get_platform_ai_effects_adoptions",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "capabilityCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "featureCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "decision",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiAdoptionPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "采纳记录台账",
+        "tags": [
+          "ai-effect-evaluation-controller"
+        ]
+      },
+      "post": {
+        "description": "主体成员由服务端从已认证会话解析（请求体不接受 membershipId）。🔴 **「修改后采用」也算被采纳**（蓝图原文：直接采用 + 人工修改后采用）—— 只记一个布尔值会把「改了才用」误判成「没用」。",
+        "operationId": "post_platform_ai_effects_adoptions",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AiAdoptionInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiAdoptionRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "录入一次人工处置",
+        "tags": [
+          "ai-effect-evaluation-controller"
+        ]
+      }
+    },
+    "/platform/ai/effects/adoptions/{id}/withdraw": {
+      "post": {
+        "description": "受控状态机：ACTIVE → WITHDRAWN。撤回后该行不再计入采纳率的分子 —— 一条填错的采纳记录会让采纳率**永远偏**，而采纳率是本模块唯一的诚实指标。",
+        "operationId": "post_platform_ai_effects_adoptions_id_withdraw",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AiWithdrawInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiAdoptionRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "撤回一条采纳记录",
+        "tags": [
+          "ai-effect-evaluation-controller"
+        ]
+      }
+    },
+    "/platform/ai/effects/backtests": {
+      "get": {
+        "description": "一条预测结果一行：预测值 + 置信区间、**实际值**（真实销量求和）、绝对误差、相对误差、是否落在区间内。",
+        "operationId": "get_platform_ai_effects_backtests",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "runId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "skuCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiBacktestPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "回测结果台账",
+        "tags": [
+          "ai-effect-evaluation-controller"
+        ]
+      }
+    },
+    "/platform/ai/effects/backtests/run": {
+      "post": {
+        "description": "runId 留空 = 取最近一次已完成的预测运行。回测是**计算快照**（真实销量是后补的）⇒ 重跑会刷新同一行。🔴 **只读上游**：18.4.2.2 的预测结果表与销量历史表一个字都不写。",
+        "operationId": "post_platform_ai_effects_backtests_run",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AiBacktestRunInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiBacktestRunResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "跑一次预测准确度回测",
+        "tags": [
+          "ai-effect-evaluation-controller"
+        ]
+      }
+    },
+    "/platform/ai/effects/capabilities": {
+      "get": {
+        "description": "逐维说清「有没有、依据是什么、缺了归谁」。⚠️ **助手答案有用性反馈如实答不可用**（18.4.1.1 已熔断未交付）—— 本模块只登记反馈的载体，不伪造助手的使用/反馈数据。",
+        "operationId": "get_platform_ai_effects_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiEffectCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "能力声明",
+        "tags": [
+          "ai-effect-evaluation-controller"
+        ]
+      }
+    },
+    "/platform/ai/effects/feedback": {
+      "get": {
+        "description": "一次「这个答案有用吗」的反馈一行：**有用 / 部分有用 / 无用** 三档 + 受控理由码。",
+        "operationId": "get_platform_ai_effects_feedback",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "capabilityCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "featureCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "usefulness",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiFeedbackPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "有用性反馈台账",
+        "tags": [
+          "ai-effect-evaluation-controller"
+        ]
+      },
+      "post": {
+        "description": "主体成员由服务端从已认证会话解析（请求体不接受 membershipId）。理由码是**受控词表**（可聚合），补充说明是自由文本（**不参与统计口径**）。⚠️ 助手答案维度上游未交付 ⇒ 聚合里该维度恒为「暂无反馈」，本模块不伪造助手数据。",
+        "operationId": "post_platform_ai_effects_feedback",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AiFeedbackInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiFeedbackRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "登记一次有用性反馈",
+        "tags": [
+          "ai-effect-evaluation-controller"
+        ]
+      }
+    },
+    "/platform/ai/effects/feedback/{id}/withdraw": {
+      "post": {
+        "description": "受控状态机：ACTIVE → WITHDRAWN。撤回后该行不再计入有用性聚合。",
+        "operationId": "post_platform_ai_effects_feedback_id_withdraw",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AiWithdrawInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiFeedbackRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "撤回一条有用性反馈",
+        "tags": [
+          "ai-effect-evaluation-controller"
+        ]
+      }
+    },
+    "/platform/ai/effects/overview": {
+      "get": {
+        "description": "窗口 = [from, to)；三块指标各自带**分子、分母、比率与口径来源**。🔴 **分母为 0 时比率是 null**（不是 0、不是 Infinity）。",
+        "operationId": "get_platform_ai_effects_overview",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "description": "起始时刻（ISO-8601，含）",
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "结束时刻（ISO-8601，不含）",
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiEffectOverview"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "效果总览",
+        "tags": [
+          "ai-effect-evaluation-controller"
+        ]
+      }
+    },
+    "/platform/ai/effects/suggestions": {
+      "get": {
+        "description": "每条建议都带齐四件事：针对哪个功能、当前指标是多少、建议做什么、依据是什么。🔴 **本模块只出建议，不执行下线** —— 真正下线需人工执行。",
+        "operationId": "get_platform_ai_effects_suggestions",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "suggestionType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "capabilityCode",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiSuggestionPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "改进建议清单",
+        "tags": [
+          "ai-effect-evaluation-controller"
+        ]
+      }
+    },
+    "/platform/ai/effects/suggestions/generate": {
+      "post": {
+        "description": "按采纳率报表与阈值生成建议：低价值 ⇒ 建议下线；样本不足 ⇒ 数据缺口（**不是**低价值）。条件不再成立的旧建议会被自动关闭。🔴 **只出建议清单**，不执行任何下线动作。",
+        "operationId": "post_platform_ai_effects_suggestions_generate",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AiSuggestionGenerateInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiSuggestionGenerateResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "生成改进建议",
+        "tags": [
+          "ai-effect-evaluation-controller"
+        ]
+      }
+    },
+    "/platform/ai/effects/suggestions/{id}/decision": {
+      "post": {
+        "description": "只记录决定（采纳 / 驳回 + 说明），**不执行下线** —— 本仓没有按能力粒度的 AI 功能开关，下线动作需人工执行。",
+        "operationId": "post_platform_ai_effects_suggestions_id_decision",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "decision",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AiSuggestionDecisionInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiSuggestionRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "记录对一条建议的决策",
+        "tags": [
+          "ai-effect-evaluation-controller"
+        ]
+      }
+    },
+    "/platform/ai/effects/thresholds": {
+      "get": {
+        "description": "「什么算低价值」是**业务口径** ⇒ 归租户维护（一个租户只有一行）。⚠️ 库里没登记时返回**系统默认阈值**并标 `configured=false` —— 不谎称是租户定的。",
+        "operationId": "get_platform_ai_effects_thresholds",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiEffectThresholdRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "评估阈值",
+        "tags": [
+          "ai-effect-evaluation-controller"
+        ]
+      },
+      "post": {
+        "description": "留空的字段沿用当前值（局部更新，不是整份替换）。判定「样本不足」的门槛很重要 —— **不拿 3 次调用判死刑**。",
+        "operationId": "post_platform_ai_effects_thresholds",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AiEffectThresholdInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiEffectThresholdRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "登记 / 修改评估阈值",
+        "tags": [
+          "ai-effect-evaluation-controller"
         ]
       }
     },
