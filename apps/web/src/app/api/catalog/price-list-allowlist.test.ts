@@ -26,6 +26,13 @@ import { GET, POST, PUT, DELETE } from './[...path]/route';
  * 拿兄弟车道的前缀当「未交付形状」是 batch-32 的教训 —— 那个前缀在同批里已经交付，
  * 断言它 404 就是**假红**；更糟的是断言方向搞反时会让「已交付的路由被静默删掉」这个真事故**假绿**。
  *
+ * <p>🔧 **2026-11-02（batch-134 L2 红修复）**：`price-lists/lists/{uuid}/conflicts`
+ * 与 `price-lists/conflicts` 这两条形状**已由 5.1.2.1（优先级与冲突检测）交付** ——
+ * 它们在白名单里由 5.1.2.1 自己那条**独立的 `services[]` 元素**放行
+ * ⇒ 本文件把这两条从**负向样本**改成**正向样本**（被放行 ⇒ 状态码不是 404）。
+ * `price-lists/lists/{uuid}/items` 依旧由 5.1.1.2 放行（那条注释保持不变），
+ * 而 `price-lists/lists/{uuid}/items/batch` 这个**确实不存在**的形状仍留在负向样本里。
+ *
  * <p><b>不误伤其他车道已登记的分支</b>：白名单是多车道共用的**累积型**文件。
  * 本车道只**新增**一条 catalog/ services 条目（锚点 = `price-anomaly-alerts` 那条之后），
  * 既有任何一条都不动 —— 但那必须被断言钉住，否则下一次并入取错一侧时会静默删掉已交付模块的路由。
@@ -151,16 +158,12 @@ it('未交付 / 不该存在的形状仍然 404（放行它们比 404 更糟）'
   for (const path of [
     // 裸路径：本模块没有裸集合读，放行它就是凭空多出一条 GET。
     'catalog/price-lists',
-    // 优先级与冲突检测是 **5.1.2.1**（本表的下游守门员），本模块不实现冲突判定
-    // ⇒ 后端没有这个端点。
-    `catalog/price-lists/lists/${ID}/conflicts`,
     // 价目项的批量维护形状同样属于 5.1.1.2 —— 🔴 **5.1.1.2 已交付**（2026-11-02）：
     //   下面那条 `lists/{id}/items` 已由 5.1.1.2 的**独立一条 services[] 元素**放行，
     //   形状与本模块的互不相交；本模块（5.1.1.1）仍然**不实现**那些端点。
     //   `items/batch` 这个形状**仍然**不存在（5.1.1.2 的批量形状叫 preview / apply）⇒ 保留 404 断言。
     `catalog/price-lists/lists/${ID}/items/batch`,
     // 不存在的子路径。
-    'catalog/price-lists/conflicts',
     'catalog/price-lists/items',
     // 非 UUID 段不应被 uuid 分支吃掉。
     `catalog/price-lists/lists/not-a-uuid`,
@@ -216,6 +219,11 @@ it('🔴 兄弟车道的白名单条目未被本车道挤掉或污染', async ()
     // 5.5.2.1 异常告警 —— 🔴 本条目的**紧邻锚点**（搬家就插在它后面）
     'catalog/price-anomaly-alerts/capabilities',
     'catalog/price-anomaly-alerts/events',
+    // 5.1.2.1 优先级与冲突检测 —— 🔴 **已交付**（2026-11-02）：
+    //   `lists/{uuid}/conflicts`（某张价目表的冲突明细）与 `conflicts`（全租户冲突概览）
+    //   由**它自己那条独立的 services[] 元素**放行 ⇒ 这两条是**正向样本**（不是 404）。
+    `catalog/price-lists/lists/${ID}/conflicts`,
+    'catalog/price-lists/conflicts',
   ];
   for (const path of siblings) {
     const response = await GET(request(path), {
