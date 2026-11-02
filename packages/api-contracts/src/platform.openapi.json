@@ -4504,6 +4504,714 @@
         },
         "type": "object"
       },
+      "AutomationRuleEffectAdviceInput": {
+        "properties": {
+          "adviceType": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "ruleId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "severity": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AutomationRuleEffectAdvicePage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AutomationRuleEffectAdviceRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AutomationRuleEffectAdviceRefreshResult": {
+        "properties": {
+          "createdAdvices": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "deactivatedAdvices": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "generatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "scannedRules": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "updatedAdvices": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AutomationRuleEffectAdviceRow": {
+        "properties": {
+          "active": {
+            "type": "boolean"
+          },
+          "adviceType": {
+            "type": "string"
+          },
+          "adviceTypeLabel": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "evidence": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "ruleId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "ruleName": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string"
+          },
+          "severityLabel": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "targetModule": {
+            "type": "string"
+          },
+          "targetRef": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AutomationRuleEffectBaselineInput": {
+        "properties": {
+          "baselineNote": {
+            "type": "string"
+          },
+          "baselineSource": {
+            "type": "string"
+          },
+          "effectiveFrom": {
+            "nullable": true,
+            "type": "string"
+          },
+          "manualMinutesPerRun": {
+            "type": "number"
+          },
+          "ruleId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AutomationRuleEffectBaselinePage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AutomationRuleEffectBaselineRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AutomationRuleEffectBaselineRow": {
+        "properties": {
+          "baselineNote": {
+            "type": "string"
+          },
+          "baselineSource": {
+            "type": "string"
+          },
+          "effectiveFrom": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "manualMinutesPerRun": {
+            "type": "number"
+          },
+          "ruleId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "ruleName": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AutomationRuleEffectCapabilities": {
+        "properties": {
+          "capabilities": {
+            "items": {
+              "$ref": "#/components/schemas/AutomationRuleEffectCapability"
+            },
+            "type": "array"
+          },
+          "gaps": {
+            "items": {
+              "$ref": "#/components/schemas/AutomationRuleEffectGap"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "AutomationRuleEffectCapability": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "evidence": {
+            "type": "string"
+          },
+          "moduleId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AutomationRuleEffectFeedbackInput": {
+        "properties": {
+          "falseTriggerType": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "ruleId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "runId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AutomationRuleEffectFeedbackPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AutomationRuleEffectFeedbackRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AutomationRuleEffectFeedbackRow": {
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "falseTriggerType": {
+            "type": "string"
+          },
+          "falseTriggerTypeLabel": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "reportedBy": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "ruleId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "ruleName": {
+            "type": "string"
+          },
+          "runId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AutomationRuleEffectGap": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "moduleId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "relation": {
+            "type": "string"
+          },
+          "service": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AutomationRuleEffectOverview": {
+        "properties": {
+          "avgDurationMs": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "criticalAdvices": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "failedRuns": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "falseTriggerFeedbacks": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "falseTriggerRate": {
+            "nullable": true,
+            "type": "number"
+          },
+          "falseTriggerRuns": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "generatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "notAttemptedRuns": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "openAdvices": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "ratedDurationMs": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "ratedRuns": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "recentRunIds": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "rulesWithBaseline": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "rulesWithRuns": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "rulesWithoutBaseline": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "savedMinutes": {
+            "nullable": true,
+            "type": "number"
+          },
+          "savingBasis": {
+            "$ref": "#/components/schemas/AutomationRuleEffectSavingBasis"
+          },
+          "skippedRuns": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "succeededRuns": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "successRate": {
+            "nullable": true,
+            "type": "number"
+          },
+          "timeoutRuns": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalDurationMs": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalRuns": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "unlinkedFeedbacks": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AutomationRuleEffectRuleDetail": {
+        "properties": {
+          "advices": {
+            "items": {
+              "$ref": "#/components/schemas/AutomationRuleEffectAdviceRow"
+            },
+            "type": "array"
+          },
+          "baseline": {
+            "$ref": "#/components/schemas/AutomationRuleEffectBaselineRow"
+          },
+          "feedbacks": {
+            "items": {
+              "$ref": "#/components/schemas/AutomationRuleEffectFeedbackRow"
+            },
+            "type": "array"
+          },
+          "recentRuns": {
+            "items": {
+              "$ref": "#/components/schemas/AutomationRuleEffectRunRef"
+            },
+            "type": "array"
+          },
+          "rule": {
+            "$ref": "#/components/schemas/AutomationRuleEffectRuleRow"
+          },
+          "runCount": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AutomationRuleEffectRulePage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AutomationRuleEffectRuleRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AutomationRuleEffectRuleRow": {
+        "properties": {
+          "adviseDisable": {
+            "type": "boolean"
+          },
+          "adviseReason": {
+            "type": "string"
+          },
+          "avgDurationMs": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "baselineSource": {
+            "type": "string"
+          },
+          "failedRuns": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "falseTriggerFeedbacks": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "falseTriggerRate": {
+            "nullable": true,
+            "type": "number"
+          },
+          "falseTriggerRuns": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "lastRunAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "lastRunId": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "manualMinutesPerRun": {
+            "nullable": true,
+            "type": "number"
+          },
+          "notAttemptedRuns": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "openAdvices": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "ratedDurationMs": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "ratedRuns": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "ruleId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "ruleName": {
+            "type": "string"
+          },
+          "savedMinutes": {
+            "nullable": true,
+            "type": "number"
+          },
+          "skippedRuns": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "succeededRuns": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "successRate": {
+            "nullable": true,
+            "type": "number"
+          },
+          "timeoutRuns": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalDurationMs": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalRuns": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "triggerEventType": {
+            "type": "string"
+          },
+          "unlinkedFeedbacks": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AutomationRuleEffectRunPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AutomationRuleEffectRunRef"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AutomationRuleEffectRunRef": {
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "dryRun": {
+            "type": "boolean"
+          },
+          "durationMs": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "eventId": {
+            "type": "string"
+          },
+          "failureReason": {
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "outcome": {
+            "type": "string"
+          },
+          "outcomeLabel": {
+            "type": "string"
+          },
+          "sideEffectsApplied": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "AutomationRuleEffectSavingBasis": {
+        "properties": {
+          "excluded": {
+            "type": "string"
+          },
+          "formula": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "sourceField": {
+            "type": "string"
+          },
+          "sourceTable": {
+            "type": "string"
+          },
+          "unit": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "AutomationRuleEventTypeRow": {
         "properties": {
           "eventType": {
@@ -18664,6 +19372,795 @@
         },
         "tags": [
           "automation-rule-controller"
+        ]
+      }
+    },
+    "/platform/automation/effect/advices": {
+      "get": {
+        "operationId": "get_platform_automation_effect_advices",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "ruleId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "adviceType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "severity",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "source",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "onlyActive",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AutomationRuleEffectAdvicePage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "automation-rule-effect-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_platform_automation_effect_advices",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AutomationRuleEffectAdviceInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AutomationRuleEffectAdviceRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "automation-rule-effect-controller"
+        ]
+      }
+    },
+    "/platform/automation/effect/advices/refresh": {
+      "post": {
+        "operationId": "post_platform_automation_effect_advices_refresh",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AutomationRuleEffectAdviceRefreshResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "automation-rule-effect-controller"
+        ]
+      }
+    },
+    "/platform/automation/effect/advices/{id}/status": {
+      "put": {
+        "operationId": "put_platform_automation_effect_advices_id_status",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AutomationRuleEffectAdviceRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "automation-rule-effect-controller"
+        ]
+      }
+    },
+    "/platform/automation/effect/baselines": {
+      "get": {
+        "operationId": "get_platform_automation_effect_baselines",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "ruleId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AutomationRuleEffectBaselinePage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "automation-rule-effect-controller"
+        ]
+      },
+      "put": {
+        "operationId": "put_platform_automation_effect_baselines",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AutomationRuleEffectBaselineInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AutomationRuleEffectBaselineRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "automation-rule-effect-controller"
+        ]
+      }
+    },
+    "/platform/automation/effect/capabilities": {
+      "get": {
+        "operationId": "get_platform_automation_effect_capabilities",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AutomationRuleEffectCapabilities"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "automation-rule-effect-controller"
+        ]
+      }
+    },
+    "/platform/automation/effect/feedbacks": {
+      "get": {
+        "operationId": "get_platform_automation_effect_feedbacks",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "ruleId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "falseTriggerType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AutomationRuleEffectFeedbackPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "automation-rule-effect-controller"
+        ]
+      },
+      "post": {
+        "operationId": "post_platform_automation_effect_feedbacks",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AutomationRuleEffectFeedbackInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AutomationRuleEffectFeedbackRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "automation-rule-effect-controller"
+        ]
+      }
+    },
+    "/platform/automation/effect/feedbacks/{id}/status": {
+      "put": {
+        "operationId": "put_platform_automation_effect_feedbacks_id_status",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AutomationRuleEffectFeedbackRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "automation-rule-effect-controller"
+        ]
+      }
+    },
+    "/platform/automation/effect/overview": {
+      "get": {
+        "operationId": "get_platform_automation_effect_overview",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AutomationRuleEffectOverview"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "automation-rule-effect-controller"
+        ]
+      }
+    },
+    "/platform/automation/effect/rules": {
+      "get": {
+        "operationId": "get_platform_automation_effect_rules",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "onlyFalseTrigger",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "onlyWithAdvice",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "falseTriggerRateAtLeast",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "adviseDisableOnly",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "order",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AutomationRuleEffectRulePage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "automation-rule-effect-controller"
+        ]
+      }
+    },
+    "/platform/automation/effect/rules/{ruleId}": {
+      "get": {
+        "operationId": "get_platform_automation_effect_rules_ruleId",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "ruleId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AutomationRuleEffectRuleDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "automation-rule-effect-controller"
+        ]
+      }
+    },
+    "/platform/automation/effect/runs": {
+      "get": {
+        "operationId": "get_platform_automation_effect_runs",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "ruleId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "outcome",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AutomationRuleEffectRunPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "automation-rule-effect-controller"
         ]
       }
     },
