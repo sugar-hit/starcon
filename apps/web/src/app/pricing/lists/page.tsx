@@ -1,7 +1,7 @@
-import { PriceListWorkspace } from '@/components/pricing/price-list-workspace';
+import { PricingListsPage } from '@/components/pricing/pricing-lists-page';
 
 /**
- * 5.1.1.1 价目表列表。
+ * 5.1.1 价目表（含 5.1.1.1 价目表列表与 5.1.1.2 价目项批量维护）。
  *
  * <p>蓝图：「管理价目表（如"北美自发货零售价"），每张表绑定一个币种、适用法人/店铺/站点、
  * 生效区间，展示表内价目项数量与最近更新时间。」输入「价目表增删改；币种与适用范围选择；
@@ -19,8 +19,13 @@ import { PriceListWorkspace } from '@/components/pricing/price-list-workspace';
  *
  * <p>🔴 **生效区间是半开区间**：[起点, 终点) —— 终点为空 = 长期有效。
  *
+ * <p>本路由现在是**两个分段**（页签）：「价目表」（5.1.1.1）与「价目项」（5.1.1.2）。
+ * 价目项是这张表的明细（SKU、单价、数量门槛、生效区间、批量设价、Excel 导入导出），
+ * 放在同一条路由下而不是另开一个 —— 另开路由会让「表头」和「明细」变成两个页面，
+ * 运营切过去就找不到自己在哪张表里。
+ *
  * <p>路由取 {@code /pricing/lists}（蓝图 05 卷：5.1 价目表 → /pricing/lists）。
  */
 export default function PriceListsPage() {
-  return <PriceListWorkspace />;
+  return <PricingListsPage />;
 }
