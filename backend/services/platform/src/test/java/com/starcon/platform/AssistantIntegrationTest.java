@@ -338,6 +338,21 @@ class AssistantIntegrationTest {
         .as("上周的起点比「最近 30 天」的起点晚（窗口更短，不是更早）")
         .isAfter(first.periodFrom());
     assertThat(second.periodTo()).isBefore(first.periodTo());
+
+    // 🔴 下面三条把「上一自然周」钉成**与今天星期几无关**的性质。
+    // 只靠上面那条 `periodTo < first.periodTo` 是不够的：今天是周一时，
+    // 「最近的周一」= 本周的周一 —— 实现错了也照样绿（缺陷被时钟藏起来）。
+    var dbToday =
+        sql.fetchOne("select (now() at time zone 'UTC')::date").get(0, java.time.LocalDate.class);
+    var thisMonday =
+        dbToday.with(
+            java.time.temporal.TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY));
+
+    assertThat(second.periodFrom().getDayOfWeek()).as("上周起点必须是周一").isEqualTo(java.time.DayOfWeek.MONDAY);
+    assertThat(second.periodTo().getDayOfWeek()).as("上周终点必须是周日").isEqualTo(java.time.DayOfWeek.SUNDAY);
+    assertThat(second.periodTo()).as("上周窗口必须是周一至周日整七天").isEqualTo(second.periodFrom().plusDays(6));
+    assertThat(second.periodFrom()).as("上周起点 = 上一自然周的周一").isEqualTo(thisMonday.minusWeeks(1));
+    assertThat(second.periodTo()).as("上周整段必须落在本周之前（不能问到还没发生的日子）").isBefore(thisMonday);
   }
 
   @Test

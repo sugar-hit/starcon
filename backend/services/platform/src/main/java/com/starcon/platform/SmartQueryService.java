@@ -1291,7 +1291,9 @@ public class SmartQueryService {
     return switch (periodCode) {
       case SmartQuerySemanticCatalog.LAST_7_DAYS -> new Window(periodCode, today.minusDays(6), today);
       case SmartQuerySemanticCatalog.LAST_WEEK -> {
-        var monday = today.with(TemporalAdjusters.previous(DayOfWeek.MONDAY));
+        // 上周 = 上一自然周（周一至周日）。🔴 口径见 PeriodWindow：
+        // 不能用 TemporalAdjusters.previous(MONDAY)（那是「最近的周一」，终点会落在未来）。
+        var monday = PeriodWindow.lastWeekMonday(today);
         yield new Window(periodCode, monday, monday.plusDays(6));
       }
       case SmartQuerySemanticCatalog.THIS_MONTH ->

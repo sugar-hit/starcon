@@ -948,8 +948,10 @@ public class AssistantService {
     return switch (periodCode) {
       case "LAST_7_DAYS" -> new Window(periodCode, today.minusDays(6), today);
       case "LAST_WEEK" -> {
-        // 上周 = 上一自然周（周一至周日）：上一个**严格早于**今天的周一。
-        var monday = today.with(TemporalAdjusters.previous(DayOfWeek.MONDAY));
+        // 上周 = 上一自然周（周一至周日）：上一个自然周的周一。
+        // 🔴 不能用 TemporalAdjusters.previous(MONDAY)（那是「最近的周一」= 本周的周一，
+        // 终点会落在未来）；口径见 PeriodWindow。
+        var monday = PeriodWindow.lastWeekMonday(today);
         yield new Window(periodCode, monday, monday.plusDays(6));
       }
       case "THIS_MONTH" ->
