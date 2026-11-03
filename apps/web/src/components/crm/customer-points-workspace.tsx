@@ -14,6 +14,7 @@ import type {
 } from '../../../../../packages/api-contracts/src/index';
 import { Field, control } from '../common/fields';
 import {
+  confirmPointsRedemption,
   createPointsEntitlement,
   createPointsRule,
   earnPoints,
@@ -41,7 +42,6 @@ import {
   pointsStatsNote,
   redeemPoints,
   spendPoints,
-  usePointsRedemption,
 } from './customer-points-model';
 import { useIdentity } from '../iam/identity-shell';
 
@@ -309,9 +309,10 @@ export function PointsWorkspace() {
     setEntitlementValue('');
   }
 
-  async function useRedemption(redemptionId: string) {
+  async function completeRedemption(redemptionId: string) {
     await run(
-      () => usePointsRedemption(redemptionId).then((r) => `权益核销完成（${r.redemptionNo}）。`),
+      () =>
+        confirmPointsRedemption(redemptionId).then((r) => `权益核销完成（${r.redemptionNo}）。`),
       (message) => setNotice(message),
     );
   }
@@ -1087,7 +1088,7 @@ export function PointsWorkspace() {
                           variant="outline"
                           size="sm"
                           disabled={!canUpdate || busy}
-                          onClick={() => void useRedemption(row.id)}
+                          onClick={() => void completeRedemption(row.id)}
                         >
                           核销
                         </Button>
