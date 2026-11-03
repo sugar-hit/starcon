@@ -120,7 +120,9 @@ jobs:
   backend:
     name: Java 21 & PostgreSQL Integration
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    # 9 个服务共用一个 reactor，每个集成测试类都会拉起一个 Testcontainers PostgreSQL
+    # 并跑一遍 Flyway —— 实测 identity+catalog 就接近 30 分钟，整条链路远超 60 分钟。
+    timeout-minutes: 180
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
@@ -128,10 +130,17 @@ jobs:
           distribution: temurin
           java-version: '21'
           cache: maven
-      - run: ./mvnw -B -ntp verify
+      # -fae（fail at end）：任何一个模块炸了，其余模块**照跑**。
+      # 默认 fail-fast 会在第一个失败模块停掉整条 reactor，于是 channel/warehouse/
+      # trade/crm/finance/reporting/platform 的失败永远藏在后面，一次只能修一个。
+      - run: ./mvnw -B -ntp -fae verify
         working-directory: backend
         env:
           JAVA_TOOL_OPTIONS: -Dapi.version=1.44
+          # 与 backend/pom.xml 里 surefire 钉的时区一致，双保险：
+          # 测试 JVM 的默认时区决定 timestamptz 读回来的偏移量，
+          # runner 默认是 UTC，仓库断言的是 +08:00。
+          TZ: Asia/Shanghai
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
