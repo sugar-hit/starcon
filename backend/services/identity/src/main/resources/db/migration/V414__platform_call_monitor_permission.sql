@@ -1,0 +1,97 @@
+-- ===========================================================================
+-- 18.1.1.3 调用监控：platform.call-monitor 权限码登记
+-- ===========================================================================
+--
+-- 蓝图 18「集成开放与智能自动化」→ 18.1「开放平台」→ 18.1.1「API 管理」→ 18.1.1.3「调用监控」。
+--
+-- ---------------------------------------------------------------------------
+-- 一、为什么需要这个迁移（补的是既有缺口，不是本车道扩大范围）
+-- ---------------------------------------------------------------------------
+--
+-- platform 服务的 ApiCallMonitorController 用
+--     access.require(bearer, "platform.call-monitor." + permission)
+-- 强制鉴权，实际只用到 2 个动作：read / update。
+--
+-- 但 identity 服务的 permission 表里**从来没有注册过 platform.call-monitor 任何一行** ——
+-- 而 role_permission.permission_code 有指向 permission(code) 的外键 ——
+-- 于是「没有任何角色可能持有 platform.call-monitor.read」，
+-- 这些端点在真实环境里恒 403（与 V378 登记 platform.app.*、V411 登记
+-- platform.api-catalog.*、V412 登记 platform.webhook.* 时遇到的缺口**完全同构**）。
+--
+-- ---------------------------------------------------------------------------
+-- 二、登记哪几个码
+-- ---------------------------------------------------------------------------
+--
+--   platform.call-monitor.read    读调用统计（概览 / 趋势 / 应用维度 / 接口维度 /
+--                                  慢调用 Top N / 调用明细 / 告警列表）
+--   platform.call-monitor.update  确认告警 / 闭环告警 / 触发一次告警扫描
+--
+-- 刻意**只**登记这 2 个动作：没有端点的权限码不注册
+-- （与 identity V104 / V53 / V330 同一纪律）。
+--
+-- 「确认 / 闭环告警」是**独立**的一个码而不是 read：能看告警的人不该顺手把告警关掉 ——
+-- 闭环意味着「这件事处理完了」，门槛要真的拦得住人。
+--
+-- ⚠️ AccessService 的判据要求同一个 grant 里同时有该动作与对应资源的 `.read` ——
+--    所以持有 platform.call-monitor.update 的角色**同时**必须持有 platform.call-monitor.read。
+--    这是有意的：能处置告警的人至少得能看懂告警是什么。
+--
+-- ---------------------------------------------------------------------------
+-- 三、为什么 page_code 取 platform.call-monitor
+-- ---------------------------------------------------------------------------
+--
+-- permission.page_code 有外键指向 page_resource(code)，所以必须先插页面行。
+--
+-- page_resource 对应**菜单入口**，不是动作。
+-- 「调用监控」是 18.1.1 的**同一个页面**（统计、维度分析、慢调用、告警在同一处管理），
+-- 不是两个页面 —— 拆成两个 page_resource 会在菜单里多出一个与「调用监控」重复的条目。
+--
+-- 前缀取 platform.call-monitor（不是 identity.call-monitor）：本模块的权限码由
+-- **platform 服务**消费（platform.call-monitor.read），与 catalog.spu / warehouse.facilities /
+-- platform.app / platform.text / platform.finance / platform.api-catalog / platform.webhook 的
+-- 「服务名.页面」口径一致；权限码跟着**消费它的服务**走，才能在审计时回答
+-- 「谁被授权看这一类东西」。
+--
+-- ⚠️ 中间那段的连字符是有意的：端点命名空间是 /platform/call-monitor，
+--    权限码与它**逐字对齐**（像 platform.api-catalog ↔ /platform/api-catalog 那样），
+--    免得「端点叫 call-monitor、权限码叫 callmonitor」这种对不上的事发生。
+--
+-- ---------------------------------------------------------------------------
+-- 四、为什么必须给存量 OWNER 补权（这是本迁移最容易漏的一步）
+-- ---------------------------------------------------------------------------
+--
+-- 新建子租户由 create_child（V47）把 permission 表里的**全部**权限码授给 OWNER，
+-- 所以新租户自动就有这 2 个码 —— 但**存量租户**的 OWNER 角色是在这 2 个码登记之前建的，
+-- 不会自动获得它们 ⇒ 新接入的 read / update 对既有租户的 OWNER 不可见，
+-- 迁移上线后这些租户会突然「什么都点不动」。
+--
+-- 用 LIKE 'platform.call-monitor.%' 扫**整个集合**，而不是只补 read 一条：
+--   · 覆盖本迁移登记的全部 2 个动作（read / update）；
+--   · 幂等 —— 重复执行不产生重复行（ON CONFLICT DO NOTHING）。
+--
+-- 与 V3 / V8 / V104 / V330 同口径：租户所有者始终拥有全部页面权限。
+--
+-- ---------------------------------------------------------------------------
+-- 五、幂等
+-- ---------------------------------------------------------------------------
+--
+-- 三段式全部带 ON CONFLICT DO NOTHING：同一段 SQL 跑两次不报错、不产生重复行。
+--
+-- ---------------------------------------------------------------------------
+-- 1. 页面资源（菜单入口）
+-- ---------------------------------------------------------------------------
+INSERT INTO page_resource(code,name) VALUES ('platform.call-monitor','调用监控')
+ON CONFLICT (code) DO NOTHING;
+
+-- ---------------------------------------------------------------------------
+-- 2. 权限码（2 个动作）
+-- ---------------------------------------------------------------------------
+INSERT INTO permission SELECT 'platform.call-monitor.'||action,'platform.call-monitor',action
+FROM unnest(ARRAY['read','update']::text[]) action
+ON CONFLICT (code) DO NOTHING;
+
+-- ---------------------------------------------------------------------------
+-- 3. 存量 OWNER 补权（覆盖 platform.call-monitor.% 整个集合）
+-- ---------------------------------------------------------------------------
+INSERT INTO role_permission SELECT r.tenant_id,r.id,p.code FROM role r CROSS JOIN permission p
+ WHERE r.code='OWNER' AND p.code LIKE 'platform.call-monitor.%' ON CONFLICT DO NOTHING;

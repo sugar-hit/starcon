@@ -38,7 +38,9 @@ import {
  * 6. **密钥明文不给就别给** —— 没签发过时是空串，不许显示成一个假的占位密钥。
  */
 
-const capabilities = (over: Partial<EventSubscriptionCapabilities> = {}): EventSubscriptionCapabilities => ({
+const capabilities = (
+  over: Partial<EventSubscriptionCapabilities> = {},
+): EventSubscriptionCapabilities => ({
   capabilities: [
     {
       module: '18.1.2.1',

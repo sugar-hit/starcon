@@ -1,0 +1,132 @@
+-- ===========================================================================
+-- V428 · platform_automation_rule_effect_permission —— 18.3.2.2「规则效果」的权限码登记
+-- ===========================================================================
+--
+-- 蓝图 18「集成开放与智能自动化」→ 18.3「业务规则引擎」→ 18.3.2「执行」→ 18.3.2.2：
+--
+--   「**职责**：统计规则效果：触发次数、成功率、平均耗时、节省工时预估、误触发反馈
+--      与规则优化建议。
+--    **输入**：执行日志聚合。
+--    **输出**：规则效果报表。
+--    **关系**：上游 = 18.3.2.1；下游 = 18.3.1.1（优化依据）。
+--    **误触发率高的规则要能快速定位并关闭**，自动化失控比没有自动化更危险。」
+--
+-- ---------------------------------------------------------------------------
+-- 一、为什么需要这个迁移
+-- ---------------------------------------------------------------------------
+--
+-- platform 服务的 AutomationRuleEffectController 用
+--     access.require(bearer, "platform.automation_rule_effect." + permission)
+-- 强制鉴权，端点实际用到 3 个动作：read / feedback / configure。
+--
+-- 但 identity 服务的 permission 表里**从来没有注册过
+-- platform.automation_rule_effect 任何一行** —— 而 role_permission.permission_code
+-- 有指向 permission(code) 的外键 ⇒「没有任何角色可能持有
+-- platform.automation_rule_effect.read」，这些端点在真实环境里**恒 403**。
+--
+-- （与 V378 登记 platform.app.*、V380 登记 platform.text.*、V411–V418 登记
+--   platform.api.* / platform.webhook.* / platform.delivery.* / platform.call.* /
+--   platform.io.* / platform.external.*、V419 登记 platform.automation_rule.*、
+--   V420 登记 platform.auto_approval.*、V421 登记
+--   platform.automation_rule_editor.*、V422 登记
+--   platform.automation_rule_run.*、V427 登记 platform.template.* 的缺口
+--   **完全同构**。）
+--
+-- 本迁移只做一件事：把这 3 个码登记进 identity 的权限码表。
+--
+-- ---------------------------------------------------------------------------
+-- 二、登记哪几个码
+-- ---------------------------------------------------------------------------
+--
+--   platform.automation_rule_effect.read      读规则效果报表（概览 / 按规则明细 /
+--                                              单规则详情 / 执行明细下钻 / 口径列表 /
+--                                              误触发反馈列表 / 优化建议列表 / 能力声明）
+--   platform.automation_rule_effect.feedback  **登记一条误触发反馈**
+--                                              （写 platform_automation_rule_effect_feedback）
+--   platform.automation_rule_effect.configure **配置口径与建议**
+--                                              （写 platform_automation_rule_effect_baseline
+--                                                与 platform_automation_rule_effect_advice）
+--
+-- 刻意**只**登记这 3 个动作：没有端点的权限码不注册
+-- （与 identity V104 / V53 / V330 / V378 / V380 / V419 / V421 / V427 同一纪律）。
+--
+-- 「登记误触发反馈」与「配置口径 / 建议」为什么**不合成一个码**：
+--   · 登记误触发反馈 = **指出一个问题**（这条规则又乱触发了）——
+--     这是每个能用自动化的人都会做的事，录入成本低、风险低。
+--   · 配置口径 / 建议 = **改口径**（这条规则一次省多少分钟人工）与
+--     **写建议 / 重新生成系统建议** —— 这是在给报表定调子，
+--     口径填错会让「节省工时预估」整体失真。
+--   ⇒ 混成一个码 ⇒ 能随手点两下的人就能改掉整个租户的节省工时口径。
+--
+-- ⚠️ 与 18.3.2.1 的 `platform.automation_rule_run.*` **不重叠**：
+--   那边的 record / rerun 写的是**只追加的执行台账**；
+--   本模块**一个字节都不写**那两张表（只读聚合）。
+--   本模块的三个码写的是**另外三张表**（口径 / 反馈 / 建议），
+--   各有各的写入所有者。
+--
+-- ⚠️ 与 18.3.1.1 的 `platform.automation_rule.*` **不重叠**：
+--   「关闭一条规则」归 18.3.1.1（它的 disable 端点）。
+--   本模块**不做关闭动作**，只输出「建议关闭 + 可定位到具体规则的入口」，
+--   所以本迁移**不登记**任何 disable 码 —— 那会让本模块看起来有权关规则。
+--
+-- ---------------------------------------------------------------------------
+-- 三、为什么 page_code 取 platform.automation_rule_effect
+-- ---------------------------------------------------------------------------
+--
+-- permission.page_code 有外键指向 page_resource(code)，所以必须先插页面行。
+--
+-- page_resource 对应**菜单入口**，不是动作。
+-- 「规则效果」是 18.3.2.2 的**同一个页面**
+-- （效果概览 / 按规则明细 / 误触发反馈录入 / 优化建议列表都在这一页里完成），
+-- 不是一个动作一个页面。
+--
+-- 刻意**不**复用 platform.automation_rule（18.3.1.1 规则列表）、
+-- platform.automation_rule_editor（18.3.1.2 规则编辑器）、
+-- platform.automation_rule_run（18.3.2.1 执行日志）那三个 page_resource：
+-- 那是**另外三个页面**（规则清单 / 规则编排 / 执行台账），四者可独立授权 ——
+-- 「能看执行日志」与「能看规则效果」在运营台上本就是两件事。
+--
+-- 前缀取 platform.automation_rule_effect 而不是 channel.rule_effect / trade.rule_effect：
+-- 本模块的权限码由 **platform 服务**消费
+-- （platform.automation_rule_effect.read），与 platform.automation_rule /
+-- platform.automation_rule_run / platform.auto_approval 的「服务名.页面」口径一致；
+-- 权限码跟着**消费它的服务**走，才能在审计时回答「谁被授权看自动化规则效果」。
+--
+-- ---------------------------------------------------------------------------
+-- 四、为什么必须给存量 OWNER 补权（这是本迁移最容易漏的一步）
+-- ---------------------------------------------------------------------------
+--
+-- 新建子租户由 create_child（V47）把 permission 表里的**全部**权限码授给 OWNER，
+-- 所以新租户自动就有这 3 个码 —— 但**存量租户**的 OWNER 角色是在这 3 个码登记之前建的，
+-- 不会自动获得它们 ⇒ 迁移上线后这些租户会突然「什么都点不动」。
+--
+-- 用 LIKE 'platform.automation_rule_effect.%' 扫**整个集合**，而不是只补 read 一条：
+--   · 覆盖本迁移登记的全部 3 个动作；
+--   · 幂等 —— 重复执行不产生重复行（ON CONFLICT DO NOTHING）。
+--
+-- 与 V3 / V8 / V104 / V330 / V378 / V380 / V418 / V419 / V420 / V421 / V427 同口径：
+-- 租户所有者始终拥有全部页面权限。
+--
+-- ---------------------------------------------------------------------------
+-- 五、幂等
+-- ---------------------------------------------------------------------------
+--
+-- page_resource / permission / role_permission 三处写入全部
+-- ON CONFLICT DO NOTHING ⇒ 迁移重复执行不产生重复行、不报错。
+--
+-- ===========================================================================
+
+INSERT INTO page_resource(code,name) VALUES ('platform.automation_rule_effect','规则效果')
+ON CONFLICT (code) DO NOTHING;
+
+INSERT INTO permission SELECT 'platform.automation_rule_effect.'||action,'platform.automation_rule_effect',action
+FROM unnest(ARRAY['read','feedback','configure']::text[]) action
+ON CONFLICT (code) DO NOTHING;
+
+-- 🔴 **只授 OWNER**（与 V419 / V420 / V421 / V427 同一纪律）：
+--    「登记误触发反馈」= 往报表里写一行「这条规则又乱触发了」（低风险）；
+--    「配置口径 / 建议」= **给报表定调子**（口径填错会让节省工时预估整体失真）
+--    —— 两者都不该默认授给任何普通角色，需要放开时由租户显式把码授给自定义角色
+--    （POST /identity/roles 的 permissions 任意组合）。
+INSERT INTO role_permission SELECT r.tenant_id,r.id,p.code FROM role r CROSS JOIN permission p
+ WHERE r.code='OWNER' AND p.code LIKE 'platform.automation_rule_effect.%' ON CONFLICT DO NOTHING;

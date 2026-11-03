@@ -12,6 +12,7 @@ import java.net.InetSocketAddress;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
@@ -249,8 +250,31 @@ class ListingKeywordRankingTenancyIntegrationTest {
         listingId, "PLATFORM", "API", crawledAt, 30, key, "", Map.of(), ranks);
   }
 
+  // ==================================================================
+  // 🔴 夹具时间轴：相对当下（UTC），不写死日历日
+  // ==================================================================
+  //
+  // 服务默认取数窗口是「今天往前 29 天」（见 {@code ListingKeywordRankingService#dayRange}），
+  // 种子一旦写成固定日历日，墙钟翻页就会把它滑出窗口 ⇒ 排名历史/预警/报表为空 ⇒ 假红。
+
+  /** 🔴 夹具锚点：所有夹具日期都相对「今天（UTC）」推。 */
+  static final LocalDate TODAY = LocalDate.now(ZoneOffset.UTC);
+
+  /** 夹具用到的「第几天」总数：day=1 最早 … day=FIXTURE_DAYS 最近（今天-1 天）。 */
+  static final int FIXTURE_DAYS = 1;
+
+  /** 夹具日：day=1 最早 … day=FIXTURE_DAYS 最近（今天-1 天）。 */
+  static LocalDate fixtureDay(int day) {
+    return TODAY.minusDays(FIXTURE_DAYS - day + 1);
+  }
+
+  /**
+   * 🔴 夹具时刻（UTC）：小时/分钟/秒与原先写死的值逐字一致，只把**日历日**换成相对当下。
+   *
+   * <p>day 越大时间越晚（day=1 最早 … day=FIXTURE_DAYS 最近）⇒ 排序语义不变。
+   */
   static OffsetDateTime at(int day, int hour) {
-    return OffsetDateTime.of(2026, 10, day, hour, 0, 0, 0, ZoneOffset.UTC);
+    return fixtureDay(day).atStartOfDay().atOffset(ZoneOffset.UTC).plusHours(hour);
   }
 
   // ==================================================================

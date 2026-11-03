@@ -149,11 +149,9 @@ export function changeEventTypeStatus(
   id: string,
   status: string,
 ): Promise<EventSubscriptionEventTypeRow> {
-  return api<EventSubscriptionEventTypeRow>(
-    `${base}/event-types/${id}/status`,
-    'POST',
-    { status } as EventSubscriptionEventTypeStatusInput,
-  );
+  return api<EventSubscriptionEventTypeRow>(`${base}/event-types/${id}/status`, 'POST', {
+    status,
+  } as EventSubscriptionEventTypeStatusInput);
 }
 
 /** 创建订阅。 */
@@ -171,7 +169,10 @@ export function updateSubscription(
 
 /** 吊销订阅（**不删**：订阅与其审计痕迹都留着）。 */
 export function revokeSubscription(id: string, reason?: string): Promise<EventSubscriptionRow> {
-  return api<EventSubscriptionRow>(`${base}/subscriptions/${id}/revoke?${query({ reason })}`, 'POST');
+  return api<EventSubscriptionRow>(
+    `${base}/subscriptions/${id}/revoke?${query({ reason })}`,
+    'POST',
+  );
 }
 
 /** 加一条事件过滤（只能订阅**已登记**的 schema）。 */
@@ -214,7 +215,9 @@ export function revokeSigningSecret(id: string): Promise<EventSubscriptionSecret
 }
 
 /** 新建一份策略（subscriptionId 为空 = 租户级默认策略）。 */
-export function createPolicy(input: EventSubscriptionPolicyInput): Promise<EventSubscriptionPolicyRow> {
+export function createPolicy(
+  input: EventSubscriptionPolicyInput,
+): Promise<EventSubscriptionPolicyRow> {
   return api<EventSubscriptionPolicyRow>(`${base}/policies`, 'POST', input);
 }
 
@@ -254,7 +257,11 @@ export function deliverEvent(
   id: string,
   input: EventSubscriptionDeliveryInput,
 ): Promise<EventSubscriptionDeliveryOutcome> {
-  return api<EventSubscriptionDeliveryOutcome>(`${base}/subscriptions/${id}/deliver`, 'POST', input);
+  return api<EventSubscriptionDeliveryOutcome>(
+    `${base}/subscriptions/${id}/deliver`,
+    'POST',
+    input,
+  );
 }
 
 // ================================================================ 词表
@@ -343,10 +350,7 @@ export function unavailableHint(capability: EventSubscriptionCapability | null):
  * 🔴 「SkuProfileSaved」和「SkuProfileSaved v2」是**两份不同的契约** ——
  * 显示时必须带上版本，否则运营会以为「改过了」，而对接方拿到的字段结构可能完全不同。
  */
-export function eventTypeVersionLabel(row: {
-  eventType: string;
-  schemaVersion: number;
-}): string {
+export function eventTypeVersionLabel(row: { eventType: string; schemaVersion: number }): string {
   return `${row.eventType} v${row.schemaVersion}`;
 }
 

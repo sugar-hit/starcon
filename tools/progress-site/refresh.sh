@@ -109,8 +109,49 @@ elif [ "$SRC" = "origin/main" ]; then
   LEDGER_NOTE="local-ledger-differs"
 fi
 
+# ── 台账滞后检测（2026-11-03 新增）────────────────────────────────────
+#
+# 为什么加这个：看板的数据源是 `origin/main` 的台账，而**交付进度只存在于
+# 集成分支 `origin/integration/module-dev`**。main 一旦长时间不合并，
+# 看板就会显示过期数字，而且**没有任何环节会报告这件事** ——
+# 2026-10-30 之后 main 停了 4 天（台账 437/465，而集成分支已到 464/465），
+# 看板连着 4 天显示 94%，每天的刷新任务都按「数据无变化 ⇒ 跳过发布」正常收工。
+#
+# 所以这里把「main 相对集成分支落后多少」变成**每次刷新都会输出的机器可读信号**。
+LEDGER_LAG_COMMITS="unknown"
+LEDGER_LAG_MODULES="unknown"
+LEDGER_LAG_STATE="unknown"
+
+if [ "$FETCHED" = "1" ] && git rev-parse --verify --quiet origin/integration/module-dev >/dev/null 2>&1; then
+  # 集成分支领先 main 多少提交
+  LEDGER_LAG_COMMITS="$(git rev-list --count origin/main..origin/integration/module-dev 2>/dev/null || echo unknown)"
+
+  # 两边台账的「已交付」模块数之差（集成分支比 main 多 ⇒ main 落后）
+  delivered_of() {
+    # $1 = ref；取台账「总览」里的已交付数
+    git show "$1:$LEDGER" 2>/dev/null \
+      | awk -F'|' '/^\|[[:space:]]*已交付[[:space:]]*\|/ {gsub(/[[:space:]]/, "", $3); print $3; exit}'
+  }
+  MAIN_DELIVERED="$(delivered_of origin/main)"
+  INT_DELIVERED="$(delivered_of origin/integration/module-dev)"
+  is_num() { case "$1" in ''|*[!0-9]*) return 1 ;; *) return 0 ;; esac; }
+  if is_num "$MAIN_DELIVERED" && is_num "$INT_DELIVERED"; then
+    LEDGER_LAG_MODULES=$(( INT_DELIVERED - MAIN_DELIVERED ))
+  fi
+
+  if [ "$LEDGER_LAG_MODULES" = "0" ] 2>/dev/null; then
+    LEDGER_LAG_STATE="in-sync"
+  elif [ "$LEDGER_LAG_MODULES" != "unknown" ] 2>/dev/null; then
+    LEDGER_LAG_STATE="main-behind"
+  fi
+  echo "  台账滞后：main 已交付 ${MAIN_DELIVERED:-?} / 集成分支已交付 ${INT_DELIVERED:-?}（差 ${LEDGER_LAG_MODULES} 个模块，落后 ${LEDGER_LAG_COMMITS} 个提交）"
+fi
+
 echo "READY —— 产物就绪：$SITE/dist"
 echo "PULL_STATUS=$PULL"
 echo "SOURCE_COMMIT=$COMMIT"
 echo "SOURCE=$SRC"
 echo "LEDGER_NOTE=$LEDGER_NOTE"
+echo "LEDGER_LAG_STATE=$LEDGER_LAG_STATE"
+echo "LEDGER_LAG_COMMITS=$LEDGER_LAG_COMMITS"
+echo "LEDGER_LAG_MODULES=$LEDGER_LAG_MODULES"

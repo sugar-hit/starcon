@@ -191,33 +191,46 @@ public class EventSubscriptionService {
             new EventSubscriptionCapability(
                 "18.1.2.1",
                 "**事件实际投递**",
-                false,
-                "本仓没有从业务服务 outbox 取事件并按订阅投递出去的 relay",
+                true,
+                "投递执行器已由 **18.1.2.2 投递记录** 接入：POST /platform/webhooks/subscriptions/{id}/deliver"
+                    + " 经 EventSubscriptionDeliveryPort 真的把包 POST 到订阅的 target_url"
+                    + "（java.net.http.HttpClient，不跟随重定向，头带 HMAC-SHA256 签名），"
+                    + "响应码如实落进 platform_delivery_record 与 platform_delivery_attempt",
                 "18.1.2.2",
-                "订阅配置可以配好，但事件不会真的发到外部端点；投递端点如实答 409，一次包都不发"),
+                ""),
             new EventSubscriptionCapability(
                 "18.1.2.1",
                 "**上游 outbox relay**（把业务事件搬到平台）",
                 false,
-                "backend/libraries 下没有 event-envelope 库；平台服务也没有跨服务读 outbox 的授权通道",
-                "18.1.2.2",
-                "事件定义的「出处」只能由租户登记时写清（source_service + source_artifact），系统不会自动发现"),
+                "backend/libraries 下只有 tenancy，**没有 event-envelope 库**；"
+                    + "backend/ 的 pom 里也**没有 Kafka / RabbitMQ / NATS 之类的事件通道依赖**；"
+                    + "平台服务**没有跨服务读业务服务 outbox 的授权通道** —— "
+                    + "按模块边界纪律，跨服务只能走授权 API / event，不能读对方的表",
+                "（跨服务事件总线，不在 18.1.2 范围内）",
+                "事件只能由 POST /platform/deliveries/publish **手工发布**进投递链路；"
+                    + "业务服务自动发出的事件不会自动走到这里 —— 事件定义的「出处」"
+                    + "（source_service + source_artifact）只能由租户登记时写清，系统不会自动发现"),
             new EventSubscriptionCapability(
                 "18.1.2.1",
                 "**死信重放**",
-                false,
-                "死信是投递明细的一种，重放要读投递记录",
+                true,
+                "死信与重放已由 **18.1.2.2 投递记录** 交付：platform_delivery_dead_letter 表（重试耗尽才产生）"
+                    + " + POST /platform/deliveries/dead-letters/{id}/replay（重放并留痕于 platform_delivery_replay_task）；"
+                    + "本模块只存 dead_letter_retention_days 这一条保留期策略参数",
                 "18.1.2.2",
-                "本模块只存死信**保留天数**这一条策略参数，不存死信本身"));
+                ""));
     var gaps =
         List.of(
             new EventSubscriptionGap(
                 "18.1.2.2",
                 "投递记录",
                 "platform",
-                false,
+                true,
                 "下游",
-                "投递明细（事件 ID、订阅方、投递状态、响应码、重试次数、死信重放）归 18.1.2.2；本模块只留接口（EventSubscriptionDeliveryPort）"),
+                "投递明细（事件 ID、订阅方、投递状态、响应码、重试次数、死信重放）**已由 18.1.2.2 交付**："
+                    + "platform_delivery_record / platform_delivery_attempt / platform_delivery_dead_letter / "
+                    + "platform_delivery_replay_task 四张表 + POST /platform/deliveries/* 一组端点；"
+                    + "本模块通过 EventSubscriptionDeliveryPort 调用它"),
             new EventSubscriptionGap(
                 "18.1.1.1",
                 "应用与凭证",

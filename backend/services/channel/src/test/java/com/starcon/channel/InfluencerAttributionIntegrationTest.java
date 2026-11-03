@@ -13,7 +13,9 @@ import java.net.InetSocketAddress;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -65,9 +67,18 @@ class InfluencerAttributionIntegrationTest {
   AccessService.Access actorA, actorB;
   String bearerA, bearerB;
 
-  /** 🔴 钉死的时刻与金额。 */
-  static final OffsetDateTime STARTED_AT = OffsetDateTime.parse("2026-09-01T00:00:00+08:00");
-  static final OffsetDateTime ENDED_AT = OffsetDateTime.parse("2026-09-30T23:59:59+08:00");
+  /**
+   * 🔴 合作起止**相对当下**：归因窗口按「结束时刻 + 归因窗口天数」判是否还在窗口内
+   * （见 {@code InfluencerAttributionRules#withinWindow}），结束时刻写成固定日历日的话，
+   * 墙钟翻页就会把合作判成「窗口外」⇒ 归因记录 0 条 ⇒ 假红。
+   * ⇒ 结束 = 今天-1 天（窗口内余量 29 天），开始 = 今天-31 天（保持 30 天的合作期）。
+   */
+  static final OffsetDateTime ENDED_AT =
+      LocalDate.now(ZoneOffset.UTC).minusDays(1).atTime(23, 59, 59).atOffset(ZoneOffset.ofHours(8));
+  static final OffsetDateTime STARTED_AT =
+      LocalDate.now(ZoneOffset.UTC).minusDays(31).atStartOfDay().atOffset(ZoneOffset.ofHours(8));
+
+  /** 🔴 故意很旧的合作：用来钉「窗口外 ⇒ 不新增归因」。 */
   static final OffsetDateTime OLD_ENDED_AT = OffsetDateTime.parse("2020-01-01T00:00:00+08:00");
 
   static final UUID AMAZON = UUID.fromString("11111111-1111-1111-1111-111111111111");

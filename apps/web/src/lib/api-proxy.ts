@@ -20,6 +20,268 @@ const services: readonly {
   fallback: string;
 }[] = [
   {
+    // 18.3.1.1 规则列表（platform 服务，卷 18「集成开放与智能自动化」L3 18.3.1「规则管理」下的第一格）。
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有的 platform/ 分支里并分支 ——
+    //   既有条目**一字未改、也不重排**。
+    //
+    // ---- 插入锚点选在**数组最开头**（本文件第一个元素之前）----
+    //   本文件是并行车道共同的累积型文件：既有车道分别落在「数组最开头」
+    //   （18.1.2.1 / 18.1.2.2 / 18.1.3.1 / 18.1.3.2）与「数组末尾」（18.2.3.1），
+    //   本车道落在开头这一段，与数组末尾相距 10000 行以上 ⇒ 并入时 git 能干净求并。
+    //
+    // ---- 首 token「automation-rules」的零命中核对结论 ----
+    //   本文件里既有的 `prefix: 'platform/'` 条目，其首 token 分别是
+    //   webhooks（18.1.2.1）/ deliveries（18.1.2.2）/ io（18.1.3.1）/ data-migration（18.1.3.2）/
+    //   text（18.4.2.1）/ apps（18.1.1.1）/ finance-software（18.2.1.1）/
+    //   api-catalog（18.1.4.1）/ call-monitor（18.1.5.1）/ payment-funds（18.2.2.1）/
+    //   external-integrations（18.2.3.1）。
+    //   它们的正则**没有一个**能吃掉 `automation-rules/...` —— 首 token 全不相同 ⇒ 天然互斥。
+    //   ⚠️ `external-integrations`（18.2.3.1）与本模块**不是一件事**：
+    //   那边管的是「对接外部系统（1688 / 海外仓 / 物流商…）的连接与同步健康」，
+    //   这边管的是「**自动化规则本身**」—— 触发事件、条件、动作、优先级、启用范围与执行统计。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   automation-rules/capabilities                 能力声明（哪些真交付 / 哪些还没交付、归谁）
+    //   automation-rules/overview                     概览（几个数，含「连续失败」这一档）
+    //   automation-rules/event-types                  可用触发事件（来自平台事件注册表）
+    //   automation-rules/rules                        规则列表（GET 真筛选真关键词）/ 新建修改（POST）
+    //   automation-rules/rules/{uuid}                 规则档案详情（GET）
+    //   automation-rules/rules/reorder                排序（POST，真改优先级）
+    //   automation-rules/rules/{uuid}/enable          启用（POST）
+    //   automation-rules/rules/{uuid}/disable         停用（POST，**不删**：历史要能复现）
+    //   automation-rules/rules/{uuid}/dry-run         开关试运行（POST，**独立状态**）
+    //   automation-rules/rules/{uuid}/preview         预演（POST，**求值但不执行**任何动作）
+    //   automation-rules/rules/{uuid}/executions      执行历史（GET）/ 登记执行结果（POST）
+    //   automation-rules/applicable                   范围内生效的规则（GET，**范围是真约束**）
+    //   automation-rules/upstream/shops               上游店铺（只读）
+    //   automation-rules/upstream/warehouses          上游仓库（只读）
+    //
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   platform/automation-rules                     —— 裸路径：后端**没有**「一条不存在的汇总列表接口」。
+    //   platform/automation-rules/unknown             —— 未实现的子路径仍然 404。
+    //   platform/automation-rules/rules/not-a-uuid    —— 非 UUID 段不应被 uuid 分支吃掉。
+    //   platform/automation-rules/rules/{uuid}/not-a-shape —— 多一段仍然 404。
+    //   ⚠️ **刻意不放行** `platform/automation-rules/rules/{uuid}/execute`：
+    //   规则执行引擎归 18.3.2、**尚未交付** ⇒ 没有这个端点 ⇒ 放行它会让界面以为
+    //   「点一下就能跑规则」，而那必然 404。
+    //
+    // id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //   （不是 `[0-9a-f-]+`）：后者会把 `enable` / `reorder` 这种非 UUID 形状也当成 id 放行。
+    // 字面量子路径（capabilities / overview / event-types / applicable）
+    //   与 `rules/reorder` 排在 {uuid} 段**之前**判别 —— alternation 是首个命中即返回。
+    prefix: 'platform/',
+    env: 'PLATFORM_URL',
+    fallback: 'http://127.0.0.1:8089',
+    pattern:
+      /^automation\-rules\/(?:capabilities|overview|event-types|applicable|rules(?:\/reorder|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:enable|disable|dry\-run|preview|executions))?)?|upstream\/(?:shops|warehouses))$/,
+  },
+  {
+    // 18.3.2.1 执行日志（platform 服务，卷 18「集成开放与智能自动化」L3 18.3.2「执行」下的第一格）。
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有的 platform/ 分支里并分支 ——
+    //   既有条目**一字未改、也不重排**。
+    //
+    // ---- 插入锚点选在「18.3.1.1 规则列表」那条之后**（数组靠前那一段）----
+    //   本文件是并行车道共同的累积型文件：同批其它车道（18.4.2.2 / 18.4.3.1 / 18.5.1.1）
+    //   用的是 `platform/ai/**` 系列首 token；本车道落在这条**兄弟模块**之后，
+    //   与它们的插入点相距甚远 ⇒ 并入时 git 能干净求并。
+    //
+    // ---- 首 token「automation/runs」的零命中核对结论 ----
+    //   同为 platform/ 的既有条目首 token 分别是
+    //   automation-rules（18.3.1.1）/ automation-rule-editor（18.3.1.2）/
+    //   auto-approvals（18.3.3.1）/ data-migration（18.1.3.2）/ webhooks（18.1.2.1）/
+    //   deliveries（18.1.2.2）/ io（18.1.3.1）/ text（18.4.2.1）/ apps（18.1.1.1）/
+    //   finance-software（18.2.1.1）/ api-catalog（18.1.4.1）/ call-monitor（18.1.5.1）/
+    //   payment-funds（18.2.2.1）/ external-integrations（18.2.3.1）。
+    //   它们的正则**没有一个**能吃掉 `automation/runs/...` ——
+    //   本条用**斜杠**分隔（`automation/runs`），兄弟模块用**连字符**
+    //   （`automation-rules` / `automation-rule-editor`）⇒ 天然互斥。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   automation/runs                     运行列表（GET 真分页真筛选）/ 登记一次执行（POST，幂等）
+    //   automation/runs/capabilities        能力声明（哪些真交付 / 哪些还没交付、归谁）
+    //   automation/runs/overview            概览（几个数，含「未执行」这一档）
+    //   automation/runs/{uuid}              运行详情（GET，**含逐步明细** ⇒ 失败可下钻到 step）
+    //   automation/runs/{uuid}/rerun        手动重跑（POST，**只登记待执行记录**）
+    //
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   platform/automation/runs/unknown            —— 未实现的子路径仍然 404。
+    //   platform/automation/runs/not-a-uuid         —— 非 UUID 段不应被 uuid 分支吃掉。
+    //   platform/automation/runs/{uuid}/not-a-shape —— 多一段仍然 404。
+    //   ⚠️ **刻意不放行** `platform/automation/runs/{uuid}/execute`：
+    //   规则执行引擎归 18.3.2、**尚未交付** ⇒ 没有这个端点 ⇒ 放行它会让界面以为
+    //   「点一下就能跑规则」，而那必然 404。
+    //
+    // id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //   （不是 `[0-9a-f-]+`）：后者会把 `rerun` 这种非 UUID 形状也当成 id 放行。
+    // 字面量子路径（capabilities / overview）排在 {uuid} 段**之前**判别 ——
+    //   alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    prefix: 'platform/',
+    env: 'PLATFORM_URL',
+    fallback: 'http://127.0.0.1:8089',
+    pattern:
+      /^automation\/runs(?:\/capabilities|\/overview|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/rerun)?)?$/,
+  },
+  {
+    // 18.3.2.2 规则效果（platform 服务，卷 18「集成开放与智能自动化」L3 18.3.2「执行」下的第二格）。
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有的 platform/ 分支里并分支 ——
+    //   既有条目**一字未改、也不重排**。
+    //
+    // ---- 插入锚点选在「18.3.2.1 执行日志」那条之后**（数组靠前那一段）----
+    //   本文件是并行车道共同的累积型文件：同批其它车道（18.4.3.2 / 18.4.2.3 / 18.5.2.1）
+    //   的插入点都落在别处，本车道落在这一段 ⇒ 并入时 git 能干净求并。
+    //
+    // ---- 首 token「automation/effect」的零命中核对结论 ----
+    //   同为 platform/ 的既有条目首 token 分别是
+    //   automation-rules（18.3.1.1）/ automation-rule-editor（18.3.1.2）/
+    //   automation/runs（18.3.2.1）/ auto-approvals（18.3.3.1）/ data-migration（18.1.3.2）/
+    //   webhooks（18.1.2.1）/ deliveries（18.1.2.2）/ io（18.1.3.1）/ text（18.4.2.1）/
+    //   apps（18.1.1.1）/ finance-software（18.2.1.1）/ api-catalog（18.1.4.1）/
+    //   call-monitor（18.1.5.1）/ payment-funds（18.2.2.1）/ external-integrations（18.2.3.1）/
+    //   ai/forecast（18.4.2.2）/ ai/usage（18.4.3.1）/ ai/templates（18.5.1.1）。
+    //   它们的正则**没有一个**能吃掉 `automation/effect/...` ——
+    //   本条用**斜杠**分隔（`automation/effect`），兄弟模块用**连字符**
+    //   （`automation-rules` / `automation-rule-editor`）⇒ 天然互斥；
+    //   而 18.3.2.1 的 `automation/runs` 的**第二** token 是 `runs` ≠ `effect` ⇒ 也不互吃。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   automation/effect/capabilities        能力声明（哪些真交付 / 哪些还没交付、归谁）
+    //   automation/effect/overview            概览（触发次数 / 五档结论 / 成功率 / 平均耗时 /
+    //                                          节省工时预估 / 误触发 / 建议）
+    //   automation/effect/rules               按规则的效果明细（GET 真分页真筛选）
+    //   automation/effect/rules/{uuid}        单规则效果详情（聚合 + 口径 + 反馈 + 建议 + 下钻）
+    //   automation/effect/runs                执行记录下钻（GET，真分页真筛选）
+    //   automation/effect/baselines           节省工时口径（GET 列表 / PUT 配置）
+    //   automation/effect/feedbacks           误触发反馈（GET 列表 / POST 登记）
+    //   automation/effect/feedbacks/{uuid}/status  处理一条反馈（PUT：已采纳 / 已忽略）
+    //   automation/effect/advices             规则优化建议（GET 列表 / POST 人工登记）
+    //   automation/effect/advices/{uuid}/status    处理一条建议（PUT：已采纳 / 已忽略）
+    //   automation/effect/advices/refresh     重新生成系统建议（POST，**幂等**）
+    //
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   platform/automation/effect/unknown            —— 未实现的子路径仍然 404。
+    //   platform/automation/effect/not-a-uuid         —— 非 UUID 段不应被 uuid 分支吃掉。
+    //   platform/automation/effect/rules/{uuid}/not-a-shape —— 多一段仍然 404。
+    //   ⚠️ **刻意不放行** `platform/automation/effect/rules/{uuid}/disable`：
+    //   「关闭一条规则」归 **18.3.1.1 规则档案**（它有 disable 端点）。
+    //   本模块只负责「**快速定位**」，**不代为关闭** ⇒ 放行它会让界面以为这里能关规则。
+    //
+    // id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //   （不是 `[0-9a-f-]+`）：后者会把 `refresh` 这种非 UUID 形状也当成 id 放行。
+    // 字面量子路径（capabilities / overview / rules / runs / baselines / feedbacks / advices）
+    //   排在 {uuid} 段**之前**判别 —— alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    prefix: 'platform/',
+    env: 'PLATFORM_URL',
+    fallback: 'http://127.0.0.1:8089',
+    pattern:
+      /^automation\/effect\/(?:capabilities|overview|rules(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|runs|baselines|feedbacks(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/status)?|advices(?:\/refresh|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/status)?)$/,
+  },
+  {
+    // 18.3.3.1 自动审批（platform 服务，卷 18「集成开放与智能自动化」L3 18.3.3 下的第一格）。
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有的 platform/ 分支里并分支 ——
+    //   既有条目**一字未改、也不重排**。
+    //
+    // ---- 插入锚点选在**数组最开头**（本文件第一个元素之前）----
+    //   与同批其它车道（18.2.3.1 插在「数组末尾」）锚点不同，git 并入才能干净求并。
+    //
+    // ---- 首 token「auto-approvals」的零命中核对结论 ----
+    //   本文件里既有的 `prefix: 'platform/'` 条目首 token 分别是
+    //   data-migration（18.1.3.2）/ webhooks（18.1.2.1）/ deliveries（18.1.2.2）/ io（18.1.3.1）/
+    //   text（18.4.2.1）/ apps（18.1.1.1）/ finance-software（18.2.1.1）/ api-catalog（18.1.4.1）/
+    //   call-monitor（18.1.5.1）/ payment-funds（18.2.2.1）/ external-integrations（18.2.3.1）。
+    //   这些首 token 与 `auto-approvals` **全不相同** ⇒ 天然互斥，
+    //   本车道**不需要**改动那十一条里的任何一个字符。
+    //   ⚠️ `external-integrations`（18.2.3.1）与本模块**不是一件事**：
+    //   那边管「1688 / 海外仓 / 物流商这些**外部系统**的连接配置与同步健康」，
+    //   这边管「系统替不替人放行单据」—— 对象、判定口径、风险边界都不同。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   auto-approvals/capabilities                能力声明（能做 / 不能做 / 边界归谁）
+    //   auto-approvals/overview                    概览（几个数）
+    //   auto-approvals/policies                    规则配置列表（GET）/ 登记规则（POST）
+    //   auto-approvals/policies/{uuid}             规则配置详情（GET）/ 修改（PUT）
+    //   auto-approvals/policies/{uuid}/disable     停用规则（**不删**：历史决策要能复现）
+    //   auto-approvals/signals                     风险信号码表（GET）/ 登记信号码（POST）
+    //   auto-approvals/signals/{uuid}/disable      停用信号码（**不删**）
+    //   auto-approvals/decisions                   决策台账列表（GET）/ **发起一次判定**（POST）
+    //   auto-approvals/decisions/{uuid}            决策详情（GET，含**决策依据快照**）
+    //   auto-approvals/escalations                 超时升级台账（GET）
+    //   auto-approvals/escalations/scan            扫描超时（POST；上游只定义规则、不实现定时器）
+    //   auto-approvals/escalations/{uuid}          单条超时升级（GET）
+    //   auto-approvals/escalations/{uuid}/execute  执行一次超时升级（POST）
+    //
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   platform/auto-approvals                            —— 裸路径：后端**没有**汇总端点。
+    //   platform/auto-approvals/unknown                    —— 未实现的子路径仍然 404。
+    //   platform/auto-approvals/policies/not-a-uuid        —— 非 UUID 段不应被 uuid 分支吃掉。
+    //   platform/auto-approvals/decisions/not-a-uuid        —— 同上。
+    //   platform/auto-approvals/signals/not-a-uuid         —— 同上。
+    //   platform/auto-approvals/escalations/not-a-uuid     —— 同上。
+    //   platform/auto-approvals/escalations/scan/extra     —— 多一段仍然 404。
+    //   platform/auto-approvals/decisions/{uuid}/extra     —— 多一段仍然 404。
+    //   platform/auto-approvals/policies/{uuid}/delete     —— 规则**不删**（历史决策要能复现）。
+    //   platform/auto-approvals/decisions/{uuid}/delete    —— 决策台账是**只追加**的，删不了。
+    //
+    // id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //   （不是 `[0-9a-f-]+`）：后者会把 `disable` / `scan` / `execute` 这种非 UUID 形状也当成 id 放行。
+    // 字面量子路径（capabilities / overview / policies / signals / decisions / escalations / scan）
+    //   排在 {uuid} 段**之前**判别 —— alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    prefix: 'platform/',
+    env: 'PLATFORM_URL',
+    fallback: 'http://127.0.0.1:8089',
+    pattern:
+      /^auto\-approvals\/(?:capabilities|overview|policies(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/disable)?)?|signals(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/disable)?|decisions(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|escalations(?:\/scan|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/execute)?)?)$/,
+  },
+  {
+    // 18.1.3.2 数据迁移（platform 服务，卷 18「集成开放与智能自动化」L3 18.1.3 下的第三格）。
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有的 platform/ 分支里并分支 ——
+    //   既有条目**一字未改、也不重排**。
+    //
+    // ---- 插入锚点选在**数组最开头**（本文件第一个元素之前）----
+    //   同批另一条车道（18.2.3.1）插在「数组末尾」—— 锚点不同，git 并入才能干净求并。
+    //
+    // ---- 首 token「data-migration」的零命中核对结论 ----
+    //   本文件里既有的 `prefix: 'platform/'` 条目共九条，首 token 分别是
+    //   webhooks（18.1.2.1）/ deliveries（18.1.2.2）/ io（18.1.3.1）/ text（18.4.2.1）/
+    //   apps（18.1.1.1）/ finance-software（18.2.1.1）/ api-catalog（18.1.4.1）/
+    //   call-monitor（18.1.5.1）/ payment-funds（18.2.2.1）。
+    //   九条的首 token 与 `data-migration` **全不相同** ⇒ 天然互斥，
+    //   本车道**不需要**改动那九条里的任何一个字符。
+    //   ⚠️ `io`（18.1.3.1 导入导出任务）与本模块**不是一件事**：
+    //   那边管「把本系统的数据导出去 / 把文件导进来」，这边管「把**别的 ERP 的历史数据**
+    //   迁进本系统的业务库」—— 方向、状态机、回滚语义都不同。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   data-migration/capabilities              能力声明（哪些真接通 / 哪些还没交付、归谁）
+    //   data-migration/overview                  概览（几个数）
+    //   data-migration/targets                   目标内部模型目录（没接通的那几个照样出现）
+    //   data-migration/mappings                  映射配置列表（GET 真分页真筛选）/ 新建（POST）
+    //   data-migration/mappings/{uuid}           映射配置详情（GET）/ 修改（PUT）/ 删除（DELETE）
+    //   data-migration/runs                      迁移任务列表（GET 真分页真筛选）/ 发起（POST，**已受理**）
+    //   data-migration/runs/{uuid}               迁移任务详情（GET，**进度跟踪**）
+    //   data-migration/runs/{uuid}/rollback      发起回滚（POST，**已受理**，真去目标库删）
+    //   data-migration/runs/{uuid}/rows          逐行结论（GET，**核对报告的明细**）
+    //   data-migration/runs/{uuid}/report        核对报告 CSV（GET，带下载有效期，过期 410）
+    //   data-migration/runs/{uuid}/rollback-report 回滚报告 CSV（GET）
+    //   data-migration/expire                    清理过期文件（POST）
+    //
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   platform/data-migration                        —— 裸路径：后端**没有**「一条不存在的汇总列表接口」。
+    //   platform/data-migration/unknown                 —— 未实现的子路径仍然 404。
+    //   platform/data-migration/mappings/not-a-uuid     —— 非 UUID 段不应被 uuid 分支吃掉。
+    //   platform/data-migration/runs/not-a-uuid         —— 同上。
+    //   platform/data-migration/runs/{uuid}/not-a-shape —— 多一段仍然 404。
+    //
+    // id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //   （不是 `[0-9a-f-]+`）：后者会把 `rollback` 这种非 UUID 形状也当成 id 放行。
+    // 字面量子路径（capabilities / overview / targets / expire / mappings / runs）
+    //   排在 {uuid} 段**之前**判别 —— alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    prefix: 'platform/',
+    env: 'PLATFORM_URL',
+    fallback: 'http://127.0.0.1:8089',
+    pattern:
+      /^data\-migration\/(?:capabilities|overview|targets|expire|mappings(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|runs(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:rollback|rows|report|rollback\-report))?)?)$/,
+  },
+  {
     // 18.1.2.1 事件订阅（platform 服务，卷 18「集成开放与智能自动化」L3 18.1.2 下的第一格）。
     // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有的 platform/ 分支里并分支 ——
     //   既有条目**一字未改、也不重排**。
@@ -75,6 +337,177 @@ const services: readonly {
     fallback: 'http://127.0.0.1:8089',
     pattern:
       /^webhooks\/(?:capabilities|overview|event-types(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/status)?|subscriptions(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:revoke|events(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|signing-secrets(?:\/(?:rotate|revoke))?|signature-preview|deliver))?)?|policies(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|audit-events)$/,
+  },
+  {
+    // 18.1.2.2 投递记录（platform 服务，卷 18「集成开放与智能自动化」L3 18.1.2 下的第二格）。
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往 18.1.2.1 那条 webhooks 正则里并分支 ——
+    //   18.1.2.1 那条**一字未改、也不重排**。
+    //
+    // ---- 插入锚点选在**18.1.2.1 那条之后**（数组靠前那一段）----
+    //   同批其它车道的插入点是「数组末尾」（收尾的 `];` 之前）；
+    //   本车道落在开头这一段（紧邻 18.1.2.1），与数组末尾相距 13000 行以上 ⇒ 并入时 git 能干净求并。
+    //
+    // ---- 首 token「deliveries」的零命中核对结论（实测，非目测）----
+    //   发车前用脚本（`.tmp/api-proxy-zero-hit.mjs`，不入库）**用 TypeScript 编译器解析**
+    //   本文件里 `services` 变量的**真实数组字面量**（不是文本计数），
+    //   逐条取出 `prefix` 与 `pattern`，按 `resolve()` 的**同构口径**实测
+    //   （`path.startsWith(prefix)` 收窄服务 → 再测 `pattern.test(path.slice(prefix.length))`），
+    //   对本模块的 11 条路径逐条判定：**11/11 零命中** —— 既有 270 条元素里没有任何一条
+    //   会吃掉本模块的路径；且别的 prefix 下的正则根本吃不到（`resolve()` 先按 prefix 闸门筛）。
+    //
+    //   ⚠️ 与 18.1.2.1 的 `webhooks` 首 token **天然互斥**：两个模块是两页、两组权限码、
+    //   两个端点命名空间（18.1.2.1 管订阅配置侧，本条管投递执行与明细侧）。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   deliveries                                   投递记录列表（GET 真分页真筛选）
+    //   deliveries/capabilities                      能力声明
+    //   deliveries/overview                          概览（几个数）
+    //   deliveries/publish                           发布一个事件并**真的**投递（POST）
+    //   deliveries/retry-due                         到期重试扫描（POST，**外部调度**触发的一次入口）
+    //   deliveries/replay-tasks                      重放任务列表（GET 真分页）
+    //   deliveries/dead-letters                      死信列表（GET 真分页真筛选）
+    //   deliveries/dead-letters/{uuid}/replay        死信重放（POST）
+    //   deliveries/{uuid}                            投递详情（GET）
+    //   deliveries/{uuid}/attempts                   投递日志（GET：每一次尝试一行）
+    //   deliveries/{uuid}/replay                     手动重投（POST）
+    //
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   platform/deliveries/{uuid}/schema            —— 投递明细**只读**，没有「改结构」的端点。
+    //   platform/deliveries/{uuid}/not-a-shape        —— 多一段仍然 404。
+    //   platform/deliveries/not-a-uuid               —— 非 UUID 段不应被 uuid 分支吃掉。
+    //   platform/deliveries/dead-letters/{uuid}      —— 后端**没有**「按 id 取单条死信」的端点。
+    //
+    // id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //   （不是 `[0-9a-f-]+`）：后者会把 `replay` / `publish` 这种非 UUID 形状也当成 id 放行。
+    // 字面量子路径（capabilities / overview / publish / retry-due / replay-tasks / dead-letters）
+    //   排在 {uuid} 段**之前**判别 —— alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    //
+    // 🔴 **{uuid} 段与 dead-letters 分支必须互斥**（本次修正的真实缺陷）：
+    //   原写法把 dead-letters 挂在字面量分支里、再让 {uuid} 段独立跟在后面，
+    //   于是 `deliveries/dead-letters/{uuid}`（后端**没有**这个 GET 端点）被放行了 ——
+    //   那正是上面「刻意不放行」清单里明确写着要拒的形状。
+    //   ⇒ 现在改成**三个平级分支**：字面量子路径 / dead-letters（含其 {uuid}/replay）/
+    //     裸 {uuid}（含 attempts / replay）。三者互斥，dead-letters 后面不再跟 {uuid}。
+    prefix: 'platform/',
+    env: 'PLATFORM_URL',
+    fallback: 'http://127.0.0.1:8089',
+    pattern:
+      /^deliveries(?:\/(?:capabilities|overview|publish|retry-due|replay-tasks)|\/dead-letters(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/replay)?|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:attempts|replay))?)?$/,
+  },
+  {
+    // 18.1.3.1 导入导出任务（platform 服务，卷 18「集成开放与智能自动化」L3 18.1.3 下的第一格）。
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往 18.1.2.1 / 18.1.2.2 那两条正则里并分支 ——
+    //   既有条目**一字未改、也不重排**。
+    //
+    // ---- 插入锚点选在**18.1.2.2 投递记录那条之后**（数组靠前那一段，与同为 platform 的两条相邻）----
+    //   同批其它车道的插入点是「数组末尾」（收尾的 `];` 之前）；
+    //   本车道落在开头这一段，与数组末尾相距 13000 行以上 ⇒ 并入时 git 能干净求并。
+    //
+    // ---- 首 token「io」的零命中核对结论（实测，非目测）----
+    //   发车前用脚本（`.tmp/api-proxy-zero-hit.mjs`，不入库）**用 TypeScript 编译器解析**
+    //   本文件里 `services` 变量的**真实数组字面量**（不是文本计数），
+    //   逐条取出 `prefix` 与 `pattern`，按 `resolve()` 的**同构口径**实测
+    //   （`path.startsWith(prefix)` 收窄服务 → 再测 `pattern.test(path.slice(prefix.length))`），
+    //   对本模块的 13 条路径逐条判定：**13/13 零命中** —— 既有 **272 条**元素里没有任何一条
+    //   会吃掉本模块的路径（别的 prefix 下的正则根本吃不到，因为 `resolve()` 先按 prefix 闸门筛）。
+    //   反向也核对了本条新正则对别人已交付形状（webhooks / deliveries / apps / text /
+    //   finance-software / call-monitor / reporting / catalog / trade）的**零命中**
+    //   ⇒ 本条不会遮蔽别人已交付的路由。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   io/capabilities                        能力声明
+    //   io/overview                            概览（几个数）
+    //   io/domains                             数据域目录（两个方向各一行）
+    //   io/tasks                               任务列表（GET 真分页真筛选）/ 发起导出（POST）
+    //   io/tasks/import                        发起导入（POST，**已受理**，异步执行）
+    //   io/tasks/{uuid}                        任务详情（GET，**进度跟踪**）
+    //   io/tasks/{uuid}/file                   结果下载（GET，**带下载有效期**，过期 410）
+    //   io/tasks/{uuid}/error-report           失败行报告 CSV（GET）
+    //   io/tasks/{uuid}/errors                 失败行明细（GET，**逐行逐列**）
+    //   io/tasks/{uuid}/cancel                 作废任务（POST）
+    //   io/templates                           模板列表（GET 真分页）
+    //   io/templates/{uuid}                    模板详情（GET，列定义 + 示例行）
+    //   io/templates/{uuid}/file               模板下载（GET，CSV）
+    //   io/expire                              清理过期任务与文件（POST）
+    //
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   platform/io                            —— 裸路径：后端**没有**「一条不存在的汇总列表接口」。
+    //   platform/io/unknown                    —— 未实现的子路径仍然 404。
+    //   platform/io/tasks/not-a-uuid           —— 非 UUID 段不应被 uuid 分支吃掉。
+    //   platform/io/tasks/{uuid}/not-a-shape   —— 多一段仍然 404。
+    //   platform/io/templates/not-a-uuid       —— 同上。
+    //   platform/io/templates/{uuid}/not-a-shape —— 同上。
+    //
+    // id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //   （不是 `[0-9a-f-]+`）：后者会把 `import` 这种非 UUID 形状也当成 id 放行。
+    // 字面量子路径（capabilities / overview / domains / expire / templates / tasks / import）
+    //   排在 {uuid} 段**之前**判别 —— alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    prefix: 'platform/',
+    env: 'PLATFORM_URL',
+    fallback: 'http://127.0.0.1:8089',
+    pattern:
+      /^io\/(?:capabilities|overview|domains|expire|tasks(?:\/import|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:file|error-report|errors|cancel))?)?|templates(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/file)?)?)$/,
+  },
+  {
+    // 18.4.2.2 选品与需求预测（platform 服务，卷 18「集成开放与智能自动化」L3 18.4.2 下的第三格）。
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有的 platform/ 分支里并分支 ——
+    //   既有条目**一字未改、也不重排**。
+    //
+    // ---- 插入锚点选在「platform/ 组的中段」（io 那条之后、reporting/ 那条之前）----
+    //   本文件是并行车道共同的累积型文件：既有车道分别落在「数组最开头」与「数组末尾」，
+    //   本车道落在这两处**之间**，与两端的插入点都相距上千行 ⇒ 并入时 git 能干净求并。
+    //
+    // ---- 首 token「ai」下的第二 token「forecast」的零命中核对结论（实测，非目测）----
+    //   本文件里既有的 `prefix: 'platform/'` 条目，其首 token 分别是
+    //   automation-rules / auto-approvals / data-migration / webhooks / deliveries / io /
+    //   text / apps / finance-software / api-catalog / call-monitor / payment-funds /
+    //   external-integrations / automation-rule-editor。
+    //   ⚠️ **本条目的首 token 是 `ai`**，与同批其它车道（18.4.3.1 的 `ai/usage`、
+    //   18.5.1.1 的 `ai/templates`）**共用首 token** —— 但第二 token 不同
+    //   （forecast / usage / templates）⇒ 三者互斥，谁也不会吃掉谁。
+    //   ⚠️ `text`（18.4.2.1 文本与翻译）与本模块**不是一件事**：
+    //   那边管的是「文案怎么翻、怎么检查、怎么确认后发布」，
+    //   这边管的是「销量怎么预测、补多少货、价怎么调、谁是爆品」。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   ai/forecast/capabilities              能力声明（算法口径 / 阈值 / 来源 / 边界逐条报出）
+    //   ai/forecast/overview                  概览（几个数）
+    //   ai/forecast/promotions                促销日历列表（GET 真分页真筛选）/ 登记（POST）
+    //   ai/forecast/promotions/{uuid}         删除一条促销（DELETE）
+    //   ai/forecast/history                   需求历史台账（GET 真分页真筛选）/ 录入（POST）
+    //   ai/forecast/history/{uuid}            删除一条需求历史（DELETE）
+    //   ai/forecast/history/sync              从 13 分析同步销量（POST）
+    //   ai/forecast/runs                      预测运行列表（GET）/ 发起一次运行（POST）
+    //   ai/forecast/runs/{uuid}               运行详情（结果 + 影响因素）
+    //   ai/forecast/forecasts                 预测结果列表（GET 真分页真筛选）
+    //   ai/forecast/forecasts/{uuid}          预测详情（**点估计 + 置信区间 + 影响因素**）
+    //   ai/forecast/replenish-suggestions     建议列表（补货 / 调价）
+    //   ai/forecast/suggestions/{uuid}/adopt  人工采纳建议（POST，**只记录决定，不执行**）
+    //   ai/forecast/suggestions/{uuid}/reject 人工驳回建议（POST）
+    //   ai/forecast/price-elasticity          价格弹性（算不出来的 SKU 也在列表里）
+    //   ai/forecast/hot-items                 爆品识别（阈值 + 统计窗口）
+    //   ai/forecast/opportunities             机会品发现（阈值 + 统计窗口）
+    //
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   platform/ai/forecast                   —— 裸路径：后端**没有**「一条不存在的汇总端点」。
+    //   platform/ai/forecast/unknown           —— 未实现的子路径仍然 404。
+    //   platform/ai/forecast/promotions/not-a-uuid  —— 非 UUID 段不应被 uuid 分支吃掉。
+    //   platform/ai/forecast/history/sync/extra    —— 多一段仍然 404。
+    //   platform/ai/forecast/forecasts/not-a-uuid   —— 同上。
+    //   platform/ai/forecast/execute           —— 🔴 **执行**（改价 / 建补货单）：
+    //                                                  归 5 定价与 6 采购，**本模块不执行**；
+    //                                                  放行它会让界面以为「点一下就能改价」。
+    //
+    // id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //   （不是 `[0-9a-f-]+`）：后者会把 `adopt` / `reject` / `sync` 这种非 UUID 形状也当成 id 放行。
+    // 字面量子路径（capabilities / overview / promotions / history / sync / runs / forecasts /
+    //   replenish-suggestions / price-elasticity / hot-items / opportunities）
+    //   排在 {uuid} 段**之前**判别 —— alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    prefix: 'platform/',
+    env: 'PLATFORM_URL',
+    fallback: 'http://127.0.0.1:8089',
+    pattern:
+      /^ai\/forecast\/(?:capabilities|overview|promotions(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|history(?:\/sync|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|runs(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|forecasts(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|replenish\-suggestions|suggestions\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/(?:adopt|reject)|price\-elasticity|hot\-items|opportunities)$/,
   },
   {
     // 13.1.1.1 经营总览（reporting 服务，卷 13「利润与经营分析」L3 13.1.1 下的第一格）。
@@ -226,8 +659,7 @@ const services: readonly {
     prefix: 'reporting/',
     env: 'REPORTING_URL',
     fallback: 'http://127.0.0.1:8088',
-    pattern:
-      /^lifecycle\-segmentation(?:\/(?:capabilities|rules(?:\/(?:SKU|SPU))?|refresh))?$/,
+    pattern: /^lifecycle\-segmentation(?:\/(?:capabilities|rules(?:\/(?:SKU|SPU))?|refresh))?$/,
   },
   {
     // 13.4.2.2 费用差异（reporting 服务，卷 13「利润与经营分析」L3 13.4.2 成本拆解下的第二格）。
@@ -344,8 +776,7 @@ const services: readonly {
     prefix: 'reporting/',
     env: 'REPORTING_URL',
     fallback: 'http://127.0.0.1:8088',
-    pattern:
-      /^sales-trend(?:\/(?:capabilities|comparison|events|metrics|refresh))?$/,
+    pattern: /^sales-trend(?:\/(?:capabilities|comparison|events|metrics|refresh))?$/,
   },
   {
     // 13.1.2.2 达成追踪（reporting 服务，卷 13「利润与经营分析」L3 13.1.2 目标管理下的第二格）。
@@ -1537,8 +1968,7 @@ const services: readonly {
     prefix: 'finance/',
     env: 'FINANCE_URL',
     fallback: 'http://127.0.0.1:8087',
-    pattern:
-      /^receivable\-aging\/(?:capabilities|options|distribution|overdue|buckets)$/,
+    pattern: /^receivable\-aging\/(?:capabilities|options|distribution|overdue|buckets)$/,
   },
   {
     // 12.1.2.2 付款计划（finance 服务，卷 12「财务核算」L3 12.1.2 应付下的第二格）。
@@ -2155,6 +2585,69 @@ const services: readonly {
       /^alert\-rules(?:\/capabilities|\/hits|(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:disable|enable|reset))?)?)$/,
   },
   {
+    // 15.6.2.1 生命周期与流失预警（crm 服务，卷 15「客户与客服」L3 15.6.2「复购与留存」下的第一格）。
+    //
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 crm 支里并分支 ——
+    //   既有条目**一字未改、也不重排**。
+    //
+    // ---- 插入锚点 = **identity 中段**（紧邻 `prefix: 'identity/'` 的 1.3.2.1 预警规则那条**之后**）----
+    //   本文件是并行车道共同的累积型文件：同批另外三条车道分别锚在
+    //   「数组末尾」「catalog 中段」「crm 中段」—— 四条车道必须占四个相距万行的锚点，
+    //   否则下轮并入时又会在同一个锚点撞车、成果全卡在冲突里。
+    //   ⚠️ **白名单条目位置无语义**：本条虽然插在 identity 那一段里，但**路由前缀仍是 crm**
+    //   （`resolve()` 按 `services[]` 顺序逐条试、首个命中即返回，位置不影响转发目标）。
+    //   本文件**不在** merge-union 驱动器的覆盖范围内（.gitattributes 只给
+    //   `packages/api-contracts/src/**` 与 `module-progress.md` 配了驱动）⇒ 它走**普通 git merge**，
+    //   所以插入点必须彼此错开。
+    //
+    // ---- 首 token「customer-lifecycle」的零命中核对结论 ----
+    //   本文件里既有 `prefix: 'crm/'` 的条目首 token 分别是
+    //   buyer-emails（15.1.2.1）/ email-rules（15.2.2.2）/ knowledge（15.4.2.1）/
+    //   message-inbox（15.1.1.1）/ message-sends（15.1.1.2）/ message-classifications（15.1.3.1）/
+    //   review-requests（15.2.2.1）/ reviews（15.2.1.2）/ review-replies（15.2.2.3）/
+    //   negative-reviews（15.2.1.3）/ review-rules（15.2.2.2）/ customer-tags（15.3.2.1）/
+    //   customer-contacts（15.3.2.2）/ customers（15.3.1.1）/ care-reminders（15.4.1.1）/
+    //   auto-replies（15.4.1.2）/ service-tickets（15.1.4.1）/ cart-recovery（15.6.2.2）。
+    //   它们的正则**没有一个**能吃掉 `customer-lifecycle/...` ——
+    //   `customers`（15.3.1.1）用的是 `^customers(?:\/...)?$`（**带尾锚**），
+    //   `customer-tags` / `customer-contacts` 用的首 token 也都**不等于** `customer-lifecycle`
+    //   ⇒ 天然互斥，本条**不需要**改动那些条目里的任何一个字符。
+    //   ⚠️ `cart-recovery`（15.6.2.2）与本模块**不是一件事**：
+    //   那边管的是「独立站加购 / 结账没走完」，这边管的是「**买过、该回购却没回购**」。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   customer-lifecycle/capabilities            能力声明（哪些真交付 / 哪些还没交付、归谁）
+    //   customer-lifecycle/segments                生命周期分层结果（GET，真分页 + 真筛选）
+    //   customer-lifecycle/alerts                  流失预警清单（GET，真分页 + 真筛选）
+    //   customer-lifecycle/alerts/{uuid}           单条预警详情（GET，**含风险因子明细**）
+    //   customer-lifecycle/alerts/{uuid}/acknowledge 标记已知悉（POST，状态只能向前）
+    //   customer-lifecycle/alerts/{uuid}/resolve   标记已处理（POST，状态只能向前）
+    //   customer-lifecycle/policies                阈值策略列表（GET）/ 新建（POST）
+    //   customer-lifecycle/policies/{uuid}         单条阈值策略（GET）/ 修改（PUT）
+    //   customer-lifecycle/compute                 重算分层与预警（POST）
+    //   customer-lifecycle/runs                    重算运行记录（GET）
+    //
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   customer-lifecycle                            —— 裸路径：后端**没有**汇总端点。
+    //   customer-lifecycle/unknown                    —— 未实现的子路径仍然 404。
+    //   customer-lifecycle/alerts/not-a-uuid          —— 非 UUID 段不应被 uuid 分支吃掉。
+    //   customer-lifecycle/policies/not-a-uuid        —— 同上。
+    //   customer-lifecycle/alerts/{uuid}/send         —— 🔴 **触达归 15.5.2，未交付**：
+    //                                                      放行它会让界面以为「点一下就能发召回消息」。
+    //   customer-lifecycle/alerts/{uuid}/extra        —— 服务端没有这一层。
+    //   customer-lifecycle/policies/{uuid}/delete    —— 阈值策略**不删**：历史判定引用着它。
+    //
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //   （不是 `[0-9a-f-]+`）：后者会把 `acknowledge` / `resolve` 这种非 UUID 形状也当成 id 放行。
+    // ⚠️ 字面量子路径（capabilities / segments / alerts / policies / compute / runs）
+    //   排在 {uuid} 段**之前**判别 —— alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    prefix: 'crm/',
+    env: 'CRM_URL',
+    fallback: 'http://127.0.0.1:8086',
+    pattern:
+      /^customer\-lifecycle\/(?:capabilities|segments|compute|runs|policies(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|alerts(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:acknowledge|resolve))?)?)$/,
+  },
+  {
     // 14.5.1.2 建联与样品（channel 服务，卷 14 广告与增长 / L3 14.5.1 达人管理下的第二格）。
     //
     // 本条目是**新增一条独立的 services[] 元素**，不是往既有 channel 分支的 alternation 里
@@ -2279,6 +2772,86 @@ const services: readonly {
       /^price-anomaly-alerts(?:\/capabilities|\/observations|\/events(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:acknowledge|resolve))?)?|\/rules|\/notifications|\/detect)$/,
   },
   {
+    // 5.1.1.1 价目表列表（catalog 服务，卷 05「定价与价目」L3 5.1.1「价目表」下的第一格）。
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，**紧接在 `price-anomaly-alerts`
+    //   （5.5.2.1 异常告警，`prefix: 'catalog/'`）那条元素之后** ——
+    //   既有条目一字未改、也不重排（并入时 git 按前缀求并，取错一侧不会丢掉别人已交付的路由）。
+    //
+    // 🔴 锚点为什么在这里：第一次并入时本条目插在**数组末尾**，与 18.4.2.3（异常诊断）
+    //   撞在同一个锚点 ⇒ git 判冲突（成果没丢，只是位置撞了）。搬到 catalog 中段后
+    //   与数组末尾相距 1.1 万行 ⇒ git 能干净求并。
+    //
+    // 🔴 为什么用 `price-lists` 这个独立前缀：
+    //   * 既有 catalog 分支是**一条**覆盖全服务的长 alternation，里面没有 `price-lists`；
+    //     已逐条核对本文件里全部既有正则：`price-lists/**` **零命中**（既有分支不会先把它吃掉）。
+    //   * 5.1.1.2 价目项批量维护与 5.1.2.1 优先级与冲突检测是**别的模块**：
+    //     本车道只交付 5.1.1.1，不代未交付的兄弟模块开形状。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   price-lists/capabilities        能力声明（一价目一币种 / 半开区间 / 价目项数量来源 / 上下游）
+    //   price-lists/scope-directory     适用范围目录（法人 + 店铺 + 站点，来自上游授权只读端点）
+    //   price-lists/coverage            覆盖范围摘要（模块级：币种分布 + 范围类型分布 + 每张表的摘要）
+    //   price-lists/lists               价目表集合（GET 真分页 + 筛选 / POST 新建）
+    //   price-lists/lists/{uuid}        价目表详情（GET）/ 修改（PUT，乐观锁）/ 删除（DELETE）
+    //
+    // ⚠️ 判别顺序：**字面量子路径（capabilities / scope-directory / coverage）排在 {uuid} 段之前** ——
+    //    alternation 是首个命中即返回，顺序反了会被 uuid 支吃掉半截。
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //   （不是 `[0-9a-f-]+`）：后者会把 `lists` 这种非 UUID 形状也当成 id 放行。
+    // ⚠️ 外层分组**不带 `?`**：本模块没有裸集合读，放行裸路径 `price-lists` 就是凭空多出一条 GET。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸路径 `price-lists` —— 本模块没有裸路径资源。
+    //   * `price-lists/lists/{uuid}/items` —— 价目项（`price_list_item`）是 **5.1.1.2 的写入所有权**，
+    //     本模块**不建**那张表 ⇒ 后端没有这个端点 ⇒ 放行它只会让界面 404。
+    //   * `price-lists/lists/{uuid}/conflicts` —— 优先级与冲突检测是 **5.1.2.1**（本表的下游守门员），
+    //     本模块**不**实现冲突判定 ⇒ 后端没有这个端点。
+    prefix: 'catalog/',
+    env: 'CATALOG_URL',
+    fallback: 'http://127.0.0.1:8082',
+    pattern:
+      /^price\-lists(?:\/(?:capabilities|scope\-directory|coverage)|\/lists(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?)$/,
+  },
+  {
+    // 5.1.2.1 优先级与冲突检测（catalog 服务，卷 05「定价与价目」L3 5.1.2「适用范围」下的第一格）。
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，**紧接在 5.1.1.1 的 `price-lists`
+    //   那条元素之后** —— 既有条目一字未改、也不重排。
+    //
+    // 🔴 **锚点为什么选在 catalog 中段（而不是数组末尾）**：同批另外三条车道分别被指定了
+    //   末尾 / crm 中段 / identity 中段三个锚点 —— 四条车道必须占四个**相距万行**的锚点，
+    //   否则下一轮并入时又会落在同一个锚点上，git 判冲突、成果全卡在冲突里。
+    //   本车道落在 catalog 中段（`price-lists` 元素之后），与另外三条车道的锚点彼此错开。
+    //
+    // 🔴 为什么仍然用 `price-lists` 这个前缀（而不是另起一个 token）：
+    //   * 蓝图 5.1.1.1 的白名单注释已经写明「`price-lists/lists/{uuid}/conflicts` 是
+    //     **5.1.2.1** 的形状」—— 本模块就是实现这一段。
+    //   * 既有正则全部**锚定**（`/^token(...)?$/`），且既有分支里 `price-lists/**` 零命中
+    //     ⇒ 本条目不会被既有分支抢走。
+    //   * 5.1.1.1 的元素在**数组里排在本条目之前** ⇒ 它自己的形状
+    //     （capabilities / scope-directory / coverage / lists / lists/{uuid}）由它自己命中，
+    //     本条目**只**放行 5.1.2.1 自己实现的那几条（下列清单里没有 `price-lists/lists` 裸集合、
+    //     也没有 `price-lists/lists/{uuid}` 裸详情 —— 那两条不是本模块实现的）。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   price-lists/priority/capabilities     能力声明（优先级语义 + 六个维度的覆盖情况）
+    //   price-lists/priority/rules           本租户全部优先级规则（GET）
+    //   price-lists/lists/{uuid}/priority     某张价目表的优先级规则（GET）+ 保存（POST）
+    //   price-lists/lists/{uuid}/conflicts    某张价目表的冲突明细（GET）
+    //   price-lists/conflicts                 全租户冲突概览（GET）
+    //   price-lists/resolve                   解析「这个 SKU 在这个店铺此刻该卖多少」（POST）
+    //
+    // ⚠️ 判别顺序：**字面量子路径（priority / conflicts / resolve）排在 {uuid} 段之前** ——
+    //    alternation 是首个命中即返回，顺序反了会被 uuid 支吃掉半截。
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //   （不是 `[0-9a-f-]+`）：后者会把 `lists` 这种非 UUID 形状也当成 id 放行。
+    // ⚠️ `price-lists/lists/{uuid}/items` —— 价目项是 **5.1.1.2 的写入所有权**，未交付 ⇒ 不放行。
+    prefix: 'catalog/',
+    env: 'CATALOG_URL',
+    fallback: 'http://127.0.0.1:8082',
+    pattern:
+      /^price\-lists(?:\/priority\/(?:capabilities|rules)|\/conflicts|\/resolve|\/lists\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/(?:priority|conflicts))$/,
+  },
+  {
     // 16.6.2.1 数据出境与留存（**本条目是新增一条独立的 services[] 元素**，
     // 不是往既有 channel 巨型 alternation 里并分支 —— 同批多车道共享这一个文件，
     // 往同一段超长单行正则里并分支会让 git 必然判冲突，retry 不会自愈）。
@@ -2338,6 +2911,123 @@ const services: readonly {
     fallback: 'http://127.0.0.1:8083',
     pattern:
       /^data-governance(?:\/capabilities|\/domains|\/transfers(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:suspend|end))?)?|\/retention-policies|\/retention-conflicts|\/deletion-requests(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:approve|reject|execute))?)?|\/cleanup-orders(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/execute)?)?|\/cleanup-records)$/,
+  },
+  {
+    // 18.5.1.1 模板管理（platform 服务，卷 18「集成开放与智能自动化」L3 18.5.1「模板管理」）。
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有的 platform/ 分支里并分支 ——
+    //   既有条目**一字未改、也不重排**。
+    //
+    // ---- 插入锚点选在文件**中段**（data-governance 那条之后，约第 2610 行）----
+    //   本文件是并行车道共同的累积型文件：最近几条 platform 车道分别落在「数组最开头」
+    //   （18.1.2.1 / 18.1.3.2 / 18.3.1.1 / 18.3.3.1）与「数组末尾」（18.2.3.1 / 18.3.1.2），
+    //   本车道落在中段，与两端各相距 12000 行以上 ⇒ 并入时 git 能干净求并。
+    //
+    // ---- 首 token「ai/templates」的零命中核对结论 ----
+    //   本文件里既有的 `prefix: 'platform/'` 条目，其首 token 分别是
+    //   automation-rules（18.3.1.1）/ auto-approvals（18.3.3.1）/ data-migration（18.1.3.2）/
+    //   webhooks（18.1.2.1）/ deliveries（18.1.2.2）/ io（18.1.3.1）/ text（18.4.2.1）/
+    //   apps（18.1.1.1）/ finance-software（18.2.1.1）/ api-catalog（18.1.4.1）/
+    //   call-monitor（18.1.5.1）/ payment-funds（18.2.2.1）/ external-integrations（18.2.3.1）/
+    //   automation-rule-editor（18.3.1.2）。
+    //   🔴 **没有一条的首 token 是 `ai`** ⇒ 本条与它们**天然互斥**，
+    //   本车道**不需要**改动那一条里的任何一个字符。
+    //   ⚠️ `text`（18.4.2.1）与本模块**不是一件事**：
+    //   那边管的是「AI 翻译链路的产物（客服话术草稿 + 置信度 + 人工确认后发布）」，
+    //   这边管的是「**通知与消息模板**：按场景 × 语言组织、版本化、可按时刻解析」。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   ai/templates                              模板列表（GET 真分页真筛选）/ 新建（POST）
+    //   ai/templates/capabilities                 能力声明（场景词表 / 语言写法 / 变量约定 / 边界）
+    //   ai/templates/overview                     概览（几个数）
+    //   ai/templates/{uuid}                       模板详情（GET）/ 归档（DELETE，**不物理删**）
+    //   ai/templates/{uuid}/metadata              改名称与说明（POST，**改不了内容**）
+    //   ai/templates/{uuid}/versions              版本列表（GET）/ **新增版本 = 编辑**（POST）
+    //   ai/templates/{uuid}/versions/{uuid}       版本详情（GET）
+    //   ai/templates/{uuid}/versions/{uuid}/enable  启用某个版本（POST）
+    //   ai/templates/{uuid}/versions/{uuid}/disable 停用某个版本（POST，**版本行不动**）
+    //   ai/templates/render-preview               渲染预览（POST，**不落库**）
+    //   ai/templates/resolve                      按时刻解析当时生效的那一版（GET）
+    //   ai/templates/upstream/content-assets      上游 3.4.2 文案资产（GET，只读）
+    //
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   platform/ai/templates/unknown             —— 未实现的子路径仍然 404。
+    //   platform/ai/templates/not-a-uuid          —— 非 UUID 段不应被 uuid 分支吃掉。
+    //   platform/ai/templates/{uuid}/extra        —— 多一段仍然 404。
+    //   platform/ai/templates/{uuid}/versions/{uuid}/update —— 🔴 版本行**不可改**：
+    //                                                          后端没有「改某一版」的端点，
+    //                                                          编辑只有「新增版本」这一条路。
+    //   platform/ai/templates/{uuid}/versions/{uuid}/delete —— 版本**不删**（历史通知要能解释）。
+    //
+    // id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //   （不是 `[0-9a-f-]+`）：后者会把 `enable` / `disable` 这种非 UUID 形状也当成 id 放行。
+    // 字面量子路径（capabilities / overview / resolve / render-preview / upstream/content-assets）
+    //   排在 {uuid} 段**之前**判别 —— alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    //
+    // ⚠️ 正则写成**两段各自可选**（字面量段 + {uuid} 段），而不是一个大 alternation：
+    //   大 alternation 里再套 {uuid} 段时，括号层级很容易多出一层 ——
+    //   多出来的那层会让 {uuid} 段整体变成可选，于是 `ai/templates/{uuid}` **匹配不上**
+    //   （实测踩过：页面 404，而界面上看不出是白名单写错了）。
+    prefix: 'platform/',
+    env: 'PLATFORM_URL',
+    fallback: 'http://127.0.0.1:8089',
+    pattern:
+      /^ai\/templates(?:\/(?:capabilities|overview|resolve|render\-preview|upstream\/content\-assets))?(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/metadata|\/versions(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:enable|disable))?)?)?)?$/,
+  },
+  {
+    // 18.5.2.1 投递记录（platform 服务，卷 18「集成开放与智能自动化」L3 18.5.2「投递记录」）。
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有任何一条里并分支 ——
+    //   既有条目**一字未改、也不重排**。
+    //
+    // ---- 插入锚点选在「18.5.1.1 模板管理」那条**紧后面**（同 L3 兄弟旁边）----
+    //   本文件是并行车道共同的累积型文件：既有车道分别落在「数组最开头」
+    //   （18.1.2.1 / 18.1.2.2 / 18.1.3.1 / 18.1.3.2 / 18.3.1.1 / 18.3.2.1 / 18.3.3.1）、
+    //   「数组中段」（18.4.2.2 的 ai/forecast、18.5.1.1 的 ai/templates、18.4.3.1 的 ai/usage）
+    //   与「中后段 / 末尾」（18.4.3.2 的 ai/diagnosis、5.1.1.2 的 price-lists），
+    //   本车道落在 18.5.1.1 那条**紧后面** —— 18.5.2.1 与 18.5.1.1 是同一个 L3 下的兄弟，
+    //   语义上该挨着，且与数组两端各相距万行以上 ⇒ 并入时 git 能干净求并。
+    //
+    // ---- 首 token「notifications」的零命中核对结论 ----
+    //   本文件里既有的 `prefix: 'platform/'` 条目首 token 分别是
+    //   automation-rules / automation/runs / automation/effect / auto-approvals /
+    //   data-migration / webhooks / deliveries / io / ai/forecast / ai/templates /
+    //   text / ai/usage / ai/effects / apps / finance-software / api-catalog /
+    //   call-monitor / payment-funds / external-integrations / automation-rule-editor /
+    //   ai/diagnosis —— **没有一个**是 `notifications` ⇒ 天然互斥。
+    //   ⚠️ `deliveries`（18.1.2.2）与本模块**不是一件事**：
+    //   那边是 **webhook 投递**（事件 → 订阅方，路由 `platform/deliveries`），
+    //   这边是**通知投递**（模板 → 收件人，路由 `platform/notifications/deliveries`）。
+    //   首 token 不同 ⇒ 两条正则谁也吃不掉谁。
+    //   ⚠️ `ai/templates`（18.5.1.1）是**通知模板**（模板内容与版本），
+    //     本模块是**通知投递**（投递结果与退订）—— 前者是内容，后者是送达。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   notifications/capabilities            能力声明（哪些真交付 / 哪些还没交付、归谁）
+    //   notifications/deliveries               投递记录列表（GET 真筛选真关键词）/ 登记一次投递（POST）
+    //   notifications/deliveries/statistics    投递统计（触达率 / 退订率 / 拦截数）
+    //   notifications/deliveries/{uuid}        投递记录详情（GET：记录 + 逐次尝试 + 拦截留痕）
+    //   notifications/deliveries/{uuid}/retry  发起一次重试（POST）
+    //   notifications/unsubscribes             退订清单（GET）/ 登记一条退订（POST，先查后登记）
+    //   notifications/unsubscribes/blocks      退订拦截留痕清单（GET）
+    //   notifications/unsubscribes/{uuid}/revoke 撤销一条退订（POST，软撤销）
+    //
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   platform/notifications                      —— 裸路径：后端**没有**汇总端点。
+    //   platform/notifications/deliveries/export    —— 后端没有导出端点。
+    //   platform/notifications/deliveries/{uuid}/delete —— 投递记录**不删**（是「发生过」的证据）。
+    //   platform/notifications/deliveries/not-a-uuid —— 非 UUID 段不应被 uuid 分支吃掉。
+    //   platform/notifications/deliveries/{uuid}/extra —— 多一段仍然 404。
+    //   platform/notifications/unsubscribes/{uuid}/delete —— 退订**软撤销**（revoke），不物理删。
+    //   platform/notifications/unknown              —— 未实现的子路径仍然 404。
+    //
+    // id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //   （不是 `[0-9a-f-]+`）：后者会把 `retry` / `revoke` 这种非 UUID 形状也当成 id 放行。
+    // 字面量子路径（capabilities / statistics / blocks）排在 {uuid} 段**之前**判别 ——
+    //   alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    prefix: 'platform/',
+    env: 'PLATFORM_URL',
+    fallback: 'http://127.0.0.1:8089',
+    pattern:
+      /^notifications\/(?:capabilities|deliveries(?:\/statistics|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/retry)?)?|unsubscribes(?:\/blocks|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/revoke)?)$/,
   },
   {
     // 5.5.1.1 价格历史（**本条目是新增一条 services[] 元素**，不是往既有 catalog 分支的
@@ -2968,8 +3658,7 @@ const services: readonly {
     prefix: 'identity/',
     env: 'IDENTITY_URL',
     fallback: 'http://127.0.0.1:8081',
-    pattern:
-      /^notification\-inbox\/(?:capabilities|read\-state|read|unread|subscriptions)$/,
+    pattern: /^notification\-inbox\/(?:capabilities|read\-state|read|unread|subscriptions)$/,
   },
   {
     // 1.3.1.2 通知偏好（identity 服务，卷 01「工作台与门户」L3 1.3.1 消息与预警的第二格）。
@@ -3006,8 +3695,7 @@ const services: readonly {
     prefix: 'identity/',
     env: 'IDENTITY_URL',
     fallback: 'http://127.0.0.1:8081',
-    pattern:
-      /^notification\-preferences(?:\/(?:capabilities|resolve))?$/,
+    pattern: /^notification\-preferences(?:\/(?:capabilities|resolve))?$/,
   },
   {
     // 1.1.1.3 审批待办（identity 服务，卷 01「工作台与门户」L3 1.1.1 待办与待决策的第四格）。
@@ -3723,8 +4411,7 @@ const services: readonly {
     prefix: 'warehouse/',
     env: 'WAREHOUSE_URL',
     fallback: 'http://127.0.0.1:8084',
-    pattern:
-      /^inventory\-risk\/(?:capabilities|projection)$/,
+    pattern: /^inventory\-risk\/(?:capabilities|projection)$/,
   },
   {
     // 1.4.1.2 列表与表格偏好（identity 服务）。纯**新增一条独立的 `services[]` 元素**，
@@ -3763,8 +4450,7 @@ const services: readonly {
     prefix: 'identity/',
     env: 'IDENTITY_URL',
     fallback: 'http://127.0.0.1:8081',
-    pattern:
-      /^user\-preferences$|^user\-preferences\/[a-z0-9][a-z0-9._-]{0,159}$/,
+    pattern: /^user\-preferences$|^user\-preferences\/[a-z0-9][a-z0-9._-]{0,159}$/,
   },
   {
     // 1.4.2.1 语言与时区（identity 服务）。纯**新增一条独立的 `services[]` 元素**，
@@ -5457,8 +6143,7 @@ const services: readonly {
     prefix: 'identity/',
     env: 'IDENTITY_URL',
     fallback: 'http://127.0.0.1:8081',
-    pattern:
-      /^page\-favorites(?:\/(?:order|hidden))?$/,
+    pattern: /^page\-favorites(?:\/(?:order|hidden))?$/,
   },
   {
     // 17.7.1.1 套餐与权益（identity 服务，卷 17「组织权限与设置」L3 17.7.1 下的第一格）。
@@ -6088,6 +6773,190 @@ const services: readonly {
     fallback: 'http://127.0.0.1:8083',
     pattern:
       /^listing\-bulk\-collects(?:\/capabilities|\/plugin\-reports|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/run|\/results)?|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?$/,
+  },
+  {
+    // 15.3.1.3 跨店合并（crm 服务，卷 15「客户与客服」L3 锚点 15.3.1「客户主档」下的跨店合并子域）。
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有的 `prefix: 'crm/'` 分支里并分支 ——
+    //   既有条目**一字未改、也不重排**。
+    //
+    // ---- 插入锚点：紧跟 4.4.1.2 `listing-bulk-collects`（channel）那条元素之后 ----
+    //   本文件是并行车道共同的累积型文件：同批另外三条车道的锚点分别是
+    //   「identity 中段（15.6.2.1）」「catalog 中段（5.1.1.1 的 price-lists）」「crm 中段（15.3.1.2）」
+    //   与「数组末尾（5.1.1.2）」。本车道落在这里，与那四个锚点**都相距 3500 行以上** ⇒ 并入时 git 能干净求并。
+    //
+    // ---- 首 token「customer-merge」的零命中核对结论（**实测**，非目测）----
+    //   本文件里 `prefix: 'crm/'` 的既有条目首 token 分别是 buyer-emails / email-rules /
+    //   knowledge / message-inbox / message-sends / message-classifications / review-requests /
+    //   reviews / review-replies / negative-reviews / review-rules / customer-tags /
+    //   customer-contacts / care-reminders / auto-replies / service-tickets / cart-recovery /
+    //   service-ticket-process / customers —— **没有一条**是 `customer-merge`。
+    //   ⚠️ 特别核对三个容易混的：
+    //   * `customer-tags`（15.3.2.1 客户标签）：第 9 个字符是 `t`；
+    //   * `customer-contacts`（15.3.2.2 接触记录）：第 9 个字符是 `c`；
+    //   * `customers`（15.3.1.1 客户列表）：第 9 个字符是 `s`；
+    //   而本模块是 `customer-merge`：第 9 个字符是 `-` ⇒ **四者互斥**，谁也不会吃掉谁。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   customer-merge/capabilities                   能力声明（哪些真交付 / 归谁 / 两条硬规矩）
+    //   customer-merge/scan                           生成候选建议（POST；🔴 **只给建议，不合并**）
+    //   customer-merge/candidates                     候选队列（GET；真分页 + 状态 / 依据 / 关键词筛选）
+    //   customer-merge/candidates/{uuid}              候选详情（GET；证据全文 + 联系方式口径）
+    //   customer-merge/candidates/{uuid}/confirm      人工确认合并（POST；理由必填）
+    //   customer-merge/candidates/{uuid}/reject       拒绝候选（POST；理由必填）
+    //   customer-merge/logical/{uuid}                 逻辑客户详情（GET；成员 + 按币种分行的金额 + 操作记录）
+    //   customer-merge/logical/{uuid}/split           拆分一个成员（POST；理由必填，映射行不删）
+    //   customer-merge/operations                     操作记录（GET；只追加流水，真分页）
+    //   customer-merge/runs                           候选生成运行台账（GET；真分页）
+    //
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   customer-merge（裸路径）                      —— 逻辑客户列表的真身是 `customer-merge/logical`，
+    //                                                      后端**没有**裸路径端点（`@RequestMapping("/crm/customer-merge")`
+    //                                                      下面第一个子路径就是 capabilities）⇒ 裸路径不放行。
+    //   customer-merge/bulk                          —— 没有批量合并端点：合并**必须**逐条人工确认。
+    //   customer-merge/export                        —— 🔴 **不导出**：证据里只有脱敏形态的联系方式。
+    //   customer-merge/auto-merge                    —— 🔴 **自动合并永不开放**：蓝图加粗句「自动合并风险高」。
+    //   customer-merge/candidates/{uuid}/undo        —— 拆分的正名是 `logical/{uuid}/split`，这里没有 undo。
+    //   customer-merge/candidates/not-a-uuid          —— 非 UUID 段不应被 uuid 支吃掉。
+    //   customer-merge/candidates/{uuid}/extra        —— 多一段仍然 404。
+    //
+    // ⚠️ 判别顺序：字面量子路径（capabilities / scan / runs / operations / candidates / logical）
+    //   排在 {uuid} 段**之前** —— alternation 是首个命中即返回，顺序反了会被 uuid 支吃掉半截。
+    // ⚠️ 外层子路径组**不可省**（末尾没有 `?`）⇒ 裸路径 `customer-merge` 不匹配：
+    //   后端没有裸路径端点，放行它只会让代理转发到一个必然 404 的地址。
+    //   （candidates / logical 两个子组**各自**带 `?` —— `customer-merge/candidates` 与
+    //   `customer-merge/logical` 本身就是后端真有的列表端点，必须放行。）
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //   （不是 `[0-9a-f-]+`）：后者会把 `confirm` / `reject` / `split` 这种非 UUID 形状也当成 id 放行。
+    prefix: 'crm/',
+    env: 'CRM_URL',
+    fallback: 'http://127.0.0.1:8086',
+    pattern:
+      /^customer\-merge(?:\/capabilities|\/scan|\/runs|\/operations|\/candidates(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:confirm|reject))?)?|\/logical(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/split)?)?)$/,
+  },
+  {
+    // 15.6.1.1 会员与等级（crm 服务，卷 15「客户与客服」L3 锚点 15.6.1「会员体系」下的会员与等级子域）。
+    //
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有的 `prefix: 'crm/'` 分支里并分支 ——
+    //   既有条目**一字未改、也不重排**。
+    //
+    // ---- 插入锚点：紧跟 15.3.1.3 `customer-merge` 那条元素之后 ----
+    //   本文件是并行车道共同的累积型文件：同批另外三条车道的锚点分别是
+    //   「15.6.2.1 生命周期（2588 行附近）」「15.3.1.2 客户详情（10466 行附近）」
+    //   与「数组末尾」。本车道落在这里，与那三个锚点**都相距 3500 行以上** ⇒ 并入时 git 能干净求并。
+    //
+    // ---- 首 token「customer-membership」的零命中核对结论（**实测**，非目测）----
+    //   本文件里 `prefix: 'crm/'` 的既有条目首 token 分别是 buyer-emails / email-rules /
+    //   knowledge / message-inbox / message-sends / message-classifications / review-requests /
+    //   reviews / review-replies / negative-reviews / review-rules / customer-tags /
+    //   customer-contacts / care-reminders / auto-replies / service-tickets / cart-recovery /
+    //   service-ticket-process / customers / customer-detail / customer-merge /
+    //   customer-lifecycle —— **没有一条**是 `customer-membership`。
+    //   ⚠️ 特别核对四个容易混的（都只差「customer-」后面的一个字符）：
+    //   * `customer-lifecycle`（15.6.2.1）：第 10 个字符是 `l`；
+    //   * `customer-detail`（15.3.1.2）：第 10 个字符是 `d`；
+    //   * `customer-merge`（15.3.1.3）：第 10 个字符是 `m`；
+    //   * `customer-tags`（15.3.2.1）：第 10 个字符是 `t`；
+    //   而本模块是 `customer-membership`：第 10 个字符是 `m` —— 与 `customer-merge` 的 `m`
+    //   相同，但**第 11 个字符**不同（`e` vs `r`）⇒ 两条互斥，谁也不会吃掉谁。
+    //   （实测：本文件全部 284 条 services 正则对 `customer-membership/capabilities` **零命中**。）
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   customer-membership/capabilities        能力声明（哪几维有 / 哪几维未交付 + 判据口径）
+    //   customer-membership/members             会员档案列表（GET 真分页 + 等级 / 店铺 / 关键词筛选）
+    //   customer-membership/members/{uuid}      单个会员详情（会员档案 + 该会员的等级变更记录）
+    //   customer-membership/levels              等级规则列表（GET 真分页）/ 新建等级规则（POST）
+    //   customer-membership/levels/{uuid}       单条等级规则（GET）/ 改启用状态与备注（PUT）
+    //   customer-membership/benefits            权益生效配置（**只输出**给 5 定价 / 14 促销）
+    //   customer-membership/level-changes       等级变更记录（GET 真分页 + 类型 / 会员 / 关键词筛选）
+    //   customer-membership/compute             从上游真实订单事实重算会员等级（POST）
+    //   customer-membership/runs                重算运行记录（GET 真分页：扫了多少 / 变了多少级）
+    //
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   customer-membership/members/{uuid}/level        —— 🔴 **没有「手工挂等级」的写路径**：
+    //     蓝图加粗句「会员等级必须由真实消费数据驱动，手工挂等级会导致权益成本失控」。
+    //     后端**没有**任何接受等级代码的端点，DB 层触发器也拒绝 level_origin='MANUAL_OVERRIDE'。
+    //   customer-membership/members/{uuid}/set-level   —— 同上（另一个常见叫法，仍然不存在）。
+    //   customer-membership/members/{uuid}/override    —— 同上（人工覆盖通道本轮未交付）。
+    //   customer-membership/points                   —— 积分与权益核销归 **15.6.1.2**（未交付）。
+    //   customer-membership/platform-sync            —— 平台会员体系对接**未交付**（channel 侧没有这个接口）。
+    //   customer-membership/export                   —— 没有导出端点。
+    //   customer-membership（裸路径）                 —— 后端第一个子路径就是 capabilities，
+    //     没有裸路径端点 ⇒ 放行它只会让代理转发到一个必然 404 的地址。
+    //   customer-membership/level-changes/{uuid}      —— 等级变更记录**按会员**读，不按单条记录寻址。
+    //   customer-membership/members/not-a-uuid        —— 非 UUID 段不应被 uuid 分支吃掉。
+    //
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //   （不是 `[0-9a-f-]+`）：后者会把 `level` / `set-level` 这种非 UUID 形状也当成 id 放行 ——
+    //   那等于**间接放行了手工挂等级**。
+    // ⚠️ 末尾**刻意不带 `?`**：带了就等于放行裸路径 `customer-membership`。
+    prefix: 'crm/',
+    env: 'CRM_URL',
+    fallback: 'http://127.0.0.1:8086',
+    pattern:
+      /^customer\-membership(?:\/capabilities|\/members(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|\/levels(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|\/benefits|\/level\-changes|\/compute|\/runs)$/,
+  },
+  {
+    // 15.6.1.2 积分与权益（crm 服务，卷 15「客户与客服」L3 15.6.1「会员体系」下的第二格）。
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 crm 分支里并分支 ——
+    //   既有 crm 条目**一字未改、也不重排**。
+    //
+    // ---- 插入锚点选在 **`^customer\-membership...$`（15.6.1.1 会员与等级）那条之后** ----
+    //   本文件是并行车道共同的累积型文件。本车道与 15.6.1.1 是**同卷同 L3 的兄弟**，
+    //   锚在它后面 ⇒ 语义相邻，且与数组末尾（约 15341 行）相距 8000 行以上，
+    //   与落在末尾/开头的其它车道互不重叠，并入时 git 能干净求并。
+    //
+    // ---- 首 token「points」的零命中核对结论（**实测**，非目测）----
+    //   脚本从本文件里抽出既有全部 **258 条** services[] 正则，逐条对本模块的 16 个
+    //   path shape 实测 `new RegExp(pat).test(shape)`：**命中数 = 0**。
+    //   且既有正则都是**锚定**的（`^token(...)?$`），而 `resolve()` 先按
+    //   `path.startsWith(service.prefix)` 收窄服务、再判别正则 ⇒ 只有 prefix='crm/'
+    //   的元素才有机会吃到 `crm/points/...`，而 prefix='crm/' 的另外几条正则
+    //   **不可能**匹配 `points/...` ⇒ 首 token 不同即可，互不遮蔽。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   points/capabilities            能力声明（逐维 available + ownerModule + impact）
+    //   points/accounts                积分账户集合读（GET，真分页 + 真筛选）
+    //   points/accounts/{uuid}         单个积分账户详情（GET：账户 + 批次 + 最近流水）
+    //   points/rules                   积分规则集合读（GET，真分页 + 真筛选）/ 新建（POST）
+    //   points/rules/{uuid}            单条规则（GET）/ 改启用与备注（PUT）
+    //   points/entitlements            权益目录集合读（GET，真分页 + 真筛选）/ 新建（POST）
+    //   points/entitlements/{uuid}     单项权益（GET）
+    //   points/ledger                  积分流水集合读（GET，真分页 + 方向/事由/会员筛选）
+    //   points/redemptions             权益核销记录集合读（GET，真分页 + 真筛选）
+    //   points/redemptions/{uuid}/use  权益核销（POST：REDEEMED → USD，单向）
+    //   points/earn                    积分获取（POST：消费 / 评价 / 签到 / 人工）
+    //   points/spend                   积分消耗（POST：订单抵扣）
+    //   points/redeem                  权益兑换（POST）
+    //   points/expire                  到期结算（POST：按**绝对时刻**清零过期批次）
+    //   points/liability               积分负债汇总（GET，**只输出**给 12 财务，不代劳入账）
+    //
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   points（裸路径）                        —— 后端第一个子路径就是 capabilities。
+    //   points/points                           —— 前缀重复，不是任何端点。
+    //   points/accounts/not-a-uuid              —— 非 UUID 段不应被 uuid 分支吃掉。
+    //   points/rules/not-a-uuid                 —— 同上。
+    //   points/entitlements/not-a-uuid          —— 同上。
+    //   points/redemptions/{uuid}               —— 核销记录**没有**单条详情端点
+    //                                              （核销走 POST /redemptions/{uuid}/use）。
+    //   points/redemptions/{uuid}/cancel        —— 🔴 **没有「撤销核销」**：核销是**单向**的，
+    //                                              已核销的事实不许撤回。
+    //   points/redemptions/{uuid}/extra         —— 多一段仍然 404。
+    //   points/reversal                         —— 🔴 积分冲正（退货回退）**本轮未交付**；
+    //                                              放行它会让界面以为「可以退回已发的积分」。
+    //   points/finance/booking                  —— 🔴 **12 财务侧的入账不在本服务**：
+    //                                              本模块只**输出**负债汇总，不代劳建科目。
+    //   points/expire/{uuid}                    —— 到期结算是**批量**动作，没有单条形态。
+    //
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //   （不是 `[0-9a-f-]+`）：后者会把 `cancel` / `reversal` 这种非 UUID 形状也当成 id 放行。
+    // ⚠️ 末尾**刻意不带 `?`**：带了就等于放行裸路径 `points`。
+    // ⚠️ **`/redemptions/{uuid}/use` 分支排在 `/redemptions` 之前** ——
+    //   alternation 是首个命中即返回，长分支在前才不会被短分支吃掉半截。
+    prefix: 'crm/',
+    env: 'CRM_URL',
+    fallback: 'http://127.0.0.1:8086',
+    pattern:
+      /^points(?:\/capabilities|\/accounts(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|\/rules(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|\/entitlements(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|\/ledger|\/redemptions\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/use|\/redemptions|\/earn|\/spend|\/redeem|\/expire|\/liability)$/,
   },
   {
     // 4.4.1.3 采集箱（channel 服务）。本条目是**新增一条 services[] 元素**，
@@ -9677,6 +10546,91 @@ const services: readonly {
     fallback: 'http://127.0.0.1:8086',
     pattern:
       /^customer\-contacts(?:\/(?:capabilities|opt-out-check|timeline|ingest)|\/contacts(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|\/opt-outs(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:revoke|events))?)?)$/,
+  },
+  {
+    // 15.3.1.1 客户列表（crm 服务，卷 15 客户与客服 L3 锚点 15.3.1「客户主档」下的第一格）。
+    //
+    // 本条目是**新增一条独立的 services[] 元素**，不是往既有的 `prefix: 'crm/'` 分支里并分支 ——
+    //   既有的 crm 条目**一字未改、也不重排**。
+    //
+    // ---- 插入锚点：紧跟 `crm/customer-contacts`（15.3.2.2 接触记录）那条元素之后 ----
+    //   ⚠️ 本车道原先落在**数组末尾**（收尾的 `];` 之前），与 18.4.2.3 落在同一锚点 ⇒
+    //   并入集成头时 git 判同锚点冲突。整块搬到 crm 中段这条锚点之后：
+    //   与数组末尾相距 4500 行以上、与 18.4.3.2 的锚点相距 3800 行以上 ⇒ 能干净求并。
+    //   既有条目**一字未改、也不重排**；本元素的 pattern / prefix / env / fallback 原样保留。
+    //
+    // ---- 首 token「customers」的零命中核对结论 ----
+    //   本文件里 `prefix: 'crm/'` 的既有条目首 token 分别是 buyer-emails / email-rules /
+    //   knowledge / message-inbox / message-sends / message-classifications / review-requests /
+    //   reviews / review-replies / negative-reviews / review-rules / customer-tags /
+    //   customer-contacts / care-reminders / auto-replies / service-tickets / cart-recovery /
+    //   service-ticket-process —— **没有一条**首 token 是 `customers`。
+    //   ⚠️ 特别核对两个容易混的：`customer-tags`（15.3.2.1 客户标签）与
+    //   `customer-contacts`（15.3.2.2 接触记录）的正则要求第 9 个字符是 `-`，
+    //   而本模块是 `customers`（第 9 个字符是 `s`）—— **两者互斥**，不会互相吃掉。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   customers                     客户列表（GET；真分页 + 多维筛选 + 分层统计）
+    //   customers/capabilities        能力声明（哪些真交付 / 哪些还没交付、归谁）
+    //   customers/runs                刷新运行记录（GET，只读台账）
+    //   customers/sync                从上游刷新客户档案（POST；真拉事实、真落库）
+    //   customers/contact             登记 / 修正联系方式（PUT）
+    //
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   crm/customers/{uuid}          —— **客户详情是 15.3.1.2 的职责**，本模块没有这个端点。
+    //   crm/customers/unknown          —— 未实现的子路径仍然 404。
+    //   crm/customers/export           —— 🔴 **不导出联系方式**：买家联系方式属敏感数据，
+    //                                    蓝图 15 卷明写「不进导出默认字段」。
+    //   crm/customers/bulk             —— 没有批量端点。
+    prefix: 'crm/',
+    env: 'CRM_URL',
+    fallback: 'http://127.0.0.1:8086',
+    pattern: /^customers(?:\/(?:capabilities|runs|sync|contact))?$/,
+  },
+  {
+    // 15.3.1.2 客户详情（crm 服务，卷 15 客户与客服 L3 锚点 15.3.1「客户主档」下的客户详情子域）。
+    //
+    // 本条目是**新增一条独立的 services[] 元素**，不是往既有的 `prefix: 'crm/'` 分支里并分支 ——
+    //   既有的 crm 条目**一字未改、也不重排**。
+    //
+    // ---- 插入锚点：紧跟 `customers`（15.3.1.1 客户列表）那条元素之后 ----
+    //   本车道原先落在**数组末尾**（收尾的 `];` 之前），与同批其它车道撞同一锚点 ⇒
+    //   整块搬到 crm 中段这条锚点之后：与数组末尾相距 4600 行以上、
+    //   与 crm 中段其它既有条目相距 3800 行以上 ⇒ 能干净求并。
+    //   既有条目**一字未改、也不重排**；本元素的 pattern / prefix / env / fallback 原样保留。
+    //
+    // ---- 与 15.3.1.1 客户列表那条的**零命中核对**（两条首 token 都是 `customers`）----
+    //   15.3.1.1 的正则是 `^customers(?:\/(?:capabilities|runs|sync|contact))?$`：
+    //     * 它**不吃** `customers/{uuid}` —— uuid 段不在那四个字面量子路径里；
+    //     * 它也**不吃** `customers/{uuid}/timeline`。
+    //   本条的正则是 `^customers\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/timeline…)?$`：
+    //     * 它**不吃** `customers`（裸路径）、`customers/capabilities`、`customers/runs`、
+    //       `customers/sync`、`customers/contact` —— id 段必须是完整 UUID 形状。
+    //   ⇒ 两条**互不遮蔽**，各自只吃自己的形状。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   customers/{uuid}                 客户详情视图（GET；基本信息 + 金额 + 标签 +
+    //                                    跨店铺身份线索 + 逐段接入状态 + 时间线概要）
+    //   customers/{uuid}/timeline        统一时间线（GET；真分页 + 按来源筛选）
+    //   customers/{uuid}/timeline/rebuild 重建统一时间线（POST；真拉五个来源、幂等）
+    //
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   customers/{uuid}/merge          —— 🔴 跨店合并是 **15.3.1.3** 的职责（未交付）；
+    //                                    放行它会让界面以为「已经合并过了」。
+    //   customers/{uuid}/export          —— 🔴 **不导出联系方式**：买家联系方式属敏感数据。
+    //   customers/{uuid}/timeline/{uuid} —— 时间线没有「单条详情」形状（时间线按来源筛，不按 id 取）。
+    //   customers/not-a-uuid             —— 非 UUID 段不应被 uuid 分支吃掉。
+    //   customers/{uuid}/extra           —— 多一段仍然 404。
+    //
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //   （不是 `[0-9a-f-]+`）：后者会把 `merge` / `export` 这种非 UUID 形状也当成 id 放行。
+    // ⚠️ 字面量子路径（timeline）排在 {uuid} 段**之后**判别 —— 本模块的 id 段后面只跟
+    //   `timeline`，两者不会互相吃掉半截。
+    prefix: 'crm/',
+    env: 'CRM_URL',
+    fallback: 'http://127.0.0.1:8086',
+    pattern:
+      /^customers\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/timeline(?:\/rebuild)?)?$/,
   },
   {
     // 15.5.2.1 关怀与催办（crm 服务，卷 15 L3 锚点 15.5.2 下的触达子域）。
@@ -13354,8 +14308,12 @@ const services: readonly {
     //   platform/text/tasks/{uuid}/not-a-shape —— 多一层仍然 404。
     //   platform/text/tasks/not-a-uuid        —— 非 UUID 段不应被 uuid 分支吃掉。
     //   platform/text/glossary/{uuid}/binding —— 变量绑定只属于**模板**，术语表没有这层。
-    //   platform/text/ai-settings              —— 🔴 18.4.3.1 使用与配额**未交付**；
+    //   platform/text/ai-settings              —— 🔴 使用与配额的端点在 **/platform/ai/usage** 下
+    //                                               （18.4.3.1 已交付，契约见 packages/api-contracts 的
+    //                                               AiUsage* 类型），**不是** /platform/text/ai-settings；
     //                                               放行它会让界面以为「能配 AI 供应商」。
+    //                                               （本车道只修正这条**理由**，负向断言本身不变 ——
+    //                                                该路径**仍然**不被放行。）
     //
     // id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
     //   （不是 `[0-9a-f-]+`）：后者会把 `confirm` / `publish` 这种非 UUID 形状也当成 id 放行。
@@ -13367,6 +14325,129 @@ const services: readonly {
     fallback: 'http://127.0.0.1:8089',
     pattern:
       /^text\/(?:capabilities|overview|published|locales|source\-candidates|glossary(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|banned\-terms(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|rules(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|templates(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/binding)?)?|tasks(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:generate|drafts|confirm|publish|reject))?)?)$/,
+  },
+  {
+    // 18.4.3.1 使用与配额（platform 服务，卷 18「集成开放与智能自动化」L3 18.4.3 AI 使用与效果管理下的第一格）。
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有任何一条里并分支 ——
+    //   既有条目**一字未改、也不重排**（18.4.2.1 那条 text 的正则**逐字未动**）。
+    //
+    // ---- 插入锚点选在**18.4.2.1 那条之后**（同卷相邻的 AI 能力）----
+    //   同批其它车道把新元素插在数组最开头或最末尾；本车道落在 18.4.2.1 之后，
+    //   与开头那一段相距 13000 行以上、与末尾那一段相距 700 行以上 ——
+    //   三个 hunk 各自独立，并入时 git 能干净求并。
+    //
+    // ---- 首 token「ai」的零命中核对结论（实测，非目测）----
+    //   resolve() 先按 prefix 过滤再测正则。本条的首 token 是 `ai`，
+    //   而既有 `prefix: 'platform/'` 条目的首 token 分别是
+    //   automation-rules（18.3.1.1）/ automation-rule-editor（18.3.1.2）/ auto-approvals（18.3.3.1）/
+    //   data-migration（18.1.3.2）/ webhooks（18.1.2.1）/ deliveries（18.1.2.2）/ io（18.1.3.1）/
+    //   text（18.4.2.1）/ apps（18.1.1.1）/ finance-software（18.2.1.1）/ api-catalog（18.1.4.1）/
+    //   call-monitor（18.1.5.1）/ payment-funds（18.2.2.1）/ external-integrations（18.2.3.1）——
+    //   **没有一支以 `ai` 开头** ⇒ 天然互斥，既有那几支吃不到本模块的路径，
+    //   本模块也吃不到它们的路径。既有那几支里的任何一个字符都不必动。
+    //
+    //   发车前用一次性脚本（`.tmp/api-proxy-ai-usage-check.mjs`，不入库）**用 TypeScript 编译器解析**
+    //   本文件里 `services` 变量的**真实数组字面量**（不是文本计数），
+    //   按 `resolve()` 的**同构口径**实测：`services[]` 共 **280** 条元素，
+    //   本条目落在第 **265** 条；本模块的 **9** 条正向路径 **9/9** 命中本条目
+    //   （**没有一条被别的条目抢先命中 = 没有遮蔽**）；
+    //   **9** 条负向形状 **9/9** 无命中；其余 **279** 条既有条目对本模块路径**零命中**。
+    //
+    //   ⚠️ 本仓的 `ai` 命名空间是**兄弟车道共用**的（18.4.3.2 效果评估、18.5.1.1 模板管理
+    //   分别落在 /platform/ai/… 的其它第二段上）—— 本条的正则**只**匹配 `ai/usage/…`，
+    //   第二段写死，不吃兄弟车道的第二段。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   platform/ai/usage/capabilities            能力声明（哪些真交付 / 哪些还没交付、归谁）
+    //   platform/ai/usage/models                  模型目录列表（GET）/ 登记或修改（POST）
+    //   platform/ai/usage/records                 用量台账列表（GET，真分页真筛选）/ 记一次用量（POST）
+    //   platform/ai/usage/summary                 用量报表（GET，**可计费口径**）
+    //   platform/ai/usage/quotas                  配额列表（GET）/ 登记租户级配额（POST）
+    //   platform/ai/usage/quotas/check            配额预检（POST，**读快照不占位**）
+    //   platform/ai/usage/members/{uuid}/quotas   登记用户级配额（POST，主体成员走**路径**）
+    //   platform/ai/usage/policies                敏感数据策略列表（GET）/ 登记或修改（POST）
+    //   platform/ai/usage/policies/effective      查生效的那条敏感策略（GET）
+    //
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   platform/ai/usage                     —— 裸路径：后端**没有**汇总端点。
+    //   platform/ai/usage/unknown             —— 未实现的子路径仍然 404。
+    //   platform/ai/usage/records/export      —— 后端没有导出端点。
+    //   platform/ai/usage/quotas/{uuid}       —— 后端没有「按 id 取单条配额」的端点。
+    //   platform/ai/usage/models/{uuid}       —— 后端没有「按 id 取单条模型」的端点。
+    //   platform/ai/usage/policies/{uuid}     —— 后端没有「按 id 取单条策略」的端点。
+    //   platform/ai/usage/members/not-a-uuid/quotas —— 非 UUID 段不应被 uuid 分支吃掉。
+    //   platform/ai/usage/quotas/check/extra  —— 多一段仍然 404。
+    //
+    // id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //   （不是 `[0-9a-f-]+`）：后者会把 `not-a-uuid` 这种非 UUID 形状也当成 id 放行。
+    // 字面量子路径（capabilities / models / records / summary / quotas / policies）排在
+    //   {uuid} 段**之前**判别 —— alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    prefix: 'platform/',
+    env: 'PLATFORM_URL',
+    fallback: 'http://127.0.0.1:8089',
+    pattern:
+      /^ai\/usage\/(?:capabilities|models|records|summary|policies(?:\/effective)?|quotas(?:\/check)?|members\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/quotas)$/,
+  },
+  {
+    // 18.4.3.2 效果评估（platform 服务，卷 18「集成开放与智能自动化」L3 18.4.3 AI 使用与效果管理下的第二格）。
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有任何一条里并分支 ——
+    //   既有条目**一字未改、也不重排**。
+    //
+    // ---- 插入锚点选在「18.4.3.1 使用与配额」那条之后**（同 L3 兄弟旁边）**----
+    //   本文件是并行车道共同的累积型文件：既有车道分别落在「数组最开头」
+    //   （18.1.2.1 / 18.1.3.1 / 18.1.3.2 / 18.3.1.1 / 18.3.2.1 / 18.3.3.1）、
+    //   「数组中段」（18.4.2.2 的 ai/forecast、18.5.1.1 的 ai/templates）
+    //   与「中后段」（18.4.3.1 的 ai/usage），
+    //   本车道落在 18.4.3.1 那条**紧后面**，与数组两端各相距 12000 行以上 ⇒ 并入时 git 能干净求并。
+    //
+    // ---- 首 token「ai/effects」的零命中核对结论 ----
+    //   本仓的 `ai` 命名空间是**兄弟车道共用**的（18.4.2.2 的 `ai/forecast`、
+    //   18.4.3.1 的 `ai/usage`、18.5.1.1 的 `ai/templates`）—— 它们与本模块
+    //   **第二 token 不同**（effects / forecast / usage / templates）
+    //   ⇒ 四条正则互斥，谁也不会吃掉谁。
+    //   ⚠️ `ai/usage`（18.4.3.1）与本模块**不是一件事**：
+    //   那边管「AI 花了多少、谁花的、额度还剩多少」，
+    //   这边管「**生成了之后有没有人真的用**」—— 分子分母与判定对象都不同。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   ai/effects/capabilities                能力声明（哪些真交付 / 哪些还没交付、归谁）
+    //   ai/effects/overview                    效果总览（采纳率 / 回测误差 / 有用性，三块各带分子分母与口径）
+    //   ai/effects/adoptions                   采纳记录台账（GET 真分页真筛选）/ 录入一次处置（POST）
+    //   ai/effects/adoptions/{uuid}/withdraw   撤回一条采纳记录（POST，**只允许 ACTIVE → WITHDRAWN**）
+    //   ai/effects/adoption-report             采纳率报表（GET，真分页真筛选）
+    //   ai/effects/feedback                    有用性反馈台账（GET 真分页真筛选）/ 登记一次（POST）
+    //   ai/effects/feedback/{uuid}/withdraw    撤回一条有用性反馈（POST）
+    //   ai/effects/backtests                   回测结果台账（GET 真分页真筛选）
+    //   ai/effects/backtests/run               跑一次回测（POST，**实际值取自真实销量**）
+    //   ai/effects/thresholds                  评估阈值（GET）/ 登记或修改（POST，**局部更新**：留空沿用当前值）
+    //   ai/effects/suggestions                 改进建议清单（GET 真分页真筛选）
+    //   ai/effects/suggestions/generate        生成改进建议（POST，重新生成 = 刷新同一条）
+    //   ai/effects/suggestions/{uuid}/decision 记录对一条建议的决策（POST，**只记录决定、不执行下线**）
+    //
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   platform/ai/effects                      —— 裸路径：后端**没有**「一条不存在的汇总端点」。
+    //   platform/ai/effects/unknown              —— 未实现的子路径仍然 404。
+    //   platform/ai/effects/adoptions/not-a-uuid —— 非 UUID 段不应被 uuid 分支吃掉。
+    //   platform/ai/effects/feedback/not-a-uuid  —— 同上。
+    //   platform/ai/effects/suggestions/not-a-uuid —— 同上。
+    //   platform/ai/effects/adoptions/{uuid}/extra —— 多一段仍然 404。
+    //   platform/ai/effects/thresholds/{uuid}    —— 阈值是**租户级一行**，没有「按 id 取单条」的端点。
+    //   platform/ai/effects/adoptions/{uuid}     —— 后端没有「按 id 取单条采纳记录」的端点。
+    //   platform/ai/effects/suggestions/{uuid}/disable —— 🔴 **本模块没有下线端点**：
+    //                                                      本仓没有按能力粒度的 AI 功能开关 ⇒
+    //                                                      放行它会让界面以为「点一下就能下线」，
+    //                                                      而那必然 404。
+    //
+    // id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //   （不是 `[0-9a-f-]+`）：后者会把 `withdraw` / `run` / `generate` 这种非 UUID 形状也当成 id 放行。
+    // 字面量子路径（capabilities / overview / adoption-report / backtests / thresholds）与
+    //   `backtests/run`、`suggestions/generate` 排在 {uuid} 段**之前**判别 ——
+    //   alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    prefix: 'platform/',
+    env: 'PLATFORM_URL',
+    fallback: 'http://127.0.0.1:8089',
+    pattern:
+      /^ai\/effects\/(?:capabilities|overview|adoptions(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/withdraw)?|adoption\-report|feedback(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/withdraw)?|backtests(?:\/run)?|thresholds|suggestions(?:\/generate|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/decision)?)$/,
   },
   {
     // 18.1.1.1 应用与凭证（platform 服务，卷 18「集成开放与智能自动化」L3 18.1.1 API 管理下的第一格）。
@@ -13624,8 +14705,7 @@ const services: readonly {
     prefix: 'reporting/',
     env: 'REPORTING_URL',
     fallback: 'http://127.0.0.1:8088',
-    pattern:
-      /^traffic\-conversion(?:\/(?:capabilities|metrics|drilldown|refresh))?$/,
+    pattern: /^traffic\-conversion(?:\/(?:capabilities|metrics|drilldown|refresh))?$/,
   },
   {
     // 13.4.2.1 成本结构（reporting 服务，卷 13「利润与经营分析」L3 13.4.2 成本拆解下的第一格）。
@@ -13724,8 +14804,7 @@ const services: readonly {
     prefix: 'reporting/',
     env: 'REPORTING_URL',
     fallback: 'http://127.0.0.1:8088',
-    pattern:
-      /^affiliate\-marketing(?:\/(?:capabilities|metrics|attributions|refresh))?$/,
+    pattern: /^affiliate\-marketing(?:\/(?:capabilities|metrics|attributions|refresh))?$/,
   },
   {
     // 13.4.3.1 利润预警（reporting 服务，卷 13「利润与经营分析」L3 13.4.3 利润预警下的第一格）。
@@ -13903,7 +14982,424 @@ const services: readonly {
     prefix: 'platform/',
     env: 'PLATFORM_URL',
     fallback: 'http://127.0.0.1:8089',
-    pattern: /^api\-catalog\/(?:capabilities|overview|domains|interfaces(?:\/detail)?|sandbox\/(?:targets|runs))$/,
+    pattern:
+      /^api\-catalog\/(?:capabilities|overview|domains|interfaces(?:\/detail)?|sandbox\/(?:targets|runs))$/,
+  },
+  {
+    // 18.1.1.3 调用监控（platform 服务，卷 18「集成开放与智能自动化」L3 18.1.1 API 管理下的第四格）。
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有任何一条里并分支 ——
+    //   既有条目**一字未改、也不重排**。
+    //
+    // ---- 插入锚点选在**数组末尾**（最后一个 services[] 元素之后、收尾的 `];` 之前）----
+    //   同批其它车道把新元素插在数组最开头；本车道落在末尾，并入时 git 能干净求并。
+    //
+    // ---- 首 token「call-monitor」的零命中核对结论 ----
+    //   resolve() 先按 prefix 过滤再测正则。既有 platform/ 前缀下已放行的首 token 有
+    //   `apps`（18.1.1.1）、`text`（18.4.2.1）、`finance-software`（18.2.1.1）、
+    //   `webhooks`（18.1.2.1）、`api-catalog`（18.1.1.2）——
+    //   与 `call-monitor` **全不相同** ⇒ 天然互斥，既有那几支吃不到本模块的路径，
+    //   本模块也吃不到它们的路径。既有那几支里的任何一个字符都不必动。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   platform/call-monitor/capabilities            能力声明
+    //   platform/call-monitor/options                 筛选项 + 阈值口径 + 网关端点清单
+    //   platform/call-monitor/overview                概览（QPS / 错误率 / 限流命中 / 慢调用）
+    //   platform/call-monitor/trend                   趋势（按分钟或按小时分桶）
+    //   platform/call-monitor/apps                    按应用维度分析
+    //   platform/call-monitor/endpoints               按接口维度分析
+    //   platform/call-monitor/slow-calls              慢调用 Top N
+    //   platform/call-monitor/calls                   调用明细（GET，真分页真筛选）
+    //   platform/call-monitor/alerts                  告警列表（GET，真分页真筛选）
+    //   platform/call-monitor/alerts/scan             扫描并开告警（POST）
+    //   platform/call-monitor/alerts/{uuid}/acknowledge  确认告警（POST）
+    //   platform/call-monitor/alerts/{uuid}/resolve      闭环告警（POST）
+    //
+    // ⚠️ **刻意不放行**：
+    //   platform/call-monitor                    —— 裸路径：后端**没有**汇总端点。
+    //   platform/call-monitor/alerts/{uuid}     —— 后端没有「按 id 取单条告警」的端点。
+    //   platform/call-monitor/alerts/export     —— 后端没有导出端点。
+    //   platform/call-monitor/calls/export      —— 同上。
+    //   platform/call-monitor/unknown            —— 多一层仍然 404。
+    //
+    // ⚠️ **网关入口（/open/v1/**）刻意不放行**：那是给**外部系统**调的路径，
+    //   租户来自 API Key 反查而不是浏览器会话。把它放进浏览器白名单等于让任意浏览器
+    //   带着别人的 Key 来打 —— 见 ApiGatewayController 的类注释。
+    prefix: 'platform/',
+    env: 'PLATFORM_URL',
+    fallback: 'http://127.0.0.1:8089',
+    pattern:
+      /^call\-monitor\/(?:capabilities|options|overview|trend|apps|endpoints|slow-calls|calls|alerts|alerts\/scan|alerts\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/(?:acknowledge|resolve))$/,
+  },
+  {
+    // 18.2.2.1 支付与资金（platform 服务，卷 18「集成开放与智能自动化」L3 18.2.2 下的第一格）。
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有任何一条里并分支 ——
+    //   既有条目**一字未改、也不重排**。
+    //
+    // ---- 插入锚点选在**数组末尾**（最后一个 services[] 元素之后、收尾的 `];` 之前）----
+    //   同批其它车道把新元素插在数组最开头；本车道落在末尾，并入时 git 能干净求并。
+    //
+    // ---- 首 token「payment-funds」的零命中核对结论（实测，非目测）----
+    //   发车前用脚本（`.tmp/api-proxy-zero-hit.mjs`，不入库）**用 TypeScript 编译器解析**
+    //   本文件里 `services` 变量的**真实数组字面量**（不是文本计数），
+    //   逐条取出 `prefix` 与 `pattern`，按 `resolve()` 的**同构口径**实测
+    //   （`path.startsWith(prefix)` 收窄服务 → 再测 `pattern.test(path.slice(prefix.length))`），
+    //   对本模块的 22 条路径逐条判定：**22/22 零命中** —— 既有 **272** 条元素里
+    //   没有任何一条会吃掉本模块的路径；且别的 prefix 下的正则根本吃不到
+    //   （`resolve()` 先按 prefix 闸门筛）。
+    //   反向也核对了 17 条别的车道已交付的形状（apps / text / finance-software / webhooks /
+    //     deliveries / call-monitor / api-catalog）：本条新正则对它们**零命中**
+    //     ⇒ 本条不会遮蔽别人已交付的路由。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**，后端 PaymentFundsController 里就这 22 条）：
+    //   payment-funds/capabilities              能力声明
+    //   payment-funds/overview                   概览（几个数）
+    //   payment-funds/providers                  服务商配置列表（GET）/ 登记配置（POST）
+    //   payment-funds/providers/availability     逐服务商通道可用性
+    //   payment-funds/providers/{uuid}/disable   停用服务商配置（**不删**）
+    //   payment-funds/payments                   **付款执行**（POST，幂等键必填）
+    //   payment-funds/receipts                   **收款登记**（POST）
+    //   payment-funds/operations                 操作台账列表（GET 真筛选真关键词）
+    //   payment-funds/operations/{uuid}          单条操作（GET）
+    //   payment-funds/operations/{uuid}/attempts 尝试留痕（GET：**查证兜底**的证据）
+    //   payment-funds/operations/{uuid}/retry    重发（POST，**只在查证确认「服务商侧没有」之后才允许**）
+    //   payment-funds/balances                   余额观测列表（GET）
+    //   payment-funds/balances/query             余额查询（POST，服务商直查；未接入 ⇒ 409）
+    //   payment-funds/balances/import            余额导入（POST，账单路径）
+    //   payment-funds/fees                       手续费明细列表（GET）
+    //   payment-funds/fees/sync                  手续费明细同步（POST，服务商直拉；未接入 ⇒ 409）
+    //   payment-funds/fees/import                手续费明细导入（POST，账单路径）
+    //   payment-funds/rates                      汇率观测列表（GET）
+    //   payment-funds/rates/query                汇率查询（POST，真读上游 5.2.2.1 汇率事实）
+    //   payment-funds/flows                      资金流水台账（GET，只追加）
+    //   payment-funds/upstream/fund-accounts     上游 12.7 资金账户（GET，**只读**）
+    //   payment-funds/upstream/payment-orders    上游 12.2 收付款（GET，**只读**）
+    //
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   platform/payment-funds                        —— 裸路径：后端**没有**汇总端点。
+    //   platform/payment-funds/providers/{uuid}        —— 没有「按 id 取单条服务商配置」的端点。
+    //   platform/payment-funds/providers/{uuid}/delete —— 服务商配置**不删**（历史流水要能复现），只有停用。
+    //   platform/payment-funds/payments/{uuid}         —— 没有「按 id 取单条付款」的端点。
+    //   platform/payment-funds/operations/{uuid}/schema —— 操作记录**只读**，没有「改结构」的端点。
+    //   platform/payment-funds/operations/not-a-uuid    —— 非 UUID 段不应被 uuid 分支吃掉。
+    //   platform/payment-funds/balances/{uuid}         —— 余额观测**只读**（append-only 台账）。
+    //   platform/payment-funds/fees/{uuid}             —— 同上。
+    //   platform/payment-funds/rates/{uuid}            —— 同上。
+    //   platform/payment-funds/flows/{uuid}            —— 同上。
+    //   platform/payment-funds/upstream                —— 裸路径：上游两组是**分开的**两个端点。
+    //   platform/payment-funds/secret-keys             —— 🔴 **绝不放行**：库里没有密钥明文，
+    //                                                        也不提供任何「取密钥」的端点。
+    //   platform/payment-funds/not-a-shape             —— 多一层仍然 404。
+    //
+    // id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //   （不是 `[0-9a-f-]+`）：后者会把 `disable` / `retry` 这种非 UUID 形状也当成 id 放行。
+    // 字面量子路径（capabilities / overview / providers / payments / receipts / operations /
+    //   balances / fees / rates / flows / upstream）排在 {uuid} 段**之前**判别 ——
+    //   alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    prefix: 'platform/',
+    env: 'PLATFORM_URL',
+    fallback: 'http://127.0.0.1:8089',
+    pattern:
+      /^payment\-funds\/(?:capabilities|overview|providers(?:\/availability|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/disable)?|payments|receipts|operations(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:attempts|retry))?)?|balances(?:\/(?:query|import))?|fees(?:\/(?:sync|import))?|rates(?:\/query)?|flows|upstream\/(?:fund-accounts|payment-orders))$/,
+  },
+  {
+    // 18.2.3.1 其他对接（platform 服务，卷 18「集成开放与智能自动化」L3 18.2.3 下的第一格）。
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有任何一条里并分支 ——
+    //   既有条目**一字未改、也不重排**。
+    //
+    // ---- 插入锚点选在**数组末尾**（最后一个 services[] 元素之后、收尾的 `];` 之前）----
+    //   同批其它车道的插入点是「数组最开头」；本车道落在末尾，两个 hunk 各自独立，
+    //   并入时 git 能干净求并。
+    //
+    // ---- 首 token「external-integrations」的零命中核对结论（实测，非目测）----
+    //   发车前用脚本（`.tmp/api-proxy-zero-hit.mjs`，不入库）**用 TypeScript 编译器解析**
+    //   本文件里 `services` 变量的**真实数组字面量**（不是文本计数），
+    //   逐条取出 `prefix` 与 `pattern`，按 `resolve()` 的**同构口径**实测
+    //   （`path.startsWith(prefix)` 收窄服务 → 再测 `pattern.test(path.slice(prefix.length))`）：
+    //   · 本模块后端真实实现的 16 条路径 → 既有 **272** 条元素里**没有任何一条**会吃掉它；
+    //   · 别的车道已交付的形状（apps / text / finance-software / webhooks / deliveries /
+    //     call-monitor / api-catalog / payment-funds）→ 本条新正则对它们**零命中**
+    //     ⇒ 本条不会遮蔽别人已交付的路由。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**，后端 ExternalIntegrationController 里就这些）：
+    //   external-integrations/capabilities                 能力声明
+    //   external-integrations/overview                      概览（几个数）
+    //   external-integrations/adapters/availability          逐个外部系统通道可用性
+    //   external-integrations/connections                   连接配置列表（GET）/ 登记配置（POST）
+    //   external-integrations/connections/{uuid}            单条连接配置（GET）
+    //   external-integrations/connections/{uuid}/disable    停用连接（**不删**）
+    //   external-integrations/connections/{uuid}/health     **这个对接自己**的健康状态（GET）
+    //   external-integrations/connections/{uuid}/health/refresh 重算**这一个**连接的健康（POST）
+    //   external-integrations/sync-tasks                    同步任务列表（GET）/ 登记任务（POST）
+    //   external-integrations/sync-tasks/{uuid}             单条同步任务（GET）
+    //   external-integrations/sync-tasks/{uuid}/disable     停用同步任务（**不删**）
+    //   external-integrations/sync-tasks/{uuid}/run         **经由外部通道发起一次同步**（POST；未接入 ⇒ 409）
+    //   external-integrations/sync-records                  同步记录台账（GET）/ 人工登记（POST）
+    //   external-integrations/sync-records/{uuid}           单条同步记录（GET）
+    //   external-integrations/upstream/platforms           上游 2 渠道机制 · 平台目录（GET，**只读**）
+    //   external-integrations/upstream/shops               上游 2 渠道机制 · 店铺（GET，**只读**）
+    //
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   platform/external-integrations                              —— 裸路径：后端**没有**汇总端点。
+    //   platform/external-integrations/connections/{uuid}/delete    —— 连接**不删**（历史同步记录要能复现），只有停用。
+    //   platform/external-integrations/sync-tasks/{uuid}/schema     —— 同步任务配置**只读地**改，没有「改结构」的端点。
+    //   platform/external-integrations/connections/not-a-uuid       —— 非 UUID 段不应被 uuid 分支吃掉。
+    //   platform/external-integrations/sync-records/{uuid}/delete   —— 同步记录是**只追加**台账，删不了。
+    //   platform/external-integrations/upstream                     —— 裸路径：上游两组是**分开的**两个端点。
+    //   platform/external-integrations/secret-keys                  —— 🔴 **绝不放行**：库里没有密钥明文，
+    //                                                            也不提供任何「取密钥」的端点。
+    //   platform/external-integrations/not-a-shape                  —— 多一层仍然 404。
+    //
+    // id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //   （不是 `[0-9a-f-]+`）：后者会把 `disable` / `run` / `refresh` 这种非 UUID 形状也当成 id 放行。
+    // 字面量子路径（capabilities / overview / adapters / connections / sync-tasks / sync-records /
+    //   upstream）排在 {uuid} 段**之前**判别 ——
+    //   alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    prefix: 'platform/',
+    env: 'PLATFORM_URL',
+    fallback: 'http://127.0.0.1:8089',
+    pattern:
+      /^external\-integrations\/(?:capabilities|overview|adapters\/availability|connections(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:disable|health(?:\/refresh)?))?)?|sync\-tasks(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:disable|run))?)?|sync\-records(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|upstream\/(?:platforms|shops))$/,
+  },
+  {
+    // 18.3.1.2 规则编辑器（platform 服务，卷 18「集成开放与智能自动化」L3 18.3.1「规则管理」下的第二格）。
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有的 platform/ 分支里并分支 ——
+    //   既有条目**一字未改、也不重排**。
+    //
+    // ---- 插入锚点选在**数组末尾**（收尾的 `];` 之前）----
+    //   本文件是并行车道共同的累积型文件：最近四条 platform 车道（18.1.2.1 / 18.1.3.2 /
+    //   18.3.1.1 / 18.3.3.1）都插在「数组最开头」，而数组末尾由 18.2.3.1 的
+    //   external-integrations 占着。本车道落在这里 ⇒ 与开头那一段相距 14000 行以上，
+    //   并入时 git 能干净求并（18.3.1.1 与 18.3.3.1 两条都插开头时已经撞过一次）。
+    //
+    // ---- 首 token「automation-rule-editor」的零命中核对结论 ----
+    //   本文件里既有的 `prefix: 'platform/'` 条目，其首 token 分别是
+    //   automation-rules（18.3.1.1）/ auto-approvals（18.3.3.1）/ data-migration（18.1.3.2）/
+    //   webhooks（18.1.2.1）/ deliveries（18.1.2.2）/ io（18.1.3.1）/ text（18.4.2.1）/
+    //   apps（18.1.1.1）/ finance-software（18.2.1.1）/ api-catalog（18.1.4.1）/
+    //   call-monitor（18.1.5.1）/ payment-funds（18.2.2.1）/ external-integrations（18.2.3.1）。
+    //   ⚠️ 18.3.1.1 的首 token 是 `automation-rules`，本模块是 `automation-rule-editor` ——
+    //   两者**互斥**：`automation\-rules\/` 要求第 14 个字符是 `s`，而这里是 `-`。
+    //   18.3.1.1 管「规则档案 / 执行统计」，本模块管「**编辑器**：选事件 / 配条件 /
+    //   编排动作 / 样本测试」—— 对象与端点命名空间都不同，不要互相调用。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   automation-rule-editor/capabilities            能力声明（哪些真交付 / 哪些还没交付、归谁）
+    //   automation-rule-editor/event-schemas           触发事件的**字段目录**（GET，从事件注册表的
+    //                                                  payload_schema 摊平而来）
+    //   automation-rule-editor/event-schemas/{event}   单个事件的字段目录（GET）
+    //   automation-rule-editor/action-catalog          动作类型目录（五类动作 + 参数规格）
+    //   automation-rule-editor/api-catalog             「调接口」动作可选的目标接口（活 spec 投影）
+    //   automation-rule-editor/save                    保存规则定义（POST，**委托 18.3.1.1**）
+    //   automation-rule-editor/test                    **跑一次样本测试**（POST，真求值、不执行）
+    //   automation-rule-editor/test-runs               样本测试历史（GET，只追加台账）
+    //
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   platform/automation-rule-editor                     —— 裸路径：后端**没有**汇总端点。
+    //   platform/automation-rule-editor/unknown             —— 未实现的子路径仍然 404。
+    //   platform/automation-rule-editor/execute             —— 🔴 **执行规则**：18.3.2 执行引擎
+    //                                                          **尚未交付** ⇒ 后端没有这个端点。
+    //                                                          放行它会让界面以为「点一下就能跑规则」。
+    //   platform/automation-rule-editor/test-runs/extra     —— 多一段仍然 404。
+    //   platform/automation-rule-editor/event-schemas/unknown —— 事件类型是**点分**的
+    //                                                          （order.created），这一段不是事件类型。
+    //
+    // 事件类型段用 `[A-Za-z0-9_-]+(?:\.[A-Za-z0-9_-]+)+`（**至少一个点**）：
+    //   事件注册表里登记的事件类型字面量都是点分的（order.created / sku.updated），
+    //   要求至少一个点就不会把 `unknown` 这类不是事件类型的形状吃进来。
+    prefix: 'platform/',
+    env: 'PLATFORM_URL',
+    fallback: 'http://127.0.0.1:8089',
+    pattern:
+      /^automation\-rule\-editor\/(?:capabilities|event\-schemas(?:\/[A-Za-z0-9_-]+(?:\.[A-Za-z0-9_-]+)+)?|action\-catalog|api\-catalog|save|test|test\-runs)$/,
+  },
+  {
+    // 18.4.2.3 异常诊断（platform 服务，卷 18「集成开放与智能自动化」L3 18.4.2「AI 业务能力」下的第三格）。
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有的 platform/ 分支里并分支 ——
+    //   既有条目**一字未改、也不重排**。
+    //
+    // ---- 插入锚点选在**数组末尾**（收尾的 `];` 之前）----
+    //   本文件是并行车道共同的累积型文件：同批其它车道分别落在「数组开头」
+    //   （18.3.1.1 / 18.3.3.1 等）、中段（18.4.2.2 的 ai/forecast，行 452）与
+    //   靠后（18.4.3.1 的 ai/usage，约行 13770 / 18.5.1.1 的 ai/templates，行 2719）。
+    //   本车道落在数组末尾 ⇒ 与最近的一条（ai/usage）也相距 800 行以上，
+    //   并入时 git 能干净求并（18.3.1.1 与 18.3.3.1 两条都插开头时已经撞过一次）。
+    //
+    // ---- 首 token「ai」下的第二 token「diagnosis」的零命中核对结论 ----
+    //   本文件里既有的 `prefix: 'platform/'` 条目里，带 `ai/` 首 token 的只有三条，
+    //   第二段分别是 usage（18.4.3.1）/ templates（18.5.1.1）/ forecast（18.4.2.2）。
+    //   ⚠️ **本条目的首 token 是 `ai`**，与这三条**共用首 token** —— 但第二 token 不同
+    //   （diagnosis / usage / templates / forecast）⇒ 四者互斥，谁也不会吃掉谁。
+    //   ⚠️ `ai/forecast`（18.4.2.2 选品与需求预测）与本模块**不是一件事**：
+    //   那边管的是「销量怎么预测、补多少货、价怎么调」，这边管的是「出了什么异常、
+    //   原因是什么、依据是什么、该谁去处理」。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   ai/diagnosis/capabilities            能力声明（归因规则 / 阈值 / 事实源 / 边界逐条报出）
+    //   ai/diagnosis/overview                概览（几个数）
+    //   ai/diagnosis/events                  异常事件列表（GET 真分页真筛选真搜索）/ 登记（POST）
+    //   ai/diagnosis/events/sync             从平台内部失败源同步异常事件（POST，**幂等**）
+    //   ai/diagnosis/events/{uuid}           事件详情（GET，事件 + 它的历史运行）
+    //   ai/diagnosis/events/{uuid}/diagnose  对一个事件发起一次诊断（POST）
+    //   ai/diagnosis/events/{uuid}/resolve   人工标记已处置（POST，**只记人的决定**）
+    //   ai/diagnosis/runs/{uuid}             运行详情（GET，**结论 + 依据的唯一入口**）
+    //
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   platform/ai/diagnosis                          —— 裸路径：后端**没有**汇总端点。
+    //   platform/ai/diagnosis/unknown                  —— 未实现的子路径仍然 404。
+    //   platform/ai/diagnosis/events/not-a-uuid        —— 非 UUID 段不应被 uuid 分支吃掉。
+    //   platform/ai/diagnosis/events/{uuid}/execute    —— 🔴 **执行处置动作**：
+    //                                                       补货归 6 采购、调价归 5 定价、停广告归 14 广告，
+    //                                                       **本模块只给建议、不执行**；
+    //                                                       放行它会让界面以为「点一下就能改价」。
+    //   platform/ai/diagnosis/events/{uuid}/extra      —— 多一段仍然 404。
+    //   platform/ai/diagnosis/runs/not-a-uuid          —— 同上。
+    //
+    // id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //   （不是 `[0-9a-f-]+`）：后者会把 `diagnose` / `resolve` / `sync` 这种非 UUID 形状也当成 id 放行。
+    // 字面量子路径（capabilities / overview / events / sync / runs）排在 {uuid} 段**之前**判别 ——
+    //   alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    prefix: 'platform/',
+    env: 'PLATFORM_URL',
+    fallback: 'http://127.0.0.1:8089',
+    pattern:
+      /^ai\/diagnosis\/(?:capabilities|overview|events(?:\/sync|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:diagnose|resolve))?)?|runs\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})$/,
+  },
+  {
+    // 18.4.1.1 对话助手（platform 服务，卷 18「集成开放与智能自动化」L3 18.4.1「智能问答」下的第一格）。
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，既有条目**一字未改、也不重排**。
+    //
+    // ---- 插入锚点选在「18.4.2.3 异常诊断（ai/diagnosis）」那条**之后**、数组末尾之前 ----
+    //   本文件是并行车道共同的累积型文件：同批其它车道分别落在「数组开头」
+    //   （18.3.1.1 / 18.3.3.1）与「数组末尾」（5.1.1.2 / 18.5.2.1 等）——
+    //   本车道落在中段，与上面两个锚点都相距甚远 ⇒ 并入时 git 能干净求并。
+    //
+    // ---- 首 token「assistant」的零命中核对结论 ----
+    //   本文件里既有的 `prefix: 'platform/'` 条目首 token 分别是
+    //   automation-rules / automation / automation / automation-rule-editor / auto-approvals /
+    //   data-migration / webhooks / deliveries / io / ai / text / apps / finance-software /
+    //   api-catalog / call-monitor / payment-funds / external-integrations。
+    //   **没有一个**能吃掉 `assistant/...` ⇒ 天然互斥。
+    //   ⚠️ `assistant`（18.4.1.1）与 `ai/*`（18.4.2.x / 18.4.3.x / 18.5.1.1）**不是一件事**：
+    //   `ai/*` 那些是「把一个已经确定的问题算出来」（预测、诊断、用量、模板），
+    //   本条是「用一句中文问业务问题，并给出带可点明细链接的答案」。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   assistant/capabilities       能力声明（哪些真接通 / 哪些还没交付、归谁）
+    //   assistant/intents            受控意图目录（问题形态 / 数据源 / 口径 / 建议的下一步）
+    //   assistant/ask                提一个问题（POST；命中意图 ⇒ 走真实只读查询 + 明细链接）
+    //   assistant/sessions/{uuid}    会话上下文 + 问答历史（含每轮的明细链接）
+    //
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   platform/assistant                              —— 裸路径：后端**没有**汇总端点。
+    //   platform/assistant/unknown                      —— 未实现的子路径仍然 404。
+    //   platform/assistant/sessions/not-a-uuid          —— 非 UUID 段不应被 uuid 分支吃掉。
+    //   platform/assistant/sessions/{uuid}/turns        —— 后端**没有**这个端点（历史在 session 里）。
+    //   ⚠️ **刻意不放行** `platform/assistant/ask/execute` 之类的形状：
+    //   本模块**只读**（蓝图关系句：下游 = 无），不存在任何执行动作的端点。
+    //
+    // id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //   （不是 `[0-9a-f-]+`）：后者会把 `ask` 这种非 UUID 形状也当成 id 放行。
+    // 字面量子路径（capabilities / intents / ask）排在 {uuid} 段**之前**判别 ——
+    //   alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    prefix: 'platform/',
+    env: 'PLATFORM_URL',
+    fallback: 'http://127.0.0.1:8089',
+    pattern:
+      /^assistant\/(?:capabilities|intents|ask|sessions\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})$/,
+  },
+  {
+    // 18.4.1.2 智能查询（platform 服务，卷 18「集成开放与智能自动化」L3 18.4.1「智能问答」下的第二格）。
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，既有条目**一字未改、也不重排**。
+    //
+    // ---- 插入锚点选在「18.4.1.1 对话助手（assistant）」那条**之后**（本模块的上游紧邻）----
+    //   本文件是并行车道共同的累积型文件：同批其它车道分别落在「数组开头」
+    //   （18.3.1.1 / 18.3.3.1）与「数组末尾」（5.1.1.2 / 18.5.2.1 等）——
+    //   本车道落在中段，与上面两个锚点都相距甚远 ⇒ 并入时 git 能干净求并。
+    //
+    // ---- 首 token「smart-query」的零命中核对结论 ----
+    //   本文件里既有的 `prefix: 'platform/'` 条目首 token 分别是
+    //   automation-rules / automation / automation / automation-rule-editor / auto-approvals /
+    //   data-migration / webhooks / deliveries / io / ai / text / apps / finance-software /
+    //   api-catalog / call-monitor / payment-funds / external-integrations / assistant。
+    //   **没有一个**能吃掉 `smart-query/...` ⇒ 天然互斥。
+    //   ⚠️ `smart-query`（18.4.1.2）与 `assistant`（18.4.1.1）**不是一件事**：
+    //   那一页是「问一句话得一个答案 + 明细链接」，本条是「把一句话变成
+    //   **可执行的查询条件**（筛选 / 聚合 / 排序）+ 报表草稿 + 常用查询」。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   smart-query/capabilities             能力声明（哪些真接通 / 哪些还没交付、归谁）
+    //   smart-query/semantic-layer           受控语义层目录（**能问什么**的唯一真相）
+    //   smart-query/metrics                  指标清单（前端下拉用的简表）
+    //   smart-query/dimensions               维度清单（13.6.1.1 的 5 个白名单维度）
+    //   smart-query/query                    提一个问题（POST；解析 ⇒ 受控条件 + 结果表 + 明细依据）
+    //   smart-query/queries                  查询台账 / 常用查询清单（GET 真分页真搜索真计数）
+    //   smart-query/queries/{uuid}           读一条查询（GET）
+    //   smart-query/queries/{uuid}/save      存为常用查询（POST）/ 取消常用（DELETE）
+    //   smart-query/queries/{uuid}/run       重跑（POST；**沿用**当初解析出来的受控条件）
+    //
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   platform/smart-query                          —— 裸路径：后端**没有**汇总端点。
+    //   platform/smart-query/unknown                   —— 未实现的子路径仍然 404。
+    //   platform/smart-query/queries/not-a-uuid        —— 非 UUID 段不应被 uuid 分支吃掉。
+    //   platform/smart-query/queries/{uuid}/delete     —— 台账是**只追加**的，删不了。
+    //   platform/smart-query/queries/{uuid}/export     —— 后端**没有**导出端点。
+    //   platform/smart-query/sql                       —— 🔴 **没有自由 SQL 入口**：
+    //     蓝图加粗句「自然语言只映射到受控语义层指标，不生成任意 SQL」——
+    //     放行一条「自己下 SQL」的路径，等于把这条加粗句从后端搬到前端再拆掉。
+    //   platform/smart-query/queries/{uuid}/extra      —— 多一段仍然 404。
+    //
+    // id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //   （不是 `[0-9a-f-]+`）：后者会把 `save` / `run` 这种非 UUID 形状也当成 id 放行。
+    // 字面量子路径（capabilities / semantic-layer / metrics / dimensions / query / queries）
+    //   排在 {uuid} 段**之前**判别 —— alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    prefix: 'platform/',
+    env: 'PLATFORM_URL',
+    fallback: 'http://127.0.0.1:8089',
+    pattern:
+      /^smart\-query\/(?:capabilities|semantic\-layer|metrics|dimensions|query|queries(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:save|run))?)?)$/,
+  },
+  {
+    // 5.1.1.2 价目项批量维护（catalog 服务，卷 05「定价与价目」L3 5.1.1「价目表」下的第二格）。
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，**追加在数组末尾**（收尾的 `];` 之前）——
+    //   既有条目一字未改、也不重排（并入时 git 按前缀求并，取错一侧不会丢掉别人已交付的路由）。
+    //
+    // 🔴 **锚点选在末尾是为避开同批另外三条车道的锚点**：本文件是并行车道共同的累积型文件，
+    //   同批另外三条车道分别被指定了 catalog 中段（5.1.1.1 的 price-lists）/
+    //   crm 中段（15.3.1.2）/ identity 中段（15.6.2.1）三个锚点 —— 四条车道必须占四个
+    //   相距万行的锚点，否则下轮并入时又会在同一个锚点撞车、成果全卡在冲突里。
+    //
+    // 🔴 ---- 为什么用 `price-lists` 这个前缀（零命中核对）----
+    //   本模块的端点挂在 5.1.1.1 的**同一个命名空间**下（`price-lists/lists/{uuid}/items`）——
+    //   价目项是价目表的明细，不是另一个服务。
+    //   既有那条 `price-lists` 元素（5.1.1.1）的正则以 `$` 收尾且**不含** `/items` 段，
+    //   所以 `price-lists/lists/{uuid}/items/**` 在它那里**零命中** ⇒ 两���元素互不遮蔽。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   price-lists/item-capabilities                能力声明（三模式 / 三范围 / 八条口径）
+    //   price-lists/lists/{uuid}/items               价目项列表（GET 真分页 + 筛选）/ 新建（POST）
+    //   price-lists/lists/{uuid}/items/{uuid}        单条价目项（GET 详情 / PUT 修改 / DELETE 删除）
+    //   price-lists/lists/{uuid}/items/conflicts     本表内的冲突清单（同优先级 + 区间重叠）
+    //   price-lists/lists/{uuid}/items/resolve       解析「这个 SKU 此刻该卖多少」（歧义 ⇒ 409）
+    //   price-lists/lists/{uuid}/items/preview       批量设价的**影响范围预览**（不落库）
+    //   price-lists/lists/{uuid}/items/apply         批量设价**执行**
+    //   price-lists/lists/{uuid}/items/export        导出 xlsx（真实工作簿，代理二进制原样透传）
+    //   price-lists/lists/{uuid}/items/import        Excel 导入（先出校验报告，有错整批不落库）
+    //
+    // ⚠️ **刻意不放行**（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   price-lists/lists/{uuid}/conflicts —— 🔴 **优先级与冲突检测是 5.1.2.1**（5.1.1.1 的下游守门员），
+    //     本模块**不**实现跨价目表的优先级判定 ⇒ 后端没有这个端点 ⇒ 放行它只会让界面 404。
+    //   price-lists/lists/{uuid}/items/{非 UUID 段} —— 非 UUID 段不应被 uuid 分支吃掉。
+    //   price-lists/lists/{uuid}/items/{uuid}/extra —— 多一段仍然 404。
+    //
+    // ⚠️ 判别顺序：**字面量子路径（conflicts / resolve / preview / apply / export / import）排在
+    //   {uuid} 段之前** —— alternation 是首个命中即返回，顺序反了会被 uuid 支吃掉半截。
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //   （不是 `[0-9a-f-]+`）：后者会把 `items` / `conflicts` 这种非 UUID 形状当成 id 放行。
+    prefix: 'catalog/',
+    env: 'CATALOG_URL',
+    fallback: 'http://127.0.0.1:8082',
+    pattern:
+      /^price\-lists(?:\/item\-capabilities|\/lists\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/items(?:\/(?:conflicts|resolve|preview|apply|export|import)|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?)$/,
   },
 ];
 
@@ -13962,9 +15458,8 @@ export async function proxy(
     //     但服务端明明返回了 200）。所以二进制分支用 `arrayBuffer()` 原样取字节。
     //   * content-disposition 一起带走，否则浏览器拿不到文件名。
     const binaryPassthrough =
-      contentType.includes(
-        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      ) || contentType.includes('application/pdf');
+      contentType.includes('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') ||
+      contentType.includes('application/pdf');
     const textPassthrough =
       contentType.includes('text/csv') ||
       contentType.includes('text/vnd.zpl') ||

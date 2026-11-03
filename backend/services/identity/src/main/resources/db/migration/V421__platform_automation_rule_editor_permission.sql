@@ -1,0 +1,103 @@
+-- ===========================================================================
+-- V421 · platform_automation_rule_editor_permission —— 18.3.1.2「规则编辑器」的权限码登记
+-- ===========================================================================
+--
+-- 蓝图 18「集成开放与智能自动化」→ 18.3「业务规则引擎」→ 18.3.1「规则管理」→ 18.3.1.2：
+--
+--   「**职责**：可视化编辑规则：选择触发事件 → 配置条件（字段/操作符/值）→
+--      编排动作（调接口/改状态/建任务/发通知/生成单据）→ 测试与保存。
+--    **输入**：规则配置；测试样本数据。
+--    **输出**：规则定义；测试运行结果。
+--    **关系**：上游 = 18.3.1.1；下游 = 18.3.2 执行。
+--    **规则必须支持用样本测试**，否则只能在生产上试错。」
+--
+-- ---------------------------------------------------------------------------
+-- 一、为什么需要这个迁移
+-- ---------------------------------------------------------------------------
+--
+-- platform 服务的 AutomationRuleEditorController 用
+--     access.require(bearer, "platform.automation_rule_editor." + permission)
+-- 强制鉴权，端点实际用到 3 个动作：read / create / test。
+--
+-- 但 identity 服务的 permission 表里**从来没有注册过
+-- platform.automation_rule_editor 任何一行** —— 而 role_permission.permission_code
+-- 有指向 permission(code) 的外键 ⇒「没有任何角色可能持有
+-- platform.automation_rule_editor.read」，这些端点在真实环境里**恒 403**。
+--
+-- （与 V378 登记 platform.app.*、V380 登记 platform.text.*、V382 登记 platform.finance.*、
+--   V411–V418 登记 platform.api.* / platform.webhook.* / platform.delivery.* /
+--   platform.call.* / platform.io.* / platform.external.*、V419 登记
+--   platform.automation_rule.*、V420 登记 platform.auto_approval.* 的缺口**完全同构**。）
+--
+-- 本迁移只做一件事：把这 3 个码登记进 identity 的权限码表。
+--
+-- ---------------------------------------------------------------------------
+-- 二、登记哪几个码
+-- ---------------------------------------------------------------------------
+--
+--   platform.automation_rule_editor.read    读能力声明 / 触发事件字段目录 / 动作类型目录 /
+--                                            接口目录 / 测试历史
+--   platform.automation_rule_editor.create  保存规则定义（**委托 18.3.1.1 的登记入口**，
+--                                            规则档案四张表的写入所有者始终是 18.3.1.1）
+--   platform.automation_rule_editor.test    **跑一次样本测试**（写样本测试台账
+--                                            platform_automation_rule_test_run）
+--
+-- 刻意**只**登记这 3 个动作：没有端点的权限码不注册
+-- （与 identity V104 / V53 / V330 / V378 / V380 / V382 / V419 / V420 同一纪律）。
+--
+-- 「保存规则」与「跑一次样本测试」是**两个独立的码**，理由与 18.3.1.1 的
+-- 「配规则 / 改规则 / 登记执行结果」三码同源：
+--   · 「保存规则」= 改本系统的规则档案（**只动本系统的账**）。
+--   · 「跑一次样本测试」= 往**测试台账**里写一行结论。
+--     台账是只追加的、且要能追责（谁在什么时候测了哪一版配置）。
+--     能改规则的人不一定有权往台账里写结论 —— 这两个码必须分开，
+--     否则「改规则」就等于「往审计台账里写东西」。
+--
+-- ⚠️ 与 18.3.1.1 的 `platform.automation_rule.*` **不重叠**：
+--   编辑器是**另一个页面**（另一个 page_resource、另一组权限码、另一组端点），
+--   但它**复用** 18.3.1.1 的规则档案表 —— 保存路径**委托**给 18.3.1.1 的登记入口，
+--   本模块**不另建一套规则表**（AGENTS.md「模块边界纪律」：
+--   每张事实表只有一个写入所有者）。
+--
+-- ---------------------------------------------------------------------------
+-- 三、为什么 page_code 取 platform.automation_rule_editor
+-- ---------------------------------------------------------------------------
+--
+-- permission.page_code 有外键指向 page_resource(code)，所以必须先插页面行。
+--
+-- page_resource 对应**菜单入口**，不是动作。
+-- 「规则编辑器」是 18.3.1.2 的**同一个页面**
+-- （选触发事件 / 配条件 / 编排动作 / 样本测试 / 保存都在这一页里完成），
+-- 不是一个动作一个页面。
+--
+-- 刻意**不**复用 platform.automation_rule（18.3.1.1 规则列表）那个 page_resource：
+-- 那是**另一个页面**（规则清单 / 档案 / 执行统计），两者可独立授权 ——
+-- 「能看规则列表」与「能配规则」在运营台上本就是两件事。
+--
+-- 前缀取 platform.automation_rule_editor 而不是 channel.rule_editor /
+-- trade.rule_editor：本模块的权限码由 **platform 服务**消费
+-- （platform.automation_rule_editor.read），与 catalog.spu / warehouse.facilities /
+-- platform.app / platform.text / platform.finance / platform.payment /
+-- platform.external / platform.automation_rule / platform.auto_approval 的
+-- 「服务名.页面」口径一致；权限码跟着**消费它的服务**走，
+-- 才能在审计时回答「谁被授权配自动化规则」。
+--
+-- ===========================================================================
+
+INSERT INTO page_resource(code,name) VALUES ('platform.automation_rule_editor','规则编辑器')
+ON CONFLICT (code) DO NOTHING;
+
+INSERT INTO permission SELECT 'platform.automation_rule_editor.'||action,'platform.automation_rule_editor',action
+FROM unnest(ARRAY['read','create','test']::text[]) action
+ON CONFLICT (code) DO NOTHING;
+
+-- 🔴 **只授 OWNER**（与 V419 / V420 同一纪律）：
+--    配规则 = 让系统按你写的条件与动作去改动业务单据；
+--    「跑一次样本测试」= 往**只追加的追责台账**里写一行结论。
+--    两者都不该默认授给任何普通角色 —— 需要放开时由租户显式把码授给自定义角色
+--    （POST /identity/roles 的 permissions 任意组合）。
+--
+-- 存量 OWNER 补权用 LIKE 'platform.automation_rule_editor.%' 扫**整个集合**
+-- （覆盖本迁移登记的全部 3 个动作），且**幂等** —— 重复执行不产生重复行。
+INSERT INTO role_permission SELECT r.tenant_id,r.id,p.code FROM role r CROSS JOIN permission p
+ WHERE r.code='OWNER' AND p.code LIKE 'platform.automation_rule_editor.%' ON CONFLICT DO NOTHING;

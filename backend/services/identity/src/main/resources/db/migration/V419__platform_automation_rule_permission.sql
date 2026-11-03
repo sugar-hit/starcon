@@ -1,0 +1,101 @@
+-- ===========================================================================
+-- V419 · platform_automation_rule_permission —— 18.3.1.1「规则列表」的权限码登记
+-- ===========================================================================
+--
+-- 蓝图 18「集成开放与智能自动化」→ 18.3「业务规则引擎」→ 18.3.1「规则管理」→ 18.3.1.1。
+--
+-- ---------------------------------------------------------------------------
+-- 一、为什么需要这个迁移
+-- ---------------------------------------------------------------------------
+--
+-- platform 服务的 AutomationRuleController 用
+--     access.require(bearer, "platform.automation_rule." + permission)
+-- 强制鉴权，端点实际用到 4 个动作：read / create / update / record。
+--
+-- 但 identity 服务的 permission 表里**从来没有注册过 platform.automation_rule 任何一行** ——
+-- 而 role_permission.permission_code 有指向 permission(code) 的外键 ——
+-- 于是「没有任何角色可能持有 platform.automation_rule.read」，
+-- 这些端点在真实环境里恒 403。
+--
+-- （与 V378 登记 platform.app.*、V380 登记 platform.text.*、V382 登记 platform.finance.*、
+--   V411–V415 登记 platform.api.* / platform.webhook.* / platform.delivery.* /
+--   platform.call.* / platform.io.*、V418 登记 platform.external.* 的缺口**完全同构**。）
+--
+-- 本迁移只做一件事：把这 4 个码登记进 identity 的权限码表。
+--
+-- ---------------------------------------------------------------------------
+-- 二、登记哪几个码
+-- ---------------------------------------------------------------------------
+--
+--   platform.automation_rule.read   读规则档案 / 执行统计 / 能力声明 / 上游目录 / 生效范围
+--   platform.automation_rule.create 登记规则（含条件 / 动作 / 启用范围）
+--   platform.automation_rule.update 改规则、启用停用、开关试运行、调整优先级排序
+--   platform.automation_rule.record 登记一次执行结果（写执行统计台账）
+--
+-- 刻意**只**登记这 4 个动作：没有端点的权限码不注册
+-- （与 identity V104 / V53 / V330 / V378 / V380 / V382 同一纪律）。
+--
+-- 「配置」与「登记执行结果」是**两个独立的码**，理由与 18.2.3.1 的「配置 / 同步」
+-- 同源：登记规则只动本系统自己的档案；登记执行结果是在**陈述已经发生的一次执行**，
+-- 两者不是一回事。
+--
+-- ⚠️ **本车道不登记「执行规则」的权限码** —— 规则执行引擎归 18.3.2（尚未交付），
+--   没有「执行」端点就没有它的码（登记一个没有端点的码 = 给运维一个假的入口）。
+--
+-- ---------------------------------------------------------------------------
+-- 三、为什么 page_code 取 platform.automation_rule
+-- ---------------------------------------------------------------------------
+--
+-- permission.page_code 有外键指向 page_resource(code)，所以必须先插页面行。
+--
+-- page_resource 对应**菜单入口**，不是动作。
+-- 「规则列表」是 18.3.1.1 的**同一个页面**（规则档案 / 条件 / 动作 / 启用范围 /
+-- 试运行开关 / 执行统计在同一处管理），不是一个动作一个页面。
+--
+-- 前缀取 platform.automation_rule：权限码由 **platform 服务**消费
+-- （platform.automation_rule.read），与 catalog.spu / warehouse.facilities /
+-- platform.app / platform.text / platform.finance / platform.payment / platform.external
+-- 的「服务名.页面」口径一致。
+--
+-- ⚠️ **不碰 channel.* 与 platform.* 的既有前缀**：本迁移**只**动
+--   platform.automation_rule.%，与其它车道互不覆盖。
+--
+-- ---------------------------------------------------------------------------
+-- 四、为什么必须给存量 OWNER 补权（这是本迁移最容易漏的一步）
+-- ---------------------------------------------------------------------------
+--
+-- 新建子租户由 create_child（V47）把 permission 表里的**全部**权限码授给 OWNER，
+-- 所以新租户自动就有这 4 个码 —— 但**存量租户**的 OWNER 角色是在这 4 个码登记之前建的，
+-- 不会自动获得它们 ⇒ 迁移上线后这些租户会突然「什么都点不动」。
+--
+-- 用 LIKE 'platform.automation_rule.%' 扫**整个集合**，而不是只补 read 一条：
+--   · 覆盖本迁移登记的全部 4 个动作；
+--   · 幂等 —— 重复执行不产生重复行（ON CONFLICT DO NOTHING）。
+--
+-- 与 V3 / V8 / V104 / V330 / V378 / V380 / V382 / V418 同口径：租户所有者始终拥有全部页面权限。
+--
+-- ---------------------------------------------------------------------------
+-- 五、幂等
+-- ---------------------------------------------------------------------------
+--
+-- 三段式全部带 ON CONFLICT DO NOTHING：同一段 SQL 跑两次不报错、不产生重复行。
+-- ===========================================================================
+
+-- ---------------------------------------------------------------------------
+-- 1. 页面资源（菜单入口）
+-- ---------------------------------------------------------------------------
+INSERT INTO page_resource(code,name) VALUES ('platform.automation_rule','规则列表')
+ON CONFLICT (code) DO NOTHING;
+
+-- ---------------------------------------------------------------------------
+-- 2. 权限码（4 个动作）
+-- ---------------------------------------------------------------------------
+INSERT INTO permission SELECT 'platform.automation_rule.'||action,'platform.automation_rule',action
+FROM unnest(ARRAY['read','create','update','record']::text[]) action
+ON CONFLICT (code) DO NOTHING;
+
+-- ---------------------------------------------------------------------------
+-- 3. 存量 OWNER 补权（覆盖 platform.automation_rule.% 整个集合）
+-- ---------------------------------------------------------------------------
+INSERT INTO role_permission SELECT r.tenant_id,r.id,p.code FROM role r CROSS JOIN permission p
+ WHERE r.code='OWNER' AND p.code LIKE 'platform.automation_rule.%' ON CONFLICT DO NOTHING;

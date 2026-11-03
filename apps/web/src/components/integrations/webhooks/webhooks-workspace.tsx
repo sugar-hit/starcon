@@ -316,22 +316,25 @@ export function WebhooksWorkspace() {
   // ------------------------------------------------------------ 订阅
 
   const submitSubscription = async () => {
-    await run(async () => {
-      const input = {
-        appId: subscriptionForm.appId,
-        name: subscriptionForm.name,
-        targetUrl: subscriptionForm.targetUrl,
-        status: subscriptionForm.status,
-        description: subscriptionForm.description,
-      };
-      if (editingSubscriptionId) {
-        await updateSubscription(editingSubscriptionId, input);
-      } else {
-        await createSubscription(input);
-      }
-      setSubscriptionForm(EMPTY_SUBSCRIPTION);
-      setEditingSubscriptionId(null);
-    }, editingSubscriptionId ? '订阅已修改。' : '订阅已创建。');
+    await run(
+      async () => {
+        const input = {
+          appId: subscriptionForm.appId,
+          name: subscriptionForm.name,
+          targetUrl: subscriptionForm.targetUrl,
+          status: subscriptionForm.status,
+          description: subscriptionForm.description,
+        };
+        if (editingSubscriptionId) {
+          await updateSubscription(editingSubscriptionId, input);
+        } else {
+          await createSubscription(input);
+        }
+        setSubscriptionForm(EMPTY_SUBSCRIPTION);
+        setEditingSubscriptionId(null);
+      },
+      editingSubscriptionId ? '订阅已修改。' : '订阅已创建。',
+    );
   };
 
   const openSubscription = async (id: string) => {
@@ -351,13 +354,10 @@ export function WebhooksWorkspace() {
   };
 
   const revoke = async (id: string) => {
-    await run(
-      async () => {
-        await revokeSubscription(id, '运营在界面上吊销');
-        if (detail?.subscription.id === id) setDetail(null);
-      },
-      '订阅已吊销（记录保留，审计痕迹不删）。',
-    );
+    await run(async () => {
+      await revokeSubscription(id, '运营在界面上吊销');
+      if (detail?.subscription.id === id) setDetail(null);
+    }, '订阅已吊销（记录保留，审计痕迹不删）。');
   };
 
   const submitFilter = async () => {
@@ -435,24 +435,27 @@ export function WebhooksWorkspace() {
   // ------------------------------------------------------------ 策略
 
   const submitPolicy = async () => {
-    await run(async () => {
-      const input = {
-        subscriptionId: policyForm.subscriptionId,
-        maxAttempts: Number(policyForm.maxAttempts) || 5,
-        initialBackoffSeconds: Number(policyForm.initialBackoffSeconds) || 30,
-        backoffMultiplier: Number(policyForm.backoffMultiplier) || 2,
-        maxBackoffSeconds: Number(policyForm.maxBackoffSeconds) || 3600,
-        requestTimeoutSeconds: Number(policyForm.requestTimeoutSeconds) || 10,
-        deadLetterRetentionDays: Number(policyForm.deadLetterRetentionDays) || 30,
-      };
-      if (editingPolicyId) {
-        await updatePolicy(editingPolicyId, input);
-      } else {
-        await createPolicy(input);
-      }
-      setPolicyForm(EMPTY_POLICY);
-      setEditingPolicyId(null);
-    }, editingPolicyId ? '策略已修改。' : '策略已新建。');
+    await run(
+      async () => {
+        const input = {
+          subscriptionId: policyForm.subscriptionId,
+          maxAttempts: Number(policyForm.maxAttempts) || 5,
+          initialBackoffSeconds: Number(policyForm.initialBackoffSeconds) || 30,
+          backoffMultiplier: Number(policyForm.backoffMultiplier) || 2,
+          maxBackoffSeconds: Number(policyForm.maxBackoffSeconds) || 3600,
+          requestTimeoutSeconds: Number(policyForm.requestTimeoutSeconds) || 10,
+          deadLetterRetentionDays: Number(policyForm.deadLetterRetentionDays) || 30,
+        };
+        if (editingPolicyId) {
+          await updatePolicy(editingPolicyId, input);
+        } else {
+          await createPolicy(input);
+        }
+        setPolicyForm(EMPTY_POLICY);
+        setEditingPolicyId(null);
+      },
+      editingPolicyId ? '策略已修改。' : '策略已新建。',
+    );
   };
 
   const hasEventTypeFilter = Boolean(eventTypeKeyword || eventTypeStatus);
@@ -466,7 +469,11 @@ export function WebhooksWorkspace() {
         description="对外提供事件订阅（webhook）：可订阅事件列表、订阅端点配置、签名密钥、事件过滤、重试与死信策略。事件实际投递尚未接入。"
         actions={
           <Button onClick={() => void load()} disabled={loading}>
-            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+            {loading ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <RefreshCw className="h-4 w-4" />
+            )}
             刷新
           </Button>
         }
@@ -559,11 +566,7 @@ export function WebhooksWorkspace() {
                     ))}
                   </select>
                 </label>
-                <Button
-                  variant="outline"
-                  onClick={() => void loadEventTypes()}
-                  disabled={loading}
-                >
+                <Button variant="outline" onClick={() => void loadEventTypes()} disabled={loading}>
                   筛选
                 </Button>
               </div>
@@ -575,9 +578,7 @@ export function WebhooksWorkspace() {
               ) : eventTypes.length === 0 ? (
                 <EmptyState
                   icon={<Webhook className="h-6 w-6" />}
-                  title={
-                    hasEventTypeFilter ? '没有匹配的事件定义' : '还没有登记过任何事件定义'
-                  }
+                  title={hasEventTypeFilter ? '没有匹配的事件定义' : '还没有登记过任何事件定义'}
                   description={
                     hasEventTypeFilter
                       ? '换个关键词或把状态筛选清掉再试。'
@@ -603,7 +604,7 @@ export function WebhooksWorkspace() {
                         </div>
                         <details className="text-muted text-xs">
                           <summary className="cursor-pointer">载荷 schema</summary>
-                          <pre className="mt-1 overflow-x-auto rounded bg-muted p-2 text-xs">
+                          <pre className="bg-muted mt-1 overflow-x-auto rounded p-2 text-xs">
                             {row.payloadSchema}
                           </pre>
                         </details>
@@ -660,7 +661,9 @@ export function WebhooksWorkspace() {
                 <Input
                   value={eventTypeForm.eventType}
                   placeholder="SkuProfileSaved"
-                  onChange={(e) => setEventTypeForm({ ...eventTypeForm, eventType: e.target.value })}
+                  onChange={(e) =>
+                    setEventTypeForm({ ...eventTypeForm, eventType: e.target.value })
+                  }
                 />
               </label>
               <label className="space-y-1 text-sm">
@@ -781,9 +784,7 @@ export function WebhooksWorkspace() {
               ) : subscriptions.length === 0 ? (
                 <EmptyState
                   icon={<Webhook className="h-6 w-6" />}
-                  title={
-                    hasSubscriptionFilter ? '没有匹配的订阅' : '还没有登记过订阅'
-                  }
+                  title={hasSubscriptionFilter ? '没有匹配的订阅' : '还没有登记过订阅'}
                   description={
                     hasSubscriptionFilter
                       ? '换个关键词或把状态筛选清掉再试。'
@@ -901,7 +902,9 @@ export function WebhooksWorkspace() {
                 <Input
                   value={subscriptionForm.name}
                   placeholder="订单事件"
-                  onChange={(e) => setSubscriptionForm({ ...subscriptionForm, name: e.target.value })}
+                  onChange={(e) =>
+                    setSubscriptionForm({ ...subscriptionForm, name: e.target.value })
+                  }
                 />
               </label>
               <label className="space-y-1 text-sm md:col-span-2">
@@ -919,7 +922,9 @@ export function WebhooksWorkspace() {
                 <select
                   className="border-input h-9 rounded-md border px-2 text-sm"
                   value={subscriptionForm.status}
-                  onChange={(e) => setSubscriptionForm({ ...subscriptionForm, status: e.target.value })}
+                  onChange={(e) =>
+                    setSubscriptionForm({ ...subscriptionForm, status: e.target.value })
+                  }
                 >
                   {SUBSCRIPTION_STATUS_OPTIONS.map((o) => (
                     <option key={o.value} value={o.value}>
@@ -1002,7 +1007,9 @@ export function WebhooksWorkspace() {
                       <Input
                         value={filterForm.eventType}
                         placeholder="SkuProfileSaved"
-                        onChange={(e) => setFilterForm({ ...filterForm, eventType: e.target.value })}
+                        onChange={(e) =>
+                          setFilterForm({ ...filterForm, eventType: e.target.value })
+                        }
                       />
                     </label>
                     <label className="space-y-1 text-sm">
@@ -1033,9 +1040,7 @@ export function WebhooksWorkspace() {
                 <div className="space-y-2">
                   <h4 className="text-sm font-medium">签名密钥</h4>
                   {detail.signingSecrets.length === 0 ? (
-                    <div className="text-muted text-sm">
-                      还没有签名密钥 —— 对接方无法验签。
-                    </div>
+                    <div className="text-muted text-sm">还没有签名密钥 —— 对接方无法验签。</div>
                   ) : (
                     detail.signingSecrets.map((s) => (
                       <div
@@ -1056,11 +1061,7 @@ export function WebhooksWorkspace() {
                     <Button disabled={busy} onClick={() => void issueSecret()}>
                       生成签名密钥
                     </Button>
-                    <Button
-                      variant="outline"
-                      disabled={busy}
-                      onClick={() => void rotateSecret()}
-                    >
+                    <Button variant="outline" disabled={busy} onClick={() => void rotateSecret()}>
                       轮换
                     </Button>
                     <Button variant="outline" disabled={busy} onClick={() => void revokeSecret()}>
@@ -1068,12 +1069,12 @@ export function WebhooksWorkspace() {
                     </Button>
                   </div>
                   {secrets && (
-                    <div className="rounded-md border border-warning p-3 text-sm">
+                    <div className="border-warning rounded-md border p-3 text-sm">
                       <div className="flex items-center gap-2 font-medium">
                         <TriangleAlert className="h-4 w-4" />
                         签名密钥明文（只出现这一次）
                       </div>
-                      <code className="mt-2 block overflow-x-auto rounded bg-muted p-2 text-xs">
+                      <code className="bg-muted mt-2 block overflow-x-auto rounded p-2 text-xs">
                         {secretPlaintext(secrets)}
                       </code>
                       <p className="text-muted mt-2 text-xs">{secrets.warning}</p>
@@ -1106,8 +1107,8 @@ export function WebhooksWorkspace() {
                 <div className="space-y-2">
                   <h4 className="text-sm font-medium">签名试算</h4>
                   <p className="text-muted text-xs">
-                    给定样例载荷，算出平台**会发**的签名头，让对接方当场核对。
-                    🔴 **不投递、不写任何投递记录**。
+                    给定样例载荷，算出平台**会发**的签名头，让对接方当场核对。 🔴
+                    **不投递、不写任何投递记录**。
                   </p>
                   <label className="block space-y-1 text-sm">
                     <span className="text-muted">样例载荷</span>
@@ -1314,9 +1315,7 @@ export function WebhooksWorkspace() {
                 </div>
               ))}
               <div className="text-muted flex items-center justify-between text-xs">
-                <span>
-                  {paginationLabel({ page: auditPage, size: 20, total: auditTotal })}
-                </span>
+                <span>{paginationLabel({ page: auditPage, size: 20, total: auditTotal })}</span>
                 <span className="flex gap-1">
                   <Button
                     variant="outline"
@@ -1398,7 +1397,7 @@ export function WebhooksWorkspace() {
           </SectionCard>
 
           {delivery && !delivery.available && (
-            <div className="rounded-md border border-warning p-3 text-sm">
+            <div className="border-warning rounded-md border p-3 text-sm">
               <div className="flex items-center gap-2 font-medium">
                 <FileKey2 className="h-4 w-4" />
                 事件实际投递未接入

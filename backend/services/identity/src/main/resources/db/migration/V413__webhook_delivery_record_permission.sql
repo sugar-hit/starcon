@@ -1,0 +1,101 @@
+-- ===========================================================================
+-- 18.1.2.2 投递记录：platform.webhook.delivery 权限码登记
+-- ===========================================================================
+--
+-- 蓝图 18「集成开放与智能自动化」→ 18.1「应用与凭证」→ 18.1.2「事件订阅」
+-- → 18.1.2.2「投递记录」。
+--
+-- ---------------------------------------------------------------------------
+-- 一、为什么需要这个迁移
+-- ---------------------------------------------------------------------------
+--
+-- platform 服务的 DeliveryRecordController 用
+--     access.require(bearer, "platform.webhook.delivery." + permission)
+-- 强制鉴权，端点实际只用到 3 个动作：read / publish / replay。
+--
+-- identity 服务的 permission 表里**从来没有注册过 platform.webhook.delivery 任何一行** ——
+-- 而 role_permission.permission_code 有指向 permission(code) 的外键 ——
+-- 于是「没有任何角色可能持有 platform.webhook.delivery.read」，
+-- 这些端点在真实环境里恒 403。
+--
+-- 本迁移只做一件事：把这 3 个码登记进 identity 的权限码表。
+--
+-- ---------------------------------------------------------------------------
+-- 二、登记哪几个码
+-- ---------------------------------------------------------------------------
+--
+--   platform.webhook.delivery.read    读投递记录 / 投递日志 / 死信 / 重放任务 / 能力声明与概览
+--   platform.webhook.delivery.publish 发布一个事件并**真的**投出去（创建投递记录 + 发包）
+--   platform.webhook.delivery.replay  手动重投、死信重放、到期重试扫描
+--
+-- 刻意**只**登记这 3 个动作：没有端点的权限码不注册
+-- （与 identity V104 / V53 / V330 / V378 / V412 同一纪律）。
+--
+-- 🔴 **read / publish / replay 是三件事**，刻意拆开：
+--   · 「看投递记录」是客服与对账的日常需要；
+--   · 「发布事件并真的投出去」是一次**对外副作用**（对方的系统会收到包）；
+--   · 「让人工重投 / 死信重放」是对一次失败投递的**再处置**。
+--   能看的人不该顺手把一条死信重放出去 ⇒ 三个码分开配。
+--
+-- ⚠️ **prefix 与 18.1.2.1 刻意不共用**：
+--   18.1.2.1 用 `platform.webhook.*`（订阅配置侧），
+--   18.1.2.2 用 `platform.webhook.delivery.*`（投递执行与明细侧）。
+--   两个模块是两页、两组权限、两个端点命名空间。
+--
+-- ⚠️ **access.require 的「能写不能读」纪律**：
+--   AccessService 要求同一个 grant 里**同时**有该动作与对应的 .read
+--   （permission.substring(0, lastIndexOf('.')) + ".read"）。
+--   ⇒ 持有 platform.webhook.delivery.publish 或 .replay 的角色**必须**同时持有
+--     platform.webhook.delivery.read，否则它连投递记录都看不到 ——
+--     这正是我们要的（发布/重放的人必须看得见自己发了什么）。
+--
+-- ---------------------------------------------------------------------------
+-- 三、为什么 page_code 取 platform.webhook.delivery
+-- ---------------------------------------------------------------------------
+--
+-- permission 表上有 UNIQUE(page_code, action) —— 同一个 page_code 下同一个动作只能有一行。
+-- 18.1.2.1 已经占了 ('platform.webhook','read') / ('platform.webhook','create') /
+-- ('platform.webhook','update') / ('platform.webhook','revoke')。
+-- ⇒ 本模块必须用**自己的** page_code 'platform.webhook.delivery'，
+--   否则 ('platform.webhook','read') 会撞唯一键。
+--
+-- page_resource 是菜单入口（code 唯一）：登记一条 'platform.webhook.delivery' → '投递记录'。
+--
+-- ---------------------------------------------------------------------------
+-- 四、存量 OWNER 补权
+-- ---------------------------------------------------------------------------
+--
+-- 新建子租户由 create_child（V47）把 permission 表里的**全部**权限码授给 OWNER，
+-- 所以新租户自动就有这 3 个码 —— 但**存量租户**的 OWNER 角色是在这 3 个码登记之前建的，
+-- 不会自动获得它们 ⇒ 迁移上线后这些租户会突然「什么都点不动」。
+--
+-- 用 LIKE 'platform.webhook.delivery.%' 扫**整个集合**，而不是只补 read 一条：
+--   · 覆盖本迁移登记的全部 3 个动作（read / publish / replay）；
+--   · 幂等 —— 重复执行不产生重复行（ON CONFLICT DO NOTHING）。
+--
+-- 与 V3 / V8 / V104 / V330 / V378 / V412 同口径：租户所有者始终拥有全部页面权限。
+--
+-- ---------------------------------------------------------------------------
+-- 五、幂等
+-- ---------------------------------------------------------------------------
+--
+-- 三段式全部带 ON CONFLICT DO NOTHING：同一段 SQL 跑两次不报错、不产生重复行。
+--
+-- ---------------------------------------------------------------------------
+-- 1. 页面资源（菜单入口）
+-- ---------------------------------------------------------------------------
+INSERT INTO page_resource(code,name) VALUES ('platform.webhook.delivery','投递记录')
+ON CONFLICT (code) DO NOTHING;
+
+-- ---------------------------------------------------------------------------
+-- 2. 权限码（3 个动作）
+-- ---------------------------------------------------------------------------
+INSERT INTO permission SELECT 'platform.webhook.delivery.'||action,'platform.webhook.delivery',action
+FROM unnest(ARRAY['read','publish','replay']::text[]) action
+ON CONFLICT (code) DO NOTHING;
+
+-- ---------------------------------------------------------------------------
+-- 3. 存量 OWNER 补权（覆盖 platform.webhook.delivery.% 整个集合）
+-- ---------------------------------------------------------------------------
+INSERT INTO role_permission SELECT r.tenant_id,r.id,p.code FROM role r CROSS JOIN permission p
+ WHERE r.code='OWNER' AND p.code LIKE 'platform.webhook.delivery.%' ON CONFLICT DO NOTHING;

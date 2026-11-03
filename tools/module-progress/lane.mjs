@@ -650,10 +650,38 @@ function readGateToken() {
  *   ② 构建进程（mvnw / java / surefire / vitest / next / playwright）—— 正在跑 L1/L2。
  * 两条任一命中 ⇒ 持闸者还活着，**不许接管**。
  */
+/**
+ * 车道心跳是否**明确过期**。
+ *
+ * ⚠️ **没有时间戳 ⇒ 判为活着**（证据不足 ≠ 死亡）。
+ *   2026-11-01 实测：lane-gate-reclaim.itest.mjs 造的夹具车道没有 heartbeatAt / createdAt，
+ *   旧写法（`!Number.isFinite(age) ⇒ stale`）会把它们全判成死车道 ⇒
+ *   `inFlightLanes` 归零 ⇒ 闸的「持闸者还活着」判据失效 ⇒ 双派发防线被打开。
+ *   宁可多挡一轮，也不能误判成「没人持有」。
+ */
+function laneHeartbeatExpired(lane) {
+  const raw = lane.heartbeatAt ?? lane.createdAt;
+  if (!raw) return false;
+  const age = (Date.now() - new Date(raw).getTime()) / 60000;
+  return Number.isFinite(age) && age > TTL_MINUTES;
+}
+
 function holderLiveness(state) {
-  const inFlightLanes = Object.values(state.lanes).filter(
+  const liveLanes = Object.values(state.lanes).filter(
     (l) => l.state === 'running' || l.state === 'ready',
-  ).length;
+  );
+
+  // ⚠️ **2026-11-01 实测修正（两处，都是「闸永远不回收 ⇒ 每轮撞闸空转」的根因）**：
+  //
+  // ① 判活依据必须是**心跳新鲜度**，不能只看 `state` 字段。
+  //    worker 被网络错误掐断（ERR_NETWORK_CHANGED / ERR_CONNECTION_CLOSED）后，
+  //    `state` 永远停在 `running` / `ready` —— 实测两条车道的心跳停在 4.5 小时前，
+  //    `inFlightLanes` 恒为 2 ⇒ `holderAlive` 恒为 true ⇒ 闸只能等 TTL（70 分钟）过期才能回收，
+  //    而每一轮 tick 都撞在这堵墙上 → 零派发 + 纯空转。
+  const inFlightLanes = liveLanes.filter((l) => !laneHeartbeatExpired(l)).length;
+  const staleLanes = liveLanes
+    .filter((l) => laneHeartbeatExpired(l))
+    .map((l) => ({ id: l.id, state: l.state, heartbeatAt: l.heartbeatAt ?? null }));
 
   let buildProcesses = [];
   try {
@@ -665,6 +693,11 @@ function holderLiveness(state) {
       .split('\n')
       .filter((l) => /mvnw|surefire|vitest|next build|playwright|gradle/i.test(l))
       .filter((l) => !/\bps -Ao\b|grep /.test(l))
+      // ⚠️ ② 构建进程必须**归属于本流水线**才算持闸者的证据。
+      //    旧实现把机器上**任何** mvnw/surefire 进程都算进来 ——
+      //    别的 worktree 在跑测试、人手上有构建，都会被当成「持闸者还活着」，
+      //    于是闸判据永远不成立。归属判据：命令行里出现本流水线的根目录（集成头 worktree）。
+      .filter((l) => l.includes(ROOT))
       .map((l) => l.trim().split(/\s+/)[0]);
   } catch {
     buildProcesses = [];
@@ -672,6 +705,7 @@ function holderLiveness(state) {
 
   return {
     inFlightLanes,
+    staleLanes,
     buildProcesses,
     holderAlive: inFlightLanes > 0 || buildProcesses.length > 0,
   };
@@ -953,6 +987,9 @@ if (cmd === 'gate') {
         // 接管判据：stale 之外，还要看持闸者死没死
         reclaimable: held && stale && !live.holderAlive,
         inFlightLanes: live.inFlightLanes,
+        // 心跳过期但 state 还停在 running/ready 的「死车道」——
+        // 它们不算持闸证据，但**需要人/调度者清理**（否则它们会一直占着车道名额）。
+        staleLanes: live.staleLanes,
         buildProcesses: live.buildProcesses,
         holderAlive: live.holderAlive,
       },

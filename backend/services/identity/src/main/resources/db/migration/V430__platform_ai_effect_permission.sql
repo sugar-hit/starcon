@@ -1,0 +1,101 @@
+-- ===========================================================================
+-- 18.4.3.2 效果评估：platform.ai-effect 权限码登记
+-- ===========================================================================
+--
+-- 蓝图 18「集成开放与智能自动化」→ 18.4「AI 治理」→ 18.4.3「AI 使用与效果管理」
+-- → 18.4.3.2「效果评估」。
+--
+-- ---------------------------------------------------------------------------
+-- 一、为什么需要这个迁移（补的是既有缺口，不是本车道扩大范围）
+-- ---------------------------------------------------------------------------
+--
+-- platform 服务的 AiEffectEvaluationController 用
+--     access.require(bearer, "platform.ai-effect." + permission)
+-- 强制鉴权，实际只用到 3 个动作：read / record / update。
+--
+-- 但 identity 服务的 permission 表里**从来没注册过 platform.ai-effect 任何一行** ——
+-- 而 role_permission.permission_code 有指向 permission(code) 的外键 ——
+-- 于是「没有任何角色可能持有 platform.ai-effect.read」，
+-- 这些端点在真实环境里恒 403（与 V378 登记 platform.app.*、V380 登记 platform.text.*、
+-- V411 登记 platform.api-catalog.*、V425 登记 platform.ai-usage.* 时遇到的缺口**完全同构**）。
+--
+-- ---------------------------------------------------------------------------
+-- 二、登记哪几个码
+-- ---------------------------------------------------------------------------
+--
+--   platform.ai-effect.read    读效果报表 / 采纳记录 / 有用性反馈 / 回测结果 / 改进建议
+--   platform.ai-effect.record  录入采纳（修改 / 拒绝）/ 有用性反馈；跑一次预测准确度回测
+--   platform.ai-effect.update  维护评估阈值；生成改进建议；记录对建议的人工决策
+--
+-- 刻意**只**登记这 3 个动作：没有端点的权限码不注册
+-- （与 identity V104 / V53 / V330 同一纪律）。
+--
+-- 🔴 **「录反馈」与「跑回测」是独立的 record 码**，与 read 分开：
+--   · 录一条采纳记录 / 有用性反馈 = **写事实台账**（它会进采纳率的分子）；
+--   · 跑一次回测 = **写计算快照**（会刷新回测结果表）。
+--   两者都不是「读报表」，门槛要真的拦得住人。
+--
+-- 🔴 **「生成建议 / 记录决策」是独立的 update 码**：
+--   生成建议会**写建议台账**，而「采纳一条『建议下线』」是把「这个功能要下线」这件事
+--   落到纸面 —— 它离「真的下线」只差一个开关。让只能看报表的人顺手点掉，
+--   等于让建议变成既成事实。
+--
+-- ⚠️ AccessService 的判据要求同一个 grant 里同时有该动作与对应资源的 `.read` ——
+--    所以持有 platform.ai-effect.record 的角色**同时**必须持有 platform.ai-effect.read。
+--    这是有意的：能录反馈的人至少得能看懂效果长什么样。
+--
+-- ---------------------------------------------------------------------------
+-- 三、为什么 page_code 取 platform.ai-effect
+-- ---------------------------------------------------------------------------
+--
+-- permission.page_code 有外键指向 page_resource(code)，所以必须先插页面行。
+--
+-- page_resource 对应**菜单入口**，不是动作。
+-- 「AI 效果评估」是 18.4.3.2 的**同一个页面**（采纳率 / 回测 / 有用性反馈 / 建议在同一处看），
+-- 不是两个页面 —— 拆成两个 page_resource 会在菜单里多出一个与「AI 效果评估」重复的条目。
+--
+-- 前缀取 platform.ai-effect（不是 identity.ai-effect）：本模块的权限码由
+-- **platform 服务**消费（platform.ai-effect.read），与 catalog.spu / warehouse.facilities /
+-- platform.app / platform.text / platform.finance / platform.api-catalog / platform.webhook /
+-- platform.call-monitor / platform.ai-usage 的「服务名.页面」口径一致；权限码跟着**消费它的服务**走，
+-- 才能在审计时回答「谁被授权看这一类东西」。
+--
+-- ⚠️ 中间那段的连字符是有意的：端点命名空间是 /platform/ai/effect，
+--    权限码与它**逐字对齐**（像 platform.api-catalog ↔ /platform/api-catalog 那样），
+--    免得「端点叫 ai/effect、权限码叫 aieffect」这种对不上的事发生。
+--
+-- ---------------------------------------------------------------------------
+-- 四、为什么必须给存量 OWNER 补权（这是本迁移最容易漏的一步）
+-- ---------------------------------------------------------------------------
+--
+-- 新建子租户由 create_child（V47）把 permission 表里的**全部**权限码授给 OWNER，
+-- 所以新租户自动就有这 3 个码 —— 但**存量租户**的 OWNER 角色是在这 3 个码登记之前建的，
+-- 不会自动获得它们 ⇒ 新接入的 read / record / update 对既有租户的 OWNER 不可见，
+-- 迁移上线后这些租户会突然「什么都点不动」。
+--
+-- 用 LIKE 'platform.ai-effect.%' 扫**整个集合**，而不是只补 read 一条：
+--   · 覆盖本迁移登记的全部 3 个动作（read / record / update）；
+--   · 幂等 —— 重复执行不产生重复行（ON CONFLICT DO NOTHING）。
+--
+-- 与 V3 / V8 / V104 / V330 同口径：租户所有者始终拥有全部页面权限。
+--
+-- ---------------------------------------------------------------------------
+-- 五、幂等
+-- ---------------------------------------------------------------------------
+--
+-- 三段式全部带 ON CONFLICT DO NOTHING：同一段 SQL 跑两次不报错、不产生重复行。
+--
+-- ===========================================================================
+
+-- 1. 页面资源（菜单入口）
+INSERT INTO page_resource(code,name) VALUES ('platform.ai-effect','AI 效果评估')
+ON CONFLICT (code) DO NOTHING;
+
+-- 2. 权限码（3 个动作）
+INSERT INTO permission SELECT 'platform.ai-effect.'||action,'platform.ai-effect',action
+FROM unnest(ARRAY['read','record','update']::text[]) action
+ON CONFLICT (code) DO NOTHING;
+
+-- 3. 存量 OWNER 补权（覆盖 platform.ai-effect.% 整个集合）
+INSERT INTO role_permission SELECT r.tenant_id,r.id,p.code FROM role r CROSS JOIN permission p
+ WHERE r.code='OWNER' AND p.code LIKE 'platform.ai-effect.%' ON CONFLICT DO NOTHING;

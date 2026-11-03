@@ -242,6 +242,13 @@ services:
       DB_MIGRATION_PASSWORD: ${PG_PASSWORD}
       IDENTITY_URL: http://identity:8081
       INTERNAL_KEY: ${INTERNAL_KEY}
+      # 导入导出任务的落盘根目录。与 catalog/channel/reporting 的存储根同型：
+      # 不配的话会退回相对路径默认值 target/platform-io-store ⇒ 解析成 /app/target/...
+      # ⇒ UID 10001 无权创建 ⇒ 构造器抛异常 ⇒ platform 起不来 ⇒ CI 等 8089 超时
+      # ⇒ 「Catalog Browser & Contract Tests」作业失败（属基线外的新增失败，阻塞合入 main）。
+      PLATFORM_IO_STORAGE_ROOT: /app/data/platform-io-store
+    volumes:
+      - platform-io-data:/app/data/platform-io-store
   migrate-identity:
     image: starcon-catalog-dev-identity
     profiles: [tools]
@@ -382,10 +389,14 @@ services:
       IDENTITY_URL: http://identity:8081
       INTERNAL_KEY: ${INTERNAL_KEY}
       LOCAL_BOOTSTRAP_ENABLED: 'false'
+      # 迁移容器同样会实例化存储 bean（构造器里就 createDirectories），
+      # 所以也要指到镜像里已建好且属于 10001 的目录。
+      PLATFORM_IO_STORAGE_ROOT: /app/data/platform-io-store
 volumes:
   catalog-media-data:
   channel-secret-data:
   channel-credential-data:
   channel-certification-data:
   reporting-export-data:
+  platform-io-data:
   catalog-pg-data:

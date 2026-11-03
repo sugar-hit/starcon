@@ -1,0 +1,126 @@
+-- ===========================================================================
+-- V422 · platform_automation_rule_run_permission —— 18.3.2.1「执行日志」的权限码登记
+-- ===========================================================================
+--
+-- 蓝图 18「集成开放与智能自动化」→ 18.3「业务规则引擎」→ 18.3.2「执行」→ 18.3.2.1：
+--
+--   「**职责**：记录每次规则执行：触发事件、条件命中情况、执行的动作、每步结果、耗时、错误；
+--      支持查看上下文与手动重跑。
+--    **输入**：执行记录；重跑请求。
+--    **输出**：执行明细 + 失败原因定位。
+--    **关系**：上游 = 18.3.1.2；下游 = 1 工作台告警。
+--    **规则必须幂等**：同一事件重复触发不能重复执行副作用（如重复改价、重复建单）。」
+--
+-- ---------------------------------------------------------------------------
+-- 一、为什么需要这个迁移
+-- ---------------------------------------------------------------------------
+--
+-- platform 服务的 AutomationRuleRunController 用
+--     access.require(bearer, "platform.automation_rule_run." + permission)
+-- 强制鉴权，端点实际用到 3 个动作：read / record / rerun。
+--
+-- 但 identity 服务的 permission 表里**从来没有注册过
+-- platform.automation_rule_run 任何一行** —— 而 role_permission.permission_code
+-- 有指向 permission(code) 的外键 ⇒「没有任何角色可能持有
+-- platform.automation_rule_run.read」，这些端点在真实环境里**恒 403**。
+--
+-- （与 V378 登记 platform.app.*、V380 登记 platform.text.*、V382 登记 platform.finance.*、
+--   V411–V418 登记 platform.api.* / platform.webhook.* / platform.delivery.* /
+--   platform.call.* / platform.io.* / platform.external.*、V419 登记
+--   platform.automation_rule.*、V420 登记 platform.auto_approval.*、V421 登记
+--   platform.automation_rule_editor.* 的缺口**完全同构**。）
+--
+-- 本迁移只做一件事：把这 3 个码登记进 identity 的权限码表。
+--
+-- ---------------------------------------------------------------------------
+-- 二、登记哪几个码
+-- ---------------------------------------------------------------------------
+--
+--   platform.automation_rule_run.read   读执行日志列表 / 单次执行详情（含逐步明细）/
+--                                         能力声明 / 概览
+--   platform.automation_rule_run.record **登记一次执行**（写只追加的执行台账
+--                                         platform_automation_rule_run + _run_step）
+--   platform.automation_rule_run.rerun  **手动重跑**（落一条新的重跑记录，
+--                                         与原 run 显式关联）
+--
+-- 刻意**只**登记这 3 个动作：没有端点的权限码不注册
+-- （与 identity V104 / V53 / V330 / V378 / V380 / V382 / V419 / V420 / V421 同一纪律）。
+--
+-- 「登记一次执行」与「手动重跑」是**两个独立的码**，理由与 18.3.1.1 的
+-- 「配规则 / 改规则 / 登记执行结果」三码同源：
+--   · 「登记一次执行」= 往**只追加的追责台账**里写一行结论（谁在什么时候、
+--     哪条规则、因为哪个事件跑了一次、每步结果如何）。
+--   · 「手动重跑」= 让系统**再跑一次**（本仓当前没有执行器 ⇒ 落成一条
+--     「待执行 / 未接通」的重跑记录）。
+--     能看台账的人不该因此就能让系统替他改价、建单 ——
+--     这两个码必须分开，否则「读执行日志」就等于「触发执行」。
+--
+-- ⚠️ 与 18.3.1.1 的 `platform.automation_rule.*` **不重叠**：
+--   那边的 record（登记一次执行**统计**）写的是
+--   platform_automation_rule_execution（**聚合计数台账**，18.3.1.1 拥有）；
+--   本模块的 record 写的是 platform_automation_rule_run（**逐步明细台账**，
+--   18.3.2.1 拥有）。两张表是两个独立事实表，各有各的写入所有者 ——
+--   权限码跟着「写哪张表」分开，避免「改统计」与「改明细」互相越权。
+--
+-- ---------------------------------------------------------------------------
+-- 三、为什么 page_code 取 platform.automation_rule_run
+-- ---------------------------------------------------------------------------
+--
+-- permission.page_code 有外键指向 page_resource(code)，所以必须先插页面行。
+--
+-- page_resource 对应**菜单入口**，不是动作。
+-- 「执行日志」是 18.3.2.1 的**同一个页面**
+-- （运行列表 / 运行详情（含逐步明细与失败定位）/ 重跑入口都在这一页里完成），
+-- 不是一个动作一个页面。
+--
+-- 刻意**不**复用 platform.automation_rule（18.3.1.1 规则列表）或
+-- platform.automation_rule_editor（18.3.1.2 规则编辑器）那两个 page_resource：
+-- 那是**另外两个页面**（规则清单 / 规则编排），三者可独立授权 ——
+-- 「能看规则列表」与「能看执行日志」在运营台上本就是两件事。
+--
+-- 前缀取 platform.automation_rule_run 而不是 channel.rule_run / trade.rule_run：
+-- 本模块的权限码由 **platform 服务**消费（platform.automation_rule_run.read），
+-- 与 catalog.spu / warehouse.facilities / platform.app / platform.text /
+-- platform.finance / platform.payment / platform.external /
+-- platform.automation_rule / platform.auto_approval /
+-- platform.automation_rule_editor 的「服务名.页面」口径一致；
+-- 权限码跟着**消费它的服务**走，才能在审计时回答「谁被授权看自动化执行日志」。
+--
+-- ---------------------------------------------------------------------------
+-- 四、为什么必须给存量 OWNER 补权（这是本迁移最容易漏的一步）
+-- ---------------------------------------------------------------------------
+--
+-- 新建子租户由 create_child（V47）把 permission 表里的**全部**权限码授给 OWNER，
+-- 所以新租户自动就有这 3 个码 —— 但**存量租户**的 OWNER 角色是在这 3 个码登记之前建的，
+-- 不会自动获得它们 ⇒ 迁移上线后这些租户会突然「什么都点不动」。
+--
+-- 用 LIKE 'platform.automation_rule_run.%' 扫**整个集合**，而不是只补 read 一条：
+--   · 覆盖本迁移登记的全部 3 个动作；
+--   · 幂等 —— 重复执行不产生重复行（ON CONFLICT DO NOTHING）。
+--
+-- 与 V3 / V8 / V104 / V330 / V378 / V380 / V382 / V418 / V419 / V420 / V421 同口径：
+-- 租户所有者始终拥有全部页面权限。
+--
+-- ---------------------------------------------------------------------------
+-- 五、幂等
+-- ---------------------------------------------------------------------------
+--
+-- page_resource / permission / role_permission 三处写入全部
+-- ON CONFLICT DO NOTHING ⇒ 迁移重复执行不产生重复行、不报错。
+--
+-- ===========================================================================
+
+INSERT INTO page_resource(code,name) VALUES ('platform.automation_rule_run','执行日志')
+ON CONFLICT (code) DO NOTHING;
+
+INSERT INTO permission SELECT 'platform.automation_rule_run.'||action,'platform.automation_rule_run',action
+FROM unnest(ARRAY['read','record','rerun']::text[]) action
+ON CONFLICT (code) DO NOTHING;
+
+-- 🔴 **只授 OWNER**（与 V419 / V420 / V421 同一纪律）：
+--    「登记一次执行」= 往只追加的追责台账里写结论；
+--    「手动重跑」= 让系统再跑一次（将来执行器接通后 = 真的改价 / 建单）。
+--    两者都不该默认授给任何普通角色 —— 需要放开时由租户显式把码授给自定义角色
+--    （POST /identity/roles 的 permissions 任意组合）。
+INSERT INTO role_permission SELECT r.tenant_id,r.id,p.code FROM role r CROSS JOIN permission p
+ WHERE r.code='OWNER' AND p.code LIKE 'platform.automation_rule_run.%' ON CONFLICT DO NOTHING;
