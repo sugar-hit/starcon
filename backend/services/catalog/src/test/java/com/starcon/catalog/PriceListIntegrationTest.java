@@ -499,7 +499,12 @@ class PriceListIntegrationTest {
     var storedTo = row.get("valid_to", OffsetDateTime.class);
     assertThat(storedFrom.toInstant()).isEqualTo(from.toInstant());
     assertThat(storedTo.toInstant()).isEqualTo(to.toInstant());
-    assertThat(storedFrom.getOffset()).isEqualTo(from.getOffset());
+    // PostgreSQL 的 timestamptz **只保时刻、不保偏移量**：读回来的偏移量跟着
+    // 会话/JVM 时区走（本地 +08:00，CI 的 UTC runner 上是 Z），所以偏移量相等
+    // 不是这个存储层能保证的性质，断言它只会得到一台机器一个答案。
+    // 这里要证的是「没被静默偏 28800s」——把读回值换算回 +08:00 之后墙钟必须一样。
+    assertThat(storedFrom.withOffsetSameInstant(ZoneOffset.ofHours(8)).toLocalDateTime())
+        .isEqualTo(from.toLocalDateTime());
   }
 
   @Test
