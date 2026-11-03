@@ -36,6 +36,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -1475,8 +1476,17 @@ public class MessageClassificationService {
         .get(0, UUID.class);
   }
 
+  /**
+   * 当前时刻（UTC），**已对齐到数据库的存储精度**。
+   *
+   * <p>🔴 必须截断到微秒：PostgreSQL 的 {@code timestamptz} 只把时刻存到微秒，
+   * 而 {@code OffsetDateTime.now()} 在 Linux 上带亚微秒尾巴（clock_gettime），
+   * 在 macOS 上恰好是微秒对齐（gettimeofday）—— 同一个缺陷只在一半机器上出现。
+   * 不截断的话，PG 会把第 7 位小数四舍五入到微秒，于是「API 返回的分类时刻」
+   * 与「库里存下来的分类时刻」不是同一个数。
+   */
   private static OffsetDateTime now() {
-    return OffsetDateTime.now(ZoneOffset.UTC);
+    return OffsetDateTime.now(ZoneOffset.UTC).truncatedTo(ChronoUnit.MICROS);
   }
 
   private static String oneOf(List<String> allowed, String value, String label) {

@@ -12,6 +12,7 @@ import java.net.InetSocketAddress;
 import java.sql.DriverManager;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -293,7 +294,9 @@ class RmaAuthorizationIntegrationTest {
   }
 
   private OffsetDateTime plusDays(long days) {
-    return OffsetDateTime.now(ZoneOffset.UTC).plusDays(days);
+    // 🔴 对齐到数据库精度（微秒）：timestamptz 只存到微秒，而 now() 在 Linux 上
+    //    带亚微秒尾巴（macOS 上恰好对齐）⇒ 不对齐的话，写回值与夹具必然差零点几微秒。
+    return OffsetDateTime.now(ZoneOffset.UTC).plusDays(days).truncatedTo(ChronoUnit.MICROS);
   }
 
   // ================================================================ 建单
@@ -447,7 +450,8 @@ class RmaAuthorizationIntegrationTest {
     assertThat(decided.head().version()).isEqualTo(1L);
 
     // ⚠️ 时间写回零漂移：夹具是 +08:00，用 Timestamp.valueOf 会偏 −28800s。
-    assertThat(decided.head().returnByAt()).isEqualTo(due);
+    // 🔴 比**瞬间**：timestamptz 只保时刻、不保偏移量，读回来的偏移量由 JDBC 按
+    //    JVM 默认时区换算（这里是 +08:00），拿它跟 UTC 夹具比整体必然不等。
     assertThat(decided.head().returnByAt().toInstant()).isEqualTo(due.toInstant());
 
     // 审批那一刻的三个基数快照落库，供事后审计「当时凭什么批了这个数」。

@@ -16,6 +16,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -1094,7 +1095,11 @@ class PlatformViolationIntegrationTest {
   @DisplayName("16.1.2.1 🔴 timestamptz 往返不是 −28800s：写回的值必须一模一样")
   void timestampsRoundTripWithoutTheEightHourShift() {
     UUID shop = seedShop("TIME-1");
-    OffsetDateTime occurred = OffsetDateTime.now(ZoneOffset.UTC).minusHours(9);
+    // 🔴 时刻先对齐到数据库精度（微秒）：timestamptz 只存到微秒，而
+    //    OffsetDateTime.now() 在 Linux 上带亚微秒尾巴（macOS 上恰好对齐）
+    //    ⇒ 不对齐的话，写进去的与读回来的必然差零点几微秒。
+    OffsetDateTime occurred =
+        OffsetDateTime.now(ZoneOffset.UTC).minusHours(9).truncatedTo(ChronoUnit.MICROS);
     PlatformViolationRegistration registration =
         as(
             "channel.operation.create",
@@ -1109,9 +1114,11 @@ class PlatformViolationIntegrationTest {
                         occurred,
                         occurred,
                         occurred.plusDays(5))));
-    assertThat(registration.violation().violation().occurredAt())
-        .as("写回的时刻必须与写进去的一致（不能被当成本地时区偏 −28800s）")
-        .isEqualTo(occurred);
+    // 🔴 比**瞬间**而不是比 OffsetDateTime 整体：timestamptz 只保时刻、不保偏移量，
+    //    读回来的偏移量由 JDBC 按 JVM 默认时区换算（这里是 +08:00），比偏移量必然不等。
+    assertThat(registration.violation().violation().occurredAt().toInstant())
+        .as("写回的时刻必须与写进去的是同一个瞬间（不能被当成本地时区偏 −28800s）")
+        .isEqualTo(occurred.toInstant());
     // 🔴 比「UTC 墙钟」：直接比字符串会被 JVM 的本地时区（+08）干扰，
     //    比 epoch 整数又会被小数秒的截断干扰 —— 显式取 UTC 墙钟才是同一个东西。
     assertThat(

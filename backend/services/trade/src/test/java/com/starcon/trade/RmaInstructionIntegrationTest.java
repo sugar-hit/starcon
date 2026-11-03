@@ -14,6 +14,7 @@ import java.security.MessageDigest;
 import java.sql.DriverManager;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 import java.util.HexFormat;
 import java.util.List;
 import java.util.Map;
@@ -151,7 +152,9 @@ class RmaInstructionIntegrationTest {
    * 用一个写死的过去时刻做夹具会在时间往前走之后整体塌掉。
    */
   static OffsetDateTime due() {
-    return OffsetDateTime.now(ZoneOffset.ofHours(8)).plusDays(14);
+    // 🔴 对齐到数据库精度（微秒）：timestamptz 只存到微秒，而 now() 在 Linux 上
+    //    带亚微秒尾巴（macOS 上恰好对齐）⇒ 不对齐的话，写回值与夹具必然差零点几微秒。
+    return OffsetDateTime.now(ZoneOffset.ofHours(8)).plusDays(14).truncatedTo(ChronoUnit.MICROS);
   }
 
   @BeforeEach

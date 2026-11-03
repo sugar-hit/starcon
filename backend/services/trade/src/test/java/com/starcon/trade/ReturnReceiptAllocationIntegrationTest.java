@@ -10,6 +10,7 @@ import java.math.BigDecimal;
 import java.sql.DriverManager;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.UUID;
 import org.jooq.DSLContext;
@@ -94,7 +95,9 @@ class ReturnReceiptAllocationIntegrationTest {
    * 而那与被测的实收分配毫无关系，是一个随日历漂移的假失败。
    */
   static OffsetDateTime now8() {
-    return OffsetDateTime.now(ZoneOffset.ofHours(8));
+    // 🔴 对齐到数据库精度（微秒）：timestamptz 只存到微秒，而 now() 在 Linux 上
+    //    带亚微秒尾巴（macOS 上恰好对齐）⇒ 不对齐的话，写回值与夹具必然差零点几微秒。
+    return OffsetDateTime.now(ZoneOffset.ofHours(8)).truncatedTo(ChronoUnit.MICROS);
   }
 
   /** 默认时限：两周后（未超期场景）。 */
