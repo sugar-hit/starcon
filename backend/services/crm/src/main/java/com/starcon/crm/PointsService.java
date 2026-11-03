@@ -336,8 +336,8 @@ public class PointsService {
     OffsetDateTime horizon = now().plusDays(EXPIRING_WINDOW_DAYS);
     Record expiring =
         sql.fetchOne(
-            "select count(*) as lots, coalesce(sum(remaining),0) as points"
-                + " from crm_points_lot where tenant_id = ? and remaining > 0"
+            "select count(*) as lots, coalesce(sum(balance),0) as points"
+                + " from crm_points_lot where tenant_id = ? and balance > 0"
                 + " and expires_at is not null and expires_at <= ?::timestamptz",
             currentTenant(),
             horizon);
@@ -959,7 +959,7 @@ public class PointsService {
     OffsetDateTime expiresAt = rule.validMonths() == null ? null : occurredAt.plusMonths(rule.validMonths());
     sql.execute(
         "insert into crm_points_lot"
-            + "(id,tenant_id,account_id,account_key,member_key,source_ledger_id,amount,remaining,"
+            + "(id,tenant_id,account_id,account_key,member_key,source_ledger_id,amount,balance,"
             + " expires_at,created_at,updated_at)"
             + " values (?,?,?,?,?,?,?,?,?::timestamptz,?::timestamptz,?::timestamptz)",
         UUID.randomUUID(),
@@ -1389,7 +1389,7 @@ public class PointsService {
         sql.fetch(
             "select l.* from crm_points_lot l"
                 + " join crm_points_account a on a.id = l.account_id and a.tenant_id = l.tenant_id"
-                + " where l.tenant_id = ? and l.remaining > 0"
+                + " where l.tenant_id = ? and l.balance > 0"
                 + " and l.expires_at is not null and l.expires_at <= ?::timestamptz"
                 + " order by l.expires_at asc, l.id asc",
             currentTenant(),
@@ -1397,7 +1397,7 @@ public class PointsService {
     int count = 0;
     BigDecimal totalExpired = BigDecimal.ZERO;
     for (Record lot : lots) {
-      BigDecimal remaining = lot.get("remaining", BigDecimal.class);
+      BigDecimal remaining = lot.get("balance", BigDecimal.class);
       if (remaining == null || remaining.signum() <= 0) continue;
       UUID accountId = lot.get("account_id", UUID.class);
       String accountKey = nz(lot.get("account_key", String.class));
@@ -1425,7 +1425,7 @@ public class PointsService {
       BigDecimal balanceAfter = afterRow.get("balance", BigDecimal.class);
       BigDecimal balanceBefore = balanceAfter.add(remaining);
       sql.execute(
-          "update crm_points_lot set remaining = 0, updated_at = ?::timestamptz"
+          "update crm_points_lot set balance = 0, updated_at = ?::timestamptz"
               + " where id = ? and tenant_id = ?",
           at,
           lot.get("id", UUID.class),
@@ -1493,8 +1493,8 @@ public class PointsService {
     OffsetDateTime horizon = at.plusDays(EXPIRING_WINDOW_DAYS);
     Record expiring =
         sql.fetchOne(
-            "select coalesce(sum(remaining),0) as points from crm_points_lot"
-                + " where tenant_id = ? and remaining > 0"
+            "select coalesce(sum(balance),0) as points from crm_points_lot"
+                + " where tenant_id = ? and balance > 0"
                 + " and expires_at is not null and expires_at <= ?::timestamptz",
             currentTenant(),
             horizon);
@@ -1559,7 +1559,7 @@ public class PointsService {
    *       余额不足时<b>更新 0 行</b>。PostgreSQL 在行锁上重新判定谓词 ⇒
    *       两个并发请求不会都扣成功（这是并发扣减的 DB 层保证）。</li>
    *   <li><b>表级 CHECK</b>：{@code balance >= 0} —— 任何绕过条件更新的写法也进不来。</li>
-   *   <li><b>批次先到期先消耗</b>：{@code remaining} 只减不增（DB 触发器）。</li>
+   *   <li><b>批次先到期先消耗</b>：{@code balance} 只减不增（DB 触发器）。</li>
    * </ol>
    */
   private DeductResult deduct(
@@ -1620,18 +1620,18 @@ public class PointsService {
     BigDecimal left = points;
     List<Record> lots =
         sql.fetch(
-            "select * from crm_points_lot where tenant_id = ? and account_id = ? and remaining > 0"
+            "select * from crm_points_lot where tenant_id = ? and account_id = ? and balance > 0"
                 + " order by (expires_at is null), expires_at asc, id asc",
             currentTenant(),
             accountId);
     for (Record lot : lots) {
       if (left.signum() <= 0) break;
-      BigDecimal remaining = lot.get("remaining", BigDecimal.class);
+      BigDecimal remaining = lot.get("balance", BigDecimal.class);
       BigDecimal take = remaining.min(left);
       int updated =
           sql.execute(
-              "update crm_points_lot set remaining = remaining - ?, updated_at = ?::timestamptz"
-                  + " where id = ? and tenant_id = ? and remaining >= ?",
+              "update crm_points_lot set balance = balance - ?, updated_at = ?::timestamptz"
+                  + " where id = ? and tenant_id = ? and balance >= ?",
               take,
               now(),
               lot.get("id", UUID.class),
@@ -1681,8 +1681,8 @@ public class PointsService {
   /** 账户的可用积分（= 各批次剩余量之和）。 */
   private BigDecimal availablePoints(UUID accountId) {
     return sql.fetchOne(
-            "select coalesce(sum(remaining),0) from crm_points_lot"
-                + " where tenant_id = ? and account_id = ? and remaining > 0",
+            "select coalesce(sum(balance),0) from crm_points_lot"
+                + " where tenant_id = ? and account_id = ? and balance > 0",
             currentTenant(),
             accountId)
         .get(0, BigDecimal.class);
@@ -1886,7 +1886,7 @@ public class PointsService {
         r.get("id", UUID.class),
         nz(r.get("account_key", String.class)),
         pointsText(r.get("amount", BigDecimal.class)),
-        pointsText(r.get("remaining", BigDecimal.class)),
+        pointsText(r.get("balance", BigDecimal.class)),
         momentText(expiresAt),
         expiresAt != null && !expiresAt.isAfter(at),
         momentText(r.get("created_at", OffsetDateTime.class)));

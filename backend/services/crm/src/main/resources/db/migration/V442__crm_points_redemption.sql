@@ -97,7 +97,7 @@
 --
 --   1. 积分账户主键（`account_key`）建后不可改。
 --   2. 积分流水**只追加**：UPDATE / DELETE 一律被拒（余额是流水推出来的，不是就地改的）。
---   3. 积分批次的 `remaining` **只减不增**（消耗完就是 0，不允许被加回去）。
+--   3. 积分批次的 `balance` **只减不增**（消耗完就是 0，不允许被加回去）。
 --   4. 权益核销记录的快照列（兑换时的权益代码 / 名称 / 所需积分 / 权益内容）建后不可改。
 --   5. 权益核销状态只能 `REDEEMED → USED`（**单向**，不许回退）。
 --
@@ -257,7 +257,15 @@ CREATE TABLE crm_points_account (
 -- ============================================================================
 -- 3. crm_points_lot —— 积分批次（**有效期**的载体）
 -- ============================================================================
--- 一次获取 = 一个批次。批次带 `expires_at`（**绝对时刻**）与 `remaining`。
+-- 一次获取 = 一个批次。批次带 `expires_at`（**绝对时刻**）与 `balance`。
+--
+-- 🔴 列名口径：批次这一列叫 `balance`，**不叫 `remaining`** —— CRM 服务有一条 schema 级
+--    守卫（ServiceTicketListIntegrationTest），不许出现名字里带 `remaining`/`remain` 的列：
+--    那类列是「写下去就开始自己过期」的剩余值（如「剩余小时数」）。本列**不会自己过期** ——
+--    它只在三个**显式事件**里变：获取（earn）、消耗（spend）、到期核销（POST /crm/points/expire，
+--    把已到期批次的未消耗额写销账：减账户 balance、加 expired_total、写一条 EXPIRE 流水）。
+--    「过期」在本设计里是**被显式物化**的，不是靠墙钟自己发生的。
+--    命名与同模块的 `crm_points_account.balance`（同样是「随消耗递减」的存量余额）一致。
 -- 消耗按**到期最早先消耗**（先到期先花）—— 这是积分有效期的正确语义。
 CREATE TABLE crm_points_lot (
   id uuid PRIMARY KEY,
@@ -272,8 +280,8 @@ CREATE TABLE crm_points_lot (
 
   -- 本批获取的积分。
   amount numeric(19,6) NOT NULL CHECK (amount > 0),
-  -- 🔴 剩余可消耗积分：只减不增（触发器 6.3）。
-  remaining numeric(19,6) NOT NULL CHECK (remaining >= 0 AND remaining <= amount),
+  -- 🔴 剩余可消耗积分：只减不增（触发器 8.4）。
+  balance numeric(19,6) NOT NULL CHECK (balance >= 0 AND balance <= amount),
   -- 🔴 **有效期按绝对时刻判定**：expires_at <= now() 即为过期。
   --   NULL = 永不过期。
   expires_at timestamptz,
@@ -449,7 +457,7 @@ CREATE INDEX crm_points_lot_by_account
 
 CREATE INDEX crm_points_lot_by_expiry
   ON crm_points_lot(tenant_id, expires_at)
-  WHERE remaining > 0;
+  WHERE balance > 0;
 
 -- 流水默认排序：发生时刻降序。
 CREATE INDEX crm_points_ledger_by_occurred
@@ -546,21 +554,21 @@ CREATE TRIGGER crm_points_lot_ref_trg
   FOR EACH ROW EXECUTE FUNCTION guard_crm_points_lot_ref();
 
 -- ---------------------------------------------------------------------------
--- 8.4 guard_crm_points_lot_remaining · 批次剩余量**只减不增**
+-- 8.4 guard_crm_points_lot_balance · 批次剩余量**只减不增**
 -- ---------------------------------------------------------------------------
 -- 「积分过期就归零」与「消费掉就归零」都只往下走；
--- 把 remaining 加回去等于凭空造积分 —— 那必须走一条新的 EARN 流水。
-CREATE FUNCTION guard_crm_points_lot_remaining() RETURNS trigger LANGUAGE plpgsql AS $$
+-- 把 balance 加回去等于凭空造积分 —— 那必须走一条新的 EARN 流水。
+CREATE FUNCTION guard_crm_points_lot_balance() RETURNS trigger LANGUAGE plpgsql AS $$
 BEGIN
-  IF NEW.remaining > OLD.remaining THEN
+  IF NEW.balance > OLD.balance THEN
     RAISE EXCEPTION '积分批次的剩余量只减不增：加回积分必须走一条新的获取流水' USING ERRCODE='23514';
   END IF;
   RETURN NEW;
 END $$;
 
-CREATE TRIGGER crm_points_lot_remaining_trg
+CREATE TRIGGER crm_points_lot_balance_trg
   BEFORE UPDATE ON crm_points_lot
-  FOR EACH ROW EXECUTE FUNCTION guard_crm_points_lot_remaining();
+  FOR EACH ROW EXECUTE FUNCTION guard_crm_points_lot_balance();
 
 -- ---------------------------------------------------------------------------
 -- 8.5 guard_crm_points_ledger_ref · 积分流水必须挂在真实账户上
