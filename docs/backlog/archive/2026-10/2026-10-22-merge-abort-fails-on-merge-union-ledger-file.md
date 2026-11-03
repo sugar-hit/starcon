@@ -1,3 +1,14 @@
+> **状态：Done（2026-11-03 销账）**
+>
+> - 判定类别：**前提已消失**
+> - 证据：`tools/module-progress/merge-union.mjs:352` 的兜底告警与 `lane.mjs:1431` 的 abort 路径仍在；两者都属于已停用的并入流程。
+> - 结论：并入流程不再运行。 ⇒ 移入 `docs/backlog/archive/2026-10/`
+> - ⚠️ **残留**：脚本本体仍在仓库且可被手动调用 ——
+>   `tools/module-progress/lane.mjs:1431` 的 `git merge --abort`、`:54/:520` 的 TTL 与宽限、
+>   `tools/module-progress/merge-union.mjs:336/:352` 的行级兜底（退出码 0）、
+>   `tools/module-progress/merge-resolve.mjs:76` 的 `rev-parse` 回显误判
+>   ⇒ **重启流水线前需先修这些脚本**，否则同类问题会原样复现。
+
 # `git merge --abort` 在 `merge-union` 改写台账后会失败，`MERGE_HEAD` 残留堵死流水线
 
 **优先级：P0 —— 这不是理论风险，而是第 25 轮同步任务**实测撞上**的。**

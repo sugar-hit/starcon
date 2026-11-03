@@ -1,3 +1,14 @@
+> **状态：Done（2026-11-03 销账）**
+>
+> - 判定类别：**前提已消失**
+> - 证据：`tools/module-progress/merge-resolve.mjs:75-77` 的 `blobOf` 仍用未加 `--verify` 的 `rev-parse`；该判定器只服务于并入裁决。
+> - 结论：并入裁决不再运行。 ⇒ 移入 `docs/backlog/archive/2026-10/`
+> - ⚠️ **残留**：脚本本体仍在仓库且可被手动调用 ——
+>   `tools/module-progress/lane.mjs:1431` 的 `git merge --abort`、`:54/:520` 的 TTL 与宽限、
+>   `tools/module-progress/merge-union.mjs:336/:352` 的行级兜底（退出码 0）、
+>   `tools/module-progress/merge-resolve.mjs:76` 的 `rev-parse` 回显误判
+>   ⇒ **重启流水线前需先修这些脚本**，否则同类问题会原样复现。
+
 # `git rev-parse` 对不存在的路径把**参数原样回显到 stdout** ⇒ 冲突判定器把 add/add 误标成 content
 
 发现：2026-10-23 05:00（第 43 轮「集成分支并入 main」期间）。发现人：并入主分支的执行者。

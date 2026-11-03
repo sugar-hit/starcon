@@ -1,3 +1,14 @@
+> **状态：Done（2026-11-03 销账）**
+>
+> - 判定类别：**前提已消失**
+> - 证据：当前台账 465 行里畸形行 = 0；`tools/module-progress/sync.mjs` 的台账同步随合并机制一并停用。
+> - 结论：台账同步不再由流水线触发。 ⇒ 移入 `docs/backlog/archive/2026-10/`
+> - ⚠️ **残留**：脚本本体仍在仓库且可被手动调用 ——
+>   `tools/module-progress/lane.mjs:1431` 的 `git merge --abort`、`:54/:520` 的 TTL 与宽限、
+>   `tools/module-progress/merge-union.mjs:336/:352` 的行级兜底（退出码 0）、
+>   `tools/module-progress/merge-resolve.mjs:76` 的 `rev-parse` 回显误判
+>   ⇒ **重启流水线前需先修这些脚本**，否则同类问题会原样复现。
+
 # 台账行缺尾随 `|` ⇒ 交付记录被 `sync.mjs` 静默抹除
 
 发现：2026-10-21 08:19（batch-47 合并期间）。发现人：批次调度者。

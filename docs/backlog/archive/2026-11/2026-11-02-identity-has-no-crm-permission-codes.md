@@ -1,3 +1,23 @@
+> **状态：Done（2026-11-03 销账）**
+>
+> - 判定类别：**已修复但条目未销账**（本条发现时属实：只有 `crm.customers` 一族被登记）
+> - 根因（仍然成立）：`role_permission.permission_code` 上有指向 `permission(code)` 的
+>   **外键** ⇒ 一个权限码没登记进 `permission` 表，就**没有任何角色能持有它**
+>   （外键直接拒绝那次授权写入），而 `access.require(bearer, code)` 按「已认证成员持有的
+>   权限码」判定 ⇒ 端点恒定 403。
+> - 修复：`backend/services/identity/src/main/resources/db/migration/V442__crm_permission_codes.sql`
+>   一次性登记 **21 个族 × read/update = 42 个权限码** + 21 条 `page_resource`，
+>   并按 V432 / V439 同口径给存量租户的 OWNER 角色补权（新租户由 identity 的
+>   `LocalBootstrap` 在建租时授予当时的全部 permission，天然齐全）。
+> - 防回归：`backend/services/crm/src/test/java/com/starcon/crm/CrmPermissionCodesGuardTest.java`
+>   —— 从 **crm 自己的源码**反向抽取真实用到的权限码，再去 identity 的迁移里核对登记
+>   （两个方向都断言：缺码红、多登记的幽灵码也红）。
+>   ⚠️ 与本条目正文「处置建议 2」建议的「跨服务读 identity 的库」不同：本实现改为
+>   **构建期静态比对迁移源码**，不连对方的库 —— AGENTS.md 禁止跨库查询，且静态比对
+>   能在单元测试层就跑，不必等集成测试层。
+> - 实测：移除 V442 ⇒ 守卫立刻报出缺失码（`crm.auto_reply.read` 起）；加回 ⇒ 2 例全绿。
+> - 结论：原缺口已补齐并有守卫钉住 ⇒ 移入 `docs/backlog/archive/2026-11/`
+
 # identity 的 permission 表里从来没有过任何 `crm.*` 权限码 ⇒ crm 服务全部端点在真实环境恒 403
 
 > 发现时间：2026-11-02 10:45（流水线 round 130，15.3.1.1 客户列表车道实测时发现）

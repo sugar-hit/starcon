@@ -1,3 +1,14 @@
+> **状态：Done（2026-11-03 销账）**
+>
+> - 判定类别：**前提已消失**
+> - 证据：冲突源于并行车道并发追加 `apps/web/src/lib/api-proxy.ts`（现有 298 个 services[] 元素）；车道机制已停。
+> - 结论：并发追加的成因不再存在。 ⇒ 移入 `docs/backlog/archive/2026-10/`
+> - ⚠️ **残留**：脚本本体仍在仓库且可被手动调用 ——
+>   `tools/module-progress/lane.mjs:1431` 的 `git merge --abort`、`:54/:520` 的 TTL 与宽限、
+>   `tools/module-progress/merge-union.mjs:336/:352` 的行级兜底（退出码 0）、
+>   `tools/module-progress/merge-resolve.mjs:76` 的 `rev-parse` 回显误判
+>   ⇒ **重启流水线前需先修这些脚本**，否则同类问题会原样复现。
+
 # `apps/web/src/lib/api-proxy.ts` 共享白名单累积文件 —— 并入冲突的结构性根因与两条解法（2026-10-21 取证）
 
 **优先级：P0 —— 这是当前吞吐的**首要瓶颈**，不是理论风险。每批只要有 ≥2 条车道改 `api-proxy.ts`，就必然产生 N-1 条并入冲突。**

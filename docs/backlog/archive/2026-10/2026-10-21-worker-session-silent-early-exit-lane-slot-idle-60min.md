@@ -1,3 +1,14 @@
+> **状态：Done（2026-11-03 销账）**
+>
+> - 判定类别：**前提已消失**
+> - 证据：`tools/module-progress/lane.mjs:54` 的 `TTL_MINUTES=90` 与 `:520` 的 `CLAIM_GRACE_MINUTES=60` 仍在，但已无调度器派发子任务。
+> - 结论：不再有 worker 会话被派发出去。 ⇒ 移入 `docs/backlog/archive/2026-10/`
+> - ⚠️ **残留**：脚本本体仍在仓库且可被手动调用 ——
+>   `tools/module-progress/lane.mjs:1431` 的 `git merge --abort`、`:54/:520` 的 TTL 与宽限、
+>   `tools/module-progress/merge-union.mjs:336/:352` 的行级兜底（退出码 0）、
+>   `tools/module-progress/merge-resolve.mjs:76` 的 `rev-parse` 回显误判
+>   ⇒ **重启流水线前需先修这些脚本**，否则同类问题会原样复现。
+
 # 子任务会话可以「静默早退」：worker 死了但车道仍显示 running，车道位空转最长 60 分钟（2026-10-21 取证）
 
 **优先级：P1 —— 吞吐损失（不是正确性缺陷）。** 不影响代码正确性，

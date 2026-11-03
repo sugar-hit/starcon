@@ -1,3 +1,9 @@
+> **状态：Done（2026-11-03 销账）**
+>
+> - 判定类别：**已修复但条目未销账**
+> - 证据：迁移 `V211__trade_fulfillment_step_clock.sql` 已存在；`FulfillmentRequestService.markStepRunning` 已无 JVM 墙钟入参。
+> - 结论：DB 约束已改为同钟域比较。 ⇒ 移入 `docs/backlog/archive/2026-10/`
+
 # 跨时钟域的第 2 例：DB **CHECK 约束**里比较了 JVM 时钟与 DB 时钟 ⇒ 生产上会间歇拒掉一次合法的履约步完成（2026-10-21 取证）
 
 **优先级：P0 —— 这不是测试脆弱性，这是**生产正确性**缺陷。**

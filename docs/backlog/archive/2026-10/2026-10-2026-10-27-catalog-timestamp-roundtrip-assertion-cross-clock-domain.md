@@ -1,3 +1,9 @@
+> **状态：Done（2026-11-03 销账）**
+>
+> - 判定类别：**已修复但条目未销账**
+> - 证据：`PlatformCategoryMappingIntegrationTest.java:879-892` 已改为 `dbNow()` 双端同源。
+> - 结论：断言已同源化。 ⇒ 移入 `docs/backlog/archive/2026-10/`
+
 # 跨时钟域隐患登记：catalog 的 `timestampsRoundTripWithoutTheSilentEightHourShift` 用 JVM 墙钟对比 DB 钟
 
 > 登记时间：2026-10-27（pipeline round 114）

@@ -1,3 +1,14 @@
+> **状态：Done（2026-11-03 销账）**
+>
+> - 判定类别：**前提已消失**
+> - 证据：`tools/module-progress/merge-union.mjs:336` 的行级兜底仍在；当前台账实测 465 行 / 18 系统行，无重复块。合并器已停用。
+> - 结论：合并器不再运行。 ⇒ 移入 `docs/backlog/archive/2026-10/`
+> - ⚠️ **残留**：脚本本体仍在仓库且可被手动调用 ——
+>   `tools/module-progress/lane.mjs:1431` 的 `git merge --abort`、`:54/:520` 的 TTL 与宽限、
+>   `tools/module-progress/merge-union.mjs:336/:352` 的行级兜底（退出码 0）、
+>   `tools/module-progress/merge-resolve.mjs:76` 的 `rev-parse` 回显误判
+>   ⇒ **重启流水线前需先修这些脚本**，否则同类问题会原样复现。
+
 # merge-union 台账分支：两个父分支改了不同卷时，汇总块整块重复 —— 汇总数字与行数永久对不上
 
 > 发现时间：2026-10-30 集成头同步第 109 轮（`origin/main` 无新提交，取证过程中发现）

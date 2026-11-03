@@ -1,3 +1,11 @@
+> **状态：Done（2026-11-03 销账）**
+>
+> - 判定类别：**已修复但条目未销账**
+> - 修复：提交 `fd5aa652` 补 `PLATFORM_IO_STORAGE_ROOT`（compose + Dockerfile 建目录同属主 10001），
+>   经 PR #73 合入 `main`；`ci.yml` 的「Verify writable storage as the runtime user」补上 platform 一条断言。
+> - 解除条件逐条核对：修复提交在 `origin/main` 上；CI run `#41621594784` 里
+>   `Catalog Browser & Contract Tests` = success。
+
 # platform 服务导入导出存储根目录不可写 ⇒ 容器内启动失败 ⇒ Catalog Browser CI 作业挂 ⇒ 阻塞 main 合入
 
 > 发现时间：2026-11-03 「每日合 main」10:30 轮次（PR #72 的 CI 闸工具判定为「阻塞」时定位）

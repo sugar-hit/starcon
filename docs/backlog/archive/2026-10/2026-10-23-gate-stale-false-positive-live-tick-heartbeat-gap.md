@@ -1,3 +1,9 @@
+> **状态：Done（2026-11-03 销账）**
+>
+> - 判定类别：**已修复但条目未销账**
+> - 证据：`tools/module-progress/lane.mjs:589-604` 的 `gateActivityMtimeMs` 已改用最新 keepalive/owner 文件 mtime；`:830-839` 的 `gateRelease` 已校验 owner token。
+> - 结论：活着的 tick 不再被判成僵死闸。 ⇒ 移入 `docs/backlog/archive/2026-10/`
+
 # 调度闸的 `stale` 判据会把**活着的**流水线 tick 判成僵死闸
 
 - **日期**：2026-10-23

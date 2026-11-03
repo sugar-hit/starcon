@@ -1,3 +1,14 @@
+> **状态：Done（2026-11-03 销账）**
+>
+> - 判定类别：**前提已消失**
+> - 证据：`packages/api-contracts/src/contracts/reporting.ts` 已 101 KB / 369 个 `export type`（不是空壳）；`lane.mjs:1411` 的 merge 循环无拓扑排序，但随车道停用不再触发。
+> - 结论：并入顺序不再有影响。 ⇒ 移入 `docs/backlog/archive/2026-10/`
+> - ⚠️ **残留**：脚本本体仍在仓库且可被手动调用 ——
+>   `tools/module-progress/lane.mjs:1431` 的 `git merge --abort`、`:54/:520` 的 TTL 与宽限、
+>   `tools/module-progress/merge-union.mjs:336/:352` 的行级兜底（退出码 0）、
+>   `tools/module-progress/merge-resolve.mjs:76` 的 `rev-parse` 回显误判
+>   ⇒ **重启流水线前需先修这些脚本**，否则同类问题会原样复现。
+
 # 并入顺序依赖：契约导出行先于真实契约文件落地 ⇒ 集成头 TS2306（2026-10-25 batch-93 取证）
 
 **优先级：P1 —— 不是理论风险，是**已经存在的**潜在破损。当前批次一旦按错误顺序并入，L2 必然红。**

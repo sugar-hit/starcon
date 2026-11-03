@@ -1,3 +1,9 @@
+> **状态：Done（2026-11-03 销账）**
+>
+> - 判定类别：**已修复但条目未销账**
+> - 证据：`tools/module-progress/ci-gate.mjs:144-145` 的 `runIsSettled` 判 `status === 'completed'`；`:149-172` 的 `baselineRun` 跳过在飞 run。
+> - 结论：闸工具不再把「还在跑的 run」当基线。 ⇒ 移入 `docs/backlog/archive/2026-10/`
+
 # 闸工具把「仍在跑的 run」当基线，导致假阻塞
 
 - 创建: 2026-10-23

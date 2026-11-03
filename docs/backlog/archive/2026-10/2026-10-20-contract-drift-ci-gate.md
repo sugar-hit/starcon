@@ -1,3 +1,9 @@
+> **状态：Done（2026-11-03 销账）**
+>
+> - 判定类别：**已过时**
+> - 证据：`.github/workflows/ci.yml:193-194` 已有 `pnpm contracts:generate` + `git diff --exit-code -- packages/api-contracts/src` ⇒ 标题里说「缺一个 contracts:check CI 闸」的前提早已不成立。
+> - 结论：原问题在当前代码里已不存在。 ⇒ 移入 `docs/backlog/archive/2026-10/`
+
 # 契约漂移无人看守 —— 缺一个 `contracts:check` CI 闸
 
 - 创建: 2026-10-20

@@ -1,3 +1,14 @@
+> **状态：Done（2026-11-03 销账）**
+>
+> - 判定类别：**前提已消失**
+> - 证据：取证脚本属并入裁决链；另 Prettier 存量债已由 `dd8a7ee2` 清零，`pnpm format:check` 现在真的检查全部匹配文件。
+> - 结论：裁决链不再运行。 ⇒ 移入 `docs/backlog/archive/2026-10/`
+> - ⚠️ **残留**：脚本本体仍在仓库且可被手动调用 ——
+>   `tools/module-progress/lane.mjs:1431` 的 `git merge --abort`、`:54/:520` 的 TTL 与宽限、
+>   `tools/module-progress/merge-union.mjs:336/:352` 的行级兜底（退出码 0）、
+>   `tools/module-progress/merge-resolve.mjs:76` 的 `rev-parse` 回显误判
+>   ⇒ **重启流水线前需先修这些脚本**，否则同类问题会原样复现。
+
 # `prettier --check` 对被 gitignore 的路径**一个文件都不查**，却报「All matched files use Prettier code style!」
 
 发现：2026-10-23 05:36（第 44 轮「集成分支并入 main」期间）。发现人：并入主分支的执行者。

@@ -1,3 +1,9 @@
+> **状态：Done（2026-11-03 销账）**
+>
+> - 判定类别：**已修复但条目未销账**
+> - 证据：`backend/services/trade/src/test/resources/application.properties:23-25` 的兜底地址改为 `http://127.0.0.1:1` 哨兵；另有 `TradeUpstreamAddressIsolationTest` 覆盖。
+> - 结论：上游不可达不再被误判成「没有待补货」。 ⇒ 移入 `docs/backlog/archive/2026-10/`
+
 # trade 补货建议：上游 404 ⇒ 503，且**只在整模块连跑时**出现
 
 发现：2026-10-22 11:04（batch-62 的 L2 重跑）。发现人：批次调度者。

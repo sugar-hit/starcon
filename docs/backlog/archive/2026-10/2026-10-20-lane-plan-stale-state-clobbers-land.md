@@ -1,3 +1,9 @@
+> **状态：Done（2026-11-03 销账）**
+>
+> - 判定类别：**已修复但条目未销账**
+> - 证据：`tools/module-progress/lane.mjs:1175-1191` 已改为「写前重读 + 增量叠加」，条目正文里也有「✅ 已实施」的记录。
+> - 结论：原缺陷已修复。 ⇒ 移入 `docs/backlog/archive/2026-10/`
+
 # lane.mjs plan：用陈旧内存快照回写 lanes.json，会静默撤销并发发生的 land / heartbeat
 
 **发现时间**：2026-10-20 13:00 tick（batch-35 的 4 条车道落地期间）

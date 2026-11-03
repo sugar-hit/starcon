@@ -1,3 +1,14 @@
+> **状态：Done（2026-11-03 销账）**
+>
+> - 判定类别：**已修复但条目未销账**
+> - 修复：`apps/web/src/app/api/platform/[...path]/route.ts` 已补 `export const PUT = proxy;`；
+>   新增方法守卫测试 `apps/web/src/app/api/platform/put-method-allowlist.test.ts`
+>   （正向断言 5 条 PUT 路径被转发且方法确实是 PUT；反向断言非白名单路径仍 404 且 fetch 未被调用）。
+> - 关键取证：`apps/web/src/lib/api-proxy.ts` 的放行判据是**路径白名单**、与方法无关，
+>   而这 5 条 PUT 路径**本来就已经在白名单里** ⇒ 缺的只是出口的方法，路径边界一点没动。
+>   与兄弟出口（channel / warehouse / catalog / trade / crm / finance）同构 —— platform 原本是唯一例外。
+> - 提交：`d1d4b4a3`
+
 # platform 代理路由不导出 PUT ⇒ platform 服务里所有 `@PutMapping` 端点在浏览器里调不到（405）
 
 > 发现时间：2026-11-02 10:27（流水线 round 130，18.4.3.2 效果评估车道自查时发现）

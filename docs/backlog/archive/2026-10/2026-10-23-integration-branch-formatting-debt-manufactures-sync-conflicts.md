@@ -1,3 +1,14 @@
+> **状态：Done（2026-11-03 销账）**
+>
+> - 判定类别：**前提已消失**
+> - 证据：集成分支同步轮次已停；另，Prettier 存量格式债已由提交 `dd8a7ee2` 清零（`pnpm format:check` 现输出「All matched files use Prettier code style!」）。
+> - 结论：同步轮次不再产生。 ⇒ 移入 `docs/backlog/archive/2026-10/`
+> - ⚠️ **残留**：脚本本体仍在仓库且可被手动调用 ——
+>   `tools/module-progress/lane.mjs:1431` 的 `git merge --abort`、`:54/:520` 的 TTL 与宽限、
+>   `tools/module-progress/merge-union.mjs:336/:352` 的行级兜底（退出码 0）、
+>   `tools/module-progress/merge-resolve.mjs:76` 的 `rev-parse` 回显误判
+>   ⇒ **重启流水线前需先修这些脚本**，否则同类问题会原样复现。
+
 # 集成分支长期带格式债，每轮同步都要在主分支侧重新格式化，并制造 38 个假冲突
 
 - 创建：2026-10-23 06:02（第 45 轮「集成分支并入 main」期间）

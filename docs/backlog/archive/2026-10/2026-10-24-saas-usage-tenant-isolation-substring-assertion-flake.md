@@ -1,3 +1,9 @@
+> **状态：Done（2026-11-03 销账）**
+>
+> - 判定类别：**已修复但条目未销账**
+> - 证据：`SaasUsageIntegrationTest.java:300-316` 新增 `assertUsageOnlyFor` 按字段断言；`:668-669` 已改调用。
+> - 结论：租户隔离断言不再用子串匹配整段 JSON。 ⇒ 移入 `docs/backlog/archive/2026-10/`
+
 # `SaasUsageIntegrationTest` 的租户隔离断言用**子串匹配**整段 JSON ⇒ 时间戳里出现 `222` 就假红
 
 - **日期**：2026-10-24

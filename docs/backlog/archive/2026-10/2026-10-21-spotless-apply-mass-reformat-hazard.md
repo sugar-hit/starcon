@@ -1,3 +1,16 @@
+> **状态：Done（2026-11-03 销账）**
+>
+> - 判定类别：**前提已消失 / 处置已执行**
+> - 处置：`.github/workflows/ci.yml` 已撤掉 `spotless:check`；`backend/pom.xml:49-71`
+>   已把 `spotless-maven-plugin` **移除**，并在原位留下判断依据与重新引入的前置条件；
+>   `docs/operations/catalog-local-development.md` 里的「格式检查 `./mvnw spotless:check`」
+>   一并更正为「无集中格式闸，改动与周边保持一致即可」。提交 `51316a4d`。
+> - 依据：全量 `spotless:apply`（JDK 21 下正常执行）会改 **2054 个文件、+152373 / -104961 行**，
+>   把刻意分行写成独立句子的中文 javadoc **并成一行**，并把行内标签切断
+>   （`{@code` 与 `app.current_tenant}` 落到两行）—— 这是**损害**可读性，不是改善。
+>   本条目正文里「需要人决策」的第三条，答案就是**不集中管格式**。
+> - 结论：保留本条目作为「为什么不做集中格式化」的依据 ⇒ 移入 `docs/backlog/archive/2026-10/`
+
 # 车道跑 `spotless:apply` 会把整仓 146 个文件重排版 —— 流水线任务书应加禁令
 
 > 记录时间：2026-10-21 09:1x（batch-47/48 tick，5.5.1.1 修复车道）
