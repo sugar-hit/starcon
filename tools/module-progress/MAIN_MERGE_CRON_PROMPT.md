@@ -47,6 +47,9 @@ cd "$PROJECT_ROOT" && node tools/module-progress/lane.mjs gate status
 在主工作区跑 `gate status` 会永远显示 `free`（那里根本没有闸目录）——
 那不是「闸空闲」，那是**读错了地方**，照着它去 acquire 就会和流水线撞车。
 
+⚠️ **合并锁（`merge-lock.mjs`）不受这个限制** —— 它落在 git common dir，
+**在哪个 worktree 跑都是同一份锁**（见 §2.5）。
+
 ---
 
 ## 1. ⛔ 硬性前提（先读这段）
@@ -167,40 +170,70 @@ cd "$PROJECT_ROOT" && node tools/module-progress/lane.mjs gate status
 
 输出含 `gate / ageSeconds / ttlSeconds / stale`，**四个都要看**。
 
-| `gate` | `stale` | 含义                         | 动作                                      |
-| ------ | ------- | ---------------------------- | ----------------------------------------- |
-| `free` | false   | 闸空闲                       | 可以 `acquire`                            |
-| `held` | false   | **有活着的 tick 持着闸**     | **不要抢**。只做只读检查 + 汇报，结束本轮 |
-| `held` | true    | 持闸者崩了（超 TTL 70 分钟） | 可以 `acquire` 接管                       |
+| `gate` | `stale` | 含义                         | 动作                                       |
+| ------ | ------- | ---------------------------- | ------------------------------------------ |
+| `free` | false   | 闸空闲                       | 可以 `acquire`                             |
+| `held` | false   | **有活着的 tick 持着闸**     | **不要抢**。**只跳过第 1 步**，第 2 步照做 |
+| `held` | true    | 持闸者崩了（超 TTL 70 分钟） | 可以 `acquire` 接管                        |
 
-⚠️ **`stale=false` 不等于持闸者在偷懒** —— 它可能正在跑 L2（实测单轮 40–60 分钟）。
-**撞闸（`acquire` 退出码 3）时，正确动作是「本轮零改动 + 只读 + 简短汇报」**，
+⚠️ **`stale=false` 不等于持闸者在偷懒** —— 它可能正在跑 L2（实测单轮 40–60 分钟，
+最长实测 **4h46m**，见 `docs/sessions/2026-10/2026-10-30-1249-*.md`）。
+**撞闸（`acquire` 退出码 3）时，正确动作是「跳过需要闸的那一步」**，
 不是清闸、不是 `force`。崩掉的闸会被 TTL 自动接管（最多挡一轮）。
+
+#### ⛔ 2026-11-03 修正：`held` 不再等于「整轮结束」
+
+**原规则造成的事故（实测取证）**：合 main 任务每轮都撞上流水线持有的闸 ⇒ 按旧规则「整轮结束」
+⇒ 2026-10-30 之后 **main 再没前进过**，台账停在 437/465，
+而集成分支已到 464/465（领先 216 个提交）。
+交付看板的数据源是 `origin/main` 的台账 ⇒ **看板连着 4 天显示 94% 的过期数字，无人报警**。
+
+**现在的规则按「本轮要动哪个状态」分流**：
+
+| 本轮要动的东西                                             | 需要哪个锁         | 撞上了怎么办                                            |
+| ---------------------------------------------------------- | ------------------ | ------------------------------------------------------- |
+| 集成头 worktree 的本地状态（**第 1 步**：main→集成头同步） | **调度闸**（本节） | `held` + `stale=false` ⇒ **只跳过第 1 步**，第 2 步照做 |
+| 远端 PR（**第 2 步**：推同步分支 / 建 PR / 合并 PR）       | **合并锁**（§2.5） | 撞锁 ⇒ 本轮不合，汇报；锁 stale ⇒ 直接接管              |
+
+**为什么第 2 步不需要调度闸**：它**不改集成头 worktree** ——
+只写远端分支 `chore/sync-module-dev` 与远端 PR。
+调度闸保护的是「本地会改状态的动作」，拿它去挡一个不碰本地状态的动作，
+就是用错了锁 —— 结果是 main 永远排不上队。
+
+**为什么「跳过第 1 步」不等于「放弃本轮」**：第 1 步的产物是「main 的新提交并入集成头」，
+而**第 2 步（把集成分支合进 main）才是 main 前进的唯一原因**。
+第 1 步被跳过时，第 2 步照做即可（`main` 是集成头的祖先时，第 1 步本来就是空操作）。
 
 ### 2.2 闸的持有范围
 
-**持闸 = 保护「本地会改状态的动作」**：
+**持闸 = 保护「集成头 worktree 的本地状态」**：
 
 ```
-取闸 → fetch → 合并 → 解冲突 → 验证 → 推分支 → 建/更新 PR → 放闸
+取闸 → fetch → 合并 → 解冲突 → 验证 → 推分支 → 放闸
 ```
+
+（2026-11-03：**「建/更新 PR」「合并 PR」已移出这个列表** ——
+它们不碰集成头 worktree，改由 §2.5 的合并锁互斥。）
 
 **CI 在远端跑，不持闸。** 等 CI 的那段时间必须放闸，
 否则一轮就把闸占住 30–60 分钟，流水线整轮空转。
 
-**合并 PR 前要再取一次闸**（短持有）—— 避免两轮同时合同一个 PR。
-流水线此刻正持闸 ⇒ 退出码 3 ⇒ **本轮不合，下一轮再合**，不许 `force`。
+**推同步分支 / 建 PR / 合并 PR 用合并锁（§2.5），不用调度闸。**
 
-### 2.3 取闸与放闸
+### 2.3 取闸与放闸（只针对第 1 步）
 
 ```bash
-node tools/module-progress/lane.mjs gate acquire   # 退出码 3 = 撞闸
-# ……做合并……
+cd "$PROJECT_ROOT"
+node tools/module-progress/lane.mjs gate acquire   # 退出码 3 = 撞闸 ⇒ 跳过第 1 步，不放弃本轮
+# ……做第 1 步的合并……
 node tools/module-progress/lane.mjs gate release     # 收尾必须放，无论成败
 ```
 
 **本轮若因任何原因提前结束（闸 STOP、撞闸、异常），也必须 `gate release`** ——
 你已经拿到闸，不释放就等于把下一轮挡住。
+
+⚠️ **第 2 步不需要调度闸，所以第 1 步撞闸时不要 `gate release`** ——
+你根本没拿到闸，放闸等于删掉别人活着的闸（调度闸的 `release` 是无条件 `rmSync`）。
 
 ### 2.4 静默窗口
 
@@ -237,6 +270,40 @@ pnpm exec prettier --check <本 PR 改动的 .md / .ts / .json / .yaml>
 ```
 
 ⇒ 判据看**失败文件集合的差集**（见 7.3），不是看仓库总数。
+
+### 2.5 合并锁（合 main 专属，与调度闸分离）
+
+**为什么单独一个锁**：调度闸保护的是**集成头 worktree 的本地状态**，
+而合 main 的第 2 步（推同步分支 / 建 PR / 合并 PR）**只写远端** ——
+它需要的只是「同一时刻只有一轮合 main 在动」。
+2026-11-03 之前两者混用，导致合 main 任务被流水线的长持闸（实测 4h46m）**连续饿死 4 天**。
+
+**锁文件落在 git common dir**（`$(git rev-parse --git-common-dir)/main-merge.lock`）
+⇒ 所有 linked worktree 共享同一份，主工作区与集成头看到的是同一个锁。
+
+```bash
+# 整轮用一个 owner 令牌，acquire / touch / release 都带它
+OWNER="main-merge-$(date +%Y%m%d-%H%M%S)-$$"
+
+node tools/module-progress/merge-lock.mjs status                    # 只读，随时可查
+node tools/module-progress/merge-lock.mjs acquire --owner "$OWNER" --note "PR#72"   # 退出码 3 = 撞锁
+node tools/module-progress/merge-lock.mjs touch   --owner "$OWNER"   # 等 CI 久了可续期
+node tools/module-progress/merge-lock.mjs release --owner "$OWNER"   # 收尾必须放
+```
+
+| 情况                 | 动作                                                             |
+| -------------------- | ---------------------------------------------------------------- |
+| `acquire` 退出码 0   | 拿到锁，做第 2 步                                                |
+| `acquire` 退出码 3   | 有人持着（心跳正常）⇒ **本轮不合**，汇报即可，**不要清别人的锁** |
+| 撞锁且对方心跳已过期 | `acquire` 会自动接管并回报 `reclaimed=true`                      |
+| `release` 退出码 3   | 锁不属于本轮 ⇒ 拒绝删除。**不许用 `rm` 绕过**                    |
+
+⚠️ **owner 令牌靠 `--owner` 传，不要靠 pid 认主** ——
+本脚本是一次性短命进程，用 pid 认主会让锁在下一个命令到来时立刻变成「持锁者已死」。
+
+⚠️ **锁是「整轮」的，不是「每个命令」的** —— acquire 之后这一轮内的
+推分支 / 建 PR / 合并 PR 都在锁内；等 CI 期间用 `touch` 续期；
+**本轮无论成败都要 `release`**（owner 对得上才会真删）。
 
 ---
 
@@ -762,9 +829,21 @@ cd .worktrees/main-merge
 # ⑦ 提交（可读标题，按第 6 节）
 git add -A && git commit -m "feat: <功能概述>"
 
-# ⑧ 推 PR 分支
+# ⑧ 取合并锁（§2.5）—— 第 2 步的远端动作全程在锁内
+#    退出码 3 = 有人正合 main ⇒ 本轮到此为止，汇报即可（不要清别人的锁）
+OWNER="main-merge-$(date +%Y%m%d-%H%M%S)-$$"
+cd /Users/guan/Projects/starcon
+node tools/module-progress/merge-lock.mjs acquire --owner "$OWNER" --note "PR#<PR号>"
+
+# ⑨ 推 PR 分支
+cd "$WT"
 git push --force-with-lease origin chore/sync-module-dev
 ```
+
+⚠️ **⑧ 要放在 ⑨ 之前**：推同步分支与合并 PR 是同一类远端写动作，
+两轮同时推同一分支会造成分支指针竞态（协议 §2 的原始动机），
+但它**不需要调度闸** —— 调度闸保护的是集成头 worktree 的本地状态。
+2026-11-03 之前这两件事被混为一谈，结果是合 main 被流水线的长持闸连续饿死 4 天。
 
 ### 7.2 建 PR
 
@@ -860,14 +939,18 @@ PR 头那份给**「阻塞」**并点名失败作业 ⇒ **结论相反**。
 
 **前置条件**：7.3 的闸工具输出 `结论：可以合并`。不是这个结论就不许走到这一步。
 
-**合并前重新取闸**（短持有），避免两轮同时合同一个 PR：
+**合并前确认合并锁还在自己手里**（§2.5）—— 不要用调度闸：
 
 ```bash
-cd /Users/guan/Projects/starcon
-node tools/module-progress/lane.mjs gate acquire   # 退出码 3 = 撞闸 ⇒ 本轮不合，下轮再合
+node tools/module-progress/merge-lock.mjs status
+node tools/module-progress/merge-lock.mjs touch --owner "$OWNER"   # 续期，避免等 CI 期间被别人接管
 gh pr merge <PR号> --merge --delete-branch
-node tools/module-progress/lane.mjs gate release
 ```
+
+⚠️ **2026-11-03 修正**：这一段原来写的是 `cd /Users/guan/Projects/starcon` + `lane.mjs gate acquire`。
+那是**双重错误**：① 闸目录只在集成头 worktree，主工作区跑永远显示 `free` ⇒ 所谓「短持有」**从来没起过作用**；
+② 即便路径正确，用调度闸挡住一个不碰本地状态的动作，也只会让合 main 被流水线饿死。
+现在改用合并锁（§2.5），它才是「同一时刻只有一轮合 main」的正确实现。
 
 **用 `--merge`（双父），不要用 `--squash`** —— 这一条在 2026-10-30 被改过，原因见下。
 
@@ -909,12 +992,16 @@ git merge-tree --write-tree origin/integration/module-dev origin/main  # 只输�
 
 ```bash
 cd /Users/guan/Projects/starcon
-git worktree remove --force "$WT"     # 只删**你自己**这一轮建的那个
-node tools/module-progress/lane.mjs gate release
+git worktree remove --force "$WT"                        # 只删**你自己**这一轮建的那个
+node tools/module-progress/merge-lock.mjs release --owner "$OWNER"   # 合并锁（§2.5）必须放
 ```
 
 **两个都必须做。** 漏掉 worktree 清理 → 自己的 worktree 会一直留着占磁盘。
-漏掉 `gate release` → 下轮撞闸，任务空转一轮。
+漏掉 `merge-lock release` → 下轮撞合并锁，任务空转一轮。
+
+⚠️ **调度闸只在「本轮真的取到过闸」时才放** ——
+第 1 步撞闸时你**没拿到闸**，此时跑 `gate release` 会删掉别人活着的闸
+（调度闸的 `release` 是无条件 `rmSync`）。判断依据：本轮 `gate acquire` 是否退出码 0。
 
 ⚠️ **只删自己建的那一个。** 不要用 `git worktree remove --force .worktrees/main-merge`
 这种固定路径去删 —— 那可能删掉**别人正在用**的 worktree（实测踩过）。
@@ -970,7 +1057,9 @@ cd /Users/guan/Projects/starcon && bash tools/progress-site/refresh.sh
 - **验证结果**：跑了哪一级、定向验证逐项的真实输出、是否跑了本地全量 L2（以及为什么）
 - **CI 结果**：闸工具的结论（可以合并 / 阻塞）+ 与 `main` 基线相比新增了什么
 - **合并结果**：PR 号 + 是否已合进 `main`；**没合要明确写「验证未绿 / 出现新增失败，本轮不合」**
-- **闸**：acquire/release 是否成功
+- **闸**：调度闸 acquire/release 是否成功（第 1 步）；合并锁 acquire/release 是否成功（第 2 步）
+- **看板**：已发布 / 跳过发布（数据无变化）/ 发布失败；delivered/total、完成率；
+  **台账滞后**（`origin/main` 相对集成分支落后多少提交、看板是否因此显示过期数字）
 - **台账**：行数是否恒为 465
 - **风险提示**（可选）
 
@@ -998,7 +1087,9 @@ cd /Users/guan/Projects/starcon && bash tools/progress-site/refresh.sh
 - **不许在 PR 标题/正文/提交信息里写工程流水账**（提交数、文件数、冲突机制、内部脚本名、工程决策理由）
 - **不许在 commit / 汇报里贴 secret**
 - **不许谎报「已合并」**
-- **必须 `gate release`**（无论成败）
+- **必须 `merge-lock release --owner "$OWNER"`**（无论成败）
+- **必须 `gate release`** —— **仅当本轮真的取到过调度闸**（第 1 步）；没取到就放闸 = 删别人的活闸
+- **不许因为调度闸被流水线持有就放弃整轮** —— 只跳过第 1 步，第 2 步照做（见 §2.1）
 - **必须清理 `.worktrees/main-merge`**（无论成败）
 - **不许在冲突解到一半时提交**
 - **不许把「读不到台账」当成「没有新交付」**
