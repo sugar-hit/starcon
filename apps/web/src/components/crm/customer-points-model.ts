@@ -516,7 +516,14 @@ export function redeemPoints(input: {
   return api<CrmPointsRedeemResult>(`${base}/redeem`, 'POST', input);
 }
 
-export function usePointsRedemption(
+/**
+ * 核销一条已兑付的权益（POST `.../redemptions/{id}/use`）。
+ *
+ * <p>**不是 React Hook** —— 名字刻意不带 `use` 前缀：它是普通的 API 包装，
+ * 与 `expirePoints()` / `fetchPointsLiability()` 同类。带 `use` 前缀时
+ * eslint react-hooks 规则会把它当 Hook，在回调里调用直接判错。
+ */
+export function confirmPointsRedemption(
   redemptionId: string,
   input: { orderRef?: string | undefined; note?: string | undefined } = {},
 ) {

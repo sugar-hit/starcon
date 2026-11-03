@@ -919,7 +919,7 @@ class PointsIntegrationTest {
     assertThat(balanceOf(MEMBER_A)).isEqualByComparingTo("0.000000");
     try (var c = admin();
         var s = c.prepareStatement(
-            "select remaining from crm_points_lot where account_key = ?")) {
+            "select balance from crm_points_lot where account_key = ?")) {
       s.setString(1, MEMBER_A);
       try (var rs = s.executeQuery()) {
         assertThat(rs.next()).isTrue();

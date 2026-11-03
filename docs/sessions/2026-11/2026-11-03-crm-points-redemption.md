@@ -153,7 +153,7 @@ numeric(19,4) + `BigDecimal`，**禁浮点**；出参一律十进制文本 —�
 - **5 定价侧**消费抵扣口径（抵扣率上限 / 单积分价值 / 可用余额）实现积分抵扣落单；
   本模块**只输出**口径，不改价目表。
 - **积分冲正**（退货 / 退款后回退已发积分）**本轮未交付**：它需要一条**反向**流水
-  与批次回补口径（当前批次 remaining 只减不增），交付前必须先把回补语义设计清楚。
+  与批次回补口径（当前批次 balance 只减不增），交付前必须先把回补语义设计清楚。
 - **积分抵扣的自动化**目前是「显式调 `POST /spend`」；接进 5 定价的落单流程时，
   需要补一条幂等键（当前靠 `crm_points_ledger` 的部分唯一索引挡住「同一订单重复发积分」，
   但**同一订单多次抵扣**尚未被挡住）。
@@ -246,3 +246,76 @@ python3 tools/codegen/catalog-contracts.py --spec-dir backend/target/openapi
 ⇒ 第二个类启动时第一个还在）。verify 结束后 `docker ps` 里**已无** `postgres:16-alpine`
 容器 —— 两个都被 **ryuk 回收**（容器直接被删除，不是停在 exited；
 `docker ps -a` 里只剩一个两天前的 `probe-pg`，不是本车道留下的）。
+
+## L2 修复：CRM schema 守卫不许 `remaining` 列（批次列改名 `balance`）
+
+### 缺陷
+
+L2 r167 后端分块 verify 红一条：
+
+```
+[ERROR] com.starcon.crm.ServiceTicketListIntegrationTest.库里没有会自己过期的剩余列
+[ERROR] Tests run: 618, Failures: 1, Errors: 0, Skipped: 0
+```
+
+守卫是 **15.x 工单列表模块立的**（属于另一个已交付模块，本车道**不改那条守卫测试**）：
+CRM 库里不许出现名字里带 `remaining` / `remain` 的列 —— 那类列是「写下去就开始
+自己过期」的剩余值（如「剩余小时数」）。本车道的 `crm_points_lot.remaining` 命中了它。
+
+### 决定：改名，不改设计
+
+1. **这条守卫拦的不是本设计。** 批次余额**不会自己过期** —— 它只在三个**显式事件**里变：
+   获取（earn）、消耗（spend）、到期核销（`POST /crm/points/expire`：减账户 `balance`、
+   加 `expired_total`、写一条 EXPIRE 流水）。「过期」在本设计里是**被显式物化**的，
+   不靠墙钟自己发生。
+2. **同模块自己的既有口径就是 `balance`。** `crm_points_account.balance` 承载的是同一种
+   聚合（随消耗递减的存量余额），它没被守卫拦（守卫只拦名字含 `remaining` 的列）。
+   把批次列改成 `balance` ⇒ 与本模块口径一致，不是为绕过守卫而生的新词。
+3. **守卫是服务级、跨模块的不变量**，不能为了一个模块把它拆掉。
+
+### 改了什么
+
+| 位置 | 改动 |
+| --- | --- |
+| `V442__crm_points_redemption.sql` | 列定义 `remaining` → `balance`（CHECK 同步）；部分索引 `crm_points_lot_by_expiry` 的谓词 `where remaining > 0` → `where balance > 0`；触发器函数 `guard_crm_points_lot_remaining` → `guard_crm_points_lot_balance`（含 `NEW.balance` / `OLD.balance`），触发器名 `crm_points_lot_remaining_trg` → `crm_points_lot_balance_trg`；两处注释口径对齐 |
+| `PointsService.java` | 9 处 SQL 列名（统计聚合 / insert 列清单 / 到期核销查询 + 更新 / 消耗查询 + 条件更新 / 可用积分聚合 / `lotRow` 取值）逐条改为 `balance`；**Java 局部变量名 `remaining` 保留**（它读起来更清楚，且与账户表的 `balance` 变量不撞名） |
+| `PointsIntegrationTest.java` | 直接写 SQL 的断言 `select remaining from crm_points_lot` → `select balance from crm_points_lot` |
+| `module-progress.md` / 本文档 | 15.6.1.2 那一行的列名证据文字同步（**别的行一字未动**） |
+
+### 🔴 取舍：对外 DTO 字段 `remaining` **不改**
+
+`PointsModels.CrmPointsLotRow.remaining` 是**对外 API 字段**（语义是「该批次剩余可消耗积分」）。
+守卫查的是**数据库列名**，不是接口字段名 ⇒ 改数据库列就够。改 DTO 会连带动
+OpenAPI 契约与前端（`packages/api-contracts` 是 codegen 产物，只读），
+等于把一个两行的守卫修复放大成契约改造。**本轮不改任何前端文件**，
+`packages/api-contracts/src/contracts/crm.ts` 里 `CrmPointsLotRow.remaining` 保持原样。
+
+### L2 修复验证（真实结果）
+
+```bash
+cd backend
+
+# ① 本模块测试
+./mvnw -pl services/crm -am test -Dtest='Points*' \
+    -Dsurefire.failIfNoSpecifiedTests=false -DfailIfNoSpecifiedTests=false
+→ Tests run: 23, Failures: 0, Errors: 0, Skipped: 0 -- in com.starcon.crm.PointsIntegrationTest
+→ Tests run:  4, Failures: 0, Errors: 0, Skipped: 0 -- in com.starcon.crm.PointsTenancyIntegrationTest
+→ Tests run: 27, Failures: 0, Errors: 0, Skipped: 0
+
+# ② schema 守卫（关键）
+./mvnw -pl services/crm -am test -Dtest='ServiceTicketListIntegrationTest' \
+    -Dsurefire.failIfNoSpecifiedTests=false -DfailIfNoSpecifiedTests=false
+→ Tests run: 20, Failures: 0, Errors: 0, Skipped: 0 -- in com.starcon.crm.ServiceTicketListIntegrationTest
+→ surefire XML 逐方法核对：[PASS] 库里没有会自己过期的剩余列  time=0.022s
+
+# ③ 全量 crm 服务（改名动了触发器与部分索引 ⇒ 必须跑）
+./mvnw -pl services/crm -am test
+→ Tests run: 618, Failures: 0, Errors: 0, Skipped: 0
+→ crm SUCCESS [02:09 min] · BUILD SUCCESS · 日志里 [ERROR] 行数 = 0
+```
+
+**③ 的例数 618 与 L2 失败时那条 `Tests run: 618, Failures: 1` 完全一致**
+⇒ 同一个测试集合，这一轮零失败；改的是列名，不是用例数。
+
+前端：`pnpm typecheck` → `Tasks: 3 successful, 3 total`（本轮零前端改动，
+不跑前端测试，也不跑全量 allowlist 回归 —— 本轮未动 `api-proxy.ts`）。
