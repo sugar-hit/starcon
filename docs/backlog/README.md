@@ -68,6 +68,7 @@ docs/backlog/YYYY-MM/YYYY-MM-DD-<topic-slug>.md
 - [`2026-10/`](2026-10/) — 2026 年 10 月
   - [`2026-10-07-sku-code-api-proxy-allowlist.md`](2026-10/2026-10-07-sku-code-api-proxy-allowlist.md) — **P0** 3.1.2.3 前端白名单漏 `sku-code`，页面必然 404
 - [`2026-11/`](2026-11/) — 2026 年 11 月
+  - [`2026-11-04-jooq-bind-precision-alignment.md`](2026-11/2026-11-04-jooq-bind-precision-alignment.md) — **P1** 在 jOOQ 绑定层统一做时刻精度对齐，从根上消掉「纳秒 vs 微秒」这条缝
 
 ### 归档
 
@@ -80,12 +81,17 @@ docs/backlog/YYYY-MM/YYYY-MM-DD-<topic-slug>.md
 > 归档里的每条都写了「残留风险」—— 脚本本体仍在仓库且可被手动调用，
 > **重启流水线前需先修**。
 
-## 仍然有效的 11 条（按修复成本从低到高）
+## 仍然有效的 12 条（按修复成本从低到高）
 
 盘点后仍留在根目录的条目，附改动量级与迁移需求 —— 排期时按这张表从上往下取。
 
 > 2026-11-03：`order-change-rule-effective-from-clock-domain`（原第 1 条）已修复并关闭
 > （提交 `93e7eb5f`，生产侧默认值改取 DB 时钟），条目从根目录移入 `docs/backlog/archive/`。
+>
+> 2026-11-04：新增第 12 条（jOOQ 绑定层时刻精度对齐）。它是 2026-11-03 那批后端红灯
+> 的**结构性根因**：Java 到纳秒、PG 只到微秒，而 `OffsetDateTime.now()` 在 Linux 上
+> 带亚微秒尾巴、在 macOS 上恰好对齐 ⇒ 同一份代码只在一半机器上出错。
+> 本轮已逐点收口 6 处，但全仓还有 2582 处 `OffsetDateTime.now(`。
 
 | # | 条目 | 改动量级 | 需迁移 | 需改断言 | 备注 |
 | --- | --- | --- | --- | --- | --- |
@@ -100,3 +106,4 @@ docs/backlog/YYYY-MM/YYYY-MM-DD-<topic-slug>.md
 | 9 | `2026-10-22-testcontainers-pg-container-leak` | 150+ 测试类 | 否 | 否 | 改多了可能打破「类间共享容器」的隐含依赖 ⇒ 逐服务验证 |
 | 10 | `2026-10-13-flaky-integration-tests-l2-false-red` | 按子类拆（catalog / warehouse 的并发 flake） | 否 | 是 | 临时端口被抢占 + 测试固件未按租户隔离 |
 | 11 | `2026-09-30-business-design-review` | 0（产品决策 R-01..R-07） | 否 | 否 | 无工程量，需人工拍板；建议降级为普通 issue |
+| 12 | `2026-11-04-jooq-bind-precision-alignment` | 大（9 服务 jOOQ 绑定层 + 全仓 2582 处 `OffsetDateTime.now(` 的逐条清理） | 否 | 是（清理后断言可放宽为逐纳秒相等） | **本轮红灯的结构性根因**；截断对 PG 无损（它本来就存不下亚微秒） |
