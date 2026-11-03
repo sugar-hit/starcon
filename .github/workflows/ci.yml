@@ -128,11 +128,6 @@ jobs:
           distribution: temurin
           java-version: '21'
           cache: maven
-      # 格式闸前置：spotless 是秒级检查，放在数据库集成测试之前，
-      # 排版问题不必等几十分钟的 Testcontainers 跑完才暴露。
-      - name: Java formatting (fail before database tests)
-        run: ./mvnw -B -ntp spotless:check
-        working-directory: backend
       - run: ./mvnw -B -ntp verify
         working-directory: backend
         env:

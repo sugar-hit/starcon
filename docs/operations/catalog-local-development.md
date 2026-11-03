@@ -100,7 +100,13 @@ pnpm build
 pnpm exec playwright test tests/e2e/catalog.spec.ts
 ```
 
-有本机 JDK21 时可用 `cd backend && ./mvnw verify`；格式检查 `./mvnw spotless:check`。Docker 29 与当前 Testcontainers 组合需要 `-Dapi.version=1.44`，容器测试脚本已配置。
+有本机 JDK21 时可用 `cd backend && ./mvnw verify`。Docker 29 与当前 Testcontainers 组合需要 `-Dapi.version=1.44`，容器测试脚本已配置。
+
+> ⚠️ 后端**没有**集中的 Java 格式闸：`spotless` 插件已从 `backend/pom.xml` 移除
+> （原先它没有绑定生命周期阶段，唯一入口是 CI 里显式跑的 `spotless:check`，实际效果是
+> 让后端作业长期挂着 95 个文件的存量格式债而一直红）。约定是
+> **改动与被改文件周围保持一致即可**；若要批量格式化，先看
+> `docs/backlog/2026-10-21-spotless-apply-mass-reformat-hazard.md` 记录的事故与代价。
 
 后端测试覆盖：两租户互不可见、伪造 header 无效、单连接池复用不串租户、跨租户关联拒绝、普通角色非 bypass、会话注销与祖先停用、角色拒绝写入、属性继承/覆写/清空/恢复、false/0、重复组合回滚、版本冲突、状态校验及附属页面记录。
 
